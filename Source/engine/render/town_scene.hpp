@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "engine/point.hpp"
+#include "engine/render/town_lighting.hpp"
 
 namespace devilution {
 
@@ -99,6 +100,27 @@ struct TownSceneMaterialPatch {
 	Point sourceMax;
 };
 
+/** Runtime adjunct for the optional east-cabin model; imported source stays exact.
+ * The window is an inscribed 20-sided opening, not a texture-opacity mask.
+ * Room apertures use the same physical 20-sided polygon as the window tunnel,
+ * so point-light visibility also preserves its opaque corners. Interior UVs are
+ * world-unit material coordinates; exterior copies keep imported normalized UVs.
+ */
+struct TownCabinInterior {
+	std::vector<TownSceneTriangle> exteriorTriangles;
+	std::vector<TownSceneTriangle> interiorTriangles;
+	std::vector<TownSceneTriangle> emissiveTriangles;
+	TownLightVector roomMinimum;
+	TownLightVector roomMaximum;
+	TownLightVector windowCenter;
+	float windowRadius = 0;
+	float windowOuterZ = 0;
+	float windowInnerZ = 0;
+	std::vector<TownLightAperture> apertures;
+	TownPointLight light;
+	uint32_t clippedSourceTriangles = 0;
+};
+
 /** One coherent architectural object, replacing its painted scenery footprint. */
 struct TownSceneModel {
 	TownSceneKind kind;
@@ -110,8 +132,12 @@ struct TownSceneModel {
 	std::vector<TownSceneMaterialPatch> materialPatches;
 	std::shared_ptr<const TownImportedTexture> importedTexture;
 	bool externalModel = false;
+	std::shared_ptr<const TownCabinInterior> cabinInterior;
 };
 
+/** Original imported triangles are never rewritten by this bounded adjunct. */
+bool BuildTownCabinInterior(TownSceneModel &model);
+const std::vector<TownSceneTriangle> &TownSceneExteriorTriangles(const TownSceneModel &model);
 const std::vector<TownSceneModel> &GetTownScene();
 bool TownSceneReplacesTile(Point tile);
 void ResetTownScene();

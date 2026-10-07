@@ -150,7 +150,7 @@ bool BuildTownShadowMap(const std::vector<TownSceneModel> &scene, const TownShad
 	HashWord(hash, static_cast<uint32_t>(config.pcfRadius));
 	std::size_t inputTriangles = 0;
 	for (const TownSceneModel &model : scene) {
-		for (const TownSceneTriangle &triangle : model.triangles) {
+		for (const TownSceneTriangle &triangle : TownSceneExteriorTriangles(model)) {
 			++inputTriangles;
 			for (const TownSceneVertex &vertex : triangle.vertices) {
 				if (!Finite({ vertex.x, vertex.height, vertex.z })) {
@@ -185,7 +185,7 @@ bool BuildTownShadowMap(const std::vector<TownSceneModel> &scene, const TownShad
 	float minU = std::numeric_limits<float>::infinity(), minV = minU;
 	float maxU = -minU, maxV = -minV;
 	for (const TownSceneModel &model : scene) {
-		for (const TownSceneTriangle &triangle : model.triangles) {
+		for (const TownSceneTriangle &triangle : TownSceneExteriorTriangles(model)) {
 			for (const TownSceneVertex &vertex : triangle.vertices) {
 				const Projected projected = Project({ vertex.x, vertex.height, vertex.z });
 				minU = std::min(minU, projected.u);
@@ -204,7 +204,7 @@ bool BuildTownShadowMap(const std::vector<TownSceneModel> &scene, const TownShad
 	Map.depth.assign(static_cast<std::size_t>(config.resolution) * config.resolution, -std::numeric_limits<float>::infinity());
 	Map.stats.depthBytes = Map.depth.size() * sizeof(float);
 	for (const TownSceneModel &model : scene) {
-		for (const TownSceneTriangle &triangle : model.triangles) {
+		for (const TownSceneTriangle &triangle : TownSceneExteriorTriangles(model)) {
 			std::array<Projected, 3> vertices;
 			for (std::size_t i = 0; i < vertices.size(); ++i)
 				vertices[i] = Project({ triangle.vertices[i].x, triangle.vertices[i].height, triangle.vertices[i].z });

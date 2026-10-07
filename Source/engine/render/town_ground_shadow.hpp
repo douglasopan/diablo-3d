@@ -7,10 +7,15 @@ namespace devilution {
 
 /** Audited painted-shadow regions in the original 64x32 town ground diamonds.
  *
- * These frozen masks select only the large connected painted shadow. They were
- * measured from covered-pixel 5x5 mean Rec.709 luminance below 22, then reviewed
- * against the native grass and nearby shadowless pieces. Retail and shareware
- * floor pixels, palette, coverage and all four masks were verified identical.
+ * These frozen masks select individually reviewed cabin-shadow regions. Their
+ * outlines were measured in native primitive exports (covered-pixel 5x5 mean
+ * Rec.709 luminance below 22), then checked against the complete cabin footprint
+ * and adjacent shadowless grass. The partial outlines include enclosed paint;
+ * there is no color threshold or inferred cleanup at runtime. Pieces 871/872
+ * are the two wholly shaded ground diamonds immediately below the south wall,
+ * so their masks cover the native diamond, never its transparent rectangle.
+ * Retail/shareware native pixels, palette, coverage and all eight masks were
+ * checked for equality using independent MIN/CEL primitive exports.
  *
  * Bit x in rows[y] corresponds to native pixel (x,y); bit 0 is the left edge.
  * Copy the donor color only at selected bits. Preserve ORIGINAL opacity and
@@ -21,6 +26,47 @@ struct TownGroundShadowMask {
 	uint16_t donorPiece;
 	std::array<uint64_t, 32> rows;
 };
+
+// 802 of 1024 native opaque pixels; 78.32% covered. East (72,73), west (28,53).
+// Donor (74,73) is unshaded grass on the same native ground row.
+inline constexpr TownGroundShadowMask CabinGroundShadow867 { 859, {
+		0x0000000000000000ULL, 0x00000003C0000000ULL, 0x0000000FF0000000ULL, 0x0000003FFC000000ULL,
+		0x000000FFFF000000ULL, 0x000003FFFFC00000ULL, 0x00000FFFFFF00000ULL, 0x00003FFFFFFC0000ULL,
+		0x0000FFFFFFFF0000ULL, 0x0003FFFFFFFFC000ULL, 0x000FFFFFFFFFF000ULL, 0x003FFFFFFFFFFC00ULL,
+		0x00FFFFFFFFFFFF00ULL, 0x03FFFFFFFFFFFFC0ULL, 0x0FFFFFFFFFFFFFF0ULL, 0x3FFFFFFFFFFFFFF8ULL,
+		0xFFFFFFFFFFFFFFF8ULL, 0x3FFFFFFFFFFFFFF0ULL, 0x0FFFFFFFFFFFFF00ULL, 0x03FFFFFFFFFFC000ULL,
+		0x00FFFFFFF0000000ULL, 0x003FFFFF80000000ULL, 0x000FFFFE00000000ULL, 0x0003FFF800000000ULL,
+		0x0000FFE000000000ULL, 0x00003F8000000000ULL, 0x00000F0000000000ULL, 0x0000020000000000ULL,
+		0x0000000000000000ULL, 0x0000000000000000ULL, 0x0000000000000000ULL, 0x0000000000000000ULL
+	} };
+
+// 579 of 1024 native opaque pixels; 56.54% covered. East (73,73), west (29,53).
+inline constexpr TownGroundShadowMask CabinGroundShadow868 { 860, {
+		0x0000000000000000ULL, 0x00000003C0000000ULL, 0x0000000FF0000000ULL, 0x0000003FFC000000ULL,
+		0x000000FFFF000000ULL, 0x000003FFFFC00000ULL, 0x00000FFFFFF00000ULL, 0x00003FFFFFFC0000ULL,
+		0x0000FFFFFFFF0000ULL, 0x0003FFFFFFFFC000ULL, 0x000FFFFFFFFFF000ULL, 0x003FFFFFFFFFF000ULL,
+		0x00FFFFFFFFFFC000ULL, 0x03FFFFFFFFFF0000ULL, 0x0FFFFFFFFFFE0000ULL, 0x3FFFFFFFFFF80000ULL,
+		0xFFFFFFFFFF800000ULL, 0x3FFFFFFFF8000000ULL, 0x0FFFFFFFC0000000ULL, 0x03FFFFFC00000000ULL,
+		0x0007FFF000000000ULL, 0x00000C0000000000ULL, 0x0000000000000000ULL, 0x0000000000000000ULL,
+		0x0000000000000000ULL, 0x0000000000000000ULL, 0x0000000000000000ULL, 0x0000000000000000ULL,
+		0x0000000000000000ULL, 0x0000000000000000ULL, 0x0000000000000000ULL, 0x0000000000000000ULL
+	} };
+
+// These two particular diamonds are entirely inside the native painted shadow;
+// 1024 selected opaque pixels and 1024 unselected transparent pixels each.
+// East (70/71,73), west (26/27,53); donors are two rows farther from the wall.
+inline constexpr TownGroundShadowMask CabinGroundShadow871 { 875, {
+		0x0000000000000000ULL, 0x00000003C0000000ULL, 0x0000000FF0000000ULL, 0x0000003FFC000000ULL,
+		0x000000FFFF000000ULL, 0x000003FFFFC00000ULL, 0x00000FFFFFF00000ULL, 0x00003FFFFFFC0000ULL,
+		0x0000FFFFFFFF0000ULL, 0x0003FFFFFFFFC000ULL, 0x000FFFFFFFFFF000ULL, 0x003FFFFFFFFFFC00ULL,
+		0x00FFFFFFFFFFFF00ULL, 0x03FFFFFFFFFFFFC0ULL, 0x0FFFFFFFFFFFFFF0ULL, 0x3FFFFFFFFFFFFFFCULL,
+		0xFFFFFFFFFFFFFFFFULL, 0x3FFFFFFFFFFFFFFCULL, 0x0FFFFFFFFFFFFFF0ULL, 0x03FFFFFFFFFFFFC0ULL,
+		0x00FFFFFFFFFFFF00ULL, 0x003FFFFFFFFFFC00ULL, 0x000FFFFFFFFFF000ULL, 0x0003FFFFFFFFC000ULL,
+		0x0000FFFFFFFF0000ULL, 0x00003FFFFFFC0000ULL, 0x00000FFFFFF00000ULL, 0x000003FFFFC00000ULL,
+		0x000000FFFF000000ULL, 0x0000003FFC000000ULL, 0x0000000FF0000000ULL, 0x00000003C0000000ULL
+	} };
+
+inline constexpr TownGroundShadowMask CabinGroundShadow872 { 876, CabinGroundShadow871.rows };
 
 // 366 of 1024 native opaque pixels; 35.74% covered.
 inline constexpr TownGroundShadowMask CabinGroundShadow873 { 875, {
@@ -74,6 +120,10 @@ inline constexpr TownGroundShadowMask CabinGroundShadow884 { 883, {
 constexpr const TownGroundShadowMask *GetTownGroundShadowMask(uint16_t piece)
 {
 	switch (piece) {
+	case 867: return &CabinGroundShadow867;
+	case 868: return &CabinGroundShadow868;
+	case 871: return &CabinGroundShadow871;
+	case 872: return &CabinGroundShadow872;
 	case 873: return &CabinGroundShadow873;
 	case 874: return &CabinGroundShadow874;
 	case 882: return &CabinGroundShadow882;

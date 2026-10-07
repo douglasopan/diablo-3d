@@ -53,6 +53,7 @@ constexpr float NativeCameraScale = 45.25483399593904F; // 32 * sqrt(2)
 constexpr float NativeHeightScale = 0.816496580927726F; // sqrt(2/3)
 constexpr float DefaultCameraDistance = 22.0F;
 constexpr size_t ImportedLightLevels = 64;
+constexpr float InteriorPointLightRange = 4.0F;
 
 struct Vec3 {
 	float x;
@@ -108,6 +109,9 @@ struct Texture {
 	std::vector<uint8_t> opacity;
 	// Imported base color stays independent of the game palette until lighting.
 	std::vector<uint32_t> albedoPixels;
+	// Interior materials use a small point-irradiance LUT and clean base colors.
+	std::vector<std::array<uint8_t, ImportedLightLevels>> interiorLightTables;
+	bool emissive = false;
 	bool sample(float u, float v, uint8_t &color, uint32_t *albedoColor = nullptr) const
 	{
 		if (width <= 0 || height <= 0 || !std::isfinite(u) || !std::isfinite(v))
@@ -204,6 +208,8 @@ struct SceneMaterials {
 };
 std::unordered_map<size_t, SceneMaterials> SceneMaterialCache;
 std::unordered_map<size_t, Texture> ImportedTextureCache;
+std::unordered_map<size_t, std::array<Texture, 3>> CabinInteriorTextureCache;
+bool CabinLampEnabledForDiagnostics = true;
 std::unordered_map<uint32_t, uint32_t> ImportedAlbedoColors;
 std::vector<std::array<uint8_t, ImportedLightLevels>> ImportedAlbedoLightTables;
 TownLightingConfig SceneLightingConfig = TristramLightingConfig();
@@ -380,7 +386,8 @@ float Edge(const ProjectedVertex &a, const ProjectedVertex &b, float x, float y)
 }
 
 void Rasterize(const Surface &out, const std::array<Vertex, 3> &triangle, const Texture &texture,
-	PickRecord pick, int shade, bool transparent, const TownSceneNormal *authoredNormal)
+	PickRecord pick, int shade, bool transparent, const TownSceneNormal *authoredNormal,
+	const TownCabinInterior *interior)
 {
 	const ProjectedVertex a = Project(triangle[0]);
 	const ProjectedVertex b = Project(triangle[1]);
@@ -447,9 +454,24 @@ void Rasterize(const Surface &out, const std::array<Vertex, 3> &triangle, const 
 			if (!texture.sample(u, v, color, &albedoColor) || (transparent && !hasAlbedo && texture.opacity.empty() && color == 0))
 				continue;
 			const Vec3 world = worldA * wa + worldB * wb + worldC * wc;
-			const float shadow = (hasAlbedo ? diffuse > 0 : receivesDirectLight) ? SampleTownShadow(world.x, world.y, world.z, shadowReceiver) : 0;
+			const float shadow = interior == nullptr && !texture.emissive && (hasAlbedo ? diffuse > 0 : receivesDirectLight)
+			    ? SampleTownShadow(world.x, world.y, world.z, shadowReceiver) : 0;
 			const int shadowLevel = std::clamp(static_cast<int>(shadow * 3.0F + 0.5F), 0, 3);
-			if (hasAlbedo) {
+			if (texture.emissive) {
+				destination[x] = color;
+			} else if (interior != nullptr) {
+				TownLightingConfig roomLight;
+				roomLight.ambient = { 0.015F, 0.013F, 0.010F };
+				roomLight.directionalIntensity = 0;
+				const TownLightOccluder room { interior->roomMinimum, interior->roomMaximum, interior->apertures };
+				const std::span<const TownPointLight> lights = CabinLampEnabledForDiagnostics
+				    ? std::span<const TownPointLight>(&interior->light, 1) : std::span<const TownPointLight>();
+				const TownLightingSample lighting = SampleTownLighting({ normal.x, normal.y, normal.z },
+					{ world.x, world.y, world.z }, 0, roomLight, lights, std::span<const TownLightOccluder>(&room, 1));
+				const float amount = interior->light.color.red > 0 ? lighting.point.red / interior->light.color.red : 0;
+				const size_t level = static_cast<size_t>(std::clamp(static_cast<int>(amount / InteriorPointLightRange * (ImportedLightLevels - 1) + 0.5F), 0, static_cast<int>(ImportedLightLevels - 1)));
+				destination[x] = texture.interiorLightTables[albedoColor][level];
+			} else if (hasAlbedo) {
 				const size_t amount = static_cast<size_t>(std::clamp(static_cast<int>(diffuse * (1 - shadow) * (ImportedLightLevels - 1) + 0.5F), 0, static_cast<int>(ImportedLightLevels - 1)));
 				destination[x] = ImportedAlbedoLightTables[albedoColor][amount];
 			} else {
@@ -464,7 +486,8 @@ void Rasterize(const Surface &out, const std::array<Vertex, 3> &triangle, const 
 }
 
 void DrawTriangle(const Surface &out, std::array<Vertex, 3> triangle, const Texture &texture,
-	PickRecord pick, int shade, bool transparent = false, const TownSceneNormal *authoredNormal = nullptr)
+	PickRecord pick, int shade, bool transparent = false, const TownSceneNormal *authoredNormal = nullptr,
+	const TownCabinInterior *interior = nullptr)
 {
 	for (Vertex &vertex : triangle)
 		vertex.position = ToCamera(vertex.position);
@@ -485,7 +508,7 @@ void DrawTriangle(const Surface &out, std::array<Vertex, 3> triangle, const Text
 			clipped[count++] = current;
 	}
 	for (size_t i = 1; i + 1 < count; ++i)
-		Rasterize(out, { clipped[0], clipped[i], clipped[i + 1] }, texture, pick, shade, transparent, authoredNormal);
+		Rasterize(out, { clipped[0], clipped[i], clipped[i + 1] }, texture, pick, shade, transparent, authoredNormal, interior);
 }
 
 void DrawQuad(const Surface &out, const std::array<Vec3, 4> &corners, const Texture &texture,
@@ -1039,6 +1062,77 @@ const Texture &ImportedSceneTexture(size_t index, const TownImportedTexture &sou
 	return ImportedTextureCache.emplace(index, std::move(texture)).first->second;
 }
 
+const std::array<Texture, 3> &CabinInteriorTextures(size_t index, const TownCabinInterior &interior)
+{
+	const auto cached = CabinInteriorTextureCache.find(index);
+	if (cached != CabinInteriorTextureCache.end())
+		return cached->second;
+	std::array<Texture, 3> textures;
+	for (size_t material = 0; material < 2; ++material) {
+		Texture &texture = textures[material];
+		texture.width = 64;
+		texture.height = 64;
+		texture.repeat = true;
+		texture.albedoPixels.resize(64 * 64);
+		std::unordered_map<uint32_t, uint32_t> colors;
+		for (int y = 0; y < 64; ++y) {
+			for (int x = 0; x < 64; ++x) {
+				// Deterministic, unlit timber/stone; no copied native lighting.
+				const int grain = ((x * 17 + y * 3 + (x * y) % 13) % 11) - 5;
+				const int joint = material == 0 && (y % 16 == 0 || ((y / 16) % 2 == 0 ? x == 0 : x == 31)) ? -35 : 0;
+				const int r = (material == 0 ? 125 : 76) + grain + joint;
+				const int g = (material == 0 ? 99 : 72) + grain + joint;
+				const int b = (material == 0 ? 64 : 67) + grain + joint;
+				const uint32_t key = (static_cast<uint32_t>(r) << 16) | (static_cast<uint32_t>(g) << 8) | static_cast<uint32_t>(b);
+				const auto color = colors.find(key);
+				if (color != colors.end()) {
+					texture.albedoPixels[static_cast<size_t>(y) * 64 + x] = color->second;
+					continue;
+				}
+				const uint32_t colorIndex = static_cast<uint32_t>(texture.interiorLightTables.size());
+				colors.emplace(key, colorIndex);
+				texture.albedoPixels[static_cast<size_t>(y) * 64 + x] = colorIndex;
+				const TownLightColor base = TownSrgbToLinear({ r / 255.0F, g / 255.0F, b / 255.0F });
+				std::array<uint8_t, ImportedLightLevels> table;
+				for (size_t level = 0; level < table.size(); ++level) {
+					const float amount = InteriorPointLightRange * static_cast<float>(level) / (table.size() - 1);
+					TownLightingSample lighting;
+					lighting.ambient = { 0.015F, 0.013F, 0.010F };
+					lighting.point = { interior.light.color.red * amount, interior.light.color.green * amount, interior.light.color.blue * amount };
+					const TownLightColor lit = TownLinearToSrgb(ComposeTownLitColor(base, lighting));
+					table[level] = ClosestSceneColor(lit.red * 255, lit.green * 255, lit.blue * 255);
+				}
+				texture.interiorLightTables.push_back(table);
+			}
+		}
+	}
+	Texture &lamp = textures[2];
+	lamp.width = lamp.height = 1;
+	lamp.pixels = { ClosestSceneColor(250, 193, 38) };
+	lamp.emissive = true;
+	return CabinInteriorTextureCache.emplace(index, std::move(textures)).first->second;
+}
+
+void DrawCabinInterior(const Surface &out, size_t index, const TownCabinInterior &interior)
+{
+	const auto &textures = CabinInteriorTextures(index, interior);
+	const auto draw = [&](const TownSceneTriangle &triangle, const Texture &texture, bool roomLit) {
+		std::array<Vertex, 3> vertices;
+		for (size_t i = 0; i < vertices.size(); ++i) {
+			const auto &source = triangle.vertices[i];
+			vertices[i] = { { source.x, source.height, source.z }, source.u, source.v };
+		}
+		PickRecord pick = PickAt(triangle.pickTile);
+		pick.architecture = static_cast<int16_t>(index);
+		DrawTriangle(out, vertices, texture, pick, 0, false, &triangle.normal, roomLit ? &interior : nullptr);
+	};
+	for (const auto &triangle : interior.interiorTriangles)
+		draw(triangle, textures[triangle.material == TownSceneMaterial::Timber ? 0 : 1], true);
+	if (CabinLampEnabledForDiagnostics)
+		for (const auto &triangle : interior.emissiveTriangles)
+			draw(triangle, textures[2], false);
+}
+
 void DrawScene(const Surface &out)
 {
 	const std::vector<TownSceneModel> &scene = GetTownScene();
@@ -1046,7 +1140,7 @@ void DrawScene(const Surface &out)
 		const TownSceneModel &model = scene[index];
 		if (model.externalModel && model.importedTexture) {
 			const Texture &texture = ImportedSceneTexture(index, *model.importedTexture);
-			for (const TownSceneTriangle &triangle : model.triangles) {
+			for (const TownSceneTriangle &triangle : TownSceneExteriorTriangles(model)) {
 				std::array<Vertex, 3> vertices;
 				for (size_t i = 0; i < vertices.size(); ++i) {
 					const TownSceneVertex &vertex = triangle.vertices[i];
@@ -1056,6 +1150,8 @@ void DrawScene(const Surface &out)
 				pick.architecture = static_cast<int16_t>(index);
 				DrawTriangle(out, vertices, texture, pick, 0, false, &triangle.normal);
 			}
+			if (model.cabinInterior)
+				DrawCabinInterior(out, index, *model.cabinInterior);
 			continue;
 		}
 		const NativeSceneArt &art = NativeArtwork(index, model);
@@ -1629,7 +1725,13 @@ bool IsTownViewCameraDragging()
 TownViewLightingState GetTownViewLightingState()
 {
 	return { SceneLightingConfig, SceneLightingProfileLoaded, ImportedTextureCache.size(),
-		ImportedAlbedoLightTables.size(), ImportedAlbedoLightTables.size() * ImportedLightLevels, ImportedLightLevels };
+		ImportedAlbedoLightTables.size(), ImportedAlbedoLightTables.size() * ImportedLightLevels, ImportedLightLevels,
+		CabinInteriorTextureCache.size(), CabinLampEnabledForDiagnostics };
+}
+
+void SetTownViewCabinLampEnabledForDiagnostics(bool enabled)
+{
+	CabinLampEnabledForDiagnostics = enabled;
 }
 
 void ResetTownViewResources()
@@ -1640,6 +1742,8 @@ void ResetTownViewResources()
 	SceneArtworkCache.clear();
 	SceneMaterialCache.clear();
 	ImportedTextureCache.clear();
+	CabinInteriorTextureCache.clear();
+	CabinLampEnabledForDiagnostics = true;
 	ImportedAlbedoColors.clear();
 	ImportedAlbedoLightTables.clear();
 	ActorVolumeCache.clear();
@@ -1670,6 +1774,8 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 		SceneArtworkCache.clear();
 		SceneMaterialCache.clear();
 		ImportedTextureCache.clear();
+		CabinInteriorTextureCache.clear();
+		CabinLampEnabledForDiagnostics = true;
 		ImportedAlbedoColors.clear();
 		ImportedAlbedoLightTables.clear();
 		ActorVolumeCache.clear();

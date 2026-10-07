@@ -209,7 +209,7 @@ void ExportNativeGroundPieces(const std::filesystem::path &output)
 	const auto directory = output / "ground-shadow-sources";
 	std::filesystem::create_directories(directory);
 	std::set<uint16_t> pieces;
-	for (const auto range : { std::pair { 0, 31 }, std::pair { 44, 55 }, std::pair { 253, 260 }, std::pair { 873, 884 } })
+	for (const auto range : { std::pair { 0, 31 }, std::pair { 44, 55 }, std::pair { 253, 260 }, std::pair { 849, 884 } })
 		for (int piece = range.first; piece <= range.second; ++piece)
 			pieces.insert(static_cast<uint16_t>(piece));
 	std::array<uint8_t, 256> identity;
@@ -370,6 +370,7 @@ void SaveTownLightingStats(const std::filesystem::path &path)
 		<< ",\"directionalIntensity\":" << configuration.directionalIntensity
 		<< ",\"importedTextures\":" << state.importedTextures << ",\"albedoColors\":" << state.albedoColors
 		<< ",\"albedoTableBytes\":" << state.albedoTableBytes << ",\"lightLevels\":" << state.lightLevels
+		<< ",\"cabinInteriors\":" << state.cabinInteriors << ",\"cabinLampEnabled\":" << (state.cabinLampEnabled ? "true" : "false")
 		<< ",\"method\":\"source RGB6 albedo -> linear ambient + directional*(NdotL)*(1-shadow) -> sRGB -> game palette\""
 		<< ",\"scope\":\"shared imported-base-color lighting; native painted textures retain compatibility shading\"}\n";
 	Check(file.good(), "record actual lighting configuration, bounded albedo LUT and source-color scope");
@@ -698,8 +699,10 @@ void CheckTownModelImporter()
 		appendWord(std::bit_cast<uint32_t>(value));
 	for (uint8_t color : std::array<uint8_t, 6> { 10, 20, 30, 40, 50, 60 })
 		data.push_back(static_cast<std::byte>(color));
+	model.cabinInterior = std::make_shared<TownCabinInterior>();
 	Check(data.size() == 20 + 15 * sizeof(float) + 6 && ParseTownModelOverride(model, data),
 		"model importer accepts exact D3DMESH1 geometry and RGB file bytes");
+	Check(!model.cabinInterior, "successful model replacement releases its previous room adjunct");
 	const auto &triangle = model.triangles.front();
 	Check(model.externalModel && model.triangles.size() == 1 && model.importedTexture
 			&& model.importedTexture->width == 2 && model.importedTexture->height == 1
@@ -714,8 +717,10 @@ void CheckTownModelImporter()
 		"imported visual geometry retains native physical bounds, artwork and material metadata");
 	const std::string originalGeometry = SceneGeometryState({ model });
 	const auto originalTexture = model.importedTexture;
+	model.cabinInterior = std::make_shared<TownCabinInterior>();
+	const auto originalInterior = model.cabinInterior;
 	const auto unchanged = [&] {
-		return model.externalModel && model.importedTexture == originalTexture
+		return model.externalModel && model.importedTexture == originalTexture && model.cabinInterior == originalInterior
 		    && SceneGeometryState({ model }) == originalGeometry && metadata(model) == originalMetadata
 		    && model.importedTexture->rgb == std::vector<uint8_t> { 10, 20, 30, 40, 50, 60 }
 		    && model.triangles.front().surfaceDetail == TownSceneSurfaceDetail::None;
@@ -2018,7 +2023,7 @@ ArchitectureCoverage CheckArchitectureCoverage(int target, const Surface &out)
 	const RayVector eye = targetPoint + eyeDirection * 256;
 	const Point anchor = GetScreenPosition(ViewPosition) + Displacement { 32, 0 };
 	std::set<std::pair<int, int>> samples;
-	for (const auto &triangle : scene[target].triangles) {
+	for (const auto &triangle : TownSceneExteriorTriangles(scene[target])) {
 		for (const std::array<double, 3> weights : { std::array<double, 3> { 0.333333, 0.333333, 0.333334 },
 			std::array<double, 3> { 0.2, 0.3, 0.5 }, std::array<double, 3> { 0.5, 0.2, 0.3 } }) {
 			RayVector world { 0, 0, 0 };
@@ -2240,7 +2245,7 @@ void RecordPlayerArchitectureOcclusion(const Surface &out, const TownVolumeMesh 
 		double architectureDepth = std::numeric_limits<double>::infinity();
 		int occluder = -1;
 		for (size_t model = 0; model < scene.size(); ++model) {
-			for (const auto &triangle : scene[model].triangles) {
+			for (const auto &triangle : TownSceneExteriorTriangles(scene[model])) {
 				double distance, u, v;
 				if (RayTriangle(origin, direction, triangle, distance, u, v) && distance < architectureDepth) {
 					architectureDepth = distance;
@@ -2264,6 +2269,53 @@ void RecordPlayerArchitectureOcclusion(const Surface &out, const TownVolumeMesh 
 		+ " unexplained=" + std::to_string(unexplained));
 	for (int model : occludingModels)
 		Record("INFO cabin actor verified occluder model=" + std::to_string(model) + " kind=" + std::to_string(static_cast<int>(scene[model].kind)));
+}
+
+void CheckCabinInteriorLight(const Surface &out, int modelIndex, const std::filesystem::path &output)
+{
+	const auto &model = GetTownScene()[modelIndex];
+	if (!model.cabinInterior)
+		return;
+	const std::string state = NativeSceneState();
+	const auto directory = output / "cabin-interior";
+	std::filesystem::create_directories(directory);
+	OwnedSurface lit(out.w(), gnViewportHeight);
+	SDL_SetPaletteColors(lit.surface->format->palette, logical_palette.data(), 0, 256);
+	for (int y = 0; y < gnViewportHeight; ++y)
+		std::memcpy(lit.at(0, y), out.at(0, y), out.w());
+	SavePng(lit, directory / "lamp-on.png");
+	SetTownViewCabinLampEnabledForDiagnostics(false);
+	Check(DrawTownView(out, true), "draw physical cabin interior with its point source and emission disabled");
+	SavePng(out.subregionY(0, gnViewportHeight), directory / "lamp-off.png");
+	int changed = 0, warm = 0, outsideOwner = 0;
+	for (int y = 0; y < gnViewportHeight; ++y) {
+		for (int x = 0; x < out.w(); ++x) {
+			if (lit[{ x, y }] == out[{ x, y }])
+				continue;
+			++changed;
+			outsideOwner += TownViewArchitectureAt({ x, y }) != modelIndex ? 1 : 0;
+			const auto color = logical_palette[lit[{ x, y }]];
+			warm += color.r > 30 && color.r >= color.g && color.g > color.b * 1.5 ? 1 : 0;
+		}
+	}
+	const auto &interior = *model.cabinInterior;
+	const TownLightOccluder room { interior.roomMinimum, interior.roomMaximum, interior.apertures };
+	Check(TownPointLightVisibility(interior.light.position,
+			{ interior.windowCenter.x, 1.0F, interior.roomMinimum.z - 0.3F }, std::span<const TownLightOccluder>(&room, 1)) == 0,
+		"opaque rear room shell blocks the cabin point light from the duplicated rear opening");
+	Check(changed > 16 && warm > 8 && outsideOwner == 0,
+		"actual point light changes warm interior pixels without lighting unrelated geometry");
+	std::ofstream report(directory / "interior-light.json");
+	report << "{\"method\":\"actual same-camera runtime point-source plus emission on/off; source albedo and exterior unchanged\","
+		<< "\"changedPixels\":" << changed << ",\"warmChangedPixels\":" << warm << ",\"changesOutsideCabinOwner\":" << outsideOwner
+		<< ",\"interiorTriangles\":" << interior.interiorTriangles.size() << ",\"emissiveTriangles\":" << interior.emissiveTriangles.size()
+		<< ",\"clippedSourceTriangles\":" << interior.clippedSourceTriangles << ",\"lightPosition\":[" << interior.light.position.x << ',' << interior.light.position.height << ',' << interior.light.position.z
+		<< "],\"lightLinearRGB\":[" << interior.light.color.red << ',' << interior.light.color.green << ',' << interior.light.color.blue
+		<< "],\"radius\":" << interior.light.radius << ",\"intensity\":" << interior.light.intensity << "}\n";
+	Check(report.good(), "record actual interior lamp visibility and geometry evidence");
+	SetTownViewCabinLampEnabledForDiagnostics(true);
+	Check(DrawTownView(out, true), "restore the production cabin lamp after its on/off fixture");
+	Check(NativeSceneState() == state, "interior illumination fixture preserves the native game and collision state");
 }
 
 void CaptureObjectTurntables(const Surface &originalOut, const std::filesystem::path &output)
@@ -2369,6 +2421,8 @@ void CaptureObjectTurntables(const Surface &originalOut, const std::filesystem::
 			Check(NativeSceneState() == frozen, "raw turntable rendering preserves native map and actor state");
 			const std::string filename = std::string(fixture.name) + "-orbit-" + std::to_string(degrees) + ".png";
 			SavePng(out.subregionY(0, gnViewportHeight), directory / filename);
+			if (degrees == 0 && std::string(fixture.name) == "cabin-east")
+				CheckCabinInteriorLight(out, fixture.model, output);
 			if (!firstFrame)
 				manifest << ",\n";
 			firstFrame = false;

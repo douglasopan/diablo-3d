@@ -159,6 +159,7 @@ bool ParseTownModelOverride(TownSceneModel &model, std::span<const std::byte> da
 		model.triangles = std::move(triangles);
 		model.importedTexture = std::move(texture);
 		model.externalModel = true;
+		model.cabinInterior.reset();
 		return true;
 	} catch (const std::bad_alloc &) {
 		return false;

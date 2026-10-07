@@ -480,6 +480,235 @@ void AddCabinMaterialPatch(Builder &builder, TownSceneSurfaceDetail detail, Town
 	builder.model.materialPatches.push_back(patch);
 }
 
+struct CabinClipPlane {
+	float x;
+	float height;
+	float z;
+	float offset;
+
+	float Distance(const TownSceneVertex &vertex) const
+	{
+		return x * vertex.x + height * vertex.height + z * vertex.z + offset;
+	}
+};
+
+using CabinPolygon = std::vector<TownSceneVertex>;
+
+CabinPolygon ClipCabinPolygon(const CabinPolygon &input, CabinClipPlane plane, bool inside)
+{
+	CabinPolygon output;
+	if (input.empty())
+		return output;
+	TownSceneVertex previous = input.back();
+	float previousDistance = plane.Distance(previous);
+	bool previousInside = inside ? previousDistance <= 0 : previousDistance >= 0;
+	for (const TownSceneVertex &current : input) {
+		const float distance = plane.Distance(current);
+		const bool currentInside = inside ? distance <= 0 : distance >= 0;
+		if (currentInside != previousInside) {
+			const float t = std::clamp(previousDistance / (previousDistance - distance), 0.0F, 1.0F);
+			output.push_back({ previous.x + t * (current.x - previous.x),
+				previous.height + t * (current.height - previous.height),
+				previous.z + t * (current.z - previous.z),
+				previous.u + t * (current.u - previous.u), previous.v + t * (current.v - previous.v) });
+		}
+		if (currentInside)
+			output.push_back(current);
+		previous = current;
+		previousDistance = distance;
+		previousInside = currentInside;
+	}
+	return output;
+}
+
+bool SetCabinTriangleNormal(TownSceneTriangle &triangle)
+{
+	const auto &a = triangle.vertices[0];
+	const auto &b = triangle.vertices[1];
+	const auto &c = triangle.vertices[2];
+	const float x = (b.height - a.height) * (c.z - a.z) - (b.z - a.z) * (c.height - a.height);
+	const float height = (b.z - a.z) * (c.x - a.x) - (b.x - a.x) * (c.z - a.z);
+	const float z = (b.x - a.x) * (c.height - a.height) - (b.height - a.height) * (c.x - a.x);
+	const float squaredLength = x * x + height * height + z * z;
+	if (squaredLength < 0.0000000001F)
+		return false;
+	const float length = std::sqrt(squaredLength);
+	triangle.normal = { x / length, height / length, z / length };
+	return true;
+}
+
+void AppendCabinPolygon(std::vector<TownSceneTriangle> &output, const TownSceneTriangle &source, const CabinPolygon &polygon)
+{
+	for (size_t i = 1; i + 1 < polygon.size(); ++i) {
+		TownSceneTriangle triangle = source;
+		triangle.vertices = { polygon[0], polygon[i], polygon[i + 1] };
+		if (SetCabinTriangleNormal(triangle))
+			output.push_back(triangle);
+	}
+}
+
+std::array<CabinClipPlane, 22> CabinWindowPlanes(const TownCabinInterior &interior)
+{
+	std::array<CabinClipPlane, 22> planes;
+	// Inscribed polygon: its vertices are on the measured circle, so the cut
+	// never extends beyond the specified radius into the approved stone rim.
+	const float sideDistance = interior.windowRadius * std::cos(Pi / 20);
+	for (size_t i = 0; i < 20; ++i) {
+		const float angle = 2 * Pi * (static_cast<float>(i) + 0.5F) / 20;
+		const float x = std::cos(angle);
+		const float height = std::sin(angle);
+		planes[i] = { x, height, 0, -x * interior.windowCenter.x - height * interior.windowCenter.height - sideDistance };
+	}
+	planes[20] = { 0, 0, -1, interior.windowInnerZ - 0.08F };
+	planes[21] = { 0, 0, 1, -interior.windowOuterZ - 0.15F };
+	return planes;
+}
+
+std::vector<TownSceneTriangle> CutCabinWindow(const std::vector<TownSceneTriangle> &input,
+	const TownCabinInterior &interior, uint32_t *clippedCount = nullptr)
+{
+	std::vector<TownSceneTriangle> output;
+	output.reserve(input.size());
+	const auto planes = CabinWindowPlanes(interior);
+	for (const TownSceneTriangle &triangle : input) {
+		CabinPolygon intersection(triangle.vertices.begin(), triangle.vertices.end());
+		for (CabinClipPlane plane : planes)
+			intersection = ClipCabinPolygon(intersection, plane, true);
+		bool nonzeroIntersection = false;
+		for (size_t i = 1; i + 1 < intersection.size(); ++i) {
+			TownSceneTriangle test = triangle;
+			test.vertices = { intersection[0], intersection[i], intersection[i + 1] };
+			nonzeroIntersection = nonzeroIntersection || SetCabinTriangleNormal(test);
+		}
+		if (!nonzeroIntersection) {
+			// Exact copy, including vertex ordering, UVs and all source metadata.
+			output.push_back(triangle);
+			continue;
+		}
+		if (clippedCount != nullptr)
+			++*clippedCount;
+		CabinPolygon remaining(triangle.vertices.begin(), triangle.vertices.end());
+		for (CabinClipPlane plane : planes) {
+			AppendCabinPolygon(output, triangle, ClipCabinPolygon(remaining, plane, false));
+			remaining = ClipCabinPolygon(remaining, plane, true);
+		}
+	}
+	return output;
+}
+
+void PrepareCabinInteriorTriangles(std::vector<TownSceneTriangle> &triangles, TownLightVector origin)
+{
+	for (TownSceneTriangle &triangle : triangles) {
+		SetCabinTriangleNormal(triangle);
+		triangle.surfaceRole = TownSceneSurfaceRole::Interior;
+		triangle.nativeProjection = false;
+		triangle.surfaceDetail = TownSceneSurfaceDetail::None;
+		for (TownSceneVertex &vertex : triangle.vertices) {
+			if (std::abs(triangle.normal.height) > 0.99F) {
+				// Plank grain follows Z; widths and seams retain a real world scale.
+				vertex.u = vertex.z - origin.z;
+				vertex.v = vertex.x - origin.x;
+			} else if (std::abs(triangle.normal.x) > std::abs(triangle.normal.z)) {
+				vertex.u = vertex.z - origin.z;
+				vertex.v = vertex.height;
+			} else {
+				vertex.u = vertex.x - origin.x;
+				vertex.v = vertex.height;
+			}
+		}
+	}
+}
+
+std::shared_ptr<const TownCabinInterior> MakeCabinInterior(const TownSceneModel &model)
+{
+	auto interior = std::make_shared<TownCabinInterior>();
+	interior->windowCenter = { 71.460F, 2.215F, 71.608F };
+	interior->windowRadius = 0.35F;
+	interior->windowOuterZ = 71.608F;
+	interior->windowInnerZ = 71.38F;
+	interior->roomMinimum = { model.physicalBounds.minX + 0.23F, 0.10F, model.physicalBounds.minZ + 0.23F };
+	interior->roomMaximum = { model.physicalBounds.maxX - 0.23F, 4.62F, interior->windowInnerZ };
+	interior->apertures.push_back({ TownLightPlane::Z, interior->roomMaximum.z,
+		interior->windowCenter.x - interior->windowRadius, interior->windowCenter.x + interior->windowRadius,
+		interior->windowCenter.height - interior->windowRadius, interior->windowCenter.height + interior->windowRadius, 20 });
+	// Offset toward an upper pane along the native ray, rather than hiding the
+	// physical bulb behind the central wooden muntins in the initial view.
+	interior->light = { { interior->windowCenter.x - 0.61F, interior->windowCenter.height - 0.61F, interior->windowOuterZ - 0.72F },
+		{ 1.0F, 0.70F, 0.08F }, 4.0F, 6.0F };
+	interior->exteriorTriangles = CutCabinWindow(model.triangles, *interior, &interior->clippedSourceTriangles);
+	const Point source = model.triangles.front().sourceTile;
+	const Point pick = model.triangles.front().pickTile;
+	Builder room = MakeBuilder(model.kind, model.minTile, model.maxTile, source, pick);
+	const float left = interior->roomMinimum.x;
+	const float right = interior->roomMaximum.x;
+	const float back = interior->roomMinimum.z;
+	const float front = interior->roomMaximum.z;
+	const float floor = interior->roomMinimum.height;
+	const float middle = (left + right) / 2;
+	const float eave = 1.52F;
+	const float peak = interior->roomMaximum.height;
+	// The complete rear shell seals the generated second window from inside.
+	room.Quad({ left, floor, back }, { right, floor, back }, { right, eave, back }, { left, eave, back }, TownSceneMaterial::Stone);
+	room.Triangle({ left, eave, back }, { right, eave, back }, { middle, peak, back }, TownSceneMaterial::Stone);
+	room.Quad({ left, floor, front }, { left, eave, front }, { right, eave, front }, { right, floor, front }, TownSceneMaterial::Stone);
+	room.Triangle({ left, eave, front }, { middle, peak, front }, { right, eave, front }, TownSceneMaterial::Stone);
+	room.Quad({ left, floor, back }, { left, eave, back }, { left, eave, front }, { left, floor, front }, TownSceneMaterial::Stone);
+	room.Quad({ right, floor, front }, { right, eave, front }, { right, eave, back }, { right, floor, back }, TownSceneMaterial::Stone);
+	room.Quad({ left, eave, back }, { middle, peak, back }, { middle, peak, front }, { left, eave, front }, TownSceneMaterial::Timber);
+	room.Quad({ middle, peak, back }, { right, eave, back }, { right, eave, front }, { middle, peak, front }, TownSceneMaterial::Timber);
+	// Real shallow board solids over a closed subfloor. Tiny recessed seams
+	// show board boundaries without exposing native terrain through the room.
+	room.Box(left, back, right, front, floor - 0.07F, floor - 0.04F, TownSceneMaterial::Timber);
+	constexpr float BoardWidth = 0.28F;
+	constexpr float Seam = 0.009F;
+	for (float x = left; x < right; x += BoardWidth) {
+		const float end = std::min(right, x + BoardWidth);
+		room.Box(x + Seam / 2, back, end - Seam / 2, front, floor - 0.04F, floor, TownSceneMaterial::Timber);
+	}
+	PrepareCabinInteriorTriangles(room.model.triangles, interior->roomMinimum);
+	interior->interiorTriangles = CutCabinWindow(room.model.triangles, *interior);
+	// Stone tunnel connects the actual outer aperture to the room shell.
+	Builder inserts = MakeBuilder(model.kind, model.minTile, model.maxTile, source, pick);
+	for (int i = 0; i < 20; ++i) {
+		const float first = 2 * Pi * static_cast<float>(i) / 20;
+		const float second = 2 * Pi * static_cast<float>(i + 1) / 20;
+		const float aX = interior->windowCenter.x + interior->windowRadius * std::cos(first);
+		const float aH = interior->windowCenter.height + interior->windowRadius * std::sin(first);
+		const float bX = interior->windowCenter.x + interior->windowRadius * std::cos(second);
+		const float bH = interior->windowCenter.height + interior->windowRadius * std::sin(second);
+		inserts.Quad({ aX, aH, interior->windowOuterZ }, { bX, bH, interior->windowOuterZ },
+			{ bX, bH, front }, { aX, aH, front }, TownSceneMaterial::Stone);
+	}
+	// Four clear panes separated by actual wood, with no opaque glow disk.
+	const float centerX = interior->windowCenter.x;
+	const float centerH = interior->windowCenter.height;
+	const float frameZ = interior->windowOuterZ - 0.08F;
+	inserts.Box(centerX - 0.016F, frameZ - 0.02F, centerX + 0.016F, frameZ + 0.02F,
+		centerH - 0.30F, centerH + 0.30F, TownSceneMaterial::Timber);
+	inserts.Box(centerX - 0.30F, frameZ - 0.02F, centerX + 0.30F, frameZ + 0.02F,
+		centerH - 0.016F, centerH + 0.016F, TownSceneMaterial::Timber);
+	PrepareCabinInteriorTriangles(inserts.model.triangles, interior->roomMinimum);
+	interior->interiorTriangles.insert(interior->interiorTriangles.end(), inserts.model.triangles.begin(), inserts.model.triangles.end());
+	// Closed, small luminous bulb: emission belongs to its own geometry, while
+	// the point light illuminates real floor/wall receivers behind the aperture.
+	Builder bulb = MakeBuilder(model.kind, model.minTile, model.maxTile, source, pick);
+	constexpr float BulbRadius = 0.08F;
+	const auto bulbPoint = [&](int latitude, int longitude) {
+		const float vertical = Pi * static_cast<float>(latitude) / 8;
+		const float horizontal = 2 * Pi * static_cast<float>(longitude) / 12;
+		return Position { interior->light.position.x + BulbRadius * std::sin(vertical) * std::cos(horizontal),
+			interior->light.position.height + BulbRadius * std::cos(vertical),
+			interior->light.position.z + BulbRadius * std::sin(vertical) * std::sin(horizontal) };
+	};
+	for (int latitude = 0; latitude < 8; ++latitude)
+		for (int longitude = 0; longitude < 12; ++longitude)
+			bulb.Quad(bulbPoint(latitude, longitude), bulbPoint(latitude, longitude + 1),
+				bulbPoint(latitude + 1, longitude + 1), bulbPoint(latitude + 1, longitude), TownSceneMaterial::Timber);
+	PrepareCabinInteriorTriangles(bulb.model.triangles, interior->roomMinimum);
+	interior->emissiveTriangles = std::move(bulb.model.triangles);
+	return interior;
+}
+
 void AddCabin(Point minTile, Point maxTile)
 {
 	Builder builder = MakeBuilder(TownSceneKind::Cabin, minTile, maxTile,
@@ -720,8 +949,8 @@ void AddCabin(Point minTile, Point maxTile)
 		hoop.vertices, { 2.20F * Pi * (BarrelRadius + 0.015F) / 10, -0.715F },
 		{ 2.80F * Pi * (BarrelRadius + 0.015F) / 10, -0.685F });
 	FinishBuilder(builder);
-	if (minTile.x == 70)
-		LoadTownModelOverride(Scene.back(), "d3d-models/cabin-east.d3d");
+	if (minTile.x == 70 && LoadTownModelOverride(Scene.back(), "d3d-models/cabin-east.d3d"))
+		BuildTownCabinInterior(Scene.back());
 }
 
 void AddSmithy(Point minTile, Point maxTile, Point sourceTile, Point entrance)
@@ -971,6 +1200,22 @@ void BuildScene()
 }
 
 } // namespace
+
+bool BuildTownCabinInterior(TownSceneModel &model)
+{
+	// Only this calibrated, optional model has a measured aperture. Do not
+	// infer openings in other imports or change the procedural closed houses.
+	if (!model.externalModel || !model.importedTexture || model.kind != TownSceneKind::Cabin
+	    || model.minTile != Point { 70, 66 } || model.triangles.empty())
+		return false;
+	model.cabinInterior = MakeCabinInterior(model);
+	return true;
+}
+
+const std::vector<TownSceneTriangle> &TownSceneExteriorTriangles(const TownSceneModel &model)
+{
+	return model.cabinInterior != nullptr ? model.cabinInterior->exteriorTriangles : model.triangles;
+}
 
 const std::vector<TownSceneModel> &GetTownScene()
 {

@@ -66,7 +66,30 @@ bool ValidAperture(const TownLightAperture &aperture)
 	return (aperture.plane == TownLightPlane::X || aperture.plane == TownLightPlane::Height || aperture.plane == TownLightPlane::Z)
 	    && std::isfinite(aperture.coordinate) && std::isfinite(aperture.minU) && std::isfinite(aperture.maxU)
 	    && std::isfinite(aperture.minV) && std::isfinite(aperture.maxV)
-	    && aperture.minU < aperture.maxU && aperture.minV < aperture.maxV;
+	    && aperture.minU < aperture.maxU && aperture.minV < aperture.maxV
+	    && (aperture.polygonSides == 0 || (aperture.polygonSides >= 3 && aperture.polygonSides <= 32));
+}
+
+bool InsideAperturePolygon(float u, float v, const TownLightAperture &aperture)
+{
+	if (aperture.polygonSides == 0)
+		return true;
+	// Double intermediates avoid overflow when finite float bounds straddle
+	// zero. Every valid regular aperture has a fixed, at-most-32-edge budget.
+	const double radiusU = (static_cast<double>(aperture.maxU) - aperture.minU) * 0.5;
+	const double radiusV = (static_cast<double>(aperture.maxV) - aperture.minV) * 0.5;
+	const double centerU = (static_cast<double>(aperture.maxU) + aperture.minU) * 0.5;
+	const double centerV = (static_cast<double>(aperture.maxV) + aperture.minV) * 0.5;
+	const float normalizedU = static_cast<float>((u - centerU) / radiusU);
+	const float normalizedV = static_cast<float>((v - centerV) / radiusV);
+	constexpr float Pi = 3.14159265358979323846F;
+	const float sideDistance = std::cos(Pi / static_cast<float>(aperture.polygonSides));
+	for (unsigned side = 0; side < aperture.polygonSides; ++side) {
+		const float angle = 2 * Pi * (static_cast<float>(side) + 0.5F) / static_cast<float>(aperture.polygonSides);
+		if (normalizedU * std::cos(angle) + normalizedV * std::sin(angle) >= sideDistance - BoundaryEpsilon)
+			return false;
+	}
+	return true;
 }
 
 bool OpeningAt(TownLightVector hit, unsigned axis, float boundary, const TownLightOccluder &occluder)
@@ -78,7 +101,8 @@ bool OpeningAt(TownLightVector hit, unsigned axis, float boundary, const TownLig
 		if (aperture.plane != plane || std::abs(aperture.coordinate - boundary) > BoundaryEpsilon)
 			continue;
 		if (u > aperture.minU + BoundaryEpsilon && u < aperture.maxU - BoundaryEpsilon
-		    && v > aperture.minV + BoundaryEpsilon && v < aperture.maxV - BoundaryEpsilon)
+		    && v > aperture.minV + BoundaryEpsilon && v < aperture.maxV - BoundaryEpsilon
+		    && InsideAperturePolygon(u, v, aperture))
 			return true;
 	}
 	return false;

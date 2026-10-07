@@ -10,7 +10,7 @@
 
 namespace devilution {
 
-/** An authored RGB base-color image; the renderer quantizes it once to its palette. */
+/** Authored RGB base color; lighting precedes the runtime's final palette mapping. */
 struct TownImportedTexture {
 	uint32_t width = 0;
 	uint32_t height = 0;

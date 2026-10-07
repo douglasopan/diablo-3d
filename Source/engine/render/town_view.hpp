@@ -43,8 +43,13 @@ struct TownViewLightingState {
 	size_t albedoColors = 0;
 	size_t albedoTableBytes = 0;
 	size_t lightLevels = 0;
+	size_t cabinInteriors = 0;
+	bool cabinLampEnabled = true;
 };
 TownViewLightingState GetTownViewLightingState();
+
+/** Headless evidence for real interior illumination; production defaults on. */
+void SetTownViewCabinLampEnabledForDiagnostics(bool enabled);
 
 /** Draw only the world viewport. forceGeometry is for reconstruction diagnostics. */
 bool DrawTownView(const Surface &fullOut, bool forceGeometry = false);

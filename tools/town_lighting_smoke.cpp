@@ -195,6 +195,30 @@ int main()
 		std::array<TownLightAperture, 1> doorway { TownLightAperture { TownLightPlane::X, 2, 0.5F, 1.5F, 0.5F, 1.5F } };
 		room[0].apertures = doorway;
 		Check(TownPointLightVisibility(lamp, { 3, 1, 1 }, room) == 1, "an explicit open doorway transmits a ray through its actual bounds");
+		Check(TownPointLightVisibility(lamp, { 3, 1.9F, 1.9F }, room) == 1,
+			"legacy rectangular apertures keep their existing corner visibility");
+		doorway[0].polygonSides = 20;
+		const std::size_t beforePolygonCheck = Allocations.load();
+		const bool centerOpen = TownPointLightVisibility(lamp, { 3, 1, 1 }, room) == 1;
+		const bool cornerBlocked = TownPointLightVisibility(lamp, { 3, 1.9F, 1.9F }, room) == 0;
+		const std::size_t polygonAllocations = Allocations.load() - beforePolygonCheck;
+		Check(centerOpen && cornerBlocked && polygonAllocations == 0,
+			"inscribed polygon aperture passes its center but blocks rectangular corner leakage without allocation");
+		std::array<TownLightAperture, 1> cabinWindow {
+			TownLightAperture { TownLightPlane::Z, 71.38F, 71.11F, 71.81F, 1.865F, 2.565F, 20 }
+		};
+		std::array<TownLightOccluder, 1> cabinRoom { TownLightOccluder { { 70, 0.1F, 67 }, { 74, 4.62F, 71.38F }, cabinWindow } };
+		const TownLightVector cabinLamp { 70.85F, 1.605F, 70.888F };
+		Check(TownPointLightVisibility(cabinLamp, { 71.2125F, 1.9675F, 71.43F }, cabinRoom) == 0
+		        && TownPointLightVisibility(cabinLamp, { 71.46F, 2.215F, 71.6F }, cabinRoom) == 1,
+			"measured cabin window blocks the stone-tunnel corner ray while preserving the clear center ray");
+		bool malformedPolygonBlocked = true;
+		for (const unsigned sides : { 1U, 2U, 33U, std::numeric_limits<unsigned>::max() }) {
+			doorway[0].polygonSides = sides;
+			malformedPolygonBlocked = malformedPolygonBlocked && TownPointLightVisibility(lamp, { 3, 1, 1 }, room) == 0;
+		}
+		Check(malformedPolygonBlocked, "malformed aperture polygon counts fail closed");
+		doorway[0].polygonSides = 0;
 		Check(TownPointLightVisibility(lamp, { 3, 2.5F, 1 }, room) == 0, "rays outside the doorway remain blocked by masonry");
 		Check(TownPointLightVisibility({ -1, 1, 1 }, { 3, 1, 1 }, room) == 0, "outside-to-outside rays require openings at both wall crossings");
 		Check(TownPointLightVisibility({ -1, 3, 1 }, { 3, 3, 1 }, room) == 1, "a parallel ray which misses a room is not falsely blocked");

@@ -46,6 +46,9 @@ struct TownLightAperture {
 	float maxU = 0;
 	float minV = 0;
 	float maxV = 0;
+	// Zero keeps a rectangular opening. 3..32 uses a regular polygon inscribed
+	// in the ellipse defined by the same bounds; vertex zero points along +u.
+	unsigned polygonSides = 0;
 };
 
 /** Closed axis-aligned opaque room shell, not a solid filled interior volume. */

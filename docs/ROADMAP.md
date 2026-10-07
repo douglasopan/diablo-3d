@@ -2,13 +2,15 @@
 
 This roadmap describes priorities for a Tristram-first 3D renderer. It is not a release schedule or a claim that planned features already work. Join [Discord](https://discord.gg/4YxQ7s69S) or open an issue to coordinate an object, rendering improvement or research task.
 
-**Resumo em português:** primeiro completar objetos 3D de Tristram e um pipeline de recursos com origem e licença claras; depois implementar iluminação e sombras geradas pela geometria. Melhorar a geração procedural vem em seguida. Catedral, mais jogadores e voz continuam como etapas futuras, sem promessa de multiplayer no build local atual.
+**Resumo em português:** completar Tristram, seus objetos 3D e o pipeline de recursos continua sendo a prioridade. A iluminação de materiais importados e as sombras da arquitetura já têm uma primeira implementação; ciclo dia/noite, horizonte e neblina ainda são propostas, sem ativação no jogo. Catedral, mais jogadores e voz continuam como etapas futuras, sem promessa de multiplayer no build local atual.
 
 ## Current baseline
 
 The v4 prototype switches views with F4 in the same local game. It renders Tristram only. The Home pose uses the actual original backend, so its pixel identity must be reported separately from forced rendering of the reconstructed meshes. Rotated views contain closed architectural meshes, complete native tree and rock groups, and character volumes. Some scenery still uses relief per fragment, and unseen geometry remains inferred from limited original views.
 
-The existing actor shadow decal preserves original artwork; it is not a shadow cast by a scene light. Static architecture now casts directional shadows through a cached software depth map; other caster types and moving lights remain future work. [Meshy multi-view generation and optional local cabin import](MESHY-WORKFLOW.md) are implemented for review, with no generated asset artistically accepted. The current Windows configuration disables networking with `NONET=ON` and does not establish extra-player or voice support.
+Static architecture, including an optional imported model, casts directional shadows through a cached software depth map. Imported RGB base color is decoded from sRGB, receives ambient and directional illumination in linear light, and is then mapped to the game palette. The light and shadow map share one world-space sun direction, configured by a bounded optional `d3d-lighting.ini` profile. Native painted textures retain compatibility shading; their baked lighting has not been universally removed.
+
+The existing actor shadow decal preserves original artwork; it is not a shadow cast by a scene light. Actors, trees and props do not yet cast into the structural shadow map. [Meshy multi-view generation and optional local cabin import](MESHY-WORKFLOW.md) are implemented for review. The east cabin exterior has been approved for continuing local work, but the optional import does not establish acceptance of every generated component, interior or topology defect. Generated art stays outside the public source repository. The current Windows configuration disables networking with `NONET=ON` and does not establish extra-player or voice support.
 
 ## 1. Complete coherent objects in Tristram
 
@@ -28,16 +30,31 @@ A complete object should pass a native-angle comparison using forced meshes and 
 
 This work should support both authored and procedural assets. It is a prerequisite for replacing temporary relief with maintainable models, rather than importing isolated files with unexplained scale and materials.
 
-## 3. Add lighting and real geometry-cast shadows
+## 3. Extend lighting and real geometry-cast shadows
 
-The first pass is implemented for static architecture with a 512×512 directional depth map, receiver-plane bias and filtered comparisons. Four audited cabin ground pieces use frozen masks to replace only painted shadow pixels with nearby native grass, preserving original opacity and every unselected pixel. Other original ground shadows and baked surface light remain. The following work extends that bounded starting point.
+The first pass is implemented for static architecture with a 512×512 directional depth map, receiver-plane bias and filtered comparisons. Imported base-color lighting uses bounded cached RGB tables, with palette conversion after the linear shader. Eight audited cabin ground pieces use frozen masks to replace selected painted shadow pixels with nearby native grass, preserving original opacity and every unselected pixel. Other original ground shadows and baked surface light remain. The optional east-cabin review now includes a timber floor, an opaque room shell and a warm point source visible through its measured polygonal window. The following work extends that bounded starting point.
 
 - Define scene lights, material normals and a clean separation between base color and baked illumination. Prefer unlit base-color sources when available and licensed for redistribution.
 - Cast shadows from buildings, branches, foliage and actors onto actual receiving geometry. Moving actors and changed light positions must change their shadows.
 - Develop and measure a bounded CPU solution compatible with the current software renderer, with explicit passes and correct depth/occlusion. Evaluate a GPU renderer with shadow maps or another suitable technique as a separate architectural choice.
 - Preserve the original Home backend for comparison. Replace compatibility shadow decals in the 3D path only after geometric shadows cover the relevant objects and contact cases.
+- Extend the calibrated cabin's local point lighting and interiors to other measured objects, including attenuation, opaque walls and explicit openings, before enabling it as a general scene feature.
 
-This lighting milestone follows coherent meshes and the asset pipeline, and precedes broad procedural-quality work. Painted dark pixels, flat decals and normal-based color shading alone do not satisfy it. Test roof overhangs, branch gaps, feet, walls, moving characters and shadow self-occlusion, and report frame cost alongside visual results.
+The remaining lighting work accompanies coherent meshes and the asset pipeline, and precedes broad procedural-quality work. Painted dark pixels, flat decals and normal-based color shading alone do not establish geometry-cast shadows. Test roof overhangs, branch gaps, feet, walls, moving characters and shadow self-occlusion, and report frame cost alongside visual results.
+
+### Planned after the Tristram completion gate: day and night
+
+There is no runtime day/night cycle enabled in the current prototype. A future cycle should vary world time, sun direction, light intensity and color together, with shadows moving because the geometry is sampled from the changed light direction. Camera rotation must not move the sun. Night requires an explicit lighting policy; the current profile accepts an elevated directional light and is not itself a night-time implementation.
+
+Keep render time separate from the simulation and its RNG. Define when changed light invalidates the shadow cache, measure rebuild cost, and test gradual color changes, shadow movement, contact and visibility at dawn, day, dusk and night. The original Home backend remains the original comparison path rather than inheriting this new visual cycle.
+
+### Planned: Tristram horizon, fog and depth-aware visibility
+
+A visual horizon and distance fog are not currently implemented. The choice between expanding the explorable town and adding a decorative horizon remains open. Until expansion is specified and tested separately, distant scenery is visual only: it must not create collision, pathing, trigger or interaction changes outside the original map.
+
+Prototype a bounded horizon at the town edge and fog derived from world/view depth, with a defined transition around silhouettes. Preserve foreground roofs, branches, actors and doors; use depth-aware blending so a far background cannot wash through nearer objects. Keep the same lighting model for the horizon and visible town, and document how painted backgrounds differ from actual distant geometry.
+
+Validate the result across 360° rotation, camera distance and pan, including the native pose, map boundary, overlapping silhouettes and transparent foliage. Measure overdraw, blend cost, memory and frame time at each supported resolution. Picking and occlusion must continue to identify the nearest actionable native object; fogged decorative scenery must not become selectable gameplay terrain.
 
 ## 4. Improve deterministic procedural reconstruction
 
