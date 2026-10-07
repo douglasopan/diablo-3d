@@ -5,7 +5,22 @@ body:
   - type: markdown
     attributes:
       value: |
-        Start with a whole object, its native reference and a 360° review plan. Current 3D meshes are not proven identical by the Home view, which uses the original backend. Português: indique um objeto completo, sua origem e como conferir contorno, volume e interação; não envie arte extraída do Diablo.
+        Start with a whole object, its native reference and a 360° review plan. Read docs/ASSET-CATALOG.md, search existing reservations and request one catalog ID before modeling; wait for maintainer assignment. Current 3D meshes are not proven identical by the Home view, which uses the original backend. Português: reserve um ID do catálogo antes de modelar, indique um objeto completo, sua origem e como conferir contorno, volume e interação; não envie arte extraída do Diablo.
+  - type: input
+    id: catalog_id
+    attributes:
+      label: Catalog ID
+      description: Exactly one stable ID from docs/ASSET-CATALOG.md or assets/registry.json. Use a discovery ID first when the whole object has not been identified.
+      placeholder: tristram.arch.cabin
+    validations:
+      required: true
+  - type: textarea
+    id: reservation
+    attributes:
+      label: Reservation request and overlap
+      description: Request ownership of this ID, or cite its existing assigned issue. Name variants/components, check related parent claims, and explain overlap. Begin modeling after a maintainer confirms the reservation.
+    validations:
+      required: true
   - type: input
     id: object
     attributes:

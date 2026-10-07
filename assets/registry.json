@@ -1,0 +1,2229 @@
+{
+  "format": "d3d.asset-registry",
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-07",
+  "rendererBaseline": "4cb265c",
+  "purpose": "Authored coordination metadata only; not a runtime asset loader or a game-map/graphics extract.",
+  "scope": {
+    "current": "Tristram exterior and town-visible runtime categories",
+    "completeGameCatalog": false,
+    "approvedManualModels": 0,
+    "conditionalContent": "Hellfire entries are source-identified reservation stubs, not audited asset coverage."
+  },
+  "contract": {
+    "idPattern": "^tristram\\.[a-z]+\\.[a-z0-9-]+$",
+    "statuses": [
+      "needed",
+      "prototype",
+      "review",
+      "accepted"
+    ],
+    "identifications": [
+      "verified",
+      "category",
+      "unidentified"
+    ],
+    "phases": [
+      "tristram",
+      "conditional-hellfire"
+    ],
+    "nullableCounts": "null means not verified or state-dependent; variantCount excludes animation frames, camera directions and random procedural seeds.",
+    "claimFields": "claimIssue is a project GitHub issue URL; claimOwner is its assigned GitHub login. Both remain null until a maintainer confirms the reservation. Issue assignment/labels are the live queue; registry updates record it.",
+    "acceptance": "accepted requires reviewer, approvedRevision, provenance (kind/license/source), an existing assetPath for authored models and native-angle forced-mesh / 360 / simulation evidence. Home backend reuse is not mesh proof."
+  },
+  "milestones": [
+    {
+      "id": "tristram-complete",
+      "gate": "Identify residual scenery, finish the complete retail/shareware Tristram objects and required states, then accept their visual and gameplay checks."
+    },
+    {
+      "id": "cathedral-first-procedural-level",
+      "gate": "After Tristram, make the first procedural Cathedral level work from the existing live map and seed, preserving collision/triggers and validating whole geometry."
+    },
+    {
+      "id": "expand-catalog",
+      "gate": "Only after the first procedural Cathedral level works, expand the catalog for further Diablo/Hellfire levels and tested edition variants."
+    }
+  ],
+  "validationProfiles": {
+    "native-360-collision": [
+      "Compare forced geometry to the real native backend at calibrated camera; Home is a dispatch check only.",
+      "Inspect whole silhouette and ±5-degree transitions plus eight azimuths; no missing backs/undersides, door/window projection on wrong faces or hidden native-visible actors.",
+      "Verify dimensions, ground contact, finite nondegenerate outward geometry, appropriate closure, picking and occlusion.",
+      "Keep the live map, SOL/collision, player/NPC positions, triggers and random seed unchanged; reload deterministically."
+    ],
+    "actor-animation-360": [
+      "Use the same real frame across source directions; inspect face/back, limbs, clothing and attached props through 360 degrees.",
+      "Feet contact native ground; shadows stay on ground; no duplicated anatomy or plane-thin side views.",
+      "Check idle/walk/actions and planned armor/weapon variants; preserve native actor positions, selection and interaction.",
+      "Label inferred anatomy and supply lawful authored-art provenance."
+    ],
+    "terrain-continuity-collision": [
+      "Compare native-scale floor continuity without cracks or invented semantic material IDs.",
+      "Verify banks/crossings and state transitions with native traversal/collision; ground pieces are not object instances.",
+      "Preserve original map/seed and actor ground contact under orbit/pan/zoom."
+    ],
+    "identify-before-model": [
+      "Find and document a whole native source stencil and its material/instance variants without committing proprietary extracts.",
+      "Check overlap with existing architecture/tree/rock source membership and claim issues.",
+      "A maintainer creates a specific stable ID before artistic modeling starts."
+    ],
+    "items-effects-runtime": [
+      "Compare the same active item/effect and animation frame with native rendering.",
+      "Inspect transparency, attachment/ground placement, 360 visibility and selection/trigger behavior where applicable.",
+      "Preserve live inventory, missile simulation and actor picking; distinguish decals, billboards and actual volumes."
+    ]
+  },
+  "verifiedSnapshot": {
+    "method": "Curated aggregate values from the local v4-final retail/shareware smoke summaries; proprietary captures/map dumps are excluded.",
+    "editions": [
+      "retail",
+      "shareware"
+    ],
+    "nativeGrid": [
+      112,
+      112
+    ],
+    "architectureSceneGroups": 14,
+    "architectureAssemblies": 12,
+    "architectureReusableFamilies": 9,
+    "treeFamilies": 6,
+    "treeInstances": 93,
+    "rockStencilFamilies": 6,
+    "rockInstances": 501,
+    "rockSourceCells": 1607,
+    "rockFillersHiddenInsideArchitecture": 19,
+    "residentTownerInstancesInRecordedFixture": 11,
+    "residentTownerModelFamiliesInRecordedFixture": 9,
+    "caveat": "Counts describe this recorded state and full renderer grid, not an exhaustive Diablo/Hellfire asset count. Older cropped diagnostics reported 419 rocks; use 501 for this snapshot."
+  },
+  "entries": [
+    {
+      "id": "tristram.arch.tavern",
+      "name": "Ogden's tavern",
+      "category": "architecture",
+      "status": "prototype",
+      "identification": "verified",
+      "phase": "tristram",
+      "sourceKeys": [
+        "scene:Tavern:source(50,54)",
+        "scene:Tavern:source(55,60)"
+      ],
+      "sourcePaths": [
+        "Source/engine/render/town_scene.cpp"
+      ],
+      "implementation": "procedural-proxy",
+      "variantCount": 1,
+      "instanceCount": 1,
+      "variants": [
+        {
+          "id": "main-with-wing",
+          "sceneGroups": 2,
+          "locator": [
+            51,
+            64
+          ]
+        }
+      ],
+      "components": [
+        "main building",
+        "attached wing",
+        "doors",
+        "windows",
+        "roof undersides",
+        "timber supports"
+      ],
+      "dependsOn": [],
+      "validationProfile": "native-360-collision",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "One complete assembly; the two scene groups are not two independent modeling claims. Native fringe family 397..452.",
+        "Geometry and runtime-derived native materials exist; no manually authored model has artistic acceptance."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.arch.smithy",
+      "name": "Griswold's smithy",
+      "category": "architecture",
+      "status": "prototype",
+      "identification": "verified",
+      "phase": "tristram",
+      "sourceKeys": [
+        "scene:Smithy:source(64,60)",
+        "scene:Smithy:AddSmithy:source(62,60)"
+      ],
+      "sourcePaths": [
+        "Source/engine/render/town_scene.cpp"
+      ],
+      "implementation": "procedural-proxy",
+      "variantCount": 1,
+      "instanceCount": 1,
+      "variants": [
+        {
+          "id": "main-with-open-bay",
+          "sceneGroups": 2,
+          "locator": [
+            62,
+            63
+          ]
+        }
+      ],
+      "components": [
+        "main building",
+        "open work bay",
+        "posts",
+        "forge/work surfaces",
+        "roof undersides"
+      ],
+      "dependsOn": [],
+      "validationProfile": "native-360-collision",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "Keep the open bay and visible Griswold body. Native fringe family 900..959; do not put every NPC above geometry to hide depth errors.",
+        "Geometry and runtime-derived native materials exist; no manually authored model has artistic acceptance."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.arch.house-common",
+      "name": "Common house family",
+      "category": "architecture",
+      "status": "prototype",
+      "identification": "verified",
+      "phase": "tristram",
+      "sourceKeys": [
+        "scene:House:source(38,64)",
+        "scene:House:source(50,42)",
+        "scene:House:source(69,79)"
+      ],
+      "sourcePaths": [
+        "Source/engine/render/town_scene.cpp"
+      ],
+      "implementation": "procedural-proxy",
+      "variantCount": 3,
+      "instanceCount": 3,
+      "variants": [
+        {
+          "id": "gillian",
+          "locator": [
+            43,
+            66
+          ]
+        },
+        {
+          "id": "north",
+          "locator": [
+            55,
+            44
+          ]
+        },
+        {
+          "id": "farnham",
+          "locator": [
+            73,
+            80
+          ]
+        }
+      ],
+      "components": [
+        "walls",
+        "closed doors",
+        "windows",
+        "roof and underside"
+      ],
+      "dependsOn": [],
+      "validationProfile": "native-360-collision",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "Reuse a parameterized family with three measured layouts; do not copy the same footprint or roof height blindly. Native fringe family 453..487.",
+        "Geometry and runtime-derived native materials exist; no manually authored model has artistic acceptance."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.arch.house-pepin",
+      "name": "Pepin's house",
+      "category": "architecture",
+      "status": "prototype",
+      "identification": "verified",
+      "phase": "tristram",
+      "sourceKeys": [
+        "scene:House:source(50,76)"
+      ],
+      "sourcePaths": [
+        "Source/engine/render/town_scene.cpp"
+      ],
+      "implementation": "procedural-proxy",
+      "variantCount": 1,
+      "instanceCount": 1,
+      "variants": [
+        {
+          "id": "pepin-hip-roof",
+          "locator": [
+            55,
+            79
+          ]
+        }
+      ],
+      "components": [
+        "hip roof",
+        "walls",
+        "closed door",
+        "windows"
+      ],
+      "dependsOn": [],
+      "validationProfile": "native-360-collision",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "Distinct hip-roof layout; native fringe family 488..541.",
+        "Geometry and runtime-derived native materials exist; no manually authored model has artistic acceptance."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.arch.house-adria",
+      "name": "Adria's open hut",
+      "category": "architecture",
+      "status": "prototype",
+      "identification": "verified",
+      "phase": "tristram",
+      "sourceKeys": [
+        "scene:House:AddWitchHut:source(78,18)"
+      ],
+      "sourcePaths": [
+        "Source/engine/render/town_scene.cpp"
+      ],
+      "implementation": "procedural-proxy",
+      "variantCount": 1,
+      "instanceCount": 1,
+      "variants": [
+        {
+          "id": "adria-open-shed",
+          "locator": [
+            80,
+            20
+          ]
+        }
+      ],
+      "components": [
+        "single-slope roof",
+        "open facade",
+        "posts",
+        "timber walls",
+        "foundation"
+      ],
+      "dependsOn": [],
+      "validationProfile": "native-360-collision",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "An open shed is intentional. Do not close its access or impose a generic closed-house shell. Native fringe family 601..642.",
+        "Geometry and runtime-derived native materials exist; no manually authored model has artistic acceptance."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.arch.cabin",
+      "name": "Stone cabin family",
+      "category": "architecture",
+      "status": "prototype",
+      "identification": "verified",
+      "phase": "tristram",
+      "sourceKeys": [
+        "scene:Cabin:min(26,48)",
+        "scene:Cabin:min(70,66)"
+      ],
+      "sourcePaths": [
+        "Source/engine/render/town_scene.cpp"
+      ],
+      "implementation": "procedural-proxy",
+      "variantCount": 2,
+      "instanceCount": 2,
+      "variants": [
+        {
+          "id": "west-short",
+          "sourceBounds": [
+            [
+              26,
+              48
+            ],
+            [
+              30,
+              52
+            ]
+          ]
+        },
+        {
+          "id": "east-long",
+          "sourceBounds": [
+            [
+              70,
+              66
+            ],
+            [
+              74,
+              72
+            ]
+          ]
+        }
+      ],
+      "components": [
+        "arched blue door",
+        "round gable window",
+        "steps",
+        "attached barrel",
+        "gable and roof underside"
+      ],
+      "dependsOn": [],
+      "validationProfile": "native-360-collision",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "One reusable family with two length/layout variants; the east and west houses must not become unrelated competing assets. Native fringe family 849..874.",
+        "Geometry and runtime-derived native materials exist; no manually authored model has artistic acceptance."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.arch.well",
+      "name": "Town well",
+      "category": "architecture",
+      "status": "prototype",
+      "identification": "verified",
+      "phase": "tristram",
+      "sourceKeys": [
+        "scene:Well:AddWell:min(60,70)"
+      ],
+      "sourcePaths": [
+        "Source/engine/render/town_scene.cpp",
+        "Source/levels/town.cpp"
+      ],
+      "implementation": "procedural-proxy",
+      "variantCount": 2,
+      "instanceCount": 1,
+      "variants": [
+        {
+          "id": "clean-water",
+          "stateSource": "levels/town.cpp:DrlgTPass3:FillTile(60,70,71)"
+        },
+        {
+          "id": "poisoned-water",
+          "stateSource": "levels/town.cpp:DrlgTPass3:FillTile(60,70,342)"
+        }
+      ],
+      "components": [
+        "stone rim",
+        "inner wall",
+        "bottom",
+        "water surface"
+      ],
+      "dependsOn": [],
+      "validationProfile": "native-360-collision",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "One object with quest-dependent water states, not two model reservations. The current mesh is a proxy and both visual states require review.",
+        "Geometry and runtime-derived native materials exist; no manually authored model has artistic acceptance."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.arch.cathedral-exterior",
+      "name": "Tristram cathedral exterior",
+      "category": "architecture",
+      "status": "prototype",
+      "identification": "verified",
+      "phase": "tristram",
+      "sourceKeys": [
+        "scene:Cathedral:AddCathedral:source(22,18)"
+      ],
+      "sourcePaths": [
+        "Source/engine/render/town_scene.cpp",
+        "Source/levels/trigs.cpp"
+      ],
+      "implementation": "procedural-proxy",
+      "variantCount": 1,
+      "instanceCount": 1,
+      "variants": [
+        {
+          "id": "exterior-with-bell-tower",
+          "entrance": [
+            25,
+            29
+          ]
+        }
+      ],
+      "components": [
+        "nave",
+        "side roofs",
+        "bell tower",
+        "spire",
+        "buttresses",
+        "apse",
+        "entrance steps"
+      ],
+      "dependsOn": [],
+      "validationProfile": "native-360-collision",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "This is the town exterior, not procedural dungeon level 1. Filter native family 700..834 inside the measured envelope; preserve trigger tiles (25,29) and (25,30).",
+        "Geometry and runtime-derived native materials exist; no manually authored model has artistic acceptance."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.arch.catacombs-entrance",
+      "name": "Catacombs town entrance / small mausoleum",
+      "category": "architecture",
+      "status": "prototype",
+      "identification": "verified",
+      "phase": "tristram",
+      "sourceKeys": [
+        "scene:Crypt:AddCrypt:source(50,20)",
+        "trigger:DTYPE_CATACOMBS:49,21"
+      ],
+      "sourcePaths": [
+        "Source/engine/render/town_scene.cpp",
+        "Source/levels/trigs.cpp",
+        "Source/levels/town.cpp"
+      ],
+      "implementation": "procedural-proxy",
+      "variantCount": 2,
+      "instanceCount": 1,
+      "variants": [
+        {
+          "id": "closed-warp",
+          "stateSource": "levels/town.cpp:DrlgTPass3:IsWarpOpen(DTYPE_CATACOMBS)"
+        },
+        {
+          "id": "open-warp",
+          "trigger": [
+            49,
+            21
+          ]
+        }
+      ],
+      "components": [
+        "stone body",
+        "gable",
+        "crest ornaments",
+        "entry/steps"
+      ],
+      "dependsOn": [],
+      "validationProfile": "native-360-collision",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "The current code calls this Crypt, but pieces 1170..1197 and TownWarp1List identify the Catacombs entrance. It is not Hellfire's crypt at (36,24). Open/closed visual fidelity is not approved.",
+        "Geometry and runtime-derived native materials exist; no manually authored model has artistic acceptance."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.arch.caves-entrance",
+      "name": "Caves town entrance",
+      "category": "architecture",
+      "status": "needed",
+      "identification": "verified",
+      "phase": "tristram",
+      "sourceKeys": [
+        "trigger:DTYPE_CAVES:17,69"
+      ],
+      "sourcePaths": [
+        "Source/levels/trigs.cpp",
+        "Source/levels/town.cpp",
+        "Source/engine/render/town_view.cpp"
+      ],
+      "implementation": "native-fallback",
+      "variantCount": 2,
+      "instanceCount": 1,
+      "variants": [
+        {
+          "id": "closed"
+        },
+        {
+          "id": "open"
+        }
+      ],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "native-360-collision",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "Open/closed warp is native; no dedicated complete scene model is assigned yet.",
+        "States are known from code; source-art coverage and complete geometry remain unvalidated. Locator 17,69."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.arch.hell-entrance",
+      "name": "Hell town entrance",
+      "category": "architecture",
+      "status": "needed",
+      "identification": "verified",
+      "phase": "tristram",
+      "sourceKeys": [
+        "trigger:DTYPE_HELL:41,80"
+      ],
+      "sourcePaths": [
+        "Source/levels/trigs.cpp",
+        "Source/levels/town.cpp",
+        "Source/engine/render/town_view.cpp"
+      ],
+      "implementation": "native-fallback",
+      "variantCount": 2,
+      "instanceCount": 1,
+      "variants": [
+        {
+          "id": "closed"
+        },
+        {
+          "id": "open"
+        }
+      ],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "native-360-collision",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "Native entrance and closed-warp terrain changes exist; complete grouped art and source stencil need identification.",
+        "States are known from code; source-art coverage and complete geometry remain unvalidated. Locator 41,80."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.arch.hive-entrance",
+      "name": "Hellfire hive entrance",
+      "category": "architecture",
+      "status": "needed",
+      "identification": "verified",
+      "phase": "conditional-hellfire",
+      "sourceKeys": [
+        "trigger:DTYPE_NEST:80,62"
+      ],
+      "sourcePaths": [
+        "Source/levels/trigs.cpp",
+        "Source/levels/town.cpp",
+        "Source/engine/render/town_view.cpp"
+      ],
+      "implementation": "native-fallback",
+      "variantCount": 2,
+      "instanceCount": 1,
+      "variants": [
+        {
+          "id": "closed"
+        },
+        {
+          "id": "open"
+        }
+      ],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "native-360-collision",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "TownOpenHive/TownCloseHive and TownHiveList identify it; do not substitute a generic building.",
+        "States are known from code; source-art coverage and complete geometry remain unvalidated. Locator 80,62."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.arch.hellfire-crypt-entrance",
+      "name": "Hellfire crypt/grave entrance",
+      "category": "architecture",
+      "status": "needed",
+      "identification": "verified",
+      "phase": "conditional-hellfire",
+      "sourceKeys": [
+        "trigger:DTYPE_CRYPT:36,24"
+      ],
+      "sourcePaths": [
+        "Source/levels/trigs.cpp",
+        "Source/levels/town.cpp",
+        "Source/engine/render/town_view.cpp"
+      ],
+      "implementation": "native-fallback",
+      "variantCount": 2,
+      "instanceCount": 1,
+      "variants": [
+        {
+          "id": "closed"
+        },
+        {
+          "id": "open"
+        }
+      ],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "native-360-collision",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "TownOpenGrave/TownCloseGrave and TownCryptList identify it. Separate from the runtime scene kind Crypt / Catacombs entrance.",
+        "States are known from code; source-art coverage and complete geometry remain unvalidated. Locator 36,24."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.rock.paired",
+      "name": "Paired rock",
+      "category": "rock",
+      "status": "prototype",
+      "identification": "verified",
+      "phase": "tristram",
+      "sourceKeys": [
+        "prop:PairedRock:anchor=219"
+      ],
+      "sourcePaths": [
+        "Source/engine/render/town_props.cpp",
+        "Source/engine/render/town_volume.cpp",
+        "Source/engine/render/town_view.cpp"
+      ],
+      "implementation": "procedural-proxy",
+      "variantCount": 1,
+      "instanceCount": null,
+      "variants": [
+        {
+          "id": "native-stencil",
+          "anchorPiece": 219,
+          "pieceIds": [
+            219,
+            220
+          ],
+          "sourceCellCount": 2
+        }
+      ],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "native-360-collision",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "One reusable model family for every exact PairedRock stencil. Instance count per family has not been separately published.",
+        "Native filler rocks wholly inside closed architecture can be hidden from drawing; they do not request extra models or change collision."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.rock.small-a",
+      "name": "Small rock A",
+      "category": "rock",
+      "status": "prototype",
+      "identification": "verified",
+      "phase": "tristram",
+      "sourceKeys": [
+        "prop:SmallRockA:anchor=221"
+      ],
+      "sourcePaths": [
+        "Source/engine/render/town_props.cpp",
+        "Source/engine/render/town_volume.cpp",
+        "Source/engine/render/town_view.cpp"
+      ],
+      "implementation": "procedural-proxy",
+      "variantCount": 1,
+      "instanceCount": null,
+      "variants": [
+        {
+          "id": "native-stencil",
+          "anchorPiece": 221,
+          "pieceIds": [
+            221
+          ],
+          "sourceCellCount": 1
+        }
+      ],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "native-360-collision",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "One reusable model family for every exact SmallRockA stencil. Instance count per family has not been separately published.",
+        "Native filler rocks wholly inside closed architecture can be hidden from drawing; they do not request extra models or change collision."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.rock.small-b",
+      "name": "Small rock B",
+      "category": "rock",
+      "status": "prototype",
+      "identification": "verified",
+      "phase": "tristram",
+      "sourceKeys": [
+        "prop:SmallRockB:anchor=222"
+      ],
+      "sourcePaths": [
+        "Source/engine/render/town_props.cpp",
+        "Source/engine/render/town_volume.cpp",
+        "Source/engine/render/town_view.cpp"
+      ],
+      "implementation": "procedural-proxy",
+      "variantCount": 1,
+      "instanceCount": null,
+      "variants": [
+        {
+          "id": "native-stencil",
+          "anchorPiece": 222,
+          "pieceIds": [
+            222
+          ],
+          "sourceCellCount": 1
+        }
+      ],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "native-360-collision",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "One reusable model family for every exact SmallRockB stencil. Instance count per family has not been separately published.",
+        "Native filler rocks wholly inside closed architecture can be hidden from drawing; they do not request extra models or change collision."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.rock.angled",
+      "name": "Angled rock",
+      "category": "rock",
+      "status": "prototype",
+      "identification": "verified",
+      "phase": "tristram",
+      "sourceKeys": [
+        "prop:AngledRock:anchor=223"
+      ],
+      "sourcePaths": [
+        "Source/engine/render/town_props.cpp",
+        "Source/engine/render/town_volume.cpp",
+        "Source/engine/render/town_view.cpp"
+      ],
+      "implementation": "procedural-proxy",
+      "variantCount": 1,
+      "instanceCount": null,
+      "variants": [
+        {
+          "id": "native-stencil",
+          "anchorPiece": 223,
+          "pieceIds": [
+            223,
+            224,
+            225
+          ],
+          "sourceCellCount": 3
+        }
+      ],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "native-360-collision",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "One reusable model family for every exact AngledRock stencil. Instance count per family has not been separately published.",
+        "Native filler rocks wholly inside closed architecture can be hidden from drawing; they do not request extra models or change collision."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.rock.wide",
+      "name": "Wide rock",
+      "category": "rock",
+      "status": "prototype",
+      "identification": "verified",
+      "phase": "tristram",
+      "sourceKeys": [
+        "prop:WideRock:anchor=226"
+      ],
+      "sourcePaths": [
+        "Source/engine/render/town_props.cpp",
+        "Source/engine/render/town_volume.cpp",
+        "Source/engine/render/town_view.cpp"
+      ],
+      "implementation": "procedural-proxy",
+      "variantCount": 1,
+      "instanceCount": null,
+      "variants": [
+        {
+          "id": "native-stencil",
+          "anchorPiece": 226,
+          "pieceIds": [
+            226,
+            227,
+            228,
+            229
+          ],
+          "sourceCellCount": 4
+        }
+      ],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "native-360-collision",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "One reusable model family for every exact WideRock stencil. Instance count per family has not been separately published.",
+        "Native filler rocks wholly inside closed architecture can be hidden from drawing; they do not request extra models or change collision."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.rock.large",
+      "name": "Large irregular boulder",
+      "category": "rock",
+      "status": "prototype",
+      "identification": "verified",
+      "phase": "tristram",
+      "sourceKeys": [
+        "prop:LargeRock:anchor=230"
+      ],
+      "sourcePaths": [
+        "Source/engine/render/town_props.cpp",
+        "Source/engine/render/town_volume.cpp",
+        "Source/engine/render/town_view.cpp"
+      ],
+      "implementation": "procedural-proxy",
+      "variantCount": 1,
+      "instanceCount": null,
+      "variants": [
+        {
+          "id": "native-stencil",
+          "anchorPiece": 230,
+          "pieceIds": [
+            230,
+            231,
+            232,
+            233
+          ],
+          "sourceCellCount": 4
+        }
+      ],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "native-360-collision",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "One reusable model family for every exact LargeRock stencil. Instance count per family has not been separately published.",
+        "Native filler rocks wholly inside closed architecture can be hidden from drawing; they do not request extra models or change collision."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.tree.bare",
+      "name": "Large bare tree",
+      "category": "tree",
+      "status": "prototype",
+      "identification": "verified",
+      "phase": "tristram",
+      "sourceKeys": [
+        "vegetation:BareTree:BareTreeCells:anchor=127"
+      ],
+      "sourcePaths": [
+        "Source/engine/render/town_vegetation.cpp",
+        "Source/engine/render/town_vegetation.hpp",
+        "Source/engine/render/town_volume.cpp",
+        "Source/engine/render/town_view.cpp"
+      ],
+      "implementation": "procedural-proxy",
+      "variantCount": null,
+      "instanceCount": null,
+      "variants": [
+        {
+          "id": "verified-source-family",
+          "anchorPiece": 127,
+          "trunkPiece": 130,
+          "foliage": false
+        }
+      ],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "native-360-collision",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "Use the whole BareTreeCells stencil; MIN fragments and any dSpecial columns are one tree, not one model per cell.",
+        "Source-layout alternates and seeded branch shapes are not a verified count of authored variants. Keep shared family ownership."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.tree.autumn",
+      "name": "Autumn tree",
+      "category": "tree",
+      "status": "prototype",
+      "identification": "verified",
+      "phase": "tristram",
+      "sourceKeys": [
+        "vegetation:AutumnTree:AutumnTreeCells:anchor=155"
+      ],
+      "sourcePaths": [
+        "Source/engine/render/town_vegetation.cpp",
+        "Source/engine/render/town_vegetation.hpp",
+        "Source/engine/render/town_volume.cpp",
+        "Source/engine/render/town_view.cpp"
+      ],
+      "implementation": "procedural-proxy",
+      "variantCount": null,
+      "instanceCount": null,
+      "variants": [
+        {
+          "id": "verified-source-family",
+          "anchorPiece": 155,
+          "trunkPiece": 156,
+          "foliage": true
+        }
+      ],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "native-360-collision",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "Use the whole AutumnTreeCells stencil; MIN fragments and any dSpecial columns are one tree, not one model per cell.",
+        "Source-layout alternates and seeded branch shapes are not a verified count of authored variants. Keep shared family ownership."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.tree.broad",
+      "name": "Broad tree",
+      "category": "tree",
+      "status": "prototype",
+      "identification": "verified",
+      "phase": "tristram",
+      "sourceKeys": [
+        "vegetation:BroadTree:BroadTreeCells:anchor=211"
+      ],
+      "sourcePaths": [
+        "Source/engine/render/town_vegetation.cpp",
+        "Source/engine/render/town_vegetation.hpp",
+        "Source/engine/render/town_volume.cpp",
+        "Source/engine/render/town_view.cpp"
+      ],
+      "implementation": "procedural-proxy",
+      "variantCount": null,
+      "instanceCount": null,
+      "variants": [
+        {
+          "id": "verified-source-family",
+          "anchorPiece": 211,
+          "trunkPiece": 212,
+          "foliage": true
+        }
+      ],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "native-360-collision",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "Use the whole BroadTreeCells stencil; MIN fragments and any dSpecial columns are one tree, not one model per cell.",
+        "Source-layout alternates and seeded branch shapes are not a verified count of authored variants. Keep shared family ownership."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.tree.riverside",
+      "name": "Riverside tree",
+      "category": "tree",
+      "status": "prototype",
+      "identification": "verified",
+      "phase": "tristram",
+      "sourceKeys": [
+        "vegetation:RiversideTree:RiversideTreeCells:anchor=357"
+      ],
+      "sourcePaths": [
+        "Source/engine/render/town_vegetation.cpp",
+        "Source/engine/render/town_vegetation.hpp",
+        "Source/engine/render/town_volume.cpp",
+        "Source/engine/render/town_view.cpp"
+      ],
+      "implementation": "procedural-proxy",
+      "variantCount": null,
+      "instanceCount": null,
+      "variants": [
+        {
+          "id": "verified-source-family",
+          "anchorPiece": 357,
+          "trunkPiece": 358,
+          "foliage": true
+        }
+      ],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "native-360-collision",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "Use the whole RiversideTreeCells stencil; MIN fragments and any dSpecial columns are one tree, not one model per cell.",
+        "Source-layout alternates and seeded branch shapes are not a verified count of authored variants. Keep shared family ownership."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.tree.small-bare",
+      "name": "Small bare tree",
+      "category": "tree",
+      "status": "prototype",
+      "identification": "verified",
+      "phase": "tristram",
+      "sourceKeys": [
+        "vegetation:SmallBareTree:SmallBareTreeCells:anchor=167"
+      ],
+      "sourcePaths": [
+        "Source/engine/render/town_vegetation.cpp",
+        "Source/engine/render/town_vegetation.hpp",
+        "Source/engine/render/town_volume.cpp",
+        "Source/engine/render/town_view.cpp"
+      ],
+      "implementation": "procedural-proxy",
+      "variantCount": null,
+      "instanceCount": null,
+      "variants": [
+        {
+          "id": "verified-source-family",
+          "anchorPiece": 167,
+          "trunkPiece": 167,
+          "foliage": false
+        }
+      ],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "native-360-collision",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "Use the whole SmallBareTreeCells stencil; MIN fragments and any dSpecial columns are one tree, not one model per cell.",
+        "Source-layout alternates and seeded branch shapes are not a verified count of authored variants. Keep shared family ownership."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.tree.small-forked",
+      "name": "Small forked tree",
+      "category": "tree",
+      "status": "prototype",
+      "identification": "verified",
+      "phase": "tristram",
+      "sourceKeys": [
+        "vegetation:SmallForkedTree:SmallForkedTreeCells:anchor=179"
+      ],
+      "sourcePaths": [
+        "Source/engine/render/town_vegetation.cpp",
+        "Source/engine/render/town_vegetation.hpp",
+        "Source/engine/render/town_volume.cpp",
+        "Source/engine/render/town_view.cpp"
+      ],
+      "implementation": "procedural-proxy",
+      "variantCount": null,
+      "instanceCount": null,
+      "variants": [
+        {
+          "id": "verified-source-family",
+          "anchorPiece": 179,
+          "trunkPiece": 179,
+          "foliage": false
+        }
+      ],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "native-360-collision",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "Use the whole SmallForkedTreeCells stencil; MIN fragments and any dSpecial columns are one tree, not one model per cell.",
+        "Source-layout alternates and seeded branch shapes are not a verified count of authored variants. Keep shared family ownership."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.actor.griswold",
+      "name": "Griswold the Blacksmith",
+      "category": "actor",
+      "status": "prototype",
+      "identification": "verified",
+      "phase": "tristram",
+      "sourceKeys": [
+        "towner:TOWN_SMITH"
+      ],
+      "sourcePaths": [
+        "assets/txtdata/towners/towners.tsv",
+        "Source/towners.h",
+        "Source/engine/render/town_body.cpp",
+        "Source/engine/render/town_view.cpp"
+      ],
+      "implementation": "procedural-proxy",
+      "variantCount": 1,
+      "instanceCount": 1,
+      "variants": [],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "actor-animation-360",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "Single native viewing direction feeds an inferred rounded segmented body; unseen anatomy is not approved.",
+        "Claim one complete animated character, including clothing and held/attached props, not separate front/back models."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.actor.pepin",
+      "name": "Pepin the Healer",
+      "category": "actor",
+      "status": "prototype",
+      "identification": "verified",
+      "phase": "tristram",
+      "sourceKeys": [
+        "towner:TOWN_HEALER"
+      ],
+      "sourcePaths": [
+        "assets/txtdata/towners/towners.tsv",
+        "Source/towners.h",
+        "Source/engine/render/town_body.cpp",
+        "Source/engine/render/town_view.cpp"
+      ],
+      "implementation": "procedural-proxy",
+      "variantCount": 1,
+      "instanceCount": 1,
+      "variants": [],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "actor-animation-360",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "Single native viewing direction feeds an inferred rounded segmented body; unseen anatomy is not approved.",
+        "Claim one complete animated character, including clothing and held/attached props, not separate front/back models."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.actor.ogden",
+      "name": "Ogden the Tavern owner",
+      "category": "actor",
+      "status": "prototype",
+      "identification": "verified",
+      "phase": "tristram",
+      "sourceKeys": [
+        "towner:TOWN_TAVERN"
+      ],
+      "sourcePaths": [
+        "assets/txtdata/towners/towners.tsv",
+        "Source/towners.h",
+        "Source/engine/render/town_body.cpp",
+        "Source/engine/render/town_view.cpp"
+      ],
+      "implementation": "procedural-proxy",
+      "variantCount": 1,
+      "instanceCount": 1,
+      "variants": [],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "actor-animation-360",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "Single native viewing direction feeds an inferred rounded segmented body; unseen anatomy is not approved.",
+        "Claim one complete animated character, including clothing and held/attached props, not separate front/back models."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.actor.cain",
+      "name": "Cain the Elder",
+      "category": "actor",
+      "status": "prototype",
+      "identification": "verified",
+      "phase": "tristram",
+      "sourceKeys": [
+        "towner:TOWN_STORY"
+      ],
+      "sourcePaths": [
+        "assets/txtdata/towners/towners.tsv",
+        "Source/towners.h",
+        "Source/engine/render/town_body.cpp",
+        "Source/engine/render/town_view.cpp"
+      ],
+      "implementation": "procedural-proxy",
+      "variantCount": 1,
+      "instanceCount": 1,
+      "variants": [],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "actor-animation-360",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "Single native viewing direction feeds an inferred rounded segmented body; unseen anatomy is not approved.",
+        "Claim one complete animated character, including clothing and held/attached props, not separate front/back models."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.actor.farnham",
+      "name": "Farnham the Drunk",
+      "category": "actor",
+      "status": "prototype",
+      "identification": "verified",
+      "phase": "tristram",
+      "sourceKeys": [
+        "towner:TOWN_DRUNK"
+      ],
+      "sourcePaths": [
+        "assets/txtdata/towners/towners.tsv",
+        "Source/towners.h",
+        "Source/engine/render/town_body.cpp",
+        "Source/engine/render/town_view.cpp"
+      ],
+      "implementation": "procedural-proxy",
+      "variantCount": 1,
+      "instanceCount": 1,
+      "variants": [],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "actor-animation-360",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "Single native viewing direction feeds an inferred rounded segmented body; unseen anatomy is not approved.",
+        "Claim one complete animated character, including clothing and held/attached props, not separate front/back models."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.actor.adria",
+      "name": "Adria the Witch",
+      "category": "actor",
+      "status": "prototype",
+      "identification": "verified",
+      "phase": "tristram",
+      "sourceKeys": [
+        "towner:TOWN_WITCH"
+      ],
+      "sourcePaths": [
+        "assets/txtdata/towners/towners.tsv",
+        "Source/towners.h",
+        "Source/engine/render/town_body.cpp",
+        "Source/engine/render/town_view.cpp"
+      ],
+      "implementation": "procedural-proxy",
+      "variantCount": 1,
+      "instanceCount": 1,
+      "variants": [],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "actor-animation-360",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "Single native viewing direction feeds an inferred rounded segmented body; unseen anatomy is not approved.",
+        "Claim one complete animated character, including clothing and held/attached props, not separate front/back models."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.actor.gillian",
+      "name": "Gillian the Barmaid",
+      "category": "actor",
+      "status": "prototype",
+      "identification": "verified",
+      "phase": "tristram",
+      "sourceKeys": [
+        "towner:TOWN_BMAID"
+      ],
+      "sourcePaths": [
+        "assets/txtdata/towners/towners.tsv",
+        "Source/towners.h",
+        "Source/engine/render/town_body.cpp",
+        "Source/engine/render/town_view.cpp"
+      ],
+      "implementation": "procedural-proxy",
+      "variantCount": 1,
+      "instanceCount": 1,
+      "variants": [],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "actor-animation-360",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "Single native viewing direction feeds an inferred rounded segmented body; unseen anatomy is not approved.",
+        "Claim one complete animated character, including clothing and held/attached props, not separate front/back models."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.actor.wirt",
+      "name": "Wirt the Peg-legged boy",
+      "category": "actor",
+      "status": "prototype",
+      "identification": "verified",
+      "phase": "tristram",
+      "sourceKeys": [
+        "towner:TOWN_PEGBOY"
+      ],
+      "sourcePaths": [
+        "assets/txtdata/towners/towners.tsv",
+        "Source/towners.h",
+        "Source/engine/render/town_body.cpp",
+        "Source/engine/render/town_view.cpp"
+      ],
+      "implementation": "procedural-proxy",
+      "variantCount": 1,
+      "instanceCount": 1,
+      "variants": [],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "actor-animation-360",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "Single native viewing direction feeds an inferred rounded segmented body; unseen anatomy is not approved.",
+        "Claim one complete animated character, including clothing and held/attached props, not separate front/back models."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.actor.cow",
+      "name": "Cow family",
+      "category": "actor",
+      "status": "prototype",
+      "identification": "verified",
+      "phase": "tristram",
+      "sourceKeys": [
+        "towner:TOWN_COW"
+      ],
+      "sourcePaths": [
+        "assets/txtdata/towners/towners.tsv",
+        "Source/towners.cpp",
+        "Source/engine/render/town_actor.cpp",
+        "Source/engine/render/town_view.cpp"
+      ],
+      "implementation": "procedural-proxy",
+      "variantCount": 1,
+      "instanceCount": 3,
+      "variants": [],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "actor-animation-360",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "Three native town instances reuse one cow family. The current renderer can reconstruct from eight directions at the same real animation frame.",
+        "Different facing directions and frames are not separate asset reservations."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.actor.wounded-townsman",
+      "name": "Wounded townsman",
+      "category": "actor",
+      "status": "needed",
+      "identification": "verified",
+      "phase": "tristram",
+      "sourceKeys": [
+        "towner:TOWN_DEADGUY"
+      ],
+      "sourcePaths": [
+        "assets/txtdata/towners/towners.tsv",
+        "Source/towners.cpp",
+        "Source/engine/render/town_view.cpp"
+      ],
+      "implementation": "generic-unvalidated",
+      "variantCount": 1,
+      "instanceCount": null,
+      "variants": [],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "actor-animation-360",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "Quest-dependent presence, animation and final state. Not present in the recorded 11-towner smoke fixture; generic rendering is not approval of a complete wounded body."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.actor.lester",
+      "name": "Lester the farmer",
+      "category": "actor",
+      "status": "needed",
+      "identification": "verified",
+      "phase": "conditional-hellfire",
+      "sourceKeys": [
+        "towner:TOWN_FARMER"
+      ],
+      "sourcePaths": [
+        "Source/towners.h",
+        "Source/towners.cpp",
+        "Source/engine/render/town_view.cpp"
+      ],
+      "implementation": "generic-unvalidated",
+      "variantCount": null,
+      "instanceCount": null,
+      "variants": [],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "actor-animation-360",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "Conditional Hellfire resident identified by enum, short-name map and IsTownerPresent. Not validated by retail/shareware diagnostics; this is a reservation stub, not a complete Hellfire catalog."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.actor.celia",
+      "name": "Celia",
+      "category": "actor",
+      "status": "needed",
+      "identification": "verified",
+      "phase": "conditional-hellfire",
+      "sourceKeys": [
+        "towner:TOWN_GIRL"
+      ],
+      "sourcePaths": [
+        "Source/towners.h",
+        "Source/towners.cpp",
+        "Source/engine/render/town_view.cpp"
+      ],
+      "implementation": "generic-unvalidated",
+      "variantCount": null,
+      "instanceCount": null,
+      "variants": [],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "actor-animation-360",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "Conditional Hellfire resident identified by enum, short-name map and IsTownerPresent. Not validated by retail/shareware diagnostics; this is a reservation stub, not a complete Hellfire catalog."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.actor.nut",
+      "name": "Cow farmer / Complete Nut",
+      "category": "actor",
+      "status": "needed",
+      "identification": "verified",
+      "phase": "conditional-hellfire",
+      "sourceKeys": [
+        "towner:TOWN_COWFARM"
+      ],
+      "sourcePaths": [
+        "Source/towners.h",
+        "Source/towners.cpp",
+        "Source/engine/render/town_view.cpp"
+      ],
+      "implementation": "generic-unvalidated",
+      "variantCount": null,
+      "instanceCount": null,
+      "variants": [],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "actor-animation-360",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "Conditional Hellfire resident identified by enum, short-name map and IsTownerPresent. Not validated by retail/shareware diagnostics; this is a reservation stub, not a complete Hellfire catalog."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.hero.warrior",
+      "name": "Warrior",
+      "category": "hero",
+      "status": "prototype",
+      "identification": "verified",
+      "phase": "tristram",
+      "sourceKeys": [
+        "hero:HeroClass::Warrior"
+      ],
+      "sourcePaths": [
+        "Source/tables/playerdat.hpp",
+        "assets/txtdata/classes/warrior/sprites.tsv",
+        "assets/txtdata/classes/warrior/animations.tsv",
+        "Source/engine/render/town_actor.cpp",
+        "Source/engine/render/town_view.cpp"
+      ],
+      "implementation": "eight-view-procedural-proxy",
+      "variantCount": null,
+      "instanceCount": null,
+      "variants": [],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "actor-animation-360",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "Warrior's real eight-direction frame, grounding and closed hull have mechanical checks; appearance and full animation coverage still need review.",
+        "Armor, weapons, actions and frames require a variant plan under this class ID. Do not reserve one model for each camera direction."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.hero.rogue",
+      "name": "Rogue",
+      "category": "hero",
+      "status": "needed",
+      "identification": "verified",
+      "phase": "tristram",
+      "sourceKeys": [
+        "hero:HeroClass::Rogue"
+      ],
+      "sourcePaths": [
+        "Source/tables/playerdat.hpp",
+        "assets/txtdata/classes/rogue/sprites.tsv",
+        "assets/txtdata/classes/rogue/animations.tsv",
+        "Source/engine/render/town_actor.cpp",
+        "Source/engine/render/town_view.cpp"
+      ],
+      "implementation": "generic-eight-view-unvalidated",
+      "variantCount": null,
+      "instanceCount": null,
+      "variants": [],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "actor-animation-360",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "The runtime attempts the shared directional path; a class-specific validated model and appearance/animation matrix are still needed.",
+        "Armor, weapons, actions and frames require a variant plan under this class ID. Do not reserve one model for each camera direction."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.hero.sorcerer",
+      "name": "Sorcerer",
+      "category": "hero",
+      "status": "needed",
+      "identification": "verified",
+      "phase": "tristram",
+      "sourceKeys": [
+        "hero:HeroClass::Sorcerer"
+      ],
+      "sourcePaths": [
+        "Source/tables/playerdat.hpp",
+        "assets/txtdata/classes/sorcerer/sprites.tsv",
+        "assets/txtdata/classes/sorcerer/animations.tsv",
+        "Source/engine/render/town_actor.cpp",
+        "Source/engine/render/town_view.cpp"
+      ],
+      "implementation": "generic-eight-view-unvalidated",
+      "variantCount": null,
+      "instanceCount": null,
+      "variants": [],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "actor-animation-360",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "The runtime attempts the shared directional path; a class-specific validated model and appearance/animation matrix are still needed.",
+        "Armor, weapons, actions and frames require a variant plan under this class ID. Do not reserve one model for each camera direction."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.hero.monk",
+      "name": "Monk",
+      "category": "hero",
+      "status": "needed",
+      "identification": "verified",
+      "phase": "conditional-hellfire",
+      "sourceKeys": [
+        "hero:HeroClass::Monk"
+      ],
+      "sourcePaths": [
+        "Source/tables/playerdat.hpp",
+        "assets/txtdata/classes/monk/sprites.tsv",
+        "assets/txtdata/classes/monk/animations.tsv",
+        "Source/engine/render/town_actor.cpp",
+        "Source/engine/render/town_view.cpp"
+      ],
+      "implementation": "generic-eight-view-unvalidated",
+      "variantCount": null,
+      "instanceCount": null,
+      "variants": [],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "actor-animation-360",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "The runtime attempts the shared directional path; a class-specific validated model and appearance/animation matrix are still needed.",
+        "Armor, weapons, actions and frames require a variant plan under this class ID. Do not reserve one model for each camera direction."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.hero.bard",
+      "name": "Bard",
+      "category": "hero",
+      "status": "needed",
+      "identification": "verified",
+      "phase": "conditional-hellfire",
+      "sourceKeys": [
+        "hero:HeroClass::Bard"
+      ],
+      "sourcePaths": [
+        "Source/tables/playerdat.hpp",
+        "assets/txtdata/classes/bard/sprites.tsv",
+        "assets/txtdata/classes/bard/animations.tsv",
+        "Source/engine/render/town_actor.cpp",
+        "Source/engine/render/town_view.cpp"
+      ],
+      "implementation": "generic-eight-view-unvalidated",
+      "variantCount": null,
+      "instanceCount": null,
+      "variants": [],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "actor-animation-360",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "The runtime attempts the shared directional path; a class-specific validated model and appearance/animation matrix are still needed.",
+        "Armor, weapons, actions and frames require a variant plan under this class ID. Do not reserve one model for each camera direction."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.hero.barbarian",
+      "name": "Barbarian",
+      "category": "hero",
+      "status": "needed",
+      "identification": "verified",
+      "phase": "conditional-hellfire",
+      "sourceKeys": [
+        "hero:HeroClass::Barbarian"
+      ],
+      "sourcePaths": [
+        "Source/tables/playerdat.hpp",
+        "assets/txtdata/classes/barbarian/sprites.tsv",
+        "assets/txtdata/classes/barbarian/animations.tsv",
+        "Source/engine/render/town_actor.cpp",
+        "Source/engine/render/town_view.cpp"
+      ],
+      "implementation": "generic-eight-view-unvalidated",
+      "variantCount": null,
+      "instanceCount": null,
+      "variants": [],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "actor-animation-360",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "The runtime attempts the shared directional path; a class-specific validated model and appearance/animation matrix are still needed.",
+        "Armor, weapons, actions and frames require a variant plan under this class ID. Do not reserve one model for each camera direction."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.component.doors",
+      "name": "Door kit / parent door details",
+      "category": "component",
+      "status": "prototype",
+      "identification": "category",
+      "phase": "tristram",
+      "sourceKeys": [
+        "component:Builder.HouseWalls:door",
+        "component:AddCabin:arched-door"
+      ],
+      "sourcePaths": [
+        "Source/engine/render/town_scene.cpp"
+      ],
+      "implementation": "procedural-proxy",
+      "variantCount": null,
+      "instanceCount": null,
+      "variants": [],
+      "components": [],
+      "dependsOn": [
+        "tristram.arch.house-common",
+        "tristram.arch.cabin"
+      ],
+      "validationProfile": "native-360-collision",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "Doors are part of complete parent assets and native collision/trigger contracts. Coordinate reusable kit work with the parent issue; never create a second competing house claim.",
+        "Current embossed/closed doors and some deliberate openings do not implement a new door-opening gameplay system."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.component.windows",
+      "name": "Window kit / parent window details",
+      "category": "component",
+      "status": "prototype",
+      "identification": "category",
+      "phase": "tristram",
+      "sourceKeys": [
+        "component:AddCabin:round-window",
+        "component:TownSceneNativeArtwork:windows"
+      ],
+      "sourcePaths": [
+        "Source/engine/render/town_scene.cpp",
+        "Source/engine/render/town_view.cpp"
+      ],
+      "implementation": "procedural-proxy",
+      "variantCount": null,
+      "instanceCount": null,
+      "variants": [],
+      "components": [],
+      "dependsOn": [
+        "tristram.arch.cabin",
+        "tristram.arch.house-common"
+      ],
+      "validationProfile": "native-360-collision",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "Native front projection and a cabin window relief exist. An exhaustive window-style inventory is not verified; coordinate with parent assets rather than duplicate whole buildings."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.component.barrels",
+      "name": "Barrels and attached containers",
+      "category": "component",
+      "status": "prototype",
+      "identification": "category",
+      "phase": "tristram",
+      "sourceKeys": [
+        "component:AddCabin:BarrelRadius"
+      ],
+      "sourcePaths": [
+        "Source/engine/render/town_scene.cpp",
+        "Source/engine/render/town_view.cpp"
+      ],
+      "implementation": "procedural-proxy",
+      "variantCount": null,
+      "instanceCount": null,
+      "variants": [],
+      "components": [],
+      "dependsOn": [
+        "tristram.arch.cabin"
+      ],
+      "validationProfile": "native-360-collision",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "The cabin barrel is part of its parent model. Other loose containers/barrel families have not been semantically inventoried; do not assume all native barrel paint shares one mesh."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.terrain.native-ground",
+      "name": "Native town ground layer",
+      "category": "terrain",
+      "status": "prototype",
+      "identification": "category",
+      "phase": "tristram",
+      "sourceKeys": [
+        "ground:DPieceMicros:mt0-mt1"
+      ],
+      "sourcePaths": [
+        "Source/engine/render/town_view.cpp",
+        "Source/levels/town.cpp",
+        "Source/engine/render/dun_render.cpp"
+      ],
+      "implementation": "native-ground",
+      "variantCount": null,
+      "instanceCount": null,
+      "variants": [],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "terrain-continuity-collision",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "The native floor is rendered as a ground layer; it is not one object per SOL tile. Piece 0 is valid.",
+        "Grass, dirt, paths, bank and water material families need a separate verified semantic inventory. No exhaustive material IDs or authored variant count are claimed."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.terrain.river-crossings",
+      "name": "River banks, water and crossings",
+      "category": "terrain",
+      "status": "needed",
+      "identification": "category",
+      "phase": "tristram",
+      "sourceKeys": [
+        "coverage:terrain:river-banks-crossings"
+      ],
+      "sourcePaths": [
+        "Source/levels/town.cpp",
+        "Source/engine/render/town_view.cpp"
+      ],
+      "implementation": "native-ground-and-fallback",
+      "variantCount": null,
+      "instanceCount": null,
+      "variants": [],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "terrain-continuity-collision",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "Reserve discovery/classification first. Riverside trees are separately cataloged; water/bank/bridge geometry and any animation states require verified source grouping. Do not alter native traversal or reseed the map."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.discovery.fences-walls",
+      "name": "Fences, loose walls and railings",
+      "category": "discovery",
+      "status": "needed",
+      "identification": "unidentified",
+      "phase": "tristram",
+      "sourceKeys": [
+        "coverage:residual-scenery:fences-walls"
+      ],
+      "sourcePaths": [
+        "Source/engine/render/town_view.cpp",
+        "Source/levels/town.cpp"
+      ],
+      "implementation": "unidentified-native-fallback",
+      "variantCount": null,
+      "instanceCount": null,
+      "variants": [],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "identify-before-model",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "No exact fence or standalone wall stencils are verified by the current whole-object groupers.",
+        "DrawScenery/DecodeTile may render a generic relief or native fallback. That is not a complete recognized object. Identify one whole-object stencil and propose a new stable ID before modeling."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.discovery.ruins-graves",
+      "name": "Ruins, graves and miscellaneous masonry",
+      "category": "discovery",
+      "status": "needed",
+      "identification": "unidentified",
+      "phase": "tristram",
+      "sourceKeys": [
+        "coverage:residual-scenery:ruins-graves"
+      ],
+      "sourcePaths": [
+        "Source/engine/render/town_view.cpp",
+        "Source/levels/town.cpp"
+      ],
+      "implementation": "unidentified-native-fallback",
+      "variantCount": null,
+      "instanceCount": null,
+      "variants": [],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "identify-before-model",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "Do not call every solid stone cell a ruin. Separate the known Catacombs entrance and conditional Hellfire grave from residual masonry.",
+        "DrawScenery/DecodeTile may render a generic relief or native fallback. That is not a complete recognized object. Identify one whole-object stencil and propose a new stable ID before modeling."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.discovery.loose-decor",
+      "name": "Loose decor, debris and unknown scenery",
+      "category": "discovery",
+      "status": "needed",
+      "identification": "unidentified",
+      "phase": "tristram",
+      "sourceKeys": [
+        "coverage:residual-scenery:loose-decor"
+      ],
+      "sourcePaths": [
+        "Source/engine/render/town_view.cpp",
+        "Source/levels/town.cpp"
+      ],
+      "implementation": "unidentified-native-fallback",
+      "variantCount": null,
+      "instanceCount": null,
+      "variants": [],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "identify-before-model",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "Includes remaining ungrouped decorative fragments; exact semantic identities and counts are unknown.",
+        "DrawScenery/DecodeTile may render a generic relief or native fallback. That is not a complete recognized object. Identify one whole-object stencil and propose a new stable ID before modeling."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.item.ground-visuals",
+      "name": "Dropped-item visual families",
+      "category": "item",
+      "status": "prototype",
+      "identification": "category",
+      "phase": "tristram",
+      "sourceKeys": [
+        "runtime:ActiveItems:Items.AnimInfo"
+      ],
+      "sourcePaths": [
+        "Source/engine/render/town_view.cpp",
+        "assets/txtdata/items/itemdat.tsv",
+        "Source/items.h"
+      ],
+      "implementation": "generic-runtime-relief",
+      "variantCount": null,
+      "instanceCount": null,
+      "variants": [],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "items-effects-runtime",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "Items have generic sprite-derived depth and native item picking. This is not a verified model library for all weapons, armor, consumables, gold and quest objects.",
+        "Inventory which appearances actually occur in town and claim a scoped reusable visual family before adding child IDs; inventory UI is outside this catalog."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.effects.spells-portals",
+      "name": "Town missiles, spells and portal effects",
+      "category": "effect",
+      "status": "needed",
+      "identification": "category",
+      "phase": "tristram",
+      "sourceKeys": [
+        "runtime:Missiles:_miAnimData"
+      ],
+      "sourcePaths": [
+        "Source/engine/render/town_view.cpp",
+        "assets/txtdata/missiles/misdat.tsv",
+        "assets/txtdata/missiles/missile_sprites.tsv"
+      ],
+      "implementation": "native-billboards",
+      "variantCount": null,
+      "instanceCount": null,
+      "variants": [],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "items-effects-runtime",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "The current free-camera path draws missile frames as billboards. No complete volumetric or VFX library is accepted.",
+        "Animation, transparency, ground placement and interaction/trigger behavior need per-effect validation. Do not infer an exhaustive spell catalog from this category."
+      ],
+      "provenance": null
+    },
+    {
+      "id": "tristram.effects.actor-shadows",
+      "name": "Actor ground shadows and future scene shadows",
+      "category": "effect",
+      "status": "prototype",
+      "identification": "category",
+      "phase": "tristram",
+      "sourceKeys": [
+        "runtime:ActorGroundShadow"
+      ],
+      "sourcePaths": [
+        "Source/engine/render/town_view.cpp",
+        "Source/engine/render/town_actor_mask.cpp"
+      ],
+      "implementation": "native-ground-decals",
+      "variantCount": null,
+      "instanceCount": null,
+      "variants": [],
+      "components": [],
+      "dependsOn": [],
+      "validationProfile": "items-effects-runtime",
+      "claimIssue": null,
+      "claimOwner": null,
+      "reviewer": null,
+      "approvedRevision": null,
+      "assetPath": null,
+      "notes": [
+        "Native painted actor shadows are separated into ground decals. They are not geometry-cast dynamic shadows.",
+        "Lighting and shadow-system work should be coordinated in one system issue; individual object issues must specify casting/receiving needs."
+      ],
+      "provenance": null
+    }
+  ],
+  "repository": "https://github.com/douglasopan/diablo-3d"
+}
