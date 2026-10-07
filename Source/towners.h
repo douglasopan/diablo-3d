@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <span>
 #include <string>
 #include <string_view>
@@ -81,6 +82,8 @@ struct Towner {
 };
 
 extern std::vector<Towner> Towners;
+/** Read-only native animal directions for the volumetric town renderer. */
+std::optional<ClxSpriteSheet> GetTownCowSpriteSheet();
 
 /**
  * @brief Returns the number of unique towner types found in TSV data.

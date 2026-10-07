@@ -1,74 +1,60 @@
 name: Bug report
-description: Create a report to help us improve
-title: "[Issue Report]: "
-labels: ["issue report"]
+description: Report a reproducible D3D rendering or gameplay regression.
+title: "[Bug] "
 body:
-  - type: dropdown
-    id: operating-system
+  - type: markdown
     attributes:
-      label: Operating System
-      options:
-        - Windows x64
-        - Windows x86
-        - Linux x64
-        - Linux x86
-        - Mac
-        - Android
-        - iOS
-        - Xbox One
-        - PlayStation 4
-        - Nintendo Switch
-        - PlayStation Vita
-        - Nintendo 3DS
-        - Other (please specify)
-    validations:
-      required: true
-  - type: dropdown
+      value: |
+        D3D currently targets Tristram. Home uses the actual original backend; rotated or forced-geometry views test reconstruction. Do not upload game archives, extracted artwork, saves or secrets. Português: descreva o erro e como reproduzi-lo; não envie os arquivos do Diablo nem chaves.
+  - type: input
     id: version
     attributes:
-      label: DevilutionX version
+      label: Build or commit
+      description: Include the executable version or commit and whether you built it yourself.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment and game data
+      description: OS, viewport/resolution, retail or shareware, game-data edition, and relevant settings. Keep personal paths private.
+    validations:
+      required: true
+  - type: dropdown
+    id: renderer
+    attributes:
+      label: View where the bug occurs
       options:
-        - 1.5.5
-        - 1.5.4
-        - 1.5.3
-        - 1.5.2
-        - 1.5.1
-        - 1.5.0
-        - 1.4.1
-        - 1.4.0
-        - 1.3.0
-        - 1.2.1
-        - 1.1.0
-        - Custom build (please specify commit ID)
-        - Other (please specify version number)
+        - Original view (F4 off)
+        - 3D mode at Home (original backend)
+        - Rotated or changed 3D camera (meshes)
+        - Forced-geometry diagnostic at native angle
+        - Multiple views or unsure
     validations:
       required: true
   - type: textarea
-    id: description
+    id: steps
     attributes:
-      label: Describe
-      placeholder: A clear and concise description of what the bug is.
+      label: Reproduction steps
+      description: Include town/object coordinates if known, camera controls, actor motion and any open panels.
     validations:
       required: true
   - type: textarea
-    id: steps-to-reproduce
+    id: behavior
     attributes:
-      label: To Reproduce
-      description: Steps to reproduce the behavior
-      placeholder: |
-        1. Go to '...'
-        2. Click on '...'
-        3. Scroll down to '...'
-        4. See error
+      label: Expected and actual behavior
+      description: Explain the visible defect or gameplay regression and whether it persists after F4/Home.
     validations:
       required: true
-  - type: input
-    id: expected-behavior
-    attributes:
-      label: Expected Behavior
-      placeholder: A clear and concise description of what you expected to happen.
   - type: textarea
-    id: additional-context
+    id: evidence
     attributes:
-      label: Additional context
-      placeholder: Any other context about the problem here (screenshots, videos, code blocks, etc.).
+      label: Evidence and logs
+      description: Attach only evidence you may publish. Label original-backend and forced-mesh captures separately; remove secrets and personal information from logs.
+  - type: checkboxes
+    id: data
+    attributes:
+      label: Included data
+      options:
+        - label: I have not attached game archives, extracted proprietary assets, player saves or credentials.
+          required: true

@@ -1,0 +1,74 @@
+name: 3D object or asset pipeline
+description: Propose a complete Tristram object, procedural reconstruction or reproducible asset import.
+title: "[3D] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Start with a whole object, its native reference and a 360° review plan. Current 3D meshes are not proven identical by the Home view, which uses the original backend. Português: indique um objeto completo, sua origem e como conferir contorno, volume e interação; não envie arte extraída do Diablo.
+  - type: input
+    id: object
+    attributes:
+      label: Object and scope
+      description: Name the Tristram object or pipeline change and the part you want to own.
+    validations:
+      required: true
+  - type: dropdown
+    id: approach
+    attributes:
+      label: Proposed approach
+      options:
+        - Procedural geometry from the live native map
+        - Authored mesh and materials
+        - Generated candidate requiring calibration
+        - Import or material pipeline
+        - Other rendering work
+    validations:
+      required: true
+  - type: textarea
+    id: native_reference
+    attributes:
+      label: Native object and current defect
+      description: Record coordinates, piece stencil, footpoint, orientation, bounds and defining features if known. Describe local references without uploading archive extracts. Label original-backend and forced-mesh captures separately.
+    validations:
+      required: true
+  - type: textarea
+    id: provenance
+    attributes:
+      label: Asset provenance and license
+      description: Author, license, source, tool/generator version and reproducible settings. Explain what can be redistributed. Never include keys, protected secret blobs or proprietary archive extracts.
+    validations:
+      required: true
+  - type: textarea
+    id: geometry_materials
+    attributes:
+      label: Geometry, import and material plan
+      description: Whole-object closed surfaces, real depth, units, origin, ground contact, UVs, normals, material slots and runtime budget. Prefer base color without painted lighting/shadows when possible; native front projection should not cover every backside.
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: Native-angle and 360° validation
+      description: Plan forced-mesh/native comparison and rotated views, finite/closed/outward geometry, picking, occlusion, preserved collision and actor movement, deterministic construction and reload checks. For procedural work, use the existing seed without reseeding gameplay.
+    validations:
+      required: true
+  - type: textarea
+    id: shadows
+    attributes:
+      label: Lighting and shadow implications
+      description: Explain normals/base-color separation and how geometry should cast/receive shadows under scene lights. Current actor decals are temporary compatibility artwork, not dynamic shadows. If proposing lighting, cover actual geometry, moving actors, depth passes and measured CPU/GPU cost.
+  - type: textarea
+    id: limitations
+    attributes:
+      label: Remaining uncertainty and dependencies
+      description: Unseen sides inferred from one view, animation limitations, external tools, budget or needed engine interfaces. Paid generation must be explicitly scoped before spending.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Proposal checks
+      options:
+        - label: This proposal preserves the original gameplay map, collision and seed.
+          required: true
+        - label: I have not included proprietary game-data extracts or credentials.
+          required: true

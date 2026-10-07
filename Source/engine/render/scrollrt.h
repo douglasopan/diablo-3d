@@ -57,6 +57,9 @@ void CalcTileOffset(int *offsetX, int *offsetY);
 void TilesInView(int *columns, int *rows);
 void CalcViewportGeometry();
 
+/** Render the original world; refuse buffers smaller than the actual viewport. */
+bool DrawNativeTownViewReference(const Surface &out, Point viewPosition);
+
 /**
  * @brief Calculate the screen position of a given tile
  * @param tile Position of a dungeon tile

@@ -704,6 +704,13 @@ const TownerData TownersData[] = {
 
 std::vector<Towner> Towners;
 
+std::optional<ClxSpriteSheet> GetTownCowSpriteSheet()
+{
+	if (!CowSprites)
+		return std::nullopt;
+	return ClxSpriteSheet { *CowSprites };
+}
+
 std::unordered_map<_talker_id, std::string> TownerLongNames;
 
 const std::unordered_map<_talker_id, const char *> TownerShortNames = {

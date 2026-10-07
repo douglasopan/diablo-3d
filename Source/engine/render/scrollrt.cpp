@@ -35,6 +35,7 @@
 #include "engine/render/dun_render.hpp"
 #include "engine/render/light_render.hpp"
 #include "engine/render/text_render.hpp"
+#include "engine/render/town_view.hpp"
 #include "engine/trn.hpp"
 #include "engine/world_tile.hpp"
 #include "game_mode.hpp"
@@ -1226,8 +1227,14 @@ void CalcFirstTilePosition(Point &position, Displacement &offset)
  * @param position First tile of view in dPiece coordinate
  * @param offset Amount to offset the rendering in screen space
  */
-void DrawGame(const Surface &fullOut, Point position, Displacement offset)
+void DrawGame(const Surface &fullOut, Point position, Displacement offset, bool forceNative = false)
 {
+	if (!forceNative && IsTownViewActive()) {
+		UpdateMissilesRendererData();
+		if (DrawTownView(fullOut))
+			return;
+	}
+
 	// Limit rendering to the view area
 	const Surface &out = !*GetOptions().Graphics.zoom
 	    ? fullOut.subregionY(0, gnViewportHeight)
@@ -1318,6 +1325,14 @@ void DrawView(const Surface &out, Point startPosition)
 	Displacement offset = {};
 	CalcFirstTilePosition(startPosition, offset);
 	DrawGame(out, startPosition, offset);
+	if (IsTownViewActive()) {
+		DrawString(out.subregionY(0, gnViewportHeight), IsTownViewNativePose()
+				? "Tristram 3D | Vista original | F4: alternar"
+				: "Tristram 3D | Camera livre | Home: vista original",
+		    Point { 8, 28 }, { .flags = UiFlags::ColorWhite });
+		DrawString(out.subregionY(0, gnViewportHeight), "Botao do meio: girar/inclinar | Roda: zoom | Shift+meio: mover",
+		    Point { 8, 44 }, { .flags = UiFlags::ColorWhite });
+	}
 	if (AutomapActive) {
 		DrawAutomap(out.subregionY(0, gnViewportHeight));
 	}
@@ -1717,6 +1732,20 @@ void CalcViewportGeometry()
 	const Point renderStart = startPosition - Displacement { TILE_WIDTH / 2, TILE_HEIGHT / 2 };
 	tileRows = (viewportHeight - renderStart.y + TILE_HEIGHT / 2 - 1) / (TILE_HEIGHT / 2);
 	tileColumns = (screenWidth - renderStart.x + TILE_WIDTH - 1) / TILE_WIDTH;
+}
+
+bool DrawNativeTownViewReference(const Surface &out, Point viewPosition)
+{
+	// Exercise the same native world backend, tile traversal, actor ordering and
+	// delayed tree pass as DrawView. The caller supplies the screen
+	// dimensions, panel layout and zoom setting; no UI overlays are drawn here.
+	CalcViewportGeometry();
+	if (MyPlayer == nullptr || out.w() < gnScreenWidth || out.h() < gnViewportHeight)
+		return false;
+	Displacement offset {};
+	CalcFirstTilePosition(viewPosition, offset);
+	DrawGame(out, viewPosition, offset, true);
+	return true;
 }
 
 Point GetScreenPosition(Point tile)

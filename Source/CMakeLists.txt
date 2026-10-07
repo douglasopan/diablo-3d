@@ -81,6 +81,15 @@ set(libdevilutionx_SRCS
 
   engine/render/automap_render.cpp
   engine/render/scrollrt.cpp
+  engine/render/town_view.cpp
+  engine/render/town_scene.cpp
+  engine/render/town_scene_projection.cpp
+  engine/render/town_props.cpp
+  engine/render/town_volume.cpp
+  engine/render/town_vegetation.cpp
+  engine/render/town_actor.cpp
+  engine/render/town_body.cpp
+  engine/render/town_actor_mask.cpp
 
   items/validation.cpp
 

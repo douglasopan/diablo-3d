@@ -50,6 +50,7 @@
 #include "engine/load_file.hpp"
 #include "engine/random.hpp"
 #include "engine/render/clx_render.hpp"
+#include "engine/render/town_view.hpp"
 #include "engine/sound.h"
 #include "game_mode.hpp"
 #include "gamemenu.h"
@@ -673,8 +674,51 @@ void PressKey(SDL_Keycode vkey, uint16_t modState)
 	}
 }
 
+bool CanUseTownCamera()
+{
+	return leveltype == DTYPE_TOWN && MyPlayer != nullptr && !MyPlayerIsDead && MyPlayer->_pmode != PM_DEATH
+	    && PauseMode != 2 && !InGameMenu() && !IsPlayerInStore() && !IsChatActive()
+	    && !QuestLogIsOpen && !HelpFlag && !ChatLogFlag && !qtextflag && !DoomFlag
+	    && !SpellSelectFlag && !DropGoldFlag && !IsWithdrawGoldOpen;
+}
+
+bool CanControlTownCamera(bool requireWorldPointer = true)
+{
+	if (!IsTownViewActive() || !CanUseTownCamera())
+		return false;
+	if (!requireWorldPointer)
+		return true;
+	if (MousePosition.x < 0 || MousePosition.x >= gnScreenWidth || MousePosition.y < 0 || MousePosition.y >= gnViewportHeight
+	    || GetMainPanel().contains(MousePosition)
+	    || (IsLeftPanelOpen() && GetLeftPanel().contains(MousePosition))
+	    || (IsRightPanelOpen() && GetRightPanel().contains(MousePosition)))
+		return false;
+	return true;
+}
+
+void ReleaseTownCameraDrag()
+{
+	EndTownViewCameraDrag();
+#if SDL_VERSION_ATLEAST(2, 0, 4) && !SDL_VERSION_ATLEAST(3, 0, 0)
+	SDL_CaptureMouse(SDL_FALSE);
+#elif SDL_VERSION_ATLEAST(3, 0, 0)
+	SDL_CaptureMouse(false);
+#endif
+}
+
 void HandleMouseButtonDown(Uint8 button, uint16_t modState)
 {
+	if (IsTownViewCameraDragging())
+		return;
+	if (button == SDL_BUTTON_MIDDLE && sgbMouseDown == CLICK_NONE && CanControlTownCamera()
+	    && BeginTownViewCameraDrag(MousePosition, (modState & SDL_KMOD_SHIFT) != 0)) {
+#if SDL_VERSION_ATLEAST(2, 0, 4) && !SDL_VERSION_ATLEAST(3, 0, 0)
+		SDL_CaptureMouse(SDL_TRUE);
+#elif SDL_VERSION_ATLEAST(3, 0, 0)
+		SDL_CaptureMouse(true);
+#endif
+		return;
+	}
 	if (IsPlayerInStore() && (button == SDL_BUTTON_X1
 #if !SDL_VERSION_ATLEAST(2, 0, 0)
 	        || button == 8
@@ -705,6 +749,10 @@ void HandleMouseButtonDown(Uint8 button, uint16_t modState)
 
 void HandleMouseButtonUp(Uint8 button, uint16_t modState)
 {
+	if (button == SDL_BUTTON_MIDDLE && IsTownViewCameraDragging()) {
+		ReleaseTownCameraDrag();
+		return;
+	}
 	if (sgbMouseDown == CLICK_LEFT && button == SDL_BUTTON_LEFT) {
 		LastPlayerAction = PlayerActionType::None;
 		sgbMouseDown = CLICK_NONE;
@@ -737,6 +785,15 @@ void PrepareForFadeIn()
 
 void GameEventHandler(const SDL_Event &event, uint16_t modState)
 {
+#if SDL_VERSION_ATLEAST(3, 0, 0)
+	if (event.type == SDL_EVENT_WINDOW_FOCUS_LOST)
+		ReleaseTownCameraDrag();
+#elif SDL_VERSION_ATLEAST(2, 0, 0)
+	if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_FOCUS_LOST)
+		ReleaseTownCameraDrag();
+#endif
+	if (event.type == SDL_EVENT_KEY_DOWN && SDLC_EventKey(event) == SDLK_ESCAPE)
+		ReleaseTownCameraDrag();
 	[[maybe_unused]] const Options &options = GetOptions();
 	StaticVector<ControllerButtonEvent, 4> ctrlEvents = ToControllerButtonEvents(event);
 	for (const ControllerButtonEvent ctrlEvent : ctrlEvents) {
@@ -778,6 +835,13 @@ void GameEventHandler(const SDL_Event &event, uint16_t modState)
 
 	switch (event.type) {
 	case SDL_EVENT_KEY_DOWN:
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+		if (event.key.repeat) {
+			const auto *action = options.Keymapper.findAction(static_cast<uint32_t>(SDLC_EventKey(event)));
+			if (action != nullptr && action->key == "ToggleTown3D")
+				return;
+		}
+#endif
 		PressKey(SDLC_EventKey(event), modState);
 		return;
 	case SDL_EVENT_KEY_UP:
@@ -787,6 +851,13 @@ void GameEventHandler(const SDL_Event &event, uint16_t modState)
 		if (ControlMode == ControlTypes::KeyboardAndMouse && invflag)
 			InvalidateInventorySlot();
 		MousePosition = { SDLC_EventMotionIntX(event), SDLC_EventMotionIntY(event) };
+		if (IsTownViewCameraDragging()) {
+			if (!CanControlTownCamera(false))
+				ReleaseTownCameraDrag();
+			else if (UpdateTownViewCameraDrag(MousePosition))
+				RedrawViewport();
+			return;
+		}
 		gmenu_on_mouse_move();
 		return;
 	case SDL_EVENT_MOUSE_BUTTON_DOWN:
@@ -799,6 +870,22 @@ void GameEventHandler(const SDL_Event &event, uint16_t modState)
 		return;
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 	case SDL_EVENT_MOUSE_WHEEL:
+		if (CanControlTownCamera() && (modState & SDL_KMOD_CTRL) == 0) {
+			float steps = static_cast<float>(SDLC_EventWheelIntY(event));
+#if SDL_VERSION_ATLEAST(3, 0, 0)
+			steps = event.wheel.y;
+#elif SDL_VERSION_ATLEAST(2, 0, 18)
+			if (event.wheel.preciseY != 0)
+				steps = event.wheel.preciseY;
+#endif
+			if (event.wheel.direction == SDL_MOUSEWHEEL_FLIPPED)
+				steps = -steps;
+			if (steps != 0) {
+				ZoomTownView(steps);
+				RedrawViewport();
+				return;
+			}
+		}
 		if (SDLC_EventWheelIntY(event) > 0) { // Up
 			if (IsPlayerInStore()) {
 				StoreUp();
@@ -1925,6 +2012,59 @@ void InitKeymapActions()
 	    nullptr,
 	    [&]() { return !gbIsMultiplayer && CanPlayerTakeAction(); });
 	options.Keymapper.AddAction(
+	    "ToggleTown3D",
+	    N_("Tristram 3D"),
+	    N_("Switch between the original and 3D view in Tristram."),
+	    SDLK_F4,
+	    [] {
+		    ReleaseTownCameraDrag();
+		    ToggleTownView();
+		    ResetItemlabelHighlighted();
+		    RedrawEverything();
+	    },
+	    nullptr,
+	    [] { return CanUseTownCamera(); });
+	options.Keymapper.AddAction(
+	    "Town3DRotateLeft",
+	    N_("Rotate Tristram camera left"),
+	    N_("Rotate the 3D camera without moving the hero."),
+	    SDLK_LEFTBRACKET,
+	    [] { RotateTownView(-0.15F); RedrawViewport(); },
+	    nullptr,
+	    [] { return CanControlTownCamera(false); });
+	options.Keymapper.AddAction(
+	    "Town3DRotateRight",
+	    N_("Rotate Tristram camera right"),
+	    N_("Rotate the 3D camera without moving the hero."),
+	    SDLK_RIGHTBRACKET,
+	    [] { RotateTownView(0.15F); RedrawViewport(); },
+	    nullptr,
+	    [] { return CanControlTownCamera(false); });
+	options.Keymapper.AddAction(
+	    "Town3DCameraNear",
+	    N_("Move Tristram camera closer"),
+	    N_("Decrease the distance of the 3D camera."),
+	    SDLK_PAGEUP,
+	    [] { AdjustTownViewDistance(-1.0F); RedrawViewport(); },
+	    nullptr,
+	    [] { return CanControlTownCamera(false); });
+	options.Keymapper.AddAction(
+	    "Town3DResetCamera",
+	    N_("Restore Tristram camera"),
+	    N_("Restore the 3D camera and follow the hero."),
+	    SDLK_HOME,
+	    [] { ReleaseTownCameraDrag(); ResetTownViewCamera(); RedrawViewport(); },
+	    nullptr,
+	    [] { return CanControlTownCamera(false); });
+	options.Keymapper.AddAction(
+	    "Town3DCameraFar",
+	    N_("Move Tristram camera farther"),
+	    N_("Increase the distance of the 3D camera."),
+	    SDLK_PAGEDOWN,
+	    [] { AdjustTownViewDistance(1.0F); RedrawViewport(); },
+	    nullptr,
+	    [] { return CanControlTownCamera(false); });
+	options.Keymapper.AddAction(
 	    "QuickLoad",
 	    N_("Quick load"),
 	    N_("Loads the game."),
@@ -2667,6 +2807,8 @@ void SetCursorPos(Point position)
 
 void FreeGameMem()
 {
+	ReleaseTownCameraDrag();
+	ResetTownViewResources();
 	pDungeonCels = nullptr;
 	pMegaTiles = nullptr;
 	pSpecialCels = std::nullopt;
@@ -3419,6 +3561,7 @@ std::expected<void, std::string> LoadGameLevel(bool firstflag, lvl_entry lvldir)
 
 	RETURN_IF_ERROR(LoadLvlGFX());
 	SetDungeonMicros(pDungeonCels, MicroTileLen);
+	ResetTownViewResources();
 	ClearClxDrawCache();
 
 	IncProgress();

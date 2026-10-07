@@ -1,0 +1,2252 @@
+// A finite offscreen check using original town assets; it never starts a game or writes a save.
+#define SDL_MAIN_HANDLED
+#include <SDL.h>
+
+#include <algorithm>
+#include <array>
+#include <chrono>
+#include <cmath>
+#include <cstring>
+#include <filesystem>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <limits>
+#include <map>
+#include <memory>
+#include <set>
+#include <sstream>
+#include <stdexcept>
+#include <string>
+#include <tuple>
+#include <vector>
+
+#include "engine/assets.hpp"
+#include "engine/light_tables.hpp"
+#include "engine/load_cel.hpp"
+#include "engine/load_cl2.hpp"
+#include "engine/load_file.hpp"
+#include "engine/palette.h"
+#include "engine/random.hpp"
+#include "engine/render/clx_render.hpp"
+#include "engine/render/dun_render.hpp"
+#include "engine/render/scrollrt.h"
+#include "engine/render/town_actor.hpp"
+#include "engine/render/town_actor_mask.hpp"
+#include "engine/render/town_body.hpp"
+#include "engine/render/town_props.hpp"
+#include "engine/render/town_scene.hpp"
+#include "engine/render/town_vegetation.hpp"
+#include "engine/render/town_view.hpp"
+#include "engine/render/town_volume.hpp"
+#include "engine/surface.hpp"
+#include "game_mode.hpp"
+#include "headless_mode.hpp"
+#include "levels/dun_tile_data.hpp"
+#include "levels/tile_properties.hpp"
+#include "levels/town.h"
+#include "nthread.h"
+#include "options.h"
+#include "control/control.hpp"
+#include "player.h"
+#include "quests.h"
+#include "towners.h"
+#include "utils/paths.h"
+#include "utils/surface_to_png.hpp"
+#include "utils/ui_fwd.h"
+
+namespace {
+using namespace devilution;
+
+std::vector<std::string> Results;
+
+void Record(const std::string &message)
+{
+	Results.push_back(message);
+	std::cout << message << '\n';
+}
+
+void Check(bool condition, const std::string &message)
+{
+	Results.push_back(std::string(condition ? "PASS " : "FAIL ") + message);
+	std::cout << Results.back() << '\n';
+	if (!condition)
+		throw std::runtime_error(message);
+}
+
+void LoadSelectedGameArchive()
+{
+	const std::filesystem::path data = std::filesystem::absolute(paths::BasePath());
+	std::filesystem::path selected;
+	for (const char *name : { "DIABDAT.MPQ", "diabdat.mpq", "spawn.mpq", "SPAWN.MPQ" }) {
+		const auto candidate = data / name;
+		if (std::filesystem::is_regular_file(candidate)) {
+			selected = candidate;
+			break;
+		}
+	}
+	Check(!selected.empty(), "selected data directory contains DIABDAT.MPQ or spawn.mpq");
+	gbIsSpawn = selected.filename().string() == "spawn.mpq" || selected.filename().string() == "SPAWN.MPQ";
+	Record("INFO archive mode=" + std::string(gbIsSpawn ? "shareware" : "retail") + " path=" + selected.string()
+		+ " bytes=" + std::to_string(std::filesystem::file_size(selected)));
+	auto archive = MpqArchive::Open(selected.string().c_str());
+	Check(archive.has_value(), archive ? "open explicitly selected game archive" : "open selected archive: " + archive.error());
+	MpqArchives.insert_or_assign(MainMpqPriority, std::move(*archive));
+	const auto ref = FindAsset("levels\\towndata\\town.cel");
+	Check(ref.ok() && ref.archive == &MpqArchives.at(MainMpqPriority), "town CEL comes from the explicitly selected archive");
+}
+
+std::vector<uint8_t> ViewportPixels(const Surface &out)
+{
+	std::vector<uint8_t> pixels(static_cast<size_t>(out.w()) * gnViewportHeight);
+	for (int y = 0; y < gnViewportHeight; ++y)
+		std::memcpy(pixels.data() + static_cast<size_t>(y) * out.w(), out.at(0, y), out.w());
+	return pixels;
+}
+
+void Capture(const Surface &out, const std::filesystem::path &path)
+{
+	OwnedSurface copy(out.w(), gnViewportHeight);
+	SDL_SetPaletteColors(copy.surface->format->palette, logical_palette.data(), 0, 256);
+	for (int y = 0; y < copy.h(); ++y)
+		std::memcpy(copy.at(0, y), out.at(0, y), out.w());
+	Check(SDL_SaveBMP(copy.surface, path.string().c_str()) == 0, "capture " + path.filename().string());
+}
+
+// Primitive reconstruction for the whole-town atlas only. Fidelity comparisons
+// below use DrawNativeTownViewReference and the actual original world backend.
+// Indexed atlas only; fidelity captures use the actual DrawGame backend below.
+void DrawTownAtlas(const Surface &fullOut, bool wholeTown = false)
+{
+	const Surface out = wholeTown ? fullOut : fullOut.subregionY(0, gnViewportHeight);
+	const Point center = wholeTown ? Point { 46, 46 } : ViewPosition;
+	for (int y = 0; y < out.h(); ++y)
+		std::memset(out.at(0, y), 0, out.w());
+	const std::vector<uint8_t> lighting(static_cast<size_t>(out.pitch()) * out.h(), 0);
+	const Lightmap lightmap(out.begin(), lighting, out.pitch(), LightTables, FullyLitLightTable, FullyDarkLightTable);
+	const auto position = [&](Point tile) {
+		return Point { out.w() / 2 - 32 + 32 * (tile.x - center.x - tile.y + center.y),
+			out.h() / 2 + 16 * (tile.x - center.x + tile.y - center.y) };
+	};
+	std::vector<Point> tiles;
+	const int first = 0;
+	const int last = 92;
+	for (int y = first; y < last; ++y) {
+		for (int x = first; x < last; ++x) {
+			const Point screen = position({ x, y });
+			if (screen.x >= -128 && screen.x < out.w() + 64 && screen.y >= -32 && screen.y < out.h() + 256)
+				tiles.push_back({ x, y });
+		}
+	}
+	std::stable_sort(tiles.begin(), tiles.end(), [](Point a, Point b) { return a.x + a.y < b.x + b.y; });
+	for (const Point tile : tiles) {
+		const auto piece = dPiece[tile.x][tile.y];
+		if (piece >= MAXTILES || HasAnyOf(SOLData[piece], TileProperties::Solid | TileProperties::BlockMissile))
+			continue;
+		const Point base = position(tile);
+		for (int i = 0; i < 2; ++i) {
+			const LevelCelBlock block = DPieceMicros[piece].mt[i];
+			if (block.hasValue())
+				RenderTileFrame(out, lightmap, { base.x + 32 * i, base.y }, i == 0 ? TileType::LeftTriangle : TileType::RightTriangle,
+					GetDunFrame(pDungeonCels.get(), block.frame()), DunFrameTriangleHeight, MaskType::Solid, FullyLitLightTable);
+		}
+	}
+	for (const Point tile : tiles) {
+		const auto piece = dPiece[tile.x][tile.y];
+		if (piece >= MAXTILES)
+			continue;
+		const Point base = position(tile);
+		const bool floor = HasNoneOf(SOLData[piece], TileProperties::Solid | TileProperties::BlockMissile);
+		for (int i = 0; i < MicroTileLen; ++i) {
+			const LevelCelBlock block = DPieceMicros[piece].mt[i];
+			if (!block.hasValue())
+				continue;
+			const Point anchor { base.x + (i & 1) * 32, base.y - (i / 2) * 32 };
+			if (floor && i < 2) {
+				if (block.type() == TileType::TransparentSquare)
+					RenderTileFoliage(out, lightmap, anchor, pDungeonCels.get(), block, FullyLitLightTable);
+			} else {
+				RenderTile(out, lightmap, anchor, pDungeonCels.get(), block, MaskType::Solid, FullyLitLightTable);
+			}
+		}
+		for (const auto &towner : Towners) {
+			if (towner.position == tile && towner.anim)
+				ClxDraw(out, base + towner.getRenderingOffset(), towner.currentSprite());
+		}
+		if (!wholeTown && MyPlayer->position.tile == tile)
+			ClxDraw(out, base + MyPlayer->getRenderingOffset(MyPlayer->currentSprite()), MyPlayer->currentSprite());
+		const int tree = dSpecial[tile.x][tile.y] - 1;
+		if (tree >= 0 && pSpecialCels && static_cast<unsigned>(tree) < pSpecialCels->numSprites())
+			ClxDraw(out, base, (*pSpecialCels)[tree]);
+	}
+}
+
+void SavePng(const Surface &out, const std::filesystem::path &path)
+{
+	SDL_RWops *file = SDL_RWFromFile(path.string().c_str(), "wb");
+	Check(file != nullptr, "open PNG " + path.filename().string());
+	// The PNG writer takes the underlying SDL surface, not the Surface view.
+	// Materialize viewport slices so diagnostics exclude the untouched UI rows.
+	std::unique_ptr<OwnedSurface> cropped;
+	if (out.w() != out.surface->w || out.h() != out.surface->h || out.begin() != out.surface->pixels) {
+		cropped = std::make_unique<OwnedSurface>(out.w(), out.h());
+		SDL_SetPaletteColors(cropped->surface->format->palette, logical_palette.data(), 0, 256);
+		for (int y = 0; y < out.h(); ++y)
+			std::memcpy(cropped->at(0, y), out.at(0, y), out.w());
+	}
+	const auto result = WriteSurfaceToFilePng(cropped ? static_cast<const Surface &>(*cropped) : out, file);
+	Check(result.has_value(), result ? "capture " + path.filename().string() : result.error());
+}
+
+void ExportNativeHouseArtwork(Point minTile, Point maxTile, const std::filesystem::path &path)
+{
+	constexpr int CanvasSize = 1024;
+	constexpr Point CanvasOrigin { 512, 768 };
+	OwnedSurface paint(CanvasSize, CanvasSize);
+	OwnedSurface coverage(CanvasSize, CanvasSize);
+	SDL_FillRect(paint.surface, nullptr, 0);
+	SDL_FillRect(coverage.surface, nullptr, 255);
+	const std::vector<uint8_t> lighting(static_cast<size_t>(paint.pitch()) * paint.h(), 0);
+	const Lightmap paintLight(paint.begin(), lighting, paint.pitch(), LightTables, FullyLitLightTable, FullyDarkLightTable);
+	const Lightmap coverageLight(coverage.begin(), lighting, coverage.pitch(), LightTables, FullyLitLightTable, FullyDarkLightTable);
+	std::vector<Point> tiles;
+	for (int y = minTile.y; y <= maxTile.y; ++y)
+		for (int x = minTile.x; x <= maxTile.x; ++x)
+			tiles.push_back({ x, y });
+	std::stable_sort(tiles.begin(), tiles.end(), [](Point a, Point b) { return a.x + a.y < b.x + b.y; });
+	for (Point tile : tiles) {
+		const auto piece = dPiece[tile.x][tile.y];
+		if (piece >= MAXTILES)
+			continue;
+		const bool floor = HasNoneOf(SOLData[piece], TileProperties::Solid | TileProperties::BlockMissile);
+		const Point base { CanvasOrigin.x - 32 + 32 * (tile.x - minTile.x - tile.y + minTile.y),
+			CanvasOrigin.y + 16 * (tile.x - minTile.x + tile.y - minTile.y) };
+		for (int i = 0; i < MicroTileLen; ++i) {
+			const auto block = DPieceMicros[piece].mt[i];
+			if (!block.hasValue())
+				continue;
+			const Point anchor { base.x + (i & 1) * 32, base.y - (i / 2) * 32 };
+			// Only the painted building layer: no ground triangles, dSpecial trees,
+			// actors, inferred geometry, or redrawn pixels are part of this export.
+			if (floor && i < 2) {
+				if (block.type() == TileType::TransparentSquare) {
+					RenderTileFoliage(paint, paintLight, anchor, pDungeonCels.get(), block, FullyLitLightTable);
+					RenderTileFoliage(coverage, coverageLight, anchor, pDungeonCels.get(), block, FullyLitLightTable);
+				}
+			} else {
+				RenderTile(paint, paintLight, anchor, pDungeonCels.get(), block, MaskType::Solid, FullyLitLightTable);
+				RenderTile(coverage, coverageLight, anchor, pDungeonCels.get(), block, MaskType::Solid, FullyLitLightTable);
+			}
+		}
+	}
+	int left = CanvasSize, top = CanvasSize, right = -1, bottom = -1;
+	for (int y = 0; y < CanvasSize; ++y) {
+		for (int x = 0; x < CanvasSize; ++x) {
+			if (paint[{ x, y }] != coverage[{ x, y }])
+				continue;
+			left = std::min(left, x);
+			top = std::min(top, y);
+			right = std::max(right, x);
+			bottom = std::max(bottom, y);
+		}
+	}
+	Check(left > 0 && top > 0 && right < CanvasSize - 1 && bottom < CanvasSize - 1 && right >= left,
+		"full native house composition fits without clipping " + path.stem().string());
+	constexpr int Margin = 8;
+	left -= Margin;
+	top -= Margin;
+	right += Margin;
+	bottom += Margin;
+	const int width = right - left + 1;
+	const int height = bottom - top + 1;
+	std::unique_ptr<SDL_Surface, decltype(&SDL_FreeSurface)> rgba(
+		SDL_CreateRGBSurfaceWithFormat(0, width, height, 32, SDL_PIXELFORMAT_RGBA32), SDL_FreeSurface);
+	Check(rgba != nullptr, "allocate native house RGBA export");
+	for (int y = 0; y < height; ++y) {
+		auto *row = reinterpret_cast<uint32_t *>(static_cast<uint8_t *>(rgba->pixels) + y * rgba->pitch);
+		for (int x = 0; x < width; ++x) {
+			const Point source { left + x, top + y };
+			const SDL_Color color = logical_palette[paint[source]];
+			const uint8_t alpha = paint[source] == coverage[source] ? 255 : 0;
+			row[x] = SDL_MapRGBA(rgba->format, color.r, color.g, color.b, alpha);
+		}
+	}
+	SavePng(Surface { rgba.get() }, path);
+	std::ofstream metadata(path.parent_path() / (path.stem().string() + ".json"));
+	metadata << "{\"minTile\":[" << minTile.x << ',' << minTile.y << "],\"maxTile\":[" << maxTile.x << ',' << maxTile.y
+		<< "],\"referenceTile\":[" << minTile.x << ',' << minTile.y << "],\"pixelOrigin\":[" << left - CanvasOrigin.x << ',' << top - CanvasOrigin.y
+		<< "],\"pixelSize\":[" << width << ',' << height << "],\"projection\":\"32*(x-z),16*(x+z)-32*height\",\"nativePixelsOnly\":true}\n";
+	Check(metadata.good(), "write native house composition coordinates");
+}
+
+void DrawMapLabel(const Surface &out, Point origin, std::string_view value)
+{
+	static constexpr std::array<std::string_view, 10> Glyphs {
+		"111101101101111", "010110010010111", "111001111100111", "111001111001111", "101101111001001",
+		"111100111001111", "111100111101111", "111001010010010", "111101111101111", "111101111001111"
+	};
+	for (const char character : value) {
+		const std::string_view glyph = character >= '0' && character <= '9' ? Glyphs[character - '0']
+			: character == 'X' ? "101101010101101" : character == 'Y' ? "101101010010010" : "000000000000000";
+		for (int row = 0; row < 5; ++row) {
+			for (int column = 0; column < 3; ++column) {
+				if (glyph[row * 3 + column] == '1') {
+					for (int py = 0; py < 2; ++py)
+						for (int px = 0; px < 2; ++px)
+							out.SetPixel({ origin.x + column * 2 + px, origin.y + row * 2 + py }, 7);
+				}
+			}
+		}
+		origin.x += 8;
+	}
+}
+
+void ExportTownMapping(const std::filesystem::path &output)
+{
+	std::ofstream json(output / "town-map.json");
+	std::ofstream csv(output / "town-tiles.csv");
+	Check(json.good() && csv.good(), "open native town mapping exports");
+	json << "{\n\"schema\":1,\"mode\":" << std::quoted(gbIsSpawn ? "shareware" : "retail")
+		<< ",\"bounds\":{\"min\":[0,0],\"maxExclusive\":[92,92]},\"playableBounds\":{\"min\":[10,10],\"maxExclusive\":[84,84]},"
+		<< "\n\"isometricAtlas\":{\"file\":\"town-atlas-isometric.png\",\"width\":6000,\"height\":3600,\"worldCenter\":[46,46],\"tileLeftX\":\"2968+32*(x-y)\",\"tileBottomY\":\"1800+16*(x+y-92)\"},"
+		<< "\n\"topDownAtlas\":{\"file\":\"town-atlas-topdown.png\",\"origin\":[64,64],\"cellSize\":16,\"legend\":{\"2\":\"walkable\",\"3\":\"solid\",\"4\":\"blocksLight\",\"5\":\"tree\",\"8\":\"NPC marker, label is towner index\"}},\n\"tiles\":[\n";
+	csv << "x,y,piece,sol,special,monster,player\n";
+	for (int y = 0; y < 92; ++y) {
+		for (int x = 0; x < 92; ++x) {
+			const auto piece = dPiece[x][y];
+			const unsigned sol = piece < MAXTILES ? static_cast<unsigned>(SOLData[piece]) : 0;
+			json << (x == 0 && y == 0 ? "" : ",\n") << "{\"x\":" << x << ",\"y\":" << y << ",\"piece\":" << piece
+				<< ",\"sol\":" << sol << ",\"special\":" << static_cast<int>(dSpecial[x][y]) << '}';
+			csv << x << ',' << y << ',' << piece << ',' << sol << ',' << static_cast<int>(dSpecial[x][y])
+				<< ',' << dMonster[x][y] << ',' << static_cast<int>(dPlayer[x][y]) << '\n';
+		}
+	}
+	json << "\n],\"towners\":[\n";
+	for (size_t i = 0; i < Towners.size(); ++i) {
+		const Towner &towner = Towners[i];
+		const auto shortName = TownerShortNames.find(towner._ttype);
+		json << (i == 0 ? "" : ",\n") << "{\"index\":" << i << ",\"type\":" << static_cast<unsigned>(towner._ttype)
+			<< ",\"id\":" << std::quoted(shortName == TownerShortNames.end() ? "" : shortName->second)
+			<< ",\"name\":" << std::quoted(std::string(towner.name)) << ",\"x\":" << towner.position.x << ",\"y\":" << towner.position.y << '}';
+	}
+	json << "\n]}\n";
+	json.close();
+	csv.close();
+	Check(!json.fail() && !csv.fail(), "export town-map.json and town-tiles.csv (8464 original cells)");
+
+	OwnedSurface atlas(6000, 3600);
+	SDL_SetPaletteColors(atlas.surface->format->palette, logical_palette.data(), 0, 256);
+	DrawTownAtlas(atlas, true);
+	SavePng(atlas, output / "town-atlas-isometric.png");
+
+	OwnedSurface topDown(1600, 1600);
+	const std::array<SDL_Color, 9> colors { SDL_Color { 0, 0, 0, 255 }, SDL_Color { 12, 16, 22, 255 },
+		SDL_Color { 48, 57, 62, 255 }, SDL_Color { 145, 111, 73, 255 }, SDL_Color { 211, 126, 59, 255 },
+		SDL_Color { 56, 127, 77, 255 }, SDL_Color { 20, 24, 29, 255 }, SDL_Color { 232, 236, 242, 255 },
+		SDL_Color { 214, 73, 89, 255 } };
+	SDL_SetPaletteColors(topDown.surface->format->palette, colors.data(), 0, static_cast<int>(colors.size()));
+	SDL_FillRect(topDown.surface, nullptr, 1);
+	for (int y = 0; y < 92; ++y) {
+		for (int x = 0; x < 92; ++x) {
+			const auto sol = SOLData[dPiece[x][y]];
+			const uint8_t color = dSpecial[x][y] != 0 ? 5 : HasAnyOf(sol, TileProperties::BlockLight) ? 4 : HasAnyOf(sol, TileProperties::Solid) ? 3 : 2;
+			SDL_Rect cell { 64 + x * 16, 64 + y * 16, 15, 15 };
+			SDL_FillRect(topDown.surface, &cell, color);
+		}
+	}
+	for (int tick = 0; tick < 92; tick += 5) {
+		DrawMapLabel(topDown, { 64 + tick * 16, 40 }, std::to_string(tick));
+		DrawMapLabel(topDown, { 35, 64 + tick * 16 }, std::to_string(tick));
+	}
+	DrawMapLabel(topDown, { 1548, 40 }, "X");
+	DrawMapLabel(topDown, { 35, 1548 }, "Y");
+	for (size_t i = 0; i < Towners.size(); ++i) {
+		const Point tile = Towners[i].position;
+		SDL_Rect marker { 64 + tile.x * 16 + 3, 64 + tile.y * 16 + 3, 10, 10 };
+		SDL_FillRect(topDown.surface, &marker, 8);
+		DrawMapLabel(topDown, { marker.x + 12, marker.y - 5 }, std::to_string(i));
+	}
+	SavePng(topDown, output / "town-atlas-topdown.png");
+}
+
+std::string NativeSceneState()
+{
+	std::string state;
+	const auto append = [&](const auto &buffer) {
+		state.append(reinterpret_cast<const char *>(&buffer), sizeof(buffer));
+	};
+	append(dPiece);
+	append(SOLData);
+	append(dSpecial);
+	append(dMonster);
+	append(dPlayer);
+	append(dFlags);
+	std::ostringstream actors;
+	actors << ViewPosition.x << ',' << ViewPosition.y << ';';
+	for (const Player &player : Players) {
+		for (const Point point : { Point { player.position.tile }, Point { player.position.future }, Point { player.position.old },
+			Point { player.position.last }, Point { player.position.temp } })
+			actors << point.x << ',' << point.y << ';';
+		actors << player._pHitPoints << ',' << static_cast<int>(player._pmode) << ',' << static_cast<int>(player._pdir) << ';';
+	}
+	for (const Towner &towner : Towners)
+		actors << towner.position.x << ',' << towner.position.y << ';';
+	state += actors.str();
+	return state;
+}
+
+std::string SceneGeometryState(const std::vector<TownSceneModel> &scene)
+{
+	std::ostringstream state;
+	state << std::setprecision(std::numeric_limits<float>::max_digits10);
+	for (const TownSceneModel &model : scene) {
+		state << static_cast<int>(model.kind) << ':' << model.minTile.x << ',' << model.minTile.y
+			<< ',' << model.maxTile.x << ',' << model.maxTile.y << ';'
+			<< model.physicalBounds.minX << ',' << model.physicalBounds.minZ << ',' << model.physicalBounds.maxX << ','
+			<< model.physicalBounds.maxZ << ',' << model.physicalBounds.wallHeight << ',' << model.physicalBounds.closed << ';'
+			<< model.nativeArtwork.enabled << ',' << model.nativeArtwork.referenceTile.x << ',' << model.nativeArtwork.referenceTile.y << ','
+			<< model.nativeArtwork.pixelOrigin.x << ',' << model.nativeArtwork.pixelOrigin.y << ','
+			<< model.nativeArtwork.pixelSize.x << ',' << model.nativeArtwork.pixelSize.y << ','
+			<< model.nativeArtwork.minTile.x << ',' << model.nativeArtwork.minTile.y << ','
+			<< model.nativeArtwork.maxTile.x << ',' << model.nativeArtwork.maxTile.y << ','
+			<< model.nativeArtwork.fringeMinPiece << ',' << model.nativeArtwork.fringeMaxPiece << ';';
+		for (const TownSceneTriangle &triangle : model.triangles) {
+			state << static_cast<int>(triangle.material) << ':' << triangle.sourceTile.x << ',' << triangle.sourceTile.y
+				<< ',' << triangle.pickTile.x << ',' << triangle.pickTile.y << ':' << triangle.nativeProjection << ':'
+				<< triangle.normal.x << ',' << triangle.normal.height << ',' << triangle.normal.z << ','
+				<< static_cast<int>(triangle.surfaceRole) << ':';
+			for (const TownSceneVertex &vertex : triangle.vertices)
+				state << vertex.x << ',' << vertex.height << ',' << vertex.z << ',' << vertex.u << ',' << vertex.v << ';';
+		}
+		state << '\n';
+	}
+	return state.str();
+}
+
+void CheckTownSceneMeshes()
+{
+	const std::string native = NativeSceneState();
+	const auto &scene = GetTownScene();
+	Check(!scene.empty(), "native town has architectural meshes");
+	bool validBounds = true;
+	bool finiteVertices = true;
+	bool nondegenerate = true;
+	bool validSources = true;
+	bool validArtwork = true;
+	bool validPhysicalBounds = true;
+	bool closedFootprints = true;
+	bool closedWalkPaths = true;
+	size_t triangleCount = 0;
+	const auto insideTown = [](Point point) { return point.x >= 0 && point.y >= 0 && point.x < 92 && point.y < 92; };
+	for (const TownSceneModel &model : scene) {
+		validBounds = validBounds && insideTown(model.minTile) && insideTown(model.maxTile)
+			&& model.minTile.x <= model.maxTile.x && model.minTile.y <= model.maxTile.y && !model.triangles.empty();
+		validArtwork = validArtwork && model.nativeArtwork.enabled && insideTown(model.nativeArtwork.minTile)
+			&& insideTown(model.nativeArtwork.maxTile) && model.nativeArtwork.pixelSize.x > 0 && model.nativeArtwork.pixelSize.y > 0;
+		const TownScenePhysicalBounds &body = model.physicalBounds;
+		validPhysicalBounds = validPhysicalBounds && std::isfinite(body.minX) && std::isfinite(body.maxX)
+			&& std::isfinite(body.minZ) && std::isfinite(body.maxZ) && std::isfinite(body.wallHeight)
+			&& body.minX < body.maxX && body.minZ < body.maxZ && body.wallHeight > 0;
+		int bodyBlocked = 0;
+		int bodyWalkable = 0;
+		int bodyActorWalkable = 0;
+		int crossingSteps = 0;
+		std::string walkableCoordinates;
+		std::string actorCoordinates;
+		const auto inside = [&](float x, float z) {
+			return x > body.minX + 0.001F && x < body.maxX - 0.001F && z > body.minZ + 0.001F && z < body.maxZ - 0.001F;
+		};
+		for (int y = 0; y < 92; ++y) {
+			for (int x = 0; x < 92; ++x) {
+				const float groundX = static_cast<float>(x) - 0.5F;
+				const float groundZ = static_cast<float>(y) - 0.5F;
+				const Point point { x, y };
+				const bool walkable = IsTileNotSolid(point);
+				if (inside(groundX, groundZ)) {
+					if (walkable) {
+						++bodyWalkable;
+						walkableCoordinates += " (" + std::to_string(x) + "," + std::to_string(y) + ")";
+					} else {
+						++bodyBlocked;
+					}
+				}
+				if (walkable && inside(static_cast<float>(x), static_cast<float>(y))) {
+					++bodyActorWalkable;
+					actorCoordinates += " (" + std::to_string(x) + "," + std::to_string(y) + ")";
+				}
+				if (!body.closed || !walkable || x < 10 || y < 10 || x >= 84 || y >= 84
+					|| x < body.minX - 2 || x > body.maxX + 2 || y < body.minZ - 2 || y > body.maxZ + 2)
+					continue;
+				for (int dy = -1; dy <= 1; ++dy) {
+					for (int dx = -1; dx <= 1; ++dx) {
+						const Point end { x + dx, y + dy };
+						if ((dx == 0 && dy == 0) || end.x < 10 || end.y < 10 || end.x >= 84 || end.y >= 84
+							|| !IsTileNotSolid(end) || !CanStep(point, end))
+							continue;
+						for (const float progress : { 0.25F, 0.5F, 0.75F }) {
+							if (inside(x + dx * progress, y + dy * progress)) {
+								++crossingSteps;
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+		Record("INFO physical footprint kind=" + std::to_string(static_cast<int>(model.kind)) + " source="
+			+ std::to_string(model.minTile.x) + "," + std::to_string(model.minTile.y) + " blocked cells=" + std::to_string(bodyBlocked)
+			+ " walkable centers=" + std::to_string(bodyWalkable) + walkableCoordinates
+			+ " walkable actor feet=" + std::to_string(bodyActorWalkable) + actorCoordinates
+			+ " crossing native steps=" + std::to_string(crossingSteps));
+		if (body.closed) {
+			closedFootprints = closedFootprints && bodyWalkable == 0 && bodyActorWalkable == 0 && bodyBlocked > 0;
+			closedWalkPaths = closedWalkPaths && crossingSteps == 0;
+		}
+		for (const TownSceneTriangle &triangle : model.triangles) {
+			++triangleCount;
+			const bool sourceValid = insideTown(triangle.sourceTile) && insideTown(triangle.pickTile)
+				&& dPiece[triangle.sourceTile.x][triangle.sourceTile.y] < MAXTILES;
+			validSources = validSources && sourceValid;
+			if (!sourceValid)
+				Record("INFO invalid mesh source kind=" + std::to_string(static_cast<int>(model.kind)) + " tile="
+					+ std::to_string(triangle.sourceTile.x) + "," + std::to_string(triangle.sourceTile.y));
+			for (const TownSceneVertex &vertex : triangle.vertices) {
+				finiteVertices = finiteVertices && std::isfinite(vertex.x) && std::isfinite(vertex.height)
+					&& std::isfinite(vertex.z) && std::isfinite(vertex.u) && std::isfinite(vertex.v);
+				// Eaves and buttresses may extend into the adjoining cell, but an object
+				// must stay within its declared painted footprint and that small margin.
+				const bool vertexBounds = vertex.x >= model.minTile.x - 1 && vertex.x <= model.maxTile.x + 1
+					&& vertex.z >= model.minTile.y - 1 && vertex.z <= model.maxTile.y + 1 && vertex.height >= 0;
+				validBounds = validBounds && vertexBounds;
+				if (!vertexBounds)
+					Record("INFO invalid mesh vertex kind=" + std::to_string(static_cast<int>(model.kind)) + " origin="
+						+ std::to_string(model.minTile.x) + "," + std::to_string(model.minTile.y) + " xyz="
+						+ std::to_string(vertex.x) + "," + std::to_string(vertex.height) + "," + std::to_string(vertex.z));
+			}
+			const auto &a = triangle.vertices[0];
+			const auto &b = triangle.vertices[1];
+			const auto &c = triangle.vertices[2];
+			const double ux = static_cast<double>(b.x) - a.x;
+			const double uy = static_cast<double>(b.height) - a.height;
+			const double uz = static_cast<double>(b.z) - a.z;
+			const double vx = static_cast<double>(c.x) - a.x;
+			const double vy = static_cast<double>(c.height) - a.height;
+			const double vz = static_cast<double>(c.z) - a.z;
+			const double nx = uy * vz - uz * vy;
+			const double ny = uz * vx - ux * vz;
+			const double nz = ux * vy - uy * vx;
+			nondegenerate = nondegenerate && nx * nx + ny * ny + nz * nz > 1.0e-12;
+		}
+	}
+	Check(finiteVertices && nondegenerate, "architectural triangles have finite coordinates and nonzero area");
+	Check(validBounds && validSources, "mesh geometry stays in its town footprint and references real native tiles");
+	Check(validArtwork, "every architectural model declares its original native CEL composition");
+	Check(validPhysicalBounds, "every architectural wall body has finite positive physical bounds");
+	Check(closedFootprints, "every closed wall body avoids both native walkable actor feet and ground cell centers");
+	Check(closedWalkPaths, "native allowed walking segments around closed houses do not cross their wall bodies");
+	Check(!TownSceneReplacesTile({ 25, 29 }) && !TownSceneReplacesTile({ 25, 30 }), "cathedral entrance trigger tiles remain unsuppressed");
+	const std::string geometry = SceneGeometryState(scene);
+	ResetTownScene();
+	Check(SceneGeometryState(GetTownScene()) == geometry, "scene cache reset reproduces identical mesh geometry");
+	Check(!TownSceneReplacesTile({ 25, 29 }) && !TownSceneReplacesTile({ 25, 30 }), "scene reset preserves native cathedral entrance triggers");
+	Check(NativeSceneState() == native, "scene construction, suppression queries, and reset preserve native map and actor state");
+	Record("INFO architectural models=" + std::to_string(GetTownScene().size()) + " triangles=" + std::to_string(triangleCount));
+}
+
+std::string VegetationGeometryState()
+{
+	std::ostringstream state;
+	for (const auto &group : GetTownVegetationGroups()) {
+		state << static_cast<int>(group.family) << ':' << group.referenceFootpoint.x << ',' << group.referenceFootpoint.y << ':'
+			<< group.minTile.x << ',' << group.minTile.y << ',' << group.maxTile.x << ',' << group.maxTile.y << ':' << group.foliage << ';';
+		for (const auto &tile : group.sourceTiles)
+			state << tile.x << ',' << tile.y << ';';
+		state << '|';
+		for (const auto &tile : group.specialTiles)
+			state << tile.x << ',' << tile.y << ';';
+		state << '\n';
+	}
+	return state.str();
+}
+
+void CheckNativeVegetationGroups()
+{
+	const std::string original = NativeSceneState();
+	const auto &groups = GetTownVegetationGroups();
+	Check(!groups.empty(), "town vegetation groups assemble original MIN and special fragments");
+	std::array<int, MAXDUNX * MAXDUNY> specialMembership {};
+	std::array<bool, MAXDUNX * MAXDUNY> sourceMembership {};
+	bool validSources = true;
+	bool validSpecials = true;
+	size_t sourceCount = 0;
+	size_t specialCount = 0;
+	const auto inside = [](Point tile) { return tile.x >= 0 && tile.y >= 0 && tile.x < MAXDUNX && tile.y < MAXDUNY; };
+	for (const auto &group : groups) {
+		validSources = validSources && !group.sourceTiles.empty() && inside(group.referenceFootpoint)
+			&& inside(group.minTile) && inside(group.maxTile) && group.minTile.x <= group.maxTile.x && group.minTile.y <= group.maxTile.y;
+		std::set<std::pair<int, int>> uniqueSources;
+		for (Point tile : group.sourceTiles) {
+			++sourceCount;
+			if (!inside(tile)) {
+				validSources = false;
+				continue;
+			}
+			validSources = validSources && uniqueSources.emplace(tile.x, tile.y).second && dPiece[tile.x][tile.y] < MAXTILES
+				&& tile.x >= group.minTile.x && tile.x <= group.maxTile.x && tile.y >= group.minTile.y && tile.y <= group.maxTile.y
+				&& TownVegetationReplacesTile(tile);
+			sourceMembership[static_cast<size_t>(tile.y) * MAXDUNX + tile.x] = true;
+		}
+		for (Point tile : group.specialTiles) {
+			++specialCount;
+			if (!inside(tile)) {
+				validSpecials = false;
+				continue;
+			}
+			validSpecials = validSpecials && dSpecial[tile.x][tile.y] != 0 && uniqueSources.contains({ tile.x, tile.y });
+			++specialMembership[static_cast<size_t>(tile.y) * MAXDUNX + tile.x];
+		}
+	}
+	bool uniqueSpecialObjects = true;
+	bool exactSuppression = true;
+	for (int y = 0; y < MAXDUNY; ++y) {
+		for (int x = 0; x < MAXDUNX; ++x) {
+			const size_t index = static_cast<size_t>(y) * MAXDUNX + x;
+			uniqueSpecialObjects = uniqueSpecialObjects && specialMembership[index] == (dSpecial[x][y] != 0 ? 1 : 0);
+			exactSuppression = exactSuppression && TownVegetationReplacesTile({ x, y }) == sourceMembership[index];
+		}
+	}
+	Check(validSources && validSpecials, "vegetation source cells are unique within each object, bounded, and backed by actual town data");
+	Check(uniqueSpecialObjects, "each original dSpecial belongs to exactly one complete vegetation object");
+	Check(exactSuppression, "vegetation scenery suppression includes exactly its native source cells");
+	if (dPiece[79][69] == 130)
+		Check(TownVegetationReplacesTile({ 79, 69 }), "original solid tree trunk130 beside east cabin belongs to its complete tree");
+	const std::string geometry = VegetationGeometryState();
+	ResetTownVegetation();
+	Check(VegetationGeometryState() == geometry, "vegetation reload reproduces identical native object grouping");
+	Check(NativeSceneState() == original, "vegetation grouping, membership queries and reset preserve map and actor state");
+	Record("INFO vegetation objects=" + std::to_string(GetTownVegetationGroups().size()) + " MIN source cells="
+		+ std::to_string(sourceCount) + " special fragments=" + std::to_string(specialCount));
+}
+
+std::string PropGroupingState()
+{
+	std::ostringstream state;
+	for (const auto &group : GetTownPropGroups()) {
+		state << group.referenceFootpoint.x << ',' << group.referenceFootpoint.y << ':'
+			<< group.minTile.x << ',' << group.minTile.y << ',' << group.maxTile.x << ',' << group.maxTile.y
+			<< ':' << TownPropHiddenByArchitecture(group) << ';';
+		for (Point tile : group.sourceTiles)
+			state << tile.x << ',' << tile.y << ';';
+		state << '\n';
+	}
+	return state.str();
+}
+
+void CheckNativePropGroups()
+{
+	const std::string original = NativeSceneState();
+	const auto &groups = GetTownPropGroups();
+	Check(!groups.empty(), "native rock fragments form complete original objects");
+	std::array<int, MAXDUNX * MAXDUNY> membership;
+	membership.fill(-1);
+	const auto inside = [](Point tile) { return tile.x >= 0 && tile.y >= 0 && tile.x < MAXDUNX && tile.y < MAXDUNY; };
+	bool valid = true;
+	size_t sourceCount = 0;
+	for (size_t index = 0; index < groups.size(); ++index) {
+		const auto &group = groups[index];
+		valid = valid && !group.sourceTiles.empty() && inside(group.referenceFootpoint) && inside(group.minTile) && inside(group.maxTile);
+		for (Point tile : group.sourceTiles) {
+			++sourceCount;
+			if (!inside(tile)) {
+				valid = false;
+				continue;
+			}
+			const size_t cell = static_cast<size_t>(tile.y) * MAXDUNX + tile.x;
+			valid = valid && membership[cell] == -1 && tile.x >= group.minTile.x && tile.x <= group.maxTile.x
+				&& tile.y >= group.minTile.y && tile.y <= group.maxTile.y && dPiece[tile.x][tile.y] >= 219
+				&& dPiece[tile.x][tile.y] <= 233 && dSpecial[tile.x][tile.y] == 0 && TownPropReplacesTile(tile);
+			membership[cell] = static_cast<int>(index);
+		}
+	}
+	Check(valid, "rock groups contain unique bounded native MIN fragments without replacing special sprites");
+	bool exactSuppression = true;
+	bool largeRocksGrouped = true;
+	size_t largeCount = 0;
+	for (int y = 0; y < MAXDUNY; ++y) {
+		for (int x = 0; x < MAXDUNX; ++x) {
+			const int owner = membership[static_cast<size_t>(y) * MAXDUNX + x];
+			exactSuppression = exactSuppression && TownPropReplacesTile({ x, y }) == (owner >= 0);
+			// This is the observed four-column defect: the real contiguous native
+			// 230..233 stencil must become one boulder, including its painted edges.
+			if (x + 1 >= MAXDUNX || y + 1 >= MAXDUNY || dPiece[x][y] != 230 || dPiece[x + 1][y] != 231
+				|| dPiece[x][y + 1] != 232 || dPiece[x + 1][y + 1] != 233
+				|| dSpecial[x][y] != 0 || dSpecial[x + 1][y] != 0 || dSpecial[x][y + 1] != 0 || dSpecial[x + 1][y + 1] != 0)
+				continue;
+			++largeCount;
+			largeRocksGrouped = largeRocksGrouped && owner >= 0 && membership[static_cast<size_t>(y) * MAXDUNX + x + 1] == owner
+				&& membership[static_cast<size_t>(y + 1) * MAXDUNX + x] == owner
+				&& membership[static_cast<size_t>(y + 1) * MAXDUNX + x + 1] == owner;
+		}
+	}
+	Check(exactSuppression, "rock scenery suppression includes exactly the original object fragments");
+	Check(largeCount > 0 && largeRocksGrouped, "each complete native230..233 stencil belongs to one rock instead of four columns");
+	for (Point foot : { Point { 27, 49 }, Point { 29, 49 }, Point { 27, 51 },
+		Point { 71, 67 }, Point { 71, 69 }, Point { 71, 71 } }) {
+		const auto found = std::find_if(groups.begin(), groups.end(), [&](const TownPropGroup &group) { return group.referenceFootpoint == foot; });
+		Check(found != groups.end() && TownPropHiddenByArchitecture(*found),
+			"native cabin rock filler remains grouped but hidden inside architecture at " + std::to_string(foot.x) + "," + std::to_string(foot.y));
+	}
+	const auto external = std::find_if(groups.begin(), groups.end(), [](const TownPropGroup &group) { return group.referenceFootpoint == Point { 55, 71 }; });
+	Check(external != groups.end() && !TownPropHiddenByArchitecture(*external), "native external boulder55,71 remains visible outside architectural bodies");
+	const std::string grouping = PropGroupingState();
+	ResetTownProps();
+	Check(PropGroupingState() == grouping, "rock grouping reset reproduces the same original stencil composition");
+	Check(NativeSceneState() == original, "rock grouping and suppression preserve original SOL, MIN, actors, and native collision");
+	Record("INFO native rock objects=" + std::to_string(GetTownPropGroups().size()) + " fragments=" + std::to_string(sourceCount)
+		+ " large2x2=" + std::to_string(largeCount));
+}
+
+bool Pick(Point screen, Point &tile, int &towner, int &item, int &player)
+{
+	return PickTownView(screen, tile, towner, item, player);
+}
+
+void CheckGroundPicking()
+{
+	int correct = 0;
+	for (int y = std::max(10, ViewPosition.y - 12); y < std::min(84, ViewPosition.y + 12); ++y) {
+		for (int x = std::max(10, ViewPosition.x - 12); x < std::min(84, ViewPosition.x + 12); ++x) {
+			const Point expected { x, y };
+			if (!IsTileNotSolid(expected))
+				continue;
+			const Point screen = TownViewScreenPosition(expected);
+			if (screen.x < 8 || screen.x >= gnScreenWidth - 8 || screen.y < 8 || screen.y >= gnViewportHeight - 8)
+				continue;
+			Point selected;
+			int towner;
+			int item;
+			int player;
+			// Tall scenery and sprites may correctly occlude a ground center.
+			if (Pick(screen, selected, towner, item, player) && selected == expected && towner < 0 && item < 0 && player < 0)
+				++correct;
+		}
+	}
+	Check(correct >= 10, "projected visible walkable ground roundtrips (" + std::to_string(correct) + " tiles)");
+}
+
+bool CheckEntityPicking(bool requireVisible = true)
+{
+	int playerPixels = 0;
+	int townerPixels = 0;
+	std::vector<int> perTowner(Towners.size(), 0);
+	bool idsValid = true;
+	for (int y = 0; y < gnViewportHeight; ++y) {
+		for (int x = 0; x < gnScreenWidth; ++x) {
+			Point tile;
+			int towner;
+			int item;
+			int player;
+			if (!Pick({ x, y }, tile, towner, item, player))
+				continue;
+			if (player >= 0) {
+				idsValid = idsValid && player < static_cast<int>(Players.size()) && tile == Players[player].position.tile;
+				++playerPixels;
+			}
+			if (towner >= 0) {
+				idsValid = idsValid && towner < static_cast<int>(Towners.size()) && tile == Towners[towner].position;
+				++townerPixels;
+				if (towner < static_cast<int>(perTowner.size()))
+					++perTowner[towner];
+			}
+		}
+	}
+	Record("INFO entity selection pixels yaw=" + std::to_string(GetTownViewCameraState().yaw)
+		+ " player=" + std::to_string(playerPixels) + " NPC=" + std::to_string(townerPixels));
+	for (size_t i = 0; i < perTowner.size(); ++i)
+		if (perTowner[i] != 0)
+			Record("INFO NPC selection index=" + std::to_string(i) + " name=" + std::string(Towners[i].name)
+				+ " pixels=" + std::to_string(perTowner[i]));
+	Check(idsValid, "all player and NPC selection pixels refer to their live tiles");
+	const bool visible = playerPixels > 0 && townerPixels > 0;
+	if (requireVisible)
+		Check(visible, "visible player and NPC are selectable");
+	return visible;
+}
+
+void LoadTown()
+{
+	const auto sol = LoadLevelSOLData();
+	Check(sol.has_value(), "load original town SOL collision data");
+	pDungeonCels = LoadFileInMem("levels\\towndata\\town.cel");
+	pMegaTiles = LoadFileInMem<MegaTile>("levels\\towndata\\town.til");
+	pSpecialCels = LoadCel("levels\\towndata\\towns", 64);
+	SetDungeonMicros(pDungeonCels, MicroTileLen);
+	CreateTown(ENTRY_MAIN);
+	MakeLightTable();
+	std::array<Color, 256> colors;
+	LoadFileInMem("levels\\towndata\\town.pal", colors);
+	for (size_t i = 0; i < colors.size(); ++i)
+		logical_palette[i] = system_palette[i] = colors[i].toSDL();
+}
+
+void InitializePlayer()
+{
+	Players.clear();
+	Players.resize(1);
+	MyPlayerId = 0;
+	MyPlayer = &Players[0];
+	Player &player = *MyPlayer;
+	player.plractive = true;
+	player.plrlevel = 0;
+	player._pClass = HeroClass::Warrior;
+	player._pHitPoints = player._pMaxHP = 64 * 70;
+	player._pmode = PM_STAND;
+	player._pdir = Direction::South;
+	player.position.tile = player.position.future = player.position.last = player.position.old = player.position.temp = ViewPosition;
+	player.AnimationData[0].sprites = LoadCl2Sheet("plrgfx\\warrior\\wln\\wlnst", 96);
+	const ClxSpriteList sprites = player.AnimationData[0].spritesForDirection(Direction::South);
+	player.AnimInfo.setNewAnimation(OptionalClxSpriteList { ClxSpriteList { sprites } }, static_cast<int8_t>(sprites.numSprites()), 1);
+	dPlayer[ViewPosition.x][ViewPosition.y] = 1;
+	dFlags[ViewPosition.x][ViewPosition.y] |= DungeonFlag::Lit | DungeonFlag::Visible;
+}
+
+void PlaceFixturePlayerNear(Point desired)
+{
+	for (int radius = 0; radius <= 10; ++radius) {
+		for (int dy = -radius; dy <= radius; ++dy) {
+			for (int dx = -radius; dx <= radius; ++dx) {
+				if (std::abs(dx) + std::abs(dy) != radius)
+					continue;
+				const Point point { desired.x + dx, desired.y + dy };
+				if (point.x < 10 || point.y < 10 || point.x >= 84 || point.y >= 84
+				    || !IsTileNotSolid(point)
+				    || dMonster[point.x][point.y] != 0 || dSpecial[point.x][point.y] != 0)
+					continue;
+				dPlayer[MyPlayer->position.tile.x][MyPlayer->position.tile.y] = 0;
+				MyPlayer->position.tile = MyPlayer->position.future = MyPlayer->position.last = MyPlayer->position.old = MyPlayer->position.temp = point;
+				dPlayer[point.x][point.y] = 1;
+				dFlags[point.x][point.y] |= DungeonFlag::Lit | DungeonFlag::Visible;
+				ViewPosition = point;
+				return;
+			}
+		}
+	}
+	Check(false, "locate walkable fixture position near requested capture");
+}
+
+void CheckWalkingContinuity(const Surface &out, const std::filesystem::path &output)
+{
+	Player &player = *MyPlayer;
+	const ActorPosition savedPosition = player.position;
+	const AnimationInfo savedAnimation = player.AnimInfo;
+	const PLR_MODE savedMode = player._pmode;
+	const Direction savedDirection = player._pdir;
+	const Point savedView = ViewPosition;
+	const uint8_t savedTickProgress = ProgressToNextGameTick;
+	const Point start = player.position.tile;
+	const Point destination = start + Direction::South;
+	Check(CanStep(start, destination) && dMonster[destination.x][destination.y] == 0,
+		"central fixture has a native walkable south step");
+	player.AnimationData[static_cast<size_t>(player_graphic::Walk)].sprites = LoadCl2Sheet("plrgfx\\warrior\\wln\\wlnwl", 96);
+	const ClxSpriteList walk = player.AnimationData[static_cast<size_t>(player_graphic::Walk)].spritesForDirection(Direction::South);
+	player.AnimInfo.setNewAnimation(OptionalClxSpriteList { ClxSpriteList { walk } }, static_cast<int8_t>(walk.numSprites()), 1);
+	player._pmode = PM_WALK_SOUTHWARDS;
+	player._pdir = Direction::South;
+	player.position.future = player.position.temp = destination;
+	ProgressToNextGameTick = 0;
+	Check(DrawTownView(out, true), "draw original warrior walk animation at step start");
+	const Point first = TownViewScreenPosition(destination);
+	Capture(out, output / "tristram-walk-start.bmp");
+	for (int frame = 1; frame < static_cast<int>(walk.numSprites()); ++frame) {
+		player.AnimInfo.processAnimation();
+		ProgressToNextGameTick = frame == walk.numSprites() - 1 ? 127 : 0;
+		Check(DrawTownView(out, true), "draw walking frame " + std::to_string(frame));
+	}
+	const Point beforeCompletion = TownViewScreenPosition(destination);
+	Capture(out, output / "tristram-walk-before-completion.bmp");
+	Check(player.position.tile == start && player.position.future == destination,
+		"rendering walk interpolation preserves live step positions");
+	// Native DoWalk finishes by moving tile to temp and selecting the stand animation.
+	// The same fixed ground point should barely move when that discrete update happens.
+	dPlayer[start.x][start.y] = 0;
+	dPlayer[destination.x][destination.y] = 1;
+	player.position.tile = player.position.future = player.position.last = player.position.old = player.position.temp = destination;
+	player._pmode = PM_STAND;
+	player.AnimInfo = savedAnimation;
+	ProgressToNextGameTick = 0;
+	ViewPosition = destination;
+	Check(DrawTownView(out, true), "draw completed native walking step");
+	const Point afterCompletion = TownViewScreenPosition(destination);
+	const int completionShift = std::abs(beforeCompletion.x - afterCompletion.x) + std::abs(beforeCompletion.y - afterCompletion.y);
+	const int travel = std::abs(first.x - beforeCompletion.x) + std::abs(first.y - beforeCompletion.y);
+	Check(travel >= 4 && completionShift <= 3,
+		"walk camera interpolates toward its destination without tile-boundary jump (travel="
+			+ std::to_string(travel) + "px, completion=" + std::to_string(completionShift) + "px)");
+	Capture(out, output / "tristram-walk-completed.bmp");
+	CheckGroundPicking();
+	dPlayer[destination.x][destination.y] = 0;
+	dPlayer[start.x][start.y] = 1;
+	player.position = savedPosition;
+	player.AnimInfo = savedAnimation;
+	player._pmode = savedMode;
+	player._pdir = savedDirection;
+	ViewPosition = savedView;
+	ProgressToNextGameTick = savedTickProgress;
+	Check(DrawTownView(out, true), "restore stationary fixture after walking check");
+}
+
+void CheckCameraControls(const Surface &out, const std::filesystem::path &output)
+{
+	constexpr float Pi = 3.14159265358979323846F;
+	const Point originalPlayer = MyPlayer->position.tile;
+	const Point originalView = ViewPosition;
+	std::array<uint16_t, MAXDUNX * MAXDUNY> originalMap;
+	std::memcpy(originalMap.data(), dPiece, sizeof(dPiece));
+	const auto finite = [](TownViewCameraState state) {
+		return std::isfinite(state.yaw) && std::isfinite(state.pitch) && std::isfinite(state.distance)
+			&& std::isfinite(state.offsetX) && std::isfinite(state.offsetZ);
+	};
+	const auto draw = [&](const std::string &description) {
+		Check(finite(GetTownViewCameraState()) && DrawTownView(out, true), description);
+		CheckGroundPicking();
+	};
+	ResetTownViewCamera();
+	draw("draw reset camera before control checks");
+	const TownViewCameraState initial = GetTownViewCameraState();
+	const Point probe = originalView + Direction::South;
+	const Point initialScreen = TownViewScreenPosition(probe);
+	for (int octant = 1; octant <= 8; ++octant) {
+		OrbitTownView(Pi / 4, 0);
+		Point tile;
+		int npc, item, player;
+		Check(!Pick(initialScreen, tile, npc, item, player), "orbit invalidates cursor result before redraw");
+		draw("draw full orbit at " + std::to_string(octant * 45) + " degrees");
+		if (octant % 2 == 0)
+			Capture(out, output / ("tristram-orbit-" + std::to_string(octant * 45) + ".bmp"));
+	}
+	const Point orbitScreen = TownViewScreenPosition(probe);
+	Check(std::abs(orbitScreen.x - initialScreen.x) + std::abs(orbitScreen.y - initialScreen.y) <= 1,
+		"full 360 degree orbit returns the ground projection to its starting point");
+	ResetTownViewCamera();
+	Check(!BeginTownViewCameraDrag({ 320, gnViewportHeight }) && !BeginTownViewCameraDrag({ -1, 80 }),
+		"camera drag starts only inside the world viewport");
+	Check(BeginTownViewCameraDrag({ 320, 176 }) && IsTownViewCameraDragging(), "begin native camera orbit drag");
+	Check(UpdateTownViewCameraDrag({ 410, 226 }), "mouse drag updates yaw and pitch");
+	EndTownViewCameraDrag();
+	const auto dragged = GetTownViewCameraState();
+	Check(!IsTownViewCameraDragging() && std::abs(std::remainder(dragged.yaw - initial.yaw, 2 * Pi)) > 0.1F
+			&& dragged.pitch > initial.pitch,
+		"camera orbit drag changes both axes and ends cleanly");
+	draw("draw mouse-orbited camera");
+	Capture(out, output / "tristram-camera-drag.bmp");
+	ResetTownViewCamera();
+	ZoomTownView(5);
+	Check(GetTownViewCameraState().distance < initial.distance, "wheel forward moves camera closer");
+	draw("draw wheel zoom closer");
+	ZoomTownView(-5);
+	Check(std::abs(GetTownViewCameraState().distance - initial.distance) < 0.01F, "opposite wheel input restores distance");
+	ZoomTownView(1000);
+	const float nearDistance = GetTownViewCameraState().distance;
+	ZoomTownView(1000);
+	Check(nearDistance > 0 && nearDistance < initial.distance && GetTownViewCameraState().distance == nearDistance,
+		"extreme wheel zoom settles at a positive near limit");
+	draw("draw camera at near zoom limit");
+	Capture(out, output / "tristram-camera-near.bmp");
+	ZoomTownView(-1000);
+	const float farDistance = GetTownViewCameraState().distance;
+	ZoomTownView(-1000);
+	Check(farDistance > initial.distance && GetTownViewCameraState().distance == farDistance,
+		"extreme wheel zoom settles at a finite far limit");
+	draw("draw camera at far zoom limit");
+	Capture(out, output / "tristram-camera-far.bmp");
+	ResetTownViewCamera();
+	OrbitTownView(0, -1000);
+	const float lowPitch = GetTownViewCameraState().pitch;
+	OrbitTownView(0, -1000);
+	Check(lowPitch > 0 && lowPitch < initial.pitch && GetTownViewCameraState().pitch == lowPitch,
+		"downward orbit remains above the horizon and stops at its limit");
+	draw("draw camera at lowest inclination");
+	Capture(out, output / "tristram-camera-low.bmp");
+	OrbitTownView(0, 1000);
+	const float highPitch = GetTownViewCameraState().pitch;
+	OrbitTownView(0, 1000);
+	Check(highPitch > initial.pitch && highPitch < Pi / 2 && GetTownViewCameraState().pitch == highPitch,
+		"upward orbit remains below vertical and stops at its limit");
+	draw("draw camera at highest inclination");
+	Capture(out, output / "tristram-camera-high.bmp");
+	Record("INFO camera limits distance=" + std::to_string(nearDistance) + ".." + std::to_string(farDistance)
+		+ " pitch=" + std::to_string(lowPitch) + ".." + std::to_string(highPitch));
+	ResetTownViewCamera();
+	draw("draw camera before pan drag");
+	Check(BeginTownViewCameraDrag({ 320, 176 }, true) && UpdateTownViewCameraDrag({ 400, 200 }), "native drag pans the camera");
+	EndTownViewCameraDrag();
+	const auto panned = GetTownViewCameraState();
+	Check(finite(panned) && std::abs(panned.offsetX) + std::abs(panned.offsetZ) > 0.1F, "pan changes the camera target offset");
+	draw("draw panned camera");
+	Check(TownViewScreenPosition(probe) != initialScreen, "pan changes the world projection");
+	Capture(out, output / "tristram-camera-pan.bmp");
+	Check(BeginTownViewCameraDrag({ 320, 176 }), "begin drag before changing display mode");
+	ToggleTownView();
+	Check(!IsTownViewCameraDragging() && !UpdateTownViewCameraDrag({ 330, 180 }), "mode switch cancels active camera drag");
+	ToggleTownView();
+	ResetTownViewCamera();
+	draw("draw reset camera after control checks");
+	const auto reset = GetTownViewCameraState();
+	Check(reset.yaw == initial.yaw && reset.pitch == initial.pitch && reset.distance == initial.distance
+			&& reset.offsetX == 0 && reset.offsetZ == 0 && TownViewScreenPosition(probe) == initialScreen,
+		"camera reset restores orbit, inclination, zoom, pan, and ground projection");
+	Check(MyPlayer->position.tile == originalPlayer && ViewPosition == originalView
+			&& std::memcmp(originalMap.data(), dPiece, sizeof(dPiece)) == 0,
+		"orbit, zoom, inclination, and pan preserve native player and town data");
+}
+
+void ClearWorld(const Surface &out)
+{
+	for (int y = 0; y < std::min<int>(gnViewportHeight, out.h()); ++y)
+		std::memset(out.at(0, y), 0, out.w());
+}
+
+void DrawActualNativeReference(const Surface &out)
+{
+	Check(out.w() >= gnScreenWidth && out.h() >= gnViewportHeight, "native target covers the real engine viewport");
+	ClearWorld(out);
+	Check(DrawNativeTownViewReference(out, ViewPosition), "native backend accepts a complete world target");
+}
+
+void CheckZeroPieceGround(const Surface &out)
+{
+	constexpr Point tile { 72, 74 };
+	Check(dPiece[tile.x][tile.y] == 0 && IsTileNotSolid(tile), "zero MIN piece is real walkable ground beside the east cabin");
+	ResetTownViewCamera();
+	DrawActualNativeReference(out);
+	const Point center = GetScreenPosition(tile) + Displacement { 32, -16 };
+	const bool visible = center.x >= 2 && center.x < out.w() - 2 && center.y >= 2 && center.y < gnViewportHeight - 2;
+	Check(visible, "zero-piece ground regression fixture is visible");
+	if (!visible)
+		return;
+	std::array<uint8_t, 25> native;
+	for (int dy = -2; dy <= 2; ++dy)
+		for (int dx = -2; dx <= 2; ++dx)
+			native[(dy + 2) * 5 + dx + 2] = out[center + Displacement { dx, dy }];
+	Check(DrawTownView(out, true), "draw real zero-piece ground with raw geometry");
+	bool equal = true;
+	for (int dy = -2; dy <= 2; ++dy)
+		for (int dx = -2; dx <= 2; ++dx)
+			equal = equal && out[center + Displacement { dx, dy }] == native[(dy + 2) * 5 + dx + 2];
+	Check(equal, "zero-piece ground reproduces the original pixels instead of a black hole");
+	Point selected;
+	int npc, item, player;
+	Check(Pick(center, selected, npc, item, player) && selected == tile && npc < 0 && item < 0 && player < 0,
+		"zero-piece ground remains selectable through raw geometry");
+}
+
+void CheckNativeCameraCalibration(const Surface &out)
+{
+	ResetTownViewCamera();
+	CalcViewportGeometry();
+	const Point nativeAnchor = GetScreenPosition(ViewPosition) + Displacement { 32, 0 };
+	Check(DrawTownView(out, true), "draw raw geometry at the actual native camera anchor");
+	bool calibrated = true;
+	for (int dy = -5; dy <= 5; ++dy) {
+		for (int dx = -5; dx <= 5; ++dx) {
+			const Point screen = TownViewScreenPosition(ViewPosition + Displacement { dx, dy });
+			const Point expected = nativeAnchor + Displacement { 32 * (dx - dy), 16 * (dx + dy) - 16 };
+			calibrated = calibrated && std::abs(screen.x - expected.x) <= 1 && std::abs(screen.y - expected.y) <= 1;
+		}
+	}
+	Check(calibrated, "raw geometry matches the actual native tile-center projection across 121 points");
+}
+
+void CheckNativePoseRoute(const Surface &out)
+{
+	ResetTownViewCamera();
+	Check(IsTownViewNativePose(), "reset selects the native rendering and cursor route");
+	OwnedSurface undersized(gnScreenWidth, gnViewportHeight - 1);
+	for (int y = 0; y < undersized.h(); ++y)
+		std::memset(undersized.at(0, y), 37, undersized.w());
+	Check(!DrawNativeTownViewReference(undersized, ViewPosition), "native backend rejects a target shorter than its viewport");
+	bool untouched = true;
+	for (int y = 0; y < undersized.h(); ++y) {
+		for (int x = 0; x < undersized.w(); ++x)
+			untouched = untouched && *undersized.at(x, y) == 37;
+	}
+	Check(untouched, "rejected native target remains untouched");
+	const std::string state = NativeSceneState();
+	DrawActualNativeReference(out);
+	const auto native = ViewportPixels(out);
+	Check(DrawTownView(out), "default pose calls the actual native world backend");
+	Check(native == ViewportPixels(out), "native pose is pixel-identical to original backend (shared rendering path, not a mesh fidelity test)");
+	Point tile;
+	int npc, item, player;
+	Check(!Pick({ out.w() / 2, gnViewportHeight / 2 }, tile, npc, item, player),
+		"native pose invalidates geometric IDs so the native cursor route is used");
+	Check(BeginTownViewCameraDrag({ out.w() / 2, gnViewportHeight / 2 }), "native pose still accepts camera drag");
+	Check(UpdateTownViewCameraDrag({ out.w() / 2 + 25, gnViewportHeight / 2 + 10 }), "drag leaves the native pose");
+	EndTownViewCameraDrag();
+	Check(!IsTownViewNativePose() && DrawTownView(out), "changed camera switches to geometric rendering and picking");
+	CheckGroundPicking();
+	ResetTownViewCamera();
+	Check(IsTownViewNativePose() && !IsTownViewCameraDragging() && DrawTownView(out), "reset restores native route and ends drag");
+	Check(native == ViewportPixels(out), "return from orbit restores original native pixels");
+	Check(NativeSceneState() == state, "native backend, orbit and reset preserve fixture map and actor state");
+}
+
+void CaptureNativeProjectionPairs(const Surface &out, const std::filesystem::path &output)
+{
+	const ActorPosition savedPosition = MyPlayer->position;
+	const Point savedView = ViewPosition;
+	struct Fixture {
+		const char *name;
+		Point position;
+		bool cabin;
+	};
+	const std::array<Fixture, 12> fixtures { Fixture { "tavern", { 51, 64 }, false },
+		Fixture { "smithy", { 62, 65 }, false }, Fixture { "gillian", { 43, 66 }, false },
+		Fixture { "pepin", { 55, 79 }, false }, Fixture { "adria", { 80, 20 }, false },
+		Fixture { "northern-house", { 55, 44 }, false }, Fixture { "farnham-house", { 73, 83 }, false },
+		Fixture { "cabin-west", { 32, 51 }, true }, Fixture { "cabin-east", { 76, 69 }, true },
+		Fixture { "well", { 62, 72 }, false }, Fixture { "cathedral", { 25, 31 }, false },
+		Fixture { "crypt", { 49, 22 }, false } };
+	constexpr int ComparisonSize = 1024;
+	// Wide native views also render beside the 128px panel. CalculatePanelAreas
+	// therefore keeps the entire screen as its viewport; allocate all of it and
+	// crop only when exporting the requested comparison frame.
+	OwnedSurface fullArchitecture(ComparisonSize, ComparisonSize + GetMainPanel().size.height);
+	SDL_SetPaletteColors(fullArchitecture.surface->format->palette, logical_palette.data(), 0, 256);
+	for (const Fixture &fixture : fixtures) {
+		PlaceFixturePlayerNear(fixture.position);
+		CheckNativeCameraCalibration(out);
+		Check(IsTileNotSolid(MyPlayer->position.tile) && dPlayer[MyPlayer->position.tile.x][MyPlayer->position.tile.y] == 1,
+			std::string("comparison fixture seeds the real native player cell ") + fixture.name);
+		const std::string state = NativeSceneState();
+		DrawActualNativeReference(out);
+		const auto native = ViewportPixels(out);
+		SavePng(out.subregionY(0, gnViewportHeight), output / (std::string("native-") + fixture.name + ".png"));
+		Check(DrawTownView(out), std::string("draw native fidelity route ") + fixture.name);
+		Check(native == ViewportPixels(out), std::string("shared native backend produces identical pixels ") + fixture.name);
+		SavePng(out.subregionY(0, gnViewportHeight), output / (std::string("nativefidelity-") + fixture.name + ".png"));
+		Check(DrawTownView(out, true), std::string("draw forced raw geometry diagnostic ") + fixture.name);
+		Check(NativeSceneState() == state, "actual native and raw geometry rendering preserve map, collision and actor state");
+		SavePng(out.subregionY(0, gnViewportHeight), output / (std::string("calibrated-") + fixture.name + ".png"));
+		int heroPixels = 0;
+		for (int y = 0; y < gnViewportHeight; ++y) {
+			for (int x = 0; x < out.w(); ++x) {
+				Point tile;
+				int npc, item, player;
+				if (Pick({ x, y }, tile, npc, item, player) && player == MyPlayerId)
+					++heroPixels;
+			}
+		}
+		Record(std::string("INFO raw geometry diagnostic ") + fixture.name + " fixture=" + std::to_string(ViewPosition.x) + ","
+			+ std::to_string(ViewPosition.y) + " geometric hero selection pixels=" + std::to_string(heroPixels));
+		if (fixture.cabin)
+			Check(heroPixels > 0, std::string("raw geometry keeps hero selectable on cabin approach ") + fixture.name);
+		const int savedWidth = gnScreenWidth;
+		const int savedHeight = gnScreenHeight;
+		const int savedViewport = gnViewportHeight;
+		gnScreenWidth = ComparisonSize;
+		gnScreenHeight = fullArchitecture.h();
+		CalculatePanelAreas();
+		Check(gnViewportHeight == gnScreenHeight && fullArchitecture.h() >= gnViewportHeight,
+			"wide native viewport includes panel-side rows within its allocation");
+		CheckNativeCameraCalibration(fullArchitecture);
+		DrawActualNativeReference(fullArchitecture);
+		const auto fullNative = ViewportPixels(fullArchitecture);
+		SavePng(fullArchitecture.subregionY(0, ComparisonSize), output / (std::string("native-full-") + fixture.name + ".png"));
+		Check(DrawTownView(fullArchitecture), std::string("draw large native fidelity frame ") + fixture.name);
+		Check(fullNative == ViewportPixels(fullArchitecture), std::string("large native route exactly matches original backend ") + fixture.name);
+		SavePng(fullArchitecture.subregionY(0, ComparisonSize), output / (std::string("nativefidelity-full-") + fixture.name + ".png"));
+		Check(DrawTownView(fullArchitecture, true), std::string("draw large raw geometry frame at native scale ") + fixture.name);
+		SavePng(fullArchitecture.subregionY(0, ComparisonSize), output / (std::string("calibrated-full-") + fixture.name + ".png"));
+		gnScreenWidth = savedWidth;
+		gnScreenHeight = savedHeight;
+		gnViewportHeight = savedViewport;
+		CalculatePanelAreas();
+		CalcViewportGeometry();
+	}
+	std::ofstream metadata(output / "comparison-capture-method.json");
+	metadata << "{\"native\":\"actual original DrawGame world backend via DrawNativeTownViewReference\","
+		<< "\"nativefidelity\":\"same native backend selected by default pose; equality validates dispatch, not mesh reconstruction\","
+		<< "\"calibrated\":\"forced raw 3D geometry diagnostic at real native anchor; artistic differences remain measurable\","
+		<< "\"zoom\":false,\"fullViewport\":[1024," << fullArchitecture.h()
+		<< "],\"comparisonCrop\":[1024,1024],\"fullScreenHeight\":" << fullArchitecture.h() << "}\n";
+	Check(metadata.good(), "capture metadata distinguishes shared native path from raw geometric fidelity");
+	dPlayer[MyPlayer->position.tile.x][MyPlayer->position.tile.y] = 0;
+	MyPlayer->position = savedPosition;
+	dPlayer[savedPosition.tile.x][savedPosition.tile.y] = 1;
+	ViewPosition = savedView;
+	ResetTownViewCamera();
+	Check(DrawTownView(out, true), "restore original geometric fixture after comparison captures");
+}
+
+// These checks use geometry and visible ownership, rather than treating black
+// palette entries as holes. The original art contains intentional black pixels.
+struct RayVector {
+	double x, y, z;
+	RayVector operator+(RayVector b) const { return { x + b.x, y + b.y, z + b.z }; }
+	RayVector operator-(RayVector b) const { return { x - b.x, y - b.y, z - b.z }; }
+	RayVector operator*(double s) const { return { x * s, y * s, z * s }; }
+};
+
+double RayDot(RayVector a, RayVector b) { return a.x * b.x + a.y * b.y + a.z * b.z; }
+RayVector RayCross(RayVector a, RayVector b) { return { a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x }; }
+RayVector RayPosition(const TownSceneVertex &v) { return { v.x, v.height, v.z }; }
+
+bool RayTriangle(RayVector origin, RayVector direction, const TownSceneTriangle &triangle, double &distance, double &u, double &v)
+{
+	const RayVector a = RayPosition(triangle.vertices[0]);
+	const RayVector e1 = RayPosition(triangle.vertices[1]) - a;
+	const RayVector e2 = RayPosition(triangle.vertices[2]) - a;
+	const RayVector h = RayCross(direction, e2);
+	const double determinant = RayDot(e1, h);
+	if (std::abs(determinant) < 1.0e-10)
+		return false;
+	const RayVector s = origin - a;
+	u = RayDot(s, h) / determinant;
+	if (u < 0 || u > 1)
+		return false;
+	const RayVector q = RayCross(s, e1);
+	v = RayDot(direction, q) / determinant;
+	if (v < 0 || u + v > 1)
+		return false;
+	distance = RayDot(e2, q) / determinant;
+	return distance > 1.0e-6;
+}
+
+void CheckClosedArchitecture()
+{
+	size_t closedModels = 0;
+	bool normalsValid = true;
+	for (const TownSceneModel &model : GetTownScene()) {
+		for (const auto &triangle : model.triangles) {
+			const auto &n = triangle.normal;
+			const double lengthSquared = n.x * n.x + n.height * n.height + n.z * n.z;
+			normalsValid = normalsValid && std::isfinite(lengthSquared) && std::abs(lengthSquared - 1) < 0.001;
+			if (triangle.nativeProjection)
+				normalsValid = normalsValid && triangle.surfaceRole == TownSceneSurfaceRole::Exterior && n.x + n.height + n.z > 0;
+		}
+		if (!model.physicalBounds.closed)
+			continue;
+		++closedModels;
+		const auto &body = model.physicalBounds;
+		const RayVector origin { (body.minX + body.maxX) * 0.5, body.wallHeight * 0.5, (body.minZ + body.maxZ) * 0.5 };
+		int enclosedDirections = 0;
+		for (const RayVector direction : { RayVector { 1, 0, 0 }, RayVector { -1, 0, 0 }, RayVector { 0, 1, 0 },
+			RayVector { 0, -1, 0 }, RayVector { 0, 0, 1 }, RayVector { 0, 0, -1 } }) {
+			bool hit = false;
+			for (const auto &triangle : model.triangles) {
+				double t, u, v;
+				hit = hit || RayTriangle(origin, direction, triangle, t, u, v);
+			}
+			enclosedDirections += hit ? 1 : 0;
+		}
+		Check(enclosedDirections == 6, "closed architectural body has surfaces in all six directions at "
+			+ std::to_string(model.minTile.x) + "," + std::to_string(model.minTile.y));
+	}
+	Check(closedModels > 0 && normalsValid, "architectural surface normals are finite unit vectors and native overlay faces point toward the original view");
+}
+
+struct DecodedVolumeSprite {
+	int width, height;
+	std::vector<uint8_t> pixels, opacity;
+	TownVolumeSprite view() const { return { width, height, pixels, opacity }; }
+};
+
+DecodedVolumeSprite DecodeVolumeSprite(ClxSprite sprite)
+{
+	OwnedSurface paint(sprite.width(), sprite.height());
+	OwnedSurface coverage(sprite.width(), sprite.height());
+	SDL_FillRect(paint.surface, nullptr, 0);
+	SDL_FillRect(coverage.surface, nullptr, 255);
+	ClxDraw(paint, { 0, paint.h() - 1 }, sprite);
+	ClxDraw(coverage, { 0, coverage.h() - 1 }, sprite);
+	DecodedVolumeSprite decoded { paint.w(), paint.h(), {}, {} };
+	for (int y = 0; y < paint.h(); ++y) {
+		for (int x = 0; x < paint.w(); ++x) {
+			decoded.pixels.push_back(*paint.at(x, y));
+			decoded.opacity.push_back(*paint.at(x, y) == *coverage.at(x, y) ? 1 : 0);
+		}
+	}
+	return decoded;
+}
+
+std::string VolumeGeometryState(const TownVolumeMesh &mesh)
+{
+	std::ostringstream state;
+	state << std::setprecision(std::numeric_limits<float>::max_digits10) << mesh.width << ',' << mesh.height << ',' << mesh.depth << ';';
+	for (const auto &triangle : mesh.triangles) {
+		state << static_cast<int>(triangle.material) << ',' << static_cast<int>(triangle.paletteIndex) << ',' << static_cast<int>(triangle.textureView) << ';';
+		for (const auto &v : triangle.vertices)
+			state << v.x << ',' << v.height << ',' << v.z << ',' << v.u << ',' << v.v << ';';
+	}
+	return state.str();
+}
+
+void CheckVolumeMesh(const TownVolumeMesh &mesh, const std::string &name)
+{
+	using VertexKey = std::tuple<int64_t, int64_t, int64_t>;
+	using EdgeKey = std::pair<VertexKey, VertexKey>;
+	std::map<EdgeKey, size_t> edges;
+	std::map<EdgeKey, int> edgeBalance;
+	std::map<EdgeKey, std::vector<size_t>> edgeOwners;
+	bool finite = true;
+	bool nondegenerate = true;
+	double minimumZ = std::numeric_limits<double>::max();
+	double maximumZ = std::numeric_limits<double>::lowest();
+	const auto key = [](const TownVolumeVertex &v) {
+		return VertexKey { std::llround(v.x * 100000.0), std::llround(v.height * 100000.0), std::llround(v.z * 100000.0) };
+	};
+	for (size_t triangleIndex = 0; triangleIndex < mesh.triangles.size(); ++triangleIndex) {
+		const auto &triangle = mesh.triangles[triangleIndex];
+		for (const auto &v : triangle.vertices) {
+			finite = finite && std::isfinite(v.x) && std::isfinite(v.height) && std::isfinite(v.z) && std::isfinite(v.u) && std::isfinite(v.v);
+			minimumZ = std::min(minimumZ, static_cast<double>(v.z));
+			maximumZ = std::max(maximumZ, static_cast<double>(v.z));
+		}
+		if (!finite)
+			break;
+		const auto &a = triangle.vertices[0];
+		const auto &b = triangle.vertices[1];
+		const auto &c = triangle.vertices[2];
+		const RayVector cross = RayCross({ b.x - a.x, b.height - a.height, b.z - a.z }, { c.x - a.x, c.height - a.height, c.z - a.z });
+		nondegenerate = nondegenerate && RayDot(cross, cross) > 1.0e-14;
+		for (size_t i = 0; i < 3; ++i) {
+			VertexKey first = key(triangle.vertices[i]);
+			VertexKey second = key(triangle.vertices[(i + 1) % 3]);
+			const int direction = first < second ? 1 : -1;
+			if (second < first)
+				std::swap(first, second);
+			++edges[{ first, second }];
+			edgeBalance[{ first, second }] += direction;
+			edgeOwners[{ first, second }].push_back(triangleIndex);
+		}
+	}
+	const auto openEdges = std::count_if(edges.begin(), edges.end(), [](const auto &edge) { return edge.second != 2; });
+	const auto inconsistentEdges = std::count_if(edgeBalance.begin(), edgeBalance.end(), [](const auto &edge) { return edge.second != 0; });
+	size_t reportedEdges = 0;
+	for (const auto &[edge, count] : edges) {
+		if (count == 2 && edgeBalance[edge] == 0)
+			continue;
+		if (reportedEdges++ >= 8)
+			break;
+		const auto coordinates = [](const VertexKey &vertex) {
+			std::ostringstream point;
+			point << std::setprecision(9) << std::get<0>(vertex) / 100000.0 << ',' << std::get<1>(vertex) / 100000.0 << ',' << std::get<2>(vertex) / 100000.0;
+			return point.str();
+		};
+		std::string triangleIndices;
+		for (size_t index : edgeOwners[edge])
+			triangleIndices += " " + std::to_string(index);
+		Record("INFO invalid volume edge " + name + " from=" + coordinates(edge.first) + " to=" + coordinates(edge.second)
+			+ " occurrences=" + std::to_string(count) + " direction balance=" + std::to_string(edgeBalance[edge]) + " triangles=" + triangleIndices);
+	}
+	Record("INFO volume " + name + " triangles=" + std::to_string(mesh.triangles.size()) + " unmatched edges=" + std::to_string(openEdges)
+		+ " actual depth=" + std::to_string(maximumZ - minimumZ));
+	Check(finite && nondegenerate && mesh.triangles.size() >= 24 && maximumZ - minimumZ > 0.05,
+		name + " uses finite nondegenerate triangles with physical depth, rather than a flat image card");
+	Check(openEdges == 0 && inconsistentEdges == 0, name + " has closed oriented components (two oppositely directed triangles per edge)");
+}
+
+void ExportDecodedActor(const DecodedVolumeSprite &sprite, const std::filesystem::path &path)
+{
+	std::unique_ptr<SDL_Surface, decltype(&SDL_FreeSurface)> rgba(
+		SDL_CreateRGBSurfaceWithFormat(0, sprite.width, sprite.height, 32, SDL_PIXELFORMAT_RGBA32), SDL_FreeSurface);
+	Check(rgba != nullptr, "allocate exact native actor RGBA export");
+	for (int y = 0; y < sprite.height; ++y) {
+		auto *row = reinterpret_cast<uint32_t *>(static_cast<uint8_t *>(rgba->pixels) + y * rgba->pitch);
+		for (int x = 0; x < sprite.width; ++x) {
+			const size_t index = static_cast<size_t>(y) * sprite.width + x;
+			const SDL_Color color = logical_palette[sprite.pixels[index]];
+			row[x] = SDL_MapRGBA(rgba->format, color.r, color.g, color.b, sprite.opacity[index] ? 255 : 0);
+		}
+	}
+	SavePng(Surface { rgba.get() }, path);
+	std::ofstream pixels(path.parent_path() / (path.stem().string() + ".pixels.bin"), std::ios::binary);
+	pixels.write(reinterpret_cast<const char *>(sprite.pixels.data()), static_cast<std::streamsize>(sprite.pixels.size()));
+	std::ofstream opacity(path.parent_path() / (path.stem().string() + ".opacity.bin"), std::ios::binary);
+	opacity.write(reinterpret_cast<const char *>(sprite.opacity.data()), static_cast<std::streamsize>(sprite.opacity.size()));
+	std::ofstream metadata(path.parent_path() / (path.stem().string() + ".json"));
+	metadata << "{\"width\":" << sprite.width << ",\"height\":" << sprite.height << ",\"nativePixelsOnly\":true,\"opacityExplicit\":true}\n";
+	Check(pixels.good() && opacity.good() && metadata.good(), "export original actor pixels and opacity for independent volume diagnostics");
+}
+
+void ExportActorBodyMask(const DecodedVolumeSprite &source, const std::filesystem::path &path)
+{
+	DecodedVolumeSprite body = source;
+	body.opacity = TownActorBodyOpacity(source.view());
+	Check(body.opacity.size() == source.opacity.size(), "real actor body mask has original sprite dimensions");
+	bool paintPreserved = true;
+	size_t shadowPixels = 0;
+	for (size_t index = 0; index < source.opacity.size(); ++index) {
+		paintPreserved = paintPreserved && (body.opacity[index] == 0 || source.opacity[index] != 0)
+			&& (source.opacity[index] == 0 || source.pixels[index] == 0 || body.opacity[index] != 0);
+		shadowPixels += source.opacity[index] != 0 && body.opacity[index] == 0 ? 1 : 0;
+	}
+	Check(paintPreserved, "separating actor ground shadow retains every colored native body pixel and adds no paint");
+	ExportDecodedActor(body, path);
+	Record("INFO actor ground shadow " + path.stem().string() + " separated pixels=" + std::to_string(shadowPixels));
+}
+
+void CheckDirectionalActorBody(const TownVolumeMesh &body, const std::array<TownVolumeSprite, 8> &views, int facing, const std::string &name)
+{
+	CheckVolumeMesh(body, name);
+	float minimumHeight = std::numeric_limits<float>::infinity();
+	double maximumForwardProjectionError = 0;
+	size_t forwardVertices = 0;
+	bool textureReferences = true;
+	for (const auto &triangle : body.triangles) {
+		textureReferences = textureReferences && triangle.textureView < views.size();
+		for (const auto &vertex : triangle.vertices) {
+			minimumHeight = std::min(minimumHeight, vertex.height);
+			textureReferences = textureReferences && vertex.u >= -0.00001F && vertex.u <= 1.00001F
+				&& vertex.v >= -0.00001F && vertex.v <= 1.00001F;
+			if (triangle.textureView == facing) {
+				const double originalX = views[facing].width * 0.5 + 45.25483399593904 * vertex.x;
+				const double originalY = views[facing].height - 1 + 22.62741699796952 * vertex.z - 32.0 * vertex.height;
+				maximumForwardProjectionError = std::max({ maximumForwardProjectionError,
+					std::abs(originalX - vertex.u * views[facing].width),
+					std::abs(originalY - vertex.v * views[facing].height) });
+				++forwardVertices;
+			}
+		}
+	}
+	Record("INFO " + name + " minimum height=" + std::to_string(minimumHeight)
+		+ " native projection UV error pixels=" + std::to_string(maximumForwardProjectionError));
+	Check(minimumHeight >= -0.00001F && minimumHeight < 0.0001F, name + " touches the physical ground without floating");
+	Check(forwardVertices > 0 && maximumForwardProjectionError < 0.0001, name + " retains original forward texture projection after grounding");
+	Check(textureReferences, name + " references valid native directional textures and UVs");
+}
+
+TownVolumeMesh CheckRealActorBodies(const std::filesystem::path &output)
+{
+	const std::string original = NativeSceneState();
+	const auto directory = output / "actor-sources";
+	std::filesystem::create_directories(directory);
+	const auto &data = MyPlayer->AnimationData[static_cast<size_t>(MyPlayer->getGraphic())];
+	const int frame = MyPlayer->AnimInfo.getFrameToUseForRendering();
+	Check(data.sprites && frame >= 0, "real warrior current animation and frame are available");
+	const ClxSpriteSheet sheet = *data.sprites;
+	Check(sheet.numLists() == 8, "real current warrior animation provides all eight native directions");
+	std::array<DecodedVolumeSprite, 8> decoded {};
+	std::array<TownVolumeSprite, 8> views {};
+	TownVolumeMesh currentBody;
+	for (size_t direction = 0; direction < views.size(); ++direction) {
+		const ClxSpriteList list = data.spritesForDirection(static_cast<Direction>(direction));
+		Check(static_cast<uint32_t>(frame) < list.numSprites(), "same real animation frame exists in warrior direction=" + std::to_string(direction));
+		decoded[direction] = DecodeVolumeSprite(list[frame]);
+		views[direction] = decoded[direction].view();
+		ExportDecodedActor(decoded[direction], directory / ("warrior-direction-" + std::to_string(direction) + ".png"));
+		ExportActorBodyMask(decoded[direction], directory / ("warrior-direction-" + std::to_string(direction) + "-body.png"));
+	}
+	for (int facing = 0; facing < 8; ++facing) {
+		const auto body = BuildTownActorVisualHull(views, facing);
+		CheckDirectionalActorBody(body, views, facing, "real eight-view warrior body facing=" + std::to_string(facing));
+		Check(VolumeGeometryState(body) == VolumeGeometryState(BuildTownActorVisualHull(views, facing)),
+			"real eight-view body rebuilds deterministically facing=" + std::to_string(facing));
+		if (facing == static_cast<int>(MyPlayer->_pdir))
+			currentBody = body;
+	}
+	std::ofstream metadata(directory / "warrior-frame.json");
+	metadata << "{\"graphic\":" << static_cast<int>(MyPlayer->getGraphic()) << ",\"frame\":" << frame
+		<< ",\"directions\":8,\"body\":\"physical visual hull; no billboard shear\"}\n";
+	for (size_t index = 0; index < Towners.size(); ++index) {
+		const auto &towner = Towners[index];
+		if (!towner.anim)
+			continue;
+		const auto source = DecodeVolumeSprite(towner.currentSprite());
+		ExportDecodedActor(source, directory / ("npc-" + std::to_string(index) + "-type-" + std::to_string(static_cast<int>(towner._ttype)) + ".png"));
+		ExportActorBodyMask(source, directory / ("npc-" + std::to_string(index) + "-body.png"));
+		const bool humanoid = towner._ttype != TOWN_COW;
+		const auto body = BuildTownActorSingleViewBody(source.view(), humanoid);
+		CheckVolumeMesh(body, "original NPC body index=" + std::to_string(index));
+		bool aboveGround = true;
+		float minimumHeight = std::numeric_limits<float>::infinity();
+		for (const auto &triangle : body.triangles)
+			for (const auto &vertex : triangle.vertices) {
+				aboveGround = aboveGround && vertex.height >= -0.00001F;
+				minimumHeight = std::min(minimumHeight, vertex.height);
+			}
+		Record("INFO original NPC index=" + std::to_string(index) + " minimum height=" + std::to_string(minimumHeight));
+		Check(minimumHeight >= -0.00001F && minimumHeight < 0.0001F,
+			"real NPC body touches the physical ground without floating index=" + std::to_string(index));
+		Check(aboveGround && VolumeGeometryState(body) == VolumeGeometryState(BuildTownActorSingleViewBody(source.view(), humanoid)),
+			"real NPC body has stable geometry with feet above ground index=" + std::to_string(index));
+		if (towner._ttype != TOWN_COW)
+			continue;
+		const auto cowSheet = GetTownCowSpriteSheet();
+		Check(cowSheet && cowSheet->numLists() == 8, "real cow current animation provides eight native directions index=" + std::to_string(index));
+		std::array<DecodedVolumeSprite, 8> cowDecoded {};
+		std::array<TownVolumeSprite, 8> cowViews {};
+		int currentDirection = -1;
+		for (int direction = 0; direction < 8; ++direction) {
+			const ClxSpriteList list = (*cowSheet)[direction];
+			Check(towner._tAnimFrame < list.numSprites(), "same real cow frame is available direction=" + std::to_string(direction));
+			const ClxSprite sprite = list[towner._tAnimFrame];
+			if (sprite.pixelData() == towner.currentSprite().pixelData())
+				currentDirection = direction;
+			cowDecoded[direction] = DecodeVolumeSprite(sprite);
+			cowViews[direction] = cowDecoded[direction].view();
+			const std::string stem = "cow-" + std::to_string(index) + "-direction-" + std::to_string(direction);
+			ExportDecodedActor(cowDecoded[direction], directory / (stem + ".png"));
+			ExportActorBodyMask(cowDecoded[direction], directory / (stem + "-body.png"));
+		}
+		Check(currentDirection >= 0, "cow current facing matches an actual native animation direction index=" + std::to_string(index));
+		const auto cowBody = BuildTownActorVisualHull(cowViews, currentDirection);
+		CheckDirectionalActorBody(cowBody, cowViews, currentDirection, "real eight-view cow body index=" + std::to_string(index));
+		Check(VolumeGeometryState(cowBody) == VolumeGeometryState(BuildTownActorVisualHull(cowViews, currentDirection)),
+			"real eight-view cow rebuilds deterministically index=" + std::to_string(index));
+		Record("INFO cow source index=" + std::to_string(index) + " frame=" + std::to_string(towner._tAnimFrame)
+			+ " native direction=" + std::to_string(currentDirection));
+	}
+	Check(NativeSceneState() == original, "real eight-direction and NPC body diagnostics preserve map, directions, and animation state");
+	Check(!currentBody.triangles.empty(), "current native warrior facing supplies the independently audited body for occlusion diagnostics");
+	return currentBody;
+}
+
+void ExportVegetationVolume(const Surface &diagnostic, Point sourceSize, const TownVolumeMesh &mesh,
+	const TownVegetationGroup &group, size_t index, bool failed, const std::filesystem::path &output)
+{
+	const std::string stem = "group-native-" + std::to_string(group.referenceFootpoint.x) + "-" + std::to_string(group.referenceFootpoint.y);
+	SavePng(diagnostic, output / (stem + ".png"));
+	std::ofstream pixels(output / (stem + ".pixels.bin"), std::ios::binary);
+	std::ofstream opacity(output / (stem + ".opacity.bin"), std::ios::binary);
+	for (int y = 0; y < sourceSize.y; ++y) {
+		pixels.write(reinterpret_cast<const char *>(diagnostic.at(0, y)), sourceSize.x);
+		for (int x = 0; x < sourceSize.x; ++x) {
+			const uint8_t covered = *diagnostic.at(sourceSize.x + 16 + x, y) != 0 ? 1 : 0;
+			opacity.write(reinterpret_cast<const char *>(&covered), 1);
+		}
+	}
+	std::ofstream metadata(output / (stem + ".json"));
+	metadata << std::setprecision(std::numeric_limits<float>::max_digits10)
+		<< "{\"groupIndex\":" << index << ",\"family\":" << static_cast<int>(group.family)
+		<< ",\"foot\":[" << group.referenceFootpoint.x << ',' << group.referenceFootpoint.y
+		<< "],\"seed\":" << group.referenceFootpoint.x + group.referenceFootpoint.y * MAXDUNX + 1
+		<< ",\"foliage\":" << (group.foliage ? "true" : "false")
+		<< ",\"width\":" << sourceSize.x << ",\"height\":" << sourceSize.y
+		<< ",\"meshWidth\":" << mesh.width << ",\"meshHeight\":" << mesh.height << ",\"meshDepth\":" << mesh.depth
+		<< ",\"triangles\":" << mesh.triangles.size() << ",\"failedVolumeAudit\":" << (failed ? "true" : "false")
+		<< ",\"nativePixelsOnly\":true,\"opacityExplicit\":true}\n";
+	std::ofstream geometry(output / (stem + ".obj"));
+	geometry << std::setprecision(std::numeric_limits<float>::max_digits10)
+		<< "# Actual renderer mesh; vertex axes x, height, z. Each triangle has separate vertices.\n";
+	for (size_t triangleIndex = 0; triangleIndex < mesh.triangles.size(); ++triangleIndex) {
+		const auto &triangle = mesh.triangles[triangleIndex];
+		geometry << "# triangle " << triangleIndex << " material " << static_cast<int>(triangle.material)
+			<< " palette " << static_cast<int>(triangle.paletteIndex) << " textureView " << static_cast<int>(triangle.textureView) << '\n';
+		for (const auto &v : triangle.vertices)
+			geometry << "v " << v.x << ' ' << v.height << ' ' << v.z << '\n';
+		for (const auto &v : triangle.vertices)
+			geometry << "vt " << v.u << ' ' << v.v << '\n';
+		const size_t first = triangleIndex * 3 + 1;
+		geometry << "f " << first << '/' << first << ' ' << first + 1 << '/' << first + 1 << ' ' << first + 2 << '/' << first + 2 << '\n';
+	}
+	Check(pixels.good() && opacity.good() && metadata.good() && geometry.good(), "export actual tree source, opacity, metadata, and raw volume geometry index=" + std::to_string(index));
+	Record("INFO tree composition index=" + std::to_string(index) + " family=" + std::to_string(static_cast<int>(group.family))
+		+ " foot=" + std::to_string(group.referenceFootpoint.x) + "," + std::to_string(group.referenceFootpoint.y)
+		+ " source=" + std::to_string(sourceSize.x) + "x" + std::to_string(sourceSize.y)
+		+ " mesh dimensions=" + std::to_string(mesh.width) + "," + std::to_string(mesh.height) + "," + std::to_string(mesh.depth));
+}
+
+bool CheckRenderedVegetationVolumes(const std::filesystem::path &output)
+{
+	const std::string original = NativeSceneState();
+	const auto &groups = GetTownVegetationGroups();
+	std::set<TownVegetationFamily> exported;
+	size_t nearestBare = groups.size();
+	int nearestDistance = std::numeric_limits<int>::max();
+	Point cabinCenter { 72, 69 };
+	for (const auto &model : GetTownScene()) {
+		if (model.kind == TownSceneKind::Cabin && model.minTile.x > 60)
+			cabinCenter = { static_cast<int>(std::lround((model.physicalBounds.minX + model.physicalBounds.maxX) * 0.5F)),
+				static_cast<int>(std::lround((model.physicalBounds.minZ + model.physicalBounds.maxZ) * 0.5F)) };
+	}
+	for (size_t index = 0; index < groups.size(); ++index) {
+		if (groups[index].family != TownVegetationFamily::BareTree)
+			continue;
+		const Point tile = groups[index].referenceFootpoint;
+		const int distance = std::abs(tile.x - cabinCenter.x) + std::abs(tile.y - cabinCenter.y);
+		if (distance < nearestDistance) {
+			nearestDistance = distance;
+			nearestBare = index;
+		}
+	}
+	OwnedSurface diagnostic(2048, 1024);
+	SDL_SetPaletteColors(diagnostic.surface->format->palette, logical_palette.data(), 0, 256);
+	size_t failedCount = 0;
+	for (size_t index = 0; index < groups.size(); ++index) {
+		const auto *mesh = TownViewVegetationVolume(index);
+		Check(mesh != nullptr, "renderer provides its actual complete vegetation volume index=" + std::to_string(index));
+		bool failed = false;
+		try {
+			CheckVolumeMesh(*mesh, "rendered whole tree index=" + std::to_string(index));
+		} catch (const std::runtime_error &) {
+			failed = true;
+			++failedCount;
+		}
+		const auto &group = groups[index];
+		if (exported.insert(group.family).second || index == nearestBare || failed) {
+			Point sourceSize;
+			Check(DrawTownViewVegetationDiagnostic(diagnostic, index, &sourceSize), "export renderer original tree composition and explicit opacity");
+			ExportVegetationVolume(diagnostic, sourceSize, *mesh, group, index, failed, output);
+		}
+	}
+	Record("INFO actual vegetation volume audit groups=" + std::to_string(groups.size()) + " failures=" + std::to_string(failedCount));
+	Check(NativeSceneState() == original, "actual renderer vegetation mesh diagnostics preserve native state");
+	return failedCount == 0;
+}
+
+bool CheckRenderedPropVolumes(const std::filesystem::path &output)
+{
+	const std::string original = NativeSceneState();
+	const auto &groups = GetTownPropGroups();
+	std::ofstream metadata(output / "rock-volume-audit.json");
+	metadata << "{\"geometry\":\"actual renderer cache, not a diagnostic reconstruction\",\"objects\":[";
+	size_t failedCount = 0;
+	for (size_t index = 0; index < groups.size(); ++index) {
+		const auto *mesh = TownViewPropVolume(index);
+		Check(mesh != nullptr, "renderer provides its actual complete rock volume index=" + std::to_string(index));
+		bool failed = false;
+		try {
+			CheckVolumeMesh(*mesh, "rendered native rock index=" + std::to_string(index));
+		} catch (const std::runtime_error &) {
+			failed = true;
+			++failedCount;
+		}
+		const auto &group = groups[index];
+		Record("INFO native rock index=" + std::to_string(index) + " foot=" + std::to_string(group.referenceFootpoint.x)
+			+ "," + std::to_string(group.referenceFootpoint.y) + " source cells=" + std::to_string(group.sourceTiles.size())
+			+ " hidden by architecture=" + std::to_string(TownPropHiddenByArchitecture(group)));
+		if (index != 0)
+			metadata << ',';
+		metadata << "{\"index\":" << index << ",\"foot\":[" << group.referenceFootpoint.x << ',' << group.referenceFootpoint.y
+			<< "],\"triangles\":" << mesh->triangles.size() << ",\"depth\":" << mesh->depth
+			<< ",\"hiddenByArchitecture\":" << (TownPropHiddenByArchitecture(group) ? "true" : "false")
+			<< ",\"closedVolumeAudit\":" << (failed ? "false" : "true") << '}';
+	}
+	metadata << "]}\n";
+	Check(metadata.good(), "record actual original rock mesh audit independently of screenshot colors");
+	Check(NativeSceneState() == original, "rendering and auditing complete rock meshes preserve native map and collision state");
+	return failedCount == 0;
+}
+
+Point FindTurntableTree()
+{
+	Point result { -1, -1 };
+	int best = std::numeric_limits<int>::max();
+	for (int y = 10; y < 84; ++y) {
+		for (int x = 10; x < 84; ++x) {
+			const int sprite = dSpecial[x][y] - 1;
+			if (sprite < 0 || !pSpecialCels || static_cast<unsigned>(sprite) >= pSpecialCels->numSprites() || (*pSpecialCels)[sprite].height() < 80)
+				continue;
+			const int distance = std::abs(x - 55) + std::abs(y - 70);
+			if (distance < best) {
+				result = { x, y };
+				best = distance;
+			}
+		}
+	}
+	Check(result.x >= 0, "locate an actual full-size native tree for volume and turntable diagnostics");
+	return result;
+}
+
+void CheckNativeSpriteVolumes(Point treeTile)
+{
+	const std::string state = NativeSceneState();
+	const auto actor = DecodeVolumeSprite(MyPlayer->currentSprite());
+	const auto tree = DecodeVolumeSprite((*pSpecialCels)[dSpecial[treeTile.x][treeTile.y] - 1]);
+	const uint32_t seed = static_cast<uint32_t>(treeTile.x * 65537 + treeTile.y);
+	const auto actorMesh = BuildTownActorVolume(actor.view());
+	const auto treeMesh = BuildTownTreeVolume(tree.view(), seed, false);
+	const auto foliageMesh = BuildTownTreeVolume(tree.view(), seed, true);
+	CheckVolumeMesh(actorMesh, "original warrior sprite volume");
+	CheckVolumeMesh(treeMesh, "original tree branch volume");
+	CheckVolumeMesh(foliageMesh, "original tree foliage volume");
+	Check(VolumeGeometryState(actorMesh) == VolumeGeometryState(BuildTownActorVolume(actor.view()))
+			&& VolumeGeometryState(treeMesh) == VolumeGeometryState(BuildTownTreeVolume(tree.view(), seed, false))
+			&& VolumeGeometryState(foliageMesh) == VolumeGeometryState(BuildTownTreeVolume(tree.view(), seed, true)),
+		"real native sprite volumes rebuild deterministically without depending on camera direction");
+	Check(NativeSceneState() == state, "volume construction preserves original town and actor state");
+}
+
+struct ArchitectureCoverage {
+	int tested = 0;
+	int covered = 0;
+	int entityOccluded = 0;
+	int holes = 0;
+};
+
+ArchitectureCoverage CheckArchitectureCoverage(int target, const Surface &out)
+{
+	ArchitectureCoverage result;
+	if (target < 0)
+		return result;
+	const auto &scene = GetTownScene();
+	const auto camera = GetTownViewCameraState();
+	constexpr double HeightScale = 0.816496580927726;
+	const double focal = 45.25483399593904 * 22 / camera.distance;
+	const double cy = std::cos(camera.yaw), sy = std::sin(camera.yaw);
+	const double cp = std::cos(camera.pitch), sp = std::sin(camera.pitch);
+	const RayVector right { sy, 0, -cy };
+	const RayVector up { -cy * sp, cp, -sy * sp };
+	const RayVector eyeDirection { cy * cp, sp, sy * cp };
+	const RayVector targetPoint { ViewPosition.x + camera.offsetX, 0, ViewPosition.y + camera.offsetZ };
+	const RayVector eye = targetPoint + eyeDirection * 256;
+	const Point anchor = GetScreenPosition(ViewPosition) + Displacement { 32, 0 };
+	std::set<std::pair<int, int>> samples;
+	for (const auto &triangle : scene[target].triangles) {
+		for (const std::array<double, 3> weights : { std::array<double, 3> { 0.333333, 0.333333, 0.333334 },
+			std::array<double, 3> { 0.2, 0.3, 0.5 }, std::array<double, 3> { 0.5, 0.2, 0.3 } }) {
+			RayVector world { 0, 0, 0 };
+			for (size_t i = 0; i < 3; ++i)
+				world = world + RayPosition(triangle.vertices[i]) * weights[i];
+			world.y *= HeightScale;
+			const RayVector relative = world - targetPoint;
+			const int x = static_cast<int>(std::floor(anchor.x + focal * RayDot(relative, right)));
+			const int y = static_cast<int>(std::floor(anchor.y - focal * RayDot(relative, up)));
+			if (x >= 0 && x < out.w() && y >= 0 && y < gnViewportHeight)
+				samples.emplace(x, y);
+		}
+	}
+	for (const auto &[x, y] : samples) {
+		RayVector origin = eye + right * ((x + 0.5 - anchor.x) / focal) + up * ((anchor.y - y - 0.5) / focal);
+		origin.y /= HeightScale;
+		const RayVector direction { -eyeDirection.x, -eyeDirection.y / HeightScale, -eyeDirection.z };
+		double nearest = std::numeric_limits<double>::max();
+		double hitU = 0, hitV = 0;
+		int expected = -1;
+		for (size_t model = 0; model < scene.size(); ++model) {
+			for (const auto &triangle : scene[model].triangles) {
+				double distance, u, v;
+				if (RayTriangle(origin, direction, triangle, distance, u, v) && distance < nearest) {
+					nearest = distance;
+					expected = static_cast<int>(model);
+					hitU = u;
+					hitV = v;
+				}
+			}
+		}
+		// Exclude the projected silhouette and triangle seams from rasterization
+		// tolerance; the remaining samples are strictly inside real surfaces.
+		if (expected != target || std::min({ hitU, hitV, 1 - hitU - hitV }) < 0.04)
+			continue;
+		++result.tested;
+		if (TownViewArchitectureAt({ x, y }) == expected) {
+			++result.covered;
+			continue;
+		}
+		Point tile;
+		int npc, item, player;
+		const bool picked = Pick({ x, y }, tile, npc, item, player);
+		const double renderedDepth = TownViewDepthAt({ x, y });
+		// Every live object, tree, and native prop can legitimately obscure the
+		// tested building. Its actual depth must be strictly closer than the ray
+		// intersection: ground behind a missing face never excuses that hole.
+		if (picked && std::isfinite(renderedDepth) && renderedDepth > 0 && renderedDepth < nearest - 0.001) {
+			++result.entityOccluded;
+			continue;
+		}
+		++result.holes;
+		if (result.holes <= 3)
+			Record("INFO missing architectural coverage model=" + std::to_string(target) + " screen=" + std::to_string(x) + "," + std::to_string(y)
+				+ " owner=" + std::to_string(TownViewArchitectureAt({ x, y })) + " rendered depth=" + std::to_string(renderedDepth)
+				+ " expected depth=" + std::to_string(nearest) + " picked=" + std::to_string(picked)
+				+ (picked ? " tile=" + std::to_string(tile.x) + "," + std::to_string(tile.y) : ""));
+	}
+	return result;
+}
+
+void RecordCabinScenerySources(const Surface &out, const std::filesystem::path &directory)
+{
+	// Fixed screen regions from the native-scale east-cabin diagnostic. The
+	// selected source cells identify actual visible props, not guessed colors.
+	struct Region { const char *name; int left, top, right, bottom; };
+	const std::array<Region, 2> regions { Region { "left-prism", 140, 135, 235, 330 },
+		Region { "right-prism", 400, 285, 505, 490 } };
+	std::ofstream metadata(directory / "cabin-scenery-sources.json");
+	metadata << "{\"view\":\"raw native-scale orbit0\",\"regions\":[";
+	bool firstRegion = true;
+	for (const auto &region : regions) {
+		std::map<std::pair<int, int>, int> sourceCounts;
+		for (int y = region.top; y < std::min<int>(region.bottom, gnViewportHeight); y += 2) {
+			for (int x = region.left; x < std::min<int>(region.right, out.w()); x += 2) {
+				Point tile;
+				int npc, item, player;
+				if (TownViewArchitectureAt({ x, y }) >= 0 || !Pick({ x, y }, tile, npc, item, player)
+					|| npc >= 0 || item >= 0 || player >= 0)
+					continue;
+				// Exclude ground: samples need to sit visibly above the selected
+				// tile's ground center to be useful for diagnosing tall scenery.
+				if (y < TownViewScreenPosition(tile).y - 24)
+					++sourceCounts[{ tile.x, tile.y }];
+			}
+		}
+		if (!firstRegion)
+			metadata << ',';
+		firstRegion = false;
+		metadata << "{\"name\":\"" << region.name << "\",\"sources\":[";
+		bool firstSource = true;
+		for (const auto &[position, count] : sourceCounts) {
+			const Point tile { position.first, position.second };
+			const auto piece = dPiece[tile.x][tile.y];
+			const bool vegetation = TownVegetationReplacesTile(tile);
+			Record("INFO cabin scenery " + std::string(region.name) + " selected=" + std::to_string(tile.x) + "," + std::to_string(tile.y)
+				+ " piece=" + std::to_string(piece) + " SOL=" + std::to_string(static_cast<int>(SOLData[piece]))
+				+ " special=" + std::to_string(static_cast<int>(dSpecial[tile.x][tile.y])) + " vegetation=" + std::to_string(vegetation)
+				+ " sampled pixels=" + std::to_string(count));
+			if (!firstSource)
+				metadata << ',';
+			firstSource = false;
+			metadata << "{\"tile\":[" << tile.x << ',' << tile.y << "],\"piece\":" << piece
+				<< ",\"sol\":" << static_cast<int>(SOLData[piece]) << ",\"special\":" << static_cast<int>(dSpecial[tile.x][tile.y])
+				<< ",\"vegetation\":" << (vegetation ? "true" : "false") << ",\"sampledPixels\":" << count << '}';
+		}
+		metadata << "]}";
+	}
+	metadata << "],\"windowRockProbes\":[";
+	const auto &props = GetTownPropGroups();
+	bool firstProbe = true;
+	for (Point screen : { Point { 224, 335 }, Point { 220, 331 }, Point { 224, 331 }, Point { 228, 331 },
+		Point { 220, 335 }, Point { 228, 335 }, Point { 220, 339 }, Point { 224, 339 }, Point { 228, 339 } }) {
+		Point tile { -1, -1 };
+		int npc, item, player;
+		const bool picked = Pick(screen, tile, npc, item, player);
+		const int architecture = TownViewArchitectureAt(screen);
+		const int piece = picked ? dPiece[tile.x][tile.y] : -1;
+		const bool sceneReplaced = picked && TownSceneReplacesTile(tile);
+		int propGroup = -1;
+		for (size_t index = 0; picked && index < props.size(); ++index) {
+			if (props[index].referenceFootpoint == tile
+				|| std::find(props[index].sourceTiles.begin(), props[index].sourceTiles.end(), tile) != props[index].sourceTiles.end()) {
+				propGroup = static_cast<int>(index);
+				break;
+			}
+		}
+		Record("INFO cabin window rock probe screen=" + std::to_string(screen.x) + "," + std::to_string(screen.y)
+			+ " picked=" + std::to_string(picked) + " tile=" + std::to_string(tile.x) + "," + std::to_string(tile.y)
+			+ " piece=" + std::to_string(piece) + " prop group=" + std::to_string(propGroup)
+			+ " scene replaced=" + std::to_string(sceneReplaced) + " architecture=" + std::to_string(architecture)
+			+ " depth=" + std::to_string(TownViewDepthAt(screen)));
+		if (!firstProbe)
+			metadata << ',';
+		firstProbe = false;
+		metadata << "{\"screen\":[" << screen.x << ',' << screen.y << "],\"picked\":" << (picked ? "true" : "false")
+			<< ",\"tile\":[" << tile.x << ',' << tile.y << "],\"piece\":" << piece << ",\"propGroup\":" << propGroup
+			<< ",\"sceneReplaced\":" << (sceneReplaced ? "true" : "false") << ",\"architecture\":" << architecture
+			<< ",\"npc\":" << npc << ",\"item\":" << item << ",\"player\":" << player;
+		if (propGroup >= 0) {
+			const auto &group = props[propGroup];
+			metadata << ",\"propFoot\":[" << group.referenceFootpoint.x << ',' << group.referenceFootpoint.y << "],\"sourceTiles\":[";
+			for (size_t source = 0; source < group.sourceTiles.size(); ++source) {
+				const Point sourceTile = group.sourceTiles[source];
+				if (source != 0)
+					metadata << ',';
+				metadata << "{\"tile\":[" << sourceTile.x << ',' << sourceTile.y << "],\"piece\":" << dPiece[sourceTile.x][sourceTile.y]
+					<< ",\"sceneReplaced\":" << (TownSceneReplacesTile(sourceTile) ? "true" : "false") << '}';
+			}
+			metadata << ']';
+		}
+		metadata << '}';
+	}
+	metadata << "]}\n";
+	Check(metadata.good(), "record real source-cell picks and window rock probes without changing fixture or geometry");
+}
+
+void RecordPlayerArchitectureOcclusion(const Surface &out, const TownVolumeMesh &body, int degrees)
+{
+	constexpr double HeightScale = 0.816496580927726;
+	constexpr double InverseSqrt2 = 0.7071067811865475;
+	const auto camera = GetTownViewCameraState();
+	const double focal = 45.25483399593904 * 22 / camera.distance;
+	const double cy = std::cos(camera.yaw), sy = std::sin(camera.yaw);
+	const double cp = std::cos(camera.pitch), sp = std::sin(camera.pitch);
+	const RayVector right { sy, 0, -cy }, up { -cy * sp, cp, -sy * sp };
+	const RayVector eyeDirection { cy * cp, sp, sy * cp };
+	const RayVector target { ViewPosition.x + camera.offsetX, 0, ViewPosition.y + camera.offsetZ };
+	const RayVector eye = target + eyeDirection * 256;
+	const Point anchor = GetScreenPosition(ViewPosition) + Displacement { 32, 0 };
+	std::vector<TownSceneTriangle> actorTriangles;
+	actorTriangles.reserve(body.triangles.size());
+	std::set<std::pair<int, int>> samples;
+	for (size_t index = 0; index < body.triangles.size(); ++index) {
+		const auto &source = body.triangles[index];
+		TownSceneTriangle triangle {};
+		RayVector center { 0, 0, 0 };
+		for (size_t vertex = 0; vertex < 3; ++vertex) {
+			const auto &v = source.vertices[vertex];
+			triangle.vertices[vertex] = { MyPlayer->position.tile.x + static_cast<float>((v.x + v.z) * InverseSqrt2),
+				v.height, MyPlayer->position.tile.y + static_cast<float>((-v.x + v.z) * InverseSqrt2), v.u, v.v };
+			center = center + RayPosition(triangle.vertices[vertex]) * (1.0 / 3);
+		}
+		actorTriangles.push_back(triangle);
+		if (index % std::max<size_t>(1, body.triangles.size() / 128) != 0)
+			continue;
+		center.y *= HeightScale;
+		const RayVector relative = center - target;
+		const int x = static_cast<int>(std::floor(anchor.x + focal * RayDot(relative, right)));
+		const int y = static_cast<int>(std::floor(anchor.y - focal * RayDot(relative, up)));
+		if (x >= 0 && x < out.w() && y >= 0 && y < gnViewportHeight)
+			samples.emplace(x, y);
+	}
+	int visible = 0, architectureOccluded = 0, otherOccluded = 0, unexplained = 0;
+	std::set<int> occludingModels;
+	const auto &scene = GetTownScene();
+	for (const auto &[x, y] : samples) {
+		RayVector origin = eye + right * ((x + 0.5 - anchor.x) / focal) + up * ((anchor.y - y - 0.5) / focal);
+		origin.y /= HeightScale;
+		const RayVector direction { -eyeDirection.x, -eyeDirection.y / HeightScale, -eyeDirection.z };
+		double actorDepth = std::numeric_limits<double>::infinity(), actorU = 0, actorV = 0;
+		for (const auto &triangle : actorTriangles) {
+			double distance, u, v;
+			if (RayTriangle(origin, direction, triangle, distance, u, v) && distance < actorDepth) {
+				actorDepth = distance;
+				actorU = u;
+				actorV = v;
+			}
+		}
+		if (!std::isfinite(actorDepth) || std::min({ actorU, actorV, 1 - actorU - actorV }) < 0.04)
+			continue;
+		Point tile;
+		int npc, item, player;
+		const bool picked = Pick({ x, y }, tile, npc, item, player);
+		if (picked && player == MyPlayerId) {
+			++visible;
+			continue;
+		}
+		double architectureDepth = std::numeric_limits<double>::infinity();
+		int occluder = -1;
+		for (size_t model = 0; model < scene.size(); ++model) {
+			for (const auto &triangle : scene[model].triangles) {
+				double distance, u, v;
+				if (RayTriangle(origin, direction, triangle, distance, u, v) && distance < architectureDepth) {
+					architectureDepth = distance;
+					occluder = static_cast<int>(model);
+				}
+			}
+		}
+		const double renderedDepth = TownViewDepthAt({ x, y });
+		if (occluder >= 0 && architectureDepth < actorDepth - 0.001 && TownViewArchitectureAt({ x, y }) == occluder
+			&& std::abs(renderedDepth - architectureDepth) < 0.001) {
+			++architectureOccluded;
+			occludingModels.insert(occluder);
+		} else if (picked && renderedDepth < actorDepth - 0.001) {
+			++otherOccluded;
+		} else {
+			++unexplained;
+		}
+	}
+	Record("INFO cabin actor independent ray evidence orbit=" + std::to_string(degrees) + " visible=" + std::to_string(visible)
+		+ " architecture occluded=" + std::to_string(architectureOccluded) + " other closer surfaces=" + std::to_string(otherOccluded)
+		+ " unexplained=" + std::to_string(unexplained));
+	for (int model : occludingModels)
+		Record("INFO cabin actor verified occluder model=" + std::to_string(model) + " kind=" + std::to_string(static_cast<int>(scene[model].kind)));
+}
+
+void CaptureObjectTurntables(const Surface &originalOut, const std::filesystem::path &output)
+{
+	const auto directory = output / "turntables";
+	std::filesystem::create_directories(directory);
+	const std::string initialState = NativeSceneState();
+	const int savedScreenWidth = gnScreenWidth;
+	const int savedScreenHeight = gnScreenHeight;
+	const int savedViewportHeight = gnViewportHeight;
+	// Keep native pixel scale, but provide enough vertical room for entire roofs
+	// and trees. The backing allocation includes the real engine panel rows.
+	constexpr int FrameSize = 640;
+	OwnedSurface out(FrameSize, FrameSize + GetMainPanel().size.height);
+	SDL_SetPaletteColors(out.surface->format->palette, logical_palette.data(), 0, 256);
+	gnScreenWidth = out.w();
+	gnScreenHeight = out.h();
+	CalculatePanelAreas();
+	CalcViewportGeometry();
+	Check(gnViewportHeight == FrameSize && out.h() >= gnViewportHeight, "turntable native target includes panel rows and a full 640px world frame");
+	const ActorPosition savedPosition = MyPlayer->position;
+	const Point savedView = ViewPosition;
+	std::vector<uint8_t> savedFlags(sizeof(dFlags)), savedPlayers(sizeof(dPlayer));
+	std::memcpy(savedFlags.data(), dFlags, sizeof(dFlags));
+	std::memcpy(savedPlayers.data(), dPlayer, sizeof(dPlayer));
+	const Point tree = FindTurntableTree();
+	CheckNativeSpriteVolumes(tree);
+	const TownVolumeMesh diagnosticActorBody = CheckRealActorBodies(output);
+	const bool vegetationValid = CheckRenderedVegetationVolumes(output);
+	const bool propsValid = CheckRenderedPropVolumes(output);
+	CheckClosedArchitecture();
+	int cabin = -1, well = -1;
+	const auto &scene = GetTownScene();
+	for (size_t i = 0; i < scene.size(); ++i) {
+		if (scene[i].kind == TownSceneKind::Cabin && scene[i].minTile.x > 60)
+			cabin = static_cast<int>(i);
+		if (scene[i].kind == TownSceneKind::Well)
+			well = static_cast<int>(i);
+	}
+	Check(cabin >= 0 && well >= 0, "turntable targets are the real east cabin and town well models");
+	const auto center = [&](int model) {
+		const auto &body = scene[model].physicalBounds;
+		return Point { static_cast<int>(std::lround((body.minX + body.maxX) * 0.5F)), static_cast<int>(std::lround((body.minZ + body.maxZ) * 0.5F)) };
+	};
+	struct Fixture { const char *name; Point focus; Point hero; int model; };
+	const std::array<Fixture, 4> fixtures { Fixture { "cabin-east", center(cabin), { 76, 69 }, cabin },
+		Fixture { "well", center(well), { 63, 72 }, well }, Fixture { "tree", tree, tree + Displacement { 3, 3 }, -1 },
+		// This native clearing was selected from SOL/special data, independently
+		// of renderer visibility. The cabin fixture retains actual roof occlusion.
+		Fixture { "player", { 53, 29 }, { 53, 29 }, -1 } };
+	std::ofstream manifest(directory / "turntables.json");
+	manifest << "{\"native\":\"actual original world backend\",\"raw\":\"forced geometry; never native fallback\","
+		<< "\"coverage\":\"independent ray intersections and visible architectural IDs, not pixel color\","
+		<< "\"playerFixture\":\"native walkable clearing at 53,29; scenery retained and cabin actor occlusion audited separately\","
+		<< "\"width\":" << out.w() << ",\"height\":" << gnViewportHeight << ",\"frames\":[\n";
+	bool firstFrame = true;
+	bool coverageValid = true;
+	bool playerVisible = true;
+	constexpr float Pi = 3.14159265358979323846F;
+	for (const Fixture &fixture : fixtures) {
+		PlaceFixturePlayerNear(fixture.hero);
+		if (std::string(fixture.name) == "player")
+			Check(IsTileNotSolid(MyPlayer->position.tile) && dMonster[MyPlayer->position.tile.x][MyPlayer->position.tile.y] == 0
+				&& dSpecial[MyPlayer->position.tile.x][MyPlayer->position.tile.y] == 0, "360 player fixture is an actual unoccupied native walkable clearing");
+		ViewPosition = fixture.model < 0 && std::string(fixture.name) == "player" ? Point { MyPlayer->position.tile } : fixture.focus;
+		ResetTownViewCamera();
+		const std::string frozen = NativeSceneState();
+		DrawActualNativeReference(out);
+		SavePng(out.subregionY(0, gnViewportHeight), directory / (std::string(fixture.name) + "-native.png"));
+		for (int degrees : { -5, 0, 5, 45, 90, 135, 180, 225, 270, 315 }) {
+			ResetTownViewCamera();
+			OrbitTownView(degrees * Pi / 180, 0);
+			Check(DrawTownView(out, true), std::string("draw raw turntable ") + fixture.name + " orbit=" + std::to_string(degrees));
+			if (degrees == 0 && std::string(fixture.name) == "cabin-east")
+				RecordCabinScenerySources(out, directory);
+			if (std::string(fixture.name) == "cabin-east")
+				RecordPlayerArchitectureOcclusion(out, diagnosticActorBody, degrees);
+			const auto coverage = CheckArchitectureCoverage(fixture.model, out);
+			if (fixture.model >= 0) {
+				coverageValid = coverageValid && coverage.covered >= 3 && coverage.holes == 0;
+				Record(std::string("INFO architectural interior ray coverage ")
+					+ fixture.name + " orbit=" + std::to_string(degrees) + " covered=" + std::to_string(coverage.covered)
+					+ " occluded=" + std::to_string(coverage.entityOccluded) + " holes=" + std::to_string(coverage.holes));
+			}
+			int playerPixels = 0;
+			int treePixels = 0;
+			for (int y = 0; y < gnViewportHeight; ++y) {
+				for (int x = 0; x < out.w(); ++x) {
+					Point tile;
+					int npc, item, player;
+					if (Pick({ x, y }, tile, npc, item, player)) {
+						playerPixels += player == MyPlayerId ? 1 : 0;
+						treePixels += tile == tree && npc < 0 && item < 0 && player < 0 ? 1 : 0;
+					}
+				}
+			}
+			if (std::string(fixture.name) == "player")
+				playerVisible = playerVisible && playerPixels > 0;
+			Check(NativeSceneState() == frozen, "raw turntable rendering preserves native map and actor state");
+			const std::string filename = std::string(fixture.name) + "-orbit-" + std::to_string(degrees) + ".png";
+			SavePng(out.subregionY(0, gnViewportHeight), directory / filename);
+			if (!firstFrame)
+				manifest << ",\n";
+			firstFrame = false;
+			manifest << "{\"object\":\"" << fixture.name << "\",\"orbitDegrees\":" << degrees << ",\"file\":\"" << filename
+				<< "\",\"focus\":[" << ViewPosition.x << ',' << ViewPosition.y << "],\"heroTile\":["
+				<< static_cast<int>(MyPlayer->position.tile.x) << ',' << static_cast<int>(MyPlayer->position.tile.y)
+				<< "],\"cameraYaw\":" << GetTownViewCameraState().yaw
+				<< ",\"architectureSamples\":" << coverage.tested << ",\"architectureCovered\":" << coverage.covered
+				<< ",\"architectureOccluded\":" << coverage.entityOccluded << ",\"architectureHoles\":" << coverage.holes
+				<< ",\"playerPixels\":" << playerPixels << ",\"treeTileSelectionPixels\":" << treePixels << '}';
+		}
+	}
+	manifest << "\n]}\n";
+	Check(manifest.good(), "turntable manifest records raw angles, visible IDs, and independent coverage evidence");
+	std::memcpy(dFlags, savedFlags.data(), sizeof(dFlags));
+	std::memcpy(dPlayer, savedPlayers.data(), sizeof(dPlayer));
+	MyPlayer->position = savedPosition;
+	ViewPosition = savedView;
+	gnScreenWidth = savedScreenWidth;
+	gnScreenHeight = savedScreenHeight;
+	gnViewportHeight = savedViewportHeight;
+	CalculatePanelAreas();
+	CalcViewportGeometry();
+	ResetTownViewCamera();
+	Check(DrawTownView(originalOut, true), "restore original scene and viewport after object turntables");
+	Check(NativeSceneState() == initialState, "all turntable fixtures restore original map flags, actor cells, and positions");
+	Check(vegetationValid, "all actual renderer tree meshes have closed oriented components; failure sources exported and turntables preserved");
+	Check(propsValid, "all actual renderer native rock objects have closed volumes and nonzero depth; turntables preserved");
+	Check(playerVisible, "original warrior volume remains selectable at every turntable angle");
+	Check(coverageValid, "opaque cabin and well surfaces cover all independent interior ray samples across ten angles");
+}
+
+void Run(const std::filesystem::path &output)
+{
+	HeadlessMode = true;
+	gbIsHellfire = false;
+	gbIsMultiplayer = false;
+	leveltype = DTYPE_TOWN;
+	currlevel = 0;
+	setlevel = false;
+	gnScreenWidth = 640;
+	gnScreenHeight = 480;
+	gnViewportHeight = 352;
+	GetOptions().Graphics.zoom.SetValue(false);
+	CalculatePanelAreas();
+	CalcViewportGeometry();
+	SetRndSeed(0);
+	for (auto &quest : Quests)
+		quest._qactive = QUEST_NOTAVAIL;
+	std::cout << "Loading original archives\n";
+	LoadCoreArchives();
+	LoadSelectedGameArchive();
+	Check(FindAsset("levels\\towndata\\town.cel").ok(), "game archive provides original town CEL");
+	// Retail town generation queries this player's unlocked dungeon entrances.
+	ViewPosition = { 75, 68 };
+	InitializePlayer();
+	LoadTown();
+	InitTowners();
+	dPlayer[MyPlayer->position.tile.x][MyPlayer->position.tile.y] = 1;
+	dFlags[MyPlayer->position.tile.x][MyPlayer->position.tile.y] |= DungeonFlag::Lit | DungeonFlag::Visible;
+	for (size_t i = 0; i < Towners.size(); ++i) {
+		const Point tile = Towners[i].position;
+		dMonster[tile.x][tile.y] = static_cast<int16_t>(i + 1);
+		dFlags[tile.x][tile.y] |= DungeonFlag::Lit | DungeonFlag::Visible;
+	}
+	Check(!Towners.empty(), "original Tristram NPC sprites loaded");
+	CheckTownSceneMeshes();
+	CheckNativeVegetationGroups();
+	CheckNativePropGroups();
+	ExportTownMapping(output);
+	ExportNativeHouseArtwork({ 26, 48 }, { 30, 52 }, output / "cabin-west-original.png");
+	ExportNativeHouseArtwork({ 70, 66 }, { 74, 72 }, output / "cabin-east-original.png");
+	OwnedSurface out(640, 480);
+	SDL_SetPaletteColors(out.surface->format->palette, logical_palette.data(), 0, 256);
+	SDL_FillRect(out.surface, nullptr, 255);
+	Check(!IsTownViewActive() && !DrawTownView(out, true), "perspective mode defaults off");
+	DrawActualNativeReference(out);
+	Capture(out, output / "isometric-reference-spawn.bmp");
+	for (const Point sample : { Point { 60, 63 }, Point { 62, 65 }, Point { 63, 65 }, Point { 65, 64 }, Point { 69, 67 },
+		Point { 60, 60 }, Point { 61, 58 }, Point { 64, 60 }, Point { 65, 59 },
+		Point { 38, 64 }, Point { 52, 78 }, Point { 25, 23 }, Point { 24, 20 }, Point { 60, 70 },
+		Point { 78, 18 }, Point { 53, 57 }, Point { 64, 58 }, Point { 22, 18 }, Point { 24, 25 },
+		Point { 26, 26 }, Point { 24, 19 }, Point { 23, 17 } }) {
+		const auto piece = dPiece[sample.x][sample.y];
+		std::cout << "Source tile " << sample.x << ',' << sample.y << " piece=" << piece << " SOL=" << static_cast<unsigned>(SOLData[piece]) << '\n';
+		Check(DrawTownViewTileDiagnostic(out.subregionY(0, gnViewportHeight), sample), "decode isolated source tile");
+		Capture(out, output / ("tile-" + std::to_string(sample.x) + "-" + std::to_string(sample.y) + ".bmp"));
+	}
+	const auto initialPlayer = MyPlayer->position.tile;
+	const auto initialView = ViewPosition;
+	std::array<uint16_t, MAXDUNX * MAXDUNY> initialMap;
+	std::memcpy(initialMap.data(), dPiece, sizeof(dPiece));
+	ToggleTownView();
+	Check(IsTownViewActive(), "toggle activates the view in Tristram");
+	CheckZeroPieceGround(out);
+	leveltype = DTYPE_CATHEDRAL;
+	Check(!IsTownViewActive() && !DrawTownView(out, true), "cathedral keeps original rendering");
+	leveltype = DTYPE_TOWN;
+	for (int i = 0; i < 12; ++i) {
+		Check(DrawTownView(out, true), "draw live town after toggle " + std::to_string(i + 1));
+		ToggleTownView();
+		Check(!IsTownViewActive() && !DrawTownView(out, true), "original mode skips perspective renderer");
+		ToggleTownView();
+	}
+	Check(std::memcmp(initialMap.data(), dPiece, sizeof(dPiece)) == 0 && MyPlayer->position.tile == initialPlayer && ViewPosition == initialView,
+		"24 mode switches preserve map, player, and camera target");
+	Check(DrawTownView(out, true), "redraw current view before cursor checks");
+	Capture(out, output / "tristram-spawn.bmp");
+	CheckGroundPicking();
+	for (const Point screen : { Point { -1, 0 }, Point { 640, 20 }, Point { 5, 352 }, Point { 5, 479 } }) {
+		Point tile;
+		int npc, item, player;
+		Check(!Pick(screen, tile, npc, item, player), "reject cursor outside world viewport");
+	}
+	bool interfacePreserved = true;
+	for (int y = gnViewportHeight; y < out.h(); ++y)
+		interfacePreserved = interfacePreserved && std::all_of(out.at(0, y), out.at(out.w(), y), [](uint8_t value) { return value == 255; });
+	Check(interfacePreserved, "world rendering preserves all interface rows");
+	PlaceFixturePlayerNear({ 62, 65 });
+	DrawActualNativeReference(out);
+	Capture(out, output / "isometric-reference-center.bmp");
+	Check(DrawTownView(out, true), "draw central Tristram");
+	std::cout << "Central fixture=" << ViewPosition.x << ',' << ViewPosition.y << '\n';
+	for (const Point sample : { Point { 62, 65 }, Point { 63, 65 }, Point { 65, 64 }, Point { 69, 67 } }) {
+		Point selected;
+		int npc, item, player;
+		const Point projected = TownViewScreenPosition(sample);
+		if (Pick(projected, selected, npc, item, player))
+			std::cout << "Ground projected=" << sample.x << ',' << sample.y << " actual=" << selected.x << ',' << selected.y
+				<< " palette=" << static_cast<unsigned>(out[projected]) << " npc=" << npc << " player=" << player << '\n';
+	}
+	CheckGroundPicking();
+	Capture(out, output / "tristram-center.bmp");
+	CheckEntityPicking();
+	const auto baseline = ViewportPixels(out);
+	ResetTownViewResources();
+	Check(DrawTownView(out, true) && baseline == ViewportPixels(out), "resource cache reset recreates identical image");
+	CheckWalkingContinuity(out, output);
+	CheckCameraControls(out, output);
+	CheckNativePoseRoute(out);
+	CaptureNativeProjectionPairs(out, output);
+	CaptureObjectTurntables(out, output);
+	RotateTownView(0.75F);
+	Point tile;
+	int npc, item, player;
+	Check(!Pick({ 320, 176 }, tile, npc, item, player), "camera change invalidates stale picking");
+	Check(DrawTownView(out, true), "draw rotated camera");
+	CheckGroundPicking();
+	Check(baseline != ViewportPixels(out), "rotation changes projection");
+	Capture(out, output / "tristram-rotated.bmp");
+	RotateTownView(-1.5F);
+	AdjustTownViewDistance(-4.0F);
+	PlaceFixturePlayerNear({ 25, 31 });
+	Check(DrawTownView(out, true), "draw cathedral approach");
+	CheckGroundPicking();
+	Capture(out, output / "tristram-cathedral-approach.bmp");
+	ResetTownViewResources();
+	pDungeonCels.reset();
+	Check(!DrawTownView(out, true), "missing level graphics gracefully skips view");
+	LoadTown();
+	Check(DrawTownView(out, true), "original town resources reload after release");
+	CheckGroundPicking();
+	FreeTownerGFX();
+}
+} // namespace
+
+int main(int argc, char **argv)
+{
+	std::cout << std::unitbuf;
+	std::cerr << std::unitbuf;
+	if (argc != 4) {
+		std::cerr << "Usage: town_view_smoke <game-data-directory> <built-assets-directory> <capture-directory>\n";
+		return 2;
+	}
+	const std::filesystem::path output = std::filesystem::absolute(argv[3]);
+	std::filesystem::create_directories(output);
+	std::ofstream log(output / "town-view-runtime.txt");
+	SDL_LogSetOutputFunction([](void *userdata, int, SDL_LogPriority, const char *message) {
+		auto &stream = *static_cast<std::ofstream *>(userdata);
+		stream << message << std::endl;
+		std::cerr << message << '\n';
+	}, &log);
+	devilution::paths::SetBasePath(argv[1]);
+	devilution::paths::SetAssetsPath(argv[2]);
+	devilution::paths::SetPrefPath(output.string());
+	devilution::paths::SetConfigPath(output.string());
+	SDL_SetMainReady();
+	SDL_setenv("SDL_VIDEODRIVER", "dummy", 0);
+	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
+		std::cerr << SDL_GetError() << '\n';
+		return 2;
+	}
+	const auto start = std::chrono::steady_clock::now();
+	int status = 0;
+	try {
+		Run(output);
+	} catch (const std::exception &error) {
+		std::cerr << "Smoke check stopped: " << error.what() << '\n';
+		status = 1;
+	}
+	std::ofstream report(output / "town-view-smoke.txt");
+	for (const auto &result : Results)
+		report << result << '\n';
+	const auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - start).count();
+	report << "Elapsed: " << elapsed << " ms\n";
+	std::cout << "Elapsed: " << elapsed << " ms\n";
+	SDL_Quit();
+	return status;
+}

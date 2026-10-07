@@ -475,3 +475,26 @@ uwp-project/Assets/ui_art
 /tmp/
 /compile_commands.json
 /tools/tmp
+
+# D3D local game data, asset extracts, diagnostics and credentials
+/.tools/
+/data/
+/perfil-tristram/
+/diagnostics/
+/models/meshy/
+/branding/diablo-3d-*/
+/devilutionx/
+*.MPQ
+*.sv
+*.cel
+*.cl2
+*.min
+*.til
+*.sol
+.env
+.env.*
+!.env.example
+*secret*.dpapi
+*credentials*.json
+
+.venv/

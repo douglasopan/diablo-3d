@@ -1,0 +1,26 @@
+Diablo 3D — origem da arte
+
+O numeral 3 foi criado com a ferramenta integrada image_gen, usando a captura
+do usuário como referência do contorno claro/dourado e do preenchimento preto.
+Arquivo de projeto: branding/numeral-3.png.
+
+As letras DIABLO, o D acrescentado e a animação de fogo vêm dos arquivos
+originais do Diablo instalado neste computador. O arquivo MPQ original é
+somente lido; os logos resultantes ficam no perfil separado deste protótipo.
+
+Prompt usado na ferramenta integrada:
+
+Use case: text-localization / precise-object-edit. Asset type: a single
+transparent numeral sprite for a local Diablo 1 game menu mod. Input image 1
+is a STYLE REFERENCE only: inspect the original Diablo wordmark, especially
+its large D, its black interior, thin ivory/gold sharp outlined medieval serif
+lettering. Create ONLY the numeral "3", exactly one 3, using the same lettering
+as that original large D: black fill, thin pale ivory and gold outlined edges,
+sharp pointed gothic serif strokes, flat 2D original late-1990s pixel game logo
+style. Match its upright height and stroke weight, with a small tapered
+terminal flourish. NO fire, NO flames, NO surrounding Diablo text, NO other
+letters, NO background, NO shadow, NO glow. The original animated flames will
+be reused separately by the game. Put the single 3 upright in the center of a
+transparent canvas with tight empty margins. Make the outline legible when
+scaled to 40 by 55 pixels. Text verbatim: "3". Genuine transparent background;
+the black interior of the numeral must remain solid black.

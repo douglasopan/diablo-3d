@@ -29,6 +29,7 @@
 #include "engine/points_in_rectangle_range.hpp"
 #include "engine/render/clx_render.hpp"
 #include "engine/render/primitive_render.hpp"
+#include "engine/render/town_view.hpp"
 #include "engine/trn.hpp"
 #include "headless_mode.hpp"
 #include "hwcursor.hpp"
@@ -903,6 +904,44 @@ void CheckCursMove()
 {
 	if (IsItemLabelHighlighted())
 		return;
+
+	if (IsTownViewActive() && IsTownViewCameraDragging()) {
+		ResetCursorInfo();
+		cursPosition = MyPlayer->position.tile;
+		return;
+	}
+	if (IsTownViewActive() && !IsTownViewNativePose()) {
+		const Player &myPlayer = *MyPlayer;
+		const Rectangle &mainPanel = GetMainPanel();
+		Point tile = myPlayer.position.tile;
+		int townerIndex = -1;
+		int itemIndex = -1;
+		int playerIndex = -1;
+		const bool picked = PickTownView(MousePosition, tile, townerIndex, itemIndex, playerIndex);
+		if (picked && CheckMouseHold(tile))
+			return;
+		ResetCursorInfo();
+		if (CheckPanelsAndFlags(mainPanel))
+			return;
+		cursPosition = tile;
+		if (!picked || CheckPlayerState(tile, myPlayer))
+			return;
+		if (pcurs == CURSOR_IDENTIFY)
+			return;
+		if (townerIndex >= 0 && static_cast<size_t>(townerIndex) < Towners.size()) {
+			pcursmonst = townerIndex;
+			cursPosition = Towners[townerIndex].position;
+		} else if (itemIndex >= 0 && itemIndex < MAXITEMS && !Items[itemIndex].isEmpty()) {
+			pcursitem = itemIndex;
+			cursPosition = Items[itemIndex].position;
+		} else if (playerIndex >= 0 && static_cast<size_t>(playerIndex) < Players.size() && &Players[playerIndex] != MyPlayer) {
+			PlayerUnderCursor = &Players[playerIndex];
+			cursPosition = Players[playerIndex].position.tile;
+		} else {
+			DisplayTriggerInfo();
+		}
+		return;
+	}
 
 	Point screenPosition = MousePosition;
 	const Rectangle &mainPanel = GetMainPanel();
