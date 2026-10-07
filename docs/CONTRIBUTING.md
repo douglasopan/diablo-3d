@@ -9,7 +9,7 @@ D3D is a community prototype for rendering Diablo 1's Tristram in 3D while keepi
 - F4 switches between the original view and the Tristram 3D view without reloading the map. Other levels use the original renderer.
 - Home restores the native camera pose and uses the **actual original rendering backend**, including its selection rules. Identical pixels there do not prove that the reconstructed meshes match the original. Geometry comparisons must explicitly force the mesh renderer.
 - Rotated views show reconstructed closed buildings, grouped trees and rocks, and characters with depth. Hero and cow meshes can use eight native animation views; current hero diagnostics use the warrior. Other townspeople have a single painted view, so their depth and unseen anatomy are inferred.
-- Unknown scenery can still use closed relief per MIN fragment. It may be closed and selectable while remaining visually incoherent as a whole object. Generated Meshy candidates are not integrated game assets.
+- Unknown scenery can still use closed relief per MIN fragment. It may be closed and selectable while remaining visually incoherent as a whole object. Meshy candidates can be imported for local review through the [documented workflow](MESHY-WORKFLOW.md), but generation and loading do not establish artistic acceptance.
 - Actor ground shadows currently include compatibility decals from the original artwork. These are **not dynamic shadows cast by 3D lights**.
 - The supplied Windows build uses `NONET=ON` and a separate local player profile. This prototype does not implement a multiplayer hub, extra player capacity or voice chat.
 
@@ -49,7 +49,7 @@ An asset proposal should record its author, license, original source, tool or ge
 
 Prefer base-color textures without painted lighting or ground shadows where a clean, legitimately redistributable source is available. Keep normals and material properties explicit. The original game's baked light remains a compatibility constraint; copying it into an albedo texture does not implement 3D lighting.
 
-The planned lighting work uses scene lights and surface normals, with shadows cast from actual geometry. A CPU implementation must have a bounded cost and explicit shadow/depth passes; a future GPU path may use shadow maps or another measured solution. Neither path is an implemented promise in the current prototype. Include shadow tests for roof overhangs, tree branches, character feet and moving actors, without replacing collision rules with shadow geometry.
+The current CPU depth map casts static architecture shadows from a directional light onto drawn receiving geometry. It caches construction and filters depth comparisons with receiver-plane bias. Trees, props, actors and moving lights still need caster support; baked surface illumination remains a compatibility constraint. Include shadow tests for roof overhangs, tree branches, character feet and moving actors as that support expands, without replacing collision rules with shadow geometry.
 
 If you use a paid service, keep credentials local and make spending explicit before generation. Do not put keys in an issue, a PR, a prompt dump or a committed environment file. The local Meshy tooling and stored candidate are experiments, not evidence that a generated asset is approved or ready for the game.
 

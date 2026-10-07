@@ -5,6 +5,7 @@
 #include <cmath>
 #include <utility>
 
+#include "engine/render/town_model_import.hpp"
 #include "levels/dun_tile_data.hpp"
 
 namespace devilution {
@@ -25,6 +26,7 @@ struct Builder {
 	Point sourceTile;
 	Point pickTile;
 	std::vector<size_t> authoredUv;
+	TownSceneSurfaceDetail surfaceDetail = TownSceneSurfaceDetail::None;
 
 	void Triangle(Position a, Position b, Position c, TownSceneMaterial material,
 		TownSceneSurfaceRole role = TownSceneSurfaceRole::Exterior)
@@ -36,7 +38,7 @@ struct Builder {
 			return;
 		model.triangles.push_back({ { TownSceneVertex { a.x, a.height, a.z, 0, 0 },
 			TownSceneVertex { b.x, b.height, b.z, 0, 0 },
-			TownSceneVertex { c.x, c.height, c.z, 0, 0 } }, material, sourceTile, pickTile, false, {}, role });
+			TownSceneVertex { c.x, c.height, c.z, 0, 0 } }, material, sourceTile, pickTile, false, {}, role, surfaceDetail });
 	}
 
 	void Quad(Position a, Position b, Position c, Position d, TownSceneMaterial material,
@@ -169,11 +171,11 @@ struct Builder {
 
 	/** A complete roof with two sloped surfaces, gable infill and an overhanging fascia. */
 	void Gable(float minX, float minZ, float maxX, float maxZ, float eave, float peak,
-		bool ridgeAlongZ, TownSceneMaterial gableMaterial = TownSceneMaterial::Wall, float overhang = 0.30F)
+		bool ridgeAlongZ, TownSceneMaterial gableMaterial = TownSceneMaterial::Wall, float overhang = 0.30F, float backOverhang = -1)
 	{
 		const float left = minX - overhang;
 		const float right = maxX + overhang;
-		const float back = minZ - overhang;
+		const float back = minZ - (backOverhang >= 0 ? backOverhang : overhang);
 		const float front = maxZ + overhang;
 		constexpr float Thickness = 0.16F;
 		if (ridgeAlongZ) {
@@ -286,6 +288,8 @@ Builder MakeBuilder(TownSceneKind kind, Point minTile, Point maxTile, Point sour
 
 void FinishBuilder(Builder &builder)
 {
+	std::sort(builder.authoredUv.begin(), builder.authoredUv.end());
+	builder.authoredUv.erase(std::unique(builder.authoredUv.begin(), builder.authoredUv.end()), builder.authoredUv.end());
 	TownSceneNativeArtwork &artwork = builder.model.nativeArtwork;
 	if (!artwork.enabled) {
 		artwork.referenceTile = builder.model.minTile;
@@ -445,6 +449,37 @@ void AddHouse(TownSceneKind kind, Point minTile, Point maxTile, Point sourceTile
 	FinishBuilder(builder);
 }
 
+void AddCabinMaterialPatch(Builder &builder, TownSceneSurfaceDetail detail, TownSceneMaterial material,
+	std::array<TownSceneVertex, 3> plane, std::array<float, 2> uvMin, std::array<float, 2> uvMax, bool repeat = true)
+{
+	TownSceneMaterialPatch patch { detail, material, plane, uvMin, uvMax,
+		{ uvMax[0] - uvMin[0], uvMax[1] - uvMin[1] }, repeat, {}, {} };
+	const auto &a = plane[0];
+	const auto &b = plane[1];
+	const auto &c = plane[2];
+	const float determinant = (b.u - a.u) * (c.v - a.v) - (b.v - a.v) * (c.u - a.u);
+	float minX = 100000, minY = 100000, maxX = -100000, maxY = -100000;
+	for (float u : { uvMin[0], uvMax[0] }) {
+		for (float v : { uvMin[1], uvMax[1] }) {
+			const float wb = ((u - a.u) * (c.v - a.v) - (v - a.v) * (c.u - a.u)) / determinant;
+			const float wc = ((b.u - a.u) * (v - a.v) - (b.v - a.v) * (u - a.u)) / determinant;
+			const float x = a.x + wb * (b.x - a.x) + wc * (c.x - a.x);
+			const float z = a.z + wb * (b.z - a.z) + wc * (c.z - a.z);
+			const float height = a.height + wb * (b.height - a.height) + wc * (c.height - a.height);
+			const Point reference = builder.model.nativeArtwork.referenceTile;
+			const float pixelX = 32 * (x - z - reference.x + reference.y);
+			const float pixelY = 16 * (x + z - reference.x - reference.y) - 32 * height;
+			minX = std::min(minX, pixelX);
+			maxX = std::max(maxX, pixelX);
+			minY = std::min(minY, pixelY);
+			maxY = std::max(maxY, pixelY);
+		}
+	}
+	patch.sourceMin = { static_cast<int>(std::floor(minX)), static_cast<int>(std::floor(minY)) };
+	patch.sourceMax = { static_cast<int>(std::ceil(maxX)), static_cast<int>(std::ceil(maxY)) };
+	builder.model.materialPatches.push_back(patch);
+}
+
 void AddCabin(Point minTile, Point maxTile)
 {
 	Builder builder = MakeBuilder(TownSceneKind::Cabin, minTile, maxTile,
@@ -456,34 +491,91 @@ void AddCabin(Point minTile, Point maxTile)
 	const float back = static_cast<float>(minTile.y) + 0.15F;
 	const float front = static_cast<float>(maxTile.y) - 0.40F;
 	constexpr float Eave = 1.35F;
-	constexpr float Peak = 4.65F;
+	// The native ridge contour is y + .5*x = 150.5 east / 118 west.
+	// 4.65 missed that contour by seven pixels; the measured ridge is 4.87.
+	constexpr float Peak = 4.87F;
+	constexpr float Overhang = 0.30F;
+	constexpr float BackOverhang = 0.46F;
 	builder.model.physicalBounds = { left, back, right, front, Eave, true };
-	builder.Box(left, back, right, front, 0, Eave, TownSceneMaterial::Wall);
-	builder.Gable(left, back, right, front, Eave, Peak, true, TownSceneMaterial::Wall, 0.30F);
+	builder.surfaceDetail = TownSceneSurfaceDetail::Masonry;
+	builder.Box(left, back, right, front, 0, Eave, TownSceneMaterial::Stone);
+	// The closed ceiling is an internal body cap, not another visible facade.
+	builder.model.triangles[8].surfaceRole = TownSceneSurfaceRole::Interior;
+	builder.model.triangles[9].surfaceRole = TownSceneSurfaceRole::Interior;
+	builder.Gable(left, back, right, front, Eave, Peak, true, TownSceneMaterial::Stone, Overhang, BackOverhang);
+	for (auto &triangle : builder.model.triangles) {
+		if (triangle.material == TownSceneMaterial::Roof)
+			triangle.surfaceDetail = TownSceneSurfaceDetail::Thatch;
+		else if (triangle.material == TownSceneMaterial::Timber)
+			triangle.surfaceDetail = TownSceneSurfaceDetail::TimberTrim;
+	}
+
+	// A rolled thatch ridge has real thickness and closed ends. Its highest
+	// point stays below the measured ridge, preserving the original silhouette.
+	builder.surfaceDetail = TownSceneSurfaceDetail::Thatch;
+	const float ridgeX = (left + right) / 2;
+	const float roofBack = back - BackOverhang;
+	const float roofFront = front + Overhang;
+	constexpr float RidgeRadius = 0.07F;
+	for (int i = 0; i < 12; ++i) {
+		const float first = 2 * Pi * static_cast<float>(i) / 12;
+		const float second = 2 * Pi * static_cast<float>(i + 1) / 12;
+		const Position a { ridgeX + RidgeRadius * std::cos(first), Peak - 0.075F + RidgeRadius * std::sin(first), roofFront };
+		const Position b { ridgeX + RidgeRadius * std::cos(second), Peak - 0.075F + RidgeRadius * std::sin(second), roofFront };
+		builder.Quad(b, a, { a.x, a.height, roofBack }, { b.x, b.height, roofBack }, TownSceneMaterial::Roof);
+		builder.Triangle({ ridgeX, Peak - 0.075F, roofFront }, a, b, TownSceneMaterial::Roof);
+		builder.Triangle({ ridgeX, Peak - 0.075F, roofBack }, { b.x, b.height, roofBack }, { a.x, a.height, roofBack }, TownSceneMaterial::Roof);
+	}
 
 	// Closed arched blue door on the long +X wall, not on the front gable.
 	const float doorZ = back + 1.25F;
 	const float doorX = right + 0.008F;
 	constexpr float DoorHalfWidth = 0.55F;
 	constexpr float DoorArchBase = 1.20F;
+	builder.surfaceDetail = TownSceneSurfaceDetail::TimberTrim;
+	const size_t doorFirst = builder.model.triangles.size();
 	builder.Box(doorX - 0.025F, doorZ - DoorHalfWidth, doorX + 0.025F, doorZ + DoorHalfWidth,
 		0.04F, DoorArchBase, TownSceneMaterial::Timber);
+	builder.model.triangles[doorFirst + 2].surfaceDetail = TownSceneSurfaceDetail::Door;
+	builder.model.triangles[doorFirst + 3].surfaceDetail = TownSceneSurfaceDetail::Door;
 	for (int i = 0; i < 12; ++i) {
 		const float first = Pi * static_cast<float>(i) / 12;
 		const float second = Pi * static_cast<float>(i + 1) / 12;
+		const size_t firstTriangle = builder.model.triangles.size();
 		builder.WallTriangle({ doorX + 0.025F, DoorArchBase, doorZ },
 			{ doorX + 0.025F, DoorArchBase + DoorHalfWidth * std::sin(second), doorZ + DoorHalfWidth * std::cos(second) },
 			{ doorX + 0.025F, DoorArchBase + DoorHalfWidth * std::sin(first), doorZ + DoorHalfWidth * std::cos(first) },
 			{ -0.05F, 0, 0 }, TownSceneMaterial::Timber);
+		builder.model.triangles[firstTriangle].surfaceDetail = TownSceneSurfaceDetail::Door;
 	}
+	// Stone voussoirs surround the closed blue panel instead of stretching its
+	// paint over a generic timber facade. They do not create an entrance.
+	builder.surfaceDetail = TownSceneSurfaceDetail::Masonry;
+	for (int i = 0; i < 12; ++i) {
+		const float first = Pi * static_cast<float>(i) / 12;
+		const float second = Pi * static_cast<float>(i + 1) / 12;
+		const auto arch = [&](float radius, float angle) {
+			return Position { doorX + 0.045F, DoorArchBase + radius * std::sin(angle), doorZ + radius * std::cos(angle) };
+		};
+		builder.WallQuad(arch(DoorHalfWidth + 0.075F, first), arch(DoorHalfWidth, first),
+			arch(DoorHalfWidth, second), arch(DoorHalfWidth + 0.075F, second), { -0.075F, 0, 0 }, TownSceneMaterial::Stone);
+	}
+	builder.Box(right - 0.025F, doorZ - DoorHalfWidth - 0.075F, right + 0.055F, doorZ - DoorHalfWidth,
+		0, DoorArchBase, TownSceneMaterial::Stone);
+	builder.Box(right - 0.025F, doorZ + DoorHalfWidth, right + 0.055F, doorZ + DoorHalfWidth + 0.075F,
+		0, DoorArchBase, TownSceneMaterial::Stone);
+	builder.surfaceDetail = TownSceneSurfaceDetail::Foundation;
 	builder.Box(right, doorZ - DoorHalfWidth, right + 0.60F, doorZ + DoorHalfWidth,
 		0, 0.08F, TownSceneMaterial::Stone);
 
 	// The round yellow window is a closed disk in the +Z gable. Its colors and
 	// muntins are supplied by the native projection, not a new invented opening.
-	const float windowX = (left + right) / 2 - 0.10F;
-	constexpr float WindowHeight = 2.15F;
+	// Amber-paint centroid measured at (92.74,189.80) east / (92.74,157.80)
+	// west. This placement gives (92.74,189.81)/(92.74,157.81) in those crops.
+	const float windowX = (left + right) / 2 - 0.127F;
+	constexpr float WindowHeight = 2.055F;
 	constexpr float WindowRadius = 0.35F;
+	builder.surfaceDetail = TownSceneSurfaceDetail::WindowGlass;
 	for (int i = 0; i < 20; ++i) {
 		const float first = 2 * Pi * static_cast<float>(i) / 20;
 		const float second = 2 * Pi * static_cast<float>(i + 1) / 20;
@@ -492,6 +584,13 @@ void AddCabin(Point minTile, Point maxTile)
 			{ windowX + WindowRadius * std::cos(second), WindowHeight + WindowRadius * std::sin(second), front + 0.008F },
 			{ 0, 0, -0.05F }, TownSceneMaterial::Timber);
 	}
+	builder.surfaceDetail = TownSceneSurfaceDetail::Masonry;
+	builder.Ring(windowX, WindowHeight, front + 0.025F, WindowRadius + 0.06F, WindowRadius - 0.01F, 0.06F);
+	builder.surfaceDetail = TownSceneSurfaceDetail::TimberTrim;
+	builder.Box(windowX - 0.02F, front + 0.018F, windowX + 0.02F, front + 0.065F,
+		WindowHeight - WindowRadius + 0.02F, WindowHeight + WindowRadius - 0.02F, TownSceneMaterial::Timber);
+	builder.Box(windowX - WindowRadius + 0.02F, front + 0.018F, windowX + WindowRadius - 0.02F, front + 0.065F,
+		WindowHeight - 0.02F, WindowHeight + 0.02F, TownSceneMaterial::Timber);
 
 	// Native barrel occupies the extra solid cells beside the door, never a new
 	// walkable cell. Keep it round and hollow at the top rather than a square post.
@@ -500,6 +599,8 @@ void AddCabin(Point minTile, Point maxTile)
 	constexpr float BarrelRadius = 0.30F;
 	constexpr float BarrelInnerRadius = 0.24F;
 	constexpr float BarrelTop = 1.35F;
+	builder.surfaceDetail = TownSceneSurfaceDetail::BarrelStaves;
+	const size_t barrelFirst = builder.model.triangles.size();
 	for (int i = 0; i < 20; ++i) {
 		const float first = 2 * Pi * static_cast<float>(i) / 20;
 		const float second = 2 * Pi * static_cast<float>(i + 1) / 20;
@@ -517,6 +618,32 @@ void AddCabin(Point minTile, Point maxTile)
 			{ innerB.x, BarrelTop - 0.25F, innerB.z }, { innerA.x, BarrelTop - 0.25F, innerA.z }, TownSceneMaterial::Timber, TownSceneSurfaceRole::Interior);
 		builder.Triangle({ barrelX, 0, barrelZ }, { a.x, 0, a.z }, { b.x, 0, b.z }, TownSceneMaterial::Timber, TownSceneSurfaceRole::Underside);
 	}
+	// Three closed hoops give the original container a readable volume from
+	// behind; their finish is separate from door paint and vertical stave grain.
+	builder.surfaceDetail = TownSceneSurfaceDetail::BarrelHoops;
+	const size_t hoopFirst = builder.model.triangles.size();
+	for (float height : { 0.18F, 0.70F, 1.23F }) {
+		for (int i = 0; i < 20; ++i) {
+			const float first = 2 * Pi * static_cast<float>(i) / 20;
+			const float second = 2 * Pi * static_cast<float>(i + 1) / 20;
+			const auto point = [&](float radius, float angle, float y) {
+				return Position { barrelX + radius * std::cos(angle), y, barrelZ + radius * std::sin(angle) };
+			};
+			const Position a = point(BarrelRadius + 0.015F, first, height + 0.025F);
+			const Position b = point(BarrelRadius + 0.015F, second, height + 0.025F);
+			const Position c = point(BarrelRadius - 0.005F, first, height + 0.025F);
+			const Position d = point(BarrelRadius - 0.005F, second, height + 0.025F);
+			const Position lowerA = point(BarrelRadius + 0.015F, first, height - 0.025F);
+			const Position lowerB = point(BarrelRadius + 0.015F, second, height - 0.025F);
+			const Position lowerC = point(BarrelRadius - 0.005F, first, height - 0.025F);
+			const Position lowerD = point(BarrelRadius - 0.005F, second, height - 0.025F);
+			builder.WrappedQuad(a, b, lowerB, lowerA, TownSceneMaterial::Stone,
+				first * (BarrelRadius + 0.015F), second * (BarrelRadius + 0.015F), -height - 0.025F, -height + 0.025F);
+			builder.Quad(d, c, lowerC, lowerD, TownSceneMaterial::Stone, TownSceneSurfaceRole::Interior);
+			builder.Quad(b, a, c, d, TownSceneMaterial::Stone);
+			builder.Quad(lowerA, lowerB, lowerD, lowerC, TownSceneMaterial::Stone, TownSceneSurfaceRole::Underside);
+		}
+	}
 	TownSceneNativeArtwork &artwork = builder.model.nativeArtwork;
 	artwork.referenceTile = minTile;
 	artwork.pixelOrigin = { minTile.x == 70 ? -232 : -168, -146 };
@@ -526,7 +653,75 @@ void AddCabin(Point minTile, Point maxTile)
 	artwork.maxTile = { minTile.x + 5, maxTile.y + 2 };
 	artwork.fringeMinPiece = 849;
 	artwork.fringeMaxPiece = 874;
+	const float halfRoof = (right - left) / 2 + Overhang;
+	const float roofRise = Peak - Eave;
+	const float roofSlope = std::hypot(halfRoof, roofRise);
+	for (size_t index = 0; index < builder.model.triangles.size(); ++index) {
+		TownSceneTriangle &triangle = builder.model.triangles[index];
+		if (triangle.surfaceDetail == TownSceneSurfaceDetail::BarrelStaves
+		    || triangle.surfaceDetail == TownSceneSurfaceDetail::BarrelHoops)
+			continue;
+		const bool xWall = std::abs(triangle.vertices[0].x - triangle.vertices[1].x) < 0.00001F
+		    && std::abs(triangle.vertices[0].x - triangle.vertices[2].x) < 0.00001F;
+		const bool horizontal = std::abs(triangle.vertices[0].height - triangle.vertices[1].height) < 0.00001F
+		    && std::abs(triangle.vertices[0].height - triangle.vertices[2].height) < 0.00001F;
+		for (auto &vertex : triangle.vertices) {
+			if (triangle.surfaceDetail == TownSceneSurfaceDetail::Thatch) {
+				vertex.u = vertex.z - roofBack;
+				vertex.v = std::abs(vertex.x - ridgeX) * halfRoof / roofSlope + (Peak - vertex.height) * roofRise / roofSlope;
+			} else if (triangle.surfaceDetail == TownSceneSurfaceDetail::Door) {
+				vertex.u = vertex.z - doorZ + DoorHalfWidth;
+				vertex.v = vertex.height;
+			} else if (triangle.surfaceDetail == TownSceneSurfaceDetail::WindowGlass) {
+				vertex.u = vertex.x - windowX + WindowRadius;
+				vertex.v = WindowHeight + WindowRadius - vertex.height;
+			} else {
+				vertex.u = xWall ? vertex.z - back : vertex.x - left;
+				vertex.v = horizontal ? vertex.z - back : vertex.height;
+			}
+		}
+		builder.authoredUv.push_back(index);
+	}
+	const std::array<TownSceneVertex, 3> masonryPlane { TownSceneVertex { left, 0, front, 0, 0 },
+		TownSceneVertex { right, 0, front, right - left, 0 }, TownSceneVertex { left, 1, front, 0, 1 } };
+	AddCabinMaterialPatch(builder, TownSceneSurfaceDetail::Masonry, TownSceneMaterial::Stone,
+		masonryPlane, { 0.30F, 0.20F }, { 3.35F, 1.00F });
+	AddCabinMaterialPatch(builder, TownSceneSurfaceDetail::Foundation, TownSceneMaterial::Stone,
+		masonryPlane, { 0.30F, 0.20F }, { 3.35F, 1.00F });
+	AddCabinMaterialPatch(builder, TownSceneSurfaceDetail::Thatch, TownSceneMaterial::Roof,
+		{ TownSceneVertex { ridgeX, Peak, roofBack, 0, 0 },
+			TownSceneVertex { ridgeX, Peak, roofFront, roofFront - roofBack, 0 },
+			TownSceneVertex { right + Overhang, Eave, roofBack, 0, roofSlope } },
+		{ 2.20F, 1.20F }, { 3.40F, 2.80F });
+	// Rectify the narrow front fascia along its sloped timber grain. Sampling
+	// this real beam keeps blue door paint out of rear trim and roof undersides.
+	AddCabinMaterialPatch(builder, TownSceneSurfaceDetail::TimberTrim, TownSceneMaterial::Timber,
+		{ TownSceneVertex { ridgeX, Peak, roofFront, 0, 0 },
+			TownSceneVertex { right + Overhang, Eave, roofFront, roofSlope, 0 },
+			TownSceneVertex { ridgeX, Peak - 0.16F, roofFront, 0, 0.16F } },
+		{ 0.90F, 0.03F }, { 1.70F, 0.12F });
+	AddCabinMaterialPatch(builder, TownSceneSurfaceDetail::Door, TownSceneMaterial::Timber,
+		{ TownSceneVertex { doorX + 0.025F, 0, doorZ - DoorHalfWidth, 0, 0 },
+			TownSceneVertex { doorX + 0.025F, 0, doorZ + DoorHalfWidth, 2 * DoorHalfWidth, 0 },
+			TownSceneVertex { doorX + 0.025F, DoorArchBase + DoorHalfWidth, doorZ - DoorHalfWidth, 0, DoorArchBase + DoorHalfWidth } },
+		{ 0, 0.04F }, { 2 * DoorHalfWidth, DoorArchBase + DoorHalfWidth }, false);
+	AddCabinMaterialPatch(builder, TownSceneSurfaceDetail::WindowGlass, TownSceneMaterial::Timber,
+		{ TownSceneVertex { windowX - WindowRadius, WindowHeight + WindowRadius, front + 0.008F, 0, 0 },
+			TownSceneVertex { windowX + WindowRadius, WindowHeight + WindowRadius, front + 0.008F, 2 * WindowRadius, 0 },
+			TownSceneVertex { windowX - WindowRadius, WindowHeight - WindowRadius, front + 0.008F, 0, 2 * WindowRadius } },
+		{ 0, 0 }, { 2 * WindowRadius, 2 * WindowRadius }, false);
+	// The original container's native-facing 36..54-degree stave plane is a
+	// real flat mesh facet, avoiding a cylindrical crop stretched onto a wall.
+	const auto &stave = builder.model.triangles[barrelFirst + 2 * 8];
+	AddCabinMaterialPatch(builder, TownSceneSurfaceDetail::BarrelStaves, TownSceneMaterial::Timber,
+		stave.vertices, { 2.20F * Pi * BarrelRadius / 10, -1.15F }, { 2.80F * Pi * BarrelRadius / 10, -0.25F });
+	const auto &hoop = builder.model.triangles[hoopFirst + (20 + 2) * 8];
+	AddCabinMaterialPatch(builder, TownSceneSurfaceDetail::BarrelHoops, TownSceneMaterial::Stone,
+		hoop.vertices, { 2.20F * Pi * (BarrelRadius + 0.015F) / 10, -0.715F },
+		{ 2.80F * Pi * (BarrelRadius + 0.015F) / 10, -0.685F });
 	FinishBuilder(builder);
+	if (minTile.x == 70)
+		LoadTownModelOverride(Scene.back(), "d3d-models/cabin-east.d3d");
 }
 
 void AddSmithy(Point minTile, Point maxTile, Point sourceTile, Point entrance)

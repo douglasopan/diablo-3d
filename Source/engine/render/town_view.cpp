@@ -18,8 +18,11 @@
 #include "engine/render/clx_render.hpp"
 #include "engine/render/dun_render.hpp"
 #include "engine/render/scrollrt.h"
+#include "engine/render/town_ground_shadow.hpp"
 #include "engine/render/town_scene.hpp"
 #include "engine/render/town_scene_projection.hpp"
+#include "engine/render/town_shadow.hpp"
+#include "engine/render/town_model_import.hpp"
 #include "engine/render/town_props.hpp"
 #include "engine/render/town_volume.hpp"
 #include "engine/render/town_vegetation.hpp"
@@ -177,9 +180,21 @@ Camera ViewCamera;
 std::vector<float> DepthBuffer;
 std::vector<PickRecord> PickBuffer;
 std::unordered_map<uint16_t, TileArt> TerrainCache;
+std::unordered_map<uint16_t, Texture> SceneGroundCache;
 std::unordered_map<size_t, NativeSceneArt> SceneArtworkCache;
-using SceneMaterials = std::array<Texture, 5>;
+struct SceneDetailMaterial {
+	Texture texture;
+	float originU = 0;
+	float originV = 0;
+	float sizeU = 2;
+	float sizeV = 2;
+};
+struct SceneMaterials {
+	std::array<Texture, 5> base;
+	std::array<SceneDetailMaterial, static_cast<size_t>(TownSceneSurfaceDetail::Count)> details;
+};
 std::unordered_map<size_t, SceneMaterials> SceneMaterialCache;
+std::unordered_map<size_t, Texture> ImportedTextureCache;
 std::unordered_map<const uint8_t *, VolumeArtwork> ActorVolumeCache;
 std::unordered_map<size_t, VolumeArtwork> VegetationArtworkCache;
 std::unordered_map<size_t, VolumeArtwork> PropArtworkCache;
@@ -194,6 +209,7 @@ const std::array<Texture, 256> PaletteTextures = [] {
 	return textures;
 }();
 std::array<std::array<uint8_t, 256>, 4> SceneLightTables;
+std::array<std::array<std::array<uint8_t, 256>, 4>, 4> SceneShadowTables;
 bool SceneLightingValid = false;
 const std::byte *CachedDungeonData = nullptr;
 std::unique_ptr<OwnedSurface> SpriteSurface;
@@ -239,6 +255,32 @@ void PrepareSceneLighting()
 				}
 			}
 			SceneLightTables[shade][index] = best;
+		}
+	}
+	// Combine indirect surface light with occlusion from the actual world-space
+	// depth map. Palette remapping stays independent of the camera and geometry.
+	constexpr std::array<float, 4> ShadowBrightness { 1.0F, 0.88F, 0.76F, 0.65F };
+	for (size_t shade = 0; shade < Brightness.size(); ++shade) {
+		SceneShadowTables[shade][0] = SceneLightTables[shade];
+		for (size_t shadow = 1; shadow < ShadowBrightness.size(); ++shadow) {
+			for (size_t index = 0; index < logical_palette.size(); ++index) {
+				const SDL_Color color = logical_palette[index];
+				const float brightness = Brightness[shade] * ShadowBrightness[shadow];
+				float bestDistance = std::numeric_limits<float>::max();
+				uint8_t best = static_cast<uint8_t>(index);
+				for (size_t candidate = 0; candidate < logical_palette.size(); ++candidate) {
+					const SDL_Color other = logical_palette[candidate];
+					const float dr = other.r - color.r * brightness;
+					const float dg = other.g - color.g * brightness;
+					const float db = other.b - color.b * brightness;
+					const float distance = dr * dr + dg * dg + db * db;
+					if (distance < bestDistance) {
+						bestDistance = distance;
+						best = static_cast<uint8_t>(candidate);
+					}
+				}
+				SceneShadowTables[shade][shadow][index] = best;
+			}
 		}
 	}
 	SceneLightingValid = true;
@@ -330,6 +372,26 @@ void Rasterize(const Surface &out, const std::array<Vertex, 3> &triangle, const 
 	const int maxY = std::min(out.h() - 1, static_cast<int>(std::ceil(std::max({ a.y, b.y, c.y }))));
 	const float inverseArea = 1.0F / area;
 	const uint8_t *lightTable = SceneLightTables[std::clamp(shade, 0, 3)].data();
+	const auto worldPosition = [](Vec3 camera) {
+		Vec3 world = ViewCamera.eye + ViewCamera.right * camera.x
+		    + ViewCamera.up * camera.y + ViewCamera.forward * camera.z;
+		world.y /= NativeHeightScale;
+		return world;
+	};
+	const Vec3 worldA = worldPosition(triangle[0].position);
+	const Vec3 worldB = worldPosition(triangle[1].position);
+	const Vec3 worldC = worldPosition(triangle[2].position);
+	Vec3 normal = Cross(worldB - worldA, worldC - worldA);
+	const float normalLength = std::sqrt(Dot(normal, normal));
+	if (normalLength > 0)
+		normal = normal * (1.0F / normalLength);
+	if (normal.y < 0 && std::abs(worldA.y) < 0.001F && std::abs(worldB.y) < 0.001F && std::abs(worldC.y) < 0.001F)
+		normal = normal * -1.0F;
+	const TownShadowReceiver shadowReceiver = PrepareTownShadowReceiver(normal.x, normal.y, normal.z);
+	const TownShadowDirection light = GetTownShadowLightDirection();
+	// Normal shading already supplies ambient light on faces pointing away from
+	// the source. Shadowing their absent direct light again crushed the masonry.
+	const bool receivesDirectLight = normal.x * light.x + normal.y * light.height + normal.z * light.z > 0.02F;
 	for (int y = minY; y <= maxY; ++y) {
 		uint8_t *destination = out.at(0, y);
 		for (int x = minX; x <= maxX; ++x) {
@@ -350,7 +412,11 @@ void Rasterize(const Surface &out, const std::array<Vertex, 3> &triangle, const 
 			uint8_t color;
 			if (!texture.sample(u, v, color) || (transparent && texture.opacity.empty() && color == 0))
 				continue;
-			destination[x] = lightTable[color];
+			const Vec3 world = worldA * wa + worldB * wb + worldC * wc;
+			const float shadow = receivesDirectLight ? SampleTownShadow(world.x, world.y, world.z, shadowReceiver) : 0;
+			const int shadowLevel = std::clamp(static_cast<int>(shadow * 3.0F + 0.5F), 0, 3);
+			destination[x] = shadowLevel == 0 ? lightTable[color]
+			    : SceneShadowTables[std::clamp(shade, 0, 3)][shadowLevel][color];
 			DepthBuffer[index] = depth;
 			if (!pick.preservePicking)
 				PickBuffer[index] = pick;
@@ -509,6 +575,33 @@ const TileArt &GetTile(uint16_t piece)
 	if (found != TerrainCache.end())
 		return found->second;
 	return TerrainCache.emplace(piece, DecodeTile(piece)).first->second;
+}
+
+const Texture &SceneGround(uint16_t piece)
+{
+	const Texture &original = GetTile(piece).ground;
+	const TownGroundShadowMask *mask = GetTownGroundShadowMask(piece);
+	if (mask == nullptr)
+		return original;
+	const auto found = SceneGroundCache.find(piece);
+	if (found != SceneGroundCache.end())
+		return found->second;
+	const Texture &donor = GetTile(mask->donorPiece).ground;
+	if (original.width != 64 || original.height != 32 || donor.width != 64 || donor.height != 32
+	    || original.opacity.size() != 2048 || donor.opacity.size() != 2048)
+		return original;
+	// Frozen, reviewed regions remove only the painted building shadow. The
+	// original grass outside them and the entire original opacity stay intact.
+	Texture cleaned = original;
+	for (int y = 0; y < 32; ++y) {
+		for (int x = 0; x < 64; ++x) {
+			const size_t index = static_cast<size_t>(y) * 64 + x;
+			if ((mask->rows[y] & (uint64_t { 1 } << x)) != 0
+			    && original.opacity[index] != 0 && donor.opacity[index] != 0)
+				cleaned.pixels[index] = donor.pixels[index];
+		}
+	}
+	return SceneGroundCache.emplace(piece, std::move(cleaned)).first->second;
 }
 
 const Texture &FallbackGround()
@@ -730,8 +823,8 @@ SceneMaterials BuildSceneMaterials(const TownSceneModel &model, const NativeScen
 	const std::array<Vec3, 5> fallbackRgb { Vec3 { 40, 35, 31 }, Vec3 { 55, 47, 35 },
 		Vec3 { 56, 57, 60 }, Vec3 { 31, 27, 20 }, Vec3 { 17, 25, 35 } };
 	SceneMaterials materials;
-	for (size_t materialIndex = 0; materialIndex < materials.size(); ++materialIndex) {
-		Texture &texture = materials[materialIndex];
+	for (size_t materialIndex = 0; materialIndex < materials.base.size(); ++materialIndex) {
+		Texture &texture = materials.base[materialIndex];
 		texture.width = Resolution;
 		texture.height = Resolution;
 		texture.repeat = true;
@@ -779,7 +872,7 @@ SceneMaterials BuildSceneMaterials(const TownSceneModel &model, const NativeScen
 					const int sampleX = static_cast<int>(std::floor(nativeX - art.pixelOrigin.x));
 					const int sampleY = static_cast<int>(std::floor(nativeY - art.pixelOrigin.y));
 					const int32_t triangleIndex = static_cast<int32_t>(candidates[candidateIndex] - model.triangles.data());
-					if (wa < 0 || wb < 0 || wc < 0 || sampleX < 0 || sampleY < 0
+					if (sampleX < 0 || sampleY < 0
 						|| sampleX >= art.texture.width || sampleY >= art.texture.height
 						|| !TownSceneProjectionOwnerMatches(model,
 							art.projectionOwners[static_cast<size_t>(sampleY) * art.texture.width + sampleX], triangleIndex))
@@ -804,6 +897,54 @@ SceneMaterials BuildSceneMaterials(const TownSceneModel &model, const NativeScen
 		const Vec3 color = fallbackRgb[materialIndex];
 		CompleteOpaqueMaterial(texture, bestCoverage, ClosestSceneColor(color.x, color.y, color.z));
 	}
+	for (const TownSceneMaterialPatch &patch : model.materialPatches) {
+		SceneDetailMaterial &detail = materials.details[static_cast<size_t>(patch.surfaceDetail)];
+		Texture &texture = detail.texture;
+		texture.width = Resolution;
+		texture.height = Resolution;
+		texture.repeat = patch.repeat;
+		texture.pixels.resize(Resolution * Resolution);
+		const auto &a = patch.referencePlane[0];
+		const auto &b = patch.referencePlane[1];
+		const auto &c = patch.referencePlane[2];
+		const float determinant = (b.u - a.u) * (c.v - a.v) - (b.v - a.v) * (c.u - a.u);
+		std::vector<uint8_t> coverage(Resolution * Resolution, 0);
+		if (std::abs(determinant) > 0.00001F) {
+			for (int y = 0; y < Resolution; ++y) {
+				for (int x = 0; x < Resolution; ++x) {
+					const float u = patch.uvMin[0] + (x + 0.5F) / Resolution * (patch.uvMax[0] - patch.uvMin[0]);
+					const float v = patch.uvMin[1] + (y + 0.5F) / Resolution * (patch.uvMax[1] - patch.uvMin[1]);
+					const float wb = ((u - a.u) * (c.v - a.v) - (v - a.v) * (c.u - a.u)) / determinant;
+					const float wc = ((b.u - a.u) * (v - a.v) - (b.v - a.v) * (u - a.u)) / determinant;
+					const float wa = 1 - wb - wc;
+					const float worldX = wa * a.x + wb * b.x + wc * c.x;
+					const float worldZ = wa * a.z + wb * b.z + wc * c.z;
+					const float worldHeight = wa * a.height + wb * b.height + wc * c.height;
+					const float nativeX = 32 * (worldX - worldZ - art.referenceTile.x + art.referenceTile.y);
+					const float nativeY = 16 * (worldX + worldZ - art.referenceTile.x - art.referenceTile.y) - 32 * worldHeight;
+					if (nativeX < patch.sourceMin.x || nativeY < patch.sourceMin.y
+					    || nativeX >= patch.sourceMax.x || nativeY >= patch.sourceMax.y)
+						continue;
+					uint8_t color;
+					if (!art.texture.sample((nativeX - art.pixelOrigin.x) / art.texture.width,
+					        (nativeY - art.pixelOrigin.y) / art.texture.height, color))
+						continue;
+					if ((patch.surfaceDetail == TownSceneSurfaceDetail::Masonry || patch.surfaceDetail == TownSceneSurfaceDetail::Foundation)
+					    && !IsSurfaceSample(color, TownSceneMaterial::Wall))
+						continue;
+					const size_t pixel = static_cast<size_t>(y) * Resolution + x;
+					texture.pixels[pixel] = color;
+					coverage[pixel] = 1;
+				}
+			}
+		}
+		const Vec3 fallback = fallbackRgb[static_cast<size_t>(patch.material)];
+		CompleteOpaqueMaterial(texture, coverage, ClosestSceneColor(fallback.x, fallback.y, fallback.z));
+		detail.originU = patch.repeat ? 0 : patch.uvMin[0];
+		detail.originV = patch.repeat ? 0 : patch.uvMin[1];
+		detail.sizeU = std::max(0.001F, patch.repeat ? patch.repeatWorldSize[0] : patch.uvMax[0] - patch.uvMin[0]);
+		detail.sizeV = std::max(0.001F, patch.repeat ? patch.repeatWorldSize[1] : patch.uvMax[1] - patch.uvMin[1]);
+	}
 	return materials;
 }
 
@@ -815,26 +956,66 @@ const SceneMaterials &OpaqueSceneMaterials(size_t index, const TownSceneModel &m
 	return SceneMaterialCache.emplace(index, BuildSceneMaterials(model, art)).first->second;
 }
 
+const Texture &ImportedSceneTexture(size_t index, const TownImportedTexture &source)
+{
+	const auto found = ImportedTextureCache.find(index);
+	if (found != ImportedTextureCache.end())
+		return found->second;
+	Texture texture;
+	texture.width = static_cast<int>(source.width);
+	texture.height = static_cast<int>(source.height);
+	texture.pixels.resize(static_cast<size_t>(source.width) * source.height);
+	std::unordered_map<uint32_t, uint8_t> colors;
+	for (size_t i = 0; i < texture.pixels.size(); ++i) {
+		const uint8_t *rgb = source.rgb.data() + i * 3;
+		const uint32_t key = (static_cast<uint32_t>(rgb[0]) << 16) | (static_cast<uint32_t>(rgb[1]) << 8) | rgb[2];
+		const auto color = colors.find(key);
+		texture.pixels[i] = color != colors.end() ? color->second
+		    : colors.emplace(key, ClosestSceneColor(rgb[0], rgb[1], rgb[2])).first->second;
+	}
+	return ImportedTextureCache.emplace(index, std::move(texture)).first->second;
+}
+
 void DrawScene(const Surface &out)
 {
 	const std::vector<TownSceneModel> &scene = GetTownScene();
 	for (size_t index = 0; index < scene.size(); ++index) {
 		const TownSceneModel &model = scene[index];
+		if (model.externalModel && model.importedTexture) {
+			const Texture &texture = ImportedSceneTexture(index, *model.importedTexture);
+			for (const TownSceneTriangle &triangle : model.triangles) {
+				std::array<Vertex, 3> vertices;
+				for (size_t i = 0; i < vertices.size(); ++i) {
+					const TownSceneVertex &vertex = triangle.vertices[i];
+					vertices[i] = { { vertex.x, vertex.height, vertex.z }, vertex.u, vertex.v };
+				}
+				PickRecord pick = PickAt(triangle.pickTile);
+				pick.architecture = static_cast<int16_t>(index);
+				const float illumination = (triangle.normal.x + triangle.normal.height + triangle.normal.z) / 1.7320508F;
+				const int shade = illumination < -0.1F ? 2 : (illumination < 0.4F ? 1 : 0);
+				DrawTriangle(out, vertices, texture, pick, shade);
+			}
+			continue;
+		}
 		const NativeSceneArt &art = NativeArtwork(index, model);
 		if (art.texture.width == 0)
 			continue;
 		const SceneMaterials &materials = OpaqueSceneMaterials(index, model, art);
 		for (const TownSceneTriangle &triangle : model.triangles) {
+			const SceneDetailMaterial &detail = materials.details[static_cast<size_t>(triangle.surfaceDetail)];
+			const bool detailed = detail.texture.width != 0;
 			std::array<Vertex, 3> vertices;
 			for (size_t i = 0; i < vertices.size(); ++i) {
 				const TownSceneVertex &vertex = triangle.vertices[i];
-				vertices[i] = { { vertex.x, vertex.height, vertex.z }, vertex.u / 2, vertex.v / 2 };
+				vertices[i] = { { vertex.x, vertex.height, vertex.z },
+					detailed ? (vertex.u - detail.originU) / detail.sizeU : vertex.u / 2,
+					detailed ? (vertex.v - detail.originV) / detail.sizeV : vertex.v / 2 };
 			}
 			PickRecord pick = PickAt(triangle.pickTile);
 			pick.architecture = static_cast<int16_t>(index);
 			const float illumination = (triangle.normal.x + triangle.normal.height + triangle.normal.z) / 1.7320508F;
 			const int shade = triangle.surfaceRole == TownSceneSurfaceRole::Underside ? 3 : (illumination < -0.1F ? 2 : (illumination < 0.4F ? 1 : 0));
-			DrawTriangle(out, vertices, materials[static_cast<size_t>(triangle.material)], pick, shade);
+			DrawTriangle(out, vertices, detailed ? detail.texture : materials.base[static_cast<size_t>(triangle.material)], pick, shade);
 		}
 		for (size_t triangleIndex = 0; triangleIndex < model.triangles.size(); ++triangleIndex) {
 			const TownSceneTriangle &triangle = model.triangles[triangleIndex];
@@ -959,7 +1140,7 @@ void DrawScenery(const Surface &out, Point tile, const TileArt &art, const Textu
 	if (art.solid)
 		// The bottom MIN row of a solid object may contain its painted base
 		// (notably the well rim). Its new body supplies that art in space.
-		DrawGround(out, tile, TownSceneReplacesTile(tile) || TownPropReplacesTile(tile) ? fallback : (art.ground.width != 0 ? art.ground : fallback));
+		DrawGround(out, tile, TownSceneReplacesTile(tile) || TownPropReplacesTile(tile) ? fallback : SceneGround(dPiece[tile.x][tile.y]));
 	// A tree's MIN base and its delayed CLX crown are one object. The solid tree
 	// volume below replaces both; retaining this cell proxy duplicates its trunk.
 	if (TownVegetationReplacesTile(tile) || TownSceneReplacesTile(tile) || TownPropReplacesTile(tile) || art.height < 0.25F)
@@ -1386,9 +1567,12 @@ bool IsTownViewCameraDragging()
 
 void ResetTownViewResources()
 {
+	ClearTownShadowMap();
 	TerrainCache.clear();
+	SceneGroundCache.clear();
 	SceneArtworkCache.clear();
 	SceneMaterialCache.clear();
+	ImportedTextureCache.clear();
 	ActorVolumeCache.clear();
 	VegetationArtworkCache.clear();
 	PropArtworkCache.clear();
@@ -1409,9 +1593,12 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 		return false;
 	}
 	if (CachedDungeonData != pDungeonCels.get()) {
+		ClearTownShadowMap();
 		TerrainCache.clear();
+		SceneGroundCache.clear();
 		SceneArtworkCache.clear();
 		SceneMaterialCache.clear();
+		ImportedTextureCache.clear();
 		ActorVolumeCache.clear();
 		VegetationArtworkCache.clear();
 		PropArtworkCache.clear();
@@ -1440,6 +1627,7 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 	PickBuffer.assign(size, PickRecord {});
 	ClearSurface(out);
 	PrepareSceneLighting();
+	BuildTownShadowMap(GetTownScene());
 	const Texture &fallback = FallbackGround();
 	// Native town generation fills the entire dungeon grid, including the outer
 	// grass visible around Farnham and Adria in wide views.
@@ -1462,7 +1650,7 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 	for (Point tile : tiles) {
 		const TileArt &art = GetTile(dPiece[tile.x][tile.y]);
 		if (!art.solid)
-			DrawGround(out, tile, TownPropReplacesTile(tile) ? fallback : (art.ground.width != 0 ? art.ground : fallback));
+			DrawGround(out, tile, TownPropReplacesTile(tile) ? fallback : SceneGround(dPiece[tile.x][tile.y]));
 	}
 	for (Point tile : tiles)
 		DrawScenery(out, tile, GetTile(dPiece[tile.x][tile.y]), fallback);
@@ -1587,8 +1775,9 @@ bool DrawTownViewTileDiagnostic(const Surface &out, Point tile)
 	const TileArt &art = GetTile(piece);
 	for (int y = 0; y < art.facade.height; ++y)
 		std::memcpy(out.at(0, y), art.facade.pixels.data() + static_cast<size_t>(y) * art.facade.width, art.facade.width);
-	for (int y = 0; y < art.ground.height; ++y)
-		std::memcpy(out.at(160, y), art.ground.pixels.data() + static_cast<size_t>(y) * art.ground.width, art.ground.width);
+	const Texture &ground = SceneGround(piece);
+	for (int y = 0; y < ground.height; ++y)
+		std::memcpy(out.at(160, y), ground.pixels.data() + static_cast<size_t>(y) * ground.width, ground.width);
 	const std::vector<uint8_t> lighting(static_cast<size_t>(out.pitch()) * out.h(), 0);
 	const Lightmap lightmap(out.begin(), lighting, out.pitch(), LightTables, FullyLitLightTable, FullyDarkLightTable);
 	const MICROS &micros = DPieceMicros[piece];

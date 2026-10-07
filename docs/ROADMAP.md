@@ -8,7 +8,7 @@ This roadmap describes priorities for a Tristram-first 3D renderer. It is not a 
 
 The v4 prototype switches views with F4 in the same local game. It renders Tristram only. The Home pose uses the actual original backend, so its pixel identity must be reported separately from forced rendering of the reconstructed meshes. Rotated views contain closed architectural meshes, complete native tree and rock groups, and character volumes. Some scenery still uses relief per fragment, and unseen geometry remains inferred from limited original views.
 
-The existing actor shadow decal preserves original artwork; it is not a shadow cast by a scene light. Meshy output remains a stored candidate outside the runtime. The current Windows configuration disables networking with `NONET=ON` and does not establish extra-player or voice support.
+The existing actor shadow decal preserves original artwork; it is not a shadow cast by a scene light. Static architecture now casts directional shadows through a cached software depth map; other caster types and moving lights remain future work. [Meshy multi-view generation and optional local cabin import](MESHY-WORKFLOW.md) are implemented for review, with no generated asset artistically accepted. The current Windows configuration disables networking with `NONET=ON` and does not establish extra-player or voice support.
 
 ## 1. Complete coherent objects in Tristram
 
@@ -29,6 +29,8 @@ A complete object should pass a native-angle comparison using forced meshes and 
 This work should support both authored and procedural assets. It is a prerequisite for replacing temporary relief with maintainable models, rather than importing isolated files with unexplained scale and materials.
 
 ## 3. Add lighting and real geometry-cast shadows
+
+The first pass is implemented for static architecture with a 512×512 directional depth map, receiver-plane bias and filtered comparisons. Four audited cabin ground pieces use frozen masks to replace only painted shadow pixels with nearby native grass, preserving original opacity and every unselected pixel. Other original ground shadows and baked surface light remain. The following work extends that bounded starting point.
 
 - Define scene lights, material normals and a clean separation between base color and baked illumination. Prefer unlit base-color sources when available and licensed for redistribution.
 - Cast shadows from buildings, branches, foliage and actors onto actual receiving geometry. Moving actors and changed light positions must change their shadows.

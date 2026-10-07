@@ -18,7 +18,7 @@ A community prototype bringing Diablo 1's Tristram into a rotatable 3D view, bui
 - Windows build, headless scene diagnostics and native-view comparison tools are included as source.
 - The owner-provided [animated logo](docs/ANIMATED-LOGO.md) contains 240 frames over eight seconds and covers the main, title and Escape menus.
 
-This is an **offline, CPU-rendered prototype for Tristram**. Dungeon levels still use the original renderer. The reconstructed shapes and materials need substantial visual refinement, particularly unseen faces, characters and compound scenery. Meshy-generated candidates are experiments and are not integrated game models.
+This is an **offline, CPU-rendered prototype for Tristram**. Dungeon levels still use the original renderer. The reconstructed shapes and materials need substantial visual refinement, particularly unseen faces, characters and compound scenery. [Meshy multi-view generation and optional local model review](docs/MESHY-WORKFLOW.md) are available; generated candidates still require fidelity approval.
 
 **Home currently returns to the original rendering backend.** Identical pixels at that pose verify the original-backend dispatch, not a perfect reconstruction. Forced-mesh comparisons still show differences. Contributors must compare the actual geometry with the native view and inspect rotated views before calling an asset faithful.
 
@@ -55,7 +55,7 @@ Do not submit game archives, extracted game artwork, saved characters, private c
 ## Next milestones
 
 1. Refine complete Tristram objects and establish a reproducible import and visual-validation pipeline.
-2. Add scene lighting and **real shadows cast by geometry**, with moving lights and actors. Painted ground shadows currently remain a compatibility approximation; dynamic shadows are planned work.
+2. Extend the implemented **static architecture shadow map** to moving lights, actors, trees and props. Original actor decals and some terrain lighting remain compatibility approximations.
 3. Generate coherent 3D dungeon geometry from the live procedural map and its existing seed, beginning with the Cathedral.
 4. Restore and validate the existing four-player networking in a separate experiment, then investigate a shared town hub and larger sessions.
 5. Evaluate optional proximity voice through Mumble, Discord Social SDK, TeamSpeak or a project-managed transport.

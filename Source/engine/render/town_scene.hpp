@@ -2,16 +2,33 @@
 
 #include <array>
 #include <cstdint>
+#include <memory>
 #include <vector>
 
 #include "engine/point.hpp"
 
 namespace devilution {
 
+struct TownImportedTexture;
+
 /** Geometry materials are resolved from the original town artwork by town_view. */
 enum class TownSceneMaterial : uint8_t { Wall, Roof, Stone, Timber, Water };
 enum class TownSceneKind : uint8_t { House, Smithy, Tavern, Cathedral, Well, Cabin, Crypt };
 enum class TownSceneSurfaceRole : uint8_t { Exterior, Interior, Underside };
+
+/** Distinct finishes within a building; never sample door/glass into masonry. */
+enum class TownSceneSurfaceDetail : uint8_t {
+	None,
+	Masonry,
+	Thatch,
+	Door,
+	WindowGlass,
+	TimberTrim,
+	BarrelStaves,
+	BarrelHoops,
+	Foundation,
+	Count,
+};
 
 /** Outward unit normal in the same x/height/z coordinates as scene vertices. */
 struct TownSceneNormal {
@@ -58,6 +75,28 @@ struct TownSceneTriangle {
 	bool nativeProjection = false;
 	TownSceneNormal normal;
 	TownSceneSurfaceRole surfaceRole = TownSceneSurfaceRole::Exterior;
+	TownSceneSurfaceDetail surfaceDetail = TownSceneSurfaceDetail::None;
+};
+
+/**
+ * A clean native material reference, rectified through an explicit world plane.
+ * referencePlane maps its physical u/v to x/height/z, including outside the
+ * triangle. uvMin/uvMax bound the sample rectangle; sourceMin/sourceMax are
+ * native pixel audit bounds relative to nativeArtwork.referenceTile. A renderer
+ * samples the plane's projected pixels, not a stretched isometric bitmap crop.
+ * Repeating finishes use world-unit UVs and repeatWorldSize. Door/glass finishes
+ * use their local physical UVs and clamp to this rectangle instead of repeating.
+ */
+struct TownSceneMaterialPatch {
+	TownSceneSurfaceDetail surfaceDetail;
+	TownSceneMaterial material;
+	std::array<TownSceneVertex, 3> referencePlane;
+	std::array<float, 2> uvMin;
+	std::array<float, 2> uvMax;
+	std::array<float, 2> repeatWorldSize;
+	bool repeat = true;
+	Point sourceMin;
+	Point sourceMax;
 };
 
 /** One coherent architectural object, replacing its painted scenery footprint. */
@@ -68,6 +107,9 @@ struct TownSceneModel {
 	std::vector<TownSceneTriangle> triangles;
 	TownScenePhysicalBounds physicalBounds;
 	TownSceneNativeArtwork nativeArtwork;
+	std::vector<TownSceneMaterialPatch> materialPatches;
+	std::shared_ptr<const TownImportedTexture> importedTexture;
+	bool externalModel = false;
 };
 
 const std::vector<TownSceneModel> &GetTownScene();

@@ -2,7 +2,7 @@
 
 Protótipo de uma visualização 3D para o mapa de Tristram, antes da Catedral. Usa a mesma partida do DevilutionX: a tecla F4 alterna entre o desenho original e o novo desenho, sem recarregar o mapa. A quarta versão está disponível pelo iniciador e reconstrói construções, árvores, pedras e personagens com volume. As faces ocultas e alguns detalhes ainda precisam de refinamento visual.
 
-Este documento registra a validação local realizada em 07/10/2026. Capturas, relatórios gerados, modelos experimentais de Meshy, arquivos do jogo e perfis de jogador não são distribuídos neste repositório. Os caminhos de diagnóstico abaixo são saídas locais que precisam ser geradas de novo. Consulte o [roadmap](ROADMAP.md) para trabalho futuro.
+Este documento distingue as validações locais registradas em 07/10/2026 da revisão atual de cabanas, importação Meshy e sombras. Capturas, relatórios gerados, modelos experimentais de Meshy, arquivos do jogo e perfis de jogador não são distribuídos neste repositório. Os caminhos de diagnóstico abaixo são saídas locais que precisam ser geradas de novo. Consulte o [roadmap](ROADMAP.md) para trabalho futuro.
 
 ## Jogar
 
@@ -43,6 +43,8 @@ As casas, a taverna, a oficina aberta de Griswold, a cabana de Adria, o poço, a
 
 As duas cabanas com janela redonda e porta azul têm paredes baixas, telhado íngreme, porta lateral fechada, janela no frontão e barril junto à entrada. A área da imagem foi separada do volume das paredes: as paredes residenciais ficam dentro das áreas bloqueadas pelo mapa, evitando que o herói pareça entrar numa casa fechada. A oficina, Adria e a entrada da Catedral conservam as aberturas originais. A correspondência visual é conferida em capturas na mesma projeção; superfícies vistas por outros ângulos e algumas formas menores ainda precisam de reconstrução mais detalhada.
 
+A revisão atual separa materiais de alvenaria, palha, porta, vidro, madeira, degrau e barril nas cabanas. Amostras dos planos originais são retificadas em coordenadas físicas, evitando repetir porta ou janela nas paredes traseiras. A cumeeira foi ajustada de 4,65 para 4,87 unidades a partir de sua linha na imagem original; a janela também foi reposicionada pelo centro dos pixels dourados. Essas medidas refinam o candidato local e não dispensam a revisão artística em todos os ângulos.
+
 O agrupamento completo identifica seis famílias de árvores: na cena de teste com a grade nativa de 112×112, são 93 objetos. Combina os fragmentos do cenário e as imagens especiais, incluindo as árvores pequenas desenhadas somente por peças MIN. Os troncos que apareciam como prismas são substituídos, mantendo chão, riacho e pedras. Cada árvore recebe tronco e galhos com espessura, além de pequenos volumes fechados de folhagem quando presentes. Essas formas são uma reconstrução procedural: o jogo original fornece uma vista pintada e não define a geometria das costas.
 
 As pedras são reunidas por seis padrões exatos de peças MIN: na cena final com a grade de 112×112, são 501 grupos e 1.607 células de origem. Esse total inclui 19 preenchimentos ocultos dentro das construções. Um grupo inteiramente substituído pela arquitetura, com seu ponto de referência no interior de um corpo fechado, permanece oculto e disponível para a auditoria. As rochas externas são mantidas. Uma pedra grande de quatro peças recebe um único volume fechado, com profundidade arredondada ajustada à sua silhueta. A frente conserva a arte original e as outras faces usam suas cores em materiais opacos. Chão e colisão permanecem nativos. Objetos sólidos ainda sem um grupo identificado recebem relevo fechado por fragmento: isso retira as caixas genéricas, mas não garante uma forma contínua para ruínas ou decorações compostas de vários fragmentos. A profundidade das pedras também é inferida de uma única vista.
@@ -63,20 +65,15 @@ O primeiro teste de Meshy usou uma composição dos pixels originais da cabana l
 
 `tools/meshy_assets.py` permite consultar saldo, criar uma única geração, consultar seu estado e baixar os modelos e texturas. As imagens são enviadas como dados incorporados; os metadados guardam a origem e seu hash. A chave é lida de `MESHY_API_KEY` ou do armazenamento protegido do usuário Windows, fora deste projeto. `tools/inspect_glb.py` inspeciona geometria, orientação, UVs e materiais e extrai as texturas sem redesenhá-las. Documentação usada: [Meshy Image to 3D](https://docs.meshy.ai/en/api/image-to-3d).
 
+A segunda geração usou múltiplas vistas pela API: a imagem original primeiro, seguida de vistas geradas da traseira e do frontão. Custou 44 créditos no total e retornou 5.783 triângulos, textura 4K, mapas PBR e malha mestre. Agora existe importação real opcional na cabana leste, pelo perfil separado `Comparar-Cabana-Meshy.cmd`; o modelo ainda tem janela duplicada e preta, alterações do telhado e placas de chão, e não foi aceito como substituição padrão. Consulte [MESHY-WORKFLOW.md](MESHY-WORKFLOW.md) para geração, conversão, calibração e revisão.
+
 ## Logo de entrada
 
-No perfil de teste, a entrada e os menus mostram **Diablo 3D**, com as letras originais e o fogo animado do jogo. O D acrescentado é uma cópia do primeiro D; o numeral 3 foi criado no mesmo estilo. As animações mantêm os 15 quadros e o intervalo original de 60 ms.
+No perfil de teste, a entrada, o menu e a pausa mostram **Diablo 3D** com a animação fornecida pelo autor: 240 quadros, 30 quadros por segundo e ciclo de 8 segundos. A conversão preserva a arte entregue e adapta formato e paleta ao carregador do jogo. Consulte [ANIMATED-LOGO.md](ANIMATED-LOGO.md).
 
-Os arquivos de substituição ficam em `perfil-tristram/ui_art/smlogo.pcx` e `perfil-tristram/ui_art/logo.pcx`. É necessário fechar e reabrir o jogo para carregar uma alteração do logo. O DIABDAT.MPQ da instalação original é somente lido.
+Os arquivos atuais são `assets/ui_art/d3d-menu.pcx` para o menu principal, `assets/ui_art/d3d-title.pcx` para a entrada e `assets/ui_art/d3d-pause.pcx` para o menu de pausa. A compilação copia esses recursos; uma substituição local usa os mesmos três nomes em `perfil-tristram/ui_art/`. É necessário fechar e reabrir o jogo para carregar uma alteração. [ANIMATED-LOGO.md](ANIMATED-LOGO.md) documenta a conversão da sequência fornecida, dimensões, paleta, ciclo e instalação. O DIABDAT.MPQ da instalação original é somente lido.
 
-A arte do numeral e a instrução da edição estão em `branding/numeral-3.png` e `branding/brand-info.txt`. A ferramenta opcional `diablo_logo_build` monta as animações e verifica a leitura pelo mesmo carregador usado no jogo.
-
-Para montar novamente e instalar o logo no perfil:
-
-```powershell
-.\build.ps1 -WithBranding -Targets diablo_logo_build
-.\Atualizar-Logo.ps1
-```
+`Atualizar-Logo.ps1` e a ferramenta `diablo_logo_build` permanecem como o experimento anterior de 15 quadros, baseado na arte nativa e no numeral local em `branding/numeral-3.png`. Seus resultados ficam no perfil local; a animação atual de 240 quadros tem prioridade quando presente.
 
 ## Código e compilação
 
@@ -90,25 +87,29 @@ O script detecta Visual Studio, CMake e Ninja instalados; consulte [BUILDING-D3D
 
 ## Validação
 
-A compilação Windows v4 e os diagnósticos finais passaram em 07/10/2026 com `DIABDAT.MPQ` do GOG e, separadamente, com `spawn.mpq`. A ferramenta `town_view_smoke` verifica alternância de visual, seleção pela câmera, preservação da partida, recarga dos recursos e liberação da memória sem abrir uma janela. Os relatórios e as capturas finais ficam em `diagnostics/v4-final-gog` e `diagnostics/v4-final-shareware`; `diagnostics/v4-release-audit.json` registra o executável e os resultados.
+A revisão atual passou em 07/10/2026 com `town_view_smoke` sem abrir uma janela, usando dados completos do GOG, dados shareware e um perfil separado com o candidato Meshy. As rodadas são `diagnostics/v4-masked-final-gog`, `diagnostics/v4-masked-final-shareware` e `diagnostics/v4-meshy-masked-review-gog`. O executável testado tem SHA-256 `3d2038a84bfd871991f4c85683311243ea6a1a4bd1eedc96611c6989541d5981`; o registro local `diagnostics/meshy-and-shadow-release-audit.json` identifica as saídas. Os testes mecânicos passaram; o candidato Meshy ainda não recebeu aprovação visual nem de fechamento de malha.
 
-Em cada conjunto de dados, passaram as auditorias dos 93 volumes de árvores e dos 501 grupos de pedras, incluindo os preenchimentos ocultos. Foram gravadas 40 vistas de giro de cabana, poço, árvore e herói. Os 12.794 raios independentes da cabana e do poço não encontraram faces ausentes; o guerreiro permaneceu selecionável nos dez ângulos do teste em espaço aberto. A cena perto da cabana conserva a oclusão real do herói pela construção. Os testes também verificam as oito direções originais do guerreiro e das vacas, os habitantes, a projeção dos pés e os centros caminháveis.
+O roteiro grava 50 vistas das cabanas leste e oeste, poço, árvore e herói: dez ângulos por alvo, incluindo giros de −5° e +5° para revelar falhas próximas da vista original. Verifica alternância de visual, seleção, oclusão, preservação da partida, recarga e liberação dos recursos. A auditoria mecânica dos volumes reconstruídos confere triângulos finitos, profundidade, fechamento e orientação, pés no chão, determinismo, oito direções do guerreiro e das vacas, habitantes, árvores e grupos de pedras. O importador é exercitado com arquivos válidos e malformados, preservando a alternativa procedural quando o recurso opcional é rejeitado. Os testes de sombra incluem reutilização do cache, mudanças na geometria e na direção da luz, além da preservação dos pixels fora das máscaras auditadas. A leitura independente confirmou 16 peças por rodada sem divergências dos pixels esperados; a preservação integral da opacidade foi verificada no código, pois os PNGs indexados não expõem esse vetor do runtime.
 
-A auditoria dos volumes confere triângulos finitos, profundidade, fechamento e orientação das arestas, pés no chão e reconstrução determinística. Também verifica o guerreiro em oito direções, os habitantes reais, cada árvore completa e os grupos de pedras. Essas verificações mecânicas não aprovam a fidelidade visual: as capturas de giro devem ser examinadas para detectar formas erradas, sobreposições e diferenças de textura.
+As comparações separam o backend original do jogo, a rota de Home que usa esse mesmo backend e o desenho forçado das malhas no ângulo nativo. Home confirma o retorno correto ao desenho original; sua coincidência de pixels não aprova as malhas procedurais nem o candidato Meshy. A aprovação visual exige examinar os volumes forçados e todos os giros, procurando formas erradas, sobreposições e diferenças de textura. `tools/compare_native_views.py` compara RGB na mesma posição, incluindo preto verdadeiro, sem reposicionar nem redimensionar. Uma porcentagem global alta pode esconder falhas pequenas entre grandes áreas de chão e fundo.
 
-As comparações separam três situações: o backend original do jogo, a rota de Home que usa esse mesmo backend e o desenho forçado das malhas no ângulo nativo. Os 24 enquadramentos de Home tiveram pixels exatamente iguais à referência em cada conjunto de dados. Isso confirma o uso correto do desenho original; não representa coincidência total das malhas. A comparação forçada das malhas com os dados GOG registrou diferenças nos 24 enquadramentos: a reconstrução ainda não satisfaz coincidência completa. Os resultados estão em `diagnostics/qa-v4-final-gog`. `tools/compare_native_views.py` compara RGB na mesma posição, incluindo preto verdadeiro, sem reposicionar nem redimensionar. Uma porcentagem global alta pode esconder falhas pequenas entre grandes áreas de chão e fundo.
+Como registro histórico de 07/10/2026, a compilação e os diagnósticos anteriores `diagnostics/v4-final-gog` e `diagnostics/v4-final-shareware` passaram com GOG e `spawn.mpq`; `diagnostics/v4-release-audit.json` identifica aquela execução. Ela auditou 93 árvores, 501 grupos de pedras, 40 vistas de giro e 12.794 raios da cabana e do poço. Os 24 enquadramentos de Home coincidiram com a referência em ambos os conjuntos, enquanto o desenho forçado das malhas GOG mostrou diferenças nos 24 enquadramentos, registradas em `diagnostics/qa-v4-final-gog`. Esses resultados anteriores não aprovam as alterações desta revisão.
 
-Os diagnósticos anteriores foram preservados em `diagnostics/gog`, `diagnostics/v2-gog` e `diagnostics/v3-gog`. A validação sem janela deve ser complementada pela experiência com teclado, caminhada e diálogos no jogo aberto pelo iniciador.
+Os diagnósticos anteriores também foram preservados em `diagnostics/gog`, `diagnostics/v2-gog` e `diagnostics/v3-gog`. A validação sem janela deve ser complementada pela experiência com teclado, caminhada e diálogos no jogo aberto pelo iniciador.
 
 ```powershell
 .\build.ps1 -WithSmoke -Targets devilutionx,town_view_smoke
-.\build\town_view_smoke.exe 'C:\Program Files (x86)\GOG Galaxy\Games\Diablo' '.\build\assets' '.\diagnostics\v4-final-gog'
+.\build\town_view_smoke.exe 'C:\Program Files (x86)\GOG Galaxy\Games\Diablo' '.\build\assets' '.\diagnostics\v4-masked-final-gog'
 ```
 
 Fontes: [DevilutionX](https://github.com/diasurgical/devilutionX), [dados shareware](https://github.com/diasurgical/devilutionx-assets/releases/latest/download/spawn.mpq).
 
 ## Sombras, comunidade e próximos passos
 
-[Discord oficial](https://discord.gg/4YxQ7s69S). O plano inclui sombras reais calculadas a partir dos volumes e das luzes da cena, com personagens e luzes em movimento. As sombras pintadas atuais são temporárias. Será necessário separar a iluminação presente nas texturas originais para evitar sombra duplicada. Isso ainda não está implementado.
+[Discord oficial](https://discord.gg/4YxQ7s69S). A renderização 3D agora calcula sombras das construções com um mapa de profundidade de 512×512 visto por uma luz direcional. Telhados, paredes e objetos importados bloqueiam essa luz; o chão e as superfícies desenhadas recebem a sombra com filtro de borda. A construção do mapa fica em cache durante o giro da câmera.
+
+Nas quatro peças auditadas de sombra pintada das cabanas, máscaras congeladas delimitam os pixels cuja cor recebe grama da peça doadora: 873 usa 875, 874 usa 876, 882 usa 881 e 884 usa 883. A aplicação altera somente os pixels selecionados e cobertos por ambas as peças. Todos os pixels originais fora da máscara, inclusive preto opaco, e a opacidade original inteira permanecem preservados. Os dados de origem das peças, o mapa, a colisão e a vista original conservam seus dados nativos.
+
+Os emissores atuais são apenas as construções. Árvores, pedras e personagens ainda não lançam sombras por esse sistema; personagens mantêm suas sombras de compatibilidade. Luzes de tochas, movimento e remoção das demais sombras pintadas precisam de trabalho adicional. A direção é configurável no código e testada com luz invertida, mas não há controle de iluminação na interface.
 
 Geração 3D dos níveis procedurais, voz por proximidade e um hub com mais participantes são etapas futuras. Consulte o [roadmap](ROADMAP.md) e a [pesquisa de rede e voz](NETWORKING-RESEARCH.md). O código público preserva a [Sustainable Use License do engine](../LICENSE.md), que limita a distribuição a usos gratuitos e não comerciais.

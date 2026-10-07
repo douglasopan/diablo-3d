@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <array>
+#include <bit>
 #include <chrono>
 #include <cmath>
 #include <cstring>
@@ -31,11 +32,14 @@
 #include "engine/render/clx_render.hpp"
 #include "engine/render/dun_render.hpp"
 #include "engine/render/scrollrt.h"
+#include "engine/render/town_ground_shadow.hpp"
 #include "engine/render/town_actor.hpp"
 #include "engine/render/town_actor_mask.hpp"
 #include "engine/render/town_body.hpp"
+#include "engine/render/town_model_import.hpp"
 #include "engine/render/town_props.hpp"
 #include "engine/render/town_scene.hpp"
+#include "engine/render/town_shadow.hpp"
 #include "engine/render/town_vegetation.hpp"
 #include "engine/render/town_view.hpp"
 #include "engine/render/town_volume.hpp"
@@ -196,6 +200,219 @@ void SavePng(const Surface &out, const std::filesystem::path &path)
 	}
 	const auto result = WriteSurfaceToFilePng(cropped ? static_cast<const Surface &>(*cropped) : out, file);
 	Check(result.has_value(), result ? "capture " + path.filename().string() : result.error());
+}
+
+// Archive pixels for auditing painted ground shadows. These are diagnostic
+// outputs only: no cleaned ground, inferred transparency, or redrawn artwork.
+void ExportNativeGroundPieces(const std::filesystem::path &output)
+{
+	const auto directory = output / "ground-shadow-sources";
+	std::filesystem::create_directories(directory);
+	std::set<uint16_t> pieces;
+	for (const auto range : { std::pair { 0, 31 }, std::pair { 44, 55 }, std::pair { 253, 260 }, std::pair { 873, 884 } })
+		for (int piece = range.first; piece <= range.second; ++piece)
+			pieces.insert(static_cast<uint16_t>(piece));
+	std::array<uint8_t, 256> identity;
+	std::array<SDL_Color, 256> grayscale;
+	for (size_t i = 0; i < identity.size(); ++i) {
+		identity[i] = static_cast<uint8_t>(i);
+		grayscale[i] = { static_cast<uint8_t>(i), static_cast<uint8_t>(i), static_cast<uint8_t>(i), 255 };
+	}
+	std::ofstream metadata(directory / "ground-pieces.json");
+	metadata << "{\"schema\":1,\"archiveMode\":\"" << (gbIsSpawn ? "shareware" : "retail")
+		<< "\",\"source\":\"original MIN/CEL native rendering before ground cleanup\","
+		<< "\"opacityMethod\":\"equal output from initial palette indices 0 and 255; opaque black is retained\","
+		<< "\"floorSize\":[64,32],\"facadeSize\":[64,256],\"palette\":[";
+	for (size_t i = 0; i < logical_palette.size(); ++i) {
+		const auto color = logical_palette[i];
+		metadata << (i == 0 ? "" : ",") << '[' << static_cast<int>(color.r) << ',' << static_cast<int>(color.g) << ',' << static_cast<int>(color.b) << ']';
+	}
+	metadata << "],\"pieces\":[\n";
+	const auto saveRgba = [&](const Surface &paint, const Surface &coverage, const std::filesystem::path &path) {
+		std::unique_ptr<SDL_Surface, decltype(&SDL_FreeSurface)> rgba(
+			SDL_CreateRGBSurfaceWithFormat(0, paint.w(), paint.h(), 32, SDL_PIXELFORMAT_RGBA32), SDL_FreeSurface);
+		Check(rgba != nullptr, "allocate native ground RGBA export");
+		for (int y = 0; y < paint.h(); ++y) {
+			auto *row = reinterpret_cast<uint32_t *>(static_cast<uint8_t *>(rgba->pixels) + y * rgba->pitch);
+			for (int x = 0; x < paint.w(); ++x) {
+				const SDL_Color color = logical_palette[paint[{ x, y }]];
+				row[x] = SDL_MapRGBA(rgba->format, color.r, color.g, color.b, paint[{ x, y }] == coverage[{ x, y }] ? 255 : 0);
+			}
+		}
+		SavePng(Surface { rgba.get() }, path);
+	};
+	bool firstPiece = true;
+	for (const uint16_t piece : pieces) {
+		const bool solid = HasAnyOf(SOLData[piece], TileProperties::Solid | TileProperties::BlockMissile);
+		OwnedSurface floor(64, 32), floorCoverage(64, 32), facade(64, 256), facadeCoverage(64, 256), mask(64, 32);
+		SDL_SetPaletteColors(floor.surface->format->palette, logical_palette.data(), 0, 256);
+		SDL_SetPaletteColors(mask.surface->format->palette, grayscale.data(), 0, 256);
+		SDL_FillRect(floor.surface, nullptr, 0);
+		SDL_FillRect(floorCoverage.surface, nullptr, 255);
+		SDL_FillRect(facade.surface, nullptr, 0);
+		SDL_FillRect(facadeCoverage.surface, nullptr, 255);
+		const auto render = [&](const Surface &destination, bool floorOnly) {
+			const std::vector<uint8_t> lighting(static_cast<size_t>(destination.pitch()) * destination.h(), 0);
+			const Lightmap light(destination.begin(), lighting, destination.pitch(), LightTables, identity.data(), FullyDarkLightTable);
+			for (int i = 0; i < (floorOnly ? 2 : std::min<int>(MicroTileLen, 16)); ++i) {
+				const LevelCelBlock block = DPieceMicros[piece].mt[i];
+				if (!block.hasValue())
+					continue;
+				const Point anchor { (i & 1) * 32, destination.h() - 1 - (i / 2) * 32 };
+				if (floorOnly && !solid) {
+					RenderTileFrame(destination, light, anchor, i == 0 ? TileType::LeftTriangle : TileType::RightTriangle,
+						GetDunFrame(pDungeonCels.get(), block.frame()), DunFrameTriangleHeight, MaskType::Solid, identity.data());
+				} else if (!floorOnly && !solid && i < 2) {
+					if (block.type() == TileType::TransparentSquare)
+						RenderTileFoliage(destination, light, anchor, pDungeonCels.get(), block, identity.data());
+				} else {
+					RenderTile(destination, light, anchor, pDungeonCels.get(), block, MaskType::Solid, identity.data());
+				}
+			}
+		};
+		render(floor, true);
+		render(floorCoverage, true);
+		render(facade, false);
+		render(facadeCoverage, false);
+		int opaquePixels = 0, opaqueBlackPixels = 0;
+		for (int y = 0; y < floor.h(); ++y) {
+			for (int x = 0; x < floor.w(); ++x) {
+				const bool opaque = floor[{ x, y }] == floorCoverage[{ x, y }];
+				mask[{ x, y }] = opaque ? 255 : 0;
+				opaquePixels += opaque ? 1 : 0;
+				opaqueBlackPixels += opaque && floor[{ x, y }] == 0 ? 1 : 0;
+			}
+		}
+		const std::string prefix = "piece-" + std::to_string(piece);
+		SavePng(floor, directory / (prefix + "-floor-indexed.png"));
+		saveRgba(floor, floorCoverage, directory / (prefix + "-floor.png"));
+		SavePng(mask, directory / (prefix + "-floor-mask.png"));
+		saveRgba(facade, facadeCoverage, directory / (prefix + "-facade.png"));
+		std::vector<Point> sources;
+		for (int y = 0; y < MAXDUNY; ++y)
+			for (int x = 0; x < MAXDUNX; ++x)
+				if (dPiece[x][y] == piece)
+					sources.push_back({ x, y });
+		int cachedChangedPixels = -1;
+		if (!sources.empty()) {
+			OwnedSurface diagnostic(256, 256);
+			SDL_SetPaletteColors(diagnostic.surface->format->palette, logical_palette.data(), 0, 256);
+			Check(DrawTownViewTileDiagnostic(diagnostic, sources.front()), "draw source/cache ground comparison " + prefix);
+			SavePng(diagnostic.subregion(160, 0, 64, 32), directory / (prefix + "-cached-floor-indexed.png"));
+			cachedChangedPixels = 0;
+			int changedOutsideShadow = 0;
+			const TownGroundShadowMask *shadowMask = GetTownGroundShadowMask(piece);
+			for (int y = 0; y < 32; ++y) {
+				for (int x = 0; x < 64; ++x) {
+					const bool changed = floor[{ x, y }] != diagnostic[{ x + 160, y }];
+					cachedChangedPixels += mask[{ x, y }] != 0 && changed ? 1 : 0;
+					const bool selected = shadowMask != nullptr && (shadowMask->rows[y] & (uint64_t { 1 } << x)) != 0;
+					changedOutsideShadow += changed && (!selected || mask[{ x, y }] == 0) ? 1 : 0;
+				}
+			}
+			Check(changedOutsideShadow == 0, "ground cleanup preserves every unselected pixel " + prefix);
+		}
+		metadata << (firstPiece ? "" : ",\n") << "{\"piece\":" << piece << ",\"sol\":" << static_cast<unsigned>(SOLData[piece])
+			<< ",\"blockedFloor\":" << (solid ? "true" : "false") << ",\"opaquePixels\":" << opaquePixels
+			<< ",\"opaqueBlackPixels\":" << opaqueBlackPixels << ",\"cachedChangedOriginalOpaquePixels\":" << cachedChangedPixels
+			<< ",\"microframes\":[";
+		firstPiece = false;
+		for (int i = 0; i < std::min<int>(MicroTileLen, 16); ++i) {
+			const auto block = DPieceMicros[piece].mt[i];
+			metadata << (i == 0 ? "" : ",") << "{\"slot\":" << i << ",\"frame\":" << block.frame()
+				<< ",\"type\":" << static_cast<unsigned>(block.type()) << ",\"present\":" << (block.hasValue() ? "true" : "false") << '}';
+		}
+		metadata << "],\"sourceTiles\":[";
+		for (size_t i = 0; i < sources.size(); ++i)
+			metadata << (i == 0 ? "" : ",") << '[' << sources[i].x << ',' << sources[i].y << ']';
+		metadata << "],\"indices\":[";
+		for (int y = 0; y < 32; ++y)
+			for (int x = 0; x < 64; ++x)
+				metadata << (x == 0 && y == 0 ? "" : ",") << static_cast<unsigned>(floor[{ x, y }]);
+		metadata << "],\"opacity\":[";
+		for (int y = 0; y < 32; ++y)
+			for (int x = 0; x < 64; ++x)
+				metadata << (x == 0 && y == 0 ? "" : ",") << (mask[{ x, y }] == 0 ? 0 : 1);
+		metadata << "]}";
+	}
+	metadata << "\n]}\n";
+	Check(metadata.good(), "export original ground pixels, true opacity, microframes, and current cache changes");
+}
+
+void SaveTownShadowStats(const std::filesystem::path &path)
+{
+	const TownShadowStats &stats = GetTownShadowStats();
+	std::ofstream file(path);
+	file << "{\"ready\":" << (stats.ready ? "true" : "false") << ",\"resolution\":" << stats.resolution
+		<< ",\"buildCount\":" << stats.buildCount << ",\"inputTriangles\":" << stats.inputTriangles
+		<< ",\"rasterizedTriangles\":" << stats.rasterizedTriangles << ",\"depthWrites\":" << stats.depthWrites
+		<< ",\"coveredTexels\":" << stats.coveredTexels << ",\"depthBytes\":" << stats.depthBytes
+		<< ",\"buildMilliseconds\":" << stats.buildMilliseconds << ",\"sceneHash\":\"" << stats.sceneHash << "\"}\n";
+	Check(file.good(), "write structural shadow geometry and cache statistics");
+}
+
+void CheckStructuralShadows(const std::filesystem::path &output)
+{
+	TownSceneModel caster {};
+	caster.kind = TownSceneKind::House;
+	const std::array<TownSceneVertex, 4> corners { TownSceneVertex { -1, 2, -1, 0, 0 },
+		TownSceneVertex { 1, 2, -1, 1, 0 }, TownSceneVertex { 1, 2, 1, 1, 1 }, TownSceneVertex { -1, 2, 1, 0, 1 } };
+	caster.triangles.push_back({ { corners[0], corners[1], corners[2] }, TownSceneMaterial::Roof, {}, {} });
+	caster.triangles.push_back({ { corners[0], corners[2], corners[3] }, TownSceneMaterial::Roof, {}, {} });
+	std::vector<TownSceneModel> scene { caster };
+	TownShadowConfig config;
+	config.resolution = 128;
+	config.toLight = { 1, 1, 0 };
+	Check(BuildTownShadowMap(scene, config), "build real light-depth shadow from an elevated square");
+	// The ray towards (1,1,0) from ground x=-2 reaches the square at height 2.
+	// A ray from x=2 misses it. These expectations are independent of the map.
+	Check(SampleTownShadow(-2, 0, 0) > 0.9F && SampleTownShadow(2, 0, 0) < 0.05F,
+		"elevated geometry casts ground shadow away from the light");
+	Check(SampleTownShadow(0, 3, 0) < 0.05F && SampleTownShadow(0, 2, 0, 0, 1, 0) < 0.05F,
+		"receivers above the caster and its own top remain lit");
+	const auto firstStats = GetTownShadowStats();
+	Check(firstStats.ready && firstStats.inputTriangles == 2 && firstStats.coveredTexels > 0
+		&& firstStats.depthBytes == static_cast<size_t>(128 * 128) * sizeof(float), "structural shadow map contains actual triangle depth coverage");
+	Check(BuildTownShadowMap(scene, config) && GetTownShadowStats().buildCount == firstStats.buildCount,
+		"identical geometry and light reuse the structural shadow cache");
+	const auto saveGround = [&](const char *name) {
+		OwnedSurface map(256, 256);
+		std::array<SDL_Color, 256> palette;
+		for (size_t i = 0; i < palette.size(); ++i)
+			palette[i] = { static_cast<uint8_t>(i), static_cast<uint8_t>(i), static_cast<uint8_t>(i), 255 };
+		SDL_SetPaletteColors(map.surface->format->palette, palette.data(), 0, 256);
+		for (int y = 0; y < map.h(); ++y)
+			for (int x = 0; x < map.w(); ++x)
+				map[{ x, y }] = static_cast<uint8_t>(255 * (1 - SampleTownShadow(-5 + (x + 0.5F) * 10 / map.w(), 0, -5 + (y + 0.5F) * 10 / map.h())));
+		SavePng(map, output / name);
+	};
+	saveGround("shadow-synthetic-light-positive-x.png");
+	config.toLight.x = -1;
+	Check(BuildTownShadowMap(scene, config) && SampleTownShadow(2, 0, 0) > 0.9F && SampleTownShadow(-2, 0, 0) < 0.05F,
+		"changing light direction moves the ground shadow to the opposite side");
+	saveGround("shadow-synthetic-light-negative-x.png");
+	config.toLight.x = 1;
+	for (auto &triangle : scene[0].triangles)
+		for (auto &vertex : triangle.vertices)
+			vertex.x += 4;
+	Check(BuildTownShadowMap(scene, config) && SampleTownShadow(2, 0, 0) > 0.9F && SampleTownShadow(-2, 0, 0) < 0.05F,
+		"moving actual caster geometry moves its shadow without stale coverage");
+	scene = { caster };
+	for (auto &triangle : scene[0].triangles)
+		for (auto &vertex : triangle.vertices)
+			vertex.height = 2 + 0.5F * vertex.x;
+	Check(BuildTownShadowMap(scene, config) && SampleTownShadow(0, 2, 0, -0.5F, 1, 0) < 0.05F,
+		"sloped roof receiver plane prevents filtered self-shadow acne");
+	config.resolution = 127;
+	Check(!BuildTownShadowMap(scene, config) && !GetTownShadowStats().ready && SampleTownShadow(2, 0, 0) == 0,
+		"invalid shadow configuration clears stale geometry shadows");
+	config.resolution = 128;
+	scene[0].triangles[0].vertices[0].height = std::numeric_limits<float>::quiet_NaN();
+	Check(!BuildTownShadowMap(scene, config) && SampleTownShadow(0, 0, 0) == 0, "nonfinite shadow geometry is rejected and remains lit");
+	Check(BuildTownShadowMap({}, config) && SampleTownShadow(0, 0, 0) == 0, "empty architecture has no invented structural shadow");
+	ClearTownShadowMap();
+	Check(BuildTownShadowMap(GetTownScene()), "restore actual Tristram structural shadow map after synthetic checks");
+	SaveTownShadowStats(output / "shadow-map.json");
 }
 
 void ExportNativeHouseArtwork(Point minTile, Point maxTile, const std::filesystem::path &path)
@@ -421,6 +638,89 @@ std::string SceneGeometryState(const std::vector<TownSceneModel> &scene)
 		state << '\n';
 	}
 	return state.str();
+}
+
+void CheckTownModelImporter()
+{
+	const std::string native = NativeSceneState();
+	const auto &scene = GetTownScene();
+	const auto cabin = std::find_if(scene.begin(), scene.end(), [](const TownSceneModel &model) {
+		return model.kind == TownSceneKind::Cabin && model.minTile == Point { 70, 66 };
+	});
+	Check(cabin != scene.end(), "model importer regression uses the real east cabin metadata");
+	TownSceneModel model = *cabin; // Never replace a model in the actual scene.
+	const auto metadata = [](const TownSceneModel &source) {
+		TownSceneModel withoutTriangles = source;
+		withoutTriangles.triangles.clear();
+		std::string state = SceneGeometryState({ withoutTriangles });
+		if (!source.materialPatches.empty())
+			state.append(reinterpret_cast<const char *>(source.materialPatches.data()),
+				source.materialPatches.size() * sizeof(TownSceneMaterialPatch));
+		return state;
+	};
+	const std::string originalMetadata = metadata(model);
+	std::vector<std::byte> data;
+	for (char c : std::string("D3DMESH1"))
+		data.push_back(static_cast<std::byte>(c));
+	const auto appendWord = [&](uint32_t value) {
+		for (int shift = 0; shift < 32; shift += 8)
+			data.push_back(static_cast<std::byte>((value >> shift) & 0xFF));
+	};
+	appendWord(1); // One triangle, two RGB pixels, no implicit struct padding.
+	appendWord(2);
+	appendWord(1);
+	for (float value : { 0.0F, 0.0F, 0.0F, 0.0F, 0.0F,
+		1.0F, 0.0F, 0.0F, 1.0F, 0.0F, 0.0F, 1.0F, 0.0F, 0.0F, 1.0F })
+		appendWord(std::bit_cast<uint32_t>(value));
+	for (uint8_t color : std::array<uint8_t, 6> { 10, 20, 30, 40, 50, 60 })
+		data.push_back(static_cast<std::byte>(color));
+	Check(data.size() == 20 + 15 * sizeof(float) + 6 && ParseTownModelOverride(model, data),
+		"model importer accepts exact D3DMESH1 geometry and RGB file bytes");
+	const auto &triangle = model.triangles.front();
+	Check(model.externalModel && model.triangles.size() == 1 && model.importedTexture
+			&& model.importedTexture->width == 2 && model.importedTexture->height == 1
+			&& model.importedTexture->rgb == std::vector<uint8_t> { 10, 20, 30, 40, 50, 60 }
+			&& triangle.vertices[0].x == 70 && triangle.vertices[0].z == 66
+			&& triangle.vertices[1].x == 71 && triangle.vertices[1].u == 1
+			&& triangle.vertices[2].height == 1 && triangle.vertices[2].v == 1
+			&& triangle.normal.z == 1 && !triangle.nativeProjection
+			&& triangle.surfaceDetail == TownSceneSurfaceDetail::None,
+		"imported RGB, authored UVs, world anchor and computed normal are preserved");
+	Check(metadata(model) == originalMetadata,
+		"imported visual geometry retains native physical bounds, artwork and material metadata");
+	const std::string originalGeometry = SceneGeometryState({ model });
+	const auto originalTexture = model.importedTexture;
+	const auto unchanged = [&] {
+		return model.externalModel && model.importedTexture == originalTexture
+		    && SceneGeometryState({ model }) == originalGeometry && metadata(model) == originalMetadata
+		    && model.importedTexture->rgb == std::vector<uint8_t> { 10, 20, 30, 40, 50, 60 }
+		    && model.triangles.front().surfaceDetail == TownSceneSurfaceDetail::None;
+	};
+	std::vector<std::vector<std::byte>> invalid;
+	invalid.push_back(data);
+	invalid.back()[0] = std::byte { 'X' };
+	invalid.push_back(data);
+	invalid.back().pop_back();
+	invalid.push_back(data);
+	invalid.back().push_back(std::byte { 0 });
+	const auto replaceFloat = [](std::vector<std::byte> &bytes, size_t offset, float value) {
+		const uint32_t word = std::bit_cast<uint32_t>(value);
+		for (int i = 0; i < 4; ++i)
+			bytes[offset + i] = static_cast<std::byte>((word >> (i * 8)) & 0xFF);
+	};
+	invalid.push_back(data);
+	replaceFloat(invalid.back(), 20, std::numeric_limits<float>::quiet_NaN());
+	invalid.push_back(data);
+	replaceFloat(invalid.back(), 32, 1.25F); // First vertex's U is unsupported wrapping.
+	bool atomicRejection = true;
+	for (const auto &bytes : invalid)
+		atomicRejection = !ParseTownModelOverride(model, bytes) && unchanged() && atomicRejection;
+	Check(atomicRejection,
+		"malformed, truncated, trailing, NaN and invalid-UV models are rejected atomically");
+	Check(!LoadTownModelOverride(model, "d3d-models/__smoke_missing_model_5e839da.d3d") && unchanged(),
+		"a missing optional model asset leaves the current model and RGB texture intact");
+	Check(NativeSceneState() == native,
+		"model decoding and optional asset lookup preserve native map, collision and actor state");
 }
 
 void CheckTownSceneMeshes()
@@ -1971,27 +2271,31 @@ void CaptureObjectTurntables(const Surface &originalOut, const std::filesystem::
 	const bool vegetationValid = CheckRenderedVegetationVolumes(output);
 	const bool propsValid = CheckRenderedPropVolumes(output);
 	CheckClosedArchitecture();
-	int cabin = -1, well = -1;
+	int cabin = -1, westCabin = -1, well = -1;
 	const auto &scene = GetTownScene();
 	for (size_t i = 0; i < scene.size(); ++i) {
 		if (scene[i].kind == TownSceneKind::Cabin && scene[i].minTile.x > 60)
 			cabin = static_cast<int>(i);
+		if (scene[i].kind == TownSceneKind::Cabin && scene[i].minTile.x < 60)
+			westCabin = static_cast<int>(i);
 		if (scene[i].kind == TownSceneKind::Well)
 			well = static_cast<int>(i);
 	}
-	Check(cabin >= 0 && well >= 0, "turntable targets are the real east cabin and town well models");
+	Check(cabin >= 0 && westCabin >= 0 && well >= 0, "turntable targets are both real cabins and the town well models");
 	const auto center = [&](int model) {
 		const auto &body = scene[model].physicalBounds;
 		return Point { static_cast<int>(std::lround((body.minX + body.maxX) * 0.5F)), static_cast<int>(std::lround((body.minZ + body.maxZ) * 0.5F)) };
 	};
 	struct Fixture { const char *name; Point focus; Point hero; int model; };
-	const std::array<Fixture, 4> fixtures { Fixture { "cabin-east", center(cabin), { 76, 69 }, cabin },
+	const std::array<Fixture, 5> fixtures { Fixture { "cabin-east", center(cabin), { 76, 69 }, cabin },
+		Fixture { "cabin-west", center(westCabin), { 32, 50 }, westCabin },
 		Fixture { "well", center(well), { 63, 72 }, well }, Fixture { "tree", tree, tree + Displacement { 3, 3 }, -1 },
 		// This native clearing was selected from SOL/special data, independently
 		// of renderer visibility. The cabin fixture retains actual roof occlusion.
 		Fixture { "player", { 53, 29 }, { 53, 29 }, -1 } };
 	std::ofstream manifest(directory / "turntables.json");
-	manifest << "{\"native\":\"actual original world backend\",\"raw\":\"forced geometry; never native fallback\","
+	manifest << "{\"archiveMode\":\"" << (gbIsSpawn ? "shareware" : "retail")
+		<< "\",\"native\":\"actual original world backend\",\"raw\":\"forced geometry; never native fallback\","
 		<< "\"coverage\":\"independent ray intersections and visible architectural IDs, not pixel color\","
 		<< "\"playerFixture\":\"native walkable clearing at 53,29; scenery retained and cabin actor occlusion audited separately\","
 		<< "\"width\":" << out.w() << ",\"height\":" << gnViewportHeight << ",\"frames\":[\n";
@@ -2048,6 +2352,8 @@ void CaptureObjectTurntables(const Surface &originalOut, const std::filesystem::
 				<< "\",\"focus\":[" << ViewPosition.x << ',' << ViewPosition.y << "],\"heroTile\":["
 				<< static_cast<int>(MyPlayer->position.tile.x) << ',' << static_cast<int>(MyPlayer->position.tile.y)
 				<< "],\"cameraYaw\":" << GetTownViewCameraState().yaw
+				<< ",\"cameraPitch\":" << GetTownViewCameraState().pitch << ",\"cameraDistance\":" << GetTownViewCameraState().distance
+				<< ",\"cameraPan\":[" << GetTownViewCameraState().offsetX << ',' << GetTownViewCameraState().offsetZ << ']'
 				<< ",\"architectureSamples\":" << coverage.tested << ",\"architectureCovered\":" << coverage.covered
 				<< ",\"architectureOccluded\":" << coverage.entityOccluded << ",\"architectureHoles\":" << coverage.holes
 				<< ",\"playerPixels\":" << playerPixels << ",\"treeTileSelectionPixels\":" << treePixels << '}';
@@ -2070,7 +2376,7 @@ void CaptureObjectTurntables(const Surface &originalOut, const std::filesystem::
 	Check(vegetationValid, "all actual renderer tree meshes have closed oriented components; failure sources exported and turntables preserved");
 	Check(propsValid, "all actual renderer native rock objects have closed volumes and nonzero depth; turntables preserved");
 	Check(playerVisible, "original warrior volume remains selectable at every turntable angle");
-	Check(coverageValid, "opaque cabin and well surfaces cover all independent interior ray samples across ten angles");
+	Check(coverageValid, "opaque east/west cabin and well surfaces cover all independent interior ray samples across ten angles");
 }
 
 void Run(const std::filesystem::path &output)
@@ -2093,6 +2399,7 @@ void Run(const std::filesystem::path &output)
 	std::cout << "Loading original archives\n";
 	LoadCoreArchives();
 	LoadSelectedGameArchive();
+	OverridePaths.emplace_back(paths::PrefPath());
 	Check(FindAsset("levels\\towndata\\town.cel").ok(), "game archive provides original town CEL");
 	// Retail town generation queries this player's unlocked dungeon entrances.
 	ViewPosition = { 75, 68 };
@@ -2108,11 +2415,18 @@ void Run(const std::filesystem::path &output)
 	}
 	Check(!Towners.empty(), "original Tristram NPC sprites loaded");
 	CheckTownSceneMeshes();
+	CheckTownModelImporter();
 	CheckNativeVegetationGroups();
 	CheckNativePropGroups();
+	const std::string beforeShadowCheck = NativeSceneState();
+	CheckStructuralShadows(output);
+	Check(NativeSceneState() == beforeShadowCheck, "structural shadow construction preserves original map, camera and actor state");
 	ExportTownMapping(output);
 	ExportNativeHouseArtwork({ 26, 48 }, { 30, 52 }, output / "cabin-west-original.png");
 	ExportNativeHouseArtwork({ 70, 66 }, { 74, 72 }, output / "cabin-east-original.png");
+	const std::string beforeGroundExport = NativeSceneState();
+	ExportNativeGroundPieces(output);
+	Check(NativeSceneState() == beforeGroundExport, "native ground shadow exports preserve the original map and actor state");
 	OwnedSurface out(640, 480);
 	SDL_SetPaletteColors(out.surface->format->palette, logical_palette.data(), 0, 256);
 	SDL_FillRect(out.surface, nullptr, 255);
@@ -2183,6 +2497,7 @@ void Run(const std::filesystem::path &output)
 	CheckNativePoseRoute(out);
 	CaptureNativeProjectionPairs(out, output);
 	CaptureObjectTurntables(out, output);
+	SaveTownShadowStats(output / "shadow-map.json");
 	RotateTownView(0.75F);
 	Point tile;
 	int npc, item, player;

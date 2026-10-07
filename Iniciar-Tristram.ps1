@@ -1,4 +1,4 @@
-param([string]$DataDirectory)
+param([string]$DataDirectory, [switch]$MeshyReview)
 
 $ErrorActionPreference = 'Stop'
 $taskRoot = $PSScriptRoot
@@ -19,7 +19,30 @@ if (-not ((Test-Path -LiteralPath (Join-Path $DataDirectory 'DIABDAT.MPQ')) -or
           (Test-Path -LiteralPath (Join-Path $DataDirectory 'spawn.mpq')))) {
     throw 'Informe a pasta que contem DIABDAT.MPQ ou spawn.mpq.'
 }
-$taskProfile = Join-Path $taskRoot 'perfil-tristram'
+$taskProfile = Join-Path $taskRoot $(if ($MeshyReview) { 'perfil-meshy-review' } else { 'perfil-tristram' })
+if ($MeshyReview) {
+    $taskMeshyModel = Join-Path $taskRoot 'models\meshy\cabin-east-v2-multiview\runtime\cabin-east.d3d'
+    if (-not (Test-Path -LiteralPath $taskMeshyModel -PathType Leaf)) {
+        throw 'O modelo experimental Meshy ainda não foi gerado e convertido nesta instalação. Consulte docs/MESHY-WORKFLOW.md.'
+    }
+    if (-not (Test-Path -LiteralPath $taskProfile)) {
+        New-Item -ItemType Directory -Path $taskProfile | Out-Null
+        $taskOriginalProfile = Join-Path $taskRoot 'perfil-tristram'
+        if (Test-Path -LiteralPath (Join-Path $taskOriginalProfile 'diablo.ini')) {
+            Copy-Item -LiteralPath (Join-Path $taskOriginalProfile 'diablo.ini') -Destination $taskProfile
+        }
+        if (Test-Path -LiteralPath $taskOriginalProfile) {
+            Get-ChildItem -LiteralPath $taskOriginalProfile -File -Filter 'single_*.sv' | ForEach-Object {
+                Copy-Item -LiteralPath $_.FullName -Destination $taskProfile
+            }
+        }
+    }
+    $taskOverrideDirectory = Join-Path $taskProfile 'd3d-models'
+    New-Item -ItemType Directory -Path $taskOverrideDirectory -Force | Out-Null
+    Copy-Item -LiteralPath $taskMeshyModel -Destination (Join-Path $taskOverrideDirectory 'cabin-east.d3d') -Force
+    Write-Host 'Revisão Meshy: cabana leste experimental. F4 e giro mostram o modelo importado; Home usa a vista original.'
+    Write-Host 'Este candidato ainda tem diferenças de janela, telhado e base. O perfil de revisão usa uma cópia inicial do jogador.'
+}
 New-Item -ItemType Directory -Path $taskProfile -Force | Out-Null
 $taskConfig = Join-Path $taskProfile 'diablo.ini'
 if (-not (Test-Path -LiteralPath $taskConfig)) {
