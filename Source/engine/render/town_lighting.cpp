@@ -180,6 +180,41 @@ TownLightVector OrientTownLightingNormal(TownLightVector normal, TownLightVector
 	return { -normal.x, -normal.height, -normal.z };
 }
 
+TownPointLight TownFireLightAtTime(const TownPointLight &source, uint32_t emitterIdentity,
+	double elapsedSeconds, float intensityVariation)
+{
+	TownPointLight result = source;
+	result.intensity = Positive(source.intensity);
+	if (!std::isfinite(elapsedSeconds) || elapsedSeconds < 0)
+		return result;
+	const float variation = Positive(intensityVariation, 0.15F);
+	if (variation == 0 || result.intensity == 0)
+		return result;
+	const auto mix = [](uint32_t value) {
+		value ^= value >> 16;
+		value *= 0x7FEB352DU;
+		value ^= value >> 15;
+		value *= 0x846CA68BU;
+		return value ^ (value >> 16);
+	};
+	const uint32_t first = mix(emitterIdentity + 0x9E3779B9U);
+	const uint32_t second = mix(first + 0x85EBCA6BU);
+	const uint32_t third = mix(second + 0xC2B2AE35U);
+	constexpr double Tau = 6.28318530717958647692;
+	// Integer cycle counts make wrapping continuous. Three differently phased
+	// frequencies avoid synchronous pulsing between neighboring fire sources.
+	const double time = std::fmod(elapsedSeconds, 64.0) / 64.0;
+	const auto wave = [&](uint32_t seed, unsigned minimumCycles, unsigned cycleMask) {
+		const double phase = Tau * static_cast<double>(seed & 65535U) / 65536.0;
+		const double cycles = minimumCycles + ((seed >> 16) & cycleMask);
+		return std::sin(Tau * cycles * time + phase);
+	};
+	const double oscillation = 0.55 * wave(first, 39, 7)
+	    + 0.30 * wave(second, 145, 31) + 0.15 * wave(third, 383, 63);
+	result.intensity = Positive(result.intensity * (1 + variation * static_cast<float>(std::clamp(oscillation, -1.0, 1.0))));
+	return result;
+}
+
 float TownPointLightVisibility(TownLightVector light, TownLightVector receiver,
 	std::span<const TownLightOccluder> occluders)
 {

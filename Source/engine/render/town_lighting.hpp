@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <span>
 
 namespace devilution {
@@ -76,6 +77,16 @@ inline constexpr unsigned TownMaxLightApertures = 8;
  * direction leaves a finite source normal unchanged. One-sided normals stay
  * unchanged regardless of viewer orientation. */
 TownLightVector OrientTownLightingNormal(TownLightVector normal, TownLightVector towardViewer, bool doubleSided = true);
+
+/** Deterministic, subtle fire flicker. Evaluate once per emitter per frame,
+ * outside pixel loops, using the game's render time rather than simulation RNG.
+ * Identity sets independent phases; time is in seconds. Only intensity changes:
+ * position, radius and linear source color are copied unchanged. Variation is
+ * bounded to 0..0.15 (default 0.06), intensity to 0..16. Invalid or negative time
+ * keeps the bounded base intensity. No state, allocation or camera dependence.
+ */
+TownPointLight TownFireLightAtTime(const TownPointLight &source, uint32_t emitterIdentity,
+	double elapsedSeconds, float intensityVariation = 0.06F);
 
 /**
  * Pure world-space diffuse math; no camera, palette, game-state access or

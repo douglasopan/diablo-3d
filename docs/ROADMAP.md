@@ -1,8 +1,8 @@
 # D3D roadmap
 
-This roadmap describes priorities for a Tristram-first 3D renderer. It is not a release schedule or a claim that planned features already work. Join [Discord](https://discord.gg/4YxQ7s69S) or open an issue to coordinate an object, rendering improvement or research task.
+The goal of D3D is to render **the whole Diablo 1 game in 3D**: Tristram, the procedurally generated dungeon levels, characters, monsters, objects and effects. F4 should switch views within the same running game while preserving its simulation. Tristram is the first implementation stage, where we establish the asset and rendering pipeline before tackling generated maps. This roadmap describes that sequence; it is not a release schedule or a claim that planned features already work. Join [Discord](https://discord.gg/4YxQ7s69S) or open an issue to coordinate work.
 
-**Resumo em português:** completar Tristram, seus objetos 3D e o pipeline de recursos continua sendo a prioridade. A iluminação de materiais importados e as sombras da arquitetura já têm uma primeira implementação; ciclo dia/noite, horizonte e neblina ainda são propostas, sem ativação no jogo. Catedral, mais jogadores e voz continuam como etapas futuras, sem promessa de multiplayer no build local atual.
+**Resumo em português:** a proposta é o Diablo 1 inteiro em 3D, incluindo seus níveis procedurais. Tristram é a etapa atual para validar objetos, materiais, luz e câmera. Depois vem o primeiro andar procedural da Catedral; com esse fluxo validado, ampliaremos a reconstrução para os demais níveis e ambientes, personagens, monstros e efeitos. Dia/noite, horizonte, voz e mais jogadores também estão planejados, sem promessa de que já funcionem no build atual.
 
 ## Current baseline
 
@@ -32,7 +32,7 @@ This work should support both authored and procedural assets. It is a prerequisi
 
 ## 3. Extend lighting and real geometry-cast shadows
 
-The first pass is implemented for static architecture with a 512×512 directional depth map, receiver-plane bias and filtered comparisons. Imported base-color lighting uses bounded cached RGB tables, with palette conversion after the linear shader. Eight audited cabin ground pieces use frozen masks to replace selected painted shadow pixels with nearby native grass, preserving original opacity and every unselected pixel. Other original ground shadows and baked surface light remain. The optional east-cabin review now includes a timber floor, an opaque room shell and a warm point source visible through its measured polygonal window. The following work extends that bounded starting point.
+The first pass is implemented for static architecture with a 512×512 directional depth map, receiver-plane bias and filtered comparisons. Imported base-color lighting uses bounded cached RGB tables, with palette conversion after the linear shader. Eight audited cabin ground pieces use frozen masks to replace selected painted shadow pixels with nearby native grass, preserving original opacity and every unselected pixel. Other original ground shadows and baked surface light remain. The optional east-cabin review includes a timber floor, opaque inner walls with two explicit windows, and two physical candle sources with subtle independent flicker. The following work extends that bounded starting point, using the [building openings and fire-light standard](BUILDING-OPENINGS.md).
 
 - Define scene lights, material normals and a clean separation between base color and baked illumination. Prefer unlit base-color sources when available and licensed for redistribution.
 - Cast shadows from buildings, branches, foliage and actors onto actual receiving geometry. Moving actors and changed light positions must change their shadows.
@@ -65,9 +65,16 @@ Validate the result across 360° rotation, camera distance and pan, including th
 
 The target is a consistent town across viewpoints. A high whole-frame pixel score must not conceal errors in a small house, character or tree.
 
-## 5. Extend beyond the town
+## 5. Reconstruct the procedural dungeons and the rest of Diablo 1
 
 Begin the Cathedral after the Tristram object, material and lighting pipeline is sufficiently stable. Dungeon work must consume the actual generated map and seed, preserve doors, walls, stairs, triggers and collision, and handle changes during play. F4 should remain a reversible view change in the same simulation. Other levels currently retain the original renderer.
+
+1. Validate the first generated Cathedral level across several existing seeds, including rooms, corridors, doors, stairs, actors and occlusion. Derive the reusable wall, floor and prop inventory from those real layouts.
+2. Extend that pipeline through the Cathedral and then the Catacombs, Caves and Hell, accounting for each generator's topology, materials, elevation cues, lighting and interactive pieces.
+3. Complete the remaining hero classes, monster families, bosses, equipment, animation and spell/effect representations needed by the full game. Retain native combat, quests, inventory and identity while replacing their visual representations.
+4. Expand the collaborative asset catalog with stable IDs and reservation issues as each environment is analyzed, so contributors can claim whole models without duplicating another person's work.
+
+The present [asset catalog](ASSET-CATALOG.md) covers the first town stage. It is not the final scope of the project or an exhaustive inventory of the full game. New environments require their own measured fixtures and acceptance evidence; completing Tristram alone does not complete D3D.
 
 ## 6. Research larger multiplayer and voice
 

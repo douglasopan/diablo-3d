@@ -102,6 +102,84 @@ void CheckLightingProfile()
 	Check(limitValid && !ParseTownLightingProfile(bounded, parsed) && SameConfig(parsed, defaults), "profile parsing accepts exactly 4096 bytes and rejects larger files atomically");
 }
 
+void CheckFireLight()
+{
+	using namespace devilution;
+	const TownPointLight source { { 1, 1.5F, 2 }, { 1, 0.64F, 0.06F }, 4, 2.5F };
+	const auto first = TownFireLightAtTime(source, 71, 2.25);
+	const auto repeated = TownFireLightAtTime(source, 71, 2.25);
+	Check(first.intensity == repeated.intensity && first.position.x == source.position.x
+	        && first.position.height == source.position.height && first.position.z == source.position.z
+	        && first.radius == source.radius && first.color.red == source.color.red
+	        && first.color.green == source.color.green && first.color.blue == source.color.blue,
+		"fire flicker is deterministic and preserves physical emitter position, radius and linear color");
+	bool bounded = true;
+	bool phasesDiffer = false;
+	bool changes = false;
+	const std::size_t before = Allocations.load();
+	for (unsigned step = 0; step < 256; ++step) {
+		const double seconds = step * 0.037;
+		const auto fire = TownFireLightAtTime(source, 71, seconds);
+		const auto other = TownFireLightAtTime(source, 72, seconds);
+		bounded = bounded && std::isfinite(fire.intensity)
+		    && fire.intensity >= source.intensity * 0.94F - 0.00001F && fire.intensity <= source.intensity * 1.06F + 0.00001F;
+		phasesDiffer = phasesDiffer || fire.intensity != other.intensity;
+		changes = changes || fire.intensity != first.intensity;
+	}
+	const std::size_t allocations = Allocations.load() - before;
+	Check(bounded && changes && phasesDiffer && allocations == 0,
+		"multiple fire identities have independent subtle bounded phases without allocation");
+	Check(std::abs(TownFireLightAtTime(source, 71, 63.99999).intensity - TownFireLightAtTime(source, 71, 64.00001).intensity) < 0.0005F,
+		"fire oscillation remains continuous across wrapped render time");
+	TownPointLight invalid = source;
+	invalid.intensity = std::numeric_limits<float>::infinity();
+	Check(TownFireLightAtTime(source, 71, -1).intensity == source.intensity
+	        && TownFireLightAtTime(source, 71, std::numeric_limits<double>::quiet_NaN()).intensity == source.intensity
+	        && TownFireLightAtTime(source, 71, 1, 0).intensity == source.intensity
+	        && TownFireLightAtTime(source, 71, 1, std::numeric_limits<float>::infinity()).intensity == source.intensity
+	        && TownFireLightAtTime(invalid, 71, 1).intensity == 0
+	        && std::isfinite(TownFireLightAtTime(source, 71, std::numeric_limits<double>::max()).intensity)
+	        && Close(TownFireLightAtTime(source, 71, 1, 10).intensity, TownFireLightAtTime(source, 71, 1, 0.15F).intensity),
+		"invalid fire inputs fail gracefully and requested variation cannot exceed its fixed limit");
+	std::array<TownPointLight, 2> fires { TownFireLightAtTime(source, 71, 2.25), TownFireLightAtTime(source, 72, 2.25) };
+	TownLightingConfig darkRoom;
+	darkRoom.ambient = {};
+	darkRoom.directionalIntensity = 0;
+	const TownLightVector normal { 0, 1, 0 };
+	const TownLightVector floor { 1, 0, 2 };
+	const auto firstFire = SampleTownLighting(normal, floor, 0, darkRoom, std::span<const TownPointLight>(&fires[0], 1));
+	const auto secondFire = SampleTownLighting(normal, floor, 0, darkRoom, std::span<const TownPointLight>(&fires[1], 1));
+	const auto combined = SampleTownLighting(normal, floor, 0, darkRoom, fires);
+	Check(Close(combined.point.red, firstFire.point.red + secondFire.point.red)
+	        && Close(combined.point.green, firstFire.point.green + secondFire.point.green)
+	        && Close(combined.point.blue, firstFire.point.blue + secondFire.point.blue)
+	        && combined.point.red > combined.point.green && combined.point.green > combined.point.blue,
+		"multiple fire sources add stable warm RGB irradiance before base-color and palette conversion");
+}
+
+void CheckMultipleOpenings()
+{
+	using namespace devilution;
+	std::array<TownLightAperture, 2> windows {
+		TownLightAperture { TownLightPlane::Z, 2, 0.5F, 1.5F, 0.5F, 1.5F, 20 },
+		TownLightAperture { TownLightPlane::Z, 0, 0.5F, 1.5F, 0.5F, 1.5F, 20 }
+	};
+	std::array<TownLightOccluder, 1> room { TownLightOccluder { { 0, 0, 0 }, { 2, 2, 2 }, windows } };
+	const TownLightVector source { 1, 1, 1 };
+	Check(TownPointLightVisibility(source, { 1, 1, 3 }, room) == 1
+	        && TownPointLightVisibility(source, { 1, 1, -1 }, room) == 1
+	        && TownPointLightVisibility(source, { 3, 1, 1 }, room) == 0,
+		"multiple measured front and rear openings transmit light while unopened side walls stay opaque");
+	Check(TownPointLightVisibility(source, { 1.9F, 1.9F, 3 }, room) == 0
+	        && TownPointLightVisibility(source, { 1.9F, 1.9F, -1 }, room) == 0
+	        && TownPointLightVisibility({ -1, 1, -1 }, { 3, 1, 3 }, room) == 0,
+		"diagonal rays cannot pass polygon corners or simultaneous opaque wall crossings");
+	const bool bothCrossingsOpen = TownPointLightVisibility({ 1, 1, -1 }, { 1, 1, 3 }, room) == 1;
+	room[0].apertures = std::span<const TownLightAperture>(&windows[0], 1);
+	Check(bothCrossingsOpen && TownPointLightVisibility({ 1, 1, -1 }, { 1, 1, 3 }, room) == 0,
+		"a ray crossing the whole room requires explicit openings at both entry and exit");
+}
+
 } // namespace
 
 // Measure actual C++ allocation calls around the repeated shader computations.
@@ -143,6 +221,8 @@ int main()
 	using namespace devilution;
 	try {
 		CheckLightingProfile();
+		CheckFireLight();
+		CheckMultipleOpenings();
 		TownLightingConfig config;
 		config.toLight = { 0, 1, 0 };
 		const TownLightVector upward { 0, 1, 0 };

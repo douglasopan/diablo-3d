@@ -2,7 +2,9 @@
 
 # Diablo 3D · D3D
 
-A community prototype bringing Diablo 1's Tristram into a rotatable 3D view, built on [DevilutionX](https://github.com/diasurgical/devilutionX). Press **F4** to switch views in the same running game. Our next priority is reconstructing **whole objects** that match the original camera and remain coherent through 360°.
+A community project to bring **the whole Diablo 1 game into 3D**, including its procedurally generated dungeon levels, built on [DevilutionX](https://github.com/diasurgical/devilutionX). The intended experience lets players switch between original and 3D views in the same running game. **Tristram is the current development stage**, where F4 already switches views and we are validating complete models, materials, lighting and the 360° camera before the first procedural Cathedral level.
+
+**A proposta é o Diablo 1 inteiro em 3D.** Tristram é nosso ponto de partida; depois vêm o primeiro andar procedural da Catedral, os demais ambientes, personagens, monstros e efeitos. O catálogo colaborativo crescerá com essas etapas para coordenar os modelos que ainda precisam ser criados.
 
 **[Official Discord](https://discord.gg/4YxQ7s69S)** · **[Contribute](docs/CONTRIBUTING.md)** · **[Roadmap](docs/ROADMAP.md)** · **[Build and play](docs/BUILDING-D3D.md)** · **[Estado em português](docs/TRISTRAM-STATUS.pt-BR.md)**
 
@@ -18,7 +20,7 @@ A community prototype bringing Diablo 1's Tristram into a rotatable 3D view, bui
 - Windows build, headless scene diagnostics and native-view comparison tools are included as source.
 - The owner-provided [animated logo](docs/ANIMATED-LOGO.md) contains 240 frames over eight seconds and covers the main, title and Escape menus.
 
-This is an **offline, CPU-rendered prototype for Tristram**. Dungeon levels still use the original renderer. The reconstructed shapes and materials need substantial visual refinement, particularly unseen faces, characters and compound scenery. [Meshy multi-view generation and optional local model review](docs/MESHY-WORKFLOW.md) are available; generated candidates still require fidelity approval.
+The **current build is an offline, CPU-rendered prototype in Tristram**. Dungeon levels still use the original renderer and are part of the planned whole-game reconstruction. The reconstructed shapes and materials need substantial visual refinement, particularly unseen faces, characters and compound scenery. [Meshy multi-view generation and optional local model review](docs/MESHY-WORKFLOW.md) are available; generated candidates still require fidelity approval.
 
 **Home currently returns to the original rendering backend.** Identical pixels at that pose verify the original-backend dispatch, not a perfect reconstruction. Forced-mesh comparisons still show differences. Contributors must compare the actual geometry with the native view and inspect rotated views before calling an asset faithful.
 
@@ -56,13 +58,13 @@ Do not submit game archives, extracted game artwork, saved characters, private c
 
 1. Refine complete Tristram objects and establish a reproducible import and visual-validation pipeline.
 2. Extend the implemented **static architecture shadow map** to moving lights, actors, trees and props. Original actor decals and some terrain lighting remain compatibility approximations.
-3. Generate coherent 3D dungeon geometry from the live procedural map and its existing seed, beginning with the Cathedral.
+3. Validate the first procedural Cathedral level from the live map and existing seed, then extend the pipeline through the Cathedral, Catacombs, Caves and Hell, with the characters, monsters, objects and effects required by the full game.
 4. Restore and validate the existing four-player networking in a separate experiment, then investigate a shared town hub and larger sessions.
 5. Evaluate optional proximity voice through Mumble, Discord Social SDK, TeamSpeak or a project-managed transport.
 
 The [networking research](docs/NETWORKING-RESEARCH.md) explains the current limits and integration choices. Increasing a player constant alone will not produce a scalable server. These milestones are plans, not shipped capabilities.
 
-Imported 3D models now share a [Tristram light profile](docs/TRISTRAM-LIGHTING.md), calibrated against the original cabin's roof and walls. Base color is lit before mapping into the game palette. Warm interior lighting and timber floors follow this exterior calibration.
+Imported 3D models share a [Tristram light profile](docs/TRISTRAM-LIGHTING.md), calibrated against the original cabin's roof and walls. Base color is lit before mapping into the game palette. The optional east-cabin review now has a timber floor, physical front/rear windows and two candle sources with subtle independent flicker. Further buildings follow the [openings and fire-light standard](docs/BUILDING-OPENINGS.md); their interiors are still work ahead.
 
 ## Project identity and upstream
 

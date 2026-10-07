@@ -1,6 +1,6 @@
 # Tristram asset catalog and reservations
 
-**Finish Tristram first.** This catalog coordinates whole reusable objects and exposes coverage gaps before work begins. It is not a complete Diablo/Hellfire library, an art dump, or a claim that current reconstruction is artistically accepted.
+**Project goal: the whole Diablo 1 game in 3D, including procedural levels.** This catalog currently covers Tristram, our first implementation stage. It coordinates whole reusable objects and exposes coverage gaps before work begins. The inventory will expand with the first procedural Cathedral level and subsequent environments; this town catalog is not the final scope or a claim that current reconstruction is artistically accepted.
 
 **Resumo em português:** escolha um ID abaixo, abra uma issue para reservar esse objeto e espere a confirmação de um mantenedor antes de modelar. Uma família reutilizável pode ter várias instâncias; não crie modelos concorrentes para cada árvore, pedra, direção da câmera ou pedaço de uma casa. Concluiremos Tristram antes de ampliar o catálogo. A expansão para outros mapas virá depois que o primeiro andar procedural da Catedral funcionar.
 

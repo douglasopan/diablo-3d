@@ -28,6 +28,11 @@ enum class TownSceneSurfaceDetail : uint8_t {
 	BarrelStaves,
 	BarrelHoops,
 	Foundation,
+	CandleWax,
+	CandleHolder,
+	CandleWick,
+	FireCore,
+	FireTip,
 	Count,
 };
 
@@ -100,24 +105,54 @@ struct TownSceneMaterialPatch {
 	Point sourceMax;
 };
 
+enum class TownCabinOpeningKind : uint8_t { Window, Door, RoofVent };
+
+/** Explicit geometric opening. X planes use u=z,v=height; Z planes u=x,v=height;
+ * Height planes use u=x,v=z. The aperture coordinate is the inner room plane.
+ * The depth slab bounds the only imported geometry eligible for a local cut.
+ * Height supports measured horizontal roof vents; sloped vents require their
+ * own measured geometry rather than an invented hole. Doors are not added by
+ * declaring this type: native closed-door collision is always preserved.
+ */
+struct TownCabinOpening {
+	TownCabinOpeningKind kind = TownCabinOpeningKind::Window;
+	TownLightAperture aperture;
+	float outerCoordinate = 0;
+	float clipMinimum = 0;
+	float clipMaximum = 0;
+	bool woodenMuntins = true;
+};
+
+enum class TownCabinFireKind : uint8_t { Candle, Candelabrum, Hearth, Campfire };
+
+/** Actual fire geometry plus its deterministic base point light. Flicker is a
+ * runtime intensity calculation; it never rewrites source geometry or colors.
+ */
+struct TownCabinFireSource {
+	TownCabinFireKind kind = TownCabinFireKind::Candle;
+	TownPointLight light;
+	std::vector<TownSceneTriangle> emissiveTriangles;
+	uint32_t flickerSeed = 0;
+};
+
 /** Runtime adjunct for the optional east-cabin model; imported source stays exact.
- * The window is an inscribed 20-sided opening, not a texture-opacity mask.
- * Room apertures use the same physical 20-sided polygon as the window tunnel,
- * so point-light visibility also preserves its opaque corners. Interior UVs are
- * world-unit material coordinates; exterior copies keep imported normalized UVs.
+ * Openings and lighting use the same physical polygons, preserving opaque
+ * corners. Interior UVs are world-unit coordinates; exterior copies keep their
+ * imported normalized UVs. All fire sources share these linear RGB colors for
+ * the renderer's scalar irradiance/emission caches. No electrical lights.
  */
 struct TownCabinInterior {
 	std::vector<TownSceneTriangle> exteriorTriangles;
 	std::vector<TownSceneTriangle> interiorTriangles;
-	std::vector<TownSceneTriangle> emissiveTriangles;
 	TownLightVector roomMinimum;
 	TownLightVector roomMaximum;
-	TownLightVector windowCenter;
-	float windowRadius = 0;
-	float windowOuterZ = 0;
-	float windowInnerZ = 0;
+	std::vector<TownCabinOpening> openings;
 	std::vector<TownLightAperture> apertures;
-	TownPointLight light;
+	std::vector<TownCabinFireSource> fireSources;
+	TownLightColor fireColor { 1.0F, 0.665F, 0.094F };
+	TownLightColor fireEmissionLinear;
+	TownLightColor fireCoreEmissionLinear;
+	TownLightColor fireTipEmissionLinear;
 	uint32_t clippedSourceTriangles = 0;
 };
 

@@ -44,12 +44,15 @@ struct TownViewLightingState {
 	size_t albedoTableBytes = 0;
 	size_t lightLevels = 0;
 	size_t cabinInteriors = 0;
-	bool cabinLampEnabled = true;
+	bool cabinFireEnabled = true;
 };
 TownViewLightingState GetTownViewLightingState();
 
 /** Headless evidence for real interior illumination; production defaults on. */
-void SetTownViewCabinLampEnabledForDiagnostics(bool enabled);
+void SetTownViewCabinFireEnabledForDiagnostics(bool enabled);
+/** A nonnegative time freezes visual flames for reproducible captures; negative
+ * restores the runtime timer. Simulation time and random state are untouched. */
+void SetTownViewFireTimeForDiagnostics(double seconds);
 
 /** Draw only the world viewport. forceGeometry is for reconstruction diagnostics. */
 bool DrawTownView(const Surface &fullOut, bool forceGeometry = false);

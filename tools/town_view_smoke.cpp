@@ -370,7 +370,7 @@ void SaveTownLightingStats(const std::filesystem::path &path)
 		<< ",\"directionalIntensity\":" << configuration.directionalIntensity
 		<< ",\"importedTextures\":" << state.importedTextures << ",\"albedoColors\":" << state.albedoColors
 		<< ",\"albedoTableBytes\":" << state.albedoTableBytes << ",\"lightLevels\":" << state.lightLevels
-		<< ",\"cabinInteriors\":" << state.cabinInteriors << ",\"cabinLampEnabled\":" << (state.cabinLampEnabled ? "true" : "false")
+		<< ",\"cabinInteriors\":" << state.cabinInteriors << ",\"cabinFireEnabled\":" << (state.cabinFireEnabled ? "true" : "false")
 		<< ",\"method\":\"source RGB6 albedo -> linear ambient + directional*(NdotL)*(1-shadow) -> sRGB -> game palette\""
 		<< ",\"scope\":\"shared imported-base-color lighting; native painted textures retain compatibility shading\"}\n";
 	Check(file.good(), "record actual lighting configuration, bounded albedo LUT and source-color scope");
@@ -2271,22 +2271,22 @@ void RecordPlayerArchitectureOcclusion(const Surface &out, const TownVolumeMesh 
 		Record("INFO cabin actor verified occluder model=" + std::to_string(model) + " kind=" + std::to_string(static_cast<int>(scene[model].kind)));
 }
 
-void CheckCabinInteriorLight(const Surface &out, int modelIndex, const std::filesystem::path &output)
+void CheckCabinInteriorLight(const Surface &out, int modelIndex, const std::filesystem::path &output, int orbit)
 {
 	const auto &model = GetTownScene()[modelIndex];
 	if (!model.cabinInterior)
 		return;
 	const std::string state = NativeSceneState();
-	const auto directory = output / "cabin-interior";
+	const auto directory = output / "cabin-interior" / ("orbit-" + std::to_string(orbit));
 	std::filesystem::create_directories(directory);
 	OwnedSurface lit(out.w(), gnViewportHeight);
 	SDL_SetPaletteColors(lit.surface->format->palette, logical_palette.data(), 0, 256);
 	for (int y = 0; y < gnViewportHeight; ++y)
 		std::memcpy(lit.at(0, y), out.at(0, y), out.w());
-	SavePng(lit, directory / "lamp-on.png");
-	SetTownViewCabinLampEnabledForDiagnostics(false);
-	Check(DrawTownView(out, true), "draw physical cabin interior with its point source and emission disabled");
-	SavePng(out.subregionY(0, gnViewportHeight), directory / "lamp-off.png");
+	SavePng(lit, directory / "fire-on.png");
+	SetTownViewCabinFireEnabledForDiagnostics(false);
+	Check(DrawTownView(out, true), "draw physical cabin interior with candle sources and flame emission disabled");
+	SavePng(out.subregionY(0, gnViewportHeight), directory / "fire-off.png");
 	int changed = 0, warm = 0, outsideOwner = 0;
 	for (int y = 0; y < gnViewportHeight; ++y) {
 		for (int x = 0; x < out.w(); ++x) {
@@ -2300,21 +2300,101 @@ void CheckCabinInteriorLight(const Surface &out, int modelIndex, const std::file
 	}
 	const auto &interior = *model.cabinInterior;
 	const TownLightOccluder room { interior.roomMinimum, interior.roomMaximum, interior.apertures };
-	Check(TownPointLightVisibility(interior.light.position,
-			{ interior.windowCenter.x, 1.0F, interior.roomMinimum.z - 0.3F }, std::span<const TownLightOccluder>(&room, 1)) == 0,
-		"opaque rear room shell blocks the cabin point light from the duplicated rear opening");
+	Check(interior.openings.size() == 2 && interior.fireSources.size() == 2,
+		"review cabin declares front and rear windows plus two physical candle sources");
+	const auto openingPoint = [](const TownLightAperture &aperture, float coordinate, float u, float v) -> TownLightVector {
+		if (aperture.plane == TownLightPlane::X)
+			return { coordinate, v, u };
+		if (aperture.plane == TownLightPlane::Height)
+			return { u, coordinate, v };
+		return { u, v, coordinate };
+	};
+	for (const auto &opening : interior.openings) {
+		const auto &aperture = opening.aperture;
+		const float centerU = (aperture.minU + aperture.maxU) * 0.5F;
+		const float centerV = (aperture.minV + aperture.maxV) * 0.5F;
+		const TownLightVector center = openingPoint(aperture, aperture.coordinate, centerU, centerV);
+		const auto &source = interior.fireSources.front().light.position;
+		const auto extendFromSource = [&](TownLightVector point) -> TownLightVector {
+			return { source.x + (point.x - source.x) * 1.25F,
+				source.height + (point.height - source.height) * 1.25F, source.z + (point.z - source.z) * 1.25F };
+		};
+		Check(TownPointLightVisibility(source, extendFromSource(center), std::span<const TownLightOccluder>(&room, 1)) == 1,
+			"fire visibility passes through each declared window, including the rear face");
+		const TownLightVector corner = openingPoint(aperture, aperture.coordinate,
+			centerU + (aperture.maxU - centerU) * 0.95F, centerV + (aperture.maxV - centerV) * 0.95F);
+		Check(TownPointLightVisibility(source, extendFromSource(corner), std::span<const TownLightOccluder>(&room, 1)) == 0,
+			"stone beyond the circular panes blocks candle light on both faces");
+		// Independent triangle rays traverse four panes and the full wall depth.
+		const float directionSign = aperture.coordinate > opening.outerCoordinate ? 1.0F : -1.0F;
+		bool continuous = true;
+		for (float du : { -0.12F, 0.12F }) {
+			for (float dv : { -0.12F, 0.12F }) {
+				const auto originPoint = openingPoint(aperture, opening.outerCoordinate - directionSign * 0.2F, centerU + du, centerV + dv);
+				const auto destinationPoint = openingPoint(aperture, aperture.coordinate + directionSign * 0.05F, centerU + du, centerV + dv);
+				const RayVector origin { originPoint.x, originPoint.height, originPoint.z };
+				const RayVector direction { destinationPoint.x - originPoint.x, destinationPoint.height - originPoint.height, destinationPoint.z - originPoint.z };
+				const auto blocks = [&](const auto &triangles) {
+					for (const auto &triangle : triangles) {
+						double distance, u, v;
+						if (RayTriangle(origin, direction, triangle, distance, u, v) && distance < 1)
+							return true;
+					}
+					return false;
+				};
+				continuous = continuous && !blocks(interior.exteriorTriangles) && !blocks(interior.interiorTriangles);
+			}
+		}
+		Check(continuous, "independent pane rays prove each cut continues through exterior and inner wall thickness");
+	}
 	Check(changed > 16 && warm > 8 && outsideOwner == 0,
 		"actual point light changes warm interior pixels without lighting unrelated geometry");
 	std::ofstream report(directory / "interior-light.json");
 	report << "{\"method\":\"actual same-camera runtime point-source plus emission on/off; source albedo and exterior unchanged\","
 		<< "\"changedPixels\":" << changed << ",\"warmChangedPixels\":" << warm << ",\"changesOutsideCabinOwner\":" << outsideOwner
-		<< ",\"interiorTriangles\":" << interior.interiorTriangles.size() << ",\"emissiveTriangles\":" << interior.emissiveTriangles.size()
-		<< ",\"clippedSourceTriangles\":" << interior.clippedSourceTriangles << ",\"lightPosition\":[" << interior.light.position.x << ',' << interior.light.position.height << ',' << interior.light.position.z
-		<< "],\"lightLinearRGB\":[" << interior.light.color.red << ',' << interior.light.color.green << ',' << interior.light.color.blue
-		<< "],\"radius\":" << interior.light.radius << ",\"intensity\":" << interior.light.intensity << "}\n";
-	Check(report.good(), "record actual interior lamp visibility and geometry evidence");
-	SetTownViewCabinLampEnabledForDiagnostics(true);
-	Check(DrawTownView(out, true), "restore the production cabin lamp after its on/off fixture");
+		<< ",\"interiorTriangles\":" << interior.interiorTriangles.size() << ",\"openings\":" << interior.openings.size()
+		<< ",\"clippedSourceTriangles\":" << interior.clippedSourceTriangles << ",\"fireLinearRGB\":[" << interior.fireColor.red << ',' << interior.fireColor.green << ',' << interior.fireColor.blue
+		<< "],\"flickerVariation\":0.06,\"frozenVisualTimeSeconds\":0,\"sources\":[";
+	for (size_t i = 0; i < interior.fireSources.size(); ++i) {
+		const auto &source = interior.fireSources[i];
+		const auto &light = source.light;
+		report << (i == 0 ? "" : ",") << "{\"kind\":\"candle\",\"position\":[" << light.position.x << ',' << light.position.height << ',' << light.position.z
+			<< "],\"radius\":" << light.radius << ",\"intensity\":" << light.intensity << ",\"flickerSeed\":" << source.flickerSeed
+			<< ",\"emissiveTriangles\":" << source.emissiveTriangles.size() << '}';
+	}
+	report << "]}\n";
+	Check(report.good(), "record actual candle illumination, apertures and geometry evidence");
+	SetTownViewCabinFireEnabledForDiagnostics(true);
+	Check(DrawTownView(out, true), "restore production candle lights and emission after the on/off fixture");
+	int repeatDifferences = 0;
+	for (int y = 0; y < gnViewportHeight; ++y)
+		for (int x = 0; x < out.w(); ++x)
+			repeatDifferences += lit[{ x, y }] != out[{ x, y }] ? 1 : 0;
+	Check(repeatDifferences == 0, "frozen candle time produces identical actual runtime frames");
+	if (orbit == 0) {
+		int animatedChanges = 0, unrelatedChanges = 0;
+		for (const double time : { 3.0, 17.0 }) {
+			SetTownViewFireTimeForDiagnostics(time);
+			Check(DrawTownView(out, true), "advance candle render time without changing simulation time");
+			SavePng(out.subregionY(0, gnViewportHeight), directory / ("fire-time-" + std::to_string(static_cast<int>(time)) + ".png"));
+			for (int y = 0; y < gnViewportHeight; ++y) {
+				for (int x = 0; x < out.w(); ++x) {
+					if (lit[{ x, y }] == out[{ x, y }])
+						continue;
+					++animatedChanges;
+					unrelatedChanges += TownViewArchitectureAt({ x, y }) != modelIndex ? 1 : 0;
+				}
+			}
+		}
+		Check(animatedChanges > 0 && unrelatedChanges == 0,
+			"actual palette-mapped candle flicker changes visible pixels only inside its building");
+		std::ofstream flicker(directory / "fire-animation.json");
+		flicker << "{\"frozenTimesSeconds\":[0,3,17],\"sumChangedPixelsAgainstTimeZero\":" << animatedChanges
+			<< ",\"changesOutsideCabinOwner\":" << unrelatedChanges << "}\n";
+		Check(flicker.good(), "record visible candle animation after final palette mapping");
+		SetTownViewFireTimeForDiagnostics(0);
+		Check(DrawTownView(out, true), "restore the frozen production candle fixture after animation evidence");
+	}
 	Check(NativeSceneState() == state, "interior illumination fixture preserves the native game and collision state");
 }
 
@@ -2421,8 +2501,8 @@ void CaptureObjectTurntables(const Surface &originalOut, const std::filesystem::
 			Check(NativeSceneState() == frozen, "raw turntable rendering preserves native map and actor state");
 			const std::string filename = std::string(fixture.name) + "-orbit-" + std::to_string(degrees) + ".png";
 			SavePng(out.subregionY(0, gnViewportHeight), directory / filename);
-			if (degrees == 0 && std::string(fixture.name) == "cabin-east")
-				CheckCabinInteriorLight(out, fixture.model, output);
+			if ((degrees == 0 || degrees == 180) && std::string(fixture.name) == "cabin-east")
+				CheckCabinInteriorLight(out, fixture.model, output, degrees);
 			if (!firstFrame)
 				manifest << ",\n";
 			firstFrame = false;
@@ -2459,6 +2539,7 @@ void CaptureObjectTurntables(const Surface &originalOut, const std::filesystem::
 
 void Run(const std::filesystem::path &output)
 {
+	SetTownViewFireTimeForDiagnostics(0);
 	HeadlessMode = true;
 	gbIsHellfire = false;
 	gbIsMultiplayer = false;

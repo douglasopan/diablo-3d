@@ -1,8 +1,8 @@
 # Contributing to D3D
 
-D3D is a community prototype for rendering Diablo 1's Tristram in 3D while keeping the existing game simulation. We welcome contributors working on complete 3D objects, procedural geometry, rendering, asset import, visual comparison and documentation. Coordinate work in an issue or in [Discord](https://discord.gg/4YxQ7s69S), then open a pull request with a reviewable change.
+D3D aims to render the whole Diablo 1 game in 3D, including its procedural dungeon levels, while keeping the existing game simulation. Tristram is the current implementation stage for establishing the asset and rendering pipeline; the first procedural Cathedral level follows it. We welcome contributors working on complete 3D objects, procedural geometry, rendering, asset import, visual comparison and documentation. Coordinate work in an issue or in [Discord](https://discord.gg/4YxQ7s69S), then open a pull request with a reviewable change.
 
-**Resumo em português:** contribua com um objeto completo ou uma melhoria pequena e verificável. Compare a vista original e o giro de 360°, preserve colisão e partida, informe a origem dos recursos e não envie arquivos extraídos do Diablo nem chaves. O foco atual é Tristram; já há sombras geométricas das construções e um perfil de luz para modelos importados. Interiores iluminados, geração dos níveis procedurais, voz e mais jogadores são trabalho futuro.
+**Resumo em português:** o objetivo é o jogo inteiro em 3D; Tristram é a etapa atual, seguida pelos níveis procedurais. Contribua com um objeto completo ou uma melhoria verificável. Compare a vista original e o giro de 360°, preserve colisão e partida, informe a origem dos recursos e não envie arquivos extraídos do Diablo nem chaves. Já há sombras das construções, um perfil exterior e o primeiro interior iluminado no candidato opcional da cabana. Os demais interiores, níveis procedurais, voz e mais jogadores ainda precisam de desenvolvimento.
 
 ## Understand the current prototype
 
@@ -50,7 +50,9 @@ An asset proposal should record its author, license, original source, tool or ge
 
 Prefer base-color textures without painted lighting or ground shadows where a clean, legitimately redistributable source is available. Keep normals and material properties explicit. The original game's baked light remains a compatibility constraint; copying it into an albedo texture does not implement 3D lighting.
 
-Use the shared [Tristram lighting reference](TRISTRAM-LIGHTING.md) for imported base-color assets. It applies light before the game-palette mapping, shares the sun direction with the shadow map, and retains ambient light in shadow. Keep that environment fixed when comparing a new model so material errors remain visible. Native painted materials still use compatibility shading; warm point lights are not yet active in the game.
+Use the shared [Tristram lighting reference](TRISTRAM-LIGHTING.md) for imported base-color assets. It applies light before the game-palette mapping, shares the sun direction with the shadow map, and retains ambient light in shadow. Keep that environment fixed when comparing a new model so material errors remain visible. Native painted materials still use compatibility shading. Warm fire sources are being validated in the optional east-cabin interior, rather than enabled for every scene object.
+
+Buildings must follow the [openings and fire-light standard](BUILDING-OPENINGS.md). Record each visible door, window and roof opening on its actual face, preserve wall thickness and show the same physical interior through every aperture. Use candles, candelabra and hearths appropriate to the scene, with bounded independent flicker and warm colors. Visual openings do not change native walkability. Do not invent a roof hole or place a painted yellow card over a window to imitate a lit room.
 
 The current CPU depth map casts static architecture shadows from a directional light onto drawn receiving geometry. It caches construction and filters depth comparisons with receiver-plane bias. Trees, props, actors and moving lights still need caster support; baked surface illumination remains a compatibility constraint. Include shadow tests for roof overhangs, tree branches, character feet and moving actors as that support expands, without replacing collision rules with shadow geometry.
 
