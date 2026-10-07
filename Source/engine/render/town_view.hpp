@@ -3,6 +3,7 @@
 #include <cstddef>
 
 #include "engine/point.hpp"
+#include "engine/render/town_lighting.hpp"
 
 namespace devilution {
 
@@ -33,6 +34,17 @@ void EndTownViewCameraDrag();
 bool IsTownViewCameraDragging();
 /** Call when level graphics are released/reloaded, including same-address reloads. */
 void ResetTownViewResources();
+
+/** Calibration uses one world-space light for imported albedo and shadow depth. */
+struct TownViewLightingState {
+	TownLightingConfig configuration;
+	bool profileLoaded = false;
+	size_t importedTextures = 0;
+	size_t albedoColors = 0;
+	size_t albedoTableBytes = 0;
+	size_t lightLevels = 0;
+};
+TownViewLightingState GetTownViewLightingState();
 
 /** Draw only the world viewport. forceGeometry is for reconstruction diagnostics. */
 bool DrawTownView(const Surface &fullOut, bool forceGeometry = false);

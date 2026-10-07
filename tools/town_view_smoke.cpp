@@ -351,6 +351,30 @@ void SaveTownShadowStats(const std::filesystem::path &path)
 	Check(file.good(), "write structural shadow geometry and cache statistics");
 }
 
+void SaveTownLightingStats(const std::filesystem::path &path)
+{
+	const TownViewLightingState state = GetTownViewLightingState();
+	const TownShadowDirection shadowLight = GetTownShadowLightDirection();
+	const auto &configuration = state.configuration;
+	const float length = std::sqrt(configuration.toLight.x * configuration.toLight.x
+		+ configuration.toLight.height * configuration.toLight.height + configuration.toLight.z * configuration.toLight.z);
+	Check(length > 0 && std::abs(shadowLight.x - configuration.toLight.x / length) < 0.00001F
+			&& std::abs(shadowLight.height - configuration.toLight.height / length) < 0.00001F
+			&& std::abs(shadowLight.z - configuration.toLight.z / length) < 0.00001F,
+		"imported albedo lighting and geometry shadow map use the same world-space sun direction");
+	std::ofstream file(path);
+	file << "{\"profileLoaded\":" << (state.profileLoaded ? "true" : "false")
+		<< ",\"ambientLinearRGB\":[" << configuration.ambient.red << ',' << configuration.ambient.green << ',' << configuration.ambient.blue << ']'
+		<< ",\"directionalLinearRGB\":[" << configuration.directional.red << ',' << configuration.directional.green << ',' << configuration.directional.blue << ']'
+		<< ",\"toLight\":[" << configuration.toLight.x << ',' << configuration.toLight.height << ',' << configuration.toLight.z << ']'
+		<< ",\"directionalIntensity\":" << configuration.directionalIntensity
+		<< ",\"importedTextures\":" << state.importedTextures << ",\"albedoColors\":" << state.albedoColors
+		<< ",\"albedoTableBytes\":" << state.albedoTableBytes << ",\"lightLevels\":" << state.lightLevels
+		<< ",\"method\":\"source RGB6 albedo -> linear ambient + directional*(NdotL)*(1-shadow) -> sRGB -> game palette\""
+		<< ",\"scope\":\"shared imported-base-color lighting; native painted textures retain compatibility shading\"}\n";
+	Check(file.good(), "record actual lighting configuration, bounded albedo LUT and source-color scope");
+}
+
 void CheckStructuralShadows(const std::filesystem::path &output)
 {
 	TownSceneModel caster {};
@@ -2498,6 +2522,7 @@ void Run(const std::filesystem::path &output)
 	CaptureNativeProjectionPairs(out, output);
 	CaptureObjectTurntables(out, output);
 	SaveTownShadowStats(output / "shadow-map.json");
+	SaveTownLightingStats(output / "lighting-state.json");
 	RotateTownView(0.75F);
 	Point tile;
 	int npc, item, player;

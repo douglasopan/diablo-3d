@@ -67,6 +67,14 @@ O primeiro teste de Meshy usou uma composição dos pixels originais da cabana l
 
 A segunda geração usou múltiplas vistas pela API: a imagem original primeiro, seguida de vistas geradas da traseira e do frontão. Custou 44 créditos no total e retornou 5.783 triângulos, textura 4K, mapas PBR e malha mestre. Agora existe importação real opcional na cabana leste, pelo perfil separado `Comparar-Cabana-Meshy.cmd`; o modelo ainda tem janela duplicada e preta, alterações do telhado e placas de chão, e não foi aceito como substituição padrão. Consulte [MESHY-WORKFLOW.md](MESHY-WORKFLOW.md) para geração, conversão, calibração e revisão.
 
+## Calibração da iluminação
+
+Antes de continuar os interiores ou gerar outros modelos, a cabana leste recebeu uma calibração da luz na mesma perspectiva da referência original. Os materiais importados agora recebem luz sobre sua cor de origem, em RGB linear, antes de serem convertidos para a paleta do jogo. A luz ambiente permanece nas sombras; a luz direta e o mapa de sombras usam a mesma direção. As faces vistas pelo verso também recebem a orientação correta para iluminação, eliminando grandes manchas triangulares do telhado sem alterar a geometria, as UVs ou a textura do modelo.
+
+O perfil comum está em `assets/d3d-lighting.ini`, com ambiente `(0.08, 0.085, 0.09)`, luz direta `(1.55, 1.47, 1.62)` e direção `(0.32, 1, -0.3)`. Uma cópia desse arquivo no perfil do jogador pode substituir os valores após reiniciar o jogo. Consulte [TRISTRAM-LIGHTING.md](TRISTRAM-LIGHTING.md) para unidades, comparação por material e orientação aos próximos modelos.
+
+A parede do frontão aproximou-se do tom escuro original, a lateral perdeu a aparência excessivamente clara e o telhado conservou o brilho. A textura gerada ainda tem menos contraste que a arte original e o trecho sob o beiral da porta permanece mais escuro. A janela amarela, o chão de tábuas e a luz interna são a etapa seguinte; ainda não estão ativos. As texturas nativas que já contêm iluminação pintada continuam com o tratamento de compatibilidade.
+
 ## Logo de entrada
 
 No perfil de teste, a entrada, o menu e a pausa mostram **Diablo 3D** com a animação fornecida pelo autor: 240 quadros, 30 quadros por segundo e ciclo de 8 segundos. A conversão preserva a arte entregue e adapta formato e paleta ao carregador do jogo. Consulte [ANIMATED-LOGO.md](ANIMATED-LOGO.md).
@@ -87,7 +95,9 @@ O script detecta Visual Studio, CMake e Ninja instalados; consulte [BUILDING-D3D
 
 ## Validação
 
-A revisão atual passou em 07/10/2026 com `town_view_smoke` sem abrir uma janela, usando dados completos do GOG, dados shareware e um perfil separado com o candidato Meshy. As rodadas são `diagnostics/v4-masked-final-gog`, `diagnostics/v4-masked-final-shareware` e `diagnostics/v4-meshy-masked-review-gog`. O executável testado tem SHA-256 `3d2038a84bfd871991f4c85683311243ea6a1a4bd1eedc96611c6989541d5981`; o registro local `diagnostics/meshy-and-shadow-release-audit.json` identifica as saídas. Os testes mecânicos passaram; o candidato Meshy ainda não recebeu aprovação visual nem de fechamento de malha.
+A calibração atual passou em 07/10/2026 com `town_lighting_smoke` e `town_view_smoke` sem abrir uma janela, usando dados completos do GOG, dados shareware e um perfil separado com o candidato Meshy. As rodadas finais são `diagnostics/v4-lighting-release-gog`, `diagnostics/v4-lighting-release-shareware` e `diagnostics/v4-lighting-release-meshy-gog`. O executável testado tem SHA-256 `1a5f148cd597a4a86032ff7987e6865a4ccef9c8c94c960b25c686e067883607`; o registro local `diagnostics/tristram-lighting-release-audit.json` identifica as saídas. O perfil Meshy usa a configuração distribuída sem substituir o arquivo INI no perfil do jogador. Os testes mecânicos e a comparação local de iluminação passaram; isso não encerra a revisão artística nem de fechamento da malha Meshy.
+
+As rodadas anteriores `diagnostics/v4-masked-final-gog`, `diagnostics/v4-masked-final-shareware` e `diagnostics/v4-meshy-masked-review-gog` permanecem como referência anterior à calibração. O registro `diagnostics/meshy-and-shadow-release-audit.json` identifica seu executável de SHA-256 `3d2038a84bfd871991f4c85683311243ea6a1a4bd1eedc96611c6989541d5981`.
 
 O roteiro grava 50 vistas das cabanas leste e oeste, poço, árvore e herói: dez ângulos por alvo, incluindo giros de −5° e +5° para revelar falhas próximas da vista original. Verifica alternância de visual, seleção, oclusão, preservação da partida, recarga e liberação dos recursos. A auditoria mecânica dos volumes reconstruídos confere triângulos finitos, profundidade, fechamento e orientação, pés no chão, determinismo, oito direções do guerreiro e das vacas, habitantes, árvores e grupos de pedras. O importador é exercitado com arquivos válidos e malformados, preservando a alternativa procedural quando o recurso opcional é rejeitado. Os testes de sombra incluem reutilização do cache, mudanças na geometria e na direção da luz, além da preservação dos pixels fora das máscaras auditadas. A leitura independente confirmou 16 peças por rodada sem divergências dos pixels esperados; a preservação integral da opacidade foi verificada no código, pois os PNGs indexados não expõem esse vetor do runtime.
 
@@ -98,8 +108,9 @@ Como registro histórico de 07/10/2026, a compilação e os diagnósticos anteri
 Os diagnósticos anteriores também foram preservados em `diagnostics/gog`, `diagnostics/v2-gog` e `diagnostics/v3-gog`. A validação sem janela deve ser complementada pela experiência com teclado, caminhada e diálogos no jogo aberto pelo iniciador.
 
 ```powershell
-.\build.ps1 -WithSmoke -Targets devilutionx,town_view_smoke
-.\build\town_view_smoke.exe 'C:\Program Files (x86)\GOG Galaxy\Games\Diablo' '.\build\assets' '.\diagnostics\v4-masked-final-gog'
+.\build.ps1 -WithSmoke -Targets @('devilutionx','town_view_smoke','town_lighting_smoke')
+.\build\town_lighting_smoke.exe
+.\build\town_view_smoke.exe 'C:\Program Files (x86)\GOG Galaxy\Games\Diablo' '.\build\assets' '.\diagnostics\v4-lighting-release-gog'
 ```
 
 Fontes: [DevilutionX](https://github.com/diasurgical/devilutionX), [dados shareware](https://github.com/diasurgical/devilutionx-assets/releases/latest/download/spawn.mpq).
@@ -110,6 +121,6 @@ Fontes: [DevilutionX](https://github.com/diasurgical/devilutionX), [dados sharew
 
 Nas quatro peças auditadas de sombra pintada das cabanas, máscaras congeladas delimitam os pixels cuja cor recebe grama da peça doadora: 873 usa 875, 874 usa 876, 882 usa 881 e 884 usa 883. A aplicação altera somente os pixels selecionados e cobertos por ambas as peças. Todos os pixels originais fora da máscara, inclusive preto opaco, e a opacidade original inteira permanecem preservados. Os dados de origem das peças, o mapa, a colisão e a vista original conservam seus dados nativos.
 
-Os emissores atuais são apenas as construções. Árvores, pedras e personagens ainda não lançam sombras por esse sistema; personagens mantêm suas sombras de compatibilidade. Luzes de tochas, movimento e remoção das demais sombras pintadas precisam de trabalho adicional. A direção é configurável no código e testada com luz invertida, mas não há controle de iluminação na interface.
+Os objetos que atualmente lançam sombras por esse sistema são apenas as construções. Árvores, pedras e personagens ainda não lançam sombras por ele; personagens mantêm suas sombras de compatibilidade. Luzes de tochas, movimento e remoção das demais sombras pintadas precisam de trabalho adicional. A direção é configurável em `d3d-lighting.ini` e testada com luz invertida, mas não há controle de iluminação na interface.
 
 Geração 3D dos níveis procedurais, voz por proximidade e um hub com mais participantes são etapas futuras. Consulte o [roadmap](ROADMAP.md) e a [pesquisa de rede e voz](NETWORKING-RESEARCH.md). O código público preserva a [Sustainable Use License do engine](../LICENSE.md), que limita a distribuição a usos gratuitos e não comerciais.

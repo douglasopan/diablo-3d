@@ -45,6 +45,7 @@ endif()
 
 set(devilutionx_assets
   ASSETS_VERSION
+  d3d-lighting.ini
   arena/church.dun
   arena/circle_of_death.dun
   arena/hell.dun

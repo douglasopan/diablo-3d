@@ -8,10 +8,12 @@
 #include <cstring>
 #include <limits>
 #include <memory>
+#include <string>
 #include <unordered_map>
 #include <vector>
 
 #include "control/control.hpp"
+#include "engine/assets.hpp"
 #include "engine/clx_sprite.hpp"
 #include "engine/light_tables.hpp"
 #include "engine/palette.h"
@@ -19,6 +21,8 @@
 #include "engine/render/dun_render.hpp"
 #include "engine/render/scrollrt.h"
 #include "engine/render/town_ground_shadow.hpp"
+#include "engine/render/town_lighting.hpp"
+#include "engine/render/town_lighting_profile.hpp"
 #include "engine/render/town_scene.hpp"
 #include "engine/render/town_scene_projection.hpp"
 #include "engine/render/town_shadow.hpp"
@@ -48,6 +52,7 @@ constexpr float PixelsPerWorldUnit = 32.0F;
 constexpr float NativeCameraScale = 45.25483399593904F; // 32 * sqrt(2)
 constexpr float NativeHeightScale = 0.816496580927726F; // sqrt(2/3)
 constexpr float DefaultCameraDistance = 22.0F;
+constexpr size_t ImportedLightLevels = 64;
 
 struct Vec3 {
 	float x;
@@ -101,7 +106,9 @@ struct Texture {
 	std::vector<uint8_t> pixels;
 	bool repeat = false;
 	std::vector<uint8_t> opacity;
-	bool sample(float u, float v, uint8_t &color) const
+	// Imported base color stays independent of the game palette until lighting.
+	std::vector<uint32_t> albedoPixels;
+	bool sample(float u, float v, uint8_t &color, uint32_t *albedoColor = nullptr) const
 	{
 		if (width <= 0 || height <= 0 || !std::isfinite(u) || !std::isfinite(v))
 			return false;
@@ -114,7 +121,9 @@ struct Texture {
 		const int x = std::clamp(static_cast<int>(u * static_cast<float>(width)), 0, width - 1);
 		const int y = std::clamp(static_cast<int>(v * static_cast<float>(height)), 0, height - 1);
 		const size_t index = static_cast<size_t>(y) * width + x;
-		color = pixels[index];
+		color = pixels.empty() ? 0 : pixels[index];
+		if (albedoColor != nullptr && !albedoPixels.empty())
+			*albedoColor = albedoPixels[index];
 		return opacity.empty() || opacity[index] != 0;
 	}
 };
@@ -195,6 +204,10 @@ struct SceneMaterials {
 };
 std::unordered_map<size_t, SceneMaterials> SceneMaterialCache;
 std::unordered_map<size_t, Texture> ImportedTextureCache;
+std::unordered_map<uint32_t, uint32_t> ImportedAlbedoColors;
+std::vector<std::array<uint8_t, ImportedLightLevels>> ImportedAlbedoLightTables;
+TownLightingConfig SceneLightingConfig = TristramLightingConfig();
+bool SceneLightingProfileLoaded = false;
 std::unordered_map<const uint8_t *, VolumeArtwork> ActorVolumeCache;
 std::unordered_map<size_t, VolumeArtwork> VegetationArtworkCache;
 std::unordered_map<size_t, VolumeArtwork> PropArtworkCache;
@@ -228,6 +241,15 @@ void PrepareSceneLighting()
 {
 	if (SceneLightingValid)
 		return;
+	SceneLightingConfig = TristramLightingConfig();
+	SceneLightingProfileLoaded = false;
+	AssetRef profile = FindAsset("d3d-lighting.ini");
+	if (profile.ok() && profile.size() > 0 && profile.size() <= 4096) {
+		std::string text(profile.size(), '\0');
+		AssetHandle handle = OpenAsset(std::move(profile));
+		if (handle.ok() && handle.read(text.data(), text.size()))
+			SceneLightingProfileLoaded = ParseTownLightingProfile(text, SceneLightingConfig);
+	}
 	constexpr std::array<float, 4> Brightness { 1.0F, 0.93F, 0.84F, 0.74F };
 	// Match darkened RGB colors back into the actual Tristram palette. Its first
 	// 128 entries are not ordered shade ramps, unlike the dungeon palettes.
@@ -358,7 +380,7 @@ float Edge(const ProjectedVertex &a, const ProjectedVertex &b, float x, float y)
 }
 
 void Rasterize(const Surface &out, const std::array<Vertex, 3> &triangle, const Texture &texture,
-	PickRecord pick, int shade, bool transparent)
+	PickRecord pick, int shade, bool transparent, const TownSceneNormal *authoredNormal)
 {
 	const ProjectedVertex a = Project(triangle[0]);
 	const ProjectedVertex b = Project(triangle[1]);
@@ -387,11 +409,22 @@ void Rasterize(const Surface &out, const std::array<Vertex, 3> &triangle, const 
 		normal = normal * (1.0F / normalLength);
 	if (normal.y < 0 && std::abs(worldA.y) < 0.001F && std::abs(worldB.y) < 0.001F && std::abs(worldC.y) < 0.001F)
 		normal = normal * -1.0F;
+	if (authoredNormal != nullptr)
+		normal = { authoredNormal->x, authoredNormal->height, authoredNormal->z };
+	const bool hasAlbedo = !texture.albedoPixels.empty();
+	if (hasAlbedo) {
+		// D3DMESH1 imports render both material sides. A visible back face must
+		// light its visible side, without changing authored vertices or UVs.
+		const TownLightVector facing = OrientTownLightingNormal({ normal.x, normal.y, normal.z },
+			{ -ViewCamera.forward.x, -ViewCamera.forward.y / NativeHeightScale, -ViewCamera.forward.z });
+		normal = { facing.x, facing.height, facing.z };
+	}
 	const TownShadowReceiver shadowReceiver = PrepareTownShadowReceiver(normal.x, normal.y, normal.z);
 	const TownShadowDirection light = GetTownShadowLightDirection();
 	// Normal shading already supplies ambient light on faces pointing away from
 	// the source. Shadowing their absent direct light again crushed the masonry.
 	const bool receivesDirectLight = normal.x * light.x + normal.y * light.height + normal.z * light.z > 0.02F;
+	const float diffuse = std::clamp(normal.x * light.x + normal.y * light.height + normal.z * light.z, 0.0F, 1.0F);
 	for (int y = minY; y <= maxY; ++y) {
 		uint8_t *destination = out.at(0, y);
 		for (int x = minX; x <= maxX; ++x) {
@@ -410,13 +443,19 @@ void Rasterize(const Surface &out, const std::array<Vertex, 3> &triangle, const 
 			const float u = wa * a.u + wb * b.u + wc * c.u;
 			const float v = wa * a.v + wb * b.v + wc * c.v;
 			uint8_t color;
-			if (!texture.sample(u, v, color) || (transparent && texture.opacity.empty() && color == 0))
+			uint32_t albedoColor = 0;
+			if (!texture.sample(u, v, color, &albedoColor) || (transparent && !hasAlbedo && texture.opacity.empty() && color == 0))
 				continue;
 			const Vec3 world = worldA * wa + worldB * wb + worldC * wc;
-			const float shadow = receivesDirectLight ? SampleTownShadow(world.x, world.y, world.z, shadowReceiver) : 0;
+			const float shadow = (hasAlbedo ? diffuse > 0 : receivesDirectLight) ? SampleTownShadow(world.x, world.y, world.z, shadowReceiver) : 0;
 			const int shadowLevel = std::clamp(static_cast<int>(shadow * 3.0F + 0.5F), 0, 3);
-			destination[x] = shadowLevel == 0 ? lightTable[color]
-			    : SceneShadowTables[std::clamp(shade, 0, 3)][shadowLevel][color];
+			if (hasAlbedo) {
+				const size_t amount = static_cast<size_t>(std::clamp(static_cast<int>(diffuse * (1 - shadow) * (ImportedLightLevels - 1) + 0.5F), 0, static_cast<int>(ImportedLightLevels - 1)));
+				destination[x] = ImportedAlbedoLightTables[albedoColor][amount];
+			} else {
+				destination[x] = shadowLevel == 0 ? lightTable[color]
+				    : SceneShadowTables[std::clamp(shade, 0, 3)][shadowLevel][color];
+			}
 			DepthBuffer[index] = depth;
 			if (!pick.preservePicking)
 				PickBuffer[index] = pick;
@@ -425,7 +464,7 @@ void Rasterize(const Surface &out, const std::array<Vertex, 3> &triangle, const 
 }
 
 void DrawTriangle(const Surface &out, std::array<Vertex, 3> triangle, const Texture &texture,
-	PickRecord pick, int shade, bool transparent = false)
+	PickRecord pick, int shade, bool transparent = false, const TownSceneNormal *authoredNormal = nullptr)
 {
 	for (Vertex &vertex : triangle)
 		vertex.position = ToCamera(vertex.position);
@@ -446,7 +485,7 @@ void DrawTriangle(const Surface &out, std::array<Vertex, 3> triangle, const Text
 			clipped[count++] = current;
 	}
 	for (size_t i = 1; i + 1 < count; ++i)
-		Rasterize(out, { clipped[0], clipped[i], clipped[i + 1] }, texture, pick, shade, transparent);
+		Rasterize(out, { clipped[0], clipped[i], clipped[i + 1] }, texture, pick, shade, transparent, authoredNormal);
 }
 
 void DrawQuad(const Surface &out, const std::array<Vec3, 4> &corners, const Texture &texture,
@@ -964,14 +1003,38 @@ const Texture &ImportedSceneTexture(size_t index, const TownImportedTexture &sou
 	Texture texture;
 	texture.width = static_cast<int>(source.width);
 	texture.height = static_cast<int>(source.height);
-	texture.pixels.resize(static_cast<size_t>(source.width) * source.height);
-	std::unordered_map<uint32_t, uint8_t> colors;
-	for (size_t i = 0; i < texture.pixels.size(); ++i) {
+	texture.albedoPixels.resize(static_cast<size_t>(source.width) * source.height);
+	for (size_t i = 0; i < texture.albedoPixels.size(); ++i) {
 		const uint8_t *rgb = source.rgb.data() + i * 3;
-		const uint32_t key = (static_cast<uint32_t>(rgb[0]) << 16) | (static_cast<uint32_t>(rgb[1]) << 8) | rgb[2];
-		const auto color = colors.find(key);
-		texture.pixels[i] = color != colors.end() ? color->second
-		    : colors.emplace(key, ClosestSceneColor(rgb[0], rgb[1], rgb[2])).first->second;
+		// Six bits per source channel bound the shared LUT to 262144 colors;
+		// all levels are generated from albedo, before the final game palette.
+		const uint32_t key = (static_cast<uint32_t>(rgb[0] >> 2) << 12)
+		    | (static_cast<uint32_t>(rgb[1] >> 2) << 6) | (rgb[2] >> 2);
+		const auto color = ImportedAlbedoColors.find(key);
+		if (color != ImportedAlbedoColors.end()) {
+			texture.albedoPixels[i] = color->second;
+			continue;
+		}
+		const uint32_t colorIndex = static_cast<uint32_t>(ImportedAlbedoLightTables.size());
+		ImportedAlbedoColors.emplace(key, colorIndex);
+		texture.albedoPixels[i] = colorIndex;
+		const TownLightColor base = TownSrgbToLinear({
+			(static_cast<float>((key >> 12) & 63) * 4 + 1.5F) / 255,
+			(static_cast<float>((key >> 6) & 63) * 4 + 1.5F) / 255,
+			(static_cast<float>(key & 63) * 4 + 1.5F) / 255 });
+		std::array<uint8_t, ImportedLightLevels> table;
+		for (size_t level = 0; level < table.size(); ++level) {
+			const float amount = static_cast<float>(level) / (table.size() - 1);
+			TownLightingSample lighting;
+			lighting.ambient = SceneLightingConfig.ambient;
+			lighting.directional = {
+				SceneLightingConfig.directional.red * SceneLightingConfig.directionalIntensity * amount,
+				SceneLightingConfig.directional.green * SceneLightingConfig.directionalIntensity * amount,
+				SceneLightingConfig.directional.blue * SceneLightingConfig.directionalIntensity * amount };
+			const TownLightColor lit = TownLinearToSrgb(ComposeTownLitColor(base, lighting));
+			table[level] = ClosestSceneColor(lit.red * 255, lit.green * 255, lit.blue * 255);
+		}
+		ImportedAlbedoLightTables.push_back(table);
 	}
 	return ImportedTextureCache.emplace(index, std::move(texture)).first->second;
 }
@@ -991,9 +1054,7 @@ void DrawScene(const Surface &out)
 				}
 				PickRecord pick = PickAt(triangle.pickTile);
 				pick.architecture = static_cast<int16_t>(index);
-				const float illumination = (triangle.normal.x + triangle.normal.height + triangle.normal.z) / 1.7320508F;
-				const int shade = illumination < -0.1F ? 2 : (illumination < 0.4F ? 1 : 0);
-				DrawTriangle(out, vertices, texture, pick, shade);
+				DrawTriangle(out, vertices, texture, pick, 0, false, &triangle.normal);
 			}
 			continue;
 		}
@@ -1565,6 +1626,12 @@ bool IsTownViewCameraDragging()
 	return CameraDragging && IsTownViewActive();
 }
 
+TownViewLightingState GetTownViewLightingState()
+{
+	return { SceneLightingConfig, SceneLightingProfileLoaded, ImportedTextureCache.size(),
+		ImportedAlbedoLightTables.size(), ImportedAlbedoLightTables.size() * ImportedLightLevels, ImportedLightLevels };
+}
+
 void ResetTownViewResources()
 {
 	ClearTownShadowMap();
@@ -1573,11 +1640,15 @@ void ResetTownViewResources()
 	SceneArtworkCache.clear();
 	SceneMaterialCache.clear();
 	ImportedTextureCache.clear();
+	ImportedAlbedoColors.clear();
+	ImportedAlbedoLightTables.clear();
 	ActorVolumeCache.clear();
 	VegetationArtworkCache.clear();
 	PropArtworkCache.clear();
 	SceneryVolumeCache.clear();
 	SceneLightingValid = false;
+	SceneLightingProfileLoaded = false;
+	SceneLightingConfig = TristramLightingConfig();
 	ResetTownScene();
 	ResetTownVegetation();
 	ResetTownProps();
@@ -1599,11 +1670,15 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 		SceneArtworkCache.clear();
 		SceneMaterialCache.clear();
 		ImportedTextureCache.clear();
+		ImportedAlbedoColors.clear();
+		ImportedAlbedoLightTables.clear();
 		ActorVolumeCache.clear();
 		VegetationArtworkCache.clear();
 		PropArtworkCache.clear();
 		SceneryVolumeCache.clear();
 		SceneLightingValid = false;
+		SceneLightingProfileLoaded = false;
+		SceneLightingConfig = TristramLightingConfig();
 		ResetTownScene();
 		ResetTownVegetation();
 		ResetTownProps();
@@ -1627,7 +1702,9 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 	PickBuffer.assign(size, PickRecord {});
 	ClearSurface(out);
 	PrepareSceneLighting();
-	BuildTownShadowMap(GetTownScene());
+	TownShadowConfig shadowConfig;
+	shadowConfig.toLight = { SceneLightingConfig.toLight.x, SceneLightingConfig.toLight.height, SceneLightingConfig.toLight.z };
+	BuildTownShadowMap(GetTownScene(), shadowConfig);
 	const Texture &fallback = FallbackGround();
 	// Native town generation fills the entire dungeon grid, including the outer
 	// grass visible around Farnham and Adria in wide views.

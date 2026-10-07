@@ -2,7 +2,7 @@
 
 D3D is a community prototype for rendering Diablo 1's Tristram in 3D while keeping the existing game simulation. We welcome contributors working on complete 3D objects, procedural geometry, rendering, asset import, visual comparison and documentation. Coordinate work in an issue or in [Discord](https://discord.gg/4YxQ7s69S), then open a pull request with a reviewable change.
 
-**Resumo em português:** contribua com um objeto completo ou uma melhoria pequena e verificável. Compare a vista original e o giro de 360°, preserve colisão e partida, informe a origem dos recursos e não envie arquivos extraídos do Diablo nem chaves. O foco atual é Tristram; iluminação com sombras geométricas, geração procedural, voz e mais jogadores são trabalho futuro.
+**Resumo em português:** contribua com um objeto completo ou uma melhoria pequena e verificável. Compare a vista original e o giro de 360°, preserve colisão e partida, informe a origem dos recursos e não envie arquivos extraídos do Diablo nem chaves. O foco atual é Tristram; já há sombras geométricas das construções e um perfil de luz para modelos importados. Interiores iluminados, geração dos níveis procedurais, voz e mais jogadores são trabalho futuro.
 
 ## Understand the current prototype
 
@@ -26,7 +26,8 @@ For a clean Windows clone, follow [Building D3D](BUILDING-D3D.md). The root `bui
 In a configured Windows workspace, the current diagnostic build is:
 
 ```powershell
-.\build.ps1 -WithSmoke -Targets devilutionx,town_view_smoke
+.\build.ps1 -WithSmoke -Targets @('devilutionx','town_view_smoke','town_lighting_smoke')
+.\build\town_lighting_smoke.exe
 .\build\town_view_smoke.exe 'C:\path\to\your\Diablo' '.\build\assets' '.\diagnostics\local-review'
 ```
 
@@ -48,6 +49,8 @@ For procedural work, derive placement from the live map and the existing game se
 An asset proposal should record its author, license, original source, tool or generator version, reproducible settings and any transformation. Keep a master asset and a runtime asset separate. Record object origin, world scale, orientation, ground contact, material slots, UVs, triangle count and the intended native reference. An imported mesh must pass the same whole-object review as a procedural mesh.
 
 Prefer base-color textures without painted lighting or ground shadows where a clean, legitimately redistributable source is available. Keep normals and material properties explicit. The original game's baked light remains a compatibility constraint; copying it into an albedo texture does not implement 3D lighting.
+
+Use the shared [Tristram lighting reference](TRISTRAM-LIGHTING.md) for imported base-color assets. It applies light before the game-palette mapping, shares the sun direction with the shadow map, and retains ambient light in shadow. Keep that environment fixed when comparing a new model so material errors remain visible. Native painted materials still use compatibility shading; warm point lights are not yet active in the game.
 
 The current CPU depth map casts static architecture shadows from a directional light onto drawn receiving geometry. It caches construction and filters depth comparisons with receiver-plane bias. Trees, props, actors and moving lights still need caster support; baked surface illumination remains a compatibility constraint. Include shadow tests for roof overhangs, tree branches, character feet and moving actors as that support expands, without replacing collision rules with shadow geometry.
 

@@ -87,6 +87,8 @@ set(libdevilutionx_SRCS
   engine/render/town_scene_projection.cpp
   engine/render/town_shadow.cpp
   engine/render/town_model_import.cpp
+  engine/render/town_lighting.cpp
+  engine/render/town_lighting_profile.cpp
   engine/render/town_props.cpp
   engine/render/town_volume.cpp
   engine/render/town_vegetation.cpp

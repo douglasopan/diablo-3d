@@ -62,6 +62,8 @@ Do not submit game archives, extracted game artwork, saved characters, private c
 
 The [networking research](docs/NETWORKING-RESEARCH.md) explains the current limits and integration choices. Increasing a player constant alone will not produce a scalable server. These milestones are plans, not shipped capabilities.
 
+Imported 3D models now share a [Tristram light profile](docs/TRISTRAM-LIGHTING.md), calibrated against the original cabin's roof and walls. Base color is lit before mapping into the game palette. Warm interior lighting and timber floors follow this exterior calibration.
+
 ## Project identity and upstream
 
 Use the full [Diablo 3D banner](assets/branding/diablo3d-banner.png) for project pages and the square [D3D mark](assets/branding/d3d-avatar.png) for icons and project avatars. [Artwork provenance](assets/branding/README.md) records their origin. The new [animated menu logo](docs/ANIMATED-LOGO.md) uses the owner-provided PNG sequence. The older optional tool rebuilds an alternative locally from the user's own game data; those generated game-art replacements are not distributed here.
