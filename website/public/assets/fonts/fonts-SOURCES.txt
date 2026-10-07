@@ -1,0 +1,20 @@
+Local font assets for the D3D website. Retrieved 2026-10-07.
+No Google Fonts request is made by the published website.
+
+d3d-serif.woff2: Cormorant Garamond, normal variable weight 400-600, Latin.
+Official stylesheet:
+https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400..600&display=swap
+Official binary:
+https://fonts.gstatic.com/s/cormorantgaramond/v21/co3bmX5slCNuHLi8bLeY9MK7whWMhyjYqXtK.woff2
+License: fonts-cormorant-OFL.txt
+https://raw.githubusercontent.com/google/fonts/main/ofl/cormorantgaramond/OFL.txt
+
+d3d-sans.woff2: Manrope, normal variable weight 400-600, Latin.
+Official stylesheet:
+https://fonts.googleapis.com/css2?family=Manrope:wght@400..600&display=swap
+Official binary:
+https://fonts.gstatic.com/s/manrope/v20/xn7gYHE41ni1AdIRggexSg.woff2
+License: fonts-manrope-OFL.txt
+https://raw.githubusercontent.com/google/fonts/main/ofl/manrope/OFL.txt
+
+These are unchanged font binaries. D3D Serif and D3D Sans are CSS aliases.
