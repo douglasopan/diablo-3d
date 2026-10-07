@@ -1,0 +1,19 @@
+{
+  "sourceConversation": "https://chatgpt.com/share/6ac68fd7-4898-83e8-9ce3-9e4587c49645",
+  "sourceArchive": "diablo3d_frames_leve_640x160.zip",
+  "sourceArchiveSha256": "cf05a7c2bcef63097d6f0b94dd97940149cef22b9dc0e9efe08853218e30bca9",
+  "source": "Owner-provided independently generated transparent PNG animation",
+  "sourceFrames": 240,
+  "sourceWidth": 640,
+  "sourceHeight": 160,
+  "fps": 30,
+  "cycleDurationMs": 8000,
+  "transparentIndex": 250,
+  "adaptation": "Proportional resize, common 255-color palette, ordered alpha coverage",
+  "pcxRoundTrip": "exact indexed pixels and palette",
+  "outputs": [
+    {"file": "ui_art/d3d-menu.pcx", "width": 580, "frameHeight": 154, "frames": 240, "sha256": "7c2ed84892abae7094ce987d93a968cc1c12fb26d6ebeee5d5de297ea48b9a47", "bytes": 8917211},
+    {"file": "ui_art/d3d-title.pcx", "width": 620, "frameHeight": 216, "frames": 240, "sha256": "b3f5cad822d70a1e5cd4ff7552566244f72d1fccf0801f5f157f06aafce5b3cc", "bytes": 10371738},
+    {"file": "ui_art/d3d-pause.pcx", "width": 360, "frameHeight": 90, "frames": 240, "sha256": "8cf346df5271d743da98328659b205f44f21b9631cabf47e1147f487ba1651e1", "bytes": 3605952}
+  ]
+}

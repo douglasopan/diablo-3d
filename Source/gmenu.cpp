@@ -27,6 +27,7 @@
 #include "engine/demomode.h"
 #include "engine/load_cel.hpp"
 #include "engine/render/clx_render.hpp"
+#include "engine/render/d3d_logo.hpp"
 #include "engine/render/primitive_render.hpp"
 #include "engine/render/text_render.hpp"
 #include "headless_mode.hpp"
@@ -64,6 +65,8 @@ OptionalOwnedClxSpriteList optbar_cel;
 OptionalOwnedClxSpriteList PentSpin_cel;
 OptionalOwnedClxSpriteList option_cel;
 OptionalOwnedClxSpriteList sgpLogo;
+std::optional<D3dLogo> CustomPauseLogo;
+uint32_t CustomPauseLogoStartTicks;
 bool isDraggingSlider;
 TMenuItem *sgpCurrItem;
 int LogoAnim_tick;
@@ -195,6 +198,7 @@ void gmenu_draw_pause(const Surface &out)
 void FreeGMenu()
 {
 	sgpLogo = std::nullopt;
+	CustomPauseLogo = std::nullopt;
 	PentSpin_cel = std::nullopt;
 	option_cel = std::nullopt;
 	optbar_cel = std::nullopt;
@@ -212,9 +216,13 @@ void gmenu_init_menu()
 	if (HeadlessMode)
 		return;
 
-	sgpLogo = LoadOptionalCel("data\\hf_logo3", 430);
-	if (!sgpLogo.has_value())
-		sgpLogo = LoadCel("data\\diabsmal", 296);
+	CustomPauseLogo = LoadD3dLogo(D3dLogoKind::Pause);
+	sgpLogo = std::nullopt;
+	if (!CustomPauseLogo) {
+		sgpLogo = LoadOptionalCel("data\\hf_logo3", 430);
+		if (!sgpLogo.has_value())
+			sgpLogo = LoadCel("data\\diabsmal", 296);
+	}
 	PentSpin_cel = LoadCel("data\\pentspin", 48);
 	option_cel = LoadCel("data\\option", SliderMarkerWidth);
 	optbar_cel = LoadCel("data\\optbar", SliderValueBoxWidth);
@@ -227,6 +235,8 @@ bool gmenu_is_active()
 
 void gmenu_set_items(TMenuItem *pItem, void (*gmFunc)())
 {
+	if (pItem != nullptr && sgpCurrentMenu == nullptr && CustomPauseLogo)
+		CustomPauseLogoStartTicks = SDL_GetTicks();
 	PauseMode = 0;
 	isDraggingSlider = false;
 	sgpCurrentMenu = pItem;
@@ -254,17 +264,23 @@ void gmenu_draw(const Surface &out)
 		GameMenuMove();
 		if (gmenu_current_option != nullptr)
 			gmenu_current_option();
-		if (sgpLogo->numSprites() > 1) {
-			const uint32_t ticks = SDL_GetTicks();
-			if ((int)(ticks - LogoAnim_tick) > 25) {
-				++LogoAnim_frame;
-				LogoAnim_frame = LogoAnim_frame % sgpLogo->numSprites();
-				LogoAnim_tick = ticks;
-			}
-		}
 		const int uiPositionY = GetUIRectangle().position.y;
-		const ClxSprite sprite = (*sgpLogo)[LogoAnim_frame];
-		ClxDraw(out, { (gnScreenWidth - sprite.width()) / 2, 102 + uiPositionY }, sprite);
+		if (CustomPauseLogo) {
+			const uint32_t frame = D3dLogoFrameAt(SDL_GetTicks() - CustomPauseLogoStartTicks);
+			const ClxSprite sprite = CustomPauseLogo->sprites()[frame];
+			DrawD3dLogo(out, { (gnScreenWidth - sprite.width()) / 2, 102 + uiPositionY }, *CustomPauseLogo, frame);
+		} else {
+			if (sgpLogo->numSprites() > 1) {
+				const uint32_t ticks = SDL_GetTicks();
+				if ((int)(ticks - LogoAnim_tick) > 25) {
+					++LogoAnim_frame;
+					LogoAnim_frame = LogoAnim_frame % sgpLogo->numSprites();
+					LogoAnim_tick = ticks;
+				}
+			}
+			const ClxSprite sprite = (*sgpLogo)[LogoAnim_frame];
+			ClxDraw(out, { (gnScreenWidth - sprite.width()) / 2, 102 + uiPositionY }, sprite);
+		}
 		int y = 110 + uiPositionY;
 		TMenuItem *i = sgpCurrentMenu;
 		if (sgpCurrentMenu->fnMenu != nullptr) {

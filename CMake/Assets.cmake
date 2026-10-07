@@ -223,6 +223,12 @@ set(devilutionx_assets
   ui_art/dvl_lrpopup.clx
   ui_art/mainmenuw.clx)
 
+# Owner-provided D3D animation; independently generated, not game-archive art.
+list(APPEND devilutionx_assets
+  ui_art/d3d-menu.pcx
+  ui_art/d3d-title.pcx
+  ui_art/d3d-pause.pcx)
+
 if(NOT UNPACKED_MPQS)
   list(APPEND devilutionx_assets
     data/inv/objcurs-widths.txt)

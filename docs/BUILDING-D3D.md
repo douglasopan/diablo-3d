@@ -105,6 +105,18 @@ The release helper records an executable hash and summarizes the existing report
 
 ## Optional animated logo
 
+The normal build includes the owner's new 240-frame logo for the main, title and Escape menus. It repeats over eight seconds. See [ANIMATED-LOGO.md](ANIMATED-LOGO.md) for source provenance and conversion.
+
+To validate the custom loader, timing, transparency and palette changes without opening the game:
+
+```powershell
+.\build.ps1 -WithAnimatedLogoSmoke -Targets animated_logo_smoke
+.\build\animated_logo_smoke.exe
+.\build\animated_logo_smoke.exe '.\assets'
+```
+
+The following older utility remains available for a separate 15-frame alternative assembled from local game data:
+
 After building the game, compile the local logo tool and generate profile overrides from your own archive:
 
 ```powershell

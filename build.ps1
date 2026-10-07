@@ -3,6 +3,7 @@
     [switch]$SkipConfigure,
     [switch]$WithSmoke,
     [switch]$WithBranding,
+    [switch]$WithAnimatedLogoSmoke,
     [string[]]$Targets = @('devilutionx'),
     [ValidateSet('Release', 'Debug', 'RelWithDebInfo')]
     [string]$Configuration = 'Release',
@@ -99,6 +100,9 @@ if ($WithSmoke) {
 }
 if ($WithBranding) {
     $taskArguments += '-DBUILD_DIABLO_LOGO_TOOL=ON'
+}
+if ($WithAnimatedLogoSmoke) {
+    $taskArguments += '-DBUILD_ANIMATED_LOGO_SMOKE=ON'
 }
 
 if (-not $SkipConfigure) {

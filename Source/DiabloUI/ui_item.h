@@ -15,6 +15,8 @@
 
 namespace devilution {
 
+class D3dLogo;
+
 enum class UiType : uint8_t {
 	Text,
 	ArtText,
@@ -120,9 +122,11 @@ private:
 //=============================================================================
 class UiImageAnimatedClx : public UiItemBase {
 public:
-	UiImageAnimatedClx(ClxSpriteList list, SDL_Rect rect, UiFlags flags = UiFlags::None)
+	UiImageAnimatedClx(ClxSpriteList list, SDL_Rect rect, UiFlags flags = UiFlags::None, const D3dLogo *customLogo = nullptr, uint32_t animationStartTicks = 0)
 	    : UiItemBase(UiType::ImageAnimatedClx, rect, flags)
 	    , list_(list)
+	    , customLogo_(customLogo)
+	    , animationStartTicks_(animationStartTicks)
 	{
 	}
 
@@ -141,8 +145,13 @@ public:
 		return list_.numSprites();
 	}
 
+	[[nodiscard]] const D3dLogo *customLogo() const { return customLogo_; }
+	[[nodiscard]] uint32_t animationStartTicks() const { return animationStartTicks_; }
+
 private:
 	ClxSpriteList list_;
+	const D3dLogo *customLogo_;
+	uint32_t animationStartTicks_;
 };
 
 //=============================================================================

@@ -20,6 +20,7 @@
 #include "engine/load_clx.hpp"
 #include "engine/load_pcx.hpp"
 #include "engine/point.hpp"
+#include "engine/render/d3d_logo.hpp"
 #include "utils/algorithm/container.hpp"
 #include "utils/language.h"
 #include "utils/sdl_compat.h"
@@ -30,11 +31,18 @@ namespace devilution {
 namespace {
 
 OptionalOwnedClxSpriteList DiabloTitleLogo;
+std::optional<D3dLogo> CustomTitleLogo;
 
 std::vector<std::unique_ptr<UiItemBase>> vecTitleScreen;
 
 void TitleLoad()
 {
+	CustomTitleLogo = LoadD3dLogo(D3dLogoKind::Title);
+	if (CustomTitleLogo) {
+		ArtBackgroundWidescreen = std::nullopt;
+		LoadBackgroundArt("ui_art\\title");
+		return;
+	}
 	ArtBackgroundWidescreen = LoadOptionalClx("ui_art\\hf_titlew.clx");
 	if (ArtBackgroundWidescreen.has_value()) {
 		LoadBackgroundArt("ui_art\\hf_logo1", 16);
@@ -49,6 +57,7 @@ void TitleFree()
 	ArtBackground = std::nullopt;
 	ArtBackgroundWidescreen = std::nullopt;
 	DiabloTitleLogo = std::nullopt;
+	CustomTitleLogo = std::nullopt;
 
 	vecTitleScreen.clear();
 }
@@ -67,15 +76,20 @@ void UiTitleDialog()
 	} else {
 		UiAddBackground(&vecTitleScreen);
 
-		vecTitleScreen.push_back(std::make_unique<UiImageAnimatedClx>(
-		    *DiabloTitleLogo, MakeSdlRect(0, uiPosition.y + 182, 0, 0), UiFlags::AlignCenter));
+		if (CustomTitleLogo) {
+			vecTitleScreen.push_back(std::make_unique<UiImageAnimatedClx>(
+			    CustomTitleLogo->sprites(), MakeSdlRect(0, uiPosition.y + 182, 0, 0), UiFlags::AlignCenter, &*CustomTitleLogo, SDL_GetTicks()));
+		} else {
+			vecTitleScreen.push_back(std::make_unique<UiImageAnimatedClx>(
+			    *DiabloTitleLogo, MakeSdlRect(0, uiPosition.y + 182, 0, 0), UiFlags::AlignCenter));
+		}
 
 		const SDL_Rect rect = MakeSdlRect(uiPosition.x, uiPosition.y + 410, 640, 26);
 		vecTitleScreen.push_back(std::make_unique<UiArtText>(_("Copyright © 1996-2001 Blizzard Entertainment").data(), rect, UiFlags::AlignCenter | UiFlags::FontSize24 | UiFlags::ColorUiSilver));
 	}
 
 	bool endMenu = false;
-	const Uint32 timeOut = SDL_GetTicks() + 7000;
+	const Uint32 timeOut = SDL_GetTicks() + (CustomTitleLogo ? D3dLogoCycleDurationMs : 7000);
 
 	SDL_Event event;
 	while (!endMenu && SDL_GetTicks() < timeOut) {

@@ -41,6 +41,7 @@
 #include "engine/load_pcx.hpp"
 #include "engine/palette.h"
 #include "engine/render/clx_render.hpp"
+#include "engine/render/d3d_logo.hpp"
 #include "engine/render/text_render.hpp"
 #include "engine/sound.h"
 #include "engine/surface.hpp"
@@ -90,6 +91,8 @@ OptionalOwnedClxSpriteList ArtCursor;
 std::size_t SelectedItem = 0;
 
 namespace {
+
+std::optional<D3dLogo> CustomMenuLogo;
 
 OptionalOwnedClxSpriteList ArtHero;
 std::vector<uint8_t> ArtHeroPortraitOrder;
@@ -651,9 +654,13 @@ void LoadHeros()
 
 void LoadUiGFX()
 {
-	ArtLogo = LoadPcxSpriteList("ui_art\\hf_logo2", /*numFrames=*/16, /*transparentColor=*/0, nullptr, false);
-	if (!ArtLogo.has_value()) {
-		ArtLogo = LoadPcxSpriteList("ui_art\\smlogo", /*numFrames=*/15, /*transparentColor=*/250);
+	CustomMenuLogo = LoadD3dLogo(D3dLogoKind::Menu);
+	ArtLogo = std::nullopt;
+	if (!CustomMenuLogo) {
+		ArtLogo = LoadPcxSpriteList("ui_art\\hf_logo2", /*numFrames=*/16, /*transparentColor=*/0, nullptr, false);
+		if (!ArtLogo.has_value()) {
+			ArtLogo = LoadPcxSpriteList("ui_art\\smlogo", /*numFrames=*/15, /*transparentColor=*/250);
+		}
 	}
 	DifficultyIndicator = LoadPcx("ui_art\\r1_gry", /*transparentColor=*/0);
 	ArtFocus[FOCUS_SMALL] = LoadPcxSpriteList("ui_art\\focus16", /*numFrames=*/8, /*transparentColor=*/250);
@@ -683,6 +690,7 @@ void UnloadUiGFX()
 	for (auto &art : ArtFocus)
 		art = std::nullopt;
 	ArtLogo = std::nullopt;
+	CustomMenuLogo = std::nullopt;
 	DifficultyIndicator = std::nullopt;
 }
 
@@ -790,6 +798,11 @@ void UiAddBackground(std::vector<std::unique_ptr<UiItemBase>> *vecDialog)
 
 void UiAddLogo(std::vector<std::unique_ptr<UiItemBase>> *vecDialog, int y)
 {
+	if (CustomMenuLogo) {
+		vecDialog->push_back(std::make_unique<UiImageAnimatedClx>(
+		    CustomMenuLogo->sprites(), MakeSdlRect(0, y, 0, 0), UiFlags::AlignCenter, &*CustomMenuLogo, SDL_GetTicks()));
+		return;
+	}
 	vecDialog->push_back(std::make_unique<UiImageAnimatedClx>(
 	    *ArtLogo, MakeSdlRect(0, y, 0, 0), UiFlags::AlignCenter));
 }
@@ -899,12 +912,20 @@ void Render(const UiImageClx &uiImage)
 
 void Render(const UiImageAnimatedClx &uiImage)
 {
-	const ClxSprite sprite = uiImage.sprite(GetAnimationFrame(uiImage.numFrames()));
+	const D3dLogo *custom = uiImage.customLogo();
+	const uint32_t frame = custom != nullptr
+	    ? D3dLogoFrameAt(SDL_GetTicks() - uiImage.animationStartTicks())
+	    : GetAnimationFrame(uiImage.numFrames());
+	const ClxSprite sprite = uiImage.sprite(static_cast<uint16_t>(frame));
 	int x = uiImage.m_rect.x;
 	if (uiImage.isCentered()) {
 		x += GetCenterOffset(sprite.width(), uiImage.m_rect.w);
 	}
-	RenderClxSprite(Surface(DiabloUiSurface()), sprite, { x, uiImage.m_rect.y });
+	if (custom != nullptr) {
+		DrawD3dLogo(Surface(DiabloUiSurface()), { x, uiImage.m_rect.y + sprite.height() - 1 }, *custom, frame);
+	} else {
+		RenderClxSprite(Surface(DiabloUiSurface()), sprite, { x, uiImage.m_rect.y });
+	}
 }
 
 void Render(const UiArtTextButton &uiButton)

@@ -16,6 +16,7 @@ A community prototype bringing Diablo 1's Tristram into a rotatable 3D view, bui
 - Characters have depth. Warrior and cow reconstruction can use eight original views; unseen anatomy for single-view townspeople is inferred.
 - Walking, collisions, inventory and NPC interaction use the existing game simulation.
 - Windows build, headless scene diagnostics and native-view comparison tools are included as source.
+- The owner-provided [animated logo](docs/ANIMATED-LOGO.md) contains 240 frames over eight seconds and covers the main, title and Escape menus.
 
 This is an **offline, CPU-rendered prototype for Tristram**. Dungeon levels still use the original renderer. The reconstructed shapes and materials need substantial visual refinement, particularly unseen faces, characters and compound scenery. Meshy-generated candidates are experiments and are not integrated game models.
 
@@ -47,7 +48,7 @@ The helper build defaults to **`NONET=ON`**. Voice, larger sessions and multipla
 
 We especially welcome contributors for houses, the cathedral exterior, trees, rocks, props, townspeople and characters. Match composition, scale, silhouette, doors, windows, ground contact and placement at the original camera angle. Then complete the unseen faces and review the entire object through 360°.
 
-Start with the [3D asset issue form](https://github.com/douglasopan/diablo-3d/issues/new?template=3d_asset.yml), read the [contribution guide](docs/CONTRIBUTING.md), or coordinate in [Discord](https://discord.gg/4YxQ7s69S). Procedural geometry and asset-import contributions are welcome alongside independently created art with documented provenance.
+Consult the [Tristram asset catalog](docs/ASSET-CATALOG.md), reserve its model ID in one issue, and use the [3D asset issue form](https://github.com/douglasopan/diablo-3d/issues/new?template=3d_asset.yml). Read the [contribution guide](docs/CONTRIBUTING.md) or coordinate in [Discord](https://discord.gg/4YxQ7s69S). Procedural geometry and asset-import contributions are welcome alongside independently created art with documented provenance.
 
 Do not submit game archives, extracted game artwork, saved characters, private credentials or paid-service keys. Local tools can read a user's own archives; their generated extracts are not part of this repository.
 
@@ -63,7 +64,7 @@ The [networking research](docs/NETWORKING-RESEARCH.md) explains the current limi
 
 ## Project identity and upstream
 
-Use the full [Diablo 3D banner](assets/branding/diablo3d-banner.png) for project pages and the square [D3D mark](assets/branding/d3d-avatar.png) for icons and project avatars. [Artwork provenance](assets/branding/README.md) records their origin. The optional menu-logo tool rebuilds its animation locally from the user's own game data; those generated game-art replacements are not distributed here.
+Use the full [Diablo 3D banner](assets/branding/diablo3d-banner.png) for project pages and the square [D3D mark](assets/branding/d3d-avatar.png) for icons and project avatars. [Artwork provenance](assets/branding/README.md) records their origin. The new [animated menu logo](docs/ANIMATED-LOGO.md) uses the owner-provided PNG sequence. The older optional tool rebuilds an alternative locally from the user's own game data; those generated game-art replacements are not distributed here.
 
 This independent fan project is not affiliated with Blizzard Entertainment. Diablo and associated marks belong to their respective owners. Public source access does not grant rights to proprietary game assets.
 

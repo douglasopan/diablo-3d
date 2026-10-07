@@ -7,3 +7,5 @@
 The first two images identify this independent fan project. They do not contain archived game sprite files. Diablo and related names and marks belong to their respective owners. These files do not transfer third-party trademark rights.
 
 Do not commit the PCX animations produced from a user's game archives. Build those replacements locally with `Atualizar-Logo.ps1`; the generated outputs and local profile are ignored.
+
+The new menu/title/Escape animation is documented in [ANIMATED-LOGO.md](../../docs/ANIMATED-LOGO.md), with source and adapted-file hashes in `animated-logo-provenance.json`. The three `assets/ui_art/d3d-*.pcx` files come from the owner-provided generated animation.
