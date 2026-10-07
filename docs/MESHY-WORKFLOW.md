@@ -58,3 +58,13 @@ Describe that inventory consistently in every multi-view input: preserve the ori
 Interior illumination comes from candles, candelabra, hearths and fires appropriate to Diablo's setting. Request unlit base-color materials without electric bulbs, artificial lighting baked into walls or painted ground shadows. Place the actual fire meshes and point emitters in the runtime interior, with warm colors and independent subtle flicker. Plan more than one emitter where the original visible glow requires it, and validate their combined contribution instead of multiplying one calibrated light's intensity indiscriminately.
 
 Check all views before adoption. Each hole must continue through the outer mesh and inner shell, show the same interior, and match its light-visibility boundary. Visual openness never overrides the native map's collision. Sloping roof apertures need an appropriate occlusion representation; the current axis-aligned cabin fixture is not proof that every roof gap already works.
+
+## Characters: reuse a rig or request automatic rigging
+
+Inspect a downloaded character's existing skeleton, skin weights and clips first. Keep its complete master and attribution record. The [reference-source audit](REFERENCE-SOURCES.md) records the supplied Sketchfab Diablo candidate; its published rig and one animation do not yet prove compatibility with native combat or fidelity to Diablo I.
+
+Meshy's [Rigging API](https://docs.meshy.ai/en/api/rigging) is an alternative for textured humanoid bipeds with clearly separated limbs. It accepts a textured GLB or an eligible Meshy task; external GLBs must face +Z. The API does not promise suitable rigs for quadrupeds or unusual anatomy. Review deformation and any tail, wing or attachment bones separately.
+
+The [Animation API](https://docs.meshy.ai/en/api/animation) applies preset actions to a completed Meshy rig. As checked on 7 October 2026, the [price table](https://docs.meshy.ai/en/api/pricing) lists 5 credits for rigging and 3 per preset action. Record actual costs with each task; do not spend credits merely to replace a usable existing rig.
+
+The current D3DMESH1 town format is static and cannot preserve bones, weights or animation tracks. Character integration needs a separate animated visual path following the [native animation contract](MODEL-ANIMATION-CONTRACT.md). Game state and native event timing control movement, hits, projectiles and death; clips only draw the corresponding pose. Automatic rigging does not provide that synchronization. No rigging request or character integration has been executed by this audit.
