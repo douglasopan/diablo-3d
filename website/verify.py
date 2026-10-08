@@ -137,8 +137,10 @@ def verify():
         for route, expected_ids in (('index.html', [*SHOWCASE_VIDEO_IDS.values(), VIDEO_IDS['menu-rock2']]), ('musica/index.html', list(VIDEO_IDS.values())), ('devlog/interfaces-diablo-r2/index.html', list(SHOWCASE_VIDEO_IDS.values()))):
             video_page = documents[root / (language + route)]
             buttons = [a for t, a in video_page.tags if t == 'button' and 'data-youtube-id' in a]
-            assert [a['data-youtube-id'] for a in buttons] == expected_ids, 'Only the confirmed public videos may be offered'
+            assert [a['data-youtube-id'] for a in buttons] == [video_id for video_id in expected_ids for _ in range(2)], 'Each confirmed video needs a working poster play and text trigger'
             assert all('hidden' in a and a.get('aria-controls') in video_page.ids for a in buttons), 'On-demand buttons require a real local target and progressive enhancement'
+            assert all(a.get('aria-label') and a.get('type') == 'button' for a in buttons), 'Every play trigger must be keyboard-accessible and labelled'
+            assert len([a for a in buttons if 'youtube-video-play' in a.get('class', '').split()]) == len(expected_ids), 'Every poster needs a real play button'
             assert sum(t == 'script' and urlsplit(a.get('src', '')).path == build.PREFIX + '/youtube-videos.js' and 'defer' in a for t, a in video_page.tags) == 1
         locale = 'en' if language else 'pt-BR'
         published_manifest = json.loads((root / (language + 'soundtrack.json')).read_text(encoding='utf-8'))

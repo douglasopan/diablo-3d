@@ -40,6 +40,18 @@ def _external_link(label, href, class_name=''):
     )
 
 
+def _player_button(slot_id, video_id, player_title, label, title, *, icon=False, status_message=''):
+    css = 'youtube-video-symbol youtube-video-play' if icon else 'youtube-video-load'
+    content = '<span aria-hidden="true">▶</span>' if icon else escape(label)
+    status = f' data-youtube-status-message="{escape(status_message, quote=True)}"' if status_message else ''
+    return (
+        f'<button type="button" class="{css}" hidden data-enhancement="youtube" '
+        f'data-youtube-id="{video_id}" data-youtube-title="{escape(player_title, quote=True)}"{status} '
+        f'aria-controls="{slot_id}" aria-expanded="false" '
+        f'aria-label="{escape(label + ": " + title, quote=True)}">{content}</button>'
+    )
+
+
 def videos_section(language, url, featured=False):
     """Render PT/EN cards; ``url`` resolves the site's internal music route.
 
@@ -66,8 +78,8 @@ def videos_section(language, url, featured=False):
         )
     )
     load_note = text(
-        'O player do YouTube só carrega quando você escolhe “Ouvir aqui”.',
-        'The YouTube player loads only when you choose “Listen here”.',
+        'Clique no play ou em “Ouvir aqui” para reproduzir neste card. O player do YouTube só carrega após esse clique.',
+        'Click play or “Listen here” to play in this card. The YouTube player loads only after that click.',
     )
     library_text = text('Ouvir e baixar na biblioteca da trilha', 'Listen and download in the soundtrack library')
     keys = ['menu-rock2'] if featured else list(VIDEO_IDS)
@@ -81,10 +93,10 @@ def videos_section(language, url, featured=False):
         version = text('Exportação alternativa', 'Alternate export') if key == 'town-third' else text('Regravação / reinterpretação', 'Cover / reinterpretation')
         cards.append(f'''<article class="youtube-video-card" data-youtube-card>
 <div class="youtube-video-slot" id="{slot_id}" data-youtube-slot>
-<div class="youtube-video-poster" aria-hidden="true"><span class="youtube-video-mark">D3D</span><span class="youtube-video-symbol">▶</span><span class="youtube-video-poster-title">{escape(title)}</span></div>
+<div class="youtube-video-poster"><span class="youtube-video-mark" aria-hidden="true">D3D</span>{_player_button(slot_id, video_id, player_title, play_label, title, icon=True)}<span class="youtube-video-poster-title" aria-hidden="true">{escape(title)}</span></div>
 </div>
 <div class="youtube-video-copy"><p class="youtube-video-kind">{escape(version)}</p><h3>{escape(title)}</h3><p class="youtube-video-credit">{escape(credit_text(language))}</p>
-<div class="youtube-video-actions"><button type="button" class="youtube-video-load" hidden data-enhancement="youtube" data-youtube-id="{video_id}" data-youtube-title="{escape(player_title, quote=True)}" aria-controls="{slot_id}" aria-expanded="false" aria-label="{escape(play_label + ': ' + title, quote=True)}">{escape(play_label)}</button>{_external_link(text('Ouvir no YouTube', 'Listen on YouTube'), 'https://www.youtube.com/watch?v=' + video_id)}</div>
+<div class="youtube-video-actions">{_player_button(slot_id, video_id, player_title, play_label, title)}{_external_link(text('Ouvir no YouTube', 'Listen on YouTube'), 'https://www.youtube.com/watch?v=' + video_id)}</div>
 <p class="sr-only" data-youtube-status role="status" aria-live="polite"></p></div>
 </article>''')
     actions = ''.join((
@@ -127,15 +139,15 @@ def showcase_section(language, url):
             'Griswold e Ogden em giro de 360° para revisão visual.',
             'Griswold and Ogden in a 360° turntable for visual review.',
         )
-        status_message = text('Use os controles do vídeo para começar a assistir.', 'Use the video controls to start watching.')
+        status_message = text('Player aberto. Use os controles do vídeo para reprodução e volume.', 'Player opened. Use the video controls for playback and volume.')
         watch_url = 'https://www.youtube.com/shorts/' + video_id if short else 'https://www.youtube.com/watch?v=' + video_id
         css = 'youtube-showcase-short' if short else 'youtube-showcase-main'
         cards.append(f'''<article class="youtube-video-card {css}" data-youtube-card>
 <div class="youtube-video-slot" id="{slot_id}" data-youtube-slot>
-<div class="youtube-video-poster" aria-hidden="true"><span class="youtube-video-mark">D3D · WIP</span><span class="youtube-video-symbol">▶</span><span class="youtube-video-poster-title">Griswold &amp; Ogden</span></div>
+<div class="youtube-video-poster"><span class="youtube-video-mark" aria-hidden="true">D3D · WIP</span>{_player_button(slot_id, video_id, player_title, play_label, title, icon=True, status_message=status_message)}<span class="youtube-video-poster-title" aria-hidden="true">Griswold &amp; Ogden</span></div>
 </div>
 <div class="youtube-video-copy"><p class="youtube-video-kind">{escape(kind)}</p><h3>{escape(title)}</h3><p class="youtube-video-credit">{escape(explanation)}</p>
-<div class="youtube-video-actions"><button type="button" class="youtube-video-load" hidden data-enhancement="youtube" data-youtube-id="{video_id}" data-youtube-title="{escape(player_title, quote=True)}" data-youtube-status-message="{escape(status_message, quote=True)}" aria-controls="{slot_id}" aria-expanded="false" aria-label="{escape(play_label + ': ' + title, quote=True)}">{escape(play_label)}</button>{_external_link(text('Assistir no YouTube', 'Watch on YouTube'), watch_url)}</div>
+<div class="youtube-video-actions">{_player_button(slot_id, video_id, player_title, play_label, title, status_message=status_message)}{_external_link(text('Assistir no YouTube', 'Watch on YouTube'), watch_url)}</div>
 <p class="sr-only" data-youtube-status role="status" aria-live="polite"></p></div>
 </article>''')
     actions = ''.join((
@@ -143,7 +155,7 @@ def showcase_section(language, url):
         _external_link(text('Participar no Discord', 'Join the Discord'), DISCORD, 'button secondary'),
     ))
     return f'''<section class="youtube-videos-section youtube-videos-showcase" aria-labelledby="youtube-showcase-heading">
-<div class="youtube-videos-intro"><p class="eyebrow">{escape(text('MODELOS EM DESENVOLVIMENTO · WIP', 'MODELS IN DEVELOPMENT · WIP'))}</p><h2 id="youtube-showcase-heading">{escape(text('Griswold e Ogden em 360°', 'Griswold and Ogden in 360°'))}</h2><p>{escape(text('Uma prévia de 28 segundos dos dois modelos em desenvolvimento, com um vídeo principal horizontal e um Short dos mesmos personagens.', 'A 28-second preview of the two models in development, with a main horizontal video and a Short of the same characters.'))}</p><p>{escape(text('São estudos visuais em revisão. Os vídeos não mostram gameplay nem comprovam integração no jogo ou aprovação artística.', 'These are visual studies under review. The videos do not show gameplay or establish in-game integration or artistic approval.'))}</p><p class="youtube-videos-note">{escape(text('O player só carrega ao escolher “Assistir aqui”.', 'The player loads only when you choose “Watch here”.'))} <a href="{escape(url('/devlog/'), quote=True)}">{escape(text('Acompanhar o devlog', 'Follow the devlog'))}</a>.</p></div>
+<div class="youtube-videos-intro"><p class="eyebrow">{escape(text('MODELOS EM DESENVOLVIMENTO · WIP', 'MODELS IN DEVELOPMENT · WIP'))}</p><h2 id="youtube-showcase-heading">{escape(text('Griswold e Ogden em 360°', 'Griswold and Ogden in 360°'))}</h2><p>{escape(text('Uma prévia de 28 segundos dos dois modelos em desenvolvimento, com um vídeo principal horizontal e um Short dos mesmos personagens.', 'A 28-second preview of the two models in development, with a main horizontal video and a Short of the same characters.'))}</p><p>{escape(text('São estudos visuais em revisão. Os vídeos não mostram gameplay nem comprovam integração no jogo ou aprovação artística.', 'These are visual studies under review. The videos do not show gameplay or establish in-game integration or artistic approval.'))}</p><p class="youtube-videos-note">{escape(text('Clique no play ou em “Assistir aqui” para reproduzir neste card. O player só carrega após esse clique.', 'Click play or “Watch here” to play in this card. The player loads only after that click.'))} <a href="{escape(url('/devlog/'), quote=True)}">{escape(text('Acompanhar o devlog', 'Follow the devlog'))}</a>.</p></div>
 <div class="youtube-video-grid">{''.join(cards)}</div>
 <div class="youtube-videos-community actions">{actions}</div>
 </section>'''

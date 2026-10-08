@@ -34,6 +34,8 @@ O build valida o manifesto contra o catálogo atual e lê os MP3s reais, incluin
 
 ## Player da biblioteca
 
+**Correção dos plays nos cards, 8 de outubro:** os círculos ▶ das músicas e dos vídeos WIP eram spans decorativos, sem ação. Agora são botões nativos acessíveis por clique, Enter e Espaço, com o mesmo comando de “Ouvir aqui”/“Assistir aqui”. Esse clique cria o player no card e solicita reprodução (`autoplay=1`, permissão `autoplay` e `playsinline`); nenhum iframe do YouTube é carregado antes da escolha. Ao abrir outro vídeo, o anterior é descarregado e seu poster restaurado; os players de áudio locais são pausados para evitar sobreposição. Iniciar o áudio local também encerra o iframe ativo. Links externos continuam disponíveis sem JavaScript. A política do navegador ou a disponibilidade do YouTube ainda podem impedir início automático. Não altera MP3s, tags, créditos, catálogo ou player nativo da biblioteca.
+
 Há um único player HTML nativo com controles de reprodução, volume e posição, sem início automático. Os botões da lista selecionam a faixa nesse mesmo player e seguem para a próxima ao terminar; a última encerra a sequência. Volume e silêncio podem ser lembrados localmente. Títulos, durações, crédito e downloads ficam acessíveis sem JavaScript; cada arquivo também pode ser aberto diretamente. O player de fundo é omitido nessa página, evitando reprodução simultânea mesmo sem JavaScript.
 
 ## Música de fundo nas demais páginas

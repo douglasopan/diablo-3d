@@ -22,6 +22,7 @@
 }
 .youtube-video-slot {
   width: 100%;
+  min-height: 201px; /* 200px player plus the bottom border. */
   aspect-ratio: 16 / 9;
   overflow: hidden;
   background: #0c0d0b;
@@ -64,6 +65,15 @@
   border-radius: 50%;
   color: var(--gold-light);
   font-size: 1rem;
+}
+.youtube-video-play {
+  flex-shrink: 0;
+  background: transparent;
+  transition: background .15s ease, border-color .15s ease;
+}
+.youtube-video-play:hover {
+  background: rgb(205 164 99 / 18%);
+  border-color: var(--gold-light);
 }
 .youtube-video-poster-title {
   max-width: 100%;
