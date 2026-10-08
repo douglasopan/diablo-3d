@@ -83,6 +83,7 @@ set(libdevilutionx_SRCS
   engine/render/automap_render.cpp
   engine/render/d3d_logo.cpp
   engine/render/d3d_menu_presentation.cpp
+  engine/render/d3d_hud_presentation.cpp
   engine/render/d3d_ui_layout.cpp
   engine/render/scrollrt.cpp
   engine/render/town_view.cpp

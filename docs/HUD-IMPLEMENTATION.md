@@ -6,6 +6,45 @@ O escopo é refazer a apresentação das funções existentes e permitir editar 
 
 O alinhamento com o chat do estudo gerou novas referências funcionais [16:9](hud-study/images/07-hud-native-16x9-v1.png) e [4:3](hud-study/images/08-hud-native-4x3-v1.png), a partir da captura do HUD original fornecida pelo usuário. Os prompts e a origem estão em [native-hud-r1.json](hud-study/native-hud-r1.json). São conceitos visuais para orientar a apresentação; não são capturas da implementação nem substituem automaticamente uma revisão artística aceita.
 
+## Acabamento HD reaberto por feedback
+
+O feedback posterior do usuário, “o HUD vc não terminou o HUD ingame NOVO!”, reabre o acabamento principal. A correção abaixo agrupou os controles e resolveu defeitos funcionais usando arte nativa ampliada; ela não entregou os materiais e esculturas novos das referências. Esse é o requisito que motiva esta revisão, preservando as etapas anteriores como histórico. Esc, configurações, submenus e mundo continuam com seus respectivos responsáveis.
+
+O candidato `assets/d3d-ui/hud/r1/` contém seis PNGs autorais produzidos pelo gerador integrado: chassis, botão sem legenda, placa escura, suporte esculpido e líquidos vermelho/azul. Os originais foram copiados sem edição; [prompts.json](../assets/d3d-ui/hud/r1/prompts.json) registra cada pedido e a referência 07. O contrato `skin.json` registra as regiões medidas, bordas de nine-slice, abertura circular e hashes. O estado é candidato técnico, `accepted: false`; não constitui aprovação artística nem substitui os conceitos anteriores.
+
+A arte RGBA permanece em sua resolução de origem. `engine/render/d3d_hud_presentation.*` prepara a base limpa, a skin e o conteúdo dinâmico em camadas explícitas. A caixa de informações e as seis legendas traduzidas possuem desenho de foreground separado, sem placas antigas. O índice 1 identifica transparência nesses buffers; preto 0 continua opaco. Cinto, magia atual, valores, estados MP, cursor e avisos continuam vindo do jogo. Os mesmos 13 retângulos e handlers permanecem; a geração não acrescenta ações. O brilho dos PNGs usa uma LUT obtida pela função nativa `ApplyGlobalBrightness`, preservando alfa; os planos indexados não recebem essa transformação novamente.
+
+O Godot passa a usar os mesmos PNGs e medidas. Suas fontes e valores demonstrativos não executam o jogo: a fonte nativa do runtime continua rasterizada, enquanto a prévia usa uma fonte de sistema. Na caixa compacta de 960 × 540, a fonte nativa de 12 pixels autorais corresponde a aproximadamente 13,5 pixels físicos; cinco linhas de 16 pixels não caberiam nos 72 pixels disponíveis. Não apresentar essa prévia como equivalência tipográfica HD final.
+
+**Revisão HD integrada e instalada em 8 de outubro, 09:08:58 (Brasília).** O principal integrou os hooks de `scrollrt`, `dx`, `display`, `town_presentation`, cobertura de UI, `inv` e CMake. Cobertura não-HUD é explícita, inclusive janelas desenhadas depois do HUD. Em falha de preparação, sobreposição sem cobertura segura ou fades sem contrato RGB, o quadro nativo permanece disponível. A paleta preta impede flashes durante fades; `ClearScreenBuffer` invalida o quadro retido, evitando HUD antigo durante carregamento. Texturas são liberadas antes do renderer.
+
+Validação desta revisão antes da integração nativa: **1.533 verificações de layout e 13 renders do Godot, sem falhas**, incluindo 960 × 540, Full HD, ultrawide 3440, 13 áreas de clique, MP e 0/50/100. Após o acabamento do vidro vazio, **dois renders focados adicionais**, sem falhas, verificaram reflexos neutros e ausência de pixels dominantes vermelhos/azuis em 0%. Os seis PNGs passaram em **18 verificações** de dimensões, hashes e alfa. A exportação conserva Menu e terceiros.
+
+Evidência Godot privada: `editor/godot/local/hud-visual-tests/hud-hd-*.png` e `results-glass-focused.json`. A prévia usa oito células vazias, magia sem seleção e informação demonstrativa. São renders do editor sobre fundo neutro, não capturas de uma partida nem prova dos handlers.
+
+### Validação integrada da revisão HD
+
+O build Windows passou. A fixture privada usa `HUD_HD_PRODUCTION_HOOKS`, sem shims, assets reais e composição SDL fora da janela da partida: **278 verificações, 13 casos, 15 PNGs**, todos apresentados com os 13 retângulos intactos. Inclui 960×540, Full HD, ultrawide, 0/50/100%, cinco linhas, pressionado, MP e mundo GPU 2×, inclusive 853×480 apresentado em 1920×1080. Gates de paleta preta e invalidação pelo `ClearScreenBuffer` passaram. Modelos, luz, perfil privado e PNGs autorais foram preservados. Os diagnósticos nativos passaram novamente: **946 verificações do HUD** e **59.452 de configurações**.
+
+A otimização R3 converte/restaura somente os limites necessários da base e atualiza o foreground pela união da área atual/anterior. O canvas completo de foreground conserva a fase de amostragem em escalas fracionárias. Os **15 PNGs R3 são idênticos aos R1**, por pixels decodificados e SHA dos arquivos, incluindo 853→1920. A redução da área de conversão/upload não reduziu a resolução da arte. Recibos privados: `diagnostics/hud-hd-regression-20261008/final-production-03/` e `diagnostics/hud-hd-20261008/optimization-r3-qa/`.
+
+Medição aquecida, cinco aquecimentos e 15 amostras por caso, sem construção do foreground, mundo, cold pass, readback, captura ou PNG no cronômetro:
+
+| Apresentação SDL | Resolução | Mediana R3 | p95 R3 |
+| --- | --- | ---: | ---: |
+| Acelerada `direct3d`, janela oculta, vsync desligado | 960×540 | 0,1851 ms | 0,2080 ms |
+| Acelerada `direct3d`, janela oculta, vsync desligado | 1920×1080 | 0,4530 ms | 0,4950 ms |
+| Software | 960×540 | 1,0130 ms | 1,1049 ms |
+| Software | 1920×1080 | 3,8736 ms | 6,6670 ms |
+| Software com mundo GPU 2× já retido | 960×540 | 1,2053 ms | 1,4665 ms |
+| Software | 3440×1440 | 7,6832 ms | 8,0063 ms |
+
+O escopo é `RenderD3dHudPresentation` mais `SDL_RenderFlush`; no renderer acelerado mede submissão/custo CPU da API, **sem aguardar conclusão da GPU**. A mediana Full HD acelerada anterior era 4,067 ms. Esses números não são FPS sustentado nem tempo total da partida. Evidência: `accel-production-03/` e `perf-production-03/`, na pasta privada da fixture.
+
+O executável instalado pelo mesmo `Iniciar-Tristram.cmd` tem SHA-256 `a6e78ae4301b2107572bfa54a90e060c1d7286640f3e83314c72c0c3a24e752e`. Os três aliases receberam bytes idênticos, com backup e duas verificações de ausência de jogo aberto. Os 39 arquivos do perfil e o launcher ficaram intactos por hash/tamanho/data. Recibo: `diagnostics/hud-hd-regression-20261008/installed-20261008T120858Z/receipt.json`.
+
+Limites: capturas técnicas offscreen, `runningGame: false`, `visualApproval: false`, `accepted: false`; a revisão artística na partida continua com o usuário. Não houve injeção de falha SDL tardia. Os builds SDL1/SDL3 não foram executados; os caminhos condicionais tiveram revisão estática. Os resultados históricos abaixo são entregas anteriores e não substituem este recibo.
+
 ## Correção da composição após revisão na partida
 
 Em 8 de outubro, o usuário reportou que o HUD estava visualmente incorreto. A captura real mostrou utilitários em uma fileira na extremidade direita, símbolos provisórios ampliados, magia sobre o cinto e globos sem seus suportes completos. O defeito reabre exclusivamente a apresentação principal: a integração anterior preservava os handlers, mas não reproduzia a composição agrupada das referências 07/08. As capturas sintéticas anteriores já mostravam essa divergência; ausência de colisão geométrica não era evidência de fidelidade artística.
@@ -24,13 +63,13 @@ Estado: build Windows, diagnóstico nativo e composição integrada SDL passaram
 
 ## Comportamento preservado
 
-- Vida e mana usam os valores e os sprites nativos. A composição conserva as duas regiões e os limites de preenchimento dos globos originais. As preferências de mostrar números e a restrição de mana continuam vigentes.
+- Vida e mana usam os valores nativos e mantêm os limites de preenchimento, as preferências de mostrar números e a restrição de mana. O fallback conserva os sprites herdados; a revisão HD apresenta esses mesmos recursos com as novas texturas.
 - Os oito espaços do cinto usam `SpdList`, desenho de itens, contorno, requisitos, atalhos, uso, retirada e colocação nativos. Slots vazios também mostram os atalhos realmente configurados. Desenho, hover, clique e arraste consultam os mesmos retângulos.
 - A magia atual abre a lista nativa, incluindo Shift para limpar a seleção. As teclas configuradas conservam a seleção pelos handlers originais; não há uma fileira adicional de botões de magia.
 - Personagem, inventário, livro de magias, missões, automapa e menu conservam seus handlers. O botão de mapa aciona o automapa existente; esta entrega não implementa um minimapa novo.
 - Comunicação e modo amigável continuam condicionados à disponibilidade nativa no modo multijogador.
 
-O desenho usa globos e ícones originais em placas escuras com molduras douradas, seguindo a composição escolhida. Não equivale à reprodução integral da arte dos conceitos. Os submenus, lojas, livro e painéis ainda usam a apresentação herdada. Chat, controles virtuais e os menus de modificador do gamepad usam o painel original para conservar seu desenho e navegação. Em telas nas quais os painéis laterais podem cobrir toda a vista, abrir um deles também restaura o painel original: a faixa compacta nova cruzaria os últimos 16 pixels do painel lateral nativo. A mudança de apresentação força redesenho completo para não deixar imagens antigas.
+A correção anterior usa globos e ícones originais em placas escuras com molduras douradas e não equivale à reprodução integral da arte dos conceitos. A revisão HD substitui seus materiais sem ampliar o escopo. Os submenus, lojas, livro e painéis ainda usam a apresentação herdada. Chat, controles virtuais e os menus de modificador do gamepad usam o painel original para conservar seu desenho e navegação. Em telas nas quais os painéis laterais podem cobrir toda a vista, abrir um deles também restaura o painel original: a faixa compacta nova cruzaria os últimos 16 pixels do painel lateral nativo. A mudança de apresentação força redesenho completo para não deixar imagens antigas.
 
 ## Editar visualmente
 

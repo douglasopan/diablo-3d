@@ -176,5 +176,48 @@ bool RenderTownPresentationLayers(SDL_Renderer *renderer, SDL_Surface *logicalOu
 #endif
 }
 
+bool RestoreTownPresentationWorldRegions(SDL_Renderer *renderer,
+    std::span<const SDL_Rect> footprints)
+{
+	if (renderer == nullptr || renderer != CachedRenderer
+	    || !WorldTexture || !WorldColors || !UiColors
+	    || WorldColors->w != UiColors->w * 2
+	    || WorldColors->h <= 0 || WorldColors->h % 2 != 0)
+		return false;
+	const SDL_Rect bounds { 0, 0, UiColors->w, UiColors->h };
+	const int worldHeight = WorldColors->h / 2;
+	// Validate every region before issuing the first draw command.
+	for (const SDL_Rect &footprint : footprints) {
+		SDL_Rect clipped;
+#ifdef USE_SDL3
+		if (!SDL_GetRectIntersection(&bounds, &footprint, &clipped))
+#else
+		if (SDL_IntersectRect(&bounds, &footprint, &clipped) == SDL_FALSE)
+#endif
+			continue;
+		if (clipped.y + clipped.h > worldHeight)
+			return false;
+	}
+	for (const SDL_Rect &footprint : footprints) {
+		SDL_Rect clipped;
+#ifdef USE_SDL3
+		if (!SDL_GetRectIntersection(&bounds, &footprint, &clipped))
+			continue;
+		const SDL_FRect source { static_cast<float>(clipped.x * 2), static_cast<float>(clipped.y * 2),
+			static_cast<float>(clipped.w * 2), static_cast<float>(clipped.h * 2) };
+		const SDL_FRect destination { static_cast<float>(clipped.x), static_cast<float>(clipped.y),
+			static_cast<float>(clipped.w), static_cast<float>(clipped.h) };
+		if (!SDL_RenderTexture(renderer, WorldTexture.get(), &source, &destination))
+#else
+		if (SDL_IntersectRect(&bounds, &footprint, &clipped) == SDL_FALSE)
+			continue;
+		const SDL_Rect source { clipped.x * 2, clipped.y * 2, clipped.w * 2, clipped.h * 2 };
+		if (SDL_RenderCopy(renderer, WorldTexture.get(), &source, &clipped) < 0)
+#endif
+			return false;
+	}
+	return true;
+}
+
 } // namespace devilution
 #endif

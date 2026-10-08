@@ -48,6 +48,7 @@
 #include "engine/dx.h"
 #include "engine/render/town_presentation.hpp"
 #include "engine/render/d3d_menu_presentation.hpp"
+#include "engine/render/d3d_hud_presentation.hpp"
 #include "engine/render/ui_overlay_regions.hpp"
 #include "headless_mode.hpp"
 #include "options.h"
@@ -702,6 +703,7 @@ void ReinitializeTexture()
 {
 	ResetTownPresentationResources();
 	ResetD3dMainMenuResources();
+	ResetD3dHudPresentationResources();
 	ClearUiOverlayRegions();
 	if (texture)
 		texture.reset();

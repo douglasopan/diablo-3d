@@ -22,6 +22,7 @@
 #include "DiabloUI/ui_flags.hpp"
 #include "automap.h"
 #include "control/d3d_hud.hpp"
+#include "engine/render/d3d_hud_presentation.hpp"
 #include "controls/control_mode.hpp"
 #include "controls/plrctrls.h"
 #include "cursor.h"
@@ -282,6 +283,7 @@ inline void ClxDrawLightBlended(const Surface &out, Point position, ClxSprite cl
 void DrawCursor(const Surface &out)
 {
 	DrawnCursor &cursor = GetDrawnCursor();
+	ClearD3dHudPresentationCursor();
 	if (IsHardwareCursor()) {
 		SetHardwareCursorVisible(ShouldShowCursor());
 		cursor.rect.size = { 0, 0 };
@@ -329,7 +331,9 @@ void DrawCursor(const Surface &out)
 		return;
 
 	BlitCursor(cursor.behindBuffer, rect.size.width, &out[rect.position], out.pitch(), rect.size.width, rect.size.height);
-	DrawSoftwareCursor(out, cursPosition + Displacement { 0, cursSize.height - 1 }, pcurs);
+	const Point spriteBottomLeft = cursPosition + Displacement { 0, cursSize.height - 1 };
+	DrawSoftwareCursor(out, spriteBottomLeft, pcurs);
+	CaptureD3dHudPresentationCursor(rect, spriteBottomLeft, pcurs);
 }
 
 /**
@@ -1328,14 +1332,16 @@ void DrawView(const Surface &out, Point startPosition)
 	CalcFirstTilePosition(startPosition, offset);
 	ClearUiOverlayRegions();
 	DrawGame(out, startPosition, offset);
+	BeginD3dHudPresentationFrame(out);
 #ifndef USE_SDL1
-	if (GetTownViewHighResolutionFrame() != nullptr) {
+	if (GetTownViewHighResolutionFrame() != nullptr || IsD3dHudEnabled()) {
 		BeginUiOverlayRegions(out);
 		const Rectangle &panel = GetMainPanel();
 		if (!IsD3dHudEnabled())
 			MarkUiOverlayRect(out, panel.position.x, panel.position.y, panel.size.width, panel.size.height);
 	}
 #endif
+	SetD3dHudPresentationNativeUiCapture(true);
 	if (IsTownViewActive()) {
 		DrawString(out.subregionY(0, gnViewportHeight), IsTownViewNativePose()
 				? "Tristram 3D | Vista original | F4: alternar"
@@ -1490,6 +1496,10 @@ void DrawView(const Surface &out, Point startPosition)
 	DrawPlrMsg(out);
 	gmenu_draw(out);
 	doom_draw(out);
+	// All earlier DrawView writes are ordinary UI. InfoBox and flask drawing
+	// below belong to the HUD and must not count as overlapping windows.
+	SetD3dHudPresentationNativeUiCapture(false);
+	SetD3dHudPresentationUiCoverage({});
 	DrawInfoBox(out);
 	UpdateLifeManaPercent(); // Update life/mana totals before rendering any portion of the flask.
 	DrawLifeFlaskUpper(out);
@@ -1795,6 +1805,7 @@ extern SDL_Surface *PalSurface;
 
 void ClearScreenBuffer()
 {
+	InvalidateD3dHudPresentationFrame();
 	if (HeadlessMode)
 		return;
 
@@ -1956,6 +1967,7 @@ void DrawAndBlit()
 		DrawChatBox(out);
 	}
 	DrawXPBar(out);
+	RecordD3dHudExperienceBar();
 	if (IsD3dHudEnabled())
 		DrawD3dHudValues(out);
 	if (!IsD3dHudEnabled() && *GetOptions().Gameplay.showHealthValues)
@@ -1964,25 +1976,31 @@ void DrawAndBlit()
 		DrawFlaskValues(out, { mainPanel.position.x + mainPanel.size.width - 138, mainPanel.position.y + 28 },
 		    (HasAnyOf(InspectPlayer->_pIFlags, ItemSpecialEffect::NoMana) || MyPlayer->hasNoMana()) ? 0 : MyPlayer->_pMana >> 6,
 		    HasAnyOf(InspectPlayer->_pIFlags, ItemSpecialEffect::NoMana) ? 0 : MyPlayer->_pMaxMana >> 6);
+	SetD3dHudPresentationNativeUiCapture(true);
 	if (*GetOptions().Gameplay.floatingInfoBox)
 		DrawFloatingInfoBox(out);
 
 	if (*GetOptions().Gameplay.showMultiplayerPartyInfo && PartySidePanelOpen)
 		DrawPartyMemberInfoPanel(out);
+	SetD3dHudPresentationNativeUiCapture(false);
 
 	BeginUiOverlayCursor();
 	DrawCursor(out);
 	EndUiOverlayCursor();
 
+	SetD3dHudPresentationNativeUiCapture(true);
 	DrawFPS(out);
 
 	lua::GameDrawComplete();
+	SetD3dHudPresentationNativeUiCapture(false);
 
 	this_sdl_thread::yield();
 	DrawMain(hgt, drawInfoBox, drawHealth, drawMana, drawBelt, drawControlButtons);
 
 #ifdef _DEBUG
+	SetD3dHudPresentationNativeUiCapture(true);
 	DrawConsole(out);
+	SetD3dHudPresentationNativeUiCapture(false);
 #endif
 
 	RedrawComplete();

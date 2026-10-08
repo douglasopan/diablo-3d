@@ -18,6 +18,7 @@
 
 #include "DiabloUI/ui_flags.hpp"
 #include "control/d3d_hud.hpp"
+#include "engine/render/d3d_hud_presentation.hpp"
 #include "controls/control_mode.hpp"
 #include "controls/plrctrls.h"
 #include "cursor.h"
@@ -1288,8 +1289,13 @@ void DrawInvBelt(const Surface &out)
 	const Player &myPlayer = *InspectPlayer;
 	// Keep the native item renderer and its outline, including one pixel of margin.
 	std::optional<OwnedSurface> itemBuffer;
-	if (customHud)
+	std::optional<OwnedSurface> foregroundBuffer;
+	std::optional<OwnedSurface> tintSample;
+	if (customHud) {
 		itemBuffer.emplace(InventorySlotSizeInPixels.width + 2, InventorySlotSizeInPixels.height + 2);
+		foregroundBuffer.emplace(InventorySlotSizeInPixels.width + 2, InventorySlotSizeInPixels.height + 2);
+		tintSample.emplace(1, 1);
+	}
 	const auto drawHotkey = [&](int i, Rectangle slot) {
 		const auto beltKey = StrCat("BeltItem", i + 1);
 		std::string_view keyName = ControlMode == ControlTypes::Gamepad
@@ -1334,8 +1340,22 @@ void DrawInvBelt(const Surface &out)
 		}
 
 		DrawItem(myPlayer.SpdList[i], itemOut, position, sprite);
-		if (customHud)
+		if (customHud) {
 			DrawD3dHudBeltItem(out, itemOut, slot);
+			// The complete native buffer remains the fallback. The RGB plane
+			// receives only the same item/outline, never its stone cell backdrop.
+			FillRect(*foregroundBuffer, 0, 0, foregroundBuffer->w(), foregroundBuffer->h(), 1);
+			if (pcursinvitem == i + INVITEM_BELT_FIRST
+			    && (ControlMode == ControlTypes::KeyboardAndMouse || invflag))
+				ClxDrawOutline(*foregroundBuffer, GetOutlineColor(myPlayer.SpdList[i], true), position, sprite);
+			DrawItem(myPlayer.SpdList[i], *foregroundBuffer, position, sprite);
+			const Rectangle inside = slot.size.width > 4 && slot.size.height > 4 ? slot.inset({ 2, 2 }) : slot;
+			RecordD3dHudForeground(*foregroundBuffer, inside);
+			// Let the original quality/inspection translation choose its family.
+			FillRect(*tintSample, 0, 0, 1, 1, PAL16_GRAY + 5);
+			InvDrawSlotBack(*tintSample, { 0, 0 }, { 1, 1 }, myPlayer.SpdList[i]._iMagical);
+			RecordD3dHudBeltTint(i, *tintSample->at(0, 0));
+		}
 
 		if (customHud || (myPlayer.SpdList[i].isUsable()
 		                    && myPlayer.SpdList[i]._itype != ItemType::Gold)) {

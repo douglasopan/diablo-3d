@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "engine/surface.hpp"
+#include "engine/render/d3d_hud_presentation.hpp"
 
 namespace devilution {
 namespace {
@@ -36,7 +37,7 @@ void RecordUiOverlayRect(const Surface &out, int x, int y, int width, int height
 {
 	auto &regions = RecordingCursor ? CursorRegions : Regions;
 	bool &full = RecordingCursor ? FullCursor : FullFrame;
-	if (out.surface != FrameSource || full || width <= 0 || height <= 0)
+	if (out.surface != FrameSource || width <= 0 || height <= 0)
 		return;
 
 	// Clip in local coordinates before converting subregions to the frame's
@@ -55,6 +56,11 @@ void RecordUiOverlayRect(const Surface &out, int x, int y, int width, int height
 	const SDL_Rect rect = MakeSdlRect(
 	    static_cast<int>(left - FrameRegion.x), static_cast<int>(top - FrameRegion.y),
 	    static_cast<int>(right - left), static_cast<int>(bottom - top));
+	// Forward before full/contains/merge early returns. A late native write
+	// can be contained by an earlier HUD rectangle yet still cover the skin.
+	RecordD3dHudPresentationNativeUiRect(rect);
+	if (full)
+		return;
 	if (!regions.empty()) {
 		SDL_Rect &last = regions.back();
 		if (Contains(last, rect))

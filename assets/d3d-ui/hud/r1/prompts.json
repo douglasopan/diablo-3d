@@ -1,0 +1,86 @@
+{
+  "revision": "hud-hd-components-r1",
+  "date": "2026-10-08",
+  "status": "Technically integrated, tested and installed 2026-10-08T12:08:58Z; final artistic acceptance pending",
+  "reason": "User feedback: new ingame HUD visual unfinished. Preserve all original functions; follow references07/08.",
+  "tool": "built-in image_gen",
+  "reference": "docs/hud-study/images/07-hud-native-16x9-v1.png",
+  "prompts": {
+    "chassis": "Use case: game UI production asset, isolated modular texture.\nReference image role: STYLE REFERENCE ONLY. Match the dark stone, blackened iron, restrained antique brass edging and crisp realistic sculpted material of the bottom HUD in the reference. Do not reproduce the scene.\nGenerate ONE wide rectangular EMPTY HUD backing plate on genuinely transparent background. The plate itself is opaque charcoal carved stone, with a very narrow double antique brass/pewter perimeter border, dark engraved worn corners, subtly varied close-up stone texture. Exact front view, flat orthographic UI, no perspective, no ground shadow. Target canvas 1536x320, very wide 4.8:1, tight bounds and symmetrical 12px transparent padding. A subtle low-relief narrow perimeter may decorate the outer edge; the entire interior is continuous dark stone and stays quiet. The edges must be straight, making a nine-slice texture possible.\nThis is just a material chassis to put separately editable controls above. Do NOT include globes, demons, creatures, sockets, internal frames, empty slots, button shapes, objects, letters, text, digits, logos, labels or pictograms. No scene or background. No checkerboard painted in. High density clean authored UI art, no pixel art.",
+    "button": "Use case: game UI production asset, a single reusable blank button skin.\nReference image role: STYLE REFERENCE ONLY, use the rectangular CHAR / QUESTS / MAP / MENU / INV / SPELLS button material from the bottom HUD. No need to copy the scene or any text.\nCreate exactly ONE horizontal rectangular blank medieval button in strict orthographic front view, on truly transparent background. The button is approximately 3.55 times as wide as tall, framed in narrow antique brass and blackened pewter double bevel, with dark olive bronze subtly hammered face, inset edge, soft warm worn highlights, clean straight sides and square corners. Match high-fidelity realistic dark-fantasy material, crisp edges, restrained patina, not pixel art.\nCanvas 1065x300; button almost fills canvas with small transparent padding. Its central face is EMPTY and quiet so localized dynamic lettering can be drawn later. There must be NO text, letters, digits, glyph, icon, runes, symbol, object or scene. No ornamental center motif. No extra buttons, no multiple states or atlas, no ground shadow, no painted checkerboard. Neutral unpressed normal state. The border must remain simple enough to use as a nine-slice texture.",
+    "orbFrame": "Use case: game UI production asset. One sculpted globe HOLDER FRAME, separate from the liquid.\nReference image role: STYLE REFERENCE ONLY. Match the restrained blackened pewter gargoyle/dragon supports around the health and mana globes in the bottom HUD. No scene, HUD panel, text or colored orb.\nCreate ONE front-facing vertical gothic globe holder with a genuinely transparent circular aperture and transparent exterior. Requested canvas 768x984. Match the HUD reference's aged pewter and dark carved stone dragon sculpture: a small fierce dragon head and folded wing along the left side, curling clawed supports beneath, a modest horned carved base at the bottom. A thin antique pewter/brass circular rim surrounds an empty circular aperture. Keep silhouette elegant, legible and restrained. Realistic high density sculpted UI material, crisp silhouette, neutral top left lighting, no dramatic colored illumination.\nPrecise composition: the circular hole is centered horizontally at x384 and centered vertically at y320, radius288 (diameter576). Thus aperture occupies x96..672, y32..608. A very narrow metal rim frames that circle; sculpted support primarily occupies left edge and y580..950 below the aperture. Nothing fills the circular aperture: it is fully transparent for a separately animated liquid globe. The sculpture's claws may cross the outer edge of the aperture slightly. Fit entire holder inside image with transparent 16px margin; no clipping. Flat orthographic UI, no perspective, no ground or cast shadow outside object.\nHard constraints: NO glass ball, NO liquid, NO red or blue disc, NO grey solid backing in hole, NO black disc in hole, NO text, NO letters/digits, NO icons/buttons, NO background, NO scene. The empty hole and exterior must retain real alpha transparency, not a painted checkerboard. Only one holder, not an atlas or paired comparison.",
+    "orbRed": "Use case: one isolated game HUD texture for a dynamic health globe.\nReference image role: STYLE REFERENCE ONLY. Match the crimson glass globe surface in the bottom HUD, but exclude absolutely all frame, sculpture and surrounding interface.\nCreate ONE perfect circular blood-red liquid glass orb in orthographic front view, centered on truly transparent square canvas 1024x1024. Circular silhouette centered at512,512 with radius480, leaving32px transparent margin. It must be mathematically round, not a vertical oval. High density realistic authored dark-fantasy UI, rich deep crimson translucent depth, fine subtle organic vein-like refractions within the red, very dark shaded edges and lower left, small warm white specular reflection at upper right x665,y310, restrained secondary internal glints. The orb reads as a full health resource globe, not a gemstone, planet, eye, fireball, or physical potion container.\nNothing outside its circular silhouette. NO frame/ring/metal/base/creature/sculpture, NO text/numbers/icon, NO scenery, NO flare or bloom outside orb, NO ground/cast shadow, NO opaque square background, NO checkerboard. Alpha fully transparent outside orb, fully opaque within the globe including dark portions. Tight clean antialiased edge. Only one red orb, no atlas.",
+    "orbBlue": "Edit target: the supplied single red orb PNG, a production HUD texture with transparent exterior.\nMake one precise change only: change the crimson liquid/glass inside the circular orb to deep luminous sapphire blue for the mana globe. Preserve the identical circular silhouette, alpha channel, dimensions, placement, dark edge shading, internal fine texture and warm white upper-right specular reflection. Match the blue orb identity in the approved Diablo dark-fantasy HUD.\nKeep the exterior fully transparent and everything perfectly aligned to the source so the red and blue textures can share one mask and one geometry. Do not introduce any object, frame, ring, creature, labels, letters, digits, scenery, external glow, background or checkerboard. Output exactly one blue orb.",
+    "inset": "Use case: one reusable modular game UI inset frame texture.\nReference image role: STYLE REFERENCE ONLY. Match the black information area directly below the eight belt slots of the bottom HUD and the narrow antique brass slot frames. Do not copy any text, objects or scene.\nCreate ONE EMPTY wide rectangular dark inset plate, 4:1 aspect ratio, exact flat front orthographic UI view, high density realistic authored dark-fantasy material. Entire interior fully opaque near-black matte finely grained dark leather/slate, very quiet and uniform enough for white text or an item icon to sit over it. A narrow restrained double antique brass and blackened pewter rim with straight sides and square corners frames it. No corner motifs. The perimeter is no more than 5 percent of image height thick, with modest worn bevel highlight. Small transparent margin outside the rim. Requested canvas1600x400, object fills canvas tightly.\nThis asset will be nine-sliced to create both one large info plate and eight individual square belt frames and one current-spell frame, so center and edge material must not contain any direction-specific decoration.\nNO text, letters, digits, symbols, glyphs, icons, items, bottles, hands, creatures, globes, slots within the plate, separators, additional frames, labels, scenery, shadow on ground or background. One rectangle only. Real alpha transparency outside rim; black interior remains OPAQUE, not cut out. No checkerboard pixels."
+  },
+  "accepted": false,
+  "model": "Not exposed by built-in tool",
+  "outputs": [
+    {
+      "file": "chassis.png",
+      "pixels": [
+        2172,
+        724
+      ],
+      "sha256": "834e98804a3aa3aa125022046fed3664b09bdf222ae1f46506c005ca91b3bb34",
+      "generationId": "exec-f37470ec-a741-49ec-9db5-7346d6c44505",
+      "exactCopyOfGeneration": true,
+      "sourceAlphaPreserved": true
+    },
+    {
+      "file": "button.png",
+      "pixels": [
+        2087,
+        753
+      ],
+      "sha256": "c6c2ae5a085d49ccd26f685aafd6a5c66f824ecbe05051bc4afdfb900835e517",
+      "generationId": "exec-916ddd0f-016c-4984-a735-2b68db94cfbb",
+      "exactCopyOfGeneration": true,
+      "sourceAlphaPreserved": true
+    },
+    {
+      "file": "orb-frame.png",
+      "pixels": [
+        1108,
+        1419
+      ],
+      "sha256": "4dca12289089882e19e21dbe99e2952b05b1f137e630026493e3006b4ada8f85",
+      "generationId": "exec-073240f6-2beb-4945-b07f-f47a5f19b577",
+      "exactCopyOfGeneration": true,
+      "sourceAlphaPreserved": true
+    },
+    {
+      "file": "orb-red.png",
+      "pixels": [
+        1254,
+        1254
+      ],
+      "sha256": "9e9248a32ea2ca35c29996adc778073e586fb03d6b7ae713e3d0c95a91bf0f7a",
+      "generationId": "exec-df9b967c-0dc3-4d89-aa4d-82f6d61dc05f",
+      "exactCopyOfGeneration": true,
+      "sourceAlphaPreserved": true
+    },
+    {
+      "file": "orb-blue.png",
+      "pixels": [
+        1254,
+        1254
+      ],
+      "sha256": "dce73e1eecbdc58ea23f73c5cd21d6250b8d5739e3e1b8d2e8f92913a323812d",
+      "generationId": "exec-f479bccc-8d2a-4f0a-9a4a-9adb4eeca547",
+      "exactCopyOfGeneration": true,
+      "sourceAlphaPreserved": true
+    },
+    {
+      "file": "inset.png",
+      "pixels": [
+        1983,
+        793
+      ],
+      "sha256": "f2696cd1d3150d48ac98598fe6f9225f693681a325ac6f8f2893900d9da7d6bf",
+      "generationId": "exec-1f0113b0-f718-49e1-8f31-0ccb05c4c4c5",
+      "exactCopyOfGeneration": true,
+      "sourceAlphaPreserved": true
+    }
+  ]
+}

@@ -2,6 +2,7 @@
 #include "control_panel.hpp"
 #include "control/d3d_hud.hpp"
 #include "controls/control_mode.hpp"
+#include "engine/render/d3d_hud_presentation.hpp"
 #include "engine/render/primitive_render.hpp"
 #include "gmenu.h"
 #include "inv.h"
@@ -59,14 +60,23 @@ void PrintInfo(const Surface &out)
 		DrawD3dHudPlate(*hudInfo, { { 0, 0 }, { hudInfo->w(), hudInfo->h() } });
 	}
 	const Surface &textOut = hudInfo ? *hudInfo : out;
+	const TextRenderOptions textOptions {
+		.flags = InfoColor | UiFlags::AlignCenter | UiFlags::VerticalCenter | UiFlags::KerningFitSpacing,
+		.spacing = 2,
+		.lineHeight = lineHeight,
+	};
 	DrawString(textOut, InfoString, hudInfo ? Rectangle { { 0, spacing / 2 }, { hudInfo->w(), hudInfo->h() } } : infoBox,
-	    {
-	        .flags = InfoColor | UiFlags::AlignCenter | UiFlags::VerticalCenter | UiFlags::KerningFitSpacing,
-	        .spacing = 2,
-	        .lineHeight = lineHeight,
-	    });
-	if (hudInfo)
+	    textOptions);
+	if (hudInfo) {
 		DrawD3dHudSurface(out, *hudInfo, GetD3dHudInfoRect());
+		// Keep the text separate from the fallback plate so the RGBA skin can
+		// replace its background without hiding native glyphs or their colors.
+		const OwnedSurface foreground(hudInfo->w(), hudInfo->h());
+		FillRect(foreground, 0, 0, foreground.w(), foreground.h(), 1);
+		DrawString(foreground, InfoString, { { 0, spacing / 2 }, { foreground.w(), foreground.h() } }, textOptions);
+		ClearD3dHudForeground(GetD3dHudInfoRect());
+		RecordD3dHudForeground(foreground, GetD3dHudInfoRect());
+	}
 }
 
 Rectangle GetFloatingInfoRect(const int lineHeight, const int textSpacing)
@@ -400,9 +410,12 @@ void CheckPanelInfo()
 
 void DrawInfoBox(const Surface &out)
 {
-	if (IsD3dHudEnabled() && gmenu_is_active())
+	const bool d3dHudEnabled = IsD3dHudEnabled();
+	if (d3dHudEnabled)
+		ClearD3dHudForeground(GetD3dHudInfoRect());
+	if (d3dHudEnabled && gmenu_is_active())
 		return;
-	if (!IsD3dHudEnabled())
+	if (!d3dHudEnabled)
 		DrawPanelBox(out, MakeSdlRect(InfoBoxRect.position.x, InfoBoxRect.position.y + PanelPaddingHeight, InfoBoxRect.size.width, InfoBoxRect.size.height), GetMainPanel().position + Displacement { InfoBoxRect.position.x, InfoBoxRect.position.y });
 	if (!MainPanelFlag && !trigflag && pcursinvitem == -1 && pcursstashitem == StashStruct::EmptyCell && pcursstoreitem == -1 && pcursstorebtn == -1 && !SpellSelectFlag && pcurs != CURSOR_HOURGLASS) {
 		InfoString = StringOrView {};

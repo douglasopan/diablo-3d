@@ -20,6 +20,7 @@ offset_right = 854.0
 offset_bottom = 480.0
 mouse_filter = 2
 script = ExtResource("1_hud")
+metadata/_editor_description = "HUD candidato com PNGs RGBA comuns em assets/d3d-ui/hud/r1/skin.json. Control reais são o layout exportável; Georgia na prévia é aproximação da fonte pixel nativa. Cinto vazio e magia sem seleção são estados demonstrativos."
 
 [node name="SafeFrame" type="Control" parent="."]
 layout_mode = 0
@@ -61,7 +62,7 @@ offset_left = -116.0
 offset_top = -103.0
 offset_right = 116.0
 offset_bottom = -74.0
-tooltip_text = "Cinto nativo: oito espaços iguais, atalhos 1–8. Itens desenhados aqui são demonstrativos."
+tooltip_text = "Cinto nativo: oito espaços iguais, atalhos 1–8 no canto inferior direito. Prévia mostra células vazias."
 
 [node name="HudSpell" type="Control" parent="SafeFrame"]
 layout_mode = 0
@@ -73,7 +74,7 @@ offset_left = 252.0
 offset_top = -58.0
 offset_right = 296.0
 offset_bottom = -14.0
-tooltip_text = "Magia selecionada / seletor de magias nativo."
+tooltip_text = "Magia selecionada / seletor de magias nativo. A moldura vazia demonstra o estado sem seleção."
 
 [node name="HudInfo" type="Control" parent="SafeFrame"]
 layout_mode = 0
@@ -244,5 +245,5 @@ offset_bottom = 202.0
 mouse_filter = 2
 theme_override_colors/font_color = Color(0.55, 0.61, 0.63, 1)
 theme_override_font_sizes/font_size = 9
-text = "Edite os Control em SafeFrame. Salve a cena e exporte."
+text = "PNG compartilhado • fonte de prévia aproximada • edite Control, salve e exporte."
 autowrap_mode = 2

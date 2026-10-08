@@ -1,5 +1,5 @@
 extends SceneTree
-## Layout/export integration only. No game assets, profile, save or C++ build.
+## Layout/export and authored PNG metadata only. No profile, save or C++ build.
 
 const HUD := preload("res://ui/hud.gd")
 const SCENE := preload("res://ui/hud.tscn")
@@ -37,6 +37,22 @@ func _run() -> void:
 	root.add_child(hud)
 	await process_frame
 	hud.scale = Vector2.ONE
+	_check(hud.missing_assets.is_empty() and hud.textures.size() == 6, "Seis PNGs reais carregados com hashes e dimensões do contrato comum")
+	_check(hud.skin_metadata.get("status") == "technical-candidate" and not hud.skin_metadata.get("accepted", true), "Base de implementação candidata não é aprovação artística final")
+	_check(hud.skin_metadata.preview.hotkeyPlacement.begins_with("bottom-right"), "Hotkeys compartilham a disposição nativa no canto inferior direito")
+	for element_name: String in ["HudHealthOrb", "HudManaOrb"]:
+		var element: Control = hud.get_element(element_name)
+		var fitted: Rect2 = hud.orb_frame_rect(element)
+		var region: Rect2 = hud._skin_regions["orb-frame"]
+		_check(is_equal_approx(fitted.size.x / region.size.x, fitted.size.y / region.size.y), "Escultura usa escala uniforme: " + element_name)
+		_check(Rect2(Vector2.ZERO, element.size).encloses(fitted), "Escultura inteira cabe no Control original: " + element_name)
+		var circle: Rect2 = hud.orb_circle(element, element_name == "HudManaOrb")
+		_check(Rect2(Vector2.ZERO, element.size).encloses(circle), "Abertura medida cabe no Control original: " + element_name)
+		for child_name: String in ["LiquidPNG", "FramePNG", "HitboxOverlay"]:
+			_check(element.get_node(child_name).mouse_filter == Control.MOUSE_FILTER_IGNORE, "Filho decorativo não captura a ação nativa: " + element_name + "/" + child_name)
+	var health_circle: Rect2 = hud.orb_circle(hud.get_element("HudHealthOrb"), false)
+	var mana_circle: Rect2 = hud.orb_circle(hud.get_element("HudManaOrb"), true)
+	_check(is_equal_approx(health_circle.get_center().x + mana_circle.get_center().x, 88), "Espelhamento da mana alinha a abertura assimétrica real")
 	_check(not hud.get_element("HudChat").visible and not hud.get_element("HudFriendly").visible, "Prévia single-player esconde controles multiplayer")
 	hud.demo_multiplayer = true
 	_check(hud.get_element("HudChat").visible and hud.get_element("HudFriendly").visible, "Inspector Demo Multiplayer mostra os controles condicionais")

@@ -1,5 +1,6 @@
 #include "panels/mainpanel.hpp"
 
+#include <array>
 #include <cstdint>
 #include <expected>
 #include <optional>
@@ -68,6 +69,21 @@ void RenderMainButton(const Surface &out, int buttonId, std::string_view text, i
 }
 
 } // namespace
+
+void DrawMainPanelButtonLabel(const Surface &out, int button, bool pressed)
+{
+	const std::array<std::string_view, 6> labels { _("char"), _("quests"), _("map"), _("menu"), _("inv"), _("spells") };
+	if (button < 0 || button >= static_cast<int>(labels.size()) || out.w() <= 8 || out.h() <= 0)
+		return;
+
+	const std::string_view text = labels[button];
+	const int width = out.w() - 8;
+	int spacing = 2;
+	if (std::min(GetLineWidth(text, GameFont12, spacing), width) > 38)
+		spacing = 1;
+	DrawButtonText(out, text, { { 4, pressed ? 2 : 1 }, { width, 0 } },
+	    pressed ? UiFlags::ColorButtonpushed : UiFlags::ColorButtonface, spacing);
+}
 
 std::expected<void, std::string> LoadMainPanel()
 {

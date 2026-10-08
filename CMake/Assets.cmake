@@ -255,6 +255,15 @@ list(APPEND devilutionx_assets
   d3d-ui/menu-background.png
   d3d-ui/layout.ini)
 
+# Original RGBA HUD artwork, shared with the Godot authoring preview.
+list(APPEND devilutionx_assets
+  d3d-ui/hud/r1/chassis.png
+  d3d-ui/hud/r1/button.png
+  d3d-ui/hud/r1/inset.png
+  d3d-ui/hud/r1/orb-frame.png
+  d3d-ui/hud/r1/orb-red.png
+  d3d-ui/hud/r1/orb-blue.png)
+
 # Optional locally supplied soundtrack. Register it so asset trimming preserves
 # the file on subsequent builds; public clones retain the original soundtrack.
 foreach(_d3d_music menu-rock2 menu-alternative town-rock town-alternative town-third cathedral-rock catacombs-rock caves-rock hell-rock nest-rock crypt-rock)

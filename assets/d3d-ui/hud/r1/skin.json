@@ -1,0 +1,227 @@
+{
+  "format": "d3d.hud-skin",
+  "schemaVersion": 1,
+  "revision": "r1",
+  "status": "technical-candidate",
+  "accepted": false,
+  "referenceReview": "Private Godot composition accepted as implementation candidate base; no final artistic acceptance by user.",
+  "artDirection": [
+    "docs/hud-study/images/01-hud-16x9-v2.png",
+    "docs/hud-study/images/02-hud-ultrawide-v2.png",
+    "docs/hud-study/images/03-hud-compacto.png",
+    "docs/hud-study/images/04-personagem-inventario.png"
+  ],
+  "functionalReferences": [
+    "docs/hud-study/images/07-hud-native-16x9-v1.png",
+    "docs/hud-study/images/08-hud-native-4x3-v1.png"
+  ],
+  "generationMetadata": "prompts.json",
+  "layout": {
+    "logicalHeight": 480,
+    "safeWidthMaximum": 853,
+    "anchor": "bottom-center",
+    "elementCount": 13,
+    "geometrySource": "Source/control/d3d_hud_layout.hpp and editor/godot/ui/hud.tscn",
+    "compactShift": false,
+    "assetsDoNotChangeInputRects": true
+  },
+  "assets": {
+    "chassis": {
+      "file": "chassis.png",
+      "pixels": [
+        2172,
+        724
+      ],
+      "sha256": "834e98804a3aa3aa125022046fed3664b09bdf222ae1f46506c005ca91b3bb34",
+      "sourceRegion": [
+        22,
+        190,
+        2128,
+        331
+      ],
+      "nineSliceSource": [
+        80,
+        64,
+        80,
+        64
+      ],
+      "nineSliceDestination": [
+        6,
+        5,
+        6,
+        5
+      ]
+    },
+    "button": {
+      "file": "button.png",
+      "pixels": [
+        2087,
+        753
+      ],
+      "sha256": "c6c2ae5a085d49ccd26f685aafd6a5c66f824ecbe05051bc4afdfb900835e517",
+      "sourceRegion": [
+        62,
+        143,
+        1968,
+        458
+      ],
+      "nineSliceSource": [
+        110,
+        84,
+        110,
+        84
+      ],
+      "nineSliceDestination": [
+        3,
+        3,
+        3,
+        3
+      ]
+    },
+    "orb-frame": {
+      "file": "orb-frame.png",
+      "pixels": [
+        1108,
+        1419
+      ],
+      "sha256": "4dca12289089882e19e21dbe99e2952b05b1f137e630026493e3006b4ada8f85",
+      "sourceRegion": [
+        15,
+        66,
+        1061,
+        1283
+      ],
+      "circle": {
+        "centerSource": [
+          653.27869,
+          606.47952
+        ],
+        "radiusSource": 392.30013,
+        "liquidOverlapSource": 2,
+        "method": "alpha>128 first crossing on right inner arc, rows250..950 step5",
+        "samples": 141,
+        "rmseSourcePixels": 1.74563
+      },
+      "placement": {
+        "fit": "uniform-contain-bottom",
+        "mirrorMana": true,
+        "referenceControl": [
+          88,
+          113
+        ],
+        "referenceCircleHealth": [
+          52.939,
+          51.415,
+          32.703
+        ],
+        "referenceCircleMana": [
+          35.061,
+          51.415,
+          32.703
+        ]
+      }
+    },
+    "orb-red": {
+      "file": "orb-red.png",
+      "pixels": [
+        1254,
+        1254
+      ],
+      "sha256": "9e9248a32ea2ca35c29996adc778073e586fb03d6b7ae713e3d0c95a91bf0f7a",
+      "sourceRegion": [
+        58,
+        54,
+        1137,
+        1136
+      ],
+      "measuredLiquidCircle": {
+        "center": [
+          625.3632233331913,
+          621.8806207690124
+        ],
+        "radius": 566.3371782478426,
+        "rmse": 1.005187802270694,
+        "samples": 1136
+      }
+    },
+    "orb-blue": {
+      "file": "orb-blue.png",
+      "pixels": [
+        1254,
+        1254
+      ],
+      "sha256": "dce73e1eecbdc58ea23f73c5cd21d6250b8d5739e3e1b8d2e8f92913a323812d",
+      "sourceRegion": [
+        55,
+        52,
+        1144,
+        1143
+      ],
+      "measuredLiquidCircle": {
+        "center": [
+          625.8840777292229,
+          623.8148005515582
+        ],
+        "radius": 569.0632255242305,
+        "rmse": 1.110939450213516,
+        "samples": 1142
+      }
+    },
+    "inset": {
+      "file": "inset.png",
+      "pixels": [
+        1983,
+        793
+      ],
+      "sha256": "f2696cd1d3150d48ac98598fe6f9225f693681a325ac6f8f2893900d9da7d6bf",
+      "sourceRegion": [
+        12,
+        192,
+        1960,
+        409
+      ],
+      "nineSliceSource": [
+        70,
+        62,
+        70,
+        62
+      ],
+      "nineSliceDestination": [
+        2,
+        2,
+        2,
+        2
+      ]
+    }
+  },
+  "preview": {
+    "font": "existing Georgia via SystemFont/MSDF, serif fallback if unavailable",
+    "fontIsRuntimeEquivalent": false,
+    "infoFontLogicalSize": 10,
+    "infoLinePitchLogical": 11.2,
+    "nativeInitialFont": "native bitmap Font12; readable but not typographically identical",
+    "hotkeyFontLogicalSize": 12,
+    "hotkeyPlacement": "bottom-right inside each existing belt slot, outlined",
+    "emptySpell": "valid no-selection demonstration; Control remains present",
+    "emptyBelt": "eight existing empty cells; no fabricated item icon",
+    "emptyGlobe": "neutral glass reflection from authored texture; no colored resource at 0",
+    "emptyGlassSource": "orb-red measured crop, centered uniform 1136x1136, for both globes; before liquid and frame",
+    "emptyGlassFormula": "shade=floor(min(R,G,B)*0.30) in byte values; emptyRGB=(4+shade,5+shade,7+shade); alpha=circular edge",
+    "infoCompactLimitation": "960x540: font10logical is11.25physical, below16px target; rects unchanged in this candidate"
+  },
+  "rgba": {
+    "format": "RGBA8 PNG with straight alpha, color sRGB",
+    "sourceImagesEdited": false,
+    "sourceRegionThreshold": "alpha>16 removes distant near-transparent noise; originals preserved",
+    "sampling": "linear in Godot final CanvasItem presentation",
+    "runtimeBridge": "C++ metadata must match this measured revision; rendering/input remain native"
+  },
+  "exclusions": [
+    "QuickSpell bar",
+    "left action slot",
+    "permanent minimap",
+    "quest tracker",
+    "new submenu",
+    "new native action"
+  ]
+}

@@ -25,6 +25,7 @@
 #include "controls/plrctrls.h"
 #include "engine/render/primitive_render.hpp"
 #include "engine/render/d3d_menu_presentation.hpp"
+#include "engine/render/d3d_hud_presentation.hpp"
 #include "engine/render/town_presentation.hpp"
 #include "engine/render/town_view.hpp"
 #include "engine/render/ui_overlay_regions.hpp"
@@ -140,6 +141,7 @@ void dx_cleanup()
 #ifndef USE_SDL1
 	ResetTownPresentationResources();
 	ResetD3dMainMenuResources();
+	ResetD3dHudPresentationResources();
 	if (ghMainWnd != nullptr)
 		SDL_HideWindow(ghMainWnd);
 #endif
@@ -332,12 +334,13 @@ void RenderPresent([[maybe_unused]] bool allowTownLayers)
 			if (SDL_RenderCopy(renderer, texture.get(), nullptr, nullptr) < 0) ErrSdl();
 #endif
 		}
+		bool townLayersPresented = false;
 		if (allowTownLayers && gbRunGame) {
 			const Surface *world = GetTownViewHighResolutionFrame();
 			const UiOverlayFrame ui = GetUiOverlayFrame();
 			if (world != nullptr && ui.source == PalSurface
-			    && !RenderTownPresentationLayers(renderer, surface, *world, ui, Palette.get(),
-			        *GetOptions().Graphics.scaleQuality != ScalingQuality::NearestPixel)) {
+			    && !(townLayersPresented = RenderTownPresentationLayers(renderer, surface, *world, ui, Palette.get(),
+			        *GetOptions().Graphics.scaleQuality != ScalingQuality::NearestPixel))) {
 				// Cover any partially drawn optional layers on failure.
 #ifdef USE_SDL3
 				if (!SDL_RenderTexture(renderer, texture.get(), nullptr, nullptr)) ErrSdl();
@@ -345,6 +348,17 @@ void RenderPresent([[maybe_unused]] bool allowTownLayers)
 				if (SDL_RenderCopy(renderer, texture.get(), nullptr, nullptr) < 0) ErrSdl();
 #endif
 			}
+		}
+
+		if (gbRunGame && RenderD3dHudPresentation(renderer, PalSurface, Palette.get(),
+		        allowTownLayers, townLayersPresented) == D3dHudPresentationResult::Failed) {
+			// Inactive leaves the already presented Town intact; only a failed
+			// draw command needs to cover a possibly partial optional pass.
+#ifdef USE_SDL3
+			if (!SDL_RenderTexture(renderer, texture.get(), nullptr, nullptr)) ErrSdl();
+#else
+			if (SDL_RenderCopy(renderer, texture.get(), nullptr, nullptr) < 0) ErrSdl();
+#endif
 		}
 
 		if (ControlMode == ControlTypes::VirtualGamepad) {

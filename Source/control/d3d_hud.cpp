@@ -13,10 +13,12 @@
 #include "controls/control_mode.hpp"
 #include "controls/game_controls.h"
 #include "engine/palette.h"
+#include "engine/render/d3d_hud_presentation.hpp"
 #include "engine/render/d3d_ui_layout.hpp"
 #include "engine/render/primitive_render.hpp"
 #include "engine/render/text_render.hpp"
 #include "options.h"
+#include "panels/mainpanel.hpp"
 #include "panels/spell_icons.hpp"
 #include "panels/spell_list.hpp"
 #include "player.h"
@@ -311,12 +313,23 @@ void DrawD3dHudBackground(const Surface &out)
 
 void DrawD3dHudPanelButton(const Surface &out, int button, bool pressed)
 {
+	RecordD3dHudButtonState(button, pressed);
 	const Rectangle target = GetD3dHudPanelButtonRect(button);
 	OwnedSurface buttonImage(button < TotalSpMainPanelButtons ? 71 : 33,
 	    button < TotalSpMainPanelButtons ? 21 : 32);
 	FillRect(buttonImage, 0, 0, buttonImage.w(), buttonImage.h(), 0);
 	DrawNativePanelButton(buttonImage, button, pressed);
 	BlitScaled(out, buttonImage, target);
+	// Keep the complete indexed panel as the fallback. Only its translated
+	// lettering belongs above the optional authored RGBA button skin.
+	OwnedSurface foreground(buttonImage.w(), buttonImage.h());
+	FillRect(foreground, 0, 0, foreground.w(), foreground.h(), 1);
+	if (button < TotalSpMainPanelButtons)
+		DrawMainPanelButtonLabel(foreground, button, pressed);
+	else
+		// Multiplayer pictograms retain their original state artwork.
+		DrawNativePanelButton(foreground, button, pressed);
+	RecordD3dHudForeground(foreground, target);
 }
 
 void DrawD3dHudBeltBackground(const Surface &out)
@@ -338,6 +351,9 @@ void DrawD3dHudSpellIcon(const Surface &out, Rectangle rect, SpellID spell, Spel
 	SetSpellTrans(type);
 	DrawLargeSpellIcon(icon, { 0, SPLICONLENGTH - 1 }, spell);
 	BlitScaled(out, icon, rect);
+	FillRect(icon, 0, 0, icon.w(), icon.h(), 1);
+	DrawLargeSpellIcon(icon, { 0, SPLICONLENGTH - 1 }, spell);
+	RecordD3dHudForeground(icon, rect);
 }
 
 void DrawD3dHudFlask(const Surface &out, bool mana)
@@ -392,6 +408,13 @@ void DrawD3dHudValues(const Surface &out)
 		    mana ? (noMana || MyPlayer->hasNoMana() ? 0 : MyPlayer->_pMana >> 6) : MyPlayer->_pHitPoints >> 6,
 		    mana ? (noMana ? 0 : MyPlayer->_pMaxMana >> 6) : MyPlayer->_pMaxHP >> 6);
 		BlitScaled(out, values, GetD3dHudValueRect(mana), true);
+		FillRect(values, 0, 0, values.w(), values.h(), 1);
+		DrawFlaskValues(values, { 44, 1 },
+		    mana ? (noMana || MyPlayer->hasNoMana() ? 0 : MyPlayer->_pMana >> 6) : MyPlayer->_pHitPoints >> 6,
+		    mana ? (noMana ? 0 : MyPlayer->_pMaxMana >> 6) : MyPlayer->_pMaxHP >> 6);
+		// The authored sculpture has an asymmetric aperture. Values follow its
+		// measured center (skin.json), independently of the native fallback bulb.
+		RecordD3dHudForeground(values, GetD3dHudPresentationValueRect(mana));
 	}
 }
 
@@ -403,7 +426,12 @@ void DrawD3dHudKeyLabel(const Surface &out, Rectangle rect, std::string_view tex
 	DrawString(label, text, { { 0, 0 }, { label.w(), label.h() } },
 	    { .flags = UiFlags::ColorWhite | UiFlags::AlignRight | UiFlags::Outlined | UiFlags::KerningFitSpacing, .spacing = 0 });
 	const int height = std::min(rect.size.height, std::max(1, 13 * scaleHeight / 480));
-	BlitScaled(out, label, { rect.position + Displacement { 0, rect.size.height - height }, { rect.size.width, height } }, true);
+	const Rectangle target { rect.position + Displacement { 0, rect.size.height - height }, { rect.size.width, height } };
+	BlitScaled(out, label, target, true);
+	FillRect(label, 0, 0, label.w(), label.h(), 1);
+	DrawString(label, text, { { 0, 0 }, { label.w(), label.h() } },
+	    { .flags = UiFlags::ColorWhite | UiFlags::AlignRight | UiFlags::Outlined | UiFlags::KerningFitSpacing, .spacing = 0 });
+	RecordD3dHudForeground(label, target);
 }
 
 void DrawD3dHudSurface(const Surface &out, const Surface &source, Rectangle rect, bool transparent)

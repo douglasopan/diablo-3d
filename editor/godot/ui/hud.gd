@@ -6,6 +6,31 @@ extends Control
 signal preview_area_clicked(element_name: String)
 
 const EXPORT_PATH := "res://local/ui/layout.ini"
+const FILL_SHADER := """
+shader_type canvas_item;
+uniform float fill_fraction : hint_range(0.0, 1.0) = 1.0;
+void fragment() {
+	vec4 tex = texture(TEXTURE, UV);
+	float d = length(UV - vec2(0.5));
+	float aa = max(fwidth(d), 0.0001);
+	float circle = 1.0 - smoothstep(0.5 - aa, 0.5 + aa, d);
+	float liquid = step(1.0 - fill_fraction, UV.y) * step(0.00001, fill_fraction);
+	COLOR = tex * vec4(1.0, 1.0, 1.0, circle * liquid);
+}
+"""
+const EMPTY_GLASS_SHADER := """
+shader_type canvas_item;
+void fragment() {
+	vec3 tex = texture(TEXTURE, UV).rgb;
+	float shade = floor(min(tex.r, min(tex.g, tex.b)) * 255.0 * 0.30);
+	float d = length(UV - vec2(0.5));
+	float aa = max(fwidth(d), 0.0001);
+	float edge = 1.0 - smoothstep(0.5 - aa, 0.5 + aa, d);
+	COLOR = vec4((vec3(4.0, 5.0, 7.0) + vec3(shade)) / 255.0, edge);
+}
+"""
+
+const SKIN_ASSET_NAMES := ["chassis", "button", "orb-frame", "orb-red", "orb-blue", "inset"]
 const ELEMENT_NAMES := [
 	"HudHealthOrb", "HudManaOrb", "HudBelt", "HudSpell",
 	"HudCharacter", "HudInventory", "HudSpellbook", "HudQuests", "HudMap", "HudMenu",
@@ -59,20 +84,76 @@ const BUTTON_TEXT := {
 	set(value):
 		show_hitboxes = value
 		_refresh_visuals()
+@export var show_preview_tools := true:
+	set(value):
+		show_preview_tools = value
+		_refresh_visuals()
 @export_group("Exportação explícita — somente layout")
 @export_tool_button("Exportar layout HUD", "Save") var export_action: Callable = _export_button_pressed
-@export_multiline var status := "Edite os Control em SafeFrame. Salve a cena e exporte o layout. Vida/mana e itens são demonstrativos."
+@export_multiline var status := "Edite os Control em SafeFrame. Salve e exporte o layout. Cinto vazio e magia sem seleção são demonstrativos; fonte aproximada."
 
 var _last_size := Vector2.ZERO
+var skin_metadata: Dictionary = {}
+var textures: Dictionary = {}
+var missing_assets: Array[String] = []
+var font: SystemFont
+var _skin_regions: Dictionary = {}
+var _frame_circle_center := Vector2.ZERO
+var _frame_circle_radius := 0.0
+var _liquid_overlap := 0.0
+
+func _load_preview_skin() -> void:
+	# Shared authored PNGs remain outside the Godot project. Never extract game
+	# archives, install a profile, or alter artwork while loading this preview.
+	var repo := ProjectSettings.globalize_path("res://").replace("\\", "/").trim_suffix("/").get_base_dir().get_base_dir()
+	var folder := repo.path_join("assets/d3d-ui/hud/r1")
+	var metadata_path := folder.path_join("skin.json")
+	if not FileAccess.file_exists(metadata_path):
+		missing_assets.append("skin.json")
+		return
+	var parsed: Variant = JSON.parse_string(FileAccess.get_file_as_string(metadata_path))
+	if not parsed is Dictionary or parsed.get("format", "") != "d3d.hud-skin" or parsed.get("schemaVersion", 0) != 1:
+		missing_assets.append("skin.json incompatível")
+		return
+	skin_metadata = parsed
+	for asset_name: String in SKIN_ASSET_NAMES:
+		var asset: Dictionary = skin_metadata.get("assets", {}).get(asset_name, {})
+		var path := folder.path_join(str(asset.get("file", "")))
+		if not FileAccess.file_exists(path) or FileAccess.get_sha256(path) != asset.get("sha256", ""):
+			missing_assets.append(asset_name + " ausente/divergente")
+			continue
+		var image := Image.load_from_file(path)
+		var pixels: Array = asset.get("pixels", [])
+		var source: Array = asset.get("sourceRegion", [])
+		if image == null or image.is_empty() or pixels.size() != 2 or source.size() != 4 or image.get_size() != Vector2i(pixels[0], pixels[1]):
+			missing_assets.append(asset_name + " inválido")
+			continue
+		textures[asset_name] = ImageTexture.create_from_image(image)
+		_skin_regions[asset_name] = Rect2(source[0], source[1], source[2], source[3])
+	if skin_metadata.get("assets", {}).has("orb-frame"):
+		var circle: Dictionary = skin_metadata.assets["orb-frame"].get("circle", {})
+		var center: Array = circle.get("centerSource", [0, 0])
+		_frame_circle_center = Vector2(center[0], center[1])
+		_frame_circle_radius = float(circle.get("radiusSource", 0))
+		_liquid_overlap = float(circle.get("liquidOverlapSource", 0))
 
 func _ready() -> void:
+	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	font = SystemFont.new()
+	font.font_names = PackedStringArray(["Georgia", "Times New Roman"])
+	font.multichannel_signed_distance_field = true
+	font.msdf_pixel_range = 8
+	font.msdf_size = 64
+	_load_preview_skin()
 	for element_name: String in ELEMENT_NAMES:
 		var element := get_element(element_name)
 		if element == null:
 			continue
 		element.draw.connect(_draw_element.bind(element))
-		element.resized.connect(element.queue_redraw)
+		element.resized.connect(_refresh_visuals)
 		element.gui_input.connect(_element_input.bind(element_name))
+		if element_name in ["HudHealthOrb", "HudManaOrb"] and _skin_regions.has("orb-frame"):
+			_make_orb_layers(element, element_name == "HudManaOrb")
 	if Engine.is_editor_hint():
 		set_logical_size(preview_logical_size)
 	else:
@@ -156,7 +237,15 @@ func _refresh_visuals() -> void:
 		if element:
 			if element_name in ["HudChat", "HudFriendly"]:
 				element.visible = demo_multiplayer
+			if element_name in ["HudHealthOrb", "HudManaOrb"] and _skin_regions.has("orb-frame"):
+				_place_orb_layers(element, element_name == "HudManaOrb")
+				var overlay := element.get_node_or_null("HitboxOverlay") as Control
+				if overlay:
+					overlay.queue_redraw()
 			element.queue_redraw()
+	var tools := get_node_or_null("PreviewTools") as Control
+	if tools:
+		tools.visible = show_preview_tools
 	var life := get_node_or_null("PreviewTools/Content/LifeLabel") as Label
 	var mana := get_node_or_null("PreviewTools/Content/ManaLabel") as Label
 	if life:
@@ -165,6 +254,7 @@ func _refresh_visuals() -> void:
 		mana.text = "Mana demonstrativa: %.1f%%" % demo_mana_percent
 	var output := get_node_or_null("PreviewStatus") as Label
 	if output:
+		output.visible = show_preview_tools
 		output.text = status
 
 func _element_input(event: InputEvent, element_name: String) -> void:
@@ -174,123 +264,166 @@ func _element_input(event: InputEvent, element_name: String) -> void:
 		_refresh_visuals()
 
 func _draw() -> void:
-	draw_rect(Rect2(Vector2.ZERO, size), Color("101519"))
-	for x: int in range(0, int(size.x), 40):
-		draw_line(Vector2(x, 0), Vector2(x, size.y), Color(0.17, 0.20, 0.21, 0.22))
-	for y: int in range(0, int(size.y), 40):
-		draw_line(Vector2(0, y), Vector2(size.x, y), Color(0.17, 0.20, 0.21, 0.22))
-	var font := ThemeDB.fallback_font
-	var title := "PRÉVIA DO HUD • SEM SIMULAÇÃO DO JOGO"
-	var subtitle := "Layout em pixels lógicos • controles e dados nativos permanecem no DevilutionX"
-	draw_string(font, Vector2((size.x - font.get_string_size(title, HORIZONTAL_ALIGNMENT_LEFT, -1, 12).x) / 2, 220), title, HORIZONTAL_ALIGNMENT_LEFT, -1, 12, Color("b8aa8b"))
-	draw_string(font, Vector2((size.x - font.get_string_size(subtitle, HORIZONTAL_ALIGNMENT_LEFT, -1, 9).x) / 2, 239), subtitle, HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color("7e898c"))
+	draw_rect(Rect2(Vector2.ZERO, size), Color("161a1d"))
+	if font == null:
+		return
+	var title := "PRÉVIA DO EDITOR • HUD CANDIDATO"
+	_draw_text(self, title, Rect2(0, 28, size.x, 20), 12, Color("d2c7ab"))
+	_draw_text(self, "PNGs gerados • valores demonstrativos • não é captura do jogo", Rect2(0, 52, size.x, 15), 9, Color("8e9598"))
+	_draw_text(self, "Cinto vazio • magia sem seleção • fonte de prévia aproximada", Rect2(0, 70, size.x, 15), 9, Color("8e9598"))
 	var frame := get_node_or_null("SafeFrame") as Control
 	if show_safe_frame and frame:
 		draw_rect(frame.get_rect().grow(-1), Color(0.66, 0.56, 0.36, 0.3), false, 1)
-		draw_string(font, frame.position + Vector2(10, 18), "SafeFrame %d × %d" % [frame.size.x, frame.size.y], HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color("877d65"))
-	if frame:
-		_draw_backplate(Rect2(get_panel_preview_rect()))
-
-func _draw_backplate(rect: Rect2) -> void:
-	# Geometric stone/metal approximation only, not an HD art asset or game capture.
-	draw_rect(rect, Color("292c2b"))
-	for row: int in range(3):
-		var y := rect.position.y + row * 34
-		draw_line(Vector2(rect.position.x + 3, y + 2), Vector2(rect.end.x - 3, y + 2), Color("343734"), 1)
-		for column: int in range(12):
-			var x := rect.position.x + column * 54 + (27 if row % 2 else 0)
-			if x < rect.end.x - 3:
-				draw_line(Vector2(x, y + 3), Vector2(x, minf(y + 33, rect.end.y - 3)), Color("1a1d1e"), 1)
-	draw_rect(rect.grow(-1), Color("9a8055"), false, 1)
-	draw_rect(rect.grow(-3), Color("14191b"), false, 2)
+	if not missing_assets.is_empty():
+		_draw_text(self, "ASSETS AUSENTES: " + ", ".join(missing_assets), Rect2(0, 95, size.x, 20), 10, Color("f0a36b"))
+	_nine_slice(self, Rect2(get_panel_preview_rect()), "chassis")
 
 func _draw_element(element: Control) -> void:
 	var rect := Rect2(Vector2.ZERO, element.size)
-	match String(element.name):
-		"HudHealthOrb": _draw_orb(element, demo_life_percent / 100.0, Color("b51e23"), "VIDA")
-		"HudManaOrb": _draw_orb(element, demo_mana_percent / 100.0, Color("2257ce"), "MANA")
-		"HudBelt": _draw_belt(element)
+	var element_name := String(element.name)
+	match element_name:
+		"HudHealthOrb", "HudManaOrb":
+			pass # Neutral glass, liquid and frame are separate decorative layers.
+		"HudBelt":
+			for index: int in range(8):
+				var left := element.size.x * index / 8.0
+				var right := element.size.x * (index + 1) / 8.0
+				var cell := Rect2(left, 0, right - left, element.size.y)
+				_inset(element, cell)
+				_draw_hotkey(element, str(index + 1), cell.grow(-2))
 		"HudInfo":
-			_panel(element, rect)
+			_inset(element, rect)
 			var lines := demo_info_text.split("\n")
-			var first_baseline := (element.size.y - lines.size() * 10) / 2.0 + 8
+			var pitch := 11.2
+			var first := (element.size.y - pitch * lines.size()) / 2
 			for index: int in range(lines.size()):
-				_text(element, lines[index], Vector2(element.size.x / 2, first_baseline + index * 10), 9, Color("d4c3a0"))
+				_draw_text(element, lines[index], Rect2(5, first + pitch * index, element.size.x - 10, pitch), 10)
+		"HudSpell":
+			_inset(element, rect)
 		_:
-			_panel(element, rect, String(element.name) == "HudSpell")
-			if String(element.name) == "HudSpell":
-				_draw_spell_glyph(element, rect.grow(-7))
-			else:
-				_text(element, BUTTON_TEXT.get(String(element.name), ""), Vector2(element.size.x / 2, element.size.y / 2 + 3), 9)
+			_nine_slice(element, rect, "button")
+			var text_size := 9 if element_name in ["HudCharacter", "HudInventory"] else 10
+			_draw_text(element, BUTTON_TEXT.get(element_name, ""), rect.grow(-4), text_size)
 	if show_hitboxes:
-		element.draw_rect(rect.grow(-0.5), Color(0.2, 0.9, 0.75, 0.85), false, 1)
+		element.draw_rect(rect, Color(0.2, 0.95, 0.75, 0.9), false, 0.5)
 
-func _panel(target: Control, rect: Rect2, selected := false) -> void:
-	target.draw_rect(rect, Color("0c1012"))
-	target.draw_rect(rect.grow(-1), Color("aa8750") if selected else Color("756347"), false, 1)
-	target.draw_rect(rect.grow(-3), Color("302e29"), false, 1)
-	for point: Vector2 in [rect.position + Vector2(3, 3), Vector2(rect.end.x - 3, rect.position.y + 3), rect.end - Vector2(3, 3), Vector2(rect.position.x + 3, rect.end.y - 3)]:
-		target.draw_circle(point, 1, Color("b79a65"))
+func _inset(target: Control, rect: Rect2) -> void:
+	_nine_slice(target, rect, "inset")
 
-func _draw_orb(target: Control, fraction: float, color: Color, caption: String) -> void:
-	# A full 88 x 113 ornament column with a ~69 px globe, like the native
-	# 112 x 144 column. These simple shapes show its footprint, not final art.
-	var column_size := Vector2(88, 113)
-	target.draw_set_transform(Vector2.ZERO, 0, target.size / column_size)
-	var radius := 34.5
-	var center := Vector2(column_size.x / 2, radius + 2)
-	var left := PackedVector2Array([Vector2(4, 14), Vector2(12, 24), Vector2(14, 66), Vector2(28, 88), Vector2(43, 102), Vector2(22, 106), Vector2(5, 91)])
-	var right := PackedVector2Array()
-	for point: Vector2 in left:
-		right.append(Vector2(column_size.x - point.x, point.y))
-	target.draw_colored_polygon(left, Color("464b49"))
-	target.draw_colored_polygon(right, Color("464b49"))
-	target.draw_colored_polygon(PackedVector2Array([Vector2(3, 107), Vector2(27, 98), Vector2(44, 104), Vector2(61, 98), Vector2(85, 107), Vector2(85, 112), Vector2(3, 112)]), Color("53564f"))
-	target.draw_circle(center, radius + 4, Color("24272a"))
-	target.draw_circle(center, radius + 2, Color("82735b"))
-	target.draw_circle(center, radius, Color("070c12"))
-	var top := center.y + radius - 2 * radius * fraction
-	for row: int in range(ceili(top), floori(center.y + radius) + 1):
-		var half_width := sqrt(maxf(0, radius * radius - pow(row - center.y, 2)))
-		var depth := clampf((row - top) / maxf(1, 2 * radius), 0, 1)
-		target.draw_line(Vector2(center.x - half_width, row), Vector2(center.x + half_width, row), color.darkened(depth * 0.5), 1)
-	if fraction > 0 and fraction < 1:
-		var half_width := sqrt(maxf(0, radius * radius - pow(top - center.y, 2)))
-		target.draw_line(Vector2(center.x - half_width, top), Vector2(center.x + half_width, top), color.lightened(0.35), 1)
-	target.draw_arc(center, radius - 2, PI * 1.12, PI * 1.8, 20, Color(0.6, 0.65, 0.7, 0.38), 1.5, true)
-	target.draw_circle(center + Vector2(radius * 0.34, -radius * 0.42), radius * 0.08, Color(1, 1, 1, 0.7))
-	for index: int in range(12):
-		var angle := TAU * index / 12.0
-		target.draw_line(center + Vector2.from_angle(angle) * (radius + 2), center + Vector2.from_angle(angle) * (radius + 4), Color("a3906c"), 1)
-	_text(target, "%s %.0f%%" % [caption, fraction * 100], Vector2(column_size.x / 2, column_size.y - 2), 8)
-	target.draw_set_transform(Vector2.ZERO)
+func _draw_hotkey(target: Control, text: String, rect: Rect2) -> void:
+	if font == null:
+		return
+	# Match native hotkeys: bottom right inside the existing slot, with outline.
+	var point_size := 12
+	var width := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, point_size).x
+	var point := Vector2(rect.end.x - width, rect.end.y - font.get_descent(point_size))
+	target.draw_string_outline(font, point, text, HORIZONTAL_ALIGNMENT_LEFT, -1, point_size, 1, Color("080a0b"))
+	target.draw_string(font, point, text, HORIZONTAL_ALIGNMENT_LEFT, -1, point_size, Color("eee9dd"))
 
-func _draw_belt(target: Control) -> void:
-	var slot_width := target.size.x / 8.0
-	for index: int in range(8):
-		var rect := Rect2(Vector2(index * slot_width + 1, 1), Vector2(slot_width - 2, target.size.y - 2))
-		_panel(target, rect)
-		if index < 2:
-			var bottle := Rect2(rect.position + Vector2(rect.size.x * 0.35, 7), Vector2(rect.size.x * 0.3, rect.size.y - 11))
-			target.draw_rect(bottle, Color("a5a9a6"), false, 1)
-			target.draw_rect(bottle.grow(-1), Color("aa2028"))
-			target.draw_line(bottle.position + Vector2(1, -2), bottle.position + Vector2(bottle.size.x - 1, -2), Color("ceb881"), 2)
-		_text(target, str(index + 1), Vector2(rect.get_center().x, -3), 7)
+func _draw_text(target: Control, text: String, rect: Rect2, point_size: int, color := Color("e5d8b6")) -> void:
+	if font == null:
+		return
+	var text_width := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, point_size).x
+	var point := Vector2(rect.position.x + (rect.size.x - text_width) / 2, rect.position.y + (rect.size.y - font.get_height(point_size)) / 2 + font.get_ascent(point_size))
+	target.draw_string_outline(font, point, text, HORIZONTAL_ALIGNMENT_LEFT, -1, point_size, 1, Color("11100d"))
+	target.draw_string(font, point, text, HORIZONTAL_ALIGNMENT_LEFT, -1, point_size, color)
 
-func _draw_spell_glyph(target: Control, rect: Rect2) -> void:
-	# One prepared-spell placeholder, no extra action or hotkey button.
-	var center := rect.get_center()
-	var color := Color("d4c3a0")
-	target.draw_rect(Rect2(center + Vector2(-5, -1), Vector2(10, 11)), color)
-	for finger: int in range(4):
-		var x := center.x - 4 + finger * 3
-		target.draw_line(Vector2(x, center.y), Vector2(x - 1, center.y - 8 - (2 if finger == 1 else 0)), color, 2)
-	target.draw_line(center + Vector2(-4, 5), center + Vector2(-11, -1), color, 3)
+func _nine_slice(target: Control, destination: Rect2, asset_name: String) -> void:
+	if not textures.has(asset_name):
+		return
+	var asset: Dictionary = skin_metadata.assets[asset_name]
+	var src: Array = asset.nineSliceSource
+	var dst: Array = asset.nineSliceDestination
+	var source_margins := Vector4(src[0], src[1], src[2], src[3])
+	var margins := Vector4(dst[0], dst[1], dst[2], dst[3])
+	var source: Rect2 = _skin_regions[asset_name]
+	var sx := [source.position.x, source.position.x + source_margins.x, source.end.x - source_margins.z, source.end.x]
+	var sy := [source.position.y, source.position.y + source_margins.y, source.end.y - source_margins.w, source.end.y]
+	var dx := [destination.position.x, destination.position.x + margins.x, destination.end.x - margins.z, destination.end.x]
+	var dy := [destination.position.y, destination.position.y + margins.y, destination.end.y - margins.w, destination.end.y]
+	for y: int in range(3):
+		for x: int in range(3):
+			target.draw_texture_rect_region(textures[asset_name], Rect2(dx[x], dy[y], dx[x + 1] - dx[x], dy[y + 1] - dy[y]), Rect2(sx[x], sy[y], sx[x + 1] - sx[x], sy[y + 1] - sy[y]))
 
-func _text(target: Control, text: String, center_baseline: Vector2, font_size: int, color := Color("d4c3a0")) -> void:
-	var font := ThemeDB.fallback_font
-	var width := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x
-	target.draw_string(font, center_baseline - Vector2(width / 2, 0), text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size, color)
+func _make_orb_layers(element: Control, mana: bool) -> void:
+	if element.has_node("LiquidPNG"):
+		return
+	for child_name: String in ["EmptyGlassPNG", "LiquidPNG", "FramePNG"]:
+		var child := TextureRect.new()
+		child.name = child_name
+		child.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		child.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		child.stretch_mode = TextureRect.STRETCH_SCALE
+		child.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+		element.add_child(child)
+		var asset_name := "orb-frame" if child_name == "FramePNG" else ("orb-blue" if mana and child_name == "LiquidPNG" else "orb-red")
+		if textures.has(asset_name):
+			var atlas := AtlasTexture.new()
+			atlas.atlas = textures[asset_name]
+			atlas.region = _skin_regions[asset_name]
+			if child_name == "EmptyGlassPNG":
+				# Match C++'s uniform centered crop (red 1137×1136 → 1136²).
+				var source: Rect2 = atlas.region
+				var side := minf(source.size.x, source.size.y)
+				atlas.region = Rect2(source.position + ((source.size - Vector2.ONE * side) / 2).floor(), Vector2.ONE * side)
+			atlas.filter_clip = true
+			child.texture = atlas
+		if child_name in ["EmptyGlassPNG", "LiquidPNG"]:
+			var material := ShaderMaterial.new()
+			var shader := Shader.new()
+			shader.code = EMPTY_GLASS_SHADER if child_name == "EmptyGlassPNG" else FILL_SHADER
+			material.shader = shader
+			child.material = material
+		else:
+			child.flip_h = mana
+	var overlay := Control.new()
+	overlay.name = "HitboxOverlay"
+	overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	element.add_child(overlay)
+	overlay.draw.connect(_draw_orb_hitbox.bind(element, overlay))
+	_place_orb_layers(element, mana)
+
+func _draw_orb_hitbox(element: Control, overlay: Control) -> void:
+	if show_hitboxes:
+		overlay.draw_rect(Rect2(Vector2.ZERO, element.size).grow(-0.5), Color(0.2, 0.9, 0.75, 0.85), false, 1)
+
+func orb_frame_rect(element: Control) -> Rect2:
+	if not _skin_regions.has("orb-frame"):
+		return Rect2()
+	var region: Rect2 = _skin_regions["orb-frame"]
+	var factor := minf(element.size.x / region.size.x, element.size.y / region.size.y)
+	var fitted := region.size * factor
+	return Rect2(Vector2((element.size.x - fitted.x) / 2, element.size.y - fitted.y), fitted)
+
+func orb_circle(element: Control, mana: bool) -> Rect2:
+	if not _skin_regions.has("orb-frame"):
+		return Rect2()
+	var region: Rect2 = _skin_regions["orb-frame"]
+	var fitted := orb_frame_rect(element)
+	var factor := fitted.size.x / region.size.x
+	var center := (_frame_circle_center - region.position) * factor
+	if mana:
+		center.x = fitted.size.x - center.x
+	center += fitted.position
+	var radius := (_frame_circle_radius + _liquid_overlap) * factor
+	return Rect2(center - Vector2.ONE * radius, Vector2.ONE * radius * 2)
+
+func _place_orb_layers(element: Control, mana: bool) -> void:
+	var frame := element.get_node_or_null("FramePNG") as TextureRect
+	var liquid := element.get_node_or_null("LiquidPNG") as TextureRect
+	var glass := element.get_node_or_null("EmptyGlassPNG") as TextureRect
+	if frame == null or liquid == null:
+		return
+	var fitted := orb_frame_rect(element)
+	frame.position = fitted.position
+	frame.size = fitted.size
+	var circle := orb_circle(element, mana)
+	if glass:
+		glass.position = circle.position
+		glass.size = circle.size
+	liquid.position = circle.position
+	liquid.size = circle.size
+	liquid.material.set_shader_parameter("fill_fraction", (demo_mana_percent if mana else demo_life_percent) / 100.0)
 
 func collect_layout() -> Dictionary:
 	var config := ConfigFile.new()

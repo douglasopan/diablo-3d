@@ -1,6 +1,7 @@
 #pragma once
 
 #ifndef USE_SDL1
+#include <span>
 #include "utils/sdl_compat.h"
 
 namespace devilution {
@@ -16,6 +17,10 @@ struct UiOverlayFrame;
 bool RenderTownPresentationLayers(SDL_Renderer *renderer, SDL_Surface *logicalOutput,
     const Surface &highResolutionWorld, const UiOverlayFrame &overlay,
     SDL_Palette *palette, bool linearFilter = true);
+
+/** Restore from the 2x texture uploaded by a successful Town pass THIS present. */
+bool RestoreTownPresentationWorldRegions(SDL_Renderer *renderer,
+    std::span<const SDL_Rect> footprints);
 
 /** Must run before the owning renderer is destroyed or reconfigured. */
 void ResetTownPresentationResources();
