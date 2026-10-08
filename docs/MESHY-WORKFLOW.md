@@ -8,6 +8,12 @@ The user chose Tripo for the next integration, then explicitly authorized one fi
 
 Reusing an asset in Godot does not depend on which provider generated it. Preserve the catalog ID, variant, revision and content hash. Never regenerate a paid candidate merely because the provider changed, and never pick a file by its modification date. Current per-front production records are separate from the historical cabin experiment below.
 
+## Master quality policy — 8 October 2026
+
+The local audit found that Adria's saved pre-remesh geometry has 3,491,844 triangles, while the textured result selected for the game has 5,134. That reduction was requested by our generation parameters; the local D3D conversion retained the selected result's triangle count. The dense saved file has positions and normals but no UVs or textures, so it is a recoverable geometry source, not a ready textured replacement.
+
+For a future authorized submission, `meshy_assets.py` now defaults to `should_remesh: false`, `should_texture: true` and `enable_pbr: true`, without a low polygon target. Meshy's [Image to 3D documentation](https://docs.meshy.ai/en/api/image-to-3d) recommends disabling remeshing for maximum geometry quality. This parameter change submits no task and does not resume Meshy production. Preserve each downloaded master; generate visually reviewed LOD derivatives separately. Near-camera quality must not depend on the reduced derivative. Neither completion status nor a provider preview proves which mesh the game loads: compare hashes, geometry and materials in the [model inspector](MODEL-INSPECTOR.md).
+
 ## Current experiment
 
 On 7 October 2026 the east cabin received:

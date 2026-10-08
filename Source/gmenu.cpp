@@ -65,13 +65,13 @@ constexpr int SliderFillMax = SliderValueWidth - (SliderMarkerWidth / 2) - 1;
 constexpr int GMenuTop = 117;
 constexpr int GMenuItemHeight = 45;
 
-constexpr int SettingsMaxRows = 8;
-constexpr int SettingsRowHeight = 32;
 constexpr int SettingsSliderRowHeight = 46;
 constexpr int SettingsPadding = 8;
-constexpr int SettingsTitleHeight = 28;
 constexpr int SettingsGap = 6;
-constexpr int SettingsDescriptionLineHeight = 14;
+constexpr size_t SettingsMaxNavigationItems = 3;
+
+GMenuSettingsGeometry BuildSettingsGeometry(Size screenSize, int mainPanelTop, size_t rowCount,
+    bool containsSlider, size_t navigationItems, bool pauseMenu, int logoHeight = 90);
 
 OptionalOwnedClxSpriteList optbar_cel;
 OptionalOwnedClxSpriteList PentSpin_cel;
@@ -96,7 +96,15 @@ GMenuSettingsGeometry GetSettingsGeometry()
 			break;
 		}
 	}
-	return gmenu_settings_geometry({ gnScreenWidth, gnScreenHeight }, GetMainPanel().position.y, sgCurrentMenuIdx, containsSlider);
+	int logoHeight = 90;
+	if (SettingsPresentation->pauseMenu) {
+		if (CustomPauseLogo)
+			logoHeight = CustomPauseLogo->sprites()[0].height();
+		else if (sgpLogo)
+			logoHeight = (*sgpLogo)[0].height();
+	}
+	return BuildSettingsGeometry({ gnScreenWidth, gnScreenHeight }, GetMainPanel().position.y, sgCurrentMenuIdx,
+	    containsSlider, SettingsPresentation->navigationItems, SettingsPresentation->pauseMenu, logoHeight);
 }
 
 int GmenuItemCount()
@@ -111,6 +119,8 @@ void GmenuUpDown(bool isDown)
 		return;
 	}
 	isDraggingSlider = false;
+	if (sgpCurrItem >= &sgpCurrentMenu[count])
+		sgpCurrItem = &sgpCurrentMenu[count - 1];
 	int i = count;
 	if (count != 0) {
 		while (i != 0) {
@@ -135,6 +145,16 @@ void GmenuUpDown(bool isDown)
 
 void GmenuLeftRight(bool isRight)
 {
+	if (SettingsPresentation && sgpCurrItem != nullptr) {
+		const GMenuSettingsGeometry layout = GetSettingsGeometry();
+		const size_t index = gmenu_selected_index();
+		if (layout.navigationItems > 1 && index >= layout.contentRows) {
+			const size_t column = index - layout.contentRows;
+			gmenu_select_index(layout.contentRows + (column + (isRight ? 1 : layout.navigationItems - 1)) % layout.navigationItems);
+			PlaySFX(SfxID::MenuMove);
+			return;
+		}
+	}
 	if (sgpCurrItem == nullptr || !sgpCurrItem->enabled() || !sgpCurrItem->isSlider())
 		return;
 
@@ -212,11 +232,33 @@ std::string FitSettingsLine(std::string_view text, int width, GameFontTables fon
 	return result;
 }
 
-std::string FitSettingsDescription(std::string_view text, int width, int lines)
+GameFontTables SettingsFont(int size)
+{
+	switch (size) {
+	case 24: return GameFont24;
+	case 30: return GameFont30;
+	case 42: return GameFont42;
+	case 46: return GameFont46;
+	default: return GameFont12;
+	}
+}
+
+UiFlags SettingsFontFlag(int size)
+{
+	switch (size) {
+	case 24: return UiFlags::FontSize24;
+	case 30: return UiFlags::FontSize30;
+	case 42: return UiFlags::FontSize42;
+	case 46: return UiFlags::FontSize46;
+	default: return UiFlags::FontSize12;
+	}
+}
+
+std::string FitSettingsDescription(std::string_view text, int width, int lines, GameFontTables font)
 {
 	if (text.empty() || width <= 0 || lines <= 0)
 		return {};
-	const std::string wrapped = WordWrapString(text, width);
+	const std::string wrapped = WordWrapString(text, width, font);
 	std::string_view remaining = wrapped;
 	std::string result;
 	for (int i = 0; i < lines && !remaining.empty(); ++i) {
@@ -225,7 +267,7 @@ std::string FitSettingsDescription(std::string_view text, int width, int lines)
 		const std::string_view line = remaining.substr(0, newline);
 		if (i != 0)
 			result.push_back('\n');
-		result.append(FitSettingsLine(line, width, GameFont12, more && i + 1 == lines));
+		result.append(FitSettingsLine(line, width, font, more && i + 1 == lines));
 		if (!more)
 			break;
 		remaining.remove_prefix(newline + 1);
@@ -241,15 +283,22 @@ Rectangle SettingsSliderBox(const Rectangle &row)
 		{ SliderValueBoxWidth, SliderValueHeight } };
 }
 
-void GmenuDrawSettingsItem(const Surface &out, TMenuItem *item, const Rectangle &row)
+void GmenuDrawSettingsItem(const Surface &out, TMenuItem *item, const GMenuSettingsGeometry &layout, size_t index)
 {
+	const Rectangle row = layout.row(index);
 	const bool selected = item == sgpCurrItem;
 	if (selected) {
-		FillRect(out, row.position.x, row.position.y, row.size.width, row.size.height, PAL16_BLUE + 13);
-		FillRect(out, row.position.x, row.position.y, 2, row.size.height, PAL16_YELLOW + 3);
+		FillRect(out, row.position.x, row.position.y, row.size.width, row.size.height, PAL16_GRAY + 12);
+		const OptionalOwnedClxSpriteList &spinners = SettingsPresentation->pauseMenu ? PentSpin_cel : pSPentSpn2Cels;
+		if (spinners) {
+			const ClxSprite sprite = (*spinners)[PentSpn2Spin()];
+			const int y = row.position.y + (row.size.height - sprite.height()) / 2;
+			RenderClxSprite(out, sprite, { row.position.x + 4, y });
+			RenderClxSprite(out, sprite, { row.position.x + row.size.width - sprite.width() - 4, y });
+		}
 	}
-	const UiFlags labelColor = !item->enabled() ? UiFlags::ColorUiSilverDark : selected ? UiFlags::ColorGold : UiFlags::ColorWhitegold;
-	const std::string_view label = item->pszStr != nullptr ? item->pszStr : "";
+	const UiFlags labelColor = item->enabled() ? UiFlags::ColorGold : UiFlags::ColorUiSilverDark;
+	const std::string_view label = item->pszStr == nullptr ? "" : SettingsPresentation->pauseMenu ? _(item->pszStr) : item->pszStr;
 	const std::string_view value = item->value != nullptr ? item->value : "";
 	if (item->isSlider()) {
 		const Rectangle box = SettingsSliderBox(row);
@@ -267,17 +316,24 @@ void GmenuDrawSettingsItem(const Surface &out, TMenuItem *item, const Rectangle 
 		return;
 	}
 
-	const int x = row.position.x + 10;
-	const int width = row.size.width - 20;
-	if (value.empty()) {
-		DrawString(out, FitSettingsLine(label, width, GameFont12), { { x, row.position.y }, { width, row.size.height } },
-		    { .flags = UiFlags::FontSize12 | labelColor | UiFlags::VerticalCenter });
-	} else {
-		DrawString(out, FitSettingsLine(label, width, GameFont12), { { x, row.position.y }, { width, 16 } },
-		    { .flags = UiFlags::FontSize12 | labelColor });
-		DrawString(out, FitSettingsLine(value, width, GameFont12), { { x, row.position.y + 16 }, { width, 16 } },
-		    { .flags = UiFlags::FontSize12 | UiFlags::ColorUiSilver });
+	const int inset = SettingsPresentation->pauseMenu ? 58 : 24;
+	const Rectangle text { { row.position.x + inset, row.position.y }, { std::max(0, row.size.width - 2 * inset), row.size.height } };
+	const GameFontTables font = SettingsFont(layout.fontSize);
+	const UiFlags style = SettingsFontFlag(layout.fontSize) | UiFlags::VerticalCenter;
+	if (SettingsPresentation->pauseMenu || (index >= layout.contentRows && value.empty())) {
+		DrawString(out, FitSettingsLine(label, text.size.width, font), text, { .flags = style | labelColor | UiFlags::AlignCenter });
+		return;
 	}
+	if (value.empty()) {
+		DrawString(out, FitSettingsLine(label, text.size.width, font), text, { .flags = style | labelColor });
+		return;
+	}
+	const int gap = layout.fontSize == 12 ? 12 : 24;
+	const int labelWidth = std::max(0, (text.size.width - gap) * 3 / 5);
+	const Rectangle labelRect { text.position, { labelWidth, text.size.height } };
+	const Rectangle valueRect { { text.position.x + labelWidth + gap, text.position.y }, { std::max(0, text.size.width - labelWidth - gap), text.size.height } };
+	DrawString(out, FitSettingsLine(label, labelRect.size.width, font), labelRect, { .flags = style | labelColor });
+	DrawString(out, FitSettingsLine(value, valueRect.size.width, font), valueRect, { .flags = style | UiFlags::ColorUiSilver | UiFlags::AlignRight });
 }
 
 void GmenuDrawSettings(const Surface &out)
@@ -288,17 +344,34 @@ void GmenuDrawSettings(const Surface &out)
 	FillRect(out, layout.panel.position.x, layout.panel.position.y, layout.panel.size.width, layout.panel.size.height, PAL16_GRAY + 14);
 	DrawHorizontalLine(out, layout.panel.position, layout.panel.size.width, PAL16_BEIGE + 10);
 	DrawHorizontalLine(out, { layout.panel.position.x, layout.panel.position.y + layout.panel.size.height - 1 }, layout.panel.size.width, PAL16_BEIGE + 10);
-	const std::string_view title = SettingsPresentation->title != nullptr ? SettingsPresentation->title : "";
-	DrawString(out, FitSettingsLine(title, layout.title.size.width, GameFont24), layout.title,
-	    { .flags = UiFlags::FontSize24 | UiFlags::ColorGold | UiFlags::AlignCenter });
+	if (SettingsPresentation->pauseMenu) {
+		if (CustomPauseLogo) {
+			const uint32_t frame = D3dLogoFrameAt(SDL_GetTicks() - CustomPauseLogoStartTicks);
+			const ClxSprite sprite = CustomPauseLogo->sprites()[frame];
+			DrawD3dLogo(out, { (gnScreenWidth - sprite.width()) / 2, layout.title.position.y + layout.title.size.height - 1 }, *CustomPauseLogo, frame);
+		} else if (sgpLogo) {
+			const uint32_t ticks = SDL_GetTicks();
+			if (static_cast<int>(ticks - LogoAnim_tick) > 25) {
+				LogoAnim_frame = (LogoAnim_frame + 1) % sgpLogo->numSprites();
+				LogoAnim_tick = ticks;
+			}
+			const ClxSprite sprite = (*sgpLogo)[LogoAnim_frame];
+			RenderClxSprite(out, sprite, { (gnScreenWidth - sprite.width()) / 2, layout.title.position.y });
+		}
+	} else {
+		const std::string_view title = SettingsPresentation->title != nullptr ? SettingsPresentation->title : "";
+		DrawString(out, FitSettingsLine(title, layout.title.size.width, SettingsFont(layout.titleFontSize)), layout.title,
+		    { .flags = SettingsFontFlag(layout.titleFontSize) | UiFlags::ColorGold | UiFlags::AlignCenter });
+	}
 	for (size_t i = 0; i < layout.rows; ++i)
-		GmenuDrawSettingsItem(out, &sgpCurrentMenu[i], layout.row(i));
+		GmenuDrawSettingsItem(out, &sgpCurrentMenu[i], layout, i);
 	if (sgpCurrItem == nullptr || SettingsPresentation->describe == nullptr)
 		return;
 	const std::string_view description = SettingsPresentation->describe(gmenu_selected_index());
-	const int lineHeight = std::max(SettingsDescriptionLineHeight, GetLineHeight(description, GameFont12));
-	DrawString(out, FitSettingsDescription(description, layout.description.size.width, layout.description.size.height / lineHeight), layout.description,
-	    { .flags = UiFlags::FontSize12 | UiFlags::ColorUiSilver, .lineHeight = lineHeight });
+	const GameFontTables font = SettingsFont(layout.descriptionFontSize);
+	const int lineHeight = std::max(14, GetLineHeight(description, font));
+	DrawString(out, FitSettingsDescription(description, layout.description.size.width, layout.description.size.height / lineHeight, font), layout.description,
+	    { .flags = SettingsFontFlag(layout.descriptionFontSize) | UiFlags::ColorUiSilver, .lineHeight = lineHeight });
 }
 
 void GameMenuMove()
@@ -331,31 +404,108 @@ int GmenuGetSliderFill()
 	return std::clamp(MousePosition.x - left, SliderFillMin, SliderFillMax);
 }
 
+GMenuSettingsGeometry BuildSettingsGeometry(Size screenSize, int mainPanelTop, size_t rowCount,
+    bool containsSlider, size_t navigationItems, bool pauseMenu, int logoHeight)
+{
+	GMenuSettingsGeometry layout {};
+	int maximumWidth = 760;
+	int titleHeight = 28;
+	int minimumDescriptionHeight = 32;
+	int maximumDescriptionHeight = 56;
+	layout.fontSize = 12;
+	layout.titleFontSize = 24;
+	layout.descriptionFontSize = 12;
+	layout.rowHeight = 24;
+	if (screenSize.width >= 960 && screenSize.height >= 540) {
+		maximumWidth = 1000;
+		titleHeight = 40;
+		maximumDescriptionHeight = 70;
+		layout.fontSize = 24;
+		layout.titleFontSize = 30;
+		layout.rowHeight = 32;
+	}
+	if (screenSize.width >= 960 && screenSize.height >= 900) {
+		maximumWidth = 1360;
+		titleHeight = 46;
+		minimumDescriptionHeight = 52;
+		maximumDescriptionHeight = 104;
+		layout.fontSize = 30;
+		layout.titleFontSize = 42;
+		layout.descriptionFontSize = 24;
+		layout.rowHeight = 42;
+	}
+	if (screenSize.width >= 960 && screenSize.height >= 1440) {
+		maximumWidth = 1600;
+		titleHeight = 54;
+		layout.fontSize = 42;
+		layout.titleFontSize = 46;
+		layout.rowHeight = 48;
+	}
+	const int boundary = std::clamp(mainPanelTop, 0, std::max(0, screenSize.height));
+	const int availableHeight = std::max(0, boundary - 8);
+	if (pauseMenu) {
+		maximumWidth = 1000;
+		titleHeight = std::max(1, logoHeight);
+		minimumDescriptionHeight = maximumDescriptionHeight = 0;
+		layout.fontSize = availableHeight >= 392 ? 46 : availableHeight >= 342 ? 42 : 30;
+		layout.rowHeight = layout.fontSize == 46 ? 56 : layout.fontSize == 42 ? 46 : 44;
+		navigationItems = 0;
+	}
+	if (containsSlider)
+		layout.rowHeight = std::max(layout.rowHeight, SettingsSliderRowHeight);
+	const int width = std::min(maximumWidth, std::max(0, std::max(0, screenSize.width) - 16));
+	navigationItems = std::min({ navigationItems, rowCount, SettingsMaxNavigationItems });
+	const int footerHeight = navigationItems != 0 ? layout.rowHeight : 0;
+	const int fixedHeight = 2 * SettingsPadding + titleHeight + SettingsGap
+	    + (navigationItems != 0 ? SettingsGap : 0) + (minimumDescriptionHeight != 0 ? SettingsGap : 0);
+	if (width < 2 * SettingsPadding + 24 || (containsSlider && width < SliderItemWidth + 2 * SettingsPadding)
+	    || (pauseMenu && width < 480) || availableHeight < fixedHeight + footerHeight + minimumDescriptionHeight)
+		return layout;
+	const int capacity = std::clamp((availableHeight - fixedHeight - footerHeight - minimumDescriptionHeight) / layout.rowHeight,
+	    0, static_cast<int>(GMenuSettingsMaxContentRows));
+	layout.contentRows = std::min(rowCount - navigationItems, static_cast<size_t>(capacity));
+	layout.navigationItems = navigationItems;
+	layout.rows = layout.contentRows + navigationItems;
+	const int itemsHeight = static_cast<int>(layout.contentRows) * layout.rowHeight;
+	const int descriptionHeight = std::min(maximumDescriptionHeight, availableHeight - fixedHeight - footerHeight - itemsHeight);
+	const int height = fixedHeight + itemsHeight + footerHeight + descriptionHeight;
+	const Point position { (screenSize.width - width) / 2, (boundary - height) / 2 };
+	const int contentLeft = position.x + SettingsPadding;
+	const int contentWidth = width - 2 * SettingsPadding;
+	layout.panel = { position, { width, height } };
+	layout.title = { { contentLeft, position.y + SettingsPadding }, { contentWidth, titleHeight } };
+	layout.items = { { contentLeft, layout.title.position.y + titleHeight + SettingsGap }, { contentWidth, itemsHeight } };
+	int nextY = layout.items.position.y + itemsHeight;
+	if (descriptionHeight != 0) {
+		nextY += SettingsGap;
+		layout.description = { { contentLeft + 4, nextY }, { contentWidth - 8, descriptionHeight } };
+		nextY += descriptionHeight;
+	}
+	if (navigationItems != 0) {
+		nextY += SettingsGap;
+		layout.navigation = { { contentLeft, nextY }, { contentWidth, footerHeight } };
+	}
+	return layout;
+}
+
 } // namespace
 
 TMenuItem *sgpCurrentMenu;
 
-GMenuSettingsGeometry gmenu_settings_geometry(Size screenSize, int mainPanelTop, size_t rowCount, bool containsSlider)
+GMenuSettingsGeometry gmenu_settings_geometry(Size screenSize, int mainPanelTop, size_t rowCount, bool containsSlider, size_t navigationItems)
 {
-	const int width = std::min(600, std::max(0, screenSize.width - 16));
-	const int availableHeight = std::max(0, std::min(mainPanelTop, screenSize.height) - 8);
-	const int rowHeight = containsSlider ? SettingsSliderRowHeight : SettingsRowHeight;
-	constexpr int FixedHeight = 2 * SettingsPadding + SettingsTitleHeight + 2 * SettingsGap;
-	const int capacity = std::clamp((availableHeight - FixedHeight - 2 * SettingsDescriptionLineHeight) / rowHeight, 0, SettingsMaxRows);
-	const size_t rows = std::min(rowCount, static_cast<size_t>(capacity));
-	if (width < 2 * SettingsPadding + 24 || (containsSlider && width < SliderItemWidth + 2 * SettingsPadding)
-	    || availableHeight < FixedHeight + 2 * SettingsDescriptionLineHeight)
-		return { { { 0, 0 }, { 0, 0 } }, { { 0, 0 }, { 0, 0 } }, { { 0, 0 }, { 0, 0 } }, { { 0, 0 }, { 0, 0 } }, rowHeight, 0 };
-	const int itemsHeight = static_cast<int>(rows) * rowHeight;
-	const int descriptionHeight = std::min(70, availableHeight - FixedHeight - itemsHeight);
-	const int height = FixedHeight + itemsHeight + descriptionHeight;
-	const Point position { (screenSize.width - width) / 2, (std::min(mainPanelTop, screenSize.height) - height) / 2 };
-	const int contentLeft = position.x + SettingsPadding;
-	const int contentWidth = width - 2 * SettingsPadding;
-	const Rectangle title { { contentLeft, position.y + SettingsPadding }, { contentWidth, SettingsTitleHeight } };
-	const Rectangle items { { contentLeft, title.position.y + title.size.height + SettingsGap }, { contentWidth, itemsHeight } };
-	const Rectangle description { { contentLeft + 4, items.position.y + items.size.height + SettingsGap }, { contentWidth - 8, descriptionHeight } };
-	return { { position, { width, height } }, title, items, description, rowHeight, rows };
+	return BuildSettingsGeometry(screenSize, mainPanelTop, rowCount, containsSlider, navigationItems, false);
+}
+
+size_t gmenu_settings_page_size(Size screenSize, int mainPanelTop)
+{
+	return std::max(size_t { 1 }, gmenu_settings_geometry(screenSize, mainPanelTop,
+	    GMenuSettingsMaxContentRows + SettingsMaxNavigationItems, false, SettingsMaxNavigationItems).contentRows);
+}
+
+GMenuSettingsGeometry gmenu_get_settings_geometry()
+{
+	return SettingsPresentation ? GetSettingsGeometry() : GMenuSettingsGeometry {};
 }
 
 void gmenu_draw_pause(const Surface &out)
@@ -401,6 +551,8 @@ void gmenu_init_menu()
 			sgpLogo = LoadCel("data\\diabsmal", 296);
 	}
 	PentSpin_cel = LoadCel("data\\pentspin", 48);
+	if (!pSPentSpn2Cels)
+		LoadSmallSelectionSpinner();
 	option_cel = LoadCel("data\\option", SliderMarkerWidth);
 	optbar_cel = LoadCel("data\\optbar", SliderValueBoxWidth);
 }
@@ -472,11 +624,12 @@ void gmenu_draw(const Surface &out)
 	if (HeadlessMode)
 		return;
 	if (sgpCurrentMenu != nullptr) {
-		GameMenuMove();
 		if (gmenu_current_option != nullptr)
 			gmenu_current_option();
 		if (sgpCurrentMenu == nullptr)
 			return;
+		if (!SettingsPresentation || !SettingsPresentation->lockNavigation)
+			GameMenuMove();
 		if (SettingsPresentation) {
 			GmenuDrawSettings(out);
 			return;
@@ -568,10 +721,11 @@ bool gmenu_on_mouse_move()
 		if (!SettingsPresentation || sgpCurrentMenu == nullptr)
 			return false;
 		const GMenuSettingsGeometry layout = GetSettingsGeometry();
-		if (layout.items.contains(MousePosition)) {
-			const size_t index = (MousePosition.y - layout.items.position.y) / layout.rowHeight;
-			if (index < layout.rows && sgpCurrentMenu[index].enabled())
+		for (size_t index = 0; index < layout.rows; ++index) {
+			if (layout.row(index).contains(MousePosition) && sgpCurrentMenu[index].enabled()) {
 				sgpCurrItem = &sgpCurrentMenu[index];
+				break;
+			}
 		}
 		return layout.panel.contains(MousePosition);
 	}
@@ -602,21 +756,23 @@ bool gmenu_left_mouse(bool isDown)
 	}
 	if (SettingsPresentation) {
 		const GMenuSettingsGeometry layout = GetSettingsGeometry();
-		if (!layout.items.contains(MousePosition))
-			return MousePosition.y < GetMainPanel().position.y;
-		const size_t index = (MousePosition.y - layout.items.position.y) / layout.rowHeight;
-		if (index >= layout.rows || !sgpCurrentMenu[index].enabled())
+		for (size_t index = 0; index < layout.rows; ++index) {
+			if (!layout.row(index).contains(MousePosition))
+				continue;
+			if (!sgpCurrentMenu[index].enabled())
+				return true;
+			sgpCurrItem = &sgpCurrentMenu[index];
+			PlaySFX(SfxID::MenuMove);
+			if (sgpCurrItem->isSlider()) {
+				isDraggingSlider = SettingsSliderBox(layout.row(index)).contains(MousePosition) && GmenuMouseIsOverSlider();
+				if (isDraggingSlider)
+					gmenu_on_mouse_move();
+			} else {
+				sgpCurrItem->fnMenu(true);
+			}
 			return true;
-		sgpCurrItem = &sgpCurrentMenu[index];
-		PlaySFX(SfxID::MenuMove);
-		if (sgpCurrItem->isSlider()) {
-			isDraggingSlider = SettingsSliderBox(layout.row(index)).contains(MousePosition) && GmenuMouseIsOverSlider();
-			if (isDraggingSlider)
-				gmenu_on_mouse_move();
-		} else {
-			sgpCurrItem->fnMenu(true);
 		}
-		return true;
+		return MousePosition.y < GetMainPanel().position.y;
 	}
 	const Point uiPosition = GetUIRectangle().position;
 	if (MousePosition.y >= GetMainPanel().position.y) {

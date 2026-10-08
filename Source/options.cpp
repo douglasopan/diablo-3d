@@ -904,6 +904,7 @@ GraphicsOptions::GraphicsOptions()
     , zoom("Zoom", OptionEntryFlags::None, N_("Zoom"), N_("Zoom on when enabled."), false)
     , townViewStartIn3D("Start in 3D", OptionEntryFlags::None, N_("Start in 3D"), N_("Start each game in the 3D town view. Applies when starting or loading a game; F4 still switches views during play. Other levels use the original renderer until their 3D version is available."), true)
     , townViewGpuRendering("3D GPU Rendering", OptionEntryFlags::None, N_("3D GPU Rendering"), N_("Use GPU acceleration for the 3D town view when available. Changes apply on the next frame; CPU rendering is used if unavailable."), false)
+    , townViewFrustumCulling("3D Frustum Culling", OptionEntryFlags::None, N_("3D Frustum Culling"), N_("Skip buildings outside the 3D camera view without reducing model detail. Shadows remain active. Saved changes apply on the next frame."), true)
     , townViewAntialiasing("3D Edge Smoothing", OptionEntryFlags::None, N_("3D Edge Smoothing"), N_("Smooth edges in the 3D town view without resizing the interface. Requires more processing power."), false)
     , townViewCameraMode("3D Camera Mode", OptionEntryFlags::None, N_("3D Camera Mode"), N_("Choose the saved 3D town camera. Changes apply immediately; Home restores the original view for the current session. Hold the middle mouse button to look independently of the hero. First Person keeps native click movement and combat; it does not add keyboard movement controls."), 0,
           {
@@ -947,6 +948,7 @@ std::vector<OptionEntryBase *> GraphicsOptions::GetEntries()
 		&zoom,
 		&townViewStartIn3D,
 		&townViewGpuRendering,
+		&townViewFrustumCulling,
 		&townViewAntialiasing,
 		&townViewCameraMode,
 		&townViewCameraFov,

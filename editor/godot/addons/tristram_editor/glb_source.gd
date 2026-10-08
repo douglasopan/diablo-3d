@@ -136,10 +136,26 @@ static func apply_recorded_fit(branch: Node3D, fit: Dictionary) -> bool:
 	var extent := source_max - source_min
 	if not source_min.is_finite() or not source_max.is_finite() or not target_min.is_finite() or not target_max.is_finite() or extent.x <= 0.0 or extent.y <= 0.0 or extent.z <= 0.0:
 		return false
-	var scale := (target_max - target_min) / extent
-	var basis := Basis.from_scale(scale) * Basis(Vector3.UP, deg_to_rad(float(fit.get("yawDegrees", 0))))
-	branch.transform = Transform3D(basis, target_min - source_min * scale)
-	branch.set_meta("d3d_fit", fit.duplicate(true))
+	var target_extent := target_max - target_min
+	var yaw := float(fit.get("yawDegrees", 0))
+	if target_extent.x <= 0.0 or target_extent.y <= 0.0 or target_extent.z <= 0.0 or not is_finite(yaw):
+		return false
+	# Recorded proxy bounds are an initial placement aid, never permission to
+	# stretch three axes independently. Keep the author's proportions and ground.
+	var factor := float(fit.get("uniformScale", minf(target_extent.x / extent.x, target_extent.z / extent.z)))
+	if not is_finite(factor) or factor <= 0.0:
+		return false
+	var scale := Vector3.ONE * factor
+	var target_center := (target_min + target_max) / 2.0
+	var source_center := (source_min + source_max) / 2.0
+	var translation := Vector3(target_center.x - source_center.x * factor, target_min.y - source_min.y * factor, target_center.z - source_center.z * factor)
+	var basis := Basis.from_scale(scale) * Basis(Vector3.UP, deg_to_rad(yaw))
+	branch.transform = Transform3D(basis, translation)
+	var applied := fit.duplicate(true)
+	applied["fitMode"] = "uniform-footprint-grounded; native review required"
+	applied["appliedScale"] = [factor, factor, factor]
+	applied["appliedTranslation"] = [translation.x, translation.y, translation.z]
+	branch.set_meta("d3d_fit", applied)
 	return true
 
 static func _vector(values: Array) -> Vector3:

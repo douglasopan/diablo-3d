@@ -113,15 +113,16 @@ size_t MenuCount()
 {
 	if (sgpCurrentMenu == nullptr)
 		throw std::runtime_error("Expected an active in-game menu");
-	for (size_t i = 0; i <= 8; ++i) {
+	constexpr size_t maximumRows = GMenuSettingsMaxContentRows + 3;
+	for (size_t i = 0; i <= maximumRows; ++i) {
 		if (sgpCurrentMenu[i].fnMenu == nullptr) {
-			Check(i <= 8, "menu has at most eight rows");
+			Check(i <= maximumRows, "menu fits its bounded content and navigation storage");
 			return i;
 		}
 		if (sgpCurrentMenu[i].pszStr == nullptr)
 			throw std::runtime_error("A menu row lost its owned label");
 	}
-	throw std::runtime_error("Menu has no terminator within its eight-row bound");
+	throw std::runtime_error("Menu has no terminator within its content and navigation bound");
 }
 
 std::string_view Unmarked(std::string_view text)
@@ -193,7 +194,10 @@ void OpenRoot()
 	Activate(0);
 	Check(IsInGameSettingsOpen(), "Esc menu opens the shared settings browser");
 	Check(CurrentEventHandler != SentinelEventHandler, "settings installs its own input wrapper");
-	Check(Matches(sgpCurrentMenu[0].pszStr, GetOptions().Music.GetName()), "Soundtrack is the first settings category");
+	const OptionCategoryBase &first = gbSndInited ? static_cast<OptionCategoryBase &>(GetOptions().Music)
+	                                          : static_cast<OptionCategoryBase &>(GetOptions().Graphics);
+	Check(Matches(sgpCurrentMenu[0].pszStr, first.GetName()),
+	    gbSndInited ? "Soundtrack is the first settings category" : "Graphics is first when audio is unavailable");
 }
 
 void OpenCategory(OptionCategoryBase &category)
@@ -252,6 +256,73 @@ bool Blocked(const OptionEntryBase &entry)
 	    || (gbIsMultiplayer && HasAnyOf(flags, OptionEntryFlags::CantChangeInMultiPlayer));
 }
 
+bool Deferred(const OptionEntryBase &entry)
+{
+	const Options &options = GetOptions();
+	return &entry == &options.Graphics.townViewStartIn3D || &entry == &options.Gameplay.runInTown
+	    || &entry == &options.Gameplay.friendlyFire || &entry == &options.Gameplay.multiplayerFullQuests
+	    || &entry == &options.Gameplay.showMultiplayerPartyInfo;
+}
+
+bool AvailableDuringPlay(const OptionCategoryBase &category, const OptionEntryBase &entry)
+{
+	const Options &options = GetOptions();
+	if (&category == &options.StartUp || (!gbSndInited && (&category == &options.Music || &category == &options.Audio)))
+		return false;
+	return Visible(entry) && !Blocked(entry) && !Deferred(entry)
+	    && (entry.GetType() != OptionEntryType::List || static_cast<const OptionEntryListBase &>(entry).GetListSize() > 1);
+}
+
+bool IsQuickControl(const OptionEntryBase &entry)
+{
+	const Options &options = GetOptions();
+	return &entry == &options.Audio.musicVolume || &entry == &options.Audio.soundVolume
+	    || &entry == &options.Audio.audioCuesVolume || &entry == &options.Graphics.brightness
+	    || &entry == &options.Gameplay.tickRate;
+}
+
+std::vector<std::string> ExpectedRuntimeEntries(OptionCategoryBase &category)
+{
+	Options &options = GetOptions();
+	std::vector<std::string> labels;
+	if (&category == &options.Audio && gbSndInited)
+		labels = { std::string(_("Music")), std::string(_("Sound")), std::string(_("Audio Cues Volume")) };
+	else if (&category == &options.Graphics)
+		labels.emplace_back(_("Gamma"));
+	else if (&category == &options.Gameplay && !gbIsMultiplayer)
+		labels.emplace_back(_("Speed"));
+	for (const OptionEntryBase *entry : category.GetEntries()) {
+		if (AvailableDuringPlay(category, *entry))
+			labels.emplace_back(entry->GetName());
+	}
+	return labels;
+}
+
+std::vector<std::string> MenuContent()
+{
+	std::vector<std::string> labels;
+	std::vector<std::vector<std::string>> pages;
+	for (size_t page = 0; page < 64; ++page) {
+		std::vector<std::string> current;
+		for (size_t row = 0; row < MenuCount(); ++row) {
+			const std::string_view label = sgpCurrentMenu[row].pszStr;
+			if (Matches(label, _("Previous Page")) || Matches(label, _("Next Page")) || Matches(label, _("Previous Menu")))
+				continue;
+			Check(sgpCurrentMenu[row].enabled(), "runtime row is immediately focusable: " + std::string(label));
+			current.emplace_back(label);
+		}
+		if (std::find(pages.begin(), pages.end(), current) != pages.end())
+			return labels;
+		pages.push_back(current);
+		labels.insert(labels.end(), current.begin(), current.end());
+		const auto next = FindHere(_("Next Page"));
+		if (!next)
+			return labels;
+		Activate(*next);
+	}
+	throw std::runtime_error("Runtime content did not finish its finite page cycle");
+}
+
 std::string OptionsSnapshot()
 {
 	std::string snapshot;
@@ -271,46 +342,71 @@ std::string OptionsSnapshot()
 
 void CheckCoverageAndRestrictions()
 {
+	Options &options = GetOptions();
+	const auto mainCategories = options.GetCategories();
+	std::vector<std::vector<OptionEntryBase *>> mainEntries;
+	for (OptionCategoryBase *category : mainCategories)
+		mainEntries.push_back(category->GetEntries());
+	const bool audioInitialized = gbSndInited;
+	const std::string optionsBefore = OptionsSnapshot();
+	const auto tickRate = sgGameInitInfo.nTickRate;
+	const auto runInTown = sgGameInitInfo.bRunInTown;
+	const auto friendlyFire = sgGameInitInfo.bFriendlyFire;
+	const auto quests = sgGameInitInfo.fullQuests;
 	for (const bool hellfire : { false, true }) {
 		gbIsHellfire = hellfire;
 		for (const bool multiplayer : { false, true }) {
 			gbIsMultiplayer = multiplayer;
-			size_t visibleCount = 0;
-			size_t blockedCount = 0;
-			for (OptionCategoryBase *category : GetOptions().GetCategories()) {
-				for (OptionEntryBase *entry : category->GetEntries()) {
-					if (!Visible(*entry))
+			for (const bool audioAvailable : { false, true }) {
+				if (audioAvailable && !audioInitialized)
+					continue;
+				gbSndInited = audioAvailable;
+				OpenRoot();
+				const auto categories = MenuContent();
+				size_t editableCount = 0;
+				size_t omittedCount = 0;
+				size_t expectedCategories = 0;
+				for (OptionCategoryBase *category : mainCategories) {
+					const auto expected = ExpectedRuntimeEntries(*category);
+					const bool present = std::find(categories.begin(), categories.end(), category->GetName()) != categories.end();
+					Check(present == !expected.empty(), "only nonempty usable categories appear during play: " + std::string(category->GetKey()));
+					if (expected.empty()) {
+						omittedCount += category->GetEntries().size();
 						continue;
-					++visibleCount;
+					}
+					++expectedCategories;
 					OpenCategory(*category);
-					const size_t row = FindPaged(entry->GetName());
-					Check(sgpCurrentMenu[row].enabled(), "visible preference is focusable: " + std::string(entry->key));
-					if (!Blocked(*entry))
-						continue;
-					++blockedCount;
-					const std::string before = OptionsSnapshot();
-					const auto tickRate = sgGameInitInfo.nTickRate;
-					const auto runInTown = sgGameInitInfo.bRunInTown;
-					const auto friendlyFire = sgGameInitInfo.bFriendlyFire;
-					const auto quests = sgGameInitInfo.fullQuests;
-					Activate(row);
-					Check(MenuCount() == 1 && FindHere(_("Previous Menu")).has_value(),
-					    "restricted preference opens details with a way back: " + std::string(entry->key));
-					SendKey(SDLK_RIGHT);
-					SendKey(SDLK_RETURN);
-					Check(OptionsSnapshot() == before && sgGameInitInfo.nTickRate == tickRate
-					        && sgGameInitInfo.bRunInTown == runInTown && sgGameInitInfo.bFriendlyFire == friendlyFire
-					        && sgGameInitInfo.fullQuests == quests,
-					    "restricted preference cannot mutate options or session rules: " + std::string(entry->key));
+					const auto actual = MenuContent();
+					Check(actual == expected, "runtime category contains exactly its usable controls in model order: " + std::string(category->GetKey()));
+					editableCount += actual.size();
+					for (const OptionEntryBase *entry : category->GetEntries()) {
+						// Native quick controls deliberately use aliases for Invisible
+						// model entries; the complete expected list checks those above.
+						if (AvailableDuringPlay(*category, *entry) || IsQuickControl(*entry))
+							continue;
+						++omittedCount;
+						Check(std::find(actual.begin(), actual.end(), entry->GetName()) == actual.end(),
+						    "unavailable preference is absent during play: " + std::string(category->GetKey()) + "/" + std::string(entry->key));
+					}
 				}
+				Check(categories.size() == expectedCategories, "runtime root contains no duplicate or extra categories");
+				std::cout << "COVERAGE " << (hellfire ? "Hellfire" : "Diablo") << ' '
+				          << (multiplayer ? "multiplayer" : "single-player") << ' '
+				          << (audioAvailable ? "audio-on" : "audio-off") << ": " << editableCount
+				          << " usable runtime controls, " << omittedCount << " omitted model entries\n";
 			}
-			std::cout << "COVERAGE " << (hellfire ? "Hellfire" : "Diablo") << ' '
-			          << (multiplayer ? "multiplayer" : "single-player") << ": " << visibleCount
-			          << " visible model entries, " << blockedCount << " read-only\n";
 		}
 	}
+	gbSndInited = audioInitialized;
 	gbIsHellfire = false;
 	gbIsMultiplayer = false;
+	Check(options.GetCategories() == mainCategories, "runtime filtering preserves every category in the main Settings model");
+	for (size_t i = 0; i < mainCategories.size(); ++i)
+		Check(mainCategories[i]->GetEntries() == mainEntries[i], "runtime filtering preserves main Settings entries: " + std::string(mainCategories[i]->GetKey()));
+	Check(OptionsSnapshot() == optionsBefore && sgGameInitInfo.nTickRate == tickRate
+	        && sgGameInitInfo.bRunInTown == runInTown && sgGameInitInfo.bFriendlyFire == friendlyFire
+	        && sgGameInitInfo.fullQuests == quests,
+	    "runtime coverage leaves saved preferences and active session rules unchanged");
 }
 
 void CheckDynamicNamePaging()
@@ -336,23 +432,75 @@ void CheckDynamicNamePaging()
 
 void CheckNavigation()
 {
-	OpenRoot();
-	const std::string first(sgpCurrentMenu[0].pszStr);
-	Check(FindHere(_("Next Page")).has_value(), "root settings categories have a next page");
-	SendKey(SDLK_PAGEDOWN);
-	Check(std::string_view(sgpCurrentMenu[0].pszStr) != first && FindHere(_("Previous Page")).has_value(),
-	    "Page Down moves to the next category page");
-	SendKey(SDLK_PAGEUP);
-	Check(std::string_view(sgpCurrentMenu[0].pszStr) == first, "Page Up returns to the original category page");
-	ActivateNamed(GetOptions().Music.GetName());
-	Check(FindHere(_("Next Page")).has_value(), "all nine soundtrack preferences can be paged");
-	ActivateNamed(_("Next Page"));
-	SendKey(SDLK_ESCAPE);
-	Check(IsInGameSettingsOpen() && Matches(sgpCurrentMenu[0].pszStr, GetOptions().Music.GetName()),
-	    "Esc from a category returns to settings categories");
-	SendKey(SDLK_ESCAPE);
-	Check(!IsInGameSettingsOpen() && MenuCount() == 5 && CurrentEventHandler == SentinelEventHandler,
-	    "Esc from settings restores the native game menu and event handler");
+	const std::array<Size, 4> screens { Size { 640, 480 }, Size { 960, 540 }, Size { 1920, 1080 }, Size { 2560, 1440 } };
+	const auto setScreen = [](Size screen) {
+		gnScreenWidth = screen.width;
+		gnScreenHeight = screen.height;
+		CalculatePanelAreas();
+	};
+	const auto click = [](size_t row) {
+		const auto layout = gmenu_get_settings_geometry();
+		const Rectangle bounds = layout.row(row);
+		Check(bounds.size.width > 0 && bounds.size.height > 0, "mouse target uses a real visible row rectangle");
+		MousePosition = bounds.position + Displacement { bounds.size.width / 2, bounds.size.height / 2 };
+		Check(gmenu_on_mouse_move() && gmenu_selected_index() == row, "mouse hover resolves the exact content or footer row");
+		sgbMouseDown = CLICK_LEFT;
+		Check(gmenu_left_mouse(true), "mouse click activates the row's shared geometry");
+		SendMouseButton(SDL_BUTTON_LEFT, true);
+	};
+	for (size_t screenIndex = 0; screenIndex < screens.size(); ++screenIndex) {
+		setScreen(screens[screenIndex]);
+		OpenCategory(GetOptions().Keymapper);
+		const size_t capacity = gmenu_settings_page_size(screens[screenIndex], GetMainPanel().position.y);
+		const auto layout = gmenu_get_settings_geometry();
+		Check(capacity > 5 && capacity <= GMenuSettingsMaxContentRows, "available height exposes more than five bounded content rows");
+		Check(layout.contentRows == capacity && layout.rows == MenuCount() && layout.navigationItems == 3,
+		    "long keymapping pages fill their responsive content capacity and share a three-action footer");
+		Check(FindHere(_("Next Page")).has_value() && FindHere(_("Previous Page")).has_value(), "long categories expose both page actions");
+		const std::string first(sgpCurrentMenu[0].pszStr);
+		SendKey(SDLK_PAGEDOWN);
+		Check(std::string_view(sgpCurrentMenu[0].pszStr) != first, "Page Down moves to the next responsive entry page");
+		SendKey(SDLK_PAGEUP);
+		Check(std::string_view(sgpCurrentMenu[0].pszStr) == first, "Page Up returns to the original entry page");
+		click(*FindHere(_("Next Page")));
+		Check(std::string_view(sgpCurrentMenu[0].pszStr) != first, "right footer action advances without using a vertical row index");
+		click(*FindHere(_("Previous Page")));
+		Check(std::string_view(sgpCurrentMenu[0].pszStr) == first, "left footer action returns without using a vertical row index");
+		gmenu_select_index(*FindHere(_("Previous Page")));
+		SendKey(SDLK_RIGHT);
+		Check(gmenu_selected_index() == *FindHere(_("Next Page")), "Right moves horizontally between footer actions");
+		SendKey(SDLK_LEFT);
+		Check(gmenu_selected_index() == *FindHere(_("Previous Page")), "Left moves horizontally between footer actions");
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+		SendWheel(0, -1);
+		Check(std::string_view(sgpCurrentMenu[0].pszStr) != first, "wheel down advances responsive entry pages");
+		SendWheel(0, 1);
+		Check(std::string_view(sgpCurrentMenu[0].pszStr) == first, "wheel up returns to the original entry page");
+#endif
+		Check(MenuContent() == ExpectedRuntimeEntries(GetOptions().Keymapper), "every key action is reachable exactly once at each supported capacity");
+		OptionEntryBase *action = nullptr;
+		for (OptionEntryBase *entry : GetOptions().Keymapper.GetEntries()) {
+			if (entry->key == "QuickMessage10") {
+				action = entry;
+				break;
+			}
+		}
+		Check(action != nullptr, "resize regression uses a real numbered action on a later page");
+		const std::string expected(action->GetName());
+		ActivateNamed(action->GetName());
+		Check(MenuCount() == 3 && FindHere(_("Bind key")).has_value(), "later-page action opens the production binding view");
+		setScreen(screens[(screenIndex + 1) % screens.size()]);
+		SendKey(SDLK_ESCAPE);
+		Check(IsInGameSettingsOpen() && std::string_view(sgpCurrentMenu[gmenu_selected_index()].pszStr) == expected,
+		    "Back after resize preserves the absolute entry and its focus");
+		SendKey(SDLK_ESCAPE);
+		Check(IsInGameSettingsOpen() && Matches(sgpCurrentMenu[gmenu_selected_index()].pszStr, GetOptions().Keymapper.GetName()),
+		    "Back after resize restores the originating category and focus");
+		SendKey(SDLK_ESCAPE);
+		Check(!IsInGameSettingsOpen() && MenuCount() == 5 && CurrentEventHandler == SentinelEventHandler,
+		    "Esc from settings restores the native game menu and event handler");
+	}
+	setScreen({ 640, 480 });
 	OpenRoot();
 	gamemenu_off();
 	Check(!IsInGameSettingsOpen() && !gmenu_is_active() && CurrentEventHandler == SentinelEventHandler,
@@ -362,25 +510,21 @@ void CheckNavigation()
 void CheckChanges()
 {
 	Options &options = GetOptions();
-	OpenCategory(options.Audio);
-	const bool beforeWalking = *options.Audio.walkingSound;
-	ActivateNamed(options.Audio.walkingSound.GetName());
-	Check(*options.Audio.walkingSound != beforeWalking, "boolean preference uses its shared setter immediately");
+	if (gbSndInited) {
+		OpenCategory(options.Audio);
+		const bool beforeWalking = *options.Audio.walkingSound;
+		ActivateNamed(options.Audio.walkingSound.GetName());
+		Check(*options.Audio.walkingSound != beforeWalking, "boolean preference uses its shared setter immediately");
+	}
 	OpenCategory(options.Gameplay);
 	ActivateNamed(options.Gameplay.storeUi.GetName());
 	Check(MenuCount() == 4, "three store layouts use a value list and Previous Menu");
 	ActivateNamed(options.Gameplay.storeUi.GetListDescription(1));
 	Check(*options.Gameplay.storeUi == StoreUi::ListWithItemGraphics, "list selection uses the shared stable enum value");
-	OpenCategory(options.Graphics);
-	const bool startBefore = *options.Graphics.townViewStartIn3D;
-	ActivateNamed(options.Graphics.townViewStartIn3D.GetName());
-	Check(*options.Graphics.townViewStartIn3D != startBefore, "next-session startup preference can be saved during play");
-	OpenCategory(options.Gameplay);
-	const bool runBefore = *options.Gameplay.runInTown;
-	const auto sessionRun = sgGameInitInfo.bRunInTown;
-	ActivateNamed(options.Gameplay.runInTown.GetName());
-	Check(*options.Gameplay.runInTown != runBefore && sgGameInitInfo.bRunInTown == sessionRun,
-	    "Run in Town saves the next-session preference without rewriting current rules");
+	if (!gbSndInited) {
+		std::cout << "SKIP soundtrack changes without initialized audio\n";
+		return;
+	}
 	OpenCategory(options.Music);
 	ActivateNamed(options.Music.theme.GetName());
 	ActivateNamed(options.Music.theme.GetListDescription(0));
@@ -410,12 +554,7 @@ void SetSlider(OptionCategoryBase &category, std::string_view label, int min, in
 void CheckSliders()
 {
 	Options &options = GetOptions();
-	// Initialize the real pipeline on the dummy device: the Sound handler
-	// needs its mutex even when there are no loaded sound samples.
 #ifndef NOSOUND
-	options.Audio.musicVolume.SetValue(VOLUME_MIN);
-	options.Audio.soundVolume.SetValue(VOLUME_MIN);
-	snd_init();
 	Check(gbSndInited && !gbMusicOn && !gbSoundOn, "isolated dummy audio initializes with music and sound muted");
 	SetSlider(options.Audio, _("Music"), VOLUME_MIN, VOLUME_MAX, VOLUME_MIN);
 	Check(*options.Audio.musicVolume == VOLUME_MIN && !gbMusicOn, "Music slider respects native mute");
@@ -423,7 +562,6 @@ void CheckSliders()
 	Check(*options.Audio.soundVolume == VOLUME_MIN && !gbSoundOn, "Sound slider respects native mute");
 	SetSlider(options.Audio, _("Audio Cues Volume"), VOLUME_MIN, VOLUME_MAX, VOLUME_MIN);
 	Check(*options.Audio.audioCuesVolume == VOLUME_MIN, "navigation cues have an independent volume control");
-	snd_deinit();
 #else
 	std::cout << "SKIP audio sliders in a NOSOUND build\n";
 #endif
@@ -434,15 +572,12 @@ void CheckSliders()
 	gbIsMultiplayer = true;
 	OpenCategory(options.Gameplay);
 	const auto beforeSpeed = sgGameInitInfo.nTickRate;
-	ActivateNamed(_("Speed"));
-	if (MenuCount() == 2 && sgpCurrentMenu[0].isSlider()) {
-		gmenu_slider_set(&sgpCurrentMenu[0], 20, 50, 50);
-		sgpCurrentMenu[0].fnMenu(false);
-	}
+	const auto multiplayerControls = MenuContent();
+	Check(std::find(multiplayerControls.begin(), multiplayerControls.end(), _("Speed")) == multiplayerControls.end(),
+	    "multiplayer omits the single-player Speed control");
 	Check(sgGameInitInfo.nTickRate == beforeSpeed && *options.Gameplay.tickRate == 35,
 	    "multiplayer Speed cannot change the session tick rate");
 	gbIsMultiplayer = false;
-	gbSndInited = false;
 }
 
 KeymapperOptions::Action &InventoryKey()
@@ -495,7 +630,7 @@ void CheckKeyCapture()
 	// LeftMouseDown sets CLICK_LEFT before the row handler enters capture.
 	// Reproduce that real ordering and ensure consuming the UP cannot leave
 	// the native mouse state latched, which would block subsequent clicks.
-	const auto bindingLayout = gmenu_settings_geometry({ gnScreenWidth, gnScreenHeight }, GetMainPanel().position.y, MenuCount());
+	const auto bindingLayout = gmenu_get_settings_geometry();
 	const Rectangle bindRow = bindingLayout.row(FindPaged(_("Bind key")));
 	MousePosition = bindRow.position + Displacement { bindRow.size.width / 2, bindRow.size.height / 2 };
 	sgbMouseDown = CLICK_LEFT;
@@ -505,7 +640,7 @@ void CheckKeyCapture()
 	SendKey(SDLK_F24);
 	SendKey(SDLK_F24, true);
 	Check(sgbMouseDown == CLICK_NONE && key.GetValueDescription() == "F24", "capture completion does not leave the mouse held");
-	const auto backLayout = gmenu_settings_geometry({ gnScreenWidth, gnScreenHeight }, GetMainPanel().position.y, MenuCount());
+	const auto backLayout = gmenu_get_settings_geometry();
 	const Rectangle backRow = backLayout.row(FindPaged(_("Previous Menu")));
 	MousePosition = backRow.position + Displacement { backRow.size.width / 2, backRow.size.height / 2 };
 	sgbMouseDown = CLICK_LEFT;
@@ -610,12 +745,64 @@ void CheckPadCapture()
 #endif
 }
 
+void CheckCameraKeyDefaults(const ConfigFixture &fixture)
+{
+	KeymapperOptions &keymapper = GetOptions().Keymapper;
+	const auto load = [&](std::string_view bindings) {
+		std::ofstream out(fixture.iniPath, std::ios::binary | std::ios::trunc);
+		out << "[Language]\nCode=en\n[Keymapping]\n" << bindings;
+		out.close();
+		Check(out.good(), "isolated camera key fixture is writable");
+		LoadOptions();
+	};
+	load("");
+	Check(keymapper.KeyForAction("Town3DCameraMode") == 'K', "new camera cycle defaults to the free K key");
+	Check(keymapper.KeyForAction("ToggleTown3D") == SDLK_F4, "camera cycle preserves the F4 view toggle");
+	Check(keymapper.KeyForAction("QuickSpell1") == SDLK_F5
+	        && keymapper.KeyForAction("QuickSpell4") == SDLK_F8,
+	    "camera cycle preserves the legacy quick-spell keys");
+
+	load("BeltItem1=K\n");
+	Check(keymapper.KeyForAction("BeltItem1") == 'K'
+	        && keymapper.KeyForAction("Town3DCameraMode") == SDLK_UNKNOWN,
+	    "an earlier legacy action keeps its custom K instead of the new camera default");
+	load("GameInfo=K\n");
+	Check(keymapper.KeyForAction("GameInfo") == 'K'
+	        && keymapper.KeyForAction("Town3DCameraMode") == SDLK_UNKNOWN,
+	    "a later legacy action also keeps its custom K");
+
+	load("Town3DCameraMode=\n");
+	Check(keymapper.KeyForAction("Town3DCameraMode") == SDLK_UNKNOWN,
+	    "an explicitly unbound legacy camera action remains unbound");
+	load("Town3DCameraMode=F24\nBeltItem1=K\nToggleTown3D=F23\n");
+	Check(keymapper.KeyForAction("Town3DCameraMode") == SDLK_F24
+	        && keymapper.KeyForAction("BeltItem1") == 'K'
+	        && keymapper.KeyForAction("ToggleTown3D") == SDLK_F23,
+	    "existing camera, belt and view-toggle remaps remain independent");
+	SaveOptions();
+	for (OptionEntryBase *entry : keymapper.GetEntries()) {
+		if (entry->key == "Town3DCameraMode" || entry->key == "BeltItem1" || entry->key == "ToggleTown3D")
+			static_cast<KeymapperOptions::Action &>(*entry).SetValue(SDLK_UNKNOWN);
+	}
+	LoadOptions();
+	Check(keymapper.KeyForAction("Town3DCameraMode") == SDLK_F24
+	        && keymapper.KeyForAction("BeltItem1") == 'K'
+	        && keymapper.KeyForAction("ToggleTown3D") == SDLK_F23,
+	    "native save/load restores camera and legacy remaps from the isolated INI");
+	load(""); // Leave the remaining browser checks with the standard defaults.
+}
+
 void CheckPersistence(const ConfigFixture &fixture)
 {
 	Options &options = GetOptions();
 	const bool walking = *options.Audio.walkingSound;
 	const bool start = *options.Graphics.townViewStartIn3D;
 	const bool run = *options.Gameplay.runInTown;
+	const bool friendlyFire = *options.Gameplay.friendlyFire;
+	const bool fullQuests = *options.Gameplay.multiplayerFullQuests;
+	const bool partyInfo = *options.Gameplay.showMultiplayerPartyInfo;
+	const MusicTheme theme = *options.Music.theme;
+	const MusicVariant townMusic = *options.Music.town;
 	const ControllerButtonCombo pad = FirstPadAction().boundInput;
 	CloseInGameSettings();
 	Check(CurrentEventHandler == SentinelEventHandler, "explicit settings close restores its previous input handler");
@@ -624,22 +811,31 @@ void CheckPersistence(const ConfigFixture &fixture)
 	const auto parsed = Ini::parse(saved);
 	Check(parsed.has_value(), "the browser saves a valid isolated INI before closing");
 	Check(parsed->getBool("Audio", "Walking Sound", !walking) == walking, "immediate audio preference persists through browser close");
-	Check(parsed->getBool("Graphics", "Start in 3D", !start) == start, "next-session graphics preference persists through browser close");
-	Check(parsed->getBool("Game", "Run in Town", !run) == run, "next-session gameplay preference persists independently of active rules");
+	Check(parsed->getBool("Graphics", "Start in 3D", !start) == start, "omitted next-session graphics preference is retained when runtime settings save");
+	Check(parsed->getBool("Game", "Run in Town", !run) == run, "omitted Run in Town preference persists independently of active rules");
+	Check(parsed->getBool("Game", options.Gameplay.friendlyFire.key, !friendlyFire) == friendlyFire
+	        && parsed->getBool("Game", options.Gameplay.multiplayerFullQuests.key, !fullQuests) == fullQuests
+	        && parsed->getBool("Game", options.Gameplay.showMultiplayerPartyInfo.key, !partyInfo) == partyInfo,
+	    "omitted multiplayer preferences remain persisted in the shared model");
 	Check(parsed->getInt("Game", "Store UI", -1) == static_cast<int>(StoreUi::ListWithItemGraphics), "shared list values retain their native INI representation");
-	Check(parsed->getInt("Music", "Theme", -1) == static_cast<int>(MusicTheme::Custom)
-	        && parsed->getInt("Music", "Town", -1) == 3,
-	    "soundtrack preference and stable Random ID persist independently");
+	Check(parsed->getInt("Music", "Theme", -1) == static_cast<int>(theme)
+	        && parsed->getInt("Music", "Town", -1) == static_cast<int>(townMusic),
+	    "soundtrack preferences retain their native stable IDs when runtime settings save");
 	Check(parsed->getString("Keymapping", "Inventory") == "F24", "captured keyboard binding persists under its native action key");
 	options.Audio.walkingSound.SetValue(!walking);
 	options.Graphics.townViewStartIn3D.SetValue(!start);
 	options.Gameplay.runInTown.SetValue(!run);
+	options.Gameplay.friendlyFire.SetValue(!friendlyFire);
+	options.Gameplay.multiplayerFullQuests.SetValue(!fullQuests);
+	options.Gameplay.showMultiplayerPartyInfo.SetValue(!partyInfo);
 	InventoryKey().SetValue(SDLK_UNKNOWN);
 	FirstPadAction().SetValue(ControllerButton_NONE);
 	LoadOptions();
 	Check(*options.Audio.walkingSound == walking && *options.Graphics.townViewStartIn3D == start
-	        && *options.Gameplay.runInTown == run && *options.Gameplay.storeUi == StoreUi::ListWithItemGraphics,
-	    "native option loader restores choices saved by the in-game browser");
+	        && *options.Gameplay.runInTown == run && *options.Gameplay.friendlyFire == friendlyFire
+	        && *options.Gameplay.multiplayerFullQuests == fullQuests && *options.Gameplay.showMultiplayerPartyInfo == partyInfo
+	        && *options.Gameplay.storeUi == StoreUi::ListWithItemGraphics,
+	    "native option loader restores editable and omitted choices retained by the in-game browser");
 	Check(InventoryKey().GetValueDescription() == "F24" && FirstPadAction().boundInput.modifier == pad.modifier
 	        && FirstPadAction().boundInput.button == pad.button,
 	    "native loaders restore keyboard and gamepad bindings saved during play");
@@ -668,6 +864,7 @@ int main()
 		std::cerr << "SDL fixture initialization failed: " << SDL_GetError() << '\n';
 		return 1;
 	}
+	bool audioPipelineInitialized = false;
 	try {
 		HeadlessMode = true;
 		const ConfigFixture fixture;
@@ -683,6 +880,16 @@ int main()
 		InitKeymapActions();
 		InitPadmapActions();
 		LoadOptions();
+		CheckCameraKeyDefaults(fixture);
+#ifndef NOSOUND
+		// Use the real dummy pipeline so soundtrack callbacks and native volume
+		// handlers have their mutex without a window or loaded sound samples.
+		GetOptions().Audio.musicVolume.SetValue(VOLUME_MIN);
+		GetOptions().Audio.soundVolume.SetValue(VOLUME_MIN);
+		snd_init();
+		audioPipelineInitialized = gbSndInited;
+		Check(audioPipelineInitialized, "isolated audio pipeline initializes before runtime availability checks");
+#endif
 		gnScreenWidth = 640;
 		gnScreenHeight = 480;
 		CalculatePanelAreas();
@@ -702,12 +909,18 @@ int main()
 		Check(GetLCGEngineState() == rngBefore, "settings navigation, audio choices and input capture preserve simulation RNG");
 		Check(CurrentEventHandler == SentinelEventHandler && !IsInGameSettingsOpen() && !gmenu_is_active(),
 		    "fixture leaves no active browser or input wrapper");
+		if (audioPipelineInitialized) {
+			snd_deinit();
+			audioPipelineInitialized = false;
+		}
 		gbRunGame = false;
 		std::cout << "PASS " << Checks << " checks; no window, game archive, player profile or save was used\n";
 	} catch (const std::exception &error) {
 		CloseInGameSettings();
-		if (gbSndInited)
+		if (audioPipelineInitialized) {
+			gbSndInited = true;
 			snd_deinit();
+		}
 		std::cerr << "FAIL after " << Checks << " checks: " << error.what() << '\n';
 		SDL_Quit();
 		return 1;

@@ -191,6 +191,8 @@ struct TownSceneModel {
 bool BuildTownCabinInterior(TownSceneModel &model);
 const std::vector<TownSceneTriangle> &TownSceneExteriorTriangles(const TownSceneModel &model);
 const std::vector<TownSceneModel> &GetTownScene();
+/** Monotonic reset identity for caches borrowing the assembled scene. */
+uint64_t GetTownSceneRevision();
 bool TownSceneReplacesTile(Point tile);
 void ResetTownScene();
 

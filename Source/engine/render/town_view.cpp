@@ -231,6 +231,8 @@ bool PickZoom = false;
 bool PickLeftPanel = false;
 bool PickRightPanel = false;
 bool PickGpuRequested = false;
+bool PickFrustumCullingRequested = false;
+uint64_t PickSceneRevision = 0;
 uint64_t PickCameraRevision = 0;
 bool PickHorizonEnabled = false;
 TownCameraRig CameraRig;
@@ -284,6 +286,13 @@ struct SceneMaterials {
 std::unordered_map<size_t, SceneMaterials> SceneMaterialCache;
 std::unordered_map<size_t, Texture> ImportedTextureCache;
 std::unordered_map<size_t, std::array<Texture, InteriorMaterialCount + FlameBandCount * FlameLightLevels>> CabinInteriorTextureCache;
+struct CachedArchitectureBounds {
+	TownArchitectureBounds bounds;
+	bool ready = false;
+};
+std::vector<CachedArchitectureBounds> ArchitectureBoundsCache;
+uint64_t ArchitectureBoundsRevision = std::numeric_limits<uint64_t>::max();
+TownViewArchitectureCullingState ArchitectureCullingState;
 bool CabinFireEnabledForDiagnostics = true;
 bool DirectionalShadowsEnabledForDiagnostics = true;
 double CabinFireDiagnosticTime = -1;
@@ -576,7 +585,10 @@ TownGpuTexture PrepareGpuTexture(const Texture &texture, const InteriorLighting 
 				GpuImportedLut.insert(GpuImportedLut.end(), row.begin(), row.end());
 			GpuImportedLutColors = ImportedAlbedoLightTables.size();
 		}
-		result.revision = GpuImportedLutColors;
+		// Albedo codes are immutable for this texture identity. Growing the shared
+		// lighting table must not upload another copy of every 2048px code atlas.
+		result.lightLutKey = 1;
+		result.lightLutRevision = GpuImportedLutColors;
 		result.lightLut = GpuImportedLut;
 		result.lightLevels = ImportedLightLevels;
 	} else {
@@ -1494,6 +1506,7 @@ void DrawCabinInterior(const Surface &out, size_t index, const TownCabinInterior
 		}
 	}
 	const auto draw = [&](const TownSceneTriangle &triangle, const Texture &texture, bool roomLit) {
+		++ArchitectureCullingState.trianglesVisited;
 		std::array<Vertex, 3> vertices;
 		for (size_t i = 0; i < vertices.size(); ++i) {
 			const auto &source = triangle.vertices[i];
@@ -1526,14 +1539,63 @@ void DrawCabinInterior(const Surface &out, size_t index, const TownCabinInterior
 	}
 }
 
+void PrepareArchitectureBoundsCache(const std::vector<TownSceneModel> &scene)
+{
+	const uint64_t revision = GetTownSceneRevision();
+	if (ArchitectureBoundsRevision != revision) {
+		ArchitectureBoundsCache.clear();
+		ArchitectureBoundsRevision = revision;
+	}
+	ArchitectureBoundsCache.resize(scene.size());
+}
+
+bool IsArchitectureVisible(size_t index, const TownSceneModel &model)
+{
+	if (!ArchitectureCullingState.requested)
+		return true;
+	auto &cached = ArchitectureBoundsCache[index];
+	if (!cached.ready) {
+		cached.bounds = BuildTownArchitectureBounds(model);
+		cached.ready = true;
+		++ArchitectureCullingState.boundsComputed;
+	}
+	return IsTownArchitectureBoundsVisible(ViewCamera.projection, cached.bounds);
+}
+
+void PrepareFrameImportedAlbedo()
+{
+	const auto &scene = GetTownScene();
+	PrepareArchitectureBoundsCache(scene);
+	for (size_t index = 0; index < scene.size(); ++index) {
+		const auto &model = scene[index];
+		if (model.externalModel && model.importedTexture && IsArchitectureVisible(index, model))
+			ImportedSceneTexture(index, *model.importedTexture);
+	}
+	// Freeze the append-only color table before any GPU batch snapshots it.
+	// One cold frame then shares a single LUT revision instead of pinning a
+	// larger copy after each newly encountered building. Warm frames reuse both.
+}
+
 void DrawScene(const Surface &out)
 {
 	const std::vector<TownSceneModel> &scene = GetTownScene();
+	PrepareArchitectureBoundsCache(scene);
+	ArchitectureCullingState.modelsConsidered = 0;
+	ArchitectureCullingState.modelsSubmitted = 0;
+	ArchitectureCullingState.modelsCulled = 0;
+	ArchitectureCullingState.trianglesVisited = 0;
 	for (size_t index = 0; index < scene.size(); ++index) {
 		const TownSceneModel &model = scene[index];
+		++ArchitectureCullingState.modelsConsidered;
+		if (!IsArchitectureVisible(index, model)) {
+			++ArchitectureCullingState.modelsCulled;
+			continue;
+		}
+		++ArchitectureCullingState.modelsSubmitted;
 		if (model.externalModel && model.importedTexture) {
 			const Texture &texture = ImportedSceneTexture(index, *model.importedTexture);
 			for (const TownSceneTriangle &triangle : TownSceneExteriorTriangles(model)) {
+				++ArchitectureCullingState.trianglesVisited;
 				std::array<Vertex, 3> vertices;
 				for (size_t i = 0; i < vertices.size(); ++i) {
 					const TownSceneVertex &vertex = triangle.vertices[i];
@@ -1552,6 +1614,7 @@ void DrawScene(const Surface &out)
 			continue;
 		const SceneMaterials &materials = OpaqueSceneMaterials(index, model, art);
 		for (const TownSceneTriangle &triangle : model.triangles) {
+			++ArchitectureCullingState.trianglesVisited;
 			const SceneDetailMaterial &detail = materials.details[static_cast<size_t>(triangle.surfaceDetail)];
 			const bool detailed = detail.texture.width != 0;
 			std::array<Vertex, 3> vertices;
@@ -1568,6 +1631,7 @@ void DrawScene(const Surface &out)
 			DrawTriangle(out, vertices, detailed ? detail.texture : materials.base[static_cast<size_t>(triangle.material)], pick, shade);
 		}
 		for (size_t triangleIndex = 0; triangleIndex < model.triangles.size(); ++triangleIndex) {
+			++ArchitectureCullingState.trianglesVisited;
 			const TownSceneTriangle &triangle = model.triangles[triangleIndex];
 			const NativeSceneFace &face = art.projectedFaces[triangleIndex];
 			if (!triangle.nativeProjection || face.texture.width == 0)
@@ -1590,6 +1654,8 @@ void DrawScene(const Surface &out)
 			DrawTriangle(out, vertices, face.texture, pick, 0, true);
 		}
 	}
+	ArchitectureCullingState.cachedBounds = static_cast<size_t>(std::count_if(ArchitectureBoundsCache.begin(), ArchitectureBoundsCache.end(),
+	    [](const CachedArchitectureBounds &cached) { return cached.ready; }));
 }
 
 void DrawGround(const Surface &out, Point tile, const Texture &ground)
@@ -1663,8 +1729,27 @@ void DrawVolume(const Surface &out, Vec3 position, Point tile, const VolumeArtwo
 		if (maxX < 0 || maxY < 0 || minX >= out.w() || minY >= out.h())
 			return;
 	}
-	// Perspective conservatively retains the box, including near/eye crossings;
-	// per-triangle homogeneous clipping below remains authoritative.
+	if (ViewCamera.projection.perspective && ArchitectureCullingState.requested) {
+		const float infinity = std::numeric_limits<float>::infinity();
+		TownArchitectureBounds bounds { { infinity, infinity, infinity }, { -infinity, -infinity, -infinity }, true };
+		for (const float x : { art.minimum.x, art.maximum.x }) {
+			for (const float height : { art.minimum.y, art.maximum.y }) {
+				for (const float z : { art.minimum.z, art.maximum.z }) {
+					const Vec3 point = world({ x, height, z, 0, 0 });
+					bounds.minimum.x = std::min(bounds.minimum.x, point.x);
+					bounds.minimum.height = std::min(bounds.minimum.height, point.y);
+					bounds.minimum.z = std::min(bounds.minimum.z, point.z);
+					bounds.maximum.x = std::max(bounds.maximum.x, point.x);
+					bounds.maximum.height = std::max(bounds.maximum.height, point.y);
+					bounds.maximum.z = std::max(bounds.maximum.z, point.z);
+				}
+			}
+		}
+		if (!IsTownArchitectureBoundsVisible(ViewCamera.projection, bounds))
+			return;
+	}
+	// Keep near/eye crossings for authoritative per-triangle clipping. Ground
+	// decals above have independent extents and must survive a culled body.
 	const PickRecord pick = PickAt(tile, kind, entity);
 	for (const TownVolumeTriangle &triangle : art.mesh.triangles) {
 		std::array<Vertex, 3> vertices;
@@ -2116,6 +2201,8 @@ bool CurrentPickingValid()
 	    && PickCameraRevision == CameraRig.revision()
 	    && PickHorizonEnabled == *GetOptions().Graphics.townViewHorizon
 	    && PickGpuRequested == *GetOptions().Graphics.townViewGpuRendering
+	    && PickFrustumCullingRequested == *GetOptions().Graphics.townViewFrustumCulling
+	    && PickSceneRevision == GetTownSceneRevision()
 	    && PickScreenWidth == gnScreenWidth && PickScreenHeight == gnScreenHeight
 	    && PickViewportHeight == gnViewportHeight && PickZoom == *GetOptions().Graphics.zoom
 	    && PickLeftPanel == IsLeftPanelOpen() && PickRightPanel == IsRightPanelOpen()
@@ -2125,6 +2212,84 @@ bool CurrentPickingValid()
 }
 
 } // namespace
+
+TownArchitectureBounds BuildTownArchitectureBounds(const TownSceneModel &model)
+{
+	const float infinity = std::numeric_limits<float>::infinity();
+	TownArchitectureBounds bounds { { infinity, infinity, infinity }, { -infinity, -infinity, -infinity }, false };
+	bool finite = true;
+	const auto include = [&](const std::vector<TownSceneTriangle> &triangles) {
+		for (const auto &triangle : triangles) {
+			for (const auto &vertex : triangle.vertices) {
+				finite &= std::isfinite(vertex.x) && std::isfinite(vertex.height) && std::isfinite(vertex.z);
+				bounds.minimum.x = std::min(bounds.minimum.x, vertex.x);
+				bounds.minimum.height = std::min(bounds.minimum.height, vertex.height);
+				bounds.minimum.z = std::min(bounds.minimum.z, vertex.z);
+				bounds.maximum.x = std::max(bounds.maximum.x, vertex.x);
+				bounds.maximum.height = std::max(bounds.maximum.height, vertex.height);
+				bounds.maximum.z = std::max(bounds.maximum.z, vertex.z);
+				bounds.valid = true;
+			}
+		}
+	};
+	include(model.externalModel && model.importedTexture ? TownSceneExteriorTriangles(model) : model.triangles);
+	if (model.cabinInterior) {
+		include(model.cabinInterior->interiorTriangles);
+		// Include every source even when fire is disabled or the light budget is
+		// smaller. Visual flicker changes intensity, never these coordinates.
+		for (const auto &fire : model.cabinInterior->fireSources)
+			include(fire.emissiveTriangles);
+	}
+	bounds.valid &= finite;
+	return bounds;
+}
+
+bool IsTownArchitectureBoundsVisible(const TownCameraFrame &frame, const TownArchitectureBounds &bounds)
+{
+	const auto finite = [](TownCameraPoint p) { return std::isfinite(p.x) && std::isfinite(p.height) && std::isfinite(p.z); };
+	if (!bounds.valid || !finite(bounds.minimum) || !finite(bounds.maximum)
+	    || bounds.minimum.x > bounds.maximum.x || bounds.minimum.height > bounds.maximum.height || bounds.minimum.z > bounds.maximum.z
+	    || !frame.valid || frame.width <= 0 || frame.height <= 0 || !finite(frame.eye)
+	    || !finite(frame.right) || !finite(frame.up) || !finite(frame.forward)
+	    || !std::isfinite(frame.heightScale) || frame.heightScale <= 0
+	    || !std::isfinite(frame.focalPixels) || frame.focalPixels <= 0
+	    || !std::isfinite(frame.centerX) || !std::isfinite(frame.centerY)
+	    || !std::isfinite(frame.nearClip) || !std::isfinite(frame.farClip) || frame.nearClip < 0 || frame.farClip <= frame.nearClip)
+		return true;
+	std::array<bool, 6> outside { true, true, true, true, true, true };
+	// A small world margin and one logical pixel guard retain grazing walls.
+	// These six affine half-spaces match ClipTownCameraTriangle, before divide;
+	// all corners outside one plane is the only rejection criterion.
+	constexpr float WorldMargin = 0.01F;
+	for (const float x : { bounds.minimum.x - WorldMargin, bounds.maximum.x + WorldMargin }) {
+		for (const float height : { bounds.minimum.height - WorldMargin, bounds.maximum.height + WorldMargin }) {
+			for (const float z : { bounds.minimum.z - WorldMargin, bounds.maximum.z + WorldMargin }) {
+				const TownCameraPoint point = TownCameraToView(frame, { x, height, z });
+				if (!finite(point))
+					return true;
+				const double w = frame.perspective ? point.z : 1;
+				const std::array<double, 6> distances {
+					point.z - static_cast<double>(frame.nearClip), static_cast<double>(frame.farClip) - point.z,
+					(frame.centerX + 1.0) * w + static_cast<double>(frame.focalPixels) * point.x,
+					(frame.width - static_cast<double>(frame.centerX) + 1.0) * w - static_cast<double>(frame.focalPixels) * point.x,
+					(frame.centerY + 1.0) * w - static_cast<double>(frame.focalPixels) * point.height,
+					(frame.height - static_cast<double>(frame.centerY) + 1.0) * w + static_cast<double>(frame.focalPixels) * point.height
+				};
+				for (size_t plane = 0; plane < outside.size(); ++plane) {
+					if (!std::isfinite(distances[plane]))
+						return true;
+					outside[plane] &= distances[plane] < -0.0001;
+				}
+			}
+		}
+	}
+	return std::none_of(outside.begin(), outside.end(), [](bool value) { return value; });
+}
+
+TownViewArchitectureCullingState GetTownViewArchitectureCullingState()
+{
+	return ArchitectureCullingState;
+}
 
 bool IsTownViewActive()
 {
@@ -2364,6 +2529,9 @@ void ResetTownViewResources()
 	SceneMaterialCache.clear();
 	ImportedTextureCache.clear();
 	CabinInteriorTextureCache.clear();
+	ArchitectureBoundsCache.clear();
+	ArchitectureBoundsRevision = std::numeric_limits<uint64_t>::max();
+	ArchitectureCullingState = {};
 	CabinFireEnabledForDiagnostics = true;
 	DirectionalShadowsEnabledForDiagnostics = true;
 	ImportedAlbedoColors.clear();
@@ -2388,6 +2556,8 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 	PickingValid = false;
 	RasterSampleFactor = 1;
 	RendererState = {};
+	ArchitectureCullingState = {};
+	ArchitectureCullingState.requested = *GetOptions().Graphics.townViewFrustumCulling;
 	RendererState.requestedGpu = *GetOptions().Graphics.townViewGpuRendering;
 	CaptureGpu = CaptureGpuFailed = false;
 	if (!RendererState.requestedGpu) {
@@ -2410,6 +2580,8 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 		SceneMaterialCache.clear();
 		ImportedTextureCache.clear();
 		CabinInteriorTextureCache.clear();
+		ArchitectureBoundsCache.clear();
+		ArchitectureBoundsRevision = std::numeric_limits<uint64_t>::max();
 		CabinFireEnabledForDiagnostics = true;
 		DirectionalShadowsEnabledForDiagnostics = true;
 		ImportedAlbedoColors.clear();
@@ -2460,6 +2632,7 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 	BuildTownShadowMap(GetTownScene(), shadowConfig);
 	++GpuFrameNumber;
 	if (RendererState.requestedGpu && !GpuBlocked) {
+		PrepareFrameImportedAlbedo();
 		CaptureGpu = TownGpuBeginFrame(out.w(), out.h(), false,
 		    { ViewCamera.projection.perspective, ViewCamera.projection.nearClip, ViewCamera.projection.farClip });
 		if (CaptureGpu) {
@@ -2494,28 +2667,30 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 		// Native town generation fills the entire dungeon grid, including the outer
 		// grass visible around Farnham and Adria in wide views.
 		// Camera exploration changes only drawing; movement keeps the native dmin/dmax bounds.
-		const int minX = 0;
-		const int maxX = MAXDUNX;
-		const int minY = 0;
-		const int maxY = MAXDUNY;
-		std::vector<Point> tiles;
-		for (int y = minY; y < maxY; ++y)
-			for (int x = minX; x < maxX; ++x)
-				// Zero is the first valid MIN piece, not an empty cell.
-				if (dPiece[x][y] < MAXTILES)
-					tiles.push_back({ x, y });
-		std::stable_sort(tiles.begin(), tiles.end(), [](Point a, Point b) {
-			return a.x + a.y != b.x + b.y ? a.x + a.y < b.x + b.y : a.x < b.x;
-		});
+		const auto forEachTile = [](const auto &draw) {
+			// Exactly the former stable order (x+y, then x), without allocating
+			// or sorting the grid each frame. Read live pieces on both passes.
+			for (int diagonal = 0; diagonal < MAXDUNX + MAXDUNY - 1; ++diagonal) {
+				const int firstX = std::max(0, diagonal - MAXDUNY + 1);
+				const int lastX = std::min(MAXDUNX - 1, diagonal);
+				for (int x = firstX; x <= lastX; ++x) {
+					const int y = diagonal - x;
+					// Zero is the first valid MIN piece, not an empty cell.
+					if (dPiece[x][y] < MAXTILES)
+						draw(Point { x, y });
+				}
+			}
+		};
 		// Native floor diamonds are drawn before the SOL cell artwork. Coplanar
 		// painted bases can overlap those diamonds; retain their native draw order.
-		for (Point tile : tiles) {
+		forEachTile([&](Point tile) {
 			const TileArt &art = GetTile(dPiece[tile.x][tile.y]);
 			if (!art.solid)
 				DrawGround(out, tile, TownPropReplacesTile(tile) ? fallback : SceneGround(dPiece[tile.x][tile.y]));
-		}
-		for (Point tile : tiles)
+		});
+		forEachTile([&](Point tile) {
 			DrawScenery(out, tile, GetTile(dPiece[tile.x][tile.y]), fallback);
+		});
 		DrawScene(out);
 		DrawVegetation(out);
 		DrawProps(out);
@@ -2620,6 +2795,8 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 	PickLeftPanel = IsLeftPanelOpen();
 	PickRightPanel = IsRightPanelOpen();
 	PickGpuRequested = RendererState.requestedGpu;
+	PickFrustumCullingRequested = ArchitectureCullingState.requested;
+	PickSceneRevision = GetTownSceneRevision();
 	PickCameraRevision = CameraRig.revision();
 	PickHorizonEnabled = *GetOptions().Graphics.townViewHorizon;
 	PickingValid = true;

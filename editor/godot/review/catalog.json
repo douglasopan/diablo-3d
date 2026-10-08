@@ -447,17 +447,17 @@
             0,
             14.0
           ],
-          "sha256": "fc85fe533e1cde4df925dd75befdb7ad593abce653d0d01cb40da69723d4af83",
+          "sha256": "de7ed5872d58ee5bede3879875ae776aaed7b7729ebc7a872bfefb238d9c195b",
           "bounds": {
             "min": [
-              0.11999893188476562,
+              3.981055498123169,
               0.0,
-              0.39999961853027344
+              -1.6205514669418335
             ],
             "max": [
-              14.900001525878906,
-              11.449999809265137,
-              14.350000381469727
+              16.073984146118164,
+              18.227516174316406,
+              15.428874015808105
             ]
           },
           "triangles": 16854,
@@ -466,14 +466,14 @@
             2048
           ],
           "scale": [
-            11.7172517776489,
-            6.02227687835693,
-            7.84417390823364
+            9.587,
+            9.587,
+            9.587
           ],
           "sourceSha256": "42d5566caf249b0c03962f5fbb11cae9912c53724921ab832419ceb944f98ba7",
           "masterSha256": "e2192f82badddca1ec66b48a50c6b1a064d0a9e148a7745765ac12d07d1270a7",
-          "path": "assets/fc85fe533e1cde4df925dd75befdb7ad593abce653d0d01cb40da69723d4af83.d3d",
-          "nonUniformScaleRatio": 1.9456514561392502,
+          "path": "assets/de7ed5872d58ee5bede3879875ae776aaed7b7729ebc7a872bfefb238d9c195b.d3d",
+          "nonUniformScaleRatio": 1.0,
           "provenance": "Recorded conversion and binding verified by local SHA-256 receipts; visual acceptance remains separate."
         }
       ],
@@ -559,9 +559,7 @@
         "label": "Prévia do resultado da tarefa",
         "kind": "model-preview"
       },
-      "warnings": [
-        "A transformação registrada usa escala diferente nos eixos."
-      ],
+      "warnings": [],
       "provenance": {
         "origin": "Recorded AI generation or local derivative; inspect each model stage and source relation.",
         "author": "Unknown",

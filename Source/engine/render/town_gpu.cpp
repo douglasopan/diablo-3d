@@ -108,19 +108,35 @@ struct GpuVertex {
 static_assert(sizeof(TownGpuVertex) == 36);
 static_assert(sizeof(GpuVertex) == 80);
 
-struct CachedTexture {
+struct CachedTexels {
 	ComOwner<ID3D11ShaderResourceView> codes;
 	ComOwner<ID3D11ShaderResourceView> opacity;
-	ComOwner<ID3D11ShaderResourceView> lut;
 	int width;
 	int height;
-	unsigned lightLevels;
-	unsigned codeCount;
-	unsigned lutWidth;
 	uint32_t maximumCode;
 	bool hasOpacity;
 	size_t bytes;
 	uint64_t lastSeenFrame;
+};
+
+struct CachedLightLut {
+	ComOwner<ID3D11ShaderResourceView> view;
+	unsigned lightLevels;
+	unsigned codeCount;
+	unsigned lutWidth;
+	size_t bytes;
+	uint64_t lastSeenFrame;
+};
+
+/** Frame-local binding of independent immutable resources. Both resources are
+ * pinned until BeginFrame, so recorded batches retain their exact LUT revision. */
+struct CachedTexture {
+	CachedTexels *texels;
+	CachedLightLut *lut;
+	unsigned lightLevels;
+	unsigned codeCount;
+	unsigned lutWidth;
+	bool hasOpacity;
 };
 
 struct TextureKey {
@@ -132,6 +148,34 @@ struct TextureKeyHash {
 	size_t operator()(TextureKey value) const
 	{
 		return static_cast<size_t>(value.key ^ (value.revision + 0x9E3779B97F4A7C15ULL + (value.key << 6) + (value.key >> 2)));
+	}
+};
+
+struct LightLutKey {
+	TextureKey identity;
+	bool shared;
+	bool operator==(const LightLutKey &other) const { return identity == other.identity && shared == other.shared; }
+};
+
+struct LightLutKeyHash {
+	size_t operator()(const LightLutKey &value) const
+	{
+		return TextureKeyHash {}(value.identity) ^ (value.shared ? size_t { 0x85EBCA6B } : 0);
+	}
+};
+
+struct TextureBindingKey {
+	TextureKey texels;
+	LightLutKey lut;
+	unsigned lightLevels;
+	bool hasLut;
+	bool operator==(const TextureBindingKey &other) const { return texels == other.texels && lut == other.lut && lightLevels == other.lightLevels && hasLut == other.hasLut; }
+};
+
+struct TextureBindingKeyHash {
+	size_t operator()(const TextureBindingKey &value) const
+	{
+		return TextureKeyHash {}(value.texels) ^ (LightLutKeyHash {}(value.lut) << 1) ^ value.lightLevels ^ (value.hasLut ? 0xC2B2AE35U : 0);
 	}
 };
 
@@ -163,7 +207,9 @@ std::array<Target, 3> Targets;
 ComOwner<ID3D11Texture2D> HardwareDepth;
 ComOwner<ID3D11DepthStencilView> HardwareDepthView;
 ComOwner<ID3D11ShaderResourceView> ShadowResource;
-std::unordered_map<TextureKey, CachedTexture, TextureKeyHash> TextureCache;
+std::unordered_map<TextureKey, CachedTexels, TextureKeyHash> TexelCache;
+std::unordered_map<LightLutKey, CachedLightLut, LightLutKeyHash> LightLutCache;
+std::unordered_map<TextureBindingKey, CachedTexture, TextureBindingKeyHash> TextureCache;
 size_t TextureBytes = 0;
 size_t VertexCapacity = 0;
 uint64_t FrameSerial = 0;
@@ -589,6 +635,47 @@ bool UploadTexture(int width, int height, DXGI_FORMAT format, const void *data, 
 	return SUCCEEDED(result) || Fail("Create uploaded texture view", result);
 }
 
+void UpdateTextureStatus()
+{
+	Status.cachedTextures = TexelCache.size();
+	Status.cachedLightLuts = LightLutCache.size();
+	Status.cachedTextureBytes = TextureBytes;
+}
+
+/** Eviction runs before uploads. Resources touched this frame may be borrowed
+ * by any recorded batch and are never removed, even if its draw is deferred. */
+bool MakeTextureRoom(size_t bytes)
+{
+	if (bytes > MaxTextureBytes)
+		return Fail("GPU texture payload exceeds the texture-cache budget");
+	while (TextureBytes > MaxTextureBytes - bytes) {
+		auto oldestTexels = TexelCache.end();
+		for (auto entry = TexelCache.begin(); entry != TexelCache.end(); ++entry) {
+			if (entry->second.lastSeenFrame < FrameSerial
+			    && (oldestTexels == TexelCache.end() || entry->second.lastSeenFrame < oldestTexels->second.lastSeenFrame))
+				oldestTexels = entry;
+		}
+		auto oldestLut = LightLutCache.end();
+		for (auto entry = LightLutCache.begin(); entry != LightLutCache.end(); ++entry) {
+			if (entry->second.lastSeenFrame < FrameSerial
+			    && (oldestLut == LightLutCache.end() || entry->second.lastSeenFrame < oldestLut->second.lastSeenFrame))
+				oldestLut = entry;
+		}
+		if (oldestTexels == TexelCache.end() && oldestLut == LightLutCache.end())
+			return Fail("GPU texture-cache budget exceeded by current-frame resources");
+		if (oldestLut == LightLutCache.end() || (oldestTexels != TexelCache.end() && oldestTexels->second.lastSeenFrame <= oldestLut->second.lastSeenFrame)) {
+			TextureBytes -= oldestTexels->second.bytes;
+			TexelCache.erase(oldestTexels);
+		} else {
+			TextureBytes -= oldestLut->second.bytes;
+			LightLutCache.erase(oldestLut);
+		}
+		++Status.textureEvictions;
+		UpdateTextureStatus();
+	}
+	return true;
+}
+
 CachedTexture *GetTexture(const TownGpuTexture &input, TownGpuLighting lighting)
 {
 	if (input.width <= 0 || input.height <= 0 || input.width > 16384 || input.height > 16384
@@ -596,64 +683,101 @@ CachedTexture *GetTexture(const TownGpuTexture &input, TownGpuLighting lighting)
 		Fail("Invalid GPU texture dimensions or light-level count");
 		return nullptr;
 	}
-	const TextureKey key { input.stableKey, input.revision };
-	const auto found = TextureCache.find(key);
-	if (found != TextureCache.end()) {
-		if (found->second.width != input.width || found->second.height != input.height || found->second.lightLevels != input.lightLevels
-		    || (lighting != TownGpuLighting::Unlit && !found->second.lut)
-		    || (lighting == TownGpuLighting::Unlit && found->second.maximumCode > 255)) {
-			Fail("GPU texture key/revision reused with a different layout");
-			return nullptr;
-		}
-		found->second.lastSeenFrame = FrameSerial;
-		return &found->second;
-	}
 	const size_t count = static_cast<size_t>(input.width) * input.height;
-	if (count > MaxPixels || input.texelCodes.size() != count || (!input.opacity.empty() && input.opacity.size() != count)
-	    || input.lightLut.size() % input.lightLevels != 0 || input.lightLut.size() / input.lightLevels > 262144
-	    || (lighting != TownGpuLighting::Unlit && input.lightLut.empty())) {
+	if (count > MaxPixels || (!input.texelCodes.empty() && input.texelCodes.size() != count)
+	    || (!input.opacity.empty() && input.opacity.size() != count)
+	    || input.lightLut.size() % input.lightLevels != 0 || input.lightLut.size() / input.lightLevels > 262144) {
 		Fail("Invalid GPU texture payload");
 		return nullptr;
 	}
-	const unsigned codeCount = input.lightLut.empty() ? 256 : static_cast<unsigned>(input.lightLut.size() / input.lightLevels);
-	for (uint32_t code : input.texelCodes) {
-		if (code >= codeCount || (lighting == TownGpuLighting::Unlit && code > 255)) {
-			Fail("GPU texel code exceeds its palette/LUT");
+	const TextureKey texelKey { input.stableKey, input.revision };
+	const LightLutKey lutKey { input.lightLutKey != 0 ? TextureKey { input.lightLutKey, input.lightLutRevision } : texelKey, input.lightLutKey != 0 };
+	auto texelsFound = TexelCache.find(texelKey);
+	auto lutFound = LightLutCache.find(lutKey);
+	CachedTexels *texels = texelsFound == TexelCache.end() ? nullptr : &texelsFound->second;
+	CachedLightLut *lut = lutFound == LightLutCache.end() ? nullptr : &lutFound->second;
+	if ((texels != nullptr && (texels->width != input.width || texels->height != input.height
+	        || (!input.opacity.empty() && !texels->hasOpacity)))
+	    || (lut != nullptr && (lut->lightLevels != input.lightLevels
+	        || (!input.lightLut.empty() && input.lightLut.size() != static_cast<size_t>(lut->codeCount) * lut->lightLevels)))) {
+		Fail("GPU texture/LUT key/revision reused with a different layout");
+		return nullptr;
+	}
+	if (texels == nullptr && input.texelCodes.size() != count) {
+		Fail("Missing GPU texel payload for uncached identity");
+		return nullptr;
+	}
+	if (lut == nullptr && input.lightLut.empty() && lighting != TownGpuLighting::Unlit) {
+		Fail("Missing GPU light LUT for uncached identity");
+		return nullptr;
+	}
+	const unsigned codeCount = lut != nullptr ? lut->codeCount
+	    : input.lightLut.empty() ? 256 : static_cast<unsigned>(input.lightLut.size() / input.lightLevels);
+	const uint32_t maximumCode = texels != nullptr ? texels->maximumCode : *std::max_element(input.texelCodes.begin(), input.texelCodes.end());
+	if (maximumCode >= codeCount || (lighting == TownGpuLighting::Unlit && maximumCode > 255)) {
+		Fail("GPU texel code exceeds its palette/LUT");
+		return nullptr;
+	}
+	const size_t texelBytes = texels == nullptr ? count * sizeof(uint32_t) + input.opacity.size() : 0;
+	const unsigned lutWidth = lut != nullptr ? lut->lutWidth : static_cast<unsigned>(std::min<size_t>(16384, input.lightLut.size()));
+	const size_t lutHeight = lutWidth == 0 ? 0 : (input.lightLut.size() + lutWidth - 1) / lutWidth;
+	const size_t lutBytes = lut == nullptr ? lutHeight * lutWidth : 0;
+	if (lutHeight > 16384 || texelBytes > MaxTextureBytes || lutBytes > MaxTextureBytes - texelBytes) {
+		Fail("GPU texture/LUT payload exceeds resource dimensions or cache budget");
+		return nullptr;
+	}
+	// Pin hits before making room: a new LUT revision can reuse the exact texel
+	// resource that pressure eviction would otherwise consider an older entry.
+	if (texels != nullptr)
+		texels->lastSeenFrame = FrameSerial;
+	if (lut != nullptr)
+		lut->lastSeenFrame = FrameSerial;
+	if (!MakeTextureRoom(texelBytes + lutBytes))
+		return nullptr;
+	CachedTexels newTexels {};
+	CachedLightLut newLut {};
+	if (texels == nullptr) {
+		newTexels.width = input.width;
+		newTexels.height = input.height;
+		newTexels.maximumCode = maximumCode;
+		newTexels.hasOpacity = !input.opacity.empty();
+		newTexels.bytes = texelBytes;
+		newTexels.lastSeenFrame = FrameSerial;
+		if (!UploadTexture(input.width, input.height, DXGI_FORMAT_R32_UINT, input.texelCodes.data(), input.width * sizeof(uint32_t), newTexels.codes)
+		    || (!input.opacity.empty() && !UploadTexture(input.width, input.height, DXGI_FORMAT_R8_UINT, input.opacity.data(), input.width, newTexels.opacity)))
 			return nullptr;
-		}
 	}
-	const size_t bytes = count * sizeof(uint32_t) + input.opacity.size() + input.lightLut.size();
-	if (bytes > MaxTextureBytes || TextureBytes > MaxTextureBytes - bytes) {
-		Fail("GPU texture-cache budget exceeded; reset required");
-		return nullptr;
-	}
-	CachedTexture texture {};
-	texture.width = input.width;
-	texture.height = input.height;
-	texture.lightLevels = input.lightLevels;
-	texture.codeCount = codeCount;
-	texture.lutWidth = static_cast<unsigned>(std::min<size_t>(16384, input.lightLut.size()));
-	texture.maximumCode = *std::max_element(input.texelCodes.begin(), input.texelCodes.end());
-	texture.hasOpacity = !input.opacity.empty();
-	texture.bytes = bytes;
-	texture.lastSeenFrame = FrameSerial;
-	if (!UploadTexture(input.width, input.height, DXGI_FORMAT_R32_UINT, input.texelCodes.data(), input.width * sizeof(uint32_t), texture.codes)
-	    || (!input.opacity.empty() && !UploadTexture(input.width, input.height, DXGI_FORMAT_R8_UINT, input.opacity.data(), input.width, texture.opacity)))
-		return nullptr;
-	if (!input.lightLut.empty()) {
-		const size_t lutHeight = (input.lightLut.size() + texture.lutWidth - 1) / texture.lutWidth;
+	if (lut == nullptr && !input.lightLut.empty()) {
+		newLut.lightLevels = input.lightLevels;
+		newLut.codeCount = codeCount;
+		newLut.lutWidth = lutWidth;
+		newLut.bytes = lutBytes;
+		newLut.lastSeenFrame = FrameSerial;
 		std::vector<uint8_t> padded;
 		const uint8_t *lutData = input.lightLut.data();
-		if (lutHeight * texture.lutWidth != input.lightLut.size()) {
+		if (lutBytes != input.lightLut.size()) {
 			padded.assign(input.lightLut.begin(), input.lightLut.end());
-			padded.resize(lutHeight * texture.lutWidth);
+			padded.resize(lutBytes);
 			lutData = padded.data();
 		}
-		if (!UploadTexture(texture.lutWidth, static_cast<int>(lutHeight), DXGI_FORMAT_R8_UINT, lutData, texture.lutWidth, texture.lut))
+		if (!UploadTexture(lutWidth, static_cast<int>(lutHeight), DXGI_FORMAT_R8_UINT, lutData, lutWidth, newLut.view))
 			return nullptr;
 	}
-	TextureBytes += bytes;
-	return &TextureCache.emplace(key, std::move(texture)).first->second;
+	// Commit only complete immutable uploads; earlier frame bindings retain
+	// their resource pointers and constants when this shared LUT grows.
+	if (texels == nullptr) {
+		texels = &TexelCache.emplace(texelKey, std::move(newTexels)).first->second;
+		TextureBytes += texelBytes;
+		Status.uploadedTexelBytes += texelBytes;
+	}
+	if (lut == nullptr && !input.lightLut.empty()) {
+		lut = &LightLutCache.emplace(lutKey, std::move(newLut)).first->second;
+		TextureBytes += lutBytes;
+		Status.uploadedLutBytes += lutBytes;
+	}
+	UpdateTextureStatus();
+	const TextureBindingKey bindingKey { texelKey, lutKey, input.lightLevels, lut != nullptr };
+	return &TextureCache.try_emplace(bindingKey, CachedTexture { texels, lut, input.lightLevels, codeCount, lutWidth, texels->hasOpacity }).first->second;
 }
 
 bool Finite(float value) { return std::isfinite(value); }
@@ -757,11 +881,20 @@ bool TownGpuBeginFrame(int width, int height, bool allowWarpForDiagnostics, cons
 	FrameFailed = false;
 	Vertices.clear();
 	Batches.clear();
+	TextureCache.clear();
 	++FrameSerial;
-	for (auto entry = TextureCache.begin(); entry != TextureCache.end();) {
+	for (auto entry = TexelCache.begin(); entry != TexelCache.end();) {
 		if (FrameSerial - entry->second.lastSeenFrame > 2) {
 			TextureBytes -= entry->second.bytes;
-			entry = TextureCache.erase(entry);
+			entry = TexelCache.erase(entry);
+		} else {
+			++entry;
+		}
+	}
+	for (auto entry = LightLutCache.begin(); entry != LightLutCache.end();) {
+		if (FrameSerial - entry->second.lastSeenFrame > 2) {
+			TextureBytes -= entry->second.bytes;
+			entry = LightLutCache.erase(entry);
 		} else {
 			++entry;
 		}
@@ -772,6 +905,10 @@ bool TownGpuBeginFrame(int width, int height, bool allowWarpForDiagnostics, cons
 	Status.failure.clear();
 	Status.submittedTriangles = 0;
 	Status.drawCalls = 0;
+	Status.uploadedTexelBytes = 0;
+	Status.uploadedLutBytes = 0;
+	Status.textureEvictions = 0;
+	UpdateTextureStatus();
 	Status.frameMilliseconds = 0;
 	Status.readbackMilliseconds = 0;
 	FrameStart = Clock::now();
@@ -947,7 +1084,7 @@ bool TownGpuEndFrame(TownGpuFrame &output)
 				return Fail("Map batch constants", result);
 			std::memcpy(mapped.pData, &batch.constants, sizeof(Constants));
 			Context->Unmap(ConstantBuffer.get(), 0);
-			ID3D11ShaderResourceView *resources[] { batch.texture->codes.get(), batch.texture->opacity.get(), batch.texture->lut.get(), ShadowResource.get() };
+			ID3D11ShaderResourceView *resources[] { batch.texture->texels->codes.get(), batch.texture->texels->opacity.get(), batch.texture->lut != nullptr ? batch.texture->lut->view.get() : nullptr, ShadowResource.get() };
 			Context->PSSetShaderResources(0, 4, resources);
 			Context->OMSetBlendState(BlendStates[batch.preservePicking ? 1 : 0].get(), nullptr, 0xFFFFFFFFU);
 			Context->Draw(batch.count, batch.first);
@@ -974,7 +1111,7 @@ bool TownGpuEndFrame(TownGpuFrame &output)
 		return Fail("D3D11 device removed", removed);
 	Status.readbackMilliseconds = std::chrono::duration<double, std::milli>(Clock::now() - readbackStart).count();
 	Status.frameMilliseconds = std::chrono::duration<double, std::milli>(Clock::now() - FrameStart).count();
-	Status.cachedTextures = TextureCache.size();
+	UpdateTextureStatus();
 	Status.frameSucceeded = true;
 	output = std::move(complete);
 	return true;
@@ -997,6 +1134,8 @@ void ResetTownGpuResources()
 		Context->Flush();
 	}
 	TextureCache.clear();
+	TexelCache.clear();
+	LightLutCache.clear();
 	TextureBytes = 0;
 	ShadowResource.reset();
 	ShadowKey = ShadowRevision = 0;

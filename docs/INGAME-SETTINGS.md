@@ -1,47 +1,59 @@
 # Configurações durante a partida
 
-Requisito novo de 8 de outubro de 2026: tornar o seletor de músicas evidente na partida e levar ao menu ingame o máximo de preferências do Settings inicial. A entrega substitui o pequeno conjunto manual de áudio/vídeo/trilha por um navegador único do modelo de opções; não altera o HUD principal, a escala global, os assets selecionados ou a simulação.
+Revisão solicitada em 8 de outubro de 2026 após a primeira instalação: remover da partida as opções que não podem ser alteradas nela, mostrar mais opções e melhorar a legibilidade e a coerência visual entre Esc e Configurações. O navegador continua usando o modelo nativo, com trilha sonora acessível e sem alterar o HUD principal, os assets selecionados ou a simulação.
 
-**Estado: integrado com a câmera, compilado, validado nos três testes nativos abaixo e instalado pelo chat principal em 8 de outubro de 2026.** O iniciador habitual continua único. A instalação conferiu os três aliases e preservou os 26 arquivos do perfil por hash, tamanho e data; a preparação posterior renovou somente o recibo de execução. Esta frente não alterou o perfil diretamente. A revisão visual do menu durante a partida permanece pendente.
+**Estado desta revisão: compilada, validada e instalada pelo principal às 10:45:49 UTC de 8 de outubro.** O chat principal mantém CMake/build/cache, perfil, instalação, Git, recibo do executável e o guia operacional. Os resultados desta revisão são registrados separadamente dos históricos. Nenhum perfil habitual foi alterado pela frente do menu.
 
 ## Acesso e navegação
 
-Durante a partida: **Esc → Configurações → Trilha sonora**. Trilha sonora é a primeira categoria; Gráficos, Áudio, Jogabilidade e mapeamentos vêm a seguir. Categorias restantes seguem a ordem de `GetOptions().GetCategories()`, omitindo somente aquelas sem entradas visíveis. Em inglês, a entrada da partida agora se chama `Settings`, como no menu inicial.
+Durante a partida: **Esc → Configurações → Trilha sonora**. Trilha sonora é a primeira categoria quando o áudio está disponível; Gráficos, Áudio, Jogabilidade e mapeamentos vêm a seguir. Categorias restantes seguem a ordem de `GetOptions().GetCategories()`, omitindo aquelas sem entradas editáveis durante a sessão. Em inglês, a entrada da partida se chama `Settings`, como no menu inicial.
 
 - Setas e Enter selecionam; Esc retorna um nível. No nível de categorias, volta ao menu da partida, que conserva Salvar/Carregar/saídas.
-- Page Up/Page Down, roda do mouse e os botões de página percorrem cinco entradas por página. Home/End vão ao início/fim da página. O cursor atualiza o foco; o clique usa os mesmos retângulos do desenho.
+- Page Up/Page Down, roda do mouse e os botões de página percorrem a lista. A capacidade depende do espaço acima do HUD, com limite de dezoito entradas por página. Anterior, Próxima e Voltar compartilham um rodapé com retângulos separados. Home/End vão ao início/fim da página. O cursor atualiza o foco; o clique usa os mesmos retângulos do desenho, inclusive no rodapé.
 - No controle, direcional/stick navegam, A/Y confirmam e B/Back/Start voltam conforme o layout nativo. Os botões de ombro mudam de página. Botões sem função no menu não acionam itens ou ações da partida.
 - Booleanos alternam; listas de até duas escolhas alternam como no Settings inicial. Listas maiores abrem escolhas explícitas. Trilha sonora sempre abre a lista explícita, mesmo com duas variantes.
-- Música, Som, Dicas sonoras, Gamma e Velocidade usam páginas de slider. Enter alterna seus extremos como no menu nativo; setas/clique/arraste ajustam o valor. Velocidade fica em Jogabilidade e continua bloqueada em multiplayer.
+- Música, Som, Dicas sonoras, Gamma e Velocidade usam páginas de slider. Enter alterna seus extremos como no menu nativo; setas/clique/arraste ajustam o valor. Velocidade fica em Jogabilidade somente no solo. Áudio e Trilha sonora são omitidos sem dispositivo inicializado; silenciar música ou efeitos conserva os controles para permitir reativá-los.
 
-A apresentação usa uma placa central com fontes nativas, título, nome/valor de cada entrada e descrição acima do painel. São no máximo oito linhas: cinco entradas, duas ações de página e Voltar. A geometria é compartilhada com input; textos longos recebem reticências UTF-8, sem sair horizontalmente da placa. A descrição prioriza aplicação/motivo de bloqueio. Fontes pequenas na resolução lógica alta continuam uma limitação, sem introduzir escala independente de interface. A fidelidade visual precisa de revisão do candidato renderizado.
+A apresentação usa fontes, cores e seletores nativos sobre uma placa central escura, compartilhada entre Esc e Configurações. Nomes e valores ocupam colunas quando há espaço. As fontes crescem com a resolução lógica, sem reduzir a letra para acomodar mais itens; título e descrição têm áreas próprias. Textos longos recebem reticências UTF-8. Uma mudança de capacidade preserva o índice absoluto do item selecionado e o retorno à entrada/categoria correspondente. Esta revisão não adiciona arte HD, novas fontes ou escala independente de toda a interface. A revisão técnica das capturas está registrada abaixo; não equivale à aprovação artística final do usuário.
+
+| Resolução lógica | Entradas úteis por página | Fonte dos itens / título |
+| --- | --- | --- |
+| 640×480 e 853×480 | 9 | 12 / 24 |
+| 960×540 | 8 | 24 / 30 |
+| 1280×720 | 13 | 24 / 30 |
+| 1920×1080 | 18 | 30 / 42 |
+| 1440p com largura a partir de 960 | 18 | 42 / 46 |
+
+Essas capacidades reservam o rodapé e a descrição acima do limite nativo do HUD. O menu Esc mantém seu logo e seletores de pausa, com fonte nativa 46 em 960×540 e 1920×1080 e 42 em 640×480. Sliders conservam as dimensões e sprites originais; o bloqueio de navegação por stick durante a captura não impede clicar em Voltar para cancelá-la.
 
 ## Modelo e cobertura
 
 `Source/ingame_settings.cpp` consome as categorias, entradas, traduções, valores e setters de `options.h/.cpp`. Não registra ou substitui callbacks. A única ordenação especial coloca as categorias mais usadas na primeira página. Opções futuras, como os novos campos da câmera, aparecem automaticamente quando incluídas em `GetEntries()` com suas flags corretas.
 
-O filtro preserva `Invisible`, `OnlyDiablo`, `OnlyHellfire` e `NeedDiabloMpq`, com a mesma consulta a `HaveIntro()` do Settings inicial. Somente cinco controles herdados invisíveis são explicitamente adaptados: os três volumes, Gamma e Velocidade. Não se expõem IDs de herói, dados de perfil, rede/chat sem entradas ou seleções artísticas de modelos.
+O filtro preserva `Invisible`, `OnlyDiablo`, `OnlyHellfire` e `NeedDiabloMpq`, com a mesma consulta a `HaveIntro()` do Settings inicial. Também omite opções bloqueadas, adiadas ou sem alternativas reais. Categorias e entradas usam o mesmo predicado, incluindo os cinco controles herdados invisíveis explicitamente adaptados: os três volumes, Gamma e Velocidade. O Settings principal e as flags do modelo não são modificados. Não se expõem IDs de herói, dados de perfil, rede/chat sem entradas ou seleções artísticas de modelos.
 
 | Categoria | Cobertura e aplicação |
 | --- | --- |
 | Trilha sonora | Modo Vanilla/Rock/Custom e os oito ambientes; escolhas, nomes e disponibilidade vêm de `MusicOptions`. |
-| Gráficos | Todas as entradas visíveis, incluindo 3D, filtro, zoom, luz/ciclagem e FPS; Gamma usa o handler original. Zoom também recalcula o viewport, como os atalhos nativos. |
-| Áudio | Volumes separados de música/efeitos/dicas, sons de caminhada/equipamento/coleta e todas as entradas técnicas visíveis, com as restrições originais. |
-| Jogabilidade | Todas as preferências visíveis, incluindo HUD, coleta/equipamento, poções, lojas, magia e opções condicionais da expansão; Velocidade conserva seu handler solo. |
+| Gráficos | Entradas editáveis, incluindo GPU, descarte espacial, câmera, filtro, zoom, luz/ciclagem e FPS; Gamma usa o handler original. Zoom também recalcula o viewport, como os atalhos nativos. Iniciar em 3D e reconstruções de interface ficam no menu principal. |
+| Áudio | Volumes separados de música/efeitos/dicas e sons de caminhada/equipamento/coleta quando há áudio inicializado. Dispositivo, frequência, canais, buffer e resampling ficam no menu principal. |
+| Jogabilidade | Preferências aplicáveis à sessão, incluindo HUD, coleta/equipamento, poções, lojas e magia; Velocidade conserva seu handler solo. Regras de inicialização e entradas sem efeito na sessão são omitidas. |
 | Teclas/mouse e controle | Todas as ações registradas pelo jogo, com valor atual, associar, desvincular e voltar. Sem lista paralela de nomes de ações. |
-| Idioma, mods, modo de jogo e inicialização | Entradas visíveis do modelo; bloqueadas quando exigem reconstrução ou mudança de sessão. Intro/splash podem ser salvos para a próxima inicialização. |
+| Idioma, mods, modo de jogo e inicialização | Permanecem no Settings principal. Categorias sem nenhuma entrada editável não aparecem durante a partida. |
 
 ## Restrições e persistência
 
 | Contrato | Comportamento durante a partida |
 | --- | --- |
-| `CantChangeInGame` | Entrada consultável; abre detalhes com motivo e Voltar. Nenhum setter é chamado. |
-| `CantChangeInMultiPlayer` | Mesmo bloqueio durante multiplayer; solo respeita a implementação existente. |
-| `RecreateUI` | Bloqueada mesmo quando não possui `CantChangeInGame`. Evita recriar renderer, idioma, modo ou mods dentro da sessão sem suporte validado. |
-| Iniciar em 3D | Grava preferência para a próxima sessão; conserva a câmera/F4 atual. |
-| Correr em Tristram, fogo amigo e quests completas MP | Preferências salvas para a próxima sessão. Não reescreve o snapshot de regras em `sgGameInitInfo`. No multiplayer, suas flags impedem alteração. |
-| Intro/splash | Salvos para a próxima inicialização do programa. |
-| Música/áudio disponível | Aplicação pelos handlers nativos; ausência de dispositivo deixa volume consultável com motivo. |
+| `CantChangeInGame` | Omitida; nenhum setter é chamado. |
+| `CantChangeInMultiPlayer` | Omitida durante multiplayer. |
+| `RecreateUI` | Omitida mesmo quando não possui `CantChangeInGame`. |
+| Iniciar em 3D | Omitida; F4 mantém seu contrato temporário e a preferência inicial permanece no menu principal. |
+| Correr em Tristram, fogo amigo e quests completas MP | Omitidas; não reescrevem o snapshot de regras em `sgGameInitInfo`. |
+| Informações do grupo MP | Omitida: não tem efeito no solo e é bloqueada em multiplayer. |
+| Intro/splash | Categoria de inicialização omitida. |
+| Música/áudio | Handlers nativos; categorias omitidas sem áudio inicializado. Mute não bloqueia alteração. |
+| Listas com zero ou uma escolha | Omitidas por não oferecerem mudança útil. |
 | Demais entradas sem restrição | Setter existente, redesenho e gravação da preferência; efeitos específicos continuam a cargo do contrato de cada opção. |
 
 Gravações usam `SaveOptions()` no perfil corrente e são suprimidas em playback de demo, como no menu herdado. Não se edita o INI diretamente nem se muda um perfil habitual durante os testes. O navegador não consome RNG da simulação. A velocidade solo usa os mesmos limites 20–50 e a mesma atualização de `gnTickDelay` que o menu anterior.
@@ -58,7 +70,27 @@ O navegador instala um wrapper do handler de eventos enquanto está aberto. Capt
 
 Voltar ao menu da partida ou `gamemenu_off()` restaura o handler anterior. Um handler temporário já instalado por outra operação é preservado. **Integração realizada em `diablo.cpp`:** inclusão de `ingame_settings.h` e chamada de `CloseInGameSettings()` em `RunGameLoop`, imediatamente antes da restauração final de `SetEventHandler(previousHandler)`. O evento de fechar a janela é processado antes do handler de jogo, portanto precisa desse encerramento explícito; não basta interceptar Quit no wrapper. O teste nativo confirmou que o encerramento explícito restaura o handler anterior.
 
-## Validação do candidato e entrega
+## Validação e entrega desta revisão
+
+O principal compilou o candidato após adicionar a inclusão mínima de `control/control.hpp` em `ingame_settings.cpp`, necessária à declaração de `GetMainPanel()`. Navegador, desenho e testes permanecem congelados para entrega. Revisão independente do filtro, índices e ciclo de captura e `git diff --check` também passaram.
+
+O principal adaptou `tools/ingame_settings_smoke.cpp` e seu helper geométrico para verificar ausência das opções indisponíveis, preservação do Settings principal, capacidade responsiva e retângulos do rodapé. O fixture musical agora distingue áudio disponível de mute e respeita a nova paginação; o teste legado de vídeo passou a localizar opções por nome e página, sem posições fixas.
+
+| Validação desta revisão | Resultado | Evidência |
+| --- | --- | --- |
+| `ingame_settings_smoke` | **59.452 verificações aprovadas; zero falhas** | [ingame-settings-r2.log](../../diagnostics/render-optimization-20261008/ingame-settings-r2.log) |
+| `music_selection_smoke` | **540 verificações aprovadas; zero falhas** | [music-selection-r2.log](../../diagnostics/render-optimization-20261008/music-selection-r2.log) |
+| Captura nativa `--ingame-menu-visual` | **20 PNGs em 960×540 e 1920×1080; sem falhas** | [relatório de geometria e capturas](../../diagnostics/render-optimization-20261008/menu-r1/ingame-menu-visual.txt), [checks nativos](../../diagnostics/render-optimization-20261008/menu-r1/town-view-smoke.txt) |
+
+Os testes cobriram filtro em Diablo/Hellfire × solo/multiplayer × áudio disponível/indisponível, mute reversível, persistência das escolhas editáveis e omitidas, páginas/rodapé, resize, foco, mouse/roda, teclado/controle, sliders, captura de bindings, encerramento do wrapper e preservação do RNG. Configurações usou INI temporário, sem janela, arquivo do jogo, perfil habitual ou save; seleção musical também não carregou assets do jogo ou saves.
+
+As capturas usaram o desenho real de `gmenu`, fontes/logo/seletores dos arquivos locais, catálogo `pt_BR` e fundo nativo de Tristram. Cada página foi capturada com foco no primeiro e no último item; todas registraram `outsidePanel=0` e proteção das linhas externas. A captura executou somente navegação/foco, sem ativar valores de opções ou saves. **O HUD principal não foi desenhado:** estas imagens validam exclusivamente Esc e Configurações, sem concluir a frente do HUD.
+
+Foram inspecionadas nesta frente as imagens de [Esc em 960×540](../../diagnostics/render-optimization-20261008/menu-r1/960x540-escape-focus-first.png), [Gráficos em 960×540](../../diagnostics/render-optimization-20261008/menu-r1/960x540-graphics-page-1-focus-first.png) e [Trilha sonora em 1920×1080](../../diagnostics/render-optimization-20261008/menu-r1/1920x1080-music-page-1-focus-first.png). Fontes, foco, colunas e rodapé estão legíveis, sem transbordamento visível nessas três composições. O catálogo português está ativo, com os fallbacks ingleses existentes para textos sem tradução. As capturas são renders nativos finitos, não screenshots de uma janela ou comprovação de uma partida prolongada.
+
+**Entrega instalada:** o executável SHA-256 `a1e218fab604517f409557a5863352633b632f1f83e3f3c449b06393418140c9` foi aplicado pelo principal aos três aliases do iniciador habitual, com backup e zero partidas abertas. Os 39 arquivos do perfil foram preservados por hash/tamanho/data, exceto a associação vazia da câmera preenchida com K após confirmar a tecla livre. Recibo privado: `diagnostics/render-optimization-20261008/installed-20261008T104549Z/receipt.json`. Os testes acima pertencem aos bytes instalados; não representam aprovação artística integral do usuário.
+
+## Validação histórica da primeira versão instalada
 
 Arquivos implementados nesta frente:
 
@@ -73,7 +105,7 @@ O integrador adicionou `Source/ingame_settings.cpp` à biblioteca e criou `ingam
 
 O fixture executado usou diretório TEMP recém-criado, SDL dummy, handlers/setters reais e nenhuma janela, MPQ, mundo, perfil habitual ou save. Comparou visibilidade e bloqueios em Diablo/Hellfire × solo/multiplayer, percorreu páginas/voltar e verificou Boolean/List, sliders, bindings de tecla/mouse/roda, combinação num controle virtual, gravação/releitura de INI e preservação do RNG. A captura no controle virtual passou, sem skip. O helper geométrico verificou os retângulos reais em 640×480, 853×480, 1080p e ultrawide/1440p. O teste de seleção musical percorreu os modos e cada variante dos oito ambientes; reprodução usou somente áudio gerado.
 
-A primeira execução de configurações revelou uma referência de nome invalidada no helper de paginação do próprio teste: `Action::GetName()` reutiliza sua string dinâmica durante a navegação. O helper passou a copiar o nome solicitado antes de mudar de página, com regressões explícitas para `QuickSpell10` e `QuickMessage10`. O navegador já mantinha cópias próprias dos nomes; esse reparo não exigiu mudança de produção. Após recompilar somente esse teste, os três resultados do mesmo candidato integrado foram:
+A primeira execução de configurações revelou uma referência de nome invalidada no helper de paginação do próprio teste: `Action::GetName()` reutiliza sua string dinâmica durante a navegação. O helper passou a copiar o nome solicitado antes de mudar de página, com regressões explícitas para `QuickSpell10` e `QuickMessage10`. O navegador já mantinha cópias próprias dos nomes; esse reparo não exigiu mudança de produção. Após recompilar somente esse teste, os três resultados do candidato anterior foram:
 
 | Teste nativo | Resultado | Evidência |
 | --- | --- | --- |
@@ -81,7 +113,7 @@ A primeira execução de configurações revelou uma referência de nome invalid
 | `music_selection_smoke` | **535 verificações aprovadas; zero falhas** | [music-selection.log](../../diagnostics/camera-apply-20261008/music-selection.log) |
 | `music_playback_smoke` | **55 verificações aprovadas; zero falhas** | [music-playback.log](../../diagnostics/camera-apply-20261008/music-playback.log) |
 
-A comparação exaustiva confirmou a cobertura das entradas visíveis do modelo, incluindo os campos de câmera integrados. Os cinco controles invisíveis adaptados são verificados separadamente e não entram nestes totais:
+A comparação exaustiva anterior confirmou a cobertura das entradas visíveis do modelo, incluindo campos somente leitura. Essa política foi substituída pelo novo requisito; os totais seguintes são históricos e não são metas da lista editável. Os cinco controles invisíveis adaptados foram verificados separadamente:
 
 | Contexto | Entradas visíveis | Somente leitura |
 | --- | --- | --- |
@@ -92,4 +124,4 @@ A comparação exaustiva confirmou a cobertura das entradas visíveis do modelo,
 
 **Verificado nesta frente:** revisão de contrato, índices, ownership de strings, callbacks, input e diff sem whitespace; os 21 novos msgids são únicos, compilaram pelo fallback real e retornaram as traduções pt-BR esperadas num catálogo temporário, removido ao fim. Settings/Trilha sonora conservaram as traduções. A integração confirmou compilação C++ e os resultados nativos registrados acima, inclusive persistência/releitura, encerramento do wrapper e preservação do RNG.
 
-**Ainda não verificado nesta frente:** render/capturas do menu, legibilidade no jogo, partida prolongada e instalação no perfil habitual. Geometria e eventos aprovados em SDL dummy não constituem aprovação visual. O chat principal deve completar o recibo e a revisão do executável, registrar os limites de apresentação e confirmar a instalação; esta documentação não atribui esses resultados ao jogo anteriormente instalado.
+**Limites históricos:** a instalação anterior conferiu os três aliases e preservou os 26 arquivos do perfil por hash, tamanho e data; a preparação posterior renovou somente o recibo. Esses fatos pertencem à versão anterior. A instalação atual e suas validações estão registradas acima. Geometria e eventos aprovados em SDL dummy não constituem aprovação artística nem medição de partida prolongada.

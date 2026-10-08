@@ -33,8 +33,12 @@ struct TownGpuProjection {
 	float farClip = 4096;
 };
 
-/** Borrowed inputs are uploaded during Submit, never retained by the backend. */
+/** Borrowed inputs are uploaded during Submit, never retained by the backend.
+ * Payload spans may be omitted for resident identities; cache misses require
+ * their payload. Always supply dimensions/lightLevels. Revisions are immutable
+ * content contracts, so warm hits do not rescan texels or LUT values. */
 struct TownGpuTexture {
+	/** Identity/revision of texelCodes and opacity only. */
 	uint64_t stableKey = 0;
 	uint64_t revision = 0;
 	int width = 0;
@@ -44,6 +48,12 @@ struct TownGpuTexture {
 	/** Palette output at [texelCode * lightLevels + level]. */
 	std::span<const uint8_t> lightLut;
 	unsigned lightLevels = 1;
+	/** Nonzero shares the immutable LUT independently of texel/opacity data.
+	 * Zero retains a private LUT identified by stableKey/revision. A change to
+	 * LUT values/layout requires a new lightLutRevision (or private revision).
+	 * Global LUT growth must not change the revision of unchanged texels. */
+	uint64_t lightLutKey = 0;
+	uint64_t lightLutRevision = 0;
 };
 
 enum class TownGpuLighting : uint32_t { Unlit, Shadow, Directional, Interior };
@@ -110,6 +120,13 @@ struct TownGpuStatus {
 	size_t submittedTriangles = 0;
 	size_t drawCalls = 0;
 	size_t cachedTextures = 0;
+	size_t cachedLightLuts = 0;
+	/** Actual resident texel, opacity and padded LUT payload, budget 256 MiB. */
+	size_t cachedTextureBytes = 0;
+	/** Per-frame immutable upload payload; warm shared LUTs/texels count zero. */
+	size_t uploadedTexelBytes = 0;
+	size_t uploadedLutBytes = 0;
+	size_t textureEvictions = 0;
 	double frameMilliseconds = 0;
 	double readbackMilliseconds = 0;
 };

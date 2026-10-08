@@ -363,7 +363,7 @@ func _import_glb(path: String) -> void:
 	_mark_changed()
 	preview.set_display_mode(0 if replacement_mode else 2)
 	get_editor_interface().set_main_screen_editor("Tristram 3D")
-	_log("GLB %s vinculado a %s.\nSHA: %s\n%s\n%s" % ["substituto" if replacement_mode else "fonte (somente referência)", selected.name, result.get("sha256", ""), "Fit registrado da revisão selecionada aplicado." if recorded_fit else "Ajuste inicial uniforme ao footprint; confira escala, orientação e altura no editor 3D.", "Marque o override e informe a revisão para exportar. Materiais/animação incompatíveis serão recusados." if replacement_mode else "Selecione GLB fonte (PBR) no topo da prévia para inspecionar. Baseline continua herdada."])
+	_log("GLB %s vinculado a %s.\nSHA: %s\n%s\n%s" % ["substituto" if replacement_mode else "fonte (somente referência)", selected.name, result.get("sha256", ""), "Fit uniforme da revisão selecionada aplicado; proporções preservadas. Confira o encaixe com a referência nativa." if recorded_fit else "Ajuste inicial uniforme ao footprint; confira escala, orientação e altura no editor 3D.", "Marque o override e informe a revisão para exportar. Materiais/animação incompatíveis serão recusados." if replacement_mode else "Selecione GLB fonte (PBR) no topo da prévia para inspecionar. Baseline continua herdada."])
 	preview.focus_selected()
 
 func _restore_baseline() -> void:

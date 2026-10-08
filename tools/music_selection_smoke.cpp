@@ -15,15 +15,18 @@
 #include <iostream>
 #include <iterator>
 #include <limits>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <vector>
 
 #include "engine/assets.hpp"
 #include "control/control.hpp"
 #include "engine/music_catalog.hpp"
 #include "engine/random.hpp"
 #include "engine/render/town_view.hpp"
+#include "engine/sound.h"
 #include "engine/sound_defs.hpp"
 #include "game_mode.hpp"
 #include "gamemenu.h"
@@ -385,7 +388,7 @@ size_t CurrentMenuCount()
 {
 	if (sgpCurrentMenu == nullptr)
 		throw std::runtime_error("Expected an active in-game settings menu");
-	for (size_t i = 0; i <= 8; ++i) {
+	for (size_t i = 0; i <= GMenuSettingsMaxContentRows + 3; ++i) {
 		if (sgpCurrentMenu[i].fnMenu == nullptr)
 			return i;
 		if (sgpCurrentMenu[i].pszStr == nullptr)
@@ -401,14 +404,22 @@ void ActivateMenuRow(size_t index)
 	sgpCurrentMenu[index].fnMenu(true);
 }
 
-size_t FindMenuRow(std::string_view name)
+std::optional<size_t> FindMenuRowIfPresent(std::string_view requestedName)
 {
+	// Some action names reuse mutable model storage when pages rebuild.
+	const std::string name(requestedName);
+	std::vector<std::vector<std::string>> seenPages;
 	for (size_t page = 0; page < 40; ++page) {
 		const size_t count = CurrentMenuCount();
+		std::vector<std::string> labels;
 		for (size_t row = 0; row < count; ++row) {
 			if (name == sgpCurrentMenu[row].pszStr)
 				return row;
+			labels.emplace_back(sgpCurrentMenu[row].pszStr);
 		}
+		if (std::find(seenPages.begin(), seenPages.end(), labels) != seenPages.end())
+			return std::nullopt;
+		seenPages.push_back(labels);
 		bool next = false;
 		for (size_t row = 0; row < count; ++row) {
 			if (std::string_view(sgpCurrentMenu[row].pszStr) == "Next Page") {
@@ -417,30 +428,55 @@ size_t FindMenuRow(std::string_view name)
 				break;
 			}
 		}
-		if (!next) break;
+		if (!next)
+			return std::nullopt;
 	}
-	throw std::runtime_error("Menu option is not reachable: " + std::string(name));
+	throw std::runtime_error("Menu search did not finish its finite page cycle: " + name);
 }
 
-void CheckInGameMenus()
+size_t FindMenuRow(std::string_view name)
+{
+	const std::string ownedName(name);
+	if (const auto row = FindMenuRowIfPresent(ownedName))
+		return *row;
+	throw std::runtime_error("Menu option is not reachable: " + ownedName);
+}
+
+struct MutedAudioFixture {
+	int previousMusicVolume = *GetOptions().Audio.musicVolume;
+	int previousSoundVolume = *GetOptions().Audio.soundVolume;
+	bool previousMusicOn = gbMusicOn;
+	bool previousSoundOn = gbSoundOn;
+	bool initialized = false;
+
+	MutedAudioFixture()
+	{
+#ifndef NOSOUND
+		Check(!gbSndInited, "isolated menu fixture starts without an existing audio pipeline");
+		GetOptions().Audio.musicVolume.SetValue(VOLUME_MIN);
+		GetOptions().Audio.soundVolume.SetValue(VOLUME_MIN);
+		snd_init();
+		initialized = gbSndInited;
+		Check(initialized && !gbMusicOn && !gbSoundOn, "real dummy audio makes soundtrack controls available while playback remains muted");
+#endif
+	}
+
+	~MutedAudioFixture()
+	{
+		if (gmenu_is_active())
+			gamemenu_off();
+		if (initialized)
+			snd_deinit();
+		GetOptions().Audio.musicVolume.SetValue(previousMusicVolume);
+		GetOptions().Audio.soundVolume.SetValue(previousSoundVolume);
+		gbMusicOn = previousMusicOn;
+		gbSoundOn = previousSoundOn;
+	}
+};
+
+void CheckInGameMusicChoices()
 {
 	Options &options = GetOptions();
-	gbIsMultiplayer = false;
-	gbRunGame = true;
-	gbSndInited = false;
-	gbMusicOn = gbSoundOn = false;
-	Players.resize(1);
-	MyPlayer = &Players.front();
-	MyPlayer->_pmode = PM_STAND;
-	MyPlayerIsDead = false;
-	sgGameInitInfo.nTickRate = 20;
-	gnScreenWidth = 640;
-	gnScreenHeight = 480;
-	CalculatePanelAreas();
-	gmenu_init_menu();
-	gamemenu_on();
-	Check(CurrentMenuCount() == 5 && std::string_view(sgpCurrentMenu[0].pszStr) == "Settings", "single-player menu exposes the shared Settings browser");
-	ActivateMenuRow(0);
 	Check(std::string_view(sgpCurrentMenu[0].pszStr) == "Soundtrack", "Soundtrack is the first category directly inside Settings");
 	ActivateMenuRow(0);
 	ActivateMenuRow(FindMenuRow(options.Music.theme.GetName()));
@@ -472,6 +508,37 @@ void CheckInGameMenus()
 		}
 	}
 	gmenu_presskeys(SDLK_ESCAPE);
+}
+
+void CheckInGameMenus()
+{
+	Options &options = GetOptions();
+	const uint32_t simulationRng = GetLCGEngineState();
+	const auto mainGraphicsEntries = options.Graphics.GetEntries();
+	const auto mainCategories = options.GetCategories();
+	const MutedAudioFixture audio;
+	gbIsMultiplayer = false;
+	gbRunGame = true;
+	Players.resize(1);
+	MyPlayer = &Players.front();
+	MyPlayer->_pmode = PM_STAND;
+	MyPlayerIsDead = false;
+	sgGameInitInfo.nTickRate = 20;
+	gnScreenWidth = 640;
+	gnScreenHeight = 480;
+	CalculatePanelAreas();
+	gmenu_init_menu();
+	gamemenu_on();
+	Check(CurrentMenuCount() == 5 && std::string_view(sgpCurrentMenu[0].pszStr) == "Settings", "single-player menu exposes the shared Settings browser");
+	ActivateMenuRow(0);
+	Check(!FindMenuRowIfPresent(options.StartUp.GetName()).has_value(), "startup-only category is absent during play");
+	if (audio.initialized) {
+		CheckInGameMusicChoices();
+	} else {
+		Check(!FindMenuRowIfPresent(options.Music.GetName()).has_value() && !FindMenuRowIfPresent(options.Audio.GetName()).has_value(),
+		    "without initialized audio the runtime omits Soundtrack and Audio categories");
+		std::cout << "SKIP in-game soundtrack choices in a NOSOUND build\n";
+	}
 	ActivateMenuRow(FindMenuRow(options.Graphics.GetName()));
 	leveltype = DTYPE_TOWN;
 	options.Graphics.townViewStartIn3D.SetValue(true);
@@ -483,8 +550,14 @@ void CheckInGameMenus()
 	ActivateMenuRow(FindMenuRow(options.Graphics.townViewAntialiasing.GetName()));
 	Check(*options.Graphics.townViewAntialiasing != aaBefore, "Graphics exposes shared edge smoothing");
 	const auto before = GetTownViewCameraState();
-	ActivateMenuRow(FindMenuRow(options.Graphics.townViewStartIn3D.GetName()));
-	Check(!*options.Graphics.townViewStartIn3D && IsTownViewActive() && GetTownViewCameraState().yaw == before.yaw, "Start in 3D changes only the next-session preference");
+	Check(!FindMenuRowIfPresent(options.Graphics.townViewStartIn3D.GetName()).has_value()
+	        && *options.Graphics.townViewStartIn3D && IsTownViewActive() && GetTownViewCameraState().yaw == before.yaw,
+	    "runtime omits Start in 3D and preserves the saved preference and active camera");
+	Check(options.Graphics.GetEntries() == mainGraphicsEntries
+	        && std::find(mainGraphicsEntries.begin(), mainGraphicsEntries.end(), &options.Graphics.townViewStartIn3D) != mainGraphicsEntries.end()
+	        && options.GetCategories() == mainCategories
+	        && std::find(mainCategories.begin(), mainCategories.end(), &options.StartUp) != mainCategories.end(),
+	    "runtime filtering keeps Start in 3D and startup categories in the main Settings model");
 	gmenu_presskeys(SDLK_ESCAPE);
 	ActivateMenuRow(FindMenuRow(options.Gameplay.GetName()));
 	ActivateMenuRow(FindMenuRow("Speed"));
@@ -493,6 +566,7 @@ void CheckInGameMenus()
 	Check(sgGameInitInfo.nTickRate == 35 && *options.Gameplay.tickRate == 35, "the Speed slider preserves its native single-player behavior");
 	gamemenu_off();
 	Check(!gmenu_is_active() && !gbMusicOn && !gbSoundOn, "closing settings preserves muted playback");
+	Check(GetLCGEngineState() == simulationRng, "runtime soundtrack menus and dummy audio preserve the simulation RNG");
 	gbRunGame = false;
 }
 void CheckInvalidAudio(const ConfigFixture &fixture)
@@ -527,7 +601,16 @@ void CheckInvalidAudio(const ConfigFixture &fixture)
 int main()
 {
 	SDL_SetMainReady();
-	if (SDL_Init(0) != 0) {
+#ifdef USE_SDL3
+	SDL_SetHint("SDL_VIDEODRIVER", "dummy");
+	SDL_SetHint("SDL_AUDIODRIVER", "dummy");
+	const bool initialized = SDL_Init(0);
+#else
+	SDL_setenv("SDL_VIDEODRIVER", "dummy", 1);
+	SDL_setenv("SDL_AUDIODRIVER", "dummy", 1);
+	const bool initialized = SDL_Init(0) == 0;
+#endif
+	if (!initialized) {
 		std::cerr << "SDL initialization failed: " << SDL_GetError() << '\n';
 		return 1;
 	}
@@ -544,6 +627,10 @@ int main()
 		CheckInvalidAudio(fixture);
 		std::cout << "PASS " << Checks << " checks; no game assets loaded or player saves accessed\n";
 	} catch (const std::exception &error) {
+		if (gmenu_is_active())
+			gamemenu_off();
+		if (gbSndInited)
+			snd_deinit();
 		std::cerr << "FAIL after " << Checks << " checks: " << error.what() << '\n';
 		SDL_Quit();
 		return 1;

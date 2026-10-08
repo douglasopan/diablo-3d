@@ -4,7 +4,7 @@ O piloto Windows usa **Direct3D 11 dentro do DevilutionX**. A simulação, o map
 
 ## Usar e comparar
 
-Durante a partida: **Esc → Options → Video Options → 3D GPU Rendering**. O menu também contém **3D Edge Smoothing** e a correção de brilho. GPU e suavização são independentes, persistem no INI do perfil e mudam no próximo desenho. Fora da partida, ambos estão em Settings → Graphics. O padrão público é desligado; a preparação de um perfil existente preserva suas escolhas.
+Na revisão atual, durante a partida: **Esc → Configurações → Gráficos → 3D GPU Rendering** (em inglês: Settings → Graphics). O menu também contém **3D Frustum Culling**, **3D Edge Smoothing** e a correção de brilho. A paginação é responsiva: até oito entradas em 960×540 e 18 em 1920×1080, com navegação num rodapé horizontal. GPU e suavização são independentes, persistem no INI do perfil e mudam no próximo desenho. Fora da partida, ambos estão em Settings → Graphics. O padrão público da GPU é desligado; a preparação de um perfil existente preserva suas escolhas. O antigo caminho Options → Video Options pertence às revisões anteriores.
 
 F4 habilita a visualização de Tristram. Gire a câmera para ver a reconstrução; Home restaura a imagem original. O HUD identifica GPU ativa, CPU selecionada ou fallback. Quando o backend falha, a imagem inteira é refeita pela CPU; nunca se publica cor de um frame com seleção/profundidade de outro. Desligar e ligar a opção permite uma nova tentativa; recarregar os recursos também libera o bloqueio.
 
@@ -12,14 +12,14 @@ O recibo do iniciador inclui `3D GPU Rendering` entre dez solicitações gráfic
 
 ## Fronteira implementada
 
-1. `town_view` lê a mesma cena e prepara câmera, triângulos recortados, UVs, materiais, luzes e IDs. A projeção continua ortográfica.
+1. `town_view` lê a mesma cena e prepara câmera isométrica ou perspectiva, triângulos recortados, UVs, materiais, luzes e IDs. Os quatro modos estão documentados em [Câmeras e horizonte](TRISTRAM-HORIZON-CAMERAS.md).
 2. `town_gpu` grava esses triângulos em um buffer por frame e agrupa comandos consecutivos compatíveis. Normais, intensidade direcional, parâmetros de sombra, shade e ID são dados de cada triângulo.
 3. Shaders produzem cor indexada, ID e profundidade em três alvos, com depth test e recortes de opacidade. Índice zero pintado continua opaco quando uma máscara o declara assim. Iluminação importada, fogo e sombras usam as mesmas tabelas e coordenadas da referência CPU.
 4. A ponte atual lê os três alvos de volta. A composição da interface e os acessores de seleção continuam usando os buffers herdados. Em 2×, a redução traz ID e profundidade da mesma subamostra mais próxima; o compositor SDL pode preservar a cor 2× até a saída.
 
 Uma textura de paleta compartilhada elimina trocas de textura para cada cor constante. Nas faces de volumes, o shader une a base sólida e seu sprite recortado em um único passe, incluindo o shade da base. O caminho CPU conserva seus dois passes. Isso reduz comandos sem ordenar novamente faces sobrepostas.
 
-Uploads têm identidade/revisão explícita e copiam os dados emprestados durante a submissão. Caches não usados expiram entre frames. Reset libera dispositivo, texturas e alvos. O mapa estático de sombras ainda é construído/cacheado pela CPU; a amostragem e a iluminação por pixel ocorrem no shader.
+Uploads têm identidade/revisão explícita e copiam os dados emprestados durante a submissão. Texels/máscaras e LUTs de iluminação têm caches separados: a LUT global importada é compartilhada sem duplicar os atlas quando cresce. Recursos usados no quadro ficam protegidos até sua conclusão; descarte respeita o orçamento de payload de 256 MiB. Reset libera dispositivo, texturas e alvos. O mapa estático de sombras ainda é construído/cacheado pela CPU; a amostragem e a iluminação por pixel ocorrem no shader.
 
 ## Validação reproduzível
 
@@ -34,9 +34,9 @@ O primeiro comando usa dados sintéticos. O segundo exige GPU de hardware e dado
 
 Os testes cobrem readback com pitch, máscaras, cor zero, repetição de UV, iluminação, IDs, decal preservando seleção, recursos temporários, resize/reset, persistência dos callbacks reais do menu e retorno CPU → GPU → CPU. A comparação real registra câmeras, densidade, adaptador, comandos e o custo completo de `DrawTownView`, incluindo readback/redução. Esse tempo exclui a interface e a apresentação SDL; não é FPS sustentado da partida.
 
-## Resultado em 8 de outubro de 2026
+## Resultado histórico do piloto em 8 de outubro de 2026
 
-Windows, Intel Core i7-14700, Radeon RX 570 (hardware, sem WARP), mesma cabana/luz locais selecionadas e fogo congelado. Medianas de cinco chamadas mornas por backend na última rodada:
+Windows, Intel Core i7-14700, Radeon RX 570 (hardware, sem WARP), mesma cabana/luz locais selecionadas e fogo congelado. Medianas de cinco chamadas mornas por backend naquela rodada do piloto:
 
 | Viewport/qualidade | CPU | GPU | Limite da comparação |
 | --- | ---: | ---: | --- |
@@ -60,3 +60,33 @@ O executável habitual e o alias de qualidade receberam o mesmo build. O perfil 
 - A suavização conserva o orçamento de 4.194.304 amostras; 1920×1080 recua a 1×. O backend GPU não altera essa política.
 - O alvo GPU também tem limite de 4.194.304 pixels; áreas lógicas maiores usam CPU com motivo explícito. Não se promete suporte GPU a 4K neste incremento.
 - Não adiciona arte HD do Belzebub, novos modelos, escala independente de menus ou renderização dos níveis procedurais. Esses trabalhos seguem seus marcos no [guia de execução](PROJECT-EXECUTION.md).
+
+## Cache e visibilidade em primeira pessoa — 8 de outubro
+
+O diagnóstico com o pacote atual de Tristram reproduziu `GPU texture-cache budget exceeded; reset required` em 1920×1080/FOV 80. A opção solicitava GPU, mas o bloqueio mantinha os quadros seguintes na CPU. A causa era a duplicação da LUT global por textura e dos texels imutáveis quando a revisão da LUT crescia. A correção separa essas identidades, preserva snapshots referenciados pelos comandos do quadro e prepara o albedo visível antes de abrir o frame GPU. Não reduz malhas nem texturas.
+
+O fixture isolado na RX 570 passou 239 verificações, incluindo crescimento/revisões de LUT durante o quadro, máscaras, namespaces privados, pressão de memória, descarte protegido e falha atômica. No caso sintético de nove texturas, LUTs que totalizariam 288 MiB passaram a compartilhar 32 MiB; quadros aquecidos não fizeram uploads de texels/LUT. O orçamento contabiliza payload com padding do cache, não toda a memória do dispositivo. A regressão de perspectiva passou 49.007 verificações.
+
+O descarte conservador de arquitetura usa limites reais do modelo antes de preparar texturas ou percorrer faces; volumes também são rejeitados em perspectiva. A opção **3D Frustum Culling** está ligada por padrão e permite comparação. O cache de limites acompanha a revisão da cena. Sombras direcionais continuam incluindo estruturas fora da câmera. A travessia dos tiles mantém a ordem anterior sem alocar e ordenar a grade a cada quadro.
+
+Na rodada atual **`runtime-r3`**, passaram os **16 casos em 960×540**: quatro modos de câmera × CPU/GPU × suavização desligada/solicitada. Cor, profundidade, seleção e mapa de sombras permaneceram exatos com o descarte ligado/desligado; estado nativo, RNG e reconstrução após reset também foram preservados. Nos quadros GPU aquecidos, os uploads de texels e LUT foram **zero bytes**.
+
+A rodada atual **`first-person-fullhd-r4`** passou em primeira pessoa, **1920×1080/FOV 80**, com hardware efetivo e sem fallback. Os dois casos de suavização tiveram zero upload de texels/LUT nos quadros aquecidos e **191.379.586 bytes de payload no cache**. Nessa câmera, as visitas a triângulos da arquitetura caíram de 82.626 para 54.579. O orçamento mede o payload do cache, incluindo padding, e não toda a memória do dispositivo.
+
+As medianas exploratórias de quatro pares AB/BA nessa rodada ficaram em **419,455 → 377,280 ms** com suavização desligada e **1.125,800 → 985,236 ms** com ela solicitada. A amostragem efetiva foi 1× nos dois casos; Full HD limita a solicitação 2×. A rodada histórica `first-person-fullhd-r3` havia medido 275,8 → 240,4 ms e 263,4 → 229,9 ms, respectivamente. A variação entre rodadas na máquina compartilhada impede tratar essas medidas como uma comparação controlada de versões. São tempos do desenho isolado, sem UI/apresentação SDL; não comprovam FPS sustentado ou uma meta de desempenho atendida.
+
+Evidências atuais privadas: `diagnostics/render-optimization-20261008/runtime-r3` e `diagnostics/render-optimization-20261008/first-person-fullhd-r4`. Evidências históricas preservadas: `runtime-r2`, `first-person-fullhd-r3`, `diagnostics/gpu-shared-lut/20261008-071507` e `perspective-regression-r1`. A revisão foi instalada às 10:45:49 UTC, SHA-256 `a1e218fab604517f409557a5863352633b632f1f83e3f3c449b06393418140c9`, no mesmo iniciador habitual. Recibo: `diagnostics/render-optimization-20261008/installed-20261008T104549Z/receipt.json`; modelos, luz, músicas e saves preservados. O profiling independente confirmou a prioridade seguinte: buffers persistentes e agrupamento de volumes. Readback e hashing das sombras continuam custos conhecidos. LOD, malhas persistentes e materiais novos permanecem planejados, sem integração à partida nesta entrega.
+
+## Qualidade dos masters e evolução de desempenho
+
+A qualidade próxima deve vir do master preservado. Reduzir permanentemente todos os objetos para o orçamento atual não satisfaz esse objetivo. O formato D3DMESH1 atual admite até 20.000 triângulos por arquivo e atlas RGB de até 2048 pixels; não transporta normais suaves, normal maps ou PBR. O piloto GPU transmite triângulos não indexados por quadro e tem seu próprio limite. Portanto, carregar diretamente os 3,49 milhões de triângulos da geometria pré-remesh de Adria exige evolução real do contrato e do renderer; essa fonte também precisa de UV/material antes de substituir o modelo texturizado.
+
+A execução segue estas dependências, sem declarar prontas opções ainda inexistentes:
+
+1. **Rejeição fora da câmera:** implementada, validada e instalada nas rodadas acima, com limites reais por construção antes de preparar texturas e percorrer triângulos, preservando sombras de estruturas fora do quadro. Cor, profundidade e seleção foram comparadas com a opção desligada, em CPU/GPU e nos quatro modos.
+2. **Malhas estáticas na GPU:** buffers de vértices/índices persistentes, normais por vértice e identidade por revisão. Reutilizar geometria e materiais entre instâncias, em vez de reconstruir o upload de todas as faces em cada quadro. Medir CPU, upload, memória e desenho separadamente.
+3. **Contrato de assets e LOD:** master com materiais preservados mais derivados explícitos. Selecionar detalhe por tamanho/erro na tela, com histerese para evitar trocas contínuas. Manter âncora, proporções, aberturas e seleção entre versões; colisão continua nativa. Testar perto/longe e primeira pessoa com imagens comparáveis.
+4. **Carregamento e orçamento de memória:** cache com margem de antecipação e descarregamento gradual por orçamento. Tirar algo do enquadramento não deve provocar sua destruição/reimportação imediata a cada giro da câmera. Oclusão por outros objetos é uma etapa distinta, dependente de medição.
+5. **Controles reais de qualidade:** expor distância/erro de detalhe, texturas, sombras e orçamento somente quando cada recurso existir e tiver limites/fallback verificados. Comparar qualidade e tempo no hardware do jogador antes de escolher padrões.
+
+O [guia oficial do Godot sobre LOD](https://docs.godotengine.org/en/stable/tutorials/3d/mesh_lod.html) descreve o critério em pixels; o runtime DevilutionX precisa implementar seu próprio transporte e seleção. Abrir a cena no Godot não transfere automaticamente esses recursos para o executável do jogo. Essas técnicas viabilizam mais detalhe com trabalho proporcional ao que aparece, sem prometer desempenho ou qualidade de uma produção AAA por uma única opção.

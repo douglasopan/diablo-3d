@@ -170,6 +170,7 @@ void gamemenu_on()
 	} else {
 		gmenu_set_items(sgMultiMenu, nullptr);
 	}
+	gmenu_set_settings_presentation({ nullptr, nullptr, &gamemenu_off, nullptr, 0, true });
 	PressEscKey();
 }
 

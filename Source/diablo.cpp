@@ -842,7 +842,13 @@ void GameEventHandler(const SDL_Event &event, uint16_t modState)
 	case SDL_EVENT_KEY_DOWN:
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 		if (event.key.repeat) {
-			const auto *action = options.Keymapper.findAction(static_cast<uint32_t>(SDLC_EventKey(event)));
+			SDL_Keycode code = SDLC_EventKey(event);
+			remap_keyboard_key(&code);
+			uint32_t key = static_cast<uint32_t>(code);
+			// Match the letter normalization in KeymapperPress.
+			if (key >= SDLK_A && key <= SDLK_Z)
+				key -= 'a' - 'A';
+			const auto *action = options.Keymapper.findAction(key);
 			if (action != nullptr && (action->key == "ToggleTown3D" || action->key == "Town3DCameraMode"))
 				return;
 		}
@@ -1961,6 +1967,20 @@ uint32_t GetGameId()
 void InitKeymapActions()
 {
 	Options &options = GetOptions();
+	// Load this new default first so existing custom bindings keep priority.
+	options.Keymapper.AddAction(
+	    "Town3DCameraMode",
+	    N_("Cycle Tristram camera mode"),
+	    N_("Cycle and save the Isometric, Free Orbit, Third Person and First Person camera preference. Movement and combat keep their native controls."),
+	    'K',
+	    [] {
+		    ReleaseTownCameraDrag();
+		    CycleTownViewCameraMode();
+		    ResetItemlabelHighlighted();
+		    RedrawEverything();
+	    },
+	    nullptr,
+	    [] { return CanControlTownCamera(false); });
 	for (uint32_t i = 0; i < 8; ++i) {
 		options.Keymapper.AddAction(
 		    "BeltItem{}",
@@ -2058,19 +2078,6 @@ void InitKeymapActions()
 	    },
 	    nullptr,
 	    [] { return CanUseTownCamera(); });
-	options.Keymapper.AddAction(
-	    "Town3DCameraMode",
-	    N_("Cycle Tristram camera mode"),
-	    N_("Cycle and save the Isometric, Free Orbit, Third Person and First Person camera preference. Movement and combat keep their native controls."),
-	    SDLK_UNKNOWN,
-	    [] {
-		    ReleaseTownCameraDrag();
-		    CycleTownViewCameraMode();
-		    ResetItemlabelHighlighted();
-		    RedrawEverything();
-	    },
-	    nullptr,
-	    [] { return CanControlTownCamera(false); });
 	options.Keymapper.AddAction(
 	    "Town3DRotateLeft",
 	    N_("Rotate Tristram camera left"),

@@ -581,6 +581,8 @@ struct GraphicsOptions : OptionCategoryBase {
 	OptionEntryBoolean townViewStartIn3D;
 	/** @brief Request the GPU town backend on the next draw, with CPU fallback. */
 	OptionEntryBoolean townViewGpuRendering;
+	/** @brief Skip offscreen architecture before material and triangle preparation. */
+	OptionEntryBoolean townViewFrustumCulling;
 	/** @brief Optional smoothing of reconstructed 3D world edges, independent of UI. */
 	OptionEntryBoolean townViewAntialiasing;
 	/** @brief Saved 3D camera mode; Home restores the session view without changing this preference. */

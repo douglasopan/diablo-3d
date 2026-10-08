@@ -85,12 +85,20 @@ struct TMenuItem {
 
 extern DVL_API_FOR_TEST TMenuItem *sgpCurrentMenu;
 
+inline constexpr size_t GMenuSettingsMaxContentRows = 18;
+
 /** @brief Optional presentation for settings pages. All text is already translated and owned by the caller. */
 struct GMenuSettingsPresentation {
 	const char *title = nullptr;
 	std::string_view (*describe)(size_t row) = nullptr;
 	void (*back)() = nullptr;
 	void (*page)(bool next) = nullptr;
+	/** @brief Final entries share one horizontal footer. */
+	size_t navigationItems = 0;
+	/** @brief Preserve the pause logo, native item translations and large selection spinners. */
+	bool pauseMenu = false;
+	/** @brief Input capture owns controller navigation until its handler finishes or cancels. */
+	bool lockNavigation = false;
 };
 
 /** @brief Shared compact settings geometry for rendering, input and finite diagnostics. */
@@ -98,20 +106,37 @@ struct GMenuSettingsGeometry {
 	Rectangle panel;
 	Rectangle title;
 	Rectangle items;
+	Rectangle navigation;
 	Rectangle description;
 	int rowHeight;
 	size_t rows;
+	size_t contentRows;
+	size_t navigationItems;
+	int fontSize;
+	int titleFontSize;
+	int descriptionFontSize;
 
 	[[nodiscard]] Rectangle row(size_t index) const
 	{
 		if (index >= rows)
 			return { { 0, 0 }, { 0, 0 } };
+		if (index >= contentRows) {
+			const int column = static_cast<int>(index - contentRows);
+			const int count = static_cast<int>(navigationItems);
+			const int left = navigation.position.x + navigation.size.width * column / count;
+			const int right = navigation.position.x + navigation.size.width * (column + 1) / count;
+			return { { left, navigation.position.y }, { right - left, navigation.size.height } };
+		}
 		return { { items.position.x, items.position.y + static_cast<int>(index) * rowHeight }, { items.size.width, rowHeight } };
 	}
 };
 
-/** @brief At most eight rows (32px, or 46px with sliders), limited to the space above the HUD. */
-[[nodiscard]] GMenuSettingsGeometry gmenu_settings_geometry(Size screenSize, int mainPanelTop, size_t rowCount, bool containsSlider = false);
+/** @brief Native font tiers and a shared footer, bounded by screen/HUD and eighteen content rows. */
+[[nodiscard]] GMenuSettingsGeometry gmenu_settings_geometry(Size screenSize, int mainPanelTop, size_t rowCount, bool containsSlider = false, size_t navigationItems = 0);
+/** @brief Content capacity with room for both page actions and Back. */
+[[nodiscard]] size_t gmenu_settings_page_size(Size screenSize, int mainPanelTop);
+/** @brief Geometry currently used by rendering/input, including the pause menu presentation. */
+[[nodiscard]] GMenuSettingsGeometry gmenu_get_settings_geometry();
 
 void gmenu_draw_pause(const Surface &out);
 void FreeGMenu();

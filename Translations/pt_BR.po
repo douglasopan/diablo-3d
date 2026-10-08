@@ -12547,3 +12547,18 @@ msgstr "Esta combinação de botões está indisponível."
 #: Source/ingame_settings.cpp
 msgid "Next Page"
 msgstr "Próxima página"
+
+#: Source/options.cpp
+msgid "3D Frustum Culling"
+msgstr "Ignorar construções fora da câmera 3D"
+
+#: Source/options.cpp
+msgid "Skip buildings outside the 3D camera view without reducing model detail. Shadows remain active. Saved changes apply on the next frame."
+msgstr "Não processa construções fora da câmera 3D, preservando o detalhe dos modelos e suas sombras. A alteração é salva e vale no próximo quadro."
+#: Source/diablo.cpp
+msgid "Cycle Tristram camera mode"
+msgstr "Alternar modo de câmera de Tristram"
+
+#: Source/diablo.cpp
+msgid "Cycle and save the Isometric, Free Orbit, Third Person and First Person camera preference. Movement and combat keep their native controls."
+msgstr "Alterna e salva a preferência de câmera entre Isométrica, Órbita Livre, Terceira Pessoa e Primeira Pessoa. Movimento e combate mantêm os controles nativos."

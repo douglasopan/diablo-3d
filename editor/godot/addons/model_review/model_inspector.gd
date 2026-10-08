@@ -656,7 +656,7 @@ func _update_info() -> void:
 	if selected.get("runtime", []).is_empty(): content += "Este GLB está preservado para revisão e não consta aplicado no perfil habitual.\n"
 	for warning in selected.get("warnings", []): content += "[color=#d6bd89]• " + str(warning) + "[/color]\n"
 	for error in errors: content += "[color=#e3a791]• " + error + "[/color]\n"
-	content += "\nGLB: PBR original disponível. D3D: RGB + UV; sem normal, roughness, metalness, rig ou clipes.\nA paleta de 256 cores e os 64 níveis de luz do jogo não são simulados neste visor.\nO modo ‘mesma altura’ usa apenas escala uniforme de visualização, sem alterar os arquivos."
+	content += "\nGLB: atributos presentes na fonte; PBR somente quando fornecido. D3D: RGB + UV; sem normal, roughness, metalness, rig ou clipes.\nA paleta de 256 cores e os 64 níveis de luz do jogo não são simulados neste visor.\nO modo ‘mesma altura’ usa apenas escala uniforme de visualização, sem alterar os arquivos."
 	info.text = content
 	var provenance := "[b]GLB original[/b]\n" + str(selected.get("glb", {}).get("path", "")) + "\nSHA-256: " + str(selected.get("sha256", "")) + "\n\n[b]Revisão e estado[/b]\n" + str(selected.get("revision", "")) + "\n" + str(selected.get("status", "")) + "\n\n[b]Cópias idênticas[/b]\n"
 	for alias in selected.get("aliases", []): provenance += str(alias) + "\n"

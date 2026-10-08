@@ -3,12 +3,14 @@
 #include <algorithm>
 #include <array>
 #include <string>
+#include <utility>
 #include <vector>
 
 #ifdef USE_SDL3
 #include <SDL3/SDL_timer.h>
 #endif
 
+#include "control/control.hpp"
 #include "controls/controller.h"
 #include "controls/control_mode.hpp"
 #include "controls/controller_motion.h"
@@ -38,8 +40,9 @@
 namespace devilution {
 namespace {
 
-constexpr size_t EntriesPerPage = 5;
-enum class View { Categories, Entries, Values, Details, Binding, Slider };
+constexpr size_t MaxEntriesPerPage = GMenuSettingsMaxContentRows;
+size_t EntriesPerPage = 5;
+enum class View { Categories, Entries, Values, Binding, Slider };
 enum class Special { None, MusicVolume, SoundVolume, CuesVolume, Gamma, Speed };
 struct Entry {
 	OptionEntryBase *option;
@@ -57,17 +60,18 @@ size_t EntryPage = 0;
 size_t ValuePage = 0;
 std::vector<OptionCategoryBase *> Categories;
 std::vector<Entry> Entries;
-std::array<TMenuItem, EntriesPerPage + 4> Menu;
-std::array<std::string, EntriesPerPage + 3> Labels;
-std::array<std::string, EntriesPerPage + 3> Values;
-std::array<std::string, EntriesPerPage + 3> Descriptions;
+std::array<TMenuItem, MaxEntriesPerPage + 4> Menu;
+std::array<std::string, MaxEntriesPerPage + 3> Labels;
+std::array<std::string, MaxEntriesPerPage + 3> Values;
+std::array<std::string, MaxEntriesPerPage + 3> Descriptions;
 std::string Title;
 std::string Notice;
 ControllerButtonCombo PadCombo;
 uint32_t CaptureStarted = 0;
 SDL_Keycode PendingKeyRelease = SDLK_UNKNOWN;
 uint8_t PendingMouseRelease = 0;
-size_t ReturnRow = 0;
+size_t ReturnEntryIndex = 0;
+size_t ReturnCategoryIndex = 0;
 
 void Show(size_t focus = 0);
 void Back();
@@ -109,14 +113,59 @@ std::string_view LockReason(const Entry &entry)
 	return {};
 }
 
-std::string_view Application(const Entry &entry)
+bool IsInactiveDuringPlay(const OptionEntryBase *option)
 {
 	const Options &options = GetOptions();
-	if (Category == &options.StartUp)
-		return _("Applies the next time the game starts.");
-	if (entry.option == &options.Graphics.townViewStartIn3D || entry.option == &options.Gameplay.runInTown
-	    || entry.option == &options.Gameplay.friendlyFire || entry.option == &options.Gameplay.multiplayerFullQuests)
-		return _("Saved for the next game session.");
+	return option == &options.Graphics.townViewStartIn3D || option == &options.Gameplay.runInTown
+	    || option == &options.Gameplay.friendlyFire || option == &options.Gameplay.multiplayerFullQuests
+	    // Party information has no solo effect and is locked in multiplayer.
+	    || option == &options.Gameplay.showMultiplayerPartyInfo;
+}
+
+bool IsEditable(const Entry &entry, const OptionCategoryBase *category)
+{
+	const Options &options = GetOptions();
+	if (category == &options.StartUp || (!gbSndInited && (category == &options.Audio || category == &options.Music)))
+		return false;
+	if (!LockReason(entry).empty())
+		return false;
+	if (entry.special != Special::None)
+		return true;
+	if (!IsVisible(*entry.option) || IsInactiveDuringPlay(entry.option))
+		return false;
+	return entry.option->GetType() != OptionEntryType::List
+	    || static_cast<const OptionEntryListBase *>(entry.option)->GetListSize() > 1;
+}
+
+std::vector<Entry> EditableEntries(OptionCategoryBase *category)
+{
+	Options &options = GetOptions();
+	// These preferences affect boot/session initialization only. Keep them in
+	// the main Settings; the in-game list contains usable controls exclusively.
+	if (category == &options.StartUp || (!gbSndInited && (category == &options.Audio || category == &options.Music)))
+		return {};
+	std::vector<Entry> entries;
+	const auto add = [&entries, category](Entry entry) {
+		if (IsEditable(entry, category))
+			entries.push_back(entry);
+	};
+	if (category == &options.Audio) {
+		add({ &options.Audio.musicVolume, Special::MusicVolume });
+		add({ &options.Audio.soundVolume, Special::SoundVolume });
+		add({ &options.Audio.audioCuesVolume, Special::CuesVolume });
+	} else if (category == &options.Graphics) {
+		add({ &options.Graphics.brightness, Special::Gamma });
+	} else if (category == &options.Gameplay) {
+		add({ &options.Gameplay.tickRate, Special::Speed });
+	}
+	for (auto *option : category->GetEntries())
+		add({ option });
+	return entries;
+}
+
+std::string_view Application()
+{
+	const Options &options = GetOptions();
 	if (Category == &options.Music)
 		return _("Changes the current location immediately; other locations use the choice when entered.");
 	return _("Applies immediately.");
@@ -136,7 +185,7 @@ std::string EntryDescription(const Entry &entry)
 	const auto reason = LockReason(entry);
 	// Put application/lock information first so even a two-line description
 	// reserve at 480p cannot hide the reason behind a long option description.
-	return std::string(reason.empty() ? Application(entry) : reason).append("\n").append(text);
+	return std::string(reason.empty() ? Application() : reason).append("\n").append(text);
 }
 
 std::string_view EntryName(const Entry &entry)
@@ -191,8 +240,7 @@ void BuildCategories()
 		&options.Music, &options.Graphics, &options.Audio, &options.Gameplay, &options.Keymapper, &options.Padmapper
 	};
 	const auto add = [](OptionCategoryBase *category) {
-		const auto entries = category->GetEntries();
-		if (std::any_of(entries.begin(), entries.end(), [](const auto *entry) { return IsVisible(*entry); }))
+		if (!EditableEntries(category).empty())
 			Categories.push_back(category);
 	};
 	for (auto *category : priority)
@@ -205,21 +253,7 @@ void BuildCategories()
 
 void BuildEntries()
 {
-	Entries.clear();
-	Options &options = GetOptions();
-	if (Category == &options.Audio) {
-		Entries.push_back({ &options.Audio.musicVolume, Special::MusicVolume });
-		Entries.push_back({ &options.Audio.soundVolume, Special::SoundVolume });
-		Entries.push_back({ &options.Audio.audioCuesVolume, Special::CuesVolume });
-	} else if (Category == &options.Graphics) {
-		Entries.push_back({ &options.Graphics.brightness, Special::Gamma });
-	} else if (Category == &options.Gameplay) {
-		Entries.push_back({ &options.Gameplay.tickRate, Special::Speed });
-	}
-	for (auto *option : Category->GetEntries()) {
-		if (IsVisible(*option))
-			Entries.push_back({ option });
-	}
+	Entries = EditableEntries(Category);
 }
 
 std::string_view Describe(size_t row)
@@ -235,9 +269,13 @@ void RowHandler(bool activate)
 	SelectRow(Row, activate);
 }
 
-constexpr std::array<void (*)(bool), EntriesPerPage> RowHandlers {
-	&RowHandler<0>, &RowHandler<1>, &RowHandler<2>, &RowHandler<3>, &RowHandler<4>
-};
+template <size_t... Rows>
+constexpr auto MakeRowHandlers(std::index_sequence<Rows...>)
+{
+	return std::array<void (*)(bool), sizeof...(Rows)> { &RowHandler<Rows>... };
+}
+
+constexpr auto RowHandlers = MakeRowHandlers(std::make_index_sequence<MaxEntriesPerPage> {});
 
 void PreviousPage(bool) { ChangePage(false); }
 void NextPage(bool) { ChangePage(true); }
@@ -258,8 +296,17 @@ void StopCapture()
 	PadCombo = ControllerButton_NONE;
 }
 
+size_t PageCapacity()
+{
+	return std::clamp(gmenu_settings_page_size({ gnScreenWidth, gnScreenHeight }, GetMainPanel().position.y), size_t { 1 }, MaxEntriesPerPage);
+}
+
 void UpdateCapture()
 {
+	if (EntriesPerPage != PageCapacity()) {
+		Show(gmenu_selected_index());
+		return;
+	}
 	if (!Capturing)
 		return;
 	// The menu's stick navigation must not move focus during binding capture.
@@ -296,9 +343,45 @@ void ConfigureSlider()
 
 void Show(size_t focus)
 {
+	const size_t capacity = PageCapacity();
+	if (capacity != EntriesPerPage) {
+		size_t *page = nullptr;
+		size_t total = 0;
+		switch (CurrentView) {
+		case View::Categories: page = &CategoryPage; total = Categories.size(); break;
+		case View::Entries: page = &EntryPage; total = Entries.size(); break;
+		case View::Values: page = &ValuePage; total = static_cast<OptionEntryListBase *>(Selected.option)->GetListSize(); break;
+		default: break;
+		}
+		// Resize preserves the selected content's absolute index. Navigation
+		// buttons clamp to the final content row of the old page.
+		const size_t selected = page != nullptr
+		    ? std::min(*page * EntriesPerPage + std::min(focus, EntriesPerPage - 1), std::max(total, size_t { 1 }) - 1)
+		    : 0;
+		CategoryPage = CategoryPage * EntriesPerPage / capacity;
+		EntryPage = EntryPage * EntriesPerPage / capacity;
+		ValuePage = ValuePage * EntriesPerPage / capacity;
+		EntriesPerPage = capacity;
+		if (page != nullptr) {
+			*page = selected / EntriesPerPage;
+			focus = selected % EntriesPerPage;
+		}
+	}
+	if (CurrentView != View::Categories && EditableEntries(Category).empty()) {
+		StopCapture();
+		CurrentView = View::Categories;
+		focus = 0;
+	}
+	if (IsAnyOf(CurrentView, View::Values, View::Binding, View::Slider) && !IsEditable(Selected, Category)) {
+		StopCapture();
+		CurrentView = View::Entries;
+		EntryPage = ReturnEntryIndex / EntriesPerPage;
+		focus = ReturnEntryIndex % EntriesPerPage;
+	}
 	for (size_t row = 0; row < Descriptions.size(); ++row)
 		Descriptions[row].clear();
 	size_t count = 0;
+	size_t navigationItems = 1;
 	size_t total = 0;
 	size_t *page = nullptr;
 	switch (CurrentView) {
@@ -318,10 +401,6 @@ void Show(size_t focus)
 		Title = Selected.option->GetName();
 		page = &ValuePage;
 		total = static_cast<OptionEntryListBase *>(Selected.option)->GetListSize();
-		break;
-	case View::Details:
-		Title = Selected.option->GetName();
-		AddRow(count++, _("Previous Menu"), EntryValue(Selected), EntryDescription(Selected), &PreviousMenu);
 		break;
 	case View::Binding: {
 		Title = Selected.option->GetName();
@@ -353,10 +432,7 @@ void Show(size_t focus)
 				AddRow(count, category->GetName(), {}, category->GetDescription(), RowHandlers[count]);
 			} else if (CurrentView == View::Entries) {
 				const Entry &entry = Entries[i];
-				std::string value = EntryValue(entry);
-				if (!LockReason(entry).empty())
-					value.append(" · ").append(_("Unavailable during play"));
-				AddRow(count, EntryName(entry), value, EntryDescription(entry), RowHandlers[count]);
+				AddRow(count, EntryName(entry), EntryValue(entry), EntryDescription(entry), RowHandlers[count]);
 			} else {
 				auto *option = static_cast<OptionEntryListBase *>(Selected.option);
 				AddRow(count, option->GetListDescription(i), i == ShownListIndex(*option) ? "*" : "", EntryDescription(Selected), RowHandlers[count]);
@@ -364,6 +440,7 @@ void Show(size_t focus)
 			++count;
 		}
 		if (pages > 1) {
+			navigationItems = 3;
 			Title.append(" (").append(std::to_string(*page + 1)).append("/").append(std::to_string(pages)).append(")");
 			AddRow(count++, _("Previous Page"), {}, {}, &PreviousPage);
 			AddRow(count++, _("Next Page"), {}, {}, &NextPage);
@@ -372,7 +449,7 @@ void Show(size_t focus)
 	}
 	Menu[count] = { GMENU_ENABLED, nullptr, nullptr };
 	gmenu_set_items(Menu.data(), &UpdateCapture);
-	gmenu_set_settings_presentation({ Title.c_str(), &Describe, &Back, &ChangePage });
+	gmenu_set_settings_presentation({ Title.c_str(), &Describe, &Back, &ChangePage, navigationItems, false, Capturing });
 	gmenu_select_index(std::min(focus, count - 1));
 }
 
@@ -407,11 +484,13 @@ void Back()
 	}
 	if (CurrentView == View::Entries) {
 		CurrentView = View::Categories;
-		Show();
+		CategoryPage = ReturnCategoryIndex / EntriesPerPage;
+		Show(ReturnCategoryIndex % EntriesPerPage);
 		return;
 	}
 	CurrentView = View::Entries;
-	Show(ReturnRow);
+	EntryPage = ReturnEntryIndex / EntriesPerPage;
+	Show(ReturnEntryIndex % EntriesPerPage);
 }
 
 void ApplySlider(bool activate)
@@ -465,17 +544,22 @@ void SelectRow(size_t row, bool activate)
 		return;
 	switch (CurrentView) {
 	case View::Categories:
-		Category = Categories[CategoryPage * EntriesPerPage + row];
+		ReturnCategoryIndex = CategoryPage * EntriesPerPage + row;
+		Category = Categories[ReturnCategoryIndex];
 		EntryPage = 0;
 		CurrentView = View::Entries;
 		Show();
 		break;
 	case View::Entries: {
 		Selected = Entries[EntryPage * EntriesPerPage + row];
-		ReturnRow = row;
-		if (!LockReason(Selected).empty()) {
-			CurrentView = View::Details;
-		} else if (Selected.special != Special::None) {
+		ReturnEntryIndex = EntryPage * EntriesPerPage + row;
+		// Availability can change after building the page (for example audio
+		// initialization). Never turn a stale row into a read-only dialog.
+		if (!IsEditable(Selected, Category)) {
+			Show(row);
+			return;
+		}
+		if (Selected.special != Special::None) {
 			CurrentView = View::Slider;
 		} else if (Selected.option->GetType() == OptionEntryType::Boolean) {
 			auto *option = static_cast<OptionEntryBoolean *>(Selected.option);
@@ -503,7 +587,7 @@ void SelectRow(size_t row, bool activate)
 	}
 	case View::Values: {
 		// Recheck restrictions at dispatch, not only while building the view.
-		if (!LockReason(Selected).empty()) { Back(); break; }
+		if (!IsEditable(Selected, Category)) { Back(); break; }
 		auto *option = static_cast<OptionEntryListBase *>(Selected.option);
 		const size_t index = ValuePage * EntriesPerPage + row;
 		if (index < option->GetListSize()) {
@@ -628,6 +712,10 @@ bool CaptureEvent(const SDL_Event &event)
 
 void SettingsEventHandler(const SDL_Event &event, uint16_t modState)
 {
+	// Window changes may arrive between draws. Rebuild the page before any
+	// click/key can use a geometry with a different capacity than its table.
+	if (EntriesPerPage != PageCapacity())
+		Show(gmenu_selected_index());
 	if (event.type == SDL_EVENT_KEY_DOWN && PendingKeyRelease != SDLK_UNKNOWN && SDLC_EventKey(event) == PendingKeyRelease)
 		return;
 	if (event.type == SDL_EVENT_KEY_UP && PendingKeyRelease != SDLK_UNKNOWN && SDLC_EventKey(event) == PendingKeyRelease) {
@@ -699,6 +787,7 @@ void OpenInGameSettings()
 	PendingKeyRelease = SDLK_UNKNOWN;
 	PendingMouseRelease = 0;
 	CategoryPage = EntryPage = ValuePage = 0;
+	ReturnEntryIndex = ReturnCategoryIndex = 0;
 	Category = nullptr;
 	Selected = { nullptr };
 	CurrentView = View::Categories;

@@ -39,10 +39,10 @@ PARAMETERS = {
     "image_enhancement": False,
     "should_texture": True,
     "texture_resolution": "4k",
-    "enable_pbr": False,
-    "should_remesh": True,
-    "target_polycount": 3000,
-    "topology": "triangle",
+    "enable_pbr": True,
+    # Preserve a textured high-quality master. Decimated outputs belong to a
+    # separate, visually reviewed LOD operation, never the default generation.
+    "should_remesh": False,
     "save_pre_remeshed_model": True,
     "target_formats": ["glb", "obj"],
     "multi_view_thumbnails": True,

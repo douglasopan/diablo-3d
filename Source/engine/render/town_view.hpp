@@ -13,6 +13,7 @@ namespace devilution {
 
 struct Surface;
 struct TownVolumeMesh;
+struct TownSceneModel;
 
 /** Rotatable view of the live Tristram map. */
 bool IsTownViewActive();
@@ -69,6 +70,29 @@ struct TownViewRendererState {
 	size_t cpuShadedFragments = 0;
 };
 TownViewRendererState GetTownViewRendererState();
+/** Real assembled world geometry, including interior and every flame pose.
+ * Invalid/empty bounds are retained conservatively by the visibility test. */
+struct TownArchitectureBounds {
+	TownCameraPoint minimum;
+	TownCameraPoint maximum;
+	bool valid = false;
+};
+TownArchitectureBounds BuildTownArchitectureBounds(const TownSceneModel &model);
+/** Conservative six-plane test before perspective division. Touching, near/eye
+ * crossings and boxes surrounding the camera remain eligible for clipping. */
+bool IsTownArchitectureBoundsVisible(const TownCameraFrame &frame, const TownArchitectureBounds &bounds);
+/** Last architecture pass; boundsComputed counts cold work in this frame,
+ * including a possible GPU attempt before CPU fallback. No mesh LOD is implied. */
+struct TownViewArchitectureCullingState {
+	bool requested = false;
+	size_t modelsConsidered = 0;
+	size_t modelsSubmitted = 0;
+	size_t modelsCulled = 0;
+	size_t trianglesVisited = 0;
+	size_t boundsComputed = 0;
+	size_t cachedBounds = 0;
+};
+TownViewArchitectureCullingState GetTownViewArchitectureCullingState();
 /** Borrowed world-only 2x image, or nullptr when its draw epoch is stale. */
 const Surface *GetTownViewHighResolutionFrame();
 bool BeginTownViewCameraDrag(Point screen, bool pan = false);

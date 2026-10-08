@@ -21,6 +21,7 @@ struct Position {
 };
 
 std::vector<TownSceneModel> Scene;
+uint64_t SceneRevision = 0;
 
 struct Builder {
 	TownSceneModel model;
@@ -1360,6 +1361,11 @@ const std::vector<TownSceneModel> &GetTownScene()
 	return Scene;
 }
 
+uint64_t GetTownSceneRevision()
+{
+	return SceneRevision;
+}
+
 bool TownSceneReplacesTile(Point tile)
 {
 	if (tile.x == 25 && (tile.y == 29 || tile.y == 30))
@@ -1392,6 +1398,7 @@ bool TownSceneReplacesTile(Point tile)
 
 void ResetTownScene()
 {
+	++SceneRevision;
 	Scene.clear();
 	ResetTownEditorMapAudit();
 }

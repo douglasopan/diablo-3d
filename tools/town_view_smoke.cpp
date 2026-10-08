@@ -68,6 +68,8 @@
 #include "town_cabin_light_gpu_checks.hpp"
 #include "town_camera_runtime_entry.hpp"
 #include "town_camera_capture_checks.hpp"
+#include "town_architecture_culling_checks.hpp"
+#include "ingame_menu_visual_checks.hpp"
 
 namespace {
 using namespace devilution;
@@ -4139,31 +4141,42 @@ void CheckGpuVideoOptions()
 	GetOptions().Graphics.townViewAntialiasing.SetValue(false);
 	SaveOptions();
 	const auto state = NativeSceneState();
+	const auto find = [](std::string label) {
+		for (size_t page = 0; page < 64; ++page) {
+			size_t next = GMenuSettingsMaxContentRows + 4;
+			for (size_t row = 0; row <= GMenuSettingsMaxContentRows + 3; ++row) {
+				if (sgpCurrentMenu[row].fnMenu == nullptr)
+					break;
+				if (sgpCurrentMenu[row].enabled() && sgpCurrentMenu[row].pszStr == label)
+					return row;
+				if (sgpCurrentMenu[row].enabled() && std::string_view(sgpCurrentMenu[row].pszStr) == _("Next Page"))
+					next = row;
+			}
+			if (next > GMenuSettingsMaxContentRows + 3)
+				break;
+			sgpCurrentMenu[next].fnMenu(true);
+		}
+		throw std::runtime_error("GPU menu option is not reachable: " + label);
+	};
 	gamemenu_on();
-	Check(sgpCurrentMenu != nullptr && sgpCurrentMenu[0].fnMenu != nullptr, "open the real headless game Options menu");
+	Check(sgpCurrentMenu != nullptr && sgpCurrentMenu[0].fnMenu != nullptr, "open the real headless game Settings menu");
 	sgpCurrentMenu[0].fnMenu(true);
-	Check(sgpCurrentMenu[2].fnMenu != nullptr && sgpCurrentMenu[4].fnMenu != nullptr && sgpCurrentMenu[5].fnMenu == nullptr,
-	    "Options retains five rows with Video at the old Gamma position");
-	sgpCurrentMenu[2].fnMenu(true);
-	Check(sgpCurrentMenu[0].fnMenu != nullptr && sgpCurrentMenu[1].fnMenu != nullptr
-	        && sgpCurrentMenu[2].isSlider() && sgpCurrentMenu[3].fnMenu != nullptr && sgpCurrentMenu[4].fnMenu == nullptr,
-	    "Video exposes GPU, smoothing, Gamma and Previous without overflowing the legacy menu");
-	sgpCurrentMenu[0].fnMenu(true);
-	sgpCurrentMenu[1].fnMenu(true);
+	sgpCurrentMenu[find(std::string(GetOptions().Graphics.GetName()))].fnMenu(true);
+	sgpCurrentMenu[find(std::string(GetOptions().Graphics.townViewGpuRendering.GetName()))].fnMenu(true);
+	sgpCurrentMenu[find(std::string(GetOptions().Graphics.townViewAntialiasing.GetName()))].fnMenu(true);
 	Check(*GetOptions().Graphics.townViewGpuRendering && *GetOptions().Graphics.townViewAntialiasing,
-	    "real Video callbacks enable GPU and smoothing independently");
+	    "real paginated Graphics callbacks enable GPU and smoothing independently");
 	GetOptions().Graphics.townViewGpuRendering.SetValue(false);
 	GetOptions().Graphics.townViewAntialiasing.SetValue(false);
 	LoadOptions();
 	Check(*GetOptions().Graphics.townViewGpuRendering && *GetOptions().Graphics.townViewAntialiasing,
 	    "Video callbacks persist both switches immediately to the isolated diagnostic INI");
-	sgpCurrentMenu[0].fnMenu(false);
+	sgpCurrentMenu[find(std::string(GetOptions().Graphics.townViewGpuRendering.GetName()))].fnMenu(false);
 	Check(*GetOptions().Graphics.townViewGpuRendering, "a non-activation menu callback cannot toggle GPU rendering");
-	sgpCurrentMenu[0].fnMenu(true);
+	sgpCurrentMenu[find(std::string(GetOptions().Graphics.townViewGpuRendering.GetName()))].fnMenu(true);
 	Check(!*GetOptions().Graphics.townViewGpuRendering && *GetOptions().Graphics.townViewAntialiasing,
 	    "disabling GPU preserves the independent smoothing preference");
-	sgpCurrentMenu[3].fnMenu(true);
-	Check(sgpCurrentMenu[5].fnMenu == nullptr && sgpCurrentMenu[2].fnMenu != nullptr, "Video Previous returns to the five-row Options menu");
+	Check(gmenu_presskeys(SDLK_ESCAPE) && IsInGameSettingsOpen(), "Graphics Escape returns to the shared settings categories");
 	gamemenu_off();
 	LoadOptions();
 	Check(!*GetOptions().Graphics.townViewGpuRendering && *GetOptions().Graphics.townViewAntialiasing
@@ -4665,6 +4678,9 @@ int main(int argc, char **argv)
 	const bool gpu = argc == 5 && std::string(argv[4]) == "--gpu";
 	const bool camera = argc == 5 && std::string(argv[4]) == "--camera";
 	const bool cameraExtra = argc == 5 && std::string(argv[4]) == "--camera-extra";
+	const bool architectureCulling = argc == 5 && std::string(argv[4]) == "--architecture-culling";
+	const bool firstPersonPerformance = argc == 5 && std::string(argv[4]) == "--first-person-performance";
+	const bool ingameMenuVisual = argc == 5 && std::string(argv[4]) == "--ingame-menu-visual";
 	const bool cabinOpenings = argc == 5 && std::string(argv[4]) == "--cabin-openings";
 	const bool cabinReview = argc == 5 && std::string(argv[4]) == "--cabin-review";
 	const bool editorSnapshot = argc == 5 && std::string(argv[4]) == "--editor-snapshot";
@@ -4672,8 +4688,8 @@ int main(int argc, char **argv)
 	const bool layers = argc == 3 && std::string(argv[1]) == "--presentation-layers";
 	const bool gpuFixtures = argc == 3 && std::string(argv[1]) == "--gpu-fixtures";
 	const bool synthetic = layers || gpuFixtures;
-	if (argc != 4 && !presentation && !quality && !gpu && !camera && !cameraExtra && !cabinOpenings && !cabinReview && !editorSnapshot && !editorChecks && !synthetic) {
-		std::cerr << "Usage: town_view_smoke <game-data-directory> <built-assets-directory> <capture-directory> [--presentation|--quality|--gpu|--camera|--camera-extra|--cabin-openings|--cabin-review|--editor-snapshot|--editor-map-checks]\n"
+	if (argc != 4 && !presentation && !quality && !gpu && !camera && !cameraExtra && !architectureCulling && !firstPersonPerformance && !ingameMenuVisual && !cabinOpenings && !cabinReview && !editorSnapshot && !editorChecks && !synthetic) {
+		std::cerr << "Usage: town_view_smoke <game-data-directory> <built-assets-directory> <capture-directory> [--presentation|--quality|--gpu|--camera|--camera-extra|--architecture-culling|--first-person-performance|--ingame-menu-visual|--cabin-openings|--cabin-review|--editor-snapshot|--editor-map-checks]\n"
 		          << "       town_view_smoke --presentation-layers <synthetic-capture-directory>\n"
 		          << "       town_view_smoke --gpu-fixtures <synthetic-capture-directory>\n";
 		return 2;
@@ -4732,6 +4748,29 @@ int main(int argc, char **argv)
 				std::filesystem::create_directories(directory);
 				RunTownCameraCaptureChecks(out, Check, NativeSceneState, ViewportPixels, SavePng, directory, std::cout, useGpu);
 			}
+			FreeTownerGFX();
+		}
+		else if (architectureCulling || firstPersonPerformance) {
+			size_t checks = 0;
+			Check(RunTownArchitectureCullingChecks(std::cout, checks), "conservative architecture bounds and frustum fixtures pass");
+			InitializeTownDiagnostic();
+			gnScreenWidth = firstPersonPerformance ? 1920 : 960;
+			gnScreenHeight = firstPersonPerformance ? 1080 : 540;
+			CalculatePanelAreas();
+			CalcViewportGeometry();
+			OwnedSurface out(gnScreenWidth, gnScreenHeight);
+			SDL_SetPaletteColors(out.surface->format->palette, logical_palette.data(), 0, 256);
+			if (firstPersonPerformance) {
+				GetOptions().Graphics.townViewCameraFov.SetValue(80);
+				RunTownArchitectureCullingCaptureChecks(out, Check, NativeSceneState, ViewportPixels, std::cout, true, 3);
+			} else {
+				for (const bool useGpu : { false, true })
+					RunTownArchitectureCullingCaptureChecks(out, Check, NativeSceneState, ViewportPixels, std::cout, useGpu);
+			}
+			FreeTownerGFX();
+		}
+		else if (ingameMenuVisual) {
+			RunInGameMenuVisualChecks(output, InitializeTownDiagnostic, Check, NativeSceneState, SavePng, std::cout);
 			FreeTownerGFX();
 		}
 		else if (cabinOpenings)
