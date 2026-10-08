@@ -506,3 +506,7 @@ uwp-project/Assets/ui_art
 /editor/godot/.godot/
 /editor/godot/local/
 /perfil-godot-review/
+
+# Local owner-supplied menu music; not part of the public art distribution.
+/assets/music/d3d-main-menu.mp3
+/audio/

@@ -27,6 +27,7 @@
 
 #include "appfat.h"
 #include "engine/assets.hpp"
+#include "engine/menu_music.hpp"
 #include "game_mode.hpp"
 #include "options.h"
 #include "utils/log.hpp"
@@ -343,7 +344,9 @@ void music_start(_music_id nTrack)
 	music_stop();
 	if (!gbMusicOn)
 		return;
-	if (HaveFullMusic())
+	if (nTrack == TMUSIC_INTRO && HaveMenuMusicOverride())
+		trackPath = MenuMusicOverridePath;
+	else if (HaveFullMusic())
 		trackPath = MusicTracks[nTrack];
 	else
 		trackPath = SpawnMusicTracks[nTrack];
@@ -366,6 +369,8 @@ void music_start(_music_id nTrack)
 	}
 
 	sgnMusicTrack = nTrack;
+	if (trackPath == MenuMusicOverridePath)
+		LogInfo(LogCategory::Audio, "Diablo 3D menu music playing: {}", trackPath);
 }
 
 void sound_disable_music(bool disable)

@@ -18,6 +18,7 @@
 #include "DiabloUI/settingsmenu.h"
 #include "engine/assets.hpp"
 #include "engine/demomode.h"
+#include "engine/menu_music.hpp"
 #include "game_mode.hpp"
 #include "init.hpp"
 #include "movie.h"
@@ -34,7 +35,7 @@ namespace {
 
 _music_id NextTrack()
 {
-	if (gbIsSpawn) {
+	if (gbIsSpawn || HaveMenuMusicOverride()) {
 		return TMUSIC_INTRO;
 	}
 
