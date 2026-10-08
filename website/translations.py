@@ -7,6 +7,12 @@ audit. URLs, filenames, commits and evidence hashes are language independent.
 from __future__ import annotations
 
 TRANSLATIONS: dict[str, str] = {
+    'GPU continua ativa ao afastar a câmera': 'GPU stays active when zooming out',
+    'Corrigida a contagem que provocava queda para CPU com mais objetos. A recuperação por capacidade acompanha mudanças de carga, mantendo os limites de memória e o fallback de segurança.': 'Fixed the count that caused CPU fallback when more objects were visible. Capacity recovery responds to load changes while preserving memory limits and safe fallback.',
+    'Créditos e geometria residente': 'Credits and resident geometry',
+    'A correção do zoom separa o limite do stream projetado das malhas residentes. Falhas de capacidade podem recuperar após mudança efetiva de carga e intervalo de um segundo; falhas reais ainda preservam o fallback integral para CPU.': 'The zoom fix separates the projected stream limit from resident meshes. Capacity failures can recover after an effective load change and a one-second interval; real failures still retain complete CPU fallback.',
+    'Entender a correção do zoom': 'Understand the zoom fix',
+    'correção do zoom e recuperação da GPU após pressão de capacidade': 'zoom fix and GPU recovery after capacity pressure',
     'Créditos do projeto e menos trabalho por quadro': 'Project credits and less work per frame',
     'Suporte e créditos reunidos no menu, autoria de Douglas Pan e geometria de props e árvores reutilizada na GPU. Conheça a entrega instalada, as medições e seus limites.': 'Support and credits grouped in the menu, authorship by Douglas Pan, and prop and tree geometry reused on the GPU. Explore the installed delivery, its measurements and limitations.',
     'Estudo de interfaces R2': 'R2 interface study',

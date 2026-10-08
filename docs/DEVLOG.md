@@ -73,6 +73,12 @@ Abra `http://127.0.0.1:4173/diablo-3d/` e `http://127.0.0.1:4173/diablo-3d/en/`.
 
 O workflow `.github/workflows/pages.yml` valida a publicação e envia **somente** `website/dist/` ao Pages. PRs executam build e verificação; o deploy ocorre em `main` ou por execução manual. A configuração do repositório deve usar **Settings → Pages → Source → GitHub Actions**.
 
+## Correção de zoom e recuperação da GPU — 8 de outubro de 2026
+
+O novo registro `2026-10-08-gpu-zoom-recuperacao.md` e sua tradução integral documentam a correção instalada do commit `046a1850dd022a9a9b6a93d84cd381970bc82b89`. O stream temporário contava indevidamente desenhos residentes e rejeitava quadros ao atingir 1.048.576 triângulos. A separação mantém limites reais de memória/índices e o fallback de segurança; falhas de capacidade podem recuperar após mudança efetiva de carga e intervalo mínimo de um segundo. O diagnóstico Full HD/RX 570/FOV 80 passou oito poses, com até 1.185.392 triângulos e zero rasterização CPU na sequência, além de 627 sondas e 1.843 verificações sintéticas. O teste de limite real de pixels passou fallback integral e retorno automático após reduzir viewport, sem OFF/ON. Não comprova FPS sustentado ou 60 FPS; perda física do dispositivo não foi induzida. Preparação CPU/readback, orçamento DXGI e seleção explícita de adaptador continuam limitados ou pendentes.
+
+O artigo reutiliza a comparação histórica de câmeras somente como contexto, explicitamente sem capturas novas de gameplay. Nenhuma imagem ou entrada do inventário foi adicionada ou alterada; permanecem os 44 registros. As métricas do post anterior são preservadas com ligação entre as duas entregas. Destaque, tecnologia, roadmap e fontes correntes acompanham a correção. Nenhum modelo, textura, perfil ou recibo privado entra na publicação.
+
 ## Suporte, créditos e geometria residente — 8 de outubro de 2026
 
 O registro `2026-10-08-creditos-e-geometria-gpu.md` e sua tradução integral documentam a entrega instalada do commit `fc9642982da2b74b37af366f74c75e966aad4578`. O menu reúne suporte e créditos, mantém as telas herdadas e acrescenta autoria e direção de Douglas Pan, objetivo do jogo inteiro e links da comunidade. Passaram 1.193 verificações nativas, 26 capturas e 103 verificações Godot; gamepad físico e reprodução sonora não foram exercitados. Quatro capturas selecionadas entram como diagnósticos nativos offscreen, com pixels RGBA e resolução preservados em WebP lossless. Não são gameplay. A galeria passa a 44 registros, preservando os 40 anteriores.
