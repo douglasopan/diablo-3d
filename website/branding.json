@@ -1,0 +1,24 @@
+{
+  "sourceArchiveSha256": "cf05a7c2bcef63097d6f0b94dd97940149cef22b9dc0e9efe08853218e30bca9",
+  "source": "Owner-provided original transparent RGBA frames",
+  "frames": 240,
+  "width": 640,
+  "height": 160,
+  "cycleMs": 8000,
+  "encoding": {
+    "format": "animated WebP",
+    "quality": 86,
+    "alpha": "original coverage preserved in every frame",
+    "method": 4
+  },
+  "assets": {
+    "d3d-logo-animated.webp": {
+      "bytes": 12382206,
+      "sha256": "7d886a4cce2f10130914ff615b430cdd005025b50faddc400b40acbae3f9ec4a"
+    },
+    "d3d-logo-static.webp": {
+      "bytes": 95610,
+      "sha256": "6e57a6d1478fe37800a13f4bbeef1c76c76d9f5cdd41b1d3b425bce99564b124"
+    }
+  }
+}

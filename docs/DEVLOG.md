@@ -1,10 +1,12 @@
 # Devlog do Diablo 3D
 
-Site: **[douglasopan.github.io/diablo-3d](https://douglasopan.github.io/diablo-3d/)** · [RSS](https://douglasopan.github.io/diablo-3d/rss.xml)
+Site: **[Português](https://douglasopan.github.io/diablo-3d/)** · **[English](https://douglasopan.github.io/diablo-3d/en/)** · [RSS PT-BR](https://douglasopan.github.io/diablo-3d/rss.xml) · [RSS EN](https://douglasopan.github.io/diablo-3d/en/rss.xml)
 
 O objetivo do projeto é reconstruir Diablo 1 inteiro em 3D, incluindo todos os níveis procedurais, personagens, monstros, objetos e efeitos. Tristram é a etapa atual de validação; os demais mapas continuam usando a renderização original. Consulte o [roadmap](ROADMAP.md) para distinguir o estado implementado dos próximos marcos.
 
 Os registros são arquivos Markdown versionados em `docs/devlog/`. O gerador em `website/build.py` cria HTML por página, metadados, dados estruturados, sitemap e RSS. Uma publicação em `main` que altere posts ou arquivos do site dispara o workflow dedicado de GitHub Pages. O site funciona sem buscar o conteúdo no navegador e não usa analytics de terceiros.
+
+A publicação é completa em português brasileiro e inglês: a versão PT-BR fica na raiz do projeto e a inglesa em `/en/`. O seletor PT/EN abre a página equivalente e conserva a seção de um artigo. A escolha fica salva no navegador quando o armazenamento local está disponível. Sem uma escolha salva, a página portuguesa direciona para inglês quando esse é o idioma principal do navegador. Links diretos de `/en/` funcionam de forma independente; os dois idiomas têm HTML pronto e continuam legíveis sem JavaScript.
 
 ## Publicar um registro
 
@@ -30,13 +32,29 @@ Campos obrigatórios para artigos publicados: `title`, `date`, `description`, `s
 
 Use a data real de publicação do registro. Uma retrospectiva deve informar qual etapa representa e distinguir datas de commits, timestamps locais de diagnóstico e data editorial. O RSS publica a data em `dc:date`, sem inventar um horário que não existe nos metadados.
 
+## Tradução completa para inglês
+
+Para cada registro publicado em `docs/devlog/`, crie a tradução em `website/content/en/devlog/` com **o mesmo nome de arquivo**. Traduza `title`, `description`, `image_alt` e todo o corpo Markdown. Preserve `slug`, `date`, `updated` quando presente, `image`, `category`, `order` e `status`, incluindo o estado dos campos opcionais. As categorias continuam com as chaves canônicas em português; o publicador traduz seus rótulos na interface.
+
+Conserve os níveis, a quantidade e a ordem dos subtítulos. O publicador associa os IDs dos títulos em inglês às âncoras originais, mantendo os links de seção ao trocar de idioma. Os links internos do site recebem a rota do idioma atual. Links de evidência no GitHub permanecem associados aos mesmos commits e documentos, mesmo quando o documento de origem está em português.
+
+A tradução deve manter números, custos observados, imagens, referências, contexto histórico e limites de cada etapa. Não reduza um artigo a um resumo nem apresente trabalho futuro como implementado. O build exige uma tradução inglesa completa para cada registro publicado e rejeita divergências nos metadados canônicos ou na quantidade dos títulos. As páginas, os metadados e o RSS são gerados para ambos os idiomas.
+
 ## Imagens e galeria
 
 Copie somente capturas contextuais revisadas para `website/public/assets/captures/`. Prefira WebP lossless na resolução original, com legenda e texto alternativo. Antes de publicar, confira visualmente dados pessoais, telas de contas e chaves.
 
 Cadastre a imagem em `website/evidence.json` para incluí-la na galeria. Registre `file`, `title`, `alt`, `caption`, `category`, `stage`, `source`, `sha256` do original e `duplicate_sources`. O inventário público reúne apenas as selecionadas; o inventário local completo e mapeamentos privados permanecem fora do repositório.
 
+Acrescente também a entrada correspondente em `EVIDENCE_EN`, dentro de `website/translations.py`, usando o mesmo caminho `file` como chave e traduzindo `title`, `alt` e `caption`. Esse overlay cobre todas as capturas publicadas sem alterar o arquivo, a origem, o hash original ou as referências de duplicação. Categoria e etapa recebem rótulos ingleses na publicação, preservando a proveniência da evidência.
+
 Não publique MPQ, saves, CEL/CL2/MIN/TIL/SOL extraídos, texturas isoladas, modelos derivados dos arquivos do jogo nem credenciais. Referências de UI geradas por IA ficam em `website/design-references/`, com seus prompts; não entram no artefato publicado e não são evidência do jogo. A identidade visual usa o banner do projeto e D3D nos ícones.
+
+## Identidade e animação
+
+A logomarca transparente original fornecida pelo responsável pelo projeto contém 240 quadros PNG RGBA de 640×160, a 30 fps, em um ciclo de oito segundos. Sua versão WebP animada preserva o alpha, inclusive a transparência gradual das chamas e as faces escuras opacas das letras. O cabeçalho e o rodapé usam o quadro estático; o hero da página inicial oferece animação com controle de iniciar e pausar. A imagem estática é o fallback sem JavaScript e o estado inicial para quem solicita redução de movimento. A origem da sequência está documentada em [ANIMATED-LOGO.md](ANIMATED-LOGO.md).
+
+Os títulos usam a Diablo WebFont fornecida pelo usuário; o texto de leitura continua em Manrope. As letras Mason já fazem parte do desenho original da logomarca, sem incorporar o arquivo de fonte Mason. As fontes Cormorant e Manrope existentes, seus registros de origem e os textos OFL permanecem em `website/public/assets/fonts/`.
 
 ## Verificação local
 
@@ -47,7 +65,7 @@ python website/verify.py
 python website/serve.py
 ```
 
-Abra `http://127.0.0.1:4173/diablo-3d/`. O servidor expõe somente `website/dist/`, não a raiz do repositório. Confira desktop, celular, navegação, busca e ampliação das capturas antes do commit. A saída `website/dist/` e as capturas locais de QA não são versionadas.
+Abra `http://127.0.0.1:4173/diablo-3d/` e `http://127.0.0.1:4173/diablo-3d/en/`. O servidor expõe somente `website/dist/`, não a raiz do repositório. Confira desktop, celular, navegação, busca, ampliação das capturas e controle da animação nos dois idiomas antes do commit. Teste também a troca PT/EN numa seção de artigo e a preferência de idioma do navegador. A saída `website/dist/` e as capturas locais de QA não são versionadas.
 
 O workflow `.github/workflows/pages.yml` valida a publicação e envia **somente** `website/dist/` ao Pages. PRs executam build e verificação; o deploy ocorre em `main` ou por execução manual. A configuração do repositório deve usar **Settings → Pages → Source → GitHub Actions**.
 

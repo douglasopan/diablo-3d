@@ -2,10 +2,50 @@
 (() => {
   'use strict';
 
+  const language = document.documentElement.lang || 'pt-BR';
+  const text = (portuguese, english) => language === 'en' ? english : portuguese;
+
+  function initLanguage() {
+    const links = [...document.querySelectorAll('[data-language-link]')];
+    // Keep the equivalent section even after the reader follows the article's contents.
+    const updateTargets = () => links.forEach((link) => {
+      const target = new URL(link.href);
+      target.hash = window.location.hash;
+      link.href = target.pathname + target.hash;
+    });
+    updateTargets();
+    window.addEventListener('hashchange', updateTargets);
+    links.forEach((link) => {
+      link.addEventListener('click', () => {
+        updateTargets();
+        try { localStorage.setItem('d3d-language', link.dataset.languageLink); } catch { /* Links still work. */ }
+      });
+    });
+  }
+
+  function initLogoMotion() {
+    const image = document.querySelector('[data-logo]');
+    const button = document.querySelector('[data-logo-toggle]');
+    if (!image || !button) return;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let playing = !reducedMotion.matches;
+    const render = () => {
+      image.src = playing ? image.dataset.animatedSrc : image.dataset.staticSrc;
+      button.textContent = playing
+        ? text('Pausar animação', 'Pause animation')
+        : text('Animar logomarca', 'Animate logo');
+      button.setAttribute('aria-pressed', String(playing));
+    };
+    button.addEventListener('click', () => { playing = !playing; render(); });
+    reducedMotion.addEventListener('change', () => { playing = !reducedMotion.matches; render(); });
+    button.hidden = false;
+    render();
+  }
+
   const normalize = (value) => String(value || '')
     .normalize('NFD')
     .replace(/\p{M}/gu, '')
-    .toLocaleLowerCase('pt-BR')
+    .toLocaleLowerCase(language)
     .replace(/\s+/g, ' ')
     .trim();
 
@@ -88,10 +128,10 @@
     const header = document.querySelector('.site-header');
     if (!button || !nav || !header) return;
 
-    const desktop = window.matchMedia('(min-width: 960px)');
+    const desktop = window.matchMedia('(min-width: 1100px)');
     const setOpen = (open, restoreFocus = false) => {
       button.setAttribute('aria-expanded', String(open));
-      button.setAttribute('aria-label', open ? 'Fechar menu' : 'Abrir menu');
+      button.setAttribute('aria-label', open ? text('Fechar menu', 'Close menu') : text('Abrir menu', 'Open menu'));
       nav.classList.toggle('is-open', open);
       header.classList.toggle('menu-open', open);
       if (restoreFocus) button.focus({ preventScroll: true });
@@ -159,7 +199,7 @@
         button.setAttribute('aria-pressed', String(pressed));
         button.classList.toggle('active', pressed);
       });
-      if (count) count.textContent = `${visible} ${visible === 1 ? 'resultado' : 'resultados'}`;
+      if (count) count.textContent = `${visible} ${visible === 1 ? text('resultado', 'result') : text('resultados', 'results')}`;
       if (empty) empty.hidden = visible > 0;
       document.dispatchEvent(new CustomEvent('d3d:filter', { detail: { visible } }));
     };
@@ -211,7 +251,7 @@
         || trigger.getAttribute('href') || thumbnail?.currentSrc || thumbnail?.src;
       if (!source) return;
       image.src = source;
-      image.alt = thumbnail?.alt || trigger.dataset.caption || 'Captura do desenvolvimento do D3D';
+      image.alt = thumbnail?.alt || trigger.dataset.caption || text('Captura do desenvolvimento do D3D', 'D3D development screenshot');
       caption.textContent = trigger.dataset.caption
         || trigger.closest('figure')?.querySelector('figcaption')?.textContent.trim()
         || image.alt;
@@ -292,7 +332,7 @@
         button.setAttribute('aria-busy', 'true');
         button.classList.remove('is-copied');
         if (status) {
-          status.textContent = 'Copiando e-mail…';
+          status.textContent = text('Copiando e-mail…', 'Copying email…');
           status.dataset.state = 'pending';
         }
 
@@ -301,7 +341,7 @@
           await navigator.clipboard.writeText(value);
           button.classList.add('is-copied');
           if (status) {
-            status.textContent = 'E-mail copiado.';
+            status.textContent = text('E-mail copiado.', 'Email copied.');
             status.dataset.state = 'copied';
           }
         } catch {
@@ -316,8 +356,8 @@
           }
           if (status) {
             status.textContent = identity
-              ? 'E-mail selecionado. Use Ctrl+C, ⌘C ou o menu de copiar do navegador.'
-              : 'Selecione o e-mail acima e copie pelo menu do navegador.';
+              ? text('E-mail selecionado. Use Ctrl+C, ⌘C ou o menu de copiar do navegador.', 'Email selected. Use Ctrl+C, ⌘C or your browser’s copy menu.')
+              : text('Selecione o e-mail acima e copie pelo menu do navegador.', 'Select the email above and copy it using your browser’s menu.');
             status.dataset.state = 'manual';
           }
         } finally {
@@ -330,6 +370,8 @@
   }
 
   const init = () => {
+    initLanguage();
+    initLogoMotion();
     initAtmosphere();
     initMenu();
     initFilters();

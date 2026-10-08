@@ -36,10 +36,20 @@ def verify():
     assert len(documents) >= 9, 'Expected the complete website and article pages'
     for path, document in documents.items():
         assert document.h1 == 1, f'{path}: exactly one h1 required'
-        assert any(t == 'html' and a.get('lang') == 'pt-BR' for t, a in document.tags)
+        language = 'en' if path.relative_to(root).parts[0] == 'en' else 'pt-BR'
+        assert any(t == 'html' and a.get('lang') == language for t, a in document.tags), f'{path}: incorrect language'
         assert any(t == 'meta' and a.get('name') == 'description' and a.get('content') for t, a in document.tags)
         assert any(t == 'link' and a.get('rel') == 'canonical' and a.get('href', '').startswith(build.BASE) for t, a in document.tags)
         assert any(t == 'meta' and a.get('property') == 'og:image' for t, a in document.tags)
+        alternates = {a.get('hreflang'): a.get('href') for t, a in document.tags if t == 'link' and a.get('rel') == 'alternate' and a.get('hreflang')}
+        assert set(alternates) == {'pt-BR', 'en', 'x-default'}, f'{path}: language alternates missing'
+        logical = '/' + path.relative_to(root).as_posix()
+        if language == 'en':
+            logical = logical[3:]
+        if logical.endswith('/index.html'):
+            logical = logical[:-10]
+        for locale in ('pt-BR', 'en', 'x-default'):
+            assert alternates[locale] == build.alternate_url(logical, locale), f'{path}: incorrect alternate page'
         raw = path.read_text(encoding='utf-8')
         import re
         for data in re.findall(r'<script type="application/ld\+json">(.*?)</script>', raw, re.S):
@@ -71,19 +81,27 @@ def verify():
         assert not any(t == 'script' and a.get('src', '').startswith('http') for t, a in document.tags), 'No third-party scripts'
     sitemap = ET.parse(root / 'sitemap.xml')
     locations = [element.text for element in sitemap.getroot().iter() if element.tag.endswith('loc')]
-    assert len(locations) == len(documents) - 1, 'Sitemap must include every indexable page and omit 404'
+    assert len(locations) == len(documents) - 2, 'Sitemap must include both languages and omit both 404 pages'
     assert len(locations) == len(set(locations)), 'Duplicate sitemap URLs'
     for location in locations:
         assert location.startswith(build.BASE + '/')
-    rss = ET.parse(root / 'rss.xml')
     posts = build.load_posts()
-    assert len(rss.findall('.//item')) == len(posts), 'RSS must include every published post'
+    for language in ('pt-BR', 'en'):
+        rss = ET.parse(root / ('en/rss.xml' if language == 'en' else 'rss.xml'))
+        assert rss.findtext('./channel/language') == language
+        assert len(rss.findall('.//item')) == len(posts), 'RSS must include every published post in each language'
+        assert all(item.findtext('link').startswith(build.alternate_url('/devlog/', language)) for item in rss.findall('.//item'))
     assert (root / 'robots.txt').read_text().endswith(build.absolute('/sitemap.xml') + '\n')
     assert not any(p.name in ('PROMPTS.md', 'requirements.txt', 'build.py') or 'design-references' in p.parts for p in files), 'Build-only materials leaked to artifact'
     assert not any(p.suffix.lower() in ('.mpq', '.sv', '.cel', '.cl2', '.min', '.til', '.sol', '.obj', '.glb', '.gltf') for p in files), 'Proprietary/derived game assets must never be uploaded'
     evidence = json.loads((root / 'evidence.json').read_text(encoding='utf-8'))
     entries = evidence['entries'] if isinstance(evidence, dict) else evidence
     assert len({e['sha256'] for e in entries}) == len(entries), 'Selected images must not be exact duplicates'
+    english_evidence = json.loads((root / 'en/evidence.json').read_text(encoding='utf-8'))
+    english_entries = english_evidence['entries'] if isinstance(english_evidence, dict) else english_evidence
+    assert [(e['file'], e['sha256']) for e in entries] == [(e['file'], e['sha256']) for e in english_entries], 'Translated gallery must preserve the evidence'
+    for original, english in zip(entries, english_entries):
+        assert original['title'] != english['title'] and original['caption'] != english['caption'], 'English gallery must be translated'
     print(f'Artifact verified: {len(documents)} HTML files; all local URLs/fragments, metadata, sitemap, RSS and {len(entries)} unique captures valid.')
 
 

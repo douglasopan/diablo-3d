@@ -16,6 +16,8 @@ import markdown
 from PIL import Image
 import yaml
 
+from translations import EVIDENCE_EN, translate_text
+
 ROOT = Path(__file__).resolve().parent
 REPO = ROOT.parent
 PUBLIC = ROOT / 'public'
@@ -31,6 +33,69 @@ DISCORD = 'https://discord.gg/4YxQ7s69S'
 NAV = [('Início', '/'), ('Devlog', '/devlog/'), ('Projeto', '/projeto/'), ('Tecnologia', '/tecnologia/'), ('Participar', '/participar/'), ('Apoiar', '/apoiar/'), ('Roadmap', '/roadmap/'), ('Galeria', '/galeria/')]
 CATEGORIES = ('Protótipo', 'Geometria', 'Personagens', 'Comunidade', 'Ferramentas', 'Luz')
 MONTHS = ('janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro')
+EN_MONTHS = ('January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December')
+LANG = 'pt-BR'
+
+
+def localized_path(path, language=None):
+    language = language or LANG
+    routes = ('/devlog/', '/projeto/', '/tecnologia/', '/participar/', '/apoiar/', '/roadmap/', '/galeria/')
+    route = urlsplit(path).path
+    if language == 'en' and (route in ('/', '/rss.xml', '/404.html', '/evidence.json') or route.startswith(routes)):
+        return '/en' + path
+    return path
+
+
+def alternate_url(path, language):
+    return BASE + localized_path(path, language)
+
+
+def translated(value):
+    return translate_text(str(value)) if LANG == 'en' else str(value)
+
+
+class LocalizedHTML(HTMLParser):
+    """Translate authored text/labels without rewriting code, URLs or markup."""
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.parts = []
+        self.verbatim = []
+
+    def handle_decl(self, declaration):
+        self.parts.append('<!' + declaration + '>')
+
+    def handle_starttag(self, tag, attrs):
+        localizable = {'alt', 'aria-label', 'placeholder', 'title'}
+        attrs = dict(attrs)
+        if tag == 'meta' and (attrs.get('name') == 'description' or attrs.get('property', '').startswith('og:') or attrs.get('name', '').startswith('twitter:')):
+            localizable.add('content')
+        for key in localizable & attrs.keys():
+            attrs[key] = translated(attrs[key] or '')
+        self.parts.append('<' + tag + ''.join(f' {key}' if value is None else f' {key}="{esc(value)}"' for key, value in attrs.items()) + '>')
+        if tag in ('script', 'style', 'code', 'pre'):
+            self.verbatim.append(tag)
+
+    def handle_endtag(self, tag):
+        self.parts.append(f'</{tag}>')
+        if self.verbatim and self.verbatim[-1] == tag:
+            self.verbatim.pop()
+
+    def handle_data(self, data):
+        if self.verbatim and self.verbatim[-1] in ('script', 'style'):
+            self.parts.append(data)
+        else:
+            self.parts.append(esc(data if self.verbatim else translated(data)))
+
+    def handle_comment(self, comment):
+        self.parts.append('<!--' + comment + '-->')
+
+
+def localize_html(text):
+    if LANG != 'en':
+        return text
+    parser = LocalizedHTML()
+    parser.feed(text)
+    return ''.join(parser.parts)
 
 
 def esc(value):
@@ -38,11 +103,11 @@ def esc(value):
 
 
 def url(path):
-    return PREFIX + path
+    return PREFIX + localized_path(path)
 
 
 def absolute(path):
-    return BASE + path
+    return BASE + localized_path(path)
 
 
 def source(path, pinned=True):
@@ -51,6 +116,8 @@ def source(path, pinned=True):
 
 def date_label(date):
     day = dt.date.fromisoformat(str(date))
+    if LANG == 'en':
+        return f'{EN_MONTHS[day.month - 1]} {day.day}, {day.year}'
     return f'{day.day:02d} de {MONTHS[day.month - 1]} de {day.year}'
 
 
@@ -74,11 +141,20 @@ def button(label, href, secondary=False):
     return f'<a class="button{" secondary" if secondary else ""}" href="{esc(target)}">{esc(label)} <span aria-hidden="true">↗</span></a>'
 
 
+def logo(eager=False, animated=False, cls='brand-logo'):
+    image = img('/assets/branding/d3d-logo-static.webp', 'Diablo 3D', eager, cls)
+    if not animated:
+        return image
+    image = image.replace('<img ', f'<img data-logo data-static-src="{url("/assets/branding/d3d-logo-static.webp")}" data-animated-src="{url("/assets/branding/d3d-logo-animated.webp")}" ')
+    return '<div class="logo-block">' + image + '<button class="logo-motion" type="button" data-logo-toggle hidden data-enhancement>Animar logomarca</button></div>'
+
+
 class ContentLinks(HTMLParser):
     """Validate rendered Markdown links and add dimensions to local images."""
-    def __init__(self):
+    def __init__(self, language=None):
         super().__init__(convert_charrefs=False)
         self.parts = []
+        self.language = language or LANG
 
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
@@ -96,7 +172,7 @@ class ContentLinks(HTMLParser):
                     raise ValueError('Devlog images require meaningful alt text')
                 attrs.update(width=str(width), height=str(height), loading='lazy', decoding='async')
             if value.startswith('/'):
-                attrs[key] = url(value)
+                attrs[key] = PREFIX + localized_path(value, self.language)
         self.parts.append('<' + tag + ''.join(f' {k}="{esc(v or "")}"' for k, v in attrs.items()) + '>')
 
     def handle_startendtag(self, tag, attrs):
@@ -115,15 +191,16 @@ class ContentLinks(HTMLParser):
         self.parts.append(f'&#{name};')
 
 
-def render_markdown(text):
+def render_markdown(text, language=None):
     parser = markdown.Markdown(extensions=['tables', 'fenced_code', 'sane_lists', 'toc'], output_format='html')
     rendered = parser.convert(text)
-    validator = ContentLinks()
+    validator = ContentLinks(language)
     validator.feed(rendered)
     return ''.join(validator.parts), parser.toc
 
 
-def load_posts():
+def load_posts(language=None):
+    language = language or LANG
     posts = []
     slugs = set()
     for path in sorted((REPO / 'docs/devlog').glob('*.md')):
@@ -154,9 +231,39 @@ def load_posts():
             raise ValueError(f'{path.name}: order must be an integer')
         image_info(data['image'])
         data['body'], data['toc'] = render_markdown(match[2])
-        data['minutes'] = max(1, round(len(re.findall(r'\w+', match[2])) / 200))
+        if language == 'en':
+            translated_file = ROOT / 'content/en/devlog' / path.name
+            if not translated_file.is_file():
+                raise ValueError(f'{path.name}: complete English translation required')
+            english = re.match(r'\A---\s*\n(.*?)\n---\s*\n(.*)\Z', translated_file.read_text(encoding='utf-8'), re.S)
+            if not english:
+                raise ValueError(f'{path.name}: English frontmatter required')
+            english_data = yaml.safe_load(english[1])
+            for key in ('slug', 'date', 'updated', 'image', 'category', 'order', 'status'):
+                if str(english_data.get(key, 'published' if key == 'status' else None)) != str(data.get(key, 'published' if key == 'status' else None)):
+                    raise ValueError(f'{path.name}: English {key} must match original metadata')
+            for key in ('title', 'description', 'image_alt'):
+                if not english_data.get(key):
+                    raise ValueError(f'{path.name}: English {key} required')
+                data[key] = english_data[key]
+            body, toc = render_markdown(english[2], language)
+            headings = r'(<h[1-6]\b[^>]*\bid=")([^"]+)(")'
+            original_ids = [heading[1] for heading in re.findall(headings, data['body'])]
+            english_ids = [heading[1] for heading in re.findall(headings, body)]
+            if len(original_ids) != len(english_ids):
+                raise ValueError(f'{path.name}: English heading structure must match original')
+            anchors = dict(zip(english_ids, original_ids))
+            body = re.sub(headings, lambda match: match[1] + anchors[match[2]] + match[3], body)
+            links = r'href="#([^"]+)"'
+            data['body'] = re.sub(links, lambda match: 'href="#' + anchors.get(match[1], match[1]) + '"', body)
+            data['toc'] = re.sub(links, lambda match: 'href="#' + anchors.get(match[1], match[1]) + '"', toc)
+            match_body = english[2]
+        else:
+            match_body = match[2]
+        data['minutes'] = max(1, round(len(re.findall(r'\w+', match_body)) / 200))
         data['path'] = f'/devlog/{slug}/'
         data['file'] = path.name
+        data['source_file'] = ('website/content/en/devlog/' if language == 'en' else 'docs/devlog/') + path.name
         posts.append(data)
     if not posts:
         raise ValueError('At least one published devlog article is required')
@@ -164,10 +271,10 @@ def load_posts():
 
 
 def card(post):
-    return f'''<article class="card" data-filter-item data-category="{esc(post['category'])}" data-search="{esc(post['title'] + ' ' + post['description'] + ' ' + post['category'])}">
+    return f'''<article class="card" data-filter-item data-category="{esc(post['category'])}" data-search="{esc(post['title'] + ' ' + post['description'] + ' ' + translated(post['category']))}">
       <a class="card-media" href="{url(post['path'])}" tabindex="-1" aria-hidden="true">{img(post['image'], '')}</a>
       <div class="card-body"><div class="meta"><span class="tag">{esc(post['category'])}</span><time datetime="{post['date']}">{date_label(post['date'])}</time></div>
-      <h3><a href="{url(post['path'])}">{esc(post['title'])}</a></h3><p>{esc(post['description'])}</p><span class="read-more">{post['minutes']} min de leitura <span aria-hidden="true">↗</span></span></div></article>'''
+      <h3><a href="{url(post['path'])}">{esc(post['title'])}</a></h3><p>{esc(post['description'])}</p><span class="read-more">{post['minutes']} {translated('min de leitura')} <span aria-hidden="true">↗</span></span></div></article>'''
 
 
 def section_head(label, subtitle='', href=None):
@@ -202,32 +309,36 @@ def lightbox():
 
 
 def frame(title, description, path, content, image='/assets/banner.webp', article=None, noindex=False):
+    title, description = translated(title), translated(description)
     canonical = absolute(path)
-    breadcrumb = [{'@type': 'ListItem', 'position': 1, 'name': 'Início', 'item': absolute('/')}]
+    breadcrumb = [{'@type': 'ListItem', 'position': 1, 'name': translated('Início'), 'item': absolute('/')}]
     if path != '/':
         if article:
             breadcrumb.append({'@type': 'ListItem', 'position': 2, 'name': 'Devlog', 'item': absolute('/devlog/')})
         breadcrumb.append({'@type': 'ListItem', 'position': len(breadcrumb) + 1, 'name': title, 'item': canonical})
     structured = [
-        {'@context': 'https://schema.org', '@type': 'WebSite', '@id': absolute('/#website'), 'url': absolute('/'), 'name': 'Diablo 3D · D3D', 'inLanguage': 'pt-BR', 'description': 'Projeto independente para reconstruir todo Diablo 1 em 3D, com todos os níveis. O protótipo atual está em Tristram, sobre DevilutionX.'},
+        {'@context': 'https://schema.org', '@type': 'WebSite', '@id': absolute('/#website'), 'url': absolute('/'), 'name': 'Diablo 3D · D3D', 'inLanguage': LANG, 'description': translated('Projeto independente para reconstruir todo Diablo 1 em 3D, com todos os níveis. O protótipo atual está em Tristram, sobre DevilutionX.')},
         {'@context': 'https://schema.org', '@type': 'BreadcrumbList', 'itemListElement': breadcrumb},
-        {'@context': 'https://schema.org', '@type': 'BlogPosting' if article else 'WebPage', 'headline' if article else 'name': title, 'description': description, 'url': canonical, 'inLanguage': 'pt-BR', 'isPartOf': {'@id': absolute('/#website')}, **({'datePublished': article['date'], 'dateModified': article.get('updated', article['date']), 'image': absolute(image), 'author': {'@type': 'Organization', 'name': 'Projeto D3D', 'url': absolute('/projeto/')}, 'mainEntityOfPage': canonical} if article else {})}
+        {'@context': 'https://schema.org', '@type': 'BlogPosting' if article else 'WebPage', 'headline' if article else 'name': title, 'description': description, 'url': canonical, 'inLanguage': LANG, 'isPartOf': {'@id': absolute('/#website')}, **({'datePublished': article['date'], 'dateModified': article.get('updated', article['date']), 'image': absolute(image), 'author': {'@type': 'Organization', 'name': translated('Projeto D3D'), 'url': absolute('/projeto/')}, 'mainEntityOfPage': canonical} if article else {})}
     ]
     nav = ''.join(f'<a href="{url(p)}"{" aria-current=" + chr(34) + "page" + chr(34) if (p == path or (p == "/devlog/" and article)) else ""}>{name}</a>' for name, p in NAV)
     article_meta = f'<meta property="article:published_time" content="{article["date"]}"><meta property="article:modified_time" content="{article.get("updated", article["date"])}">' if article else ''
-    return f'''<!doctype html>
-<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    languages = '<nav class="language-switch" aria-label="Idioma">' + ''.join(f'<a href="{urlsplit(alternate_url(path, lang)).path}" hreflang="{lang}" lang="{lang}" data-language-link="{lang}" aria-label="{label}"' + (' aria-current="true"' if LANG == lang else '') + f'>{short}</a>' for lang, label, short in [('pt-BR', 'Ler em português', 'PT'), ('en', 'Read in English', 'EN')]) + '</nav>'
+    alternates = ''.join(f'<link rel="alternate" hreflang="{lang}" href="{alternate_url(path, lang)}">' for lang in ('pt-BR', 'en', 'x-default'))
+    document = f'''<!doctype html>
+<html lang="{LANG}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{esc(title)} · Diablo 3D</title><meta name="description" content="{esc(description)}"><meta name="robots" content="{'noindex, follow' if noindex else 'index, follow'}"><link rel="canonical" href="{canonical}">
-<meta name="theme-color" content="#111211"><meta property="og:locale" content="pt_BR"><meta property="og:type" content="{'article' if article else 'website'}"><meta property="og:site_name" content="Diablo 3D · D3D"><meta property="og:title" content="{esc(title)}"><meta property="og:description" content="{esc(description)}"><meta property="og:url" content="{canonical}"><meta property="og:image" content="{absolute(image)}"><meta property="og:image:alt" content="{esc(article['image_alt'] if article else 'Banner oficial do projeto Diablo 3D')}">{article_meta}
+<meta name="theme-color" content="#111211"><meta property="og:locale" content="{'en_US' if LANG == 'en' else 'pt_BR'}"><meta property="og:type" content="{'article' if article else 'website'}"><meta property="og:site_name" content="Diablo 3D · D3D"><meta property="og:title" content="{esc(title)}"><meta property="og:description" content="{esc(description)}"><meta property="og:url" content="{canonical}"><meta property="og:image" content="{absolute(image)}"><meta property="og:image:alt" content="{esc(article['image_alt'] if article else 'Banner oficial do projeto Diablo 3D')}">{article_meta}
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{esc(title)}"><meta name="twitter:description" content="{esc(description)}"><meta name="twitter:image" content="{absolute(image)}">
 <link rel="icon" type="image/png" href="{url('/assets/d3d-icon.png')}"><link rel="apple-touch-icon" href="{url('/assets/d3d-touch.png')}"><link rel="alternate" type="application/rss+xml" title="Diablo 3D — Devlog" href="{url('/rss.xml')}"><link rel="stylesheet" href="{url('/site.css')}">
-<script type="application/ld+json">{json.dumps(structured, ensure_ascii=False).replace('<', chr(92) + 'u003c')}</script><script src="{url('/site.js')}" defer></script></head>
-<body><a class="skip-link" href="#main">Pular para o conteúdo</a><header class="site-header"><div class="wrap"><a class="brand" href="{url('/')}" aria-label="D3D — Início"><span>D3D</span><small>DIABLO 3D<br>DIÁRIO DE CONSTRUÇÃO</small></a><button class="menu-toggle" type="button" aria-controls="navigation" aria-expanded="false" hidden data-enhancement>Menu <span aria-hidden="true">☰</span></button><nav id="navigation" class="main-nav" aria-label="Navegação principal">{nav}</nav></div></header>
-<main id="main" class="wrap">{content}</main><footer class="site-footer"><div class="wrap"><div class="footer-top"><a class="brand" href="{url('/')}"><span>D3D</span><small>DIABLO INTEIRO.<br>UM TRABALHO EM CONSTRUÇÃO.</small></a><nav aria-label="Links do projeto"><a href="{GITHUB}">GitHub ↗</a><a href="{DISCORD}">Discord ↗</a><a href="{url('/apoiar/')}">Apoiar ↗</a><a href="{url('/rss.xml')}">RSS ↗</a><a href="{source('LICENSE.md', False)}">Licença ↗</a></nav></div><p>Projeto de fã independente, sem afiliação com a Blizzard Entertainment. Diablo e suas marcas pertencem aos respectivos titulares.</p><p>Código público sob <a href="{source('LICENSE.md', False)}">Sustainable Use License</a>: distribuição gratuita e não comercial. Dados originais do jogo não são distribuídos.</p></div></footer>{lightbox()}</body></html>'''
+{alternates}<script src="{url('/language.js')}"></script><script type="application/ld+json">{json.dumps(structured, ensure_ascii=False).replace('<', chr(92) + 'u003c')}</script><script src="{url('/site.js')}" defer></script></head>
+<body><a class="skip-link" href="#main">Pular para o conteúdo</a><header class="site-header"><div class="wrap"><a class="brand" href="{url('/')}" aria-label="D3D — Início">{logo(True)}</a><button class="menu-toggle" type="button" aria-controls="navigation" aria-expanded="false" hidden data-enhancement>Menu <span aria-hidden="true">☰</span></button><nav id="navigation" class="main-nav" aria-label="Navegação principal">{nav}</nav>{languages}</div></header>
+<main id="main" class="wrap">{content}</main><footer class="site-footer"><div class="wrap"><div class="footer-top"><a class="brand" href="{url('/')}">{logo()}</a><nav aria-label="Links do projeto"><a href="{GITHUB}">GitHub ↗</a><a href="{DISCORD}">Discord ↗</a><a href="{url('/apoiar/')}">Apoiar ↗</a><a href="{url('/rss.xml')}">RSS ↗</a><a href="{source('LICENSE.md', False)}">Licença ↗</a></nav></div><p>Projeto de fã independente, sem afiliação com a Blizzard Entertainment. Diablo e suas marcas pertencem aos respectivos titulares.</p><p>Código público sob <a href="{source('LICENSE.md', False)}">Sustainable Use License</a>: distribuição gratuita e não comercial. Dados originais do jogo não são distribuídos.</p></div></footer>{lightbox()}</body></html>'''
+    return localize_html(document)
 
 
 def home(posts):
-    return f'''<section class="hero hero-atmospheric atmospheric bleed">{scene(eager=True)}<div class="hero-copy"><p class="eyebrow">DIABLO 3D · DEVLOG ABERTO</p>{img('/assets/banner.webp', 'Diablo 3D — banner oficial', True, 'project-banner')}<h1>Diablo inteiro.<br>Uma nova dimensão.</h1><p class="lede">Reconstruir todo Diablo 1 em 3D, com todos os níveis, preservando a partida e a atmosfera do original. Tristram é o primeiro marco de um trabalho que avança com testes e colaboração.</p><div class="actions">{button('Acompanhar o devlog', '/devlog/')}{button('Apoiar o projeto', '/apoiar/', True)}</div><div class="status-strip"><span><i aria-hidden="true"></i> Objetivo: jogo completo</span><span>Etapa atual: Tristram</span><span>Protótipo offline · CPU</span></div></div>{art_credit()}</section><figure class="wide-capture evidence-capture"><a href="{url('/galeria/')}">{img('/assets/captures/cabin-interior-final.webp', 'Cabana leste: jogo original, protótipo antes e protótipo depois do interior iluminado', True)}</a><figcaption><span class="tag">CAPTURA REAL · 63e5e749</span> Original, antes e depois: o interior da cabana de revisão em Tristram. Forma e materiais continuam em revisão.</figcaption></figure>
+    return f'''<section class="hero hero-atmospheric atmospheric bleed">{scene(eager=True)}<div class="hero-copy"><p class="eyebrow">DIABLO 3D · DEVLOG ABERTO</p>{logo(True, True, 'project-banner')}<h1>Diablo inteiro.<br>Uma nova dimensão.</h1><p class="lede">Reconstruir todo Diablo 1 em 3D, com todos os níveis, preservando a partida e a atmosfera do original. Tristram é o primeiro marco de um trabalho que avança com testes e colaboração.</p><div class="actions">{button('Acompanhar o devlog', '/devlog/')}{button('Apoiar o projeto', '/apoiar/', True)}</div><div class="status-strip"><span><i aria-hidden="true"></i> Objetivo: jogo completo</span><span>Etapa atual: Tristram</span><span>Protótipo offline · CPU</span></div></div>{art_credit()}</section><figure class="wide-capture evidence-capture"><a href="{url('/galeria/')}">{img('/assets/captures/cabin-interior-final.webp', 'Cabana leste: jogo original, protótipo antes e protótipo depois do interior iluminado', True)}</a><figcaption><span class="tag">CAPTURA REAL · 63e5e749</span> Original, antes e depois: o interior da cabana de revisão em Tristram. Forma e materiais continuam em revisão.</figcaption></figure>
 <section class="section-atmosphere atmospheric bleed">{scene('/assets/art/journal-atmosphere.webp')}<div class="atmosphere-content wrap">{section_head('Cada mudança deixa um registro.', 'Capturas, decisões e limites do desenvolvimento.', '/devlog/')}<div class="card-grid">{''.join(card(p) for p in posts[:3])}</div></div>{art_credit()}</section>
 <section class="split"><div class="panel"><p class="eyebrow">UMA PARTIDA, DUAS VISÕES</p><h2>O jogo continua.<br>A câmera muda.</h2><p><kbd>F4</kbd> alterna entre o original e o protótipo na mesma partida. Movimento, colisões, inventário e interação continuam usando a simulação do DevilutionX.</p><p class="notice"><kbd>Home</kbd> retorna ao backend original. Pixels iguais nessa rota comprovam esse retorno; a fidelidade da geometria precisa de comparações com a malha ativa.</p>{button('Entender a tecnologia', '/tecnologia/', True)}</div><div class="panel"><p class="eyebrow">DO PRIMEIRO MARCO AO JOGO COMPLETO</p><h2>A jornada começa<br>em Tristram.</h2><p>A cidade é a etapa atual de calibração. Depois vem o primeiro nível procedural da Catedral, seguido dos demais níveis da Catedral, Catacumbas, Cavernas e Inferno, com o conteúdo do jogo.</p><p class="meta">As masmorras ainda usam o renderer original. Os marcos futuros serão registrados com evidências à medida que forem implementados.</p>{button('Ver o roadmap completo', '/roadmap/', True)}</div></section>
 <section class="contribute-banner chapter-band atmospheric bleed">{scene()}<div class="atmosphere-content wrap"><div><p class="eyebrow">UM PROJETO EM COMUNIDADE</p><h2>Ajude a construir o próximo capítulo.</h2><p>Modelagem, código, testes e documentação fazem o projeto avançar. Apoio financeiro e ajuda com ferramentas de geração sustentam as revisões, a continuidade e a expansão para todos os níveis.</p></div><div class="actions">{button('Apoiar o desenvolvimento', '/apoiar/')}{button('Como contribuir', '/participar/', True)}</div></div>{art_credit()}</section>'''
@@ -274,7 +385,7 @@ def gallery(evidence):
     items = []
     for entry in evidence:
         items.append(f'''<figure class="gallery-item" data-filter-item data-category="{esc(entry['category'])}" data-search="{esc(entry['title'] + ' ' + entry['caption'])}"><a href="{url(entry['file'])}" data-lightbox data-caption="{esc(entry['title'] + ' — ' + entry['caption'])}">{img(entry['file'], entry['alt'])}<span class="image-open" aria-hidden="true">Ampliar ↗</span></a><figcaption><span class="tag">{esc(entry['stage'])}</span><h2>{esc(entry['title'])}</h2><p>{esc(entry['caption'])}</p></figcaption></figure>''')
-    return intro('GALERIA', 'Do primeiro protótipo<br>ao jogo completo.', 'O destino é todo Diablo 1 em 3D. As evidências atuais mostram Tristram: referências do original, comparações e giros de revisão, com as diferenças preservadas.') + '<p class="notice">As etapas v1 a v4 são registros locais retrospectivos publicados aqui em 07/10/2026. Novos níveis serão documentados quando implementados. As ilustrações de ambientação e os conceitos de interface ficam separados das capturas reais abaixo.</p>' + filters(sorted(set(e['category'] for e in evidence))) + f'<section class="gallery-grid">{"".join(items)}</section>' + no_results() + f'<p class="meta">{len(evidence)} capturas selecionadas. <a href="{url("/evidence.json")}">Inventário público e proveniência</a>.</p>'
+    return intro('GALERIA', 'Do primeiro protótipo<br>ao jogo completo.', 'O destino é todo Diablo 1 em 3D. As evidências atuais mostram Tristram: referências do original, comparações e giros de revisão, com as diferenças preservadas.') + '<p class="notice">As etapas v1 a v4 são registros locais retrospectivos publicados aqui em 07/10/2026. Novos níveis serão documentados quando implementados. As ilustrações de ambientação e os conceitos de interface ficam separados das capturas reais abaixo.</p>' + filters(sorted(set(e['category'] for e in evidence))) + f'<section class="gallery-grid">{"".join(items)}</section>' + no_results() + f'<p class="meta">{len(evidence)} {translated('capturas selecionadas.')} <a href="{url("/evidence.json")}">Inventário público e proveniência</a>.</p>'
 
 
 def support():
@@ -289,33 +400,14 @@ def support():
 
 
 def write(path, text):
-    target = OUT / path.lstrip('/')
+    target = OUT / localized_path(path).lstrip('/')
     if path.endswith('/'):
         target /= 'index.html'
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(text, encoding='utf-8', newline='\n')
 
 
-def build():
-    posts = load_posts()
-    raw_evidence = json.loads((ROOT / 'evidence.json').read_text(encoding='utf-8'))
-    evidence = raw_evidence['entries'] if isinstance(raw_evidence, dict) else raw_evidence
-    for entry in evidence:
-        image_info(entry['file'])
-        if not all(entry.get(k) for k in ('title', 'alt', 'caption', 'category', 'stage', 'source', 'sha256')):
-            raise ValueError('Incomplete evidence metadata')
-    allowed = {'.css', '.js', '.png', '.webp', '.svg', '.woff2'}
-    for path in PUBLIC.rglob('*'):
-        if path.is_symlink() or (path.is_file() and path.suffix.lower() not in allowed and not (path.parent == PUBLIC / 'assets/fonts' and path.suffix == '.txt')):
-            raise ValueError(f'Unexpected public file: {path.relative_to(PUBLIC)}')
-    # Output deletion is deliberately constrained to this generator's own directory.
-    if OUT.resolve().parent != ROOT.resolve() or OUT.name != 'dist':
-        raise ValueError('Output path escaped website directory')
-    if OUT.exists():
-        shutil.rmtree(OUT)
-    shutil.copytree(PUBLIC, OUT)
-    write('/.nojekyll', '')
-    write('/evidence.json', json.dumps(raw_evidence, ensure_ascii=False, indent=2) + '\n')
+def build_locale(posts, evidence):
     pages = [
         ('/', 'Diablo inteiro. Uma nova dimensão', 'Diablo 3D: um projeto para reconstruir todo Diablo 1 em 3D, com todos os níveis. Etapa atual: Tristram. Devlog, capturas reais e formas de apoiar.', home(posts)),
         ('/devlog/', 'Diário de construção', 'Acompanhe o desenvolvimento do jogo completo em Diablo 3D. Registros atuais de Tristram, capturas reais, decisões e verificações.', intro('DEVLOG', 'Diário de construção.', 'Do primeiro protótipo ao objetivo de reconstruir todo Diablo 1 em 3D. O que mudou, como foi testado e o que ainda precisa de revisão, com capturas reais e fontes versionadas.') + '<p class="notice">Retrospectiva publicada em 07/10/2026. A data de cada post é a publicação deste registro; v1–v4 representam etapas locais anteriores à primeira publicação consolidada.</p>' + filters(CATEGORIES, True) + '<h2 class="sr-only">Registros publicados</h2><section class="card-grid devlog-feed">' + ''.join(card(p) for p in posts) + '</section>' + no_results()),
@@ -329,34 +421,78 @@ def build():
     for path, title, description, content in pages:
         write(path, frame(title, description, path, content))
     for post in posts:
-        content = f'''<header class="page-intro article-intro atmospheric bleed">{scene('/assets/art/journal-atmosphere.webp', True)}<div class="intro-copy"><p class="eyebrow">{esc(post['category'])} · DEVLOG</p><h1>{esc(post['title'])}</h1><p class="lede">{esc(post['description'])}</p><div class="meta"><time datetime="{post['date']}">{date_label(post['date'])}</time><span>Projeto D3D</span><span>{post['minutes']} min de leitura</span></div></div>{art_credit()}</header><nav class="breadcrumb" aria-label="Você está aqui"><a href="{url('/devlog/')}">Devlog</a><span aria-hidden="true"> / </span><span>{esc(post['category'])}</span></nav><div class="article-layout"><article class="prose"><figure>{img(post['image'], post['image_alt'], True)}<figcaption>{esc(post['image_alt'])}</figcaption></figure>{post['body']}<aside class="notice"><p>Este registro é versionado no GitHub. <a href="{source('docs/devlog/' + post['file'], False)}">Ver fonte e histórico ↗</a></p></aside></article><aside class="toc"><details open><summary>Neste registro</summary>{post['toc']}</details><div class="notice"><p>Home usa o backend original. Essa rota não valida a malha.</p></div></aside></div><section>{section_head('Continue acompanhando.')}<div class="card-grid">{''.join(card(p) for p in [p for p in posts if p is not post][:3])}</div></section>'''
+        content = f'''<header class="page-intro article-intro atmospheric bleed">{scene('/assets/art/journal-atmosphere.webp', True)}<div class="intro-copy"><p class="eyebrow">{esc(translated(post['category']))} · DEVLOG</p><h1>{esc(post['title'])}</h1><p class="lede">{esc(post['description'])}</p><div class="meta"><time datetime="{post['date']}">{date_label(post['date'])}</time><span>Projeto D3D</span><span>{post['minutes']} {translated('min de leitura')}</span></div></div>{art_credit()}</header><nav class="breadcrumb" aria-label="Você está aqui"><a href="{url('/devlog/')}">Devlog</a><span aria-hidden="true"> / </span><span>{esc(post['category'])}</span></nav><div class="article-layout"><article class="prose"><figure>{img(post['image'], post['image_alt'], True)}<figcaption>{esc(post['image_alt'])}</figcaption></figure>{post['body']}<aside class="notice"><p>Este registro é versionado no GitHub. <a href="{source(post['source_file'], False)}">Ver fonte e histórico ↗</a></p></aside></article><aside class="toc"><details open><summary>Neste registro</summary>{post['toc']}</details><div class="notice"><p>Home usa o backend original. Essa rota não valida a malha.</p></div></aside></div><section>{section_head('Continue acompanhando.')}<div class="card-grid">{''.join(card(p) for p in [p for p in posts if p is not post][:3])}</div></section>'''
         write(post['path'], frame(post['title'], post['description'], post['path'], content, post['image'], post))
     write('/404.html', frame('Página não encontrada', 'Encontre o devlog, as capturas e as informações do projeto Diablo 3D.', '/404.html', intro('404', 'Esse caminho ainda<br>não foi construído.', 'Você pode continuar pelo diário do projeto ou voltar ao início.') + button('Voltar ao início', '/'), noindex=True))
-    namespace = 'http://www.sitemaps.org/schemas/sitemap/0.9'
-    ET.register_namespace('', namespace)
-    sitemap = ET.Element(f'{{{namespace}}}urlset')
-    for path in [p[0] for p in pages] + [p['path'] for p in posts]:
-        entry = ET.SubElement(sitemap, f'{{{namespace}}}url')
-        ET.SubElement(entry, f'{{{namespace}}}loc').text = absolute(path)
-    write('/sitemap.xml', ET.tostring(sitemap, encoding='unicode', xml_declaration=True))
     atom = 'http://www.w3.org/2005/Atom'
     ET.register_namespace('atom', atom)
     rss = ET.Element('rss', version='2.0')
     channel = ET.SubElement(rss, 'channel')
-    for name, value in [('title', 'Diablo 3D — Diário de construção'), ('link', absolute('/devlog/')), ('description', 'Etapas reais de um projeto para reconstruir todo Diablo 1 em 3D. Tristram é o marco atual.'), ('language', 'pt-BR')]:
-        ET.SubElement(channel, name).text = value
+    for name, value in [('title', 'Diablo 3D — Diário de construção'), ('link', absolute('/devlog/')), ('description', 'Etapas reais de um projeto para reconstruir todo Diablo 1 em 3D. Tristram é o marco atual.'), ('language', LANG)]:
+        ET.SubElement(channel, name).text = translated(value)
     ET.SubElement(channel, f'{{{atom}}}link', href=absolute('/rss.xml'), rel='self', type='application/rss+xml')
     dc = 'http://purl.org/dc/elements/1.1/'
     ET.register_namespace('dc', dc)
     for post in posts:
         item = ET.SubElement(channel, 'item')
-        for name, value in [('title', post['title']), ('link', absolute(post['path'])), ('description', post['description']), ('category', post['category'])]:
+        for name, value in [('title', post['title']), ('link', absolute(post['path'])), ('description', post['description']), ('category', translated(post['category']))]:
             ET.SubElement(item, name).text = value
         ET.SubElement(item, f'{{{dc}}}date').text = post['date']
         ET.SubElement(item, 'guid', isPermaLink='true').text = absolute(post['path'])
     write('/rss.xml', ET.tostring(rss, encoding='unicode', xml_declaration=True))
+    return [localized_path(p[0]) for p in pages] + [localized_path(p['path']) for p in posts]
+
+
+def build():
+    global LANG
+    LANG = 'pt-BR'
+    posts = load_posts()
+    raw_evidence = json.loads((ROOT / 'evidence.json').read_text(encoding='utf-8'))
+    evidence = raw_evidence['entries'] if isinstance(raw_evidence, dict) else raw_evidence
+    for entry in evidence:
+        image_info(entry['file'])
+        if not all(entry.get(k) for k in ('title', 'alt', 'caption', 'category', 'stage', 'source', 'sha256')):
+            raise ValueError('Incomplete evidence metadata')
+    allowed = {'.css', '.js', '.png', '.webp', '.svg', '.woff', '.woff2'}
+    for path in PUBLIC.rglob('*'):
+        if path.is_symlink() or (path.is_file() and path.suffix.lower() not in allowed and not (path.parent == PUBLIC / 'assets/fonts' and path.suffix == '.txt')):
+            raise ValueError(f'Unexpected public file: {path.relative_to(PUBLIC)}')
+    # Output deletion is deliberately constrained to this generator's own directory.
+    if OUT.resolve().parent != ROOT.resolve() or OUT.name != 'dist':
+        raise ValueError('Output path escaped website directory')
+    if OUT.exists():
+        shutil.rmtree(OUT)
+    shutil.copytree(PUBLIC, OUT)
+    write('/.nojekyll', '')
+    write('/evidence.json', json.dumps(raw_evidence, ensure_ascii=False, indent=2) + '\n')
+    paths = []
+    for language in ('pt-BR', 'en'):
+        LANG = language
+        posts = load_posts()
+        localized_evidence = evidence
+        if language == 'en':
+            if set(EVIDENCE_EN) != {entry['file'] for entry in evidence}:
+                raise ValueError('English gallery translations must cover every capture')
+            localized_evidence = [dict(entry, **{key: EVIDENCE_EN[entry['file']][key] for key in ('title', 'alt', 'caption')}) for entry in evidence]
+            public_entries = [dict(entry, category=translated(entry['category']), stage=translated(entry['stage'])) for entry in localized_evidence]
+            public_inventory = dict(raw_evidence, entries=public_entries) if isinstance(raw_evidence, dict) else public_entries
+            write('/evidence.json', json.dumps(public_inventory, ensure_ascii=False, indent=2) + '\n')
+        paths.extend(build_locale(posts, localized_evidence))
+    LANG = 'pt-BR'
+    namespace = 'http://www.sitemaps.org/schemas/sitemap/0.9'
+    xhtml = 'http://www.w3.org/1999/xhtml'
+    ET.register_namespace('', namespace)
+    ET.register_namespace('xhtml', xhtml)
+    sitemap = ET.Element(f'{{{namespace}}}urlset')
+    for path in paths:
+        entry = ET.SubElement(sitemap, f'{{{namespace}}}url')
+        ET.SubElement(entry, f'{{{namespace}}}loc').text = BASE + path
+        original_path = path[3:] if path.startswith('/en/') else path
+        for language in ('pt-BR', 'en', 'x-default'):
+            ET.SubElement(entry, f'{{{xhtml}}}link', rel='alternate', hreflang=language, href=alternate_url(original_path, language))
+    write('/sitemap.xml', ET.tostring(sitemap, encoding='unicode', xml_declaration=True))
     write('/robots.txt', f'User-agent: *\nAllow: /\nSitemap: {absolute("/sitemap.xml")}\n')
-    print(f'Built {len(pages) + len(posts)} pages, {len(posts)} articles and {len(evidence)} curated captures -> website/dist')
+    print(f'Built {len(paths)} bilingual pages, {len(posts)} articles per language and {len(evidence)} curated captures -> website/dist')
 
 
 if __name__ == '__main__':

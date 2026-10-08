@@ -1,0 +1,9 @@
+Diablo WebFont supplied by the project owner for website headings.
+Source: diablo-webfont.zip, diablo.woff (unchanged).
+Embedded font name: Diablo Heavy.
+Embedded copyright: (c) MaGiK Software, 1997.
+The source archive contains no separate license text; no additional license grant is asserted here.
+
+Mason Serif is already rendered into the owner's original Diablo 3D logo artwork.
+The supplied Mason Serif desktop font file is not embedded in this website.
+Manrope and Cormorant Garamond retain their existing OFL notices in this directory.
