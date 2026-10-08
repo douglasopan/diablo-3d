@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "engine/point.hpp"
+#include "engine/render/town_camera.hpp"
 #include "engine/render/town_lighting.hpp"
 
 namespace devilution {
@@ -25,12 +26,23 @@ void AdjustTownViewDistance(float delta);
 void OrbitTownView(float yawDelta, float pitchDelta);
 void ZoomTownView(float wheelSteps);
 void ResetTownViewCamera();
+TownCameraMode GetTownViewCameraMode();
+/** Session mode only; Home does not overwrite the saved startup preference. */
+void SetTownViewCameraMode(TownCameraMode mode);
+/** Cycles and updates the saved preference through the normal option setter. */
+void CycleTownViewCameraMode();
+void ApplyTownViewCameraPreferences();
+/** Private fixture control; does not write options or the native player. */
+void SetTownViewCameraPoseForDiagnostics(TownCameraPose pose);
 struct TownViewCameraState {
 	float yaw;
 	float pitch;
 	float distance;
 	float offsetX;
 	float offsetZ;
+	TownCameraMode mode = TownCameraMode::Isometric;
+	float verticalFovDegrees = 60;
+	float eyeHeight = 1.1F;
 };
 TownViewCameraState GetTownViewCameraState();
 /** Effective world sampling; camera, pointer coordinates and UI remain logical. */
@@ -49,6 +61,12 @@ struct TownViewRendererState {
 	size_t cpuRasterizedTriangles = 0;
 	size_t gpuSubmittedTriangles = 0;
 	std::string failure;
+	size_t horizonTriangles = 0;
+	size_t horizonBytes = 0;
+	size_t cpuPixelVisits = 0;
+	size_t cpuCoveredFragments = 0;
+	size_t cpuDepthRejected = 0;
+	size_t cpuShadedFragments = 0;
 };
 TownViewRendererState GetTownViewRendererState();
 /** Borrowed world-only 2x image, or nullptr when its draw epoch is stale. */

@@ -29,6 +29,7 @@
 #include "engine/render/scrollrt.h"
 #include "engine/render/town_ground_shadow.hpp"
 #include "engine/render/town_gpu.hpp"
+#include "engine/render/town_horizon.hpp"
 #include "engine/render/town_lighting.hpp"
 #include "engine/render/town_lighting_profile.hpp"
 #include "engine/render/town_scene.hpp"
@@ -58,10 +59,8 @@ namespace devilution {
 namespace {
 
 constexpr float Pi = 3.14159265358979323846F;
-constexpr float NearPlane = 0.4F;
 constexpr float PixelsPerWorldUnit = 32.0F;
 constexpr float NativeCameraScale = 45.25483399593904F; // 32 * sqrt(2)
-constexpr float NativeHeightScale = 0.816496580927726F; // sqrt(2/3)
 constexpr float DefaultCameraDistance = 22.0F;
 constexpr size_t ImportedLightLevels = 64;
 constexpr float InteriorPointLightRange = 4.0F;
@@ -102,6 +101,7 @@ Vec3 Cross(Vec3 a, Vec3 b)
 }
 
 struct Camera {
+	TownCameraFrame projection;
 	Vec3 target;
 	Vec3 eye;
 	Vec3 forward;
@@ -126,6 +126,7 @@ struct ProjectedVertex {
 	float depth;
 	float u;
 	float v;
+	float reciprocalW = 1;
 };
 
 uint64_t NextTextureGpuIdentity()
@@ -230,6 +231,9 @@ bool PickZoom = false;
 bool PickLeftPanel = false;
 bool PickRightPanel = false;
 bool PickGpuRequested = false;
+uint64_t PickCameraRevision = 0;
+bool PickHorizonEnabled = false;
+TownCameraRig CameraRig;
 float CameraYaw = Pi * 0.25F;
 float CameraDistance = 22.0F;
 float CameraPitch = Pi / 6;
@@ -237,10 +241,6 @@ Vec3 CameraPanOffset { 0, 0, 0 };
 bool CameraDragging = false;
 bool CameraDragPans = false;
 Point CameraDragLastPosition;
-constexpr float MinCameraDistance = 10.0F;
-constexpr float MaxCameraDistance = 52.0F;
-constexpr float MinCameraPitch = 0.35F;
-constexpr float MaxCameraPitch = 1.40F;
 Camera ViewCamera;
 TownViewSamplingState SamplingState;
 int RasterSampleFactor = 1;
@@ -292,6 +292,22 @@ std::unordered_map<uint32_t, uint32_t> ImportedAlbedoColors;
 std::vector<std::array<uint8_t, ImportedLightLevels>> ImportedAlbedoLightTables;
 TownLightingConfig SceneLightingConfig = TristramLightingConfig();
 bool SceneLightingProfileLoaded = false;
+TownHorizonMesh HorizonMesh;
+std::vector<uint8_t> HorizonColors;
+TownHorizonFogPalette HorizonFogPalette;
+std::array<uint32_t, 256> HorizonPaletteSignature {};
+std::array<uint8_t, 256> HorizonSkyColors {};
+bool HorizonPaletteValid = false;
+constexpr TownHorizonFogConfig HorizonFog;
+constexpr unsigned HorizonDepthSteps = 8;
+const std::array<uint8_t, 220 * HorizonDepthSteps + 1> HorizonFogDepthLevels = [] {
+	std::array<uint8_t, 220 * HorizonDepthSteps + 1> levels {};
+	for (size_t i = 0; i < levels.size(); ++i) {
+		const float amount = TownHorizonFogAmount(static_cast<float>(i) / HorizonDepthSteps, HorizonFog);
+		levels[i] = static_cast<uint8_t>(amount * (TownHorizonFogLevels - 1) + 0.5F);
+	}
+	return levels;
+}();
 std::unordered_map<const uint8_t *, VolumeArtwork> ActorVolumeCache;
 struct BillboardArtwork {
 	Texture texture;
@@ -307,6 +323,18 @@ const std::array<Texture, 256> PaletteTextures = [] {
 		textures[i].width = 1;
 		textures[i].height = 1;
 		textures[i].pixels.push_back(static_cast<uint8_t>(i));
+	}
+	return textures;
+}();
+// Horizon colors have already received the same world-space sunlight. Their
+// palette indices still use the shared GPU atlas, without applying light twice.
+const std::array<Texture, 256> HorizonPaletteTextures = [] {
+	std::array<Texture, 256> textures;
+	for (size_t i = 0; i < textures.size(); ++i) {
+		textures[i].width = 1;
+		textures[i].height = 1;
+		textures[i].pixels.push_back(static_cast<uint8_t>(i));
+		textures[i].emissive = true;
 	}
 	return textures;
 }();
@@ -424,26 +452,21 @@ Vec3 PlayerPosition(const Player &player)
 	return position;
 }
 
+void SyncCameraPose()
+{
+	const auto &pose = CameraRig.pose();
+	CameraYaw = pose.yaw;
+	CameraPitch = pose.pitch;
+	CameraDistance = pose.distance;
+	CameraPanOffset = { pose.pan.x, 0, pose.pan.z };
+}
+
 void ConfigureCamera(int width, int height)
 {
 	Vec3 target { static_cast<float>(ViewPosition.x), 0, static_cast<float>(ViewPosition.y) };
-	if (MyPlayer != nullptr && MyPlayer->position.tile == ViewPosition)
+	const bool followsHero = CameraRig.mode() == TownCameraMode::ThirdPerson || CameraRig.mode() == TownCameraMode::FirstPerson;
+	if (MyPlayer != nullptr && (followsHero || MyPlayer->position.tile == ViewPosition))
 		target = PlayerPosition(*MyPlayer);
-	target = target + CameraPanOffset;
-	ViewCamera.target = target;
-	const float inclination = CameraPitch;
-	const float cosYaw = std::cos(CameraYaw);
-	const float sinYaw = std::sin(CameraYaw);
-	const float cosPitch = std::cos(inclination);
-	const float sinPitch = std::sin(inclination);
-	// Orthographic rays start far enough behind every town cell. Distance controls
-	// magnification, so orbit/zoom cannot clip scenery merely by moving the eye.
-	ViewCamera.eye = target + Vec3 { cosYaw * cosPitch, sinPitch, sinYaw * cosPitch } * 256.0F;
-	ViewCamera.forward = { -cosYaw * cosPitch, -sinPitch, -sinYaw * cosPitch };
-	ViewCamera.right = { sinYaw, 0, -cosYaw };
-	ViewCamera.up = { -cosYaw * sinPitch, cosPitch, -sinYaw * sinPitch };
-	ViewCamera.width = width;
-	ViewCamera.height = height;
 	// Derive the anchor from the real native viewport, including zoom and side
 	// panels. Walking offsets cancel the camera offset, since target already
 	// follows the interpolated player position.
@@ -452,25 +475,44 @@ void ConfigureCamera(int width, int height)
 	if (MyPlayer != nullptr && MyPlayer->position.tile == ViewPosition && MyPlayer->isWalking())
 		anchor += GetOffsetForWalking(MyPlayer->AnimInfo, MyPlayer->_pdir);
 	const int zoomFactor = *GetOptions().Graphics.zoom ? 2 : 1;
-	ViewCamera.centerX = static_cast<float>(anchor.x * zoomFactor);
-	ViewCamera.centerY = static_cast<float>(anchor.y * zoomFactor);
+	float centerX = static_cast<float>(anchor.x * zoomFactor);
+	float centerY = static_cast<float>(anchor.y * zoomFactor);
 	if (zoomFactor == 2 && CanPanelsCoverView() && IsLeftPanelOpen())
-		ViewCamera.centerX += SidePanelSize.width;
-	ViewCamera.focal = NativeCameraScale * DefaultCameraDistance / CameraDistance * zoomFactor;
+		centerX += SidePanelSize.width;
+	if (CameraRig.mode() != TownCameraMode::Isometric) {
+		// The logical world viewport remains independent of HUD/sampling. A
+		// centered perspective has the configured vertical FOV exactly.
+		centerX = width / 2.0F;
+		centerY = height / 2.0F;
+	}
+	ViewCamera.projection = BuildTownCameraFrame(CameraRig, { target.x, target.y, target.z }, width, height,
+		centerX, centerY, static_cast<float>(zoomFactor));
+	const TownCameraFrame &frame = ViewCamera.projection;
+	const auto vector = [](TownCameraPoint point) { return Vec3 { point.x, point.height, point.z }; };
+	ViewCamera.target = target + CameraPanOffset;
+	ViewCamera.eye = vector(frame.eye);
+	ViewCamera.forward = vector(frame.forward);
+	ViewCamera.right = vector(frame.right);
+	ViewCamera.up = vector(frame.up);
+	ViewCamera.width = frame.width;
+	ViewCamera.height = frame.height;
+	ViewCamera.centerX = frame.centerX;
+	ViewCamera.centerY = frame.centerY;
+	ViewCamera.focal = frame.focalPixels;
 }
 
 Vec3 ToCamera(Vec3 point)
 {
-	point.y *= NativeHeightScale;
-	const Vec3 relative = point - ViewCamera.eye;
-	return { Dot(relative, ViewCamera.right), Dot(relative, ViewCamera.up), Dot(relative, ViewCamera.forward) };
+	const TownCameraPoint view = TownCameraToView(ViewCamera.projection, { point.x, point.y, point.z });
+	return { view.x, view.height, view.z };
 }
 
 ProjectedVertex Project(Vertex vertex)
 {
-	return { ViewCamera.centerX + vertex.position.x * ViewCamera.focal,
-		ViewCamera.centerY - vertex.position.y * ViewCamera.focal,
-		vertex.position.z, vertex.u, vertex.v };
+	const float q = ViewCamera.projection.perspective ? 1 / vertex.position.z : 1;
+	return { ViewCamera.centerX + vertex.position.x * ViewCamera.focal * q,
+		ViewCamera.centerY - vertex.position.y * ViewCamera.focal * q,
+		vertex.position.z, vertex.u, vertex.v, q };
 }
 
 ProjectedVertex ProjectRaster(Vertex vertex)
@@ -565,13 +607,17 @@ uint32_t GpuPickId(PickRecord pick)
 	return entry->second;
 }
 
-void Rasterize(const Surface &out, const std::array<Vertex, 3> &triangle, const Texture &texture,
+void Rasterize(const Surface &out, const std::array<TownCameraProjectedVertex, 3> &triangle, const Texture &texture,
 	PickRecord pick, int shade, bool transparent, const TownSceneNormal *authoredNormal,
 	const InteriorLighting *interior, GpuVolumeFallback fallback)
 {
-	const ProjectedVertex a = ProjectRaster(triangle[0]);
-	const ProjectedVertex b = ProjectRaster(triangle[1]);
-	const ProjectedVertex c = ProjectRaster(triangle[2]);
+	const auto raster = [](const TownCameraProjectedVertex &vertex) {
+		return ProjectedVertex { vertex.x * RasterSampleFactor, vertex.y * RasterSampleFactor,
+			vertex.depth, vertex.source.u, vertex.source.v, vertex.reciprocalW };
+	};
+	const ProjectedVertex a = raster(triangle[0]);
+	const ProjectedVertex b = raster(triangle[1]);
+	const ProjectedVertex c = raster(triangle[2]);
 	const float area = Edge(a, b, c.x, c.y);
 	if (std::abs(area) < 0.001F * RasterSampleFactor * RasterSampleFactor)
 		return;
@@ -583,15 +629,12 @@ void Rasterize(const Surface &out, const std::array<Vertex, 3> &triangle, const 
 		return;
 	const float inverseArea = 1.0F / area;
 	const uint8_t *lightTable = SceneLightTables[std::clamp(shade, 0, 3)].data();
-	const auto worldPosition = [](Vec3 camera) {
-		Vec3 world = ViewCamera.eye + ViewCamera.right * camera.x
-		    + ViewCamera.up * camera.y + ViewCamera.forward * camera.z;
-		world.y /= NativeHeightScale;
-		return world;
+	const auto worldPosition = [](const TownCameraProjectedVertex &vertex) {
+		return Vec3 { vertex.source.world.x, vertex.source.world.height, vertex.source.world.z };
 	};
-	const Vec3 worldA = worldPosition(triangle[0].position);
-	const Vec3 worldB = worldPosition(triangle[1].position);
-	const Vec3 worldC = worldPosition(triangle[2].position);
+	const Vec3 worldA = worldPosition(triangle[0]);
+	const Vec3 worldB = worldPosition(triangle[1]);
+	const Vec3 worldC = worldPosition(triangle[2]);
 	Vec3 normal = Cross(worldB - worldA, worldC - worldA);
 	const float normalLength = std::sqrt(Dot(normal, normal));
 	if (normalLength > 0)
@@ -604,8 +647,11 @@ void Rasterize(const Surface &out, const std::array<Vertex, 3> &triangle, const 
 	if (hasAlbedo) {
 		// D3DMESH1 imports render both material sides. A visible back face must
 		// light its visible side, without changing authored vertices or UVs.
+		const Vec3 towardViewer = ViewCamera.projection.perspective
+		    ? ViewCamera.eye - (worldA + worldB + worldC) * (1.0F / 3)
+		    : Vec3 { -ViewCamera.forward.x, -ViewCamera.forward.y / ViewCamera.projection.heightScale, -ViewCamera.forward.z };
 		const TownLightVector facing = OrientTownLightingNormal({ normal.x, normal.y, normal.z },
-			{ -ViewCamera.forward.x, -ViewCamera.forward.y / NativeHeightScale, -ViewCamera.forward.z });
+			{ towardViewer.x, towardViewer.y, towardViewer.z });
 		normal = { facing.x, facing.height, facing.z };
 	}
 	const TownShadowReceiver shadowReceiver = PrepareTownShadowReceiver(normal.x, normal.y, normal.z);
@@ -643,7 +689,7 @@ void Rasterize(const Surface &out, const std::array<Vertex, 3> &triangle, const 
 			material.room = &occluders.front();
 			material.blockers = occluders.subspan(1);
 		}
-		const bool constantPalette = !hasAlbedo && !texture.emissive && texture.opacity.empty()
+		const bool constantPalette = !hasAlbedo && texture.opacity.empty()
 		    && texture.width == 1 && texture.height == 1 && texture.pixels.size() == 1;
 		if (constantPalette)
 			material.repeat = false;
@@ -652,7 +698,7 @@ void Rasterize(const Surface &out, const std::array<Vertex, 3> &triangle, const 
 				p.u = (static_cast<float>(texture.pixels[0]) + 0.5F) / 256;
 				p.v = 0.5F;
 			}
-			return TownGpuVertex { p.x, p.y, p.depth, p.u, p.v, { w.x, w.y, w.z } };
+			return TownGpuVertex { p.x, p.y, p.depth, p.u, p.v, { w.x, w.y, w.z }, ViewCamera.projection.perspective ? p.depth : 1.0F };
 		};
 		CaptureGpuFailed = !TownGpuSubmitProjectedTriangle({ vertex(a, worldA), vertex(b, worldB), vertex(c, worldC) },
 			PrepareGpuTexture(constantPalette ? GpuPaletteAtlas : texture, interior), material, GpuPickId(pick));
@@ -663,6 +709,7 @@ void Rasterize(const Surface &out, const std::array<Vertex, 3> &triangle, const 
 	for (int y = minY; y <= maxY; ++y) {
 		uint8_t *destination = out.at(0, y);
 		for (int x = minX; x <= maxX; ++x) {
+			++RendererState.cpuPixelVisits;
 			const float px = static_cast<float>(x) + 0.5F;
 			const float py = static_cast<float>(y) + 0.5F;
 			const float wa = Edge(b, c, px, py) * inverseArea;
@@ -670,18 +717,34 @@ void Rasterize(const Surface &out, const std::array<Vertex, 3> &triangle, const 
 			const float wc = 1.0F - wa - wb;
 			if (wa < -0.0001F || wb < -0.0001F || wc < -0.0001F)
 				continue;
-			const float depth = wa * a.depth + wb * b.depth + wc * c.depth;
+			++RendererState.cpuCoveredFragments;
+			float ca = wa, cb = wb, cc = wc;
+			if (ViewCamera.projection.perspective) {
+				// Coverage tolerates float edge error; never extrapolate reciprocal
+				// depth or world/UV outside a clipped perspective triangle.
+				ca = std::max(0.0F, ca);
+				cb = std::max(0.0F, cb);
+				cc = std::max(0.0F, cc);
+				const float q = ca * a.reciprocalW + cb * b.reciprocalW + cc * c.reciprocalW;
+				if (!std::isfinite(q) || q <= 0)
+					continue;
+				ca = ca * a.reciprocalW / q;
+				cb = cb * b.reciprocalW / q;
+				cc = cc * c.reciprocalW / q;
+			}
+			const float depth = ca * a.depth + cb * b.depth + cc * c.depth;
 			const size_t index = static_cast<size_t>(y) * out.w() + x;
-			if (depth > DepthBuffer[index] + 0.0001F)
+			if (!std::isfinite(depth) || depth > DepthBuffer[index] + 0.0001F) {
+				++RendererState.cpuDepthRejected;
 				continue;
-			// Both texture coordinates and depth are affine under parallel rays.
-			const float u = wa * a.u + wb * b.u + wc * c.u;
-			const float v = wa * a.v + wb * b.v + wc * c.v;
+			}
+			const float u = ca * a.u + cb * b.u + cc * c.u;
+			const float v = ca * a.v + cb * b.v + cc * c.v;
 			uint8_t color;
 			uint32_t albedoColor = 0;
 			if (!texture.sample(u, v, color, &albedoColor) || (transparent && !hasAlbedo && texture.opacity.empty() && color == 0))
 				continue;
-			const Vec3 world = worldA * wa + worldB * wb + worldC * wc;
+			const Vec3 world = worldA * ca + worldB * cb + worldC * cc;
 			const float shadow = receivesShadow
 			    ? SampleTownShadow(world.x, world.y, world.z, shadowReceiver) : 0;
 			const int shadowLevel = std::clamp(static_cast<int>(shadow * 3.0F + 0.5F), 0, 3);
@@ -705,6 +768,7 @@ void Rasterize(const Surface &out, const std::array<Vertex, 3> &triangle, const 
 				    : SceneShadowTables[std::clamp(shade, 0, 3)][shadowLevel][color];
 			}
 			DepthBuffer[index] = depth;
+			++RendererState.cpuShadedFragments;
 			if (!pick.preservePicking)
 				PickBuffer[index] = pick;
 		}
@@ -715,29 +779,14 @@ void DrawTriangle(const Surface &out, std::array<Vertex, 3> triangle, const Text
 	PickRecord pick, int shade, bool transparent = false, const TownSceneNormal *authoredNormal = nullptr,
 	const InteriorLighting *interior = nullptr, GpuVolumeFallback fallback = {})
 {
-	for (Vertex &vertex : triangle)
-		vertex.position = ToCamera(vertex.position);
-	// Clip against the near plane before projecting; crossing triangles remain selectable.
-	std::array<Vertex, 4> clipped;
-	size_t count = 0;
-	for (size_t i = 0; i < 3; ++i) {
-		const Vertex &previous = triangle[(i + 2) % 3];
-		const Vertex &current = triangle[i];
-		const bool previousInside = previous.position.z >= NearPlane;
-		const bool currentInside = current.position.z >= NearPlane;
-		if (previousInside != currentInside) {
-			const float t = (NearPlane - previous.position.z) / (current.position.z - previous.position.z);
-			clipped[count] = { previous.position + (current.position - previous.position) * t,
-				previous.u + (current.u - previous.u) * t, previous.v + (current.v - previous.v) * t };
-			// Interpolation can round just below the plane; both backends receive
-			// the exact same clipped position and the GPU validates this boundary.
-			clipped[count++].position.z = NearPlane;
-		}
-		if (currentInside)
-			clipped[count++] = current;
-	}
-	for (size_t i = 1; i + 1 < count; ++i)
-		Rasterize(out, { clipped[0], clipped[i], clipped[i + 1] }, texture, pick, shade, transparent, authoredNormal, interior, fallback);
+	std::array<TownCameraVertex, 3> world;
+	for (size_t i = 0; i < triangle.size(); ++i)
+		world[i] = { { triangle[i].position.x, triangle[i].position.y, triangle[i].position.z }, triangle[i].u, triangle[i].v };
+	// Both backends receive the same six-plane clipped vertices, UV and world
+	// positions. No perspective vertex is divided before clipping.
+	const auto clipped = ClipTownCameraTriangle(ViewCamera.projection, world);
+	for (size_t i = 0; i < clipped.count; ++i)
+		Rasterize(out, clipped.triangles[i], texture, pick, shade, transparent, authoredNormal, interior, fallback);
 }
 
 void DrawQuad(const Surface &out, const std::array<Vec3, 4> &corners, const Texture &texture,
@@ -1057,6 +1106,87 @@ uint8_t ClosestSceneColor(float red, float green, float blue)
 		}
 	}
 	return best;
+}
+
+void PrepareHorizon()
+{
+	if (HorizonMesh.triangles.empty()) {
+		TownHorizonConfig config;
+		// Native diamonds extend beyond tile centers. This conservative bound
+		// encloses every floor quad; the visual apron never covers native ground.
+		config.bounds = { -1.46875F, -1.46875F, MAXDUNX - 0.46875F, MAXDUNY - 0.46875F };
+		HorizonMesh = BuildTownHorizon(config);
+		HorizonPaletteValid = false;
+	}
+	std::array<uint32_t, 256> signature;
+	for (size_t i = 0; i < signature.size(); ++i) {
+		const SDL_Color color = logical_palette[i];
+		signature[i] = static_cast<uint32_t>(color.r) | (static_cast<uint32_t>(color.g) << 8) | (static_cast<uint32_t>(color.b) << 16);
+	}
+	if (HorizonPaletteValid && signature == HorizonPaletteSignature)
+		return;
+	TownHorizonPalette linearPalette;
+	for (size_t i = 0; i < linearPalette.size(); ++i) {
+		const SDL_Color color = logical_palette[i];
+		linearPalette[i] = { TownSrgbToLinear(color.r / 255.0F), TownSrgbToLinear(color.g / 255.0F), TownSrgbToLinear(color.b / 255.0F) };
+	}
+	HorizonFogPalette = BuildTownHorizonFogPalette(linearPalette, HorizonFog.color);
+	HorizonColors.resize(HorizonMesh.triangles.size());
+	for (size_t i = 0; i < HorizonMesh.triangles.size(); ++i) {
+		const TownHorizonTriangle &triangle = HorizonMesh.triangles[i];
+		const auto vec = [](TownCameraPoint p) { return Vec3 { p.x, p.height, p.z }; };
+		const Vec3 normal = Cross(vec(triangle.vertices[1] - triangle.vertices[0]), vec(triangle.vertices[2] - triangle.vertices[0]));
+		const TownCameraPoint center = (triangle.vertices[0] + triangle.vertices[1] + triangle.vertices[2]) * (1.0F / 3);
+		const TownLightingSample light = SampleTownLighting({ normal.x, normal.y, normal.z },
+		    { center.x, center.height, center.z }, 0, SceneLightingConfig);
+		const TownLightColor color = TownLinearToSrgb(ComposeTownLitColor(
+		    { triangle.color.red, triangle.color.green, triangle.color.blue }, light));
+		HorizonColors[i] = ClosestSceneColor(color.red * 255, color.green * 255, color.blue * 255);
+	}
+	for (size_t i = 0; i < HorizonSkyColors.size(); ++i) {
+		const float amount = static_cast<float>(i) / (HorizonSkyColors.size() - 1);
+		const TownLightColor color = TownLinearToSrgb({ 0.055F + (HorizonFog.color.red - 0.055F) * amount,
+		    0.085F + (HorizonFog.color.green - 0.085F) * amount, 0.13F + (HorizonFog.color.blue - 0.13F) * amount });
+		HorizonSkyColors[i] = ClosestSceneColor(color.red * 255, color.green * 255, color.blue * 255);
+	}
+	HorizonPaletteSignature = signature;
+	HorizonPaletteValid = true;
+}
+
+void DrawHorizon(const Surface &out)
+{
+	for (size_t i = 0; i < HorizonMesh.triangles.size(); ++i) {
+		std::array<Vertex, 3> triangle;
+		for (size_t j = 0; j < triangle.size(); ++j) {
+			const TownCameraPoint p = HorizonMesh.triangles[i].vertices[j];
+			triangle[j] = { { p.x, p.height, p.z }, 0, 0 };
+		}
+		// Opaque decoration publishes invalid picking with its own depth. It
+		// must never preserve the selection of a native surface hidden behind it.
+		DrawTriangle(out, triangle, HorizonPaletteTextures[HorizonColors[i]], PickRecord {}, 0);
+	}
+}
+
+void ApplyHorizonAtmosphere(const Surface &out)
+{
+	// This shared postpass runs after GPU readback or a complete CPU fallback,
+	// before sampling resolve. Only the visible surface's color is transformed.
+	for (int y = 0; y < out.h(); ++y) {
+		uint8_t *destination = out.at(0, y);
+		const size_t sky = static_cast<size_t>(y) * (HorizonSkyColors.size() - 1) / std::max(1, out.h() - 1);
+		for (int x = 0; x < out.w(); ++x) {
+			const float depth = DepthBuffer[static_cast<size_t>(y) * out.w() + x];
+			if (!std::isfinite(depth)) {
+				destination[x] = HorizonSkyColors[sky];
+				continue;
+			}
+			const float fogDepth = TownCameraFogDepth(ViewCamera.projection, depth);
+			if (fogDepth <= HorizonFog.startDepth)
+				continue;
+			const size_t step = static_cast<size_t>(std::min(fogDepth, HorizonFog.endDepth) * HorizonDepthSteps);
+			destination[x] = HorizonFogPalette[HorizonFogDepthLevels[step]][destination[x]];
+		}
+	}
 }
 
 void CompleteOpaqueMaterial(Texture &texture, const std::vector<uint8_t> &coverage, uint8_t fallback)
@@ -1442,8 +1572,8 @@ void DrawScene(const Surface &out)
 			const NativeSceneFace &face = art.projectedFaces[triangleIndex];
 			if (!triangle.nativeProjection || face.texture.width == 0)
 				continue;
-			const Vec3 toEye = ViewCamera.eye - Vec3 { triangle.vertices[0].x, triangle.vertices[0].height * NativeHeightScale, triangle.vertices[0].z };
-			if (triangle.normal.x * toEye.x + triangle.normal.height * toEye.y / NativeHeightScale + triangle.normal.z * toEye.z <= 0)
+			const Vec3 toEye = ViewCamera.eye - Vec3 { triangle.vertices[0].x, triangle.vertices[0].height, triangle.vertices[0].z };
+			if (triangle.normal.x * toEye.x + triangle.normal.height * toEye.y + triangle.normal.z * toEye.z <= 0)
 				continue;
 			std::array<Vertex, 3> vertices;
 			for (size_t i = 0; i < vertices.size(); ++i) {
@@ -1516,29 +1646,32 @@ void DrawVolume(const Surface &out, Vec3 position, Point tile, const VolumeArtwo
 	}
 	if (art.mesh.triangles.empty())
 		return;
-	float minX = std::numeric_limits<float>::infinity(), minY = minX;
-	float maxX = -minX, maxY = -minX;
-	for (const float x : { art.minimum.x - 0.01F, art.maximum.x + 0.01F }) {
-		for (const float height : { art.minimum.y - 0.01F, art.maximum.y + 0.01F }) {
-			for (const float z : { art.minimum.z - 0.01F, art.maximum.z + 0.01F }) {
-				const ProjectedVertex projected = ProjectRaster({ ToCamera(world({ x, height, z, 0, 0 })), 0, 0 });
-				minX = std::min(minX, projected.x);
-				maxX = std::max(maxX, projected.x);
-				minY = std::min(minY, projected.y);
-				maxY = std::max(maxY, projected.y);
+	if (!ViewCamera.projection.perspective) {
+		float minX = std::numeric_limits<float>::infinity(), minY = minX;
+		float maxX = -minX, maxY = -minX;
+		for (const float x : { art.minimum.x - 0.01F, art.maximum.x + 0.01F }) {
+			for (const float height : { art.minimum.y - 0.01F, art.maximum.y + 0.01F }) {
+				for (const float z : { art.minimum.z - 0.01F, art.maximum.z + 0.01F }) {
+					const ProjectedVertex projected = ProjectRaster({ ToCamera(world({ x, height, z, 0, 0 })), 0, 0 });
+					minX = std::min(minX, projected.x);
+					maxX = std::max(maxX, projected.x);
+					minY = std::min(minY, projected.y);
+					maxY = std::max(maxY, projected.y);
+				}
 			}
 		}
+		if (maxX < 0 || maxY < 0 || minX >= out.w() || minY >= out.h())
+			return;
 	}
-	if (maxX < 0 || maxY < 0 || minX >= out.w() || minY >= out.h())
-		return;
+	// Perspective conservatively retains the box, including near/eye crossings;
+	// per-triangle homogeneous clipping below remains authoritative.
 	const PickRecord pick = PickAt(tile, kind, entity);
 	for (const TownVolumeTriangle &triangle : art.mesh.triangles) {
 		std::array<Vertex, 3> vertices;
 		for (size_t i = 0; i < vertices.size(); ++i)
 			vertices[i] = { world(triangle.vertices[i]), triangle.vertices[i].u, triangle.vertices[i].v };
 		const Vec3 normal = Cross(vertices[1].position - vertices[0].position, vertices[2].position - vertices[0].position);
-		const Vec3 eye { ViewCamera.eye.x, ViewCamera.eye.y / NativeHeightScale, ViewCamera.eye.z };
-		if (Dot(normal, eye - vertices[0].position) <= 0)
+		if (Dot(normal, ViewCamera.eye - vertices[0].position) <= 0)
 			continue;
 		const float length = std::sqrt(Dot(normal, normal));
 		const float light = length > 0 ? (normal.x + normal.y + normal.z) / (length * 1.7320508F) : 0;
@@ -1757,7 +1890,7 @@ void DrawVegetation(const Surface &out)
 void DrawVolumetricSprite(const Surface &out, Vec3 position, Point tile, ClxSprite sprite, PickKind kind, int entity,
 	int lighting = 0)
 {
-	if (std::abs(position.x - ViewCamera.target.x) > 80 || std::abs(position.z - ViewCamera.target.z) > 80)
+	if (!ViewCamera.projection.perspective && (std::abs(position.x - ViewCamera.target.x) > 80 || std::abs(position.z - ViewCamera.target.z) > 80))
 		return;
 	auto &cache = ActorVolumeCache;
 	const uint8_t *key = sprite.pixelData();
@@ -1867,7 +2000,7 @@ void DrawPlayerVolume(const Surface &out, Vec3 position, const Player &player, i
 
 void DrawBillboard(const Surface &out, Vec3 position, Point tile, ClxSprite sprite, PickKind kind, int entity, int lighting = 0)
 {
-	if (std::abs(position.x - ViewCamera.target.x) > 80 || std::abs(position.z - ViewCamera.target.z) > 80)
+	if (!ViewCamera.projection.perspective && (std::abs(position.x - ViewCamera.target.x) > 80 || std::abs(position.z - ViewCamera.target.z) > 80))
 		return;
 	const uint8_t *key = sprite.pixelData();
 	uint64_t hash = 1469598103934665603ULL;
@@ -1980,6 +2113,8 @@ void ResolveSampling(const Surface &logical, const Surface &sampled)
 bool CurrentPickingValid()
 {
 	return PickingValid && SamplingState.requested == *GetOptions().Graphics.townViewAntialiasing
+	    && PickCameraRevision == CameraRig.revision()
+	    && PickHorizonEnabled == *GetOptions().Graphics.townViewHorizon
 	    && PickGpuRequested == *GetOptions().Graphics.townViewGpuRendering
 	    && PickScreenWidth == gnScreenWidth && PickScreenHeight == gnScreenHeight
 	    && PickViewportHeight == gnViewportHeight && PickZoom == *GetOptions().Graphics.zoom
@@ -1999,17 +2134,22 @@ bool IsTownViewActive()
 void InitializeTownViewForGame()
 {
 	Enabled = *GetOptions().Graphics.townViewStartIn3D;
+	CameraRig = TownCameraRig {};
+	ApplyTownViewCameraPreferences();
 	ResetTownViewCamera();
 	// Home remains an exact native comparison. Start just off that pose so the
 	// initial 3D view actually renders geometry and uses its matching picking.
 	if (Enabled)
 		RotateTownView(0.15F);
+	SetTownViewCameraMode(static_cast<TownCameraMode>(std::clamp(*GetOptions().Graphics.townViewCameraMode, 0, 3)));
+	CameraRig.Suspend(!Enabled);
 }
 
 bool IsTownViewNativePose()
 {
 	constexpr float Tolerance = 0.00001F;
 	return IsTownViewActive()
+	    && CameraRig.mode() == TownCameraMode::Isometric
 	    && std::abs(std::remainder(CameraYaw - Pi * 0.25F, 2 * Pi)) <= Tolerance
 	    && std::abs(CameraPitch - Pi / 6) <= Tolerance
 	    && std::abs(CameraDistance - DefaultCameraDistance) <= Tolerance
@@ -2020,6 +2160,7 @@ bool IsTownViewNativePose()
 void ToggleTownView()
 {
 	Enabled = !Enabled;
+	CameraRig.Suspend(!Enabled);
 	EndTownViewCameraDrag();
 	PickingValid = false;
 }
@@ -2031,7 +2172,12 @@ void RotateTownView(float radians)
 
 void AdjustTownViewDistance(float delta)
 {
-	CameraDistance = std::clamp(CameraDistance + delta, MinCameraDistance, MaxCameraDistance);
+	if (!std::isfinite(delta) || CameraRig.mode() == TownCameraMode::FirstPerson)
+		return;
+	auto pose = CameraRig.pose();
+	pose.distance += std::clamp(delta, -80.0F, 80.0F);
+	CameraRig.SetPose(pose);
+	SyncCameraPose();
 	PickingValid = false;
 }
 
@@ -2039,8 +2185,8 @@ void OrbitTownView(float yawDelta, float pitchDelta)
 {
 	if (!std::isfinite(yawDelta) || !std::isfinite(pitchDelta))
 		return;
-	CameraYaw = std::remainder(CameraYaw + yawDelta, 2 * Pi);
-	CameraPitch = std::clamp(CameraPitch + pitchDelta, MinCameraPitch, MaxCameraPitch);
+	CameraRig.Orbit(yawDelta, pitchDelta);
+	SyncCameraPose();
 	PickingValid = false;
 }
 
@@ -2048,23 +2194,62 @@ void ZoomTownView(float wheelSteps)
 {
 	if (!std::isfinite(wheelSteps))
 		return;
-	CameraDistance = std::clamp(CameraDistance * std::pow(0.88F, std::clamp(wheelSteps, -50.0F, 50.0F)), MinCameraDistance, MaxCameraDistance);
+	CameraRig.Zoom(wheelSteps);
+	SyncCameraPose();
 	PickingValid = false;
 }
 
 void ResetTownViewCamera()
 {
-	CameraYaw = Pi * 0.25F;
-	CameraPitch = Pi / 6;
-	CameraDistance = DefaultCameraDistance;
-	CameraPanOffset = { 0, 0, 0 };
+	CameraRig.RestoreIsometric();
+	SyncCameraPose();
 	EndTownViewCameraDrag();
 	PickingValid = false;
 }
 
 TownViewCameraState GetTownViewCameraState()
 {
-	return { CameraYaw, CameraPitch, CameraDistance, CameraPanOffset.x, CameraPanOffset.z };
+	return { CameraYaw, CameraPitch, CameraDistance, CameraPanOffset.x, CameraPanOffset.z,
+		CameraRig.mode(), CameraRig.preferences().verticalFovDegrees, CameraRig.preferences().eyeHeight };
+}
+
+TownCameraMode GetTownViewCameraMode()
+{
+	return CameraRig.mode();
+}
+
+void SetTownViewCameraMode(TownCameraMode mode)
+{
+	if (!CameraRig.SetMode(mode))
+		return;
+	SyncCameraPose();
+	EndTownViewCameraDrag();
+	PickingValid = false;
+}
+
+void CycleTownViewCameraMode()
+{
+	const int next = (static_cast<int>(CameraRig.mode()) + 1) % 4;
+	GetOptions().Graphics.townViewCameraMode.SetValue(next);
+	SetTownViewCameraMode(static_cast<TownCameraMode>(next));
+}
+
+void ApplyTownViewCameraPreferences()
+{
+	auto preferences = CameraRig.preferences();
+	preferences.verticalFovDegrees = static_cast<float>(std::clamp(*GetOptions().Graphics.townViewCameraFov, 35, 100));
+	preferences.orbitRadiansPerPixel = 0.006F * static_cast<float>(std::clamp(*GetOptions().Graphics.townViewCameraSensitivity, 25, 200)) / 100;
+	CameraRig.SetPreferences(preferences);
+	EndTownViewCameraDrag();
+	PickingValid = false;
+}
+
+void SetTownViewCameraPoseForDiagnostics(TownCameraPose pose)
+{
+	CameraRig.SetPose(pose);
+	SyncCameraPose();
+	EndTownViewCameraDrag();
+	PickingValid = false;
 }
 
 TownViewSamplingState GetTownViewSamplingState()
@@ -2090,6 +2275,8 @@ bool BeginTownViewCameraDrag(Point screen, bool pan)
 {
 	if (!IsTownViewActive() || screen.x < 0 || screen.y < 0 || screen.x >= gnScreenWidth || screen.y >= gnViewportHeight)
 		return false;
+	if (pan && (CameraRig.mode() == TownCameraMode::ThirdPerson || CameraRig.mode() == TownCameraMode::FirstPerson))
+		return false;
 	CameraDragging = true;
 	CameraDragPans = pan;
 	CameraDragLastPosition = screen;
@@ -2107,17 +2294,17 @@ bool UpdateTownViewCameraDrag(Point screen)
 	if (delta.deltaX == 0 && delta.deltaY == 0)
 		return false;
 	if (CameraDragPans) {
-		const float unitsPerPixel = 1.0F / std::max(1.0F, ViewCamera.focal);
+		const float unitsPerPixel = (ViewCamera.projection.perspective ? CameraDistance : 1.0F) / std::max(1.0F, ViewCamera.focal);
 		const Vec3 right { std::sin(CameraYaw), 0, -std::cos(CameraYaw) };
 		const Vec3 forward { -std::cos(CameraYaw), 0, -std::sin(CameraYaw) };
-		CameraPanOffset = CameraPanOffset - right * (static_cast<float>(delta.deltaX) * unitsPerPixel)
-		    + forward * (static_cast<float>(delta.deltaY) * unitsPerPixel / std::sin(CameraPitch));
-		const float length = std::sqrt(Dot(CameraPanOffset, CameraPanOffset));
-		if (length > 20.0F)
-			CameraPanOffset = CameraPanOffset * (20.0F / length);
+		const Vec3 movement = right * (-static_cast<float>(delta.deltaX) * unitsPerPixel)
+		    + forward * (static_cast<float>(delta.deltaY) * unitsPerPixel / std::max(0.15F, std::sin(CameraPitch)));
+		CameraRig.Pan(movement.x, movement.z);
+		SyncCameraPose();
 		PickingValid = false;
 	} else {
-		OrbitTownView(static_cast<float>(delta.deltaX) * 0.008F, static_cast<float>(delta.deltaY) * 0.006F);
+		const float sensitivity = CameraRig.preferences().orbitRadiansPerPixel;
+		OrbitTownView(static_cast<float>(delta.deltaX) * sensitivity * (4.0F / 3), static_cast<float>(delta.deltaY) * sensitivity);
 	}
 	return true;
 }
@@ -2157,6 +2344,9 @@ void SetTownViewFireTimeForDiagnostics(double seconds)
 void ResetTownViewResources()
 {
 	ClearGpuSceneResources();
+	HorizonMesh = {};
+	std::vector<uint8_t>().swap(HorizonColors);
+	HorizonPaletteValid = false;
 	BillboardTextureCache.clear();
 	ClearUiOverlayRegions();
 #ifndef USE_SDL1
@@ -2210,6 +2400,7 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 	}
 	if (CachedDungeonData != pDungeonCels.get()) {
 		ClearGpuSceneResources();
+		HorizonPaletteValid = false;
 		RendererState.requestedGpu = *GetOptions().Graphics.townViewGpuRendering;
 		BillboardTextureCache.clear();
 		ClearTownShadowMap();
@@ -2249,16 +2440,28 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 		ClearSurface(logical);
 		return DrawNativeTownViewReference(fullOut, ViewPosition);
 	}
+	if (!ViewCamera.projection.valid) {
+		RendererState.failure = "Invalid town camera frame";
+		return false;
+	}
 	const Surface out = PrepareSamplingBuffers(logical);
 	ClearSurface(out);
 	PrepareSceneLighting();
+	const bool horizonEnabled = *GetOptions().Graphics.townViewHorizon;
+	if (horizonEnabled) {
+		PrepareHorizon();
+		RendererState.horizonTriangles = HorizonMesh.statistics.triangles;
+		RendererState.horizonBytes = HorizonMesh.statistics.reservedTriangleBytes + HorizonColors.capacity()
+		    + sizeof(HorizonFogPalette) + sizeof(HorizonFogDepthLevels) + sizeof(HorizonSkyColors) + sizeof(HorizonPaletteSignature);
+	}
 	FrameFireTime = CabinFireDiagnosticTime >= 0 ? CabinFireDiagnosticTime : static_cast<double>(SDL_GetTicks()) / 1000;
 	TownShadowConfig shadowConfig;
 	shadowConfig.toLight = { SceneLightingConfig.toLight.x, SceneLightingConfig.toLight.height, SceneLightingConfig.toLight.z };
 	BuildTownShadowMap(GetTownScene(), shadowConfig);
 	++GpuFrameNumber;
 	if (RendererState.requestedGpu && !GpuBlocked) {
-		CaptureGpu = TownGpuBeginFrame(out.w(), out.h());
+		CaptureGpu = TownGpuBeginFrame(out.w(), out.h(), false,
+		    { ViewCamera.projection.perspective, ViewCamera.projection.nearClip, ViewCamera.projection.farClip });
 		if (CaptureGpu) {
 			GpuPickIds.clear();
 			GpuPickRecords.assign(1, PickRecord {});
@@ -2285,6 +2488,8 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 		}
 	}
 	const auto drawWorld = [&]() {
+		if (horizonEnabled)
+			DrawHorizon(out);
 		const Texture &fallback = FallbackGround();
 		// Native town generation fills the entire dungeon grid, including the outer
 		// grass visible around Farnham and Adria in wide views.
@@ -2353,6 +2558,8 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 			const Player &player = Players[i];
 			if (!player.plractive || !player.isOnActiveLevel() || !player.AnimInfo.sprites)
 				continue;
+			if (CameraRig.HideLocalPlayer() && &player == MyPlayer)
+				continue;
 			Vec3 position = PlayerPosition(player);
 			position.y = 0;
 			DrawPlayerVolume(out, position, player, static_cast<int>(i));
@@ -2403,6 +2610,8 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 		else
 			++it;
 	}
+	if (horizonEnabled)
+		ApplyHorizonAtmosphere(out);
 	ResolveSampling(logical, out);
 	PickScreenWidth = gnScreenWidth;
 	PickScreenHeight = gnScreenHeight;
@@ -2411,6 +2620,8 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 	PickLeftPanel = IsLeftPanelOpen();
 	PickRightPanel = IsRightPanelOpen();
 	PickGpuRequested = RendererState.requestedGpu;
+	PickCameraRevision = CameraRig.revision();
+	PickHorizonEnabled = *GetOptions().Graphics.townViewHorizon;
 	PickingValid = true;
 	return true;
 }
@@ -2456,10 +2667,10 @@ Point TownViewScreenPosition(Point tile)
 {
 	if (!IsTownViewActive() || ViewCamera.width == 0)
 		return { -10000, -10000 };
-	const Vec3 point = ToCamera({ static_cast<float>(tile.x) - 0.5F, 0, static_cast<float>(tile.y) - 0.5F });
-	if (point.z < NearPlane)
+	TownCameraProjectedVertex projected;
+	if (!ProjectTownCameraPoint(ViewCamera.projection,
+	        { static_cast<float>(tile.x) - 0.5F, 0, static_cast<float>(tile.y) - 0.5F }, projected))
 		return { -10000, -10000 };
-	const ProjectedVertex projected = Project({ point, 0, 0 });
 	return { static_cast<int>(std::lround(projected.x)), static_cast<int>(std::lround(projected.y)) };
 }
 

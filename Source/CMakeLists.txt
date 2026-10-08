@@ -14,6 +14,7 @@ set(libdevilutionx_SRCS
   doom.cpp
   gamemenu.cpp
   gmenu.cpp
+  ingame_settings.cpp
   help.cpp
   hwcursor.cpp
   interfac.cpp
@@ -85,6 +86,8 @@ set(libdevilutionx_SRCS
   engine/render/d3d_ui_layout.cpp
   engine/render/scrollrt.cpp
   engine/render/town_view.cpp
+  engine/render/town_camera.cpp
+  engine/render/town_horizon.cpp
   engine/render/town_presentation.cpp
   engine/render/town_gpu.cpp
   engine/render/ui_overlay_regions.cpp

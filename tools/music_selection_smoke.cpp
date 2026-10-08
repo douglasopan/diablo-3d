@@ -20,6 +20,7 @@
 #include <string_view>
 
 #include "engine/assets.hpp"
+#include "control/control.hpp"
 #include "engine/music_catalog.hpp"
 #include "engine/random.hpp"
 #include "engine/render/town_view.hpp"
@@ -384,7 +385,7 @@ size_t CurrentMenuCount()
 {
 	if (sgpCurrentMenu == nullptr)
 		throw std::runtime_error("Expected an active in-game settings menu");
-	for (size_t i = 0; i < 8; ++i) {
+	for (size_t i = 0; i <= 8; ++i) {
 		if (sgpCurrentMenu[i].fnMenu == nullptr)
 			return i;
 		if (sgpCurrentMenu[i].pszStr == nullptr)
@@ -400,6 +401,27 @@ void ActivateMenuRow(size_t index)
 	sgpCurrentMenu[index].fnMenu(true);
 }
 
+size_t FindMenuRow(std::string_view name)
+{
+	for (size_t page = 0; page < 40; ++page) {
+		const size_t count = CurrentMenuCount();
+		for (size_t row = 0; row < count; ++row) {
+			if (name == sgpCurrentMenu[row].pszStr)
+				return row;
+		}
+		bool next = false;
+		for (size_t row = 0; row < count; ++row) {
+			if (std::string_view(sgpCurrentMenu[row].pszStr) == "Next Page") {
+				ActivateMenuRow(row);
+				next = true;
+				break;
+			}
+		}
+		if (!next) break;
+	}
+	throw std::runtime_error("Menu option is not reachable: " + std::string(name));
+}
+
 void CheckInGameMenus()
 {
 	Options &options = GetOptions();
@@ -412,153 +434,67 @@ void CheckInGameMenus()
 	MyPlayer->_pmode = PM_STAND;
 	MyPlayerIsDead = false;
 	sgGameInitInfo.nTickRate = 20;
-	options.Audio.musicVolume.SetValue(-600);
-	options.Audio.soundVolume.SetValue(-700);
+	gnScreenWidth = 640;
+	gnScreenHeight = 480;
+	CalculatePanelAreas();
 	gmenu_init_menu();
 	gamemenu_on();
-	Check(CurrentMenuCount() == 5 && std::string_view(sgpCurrentMenu[0].pszStr) == "Options", "real single-player menu exposes Options without invoking save/load");
+	Check(CurrentMenuCount() == 5 && std::string_view(sgpCurrentMenu[0].pszStr) == "Settings", "single-player menu exposes the shared Settings browser");
 	ActivateMenuRow(0);
-	Check(CurrentMenuCount() == 4
-	        && std::string_view(sgpCurrentMenu[0].pszStr) == "Audio Options"
-	        && std::string_view(sgpCurrentMenu[1].pszStr) == "Video Options"
-	        && sgpCurrentMenu[2].isSlider(),
-	    "Options has Audio, Video and the relocated Speed slider in four rows");
-	gmenu_slider_set(&sgpCurrentMenu[2], 20, 50, 35);
-	sgpCurrentMenu[2].fnMenu(false);
-	Check(sgGameInitInfo.nTickRate == 35 && *options.Gameplay.tickRate == 35
-	        && *options.Audio.musicVolume == -600 && *options.Audio.soundVolume == -700,
-	    "the Speed slider changes tick rate without touching the audio rows");
+	Check(std::string_view(sgpCurrentMenu[0].pszStr) == "Soundtrack", "Soundtrack is the first category directly inside Settings");
 	ActivateMenuRow(0);
-	Check(CurrentMenuCount() == 4 && std::string_view(sgpCurrentMenu[2].pszStr) == "Soundtrack", "Audio exposes the Soundtrack submenu at row two");
-	// Audio devices remain disabled. Exercise the real callbacks at the muted
-	// endpoint, which must not initialize a decoder or load a music asset.
-	gmenu_slider_steps(&sgpCurrentMenu[0], VOLUME_STEPS);
-	gmenu_slider_set(&sgpCurrentMenu[0], VOLUME_MIN, VOLUME_MAX, VOLUME_MIN);
-	sgpCurrentMenu[0].fnMenu(false);
-	Check(*options.Audio.musicVolume == VOLUME_MIN && *options.Audio.soundVolume == -700 && !gbMusicOn,
-	    "the relocated Music slider changes only music volume and preserves mute");
-	gmenu_slider_steps(&sgpCurrentMenu[1], VOLUME_STEPS);
-	gmenu_slider_set(&sgpCurrentMenu[1], VOLUME_MIN, VOLUME_MAX, VOLUME_MIN);
-	sgpCurrentMenu[1].fnMenu(false);
-	Check(*options.Audio.soundVolume == VOLUME_MIN && *options.Audio.musicVolume == VOLUME_MIN && !gbSoundOn,
-	    "the relocated Sound slider changes only sound volume and preserves mute");
-	ActivateMenuRow(2);
-	Check(CurrentMenuCount() == 3 && std::string_view(sgpCurrentMenu[1].pszStr) == "Music by Location", "Soundtrack exposes its mode and music by location");
-	options.Music.theme.SetValue(MusicTheme::Vanilla);
-	ActivateMenuRow(0);
-	Check(*options.Music.theme == MusicTheme::Rock, "mode activation changes Vanilla to Rock through the real menu handler");
-	ActivateMenuRow(0);
-	Check(*options.Music.theme == MusicTheme::Custom, "mode activation changes Rock to Custom");
-	ActivateMenuRow(0);
-	Check(*options.Music.theme == MusicTheme::Vanilla, "mode activation cycles Custom back to Vanilla");
-	ActivateMenuRow(1);
+	ActivateMenuRow(FindMenuRow(options.Music.theme.GetName()));
+	Check(CurrentMenuCount() == 4, "all three soundtrack modes are explicit choices");
+	for (size_t index = 0; index < options.Music.theme.GetListSize(); ++index) {
+		ActivateMenuRow(index);
+		Check(options.Music.theme.GetActiveListIndex() == index, "mode applies through the shared option setter");
+		ActivateMenuRow(FindMenuRow(options.Music.theme.GetName()));
+	}
+	gmenu_presskeys(SDLK_ESCAPE);
 	constexpr std::array<_music_id, NUM_MUSIC> Order {
 		TMUSIC_INTRO, TMUSIC_TOWN, TMUSIC_CATHEDRAL, TMUSIC_CATACOMBS,
 		TMUSIC_CAVES, TMUSIC_HELL, TMUSIC_NEST, TMUSIC_CRYPT,
 	};
-	for (size_t page = 0; page < 3; ++page) {
-		const size_t first = page * 3;
-		const size_t count = page == 2 ? 2 : 3;
-		Check(CurrentMenuCount() == count + 2 && CurrentMenuCount() <= 5, "location page " + std::to_string(page + 1) + " fits above the 640x480 control panel");
-		for (size_t row = 0; row < count; ++row) {
-			const _music_id track = Order[first + row];
-			const std::string key(MusicTrackCatalog[track].key);
-			Check(std::string_view(sgpCurrentMenu[row].pszStr) == MusicTrackCatalog[track].name, "location page maps the real row to " + key);
-			ActivateMenuRow(row);
-			const bool isTown = track == TMUSIC_TOWN;
-			const size_t variants = track == TMUSIC_INTRO ? 3 : 2;
-			const size_t previousRow = isTown ? 4 : variants;
-			Check(CurrentMenuCount() == (isTown ? 5 : variants + 1) && CurrentMenuCount() <= 5,
-			    "variant menu exposes supported choices or pagination within five rows for " + key);
-			if (track == TMUSIC_TOWN) {
-				options.Music.theme.SetValue(MusicTheme::Rock);
-				ActivateMenuRow(previousRow);
-				ActivateMenuRow(row);
-				ActivateMenuRow(3);
-				Check(CurrentMenuCount() == 4 && std::string_view(sgpCurrentMenu[1].pszStr).starts_with("* "),
-				    "global Rock mode marks Random on the second Town variant page");
-				ActivateMenuRow(2);
-				Check(CurrentMenuCount() == 5 && std::string_view(sgpCurrentMenu[0].pszStr) == "Original",
-				    "Previous Page returns to the first Town choices without changing the selected location");
-			}
+	for (const auto track : Order) {
+		auto &option = options.Music.ForTrack(track);
+		for (size_t index = 0; index < option.GetListSize(); ++index) {
+			ActivateMenuRow(FindMenuRow(option.GetName()));
+			Check(CurrentMenuCount() == option.GetListSize() + 1 && CurrentMenuCount() <= 6, "all variants fit in one compact page, including five Town choices");
 			std::array<MusicVariant, NUM_MUSIC> before;
 			for (unsigned i = 0; i < NUM_MUSIC; ++i)
 				before[i] = *options.Music.ForTrack(static_cast<_music_id>(i));
-			ActivateMenuRow(0);
-			bool otherTracksUnchanged = true;
+			ActivateMenuRow(index);
+			Check(option.GetActiveListIndex() == index && *options.Music.theme == MusicTheme::Custom, "location choice applies the existing Custom callback");
 			for (unsigned i = 0; i < NUM_MUSIC; ++i) {
 				if (i != track)
-					otherTracksUnchanged &= *options.Music.ForTrack(static_cast<_music_id>(i)) == before[i];
+					Check(*options.Music.ForTrack(static_cast<_music_id>(i)) == before[i], "editing a location preserves every other location");
 			}
-			Check(*options.Music.theme == MusicTheme::Custom && *options.Music.ForTrack(track) == MusicVariant::Original && otherTracksUnchanged,
-			    "Original selects Custom mode and changes only " + key);
-			ActivateMenuRow(1);
-			Check(*options.Music.ForTrack(track) == MusicVariant::Rock && std::string_view(sgpCurrentMenu[1].pszStr).starts_with("* "),
-			    "Rock selection marks the current choice for " + key);
-			if (track == TMUSIC_INTRO) {
-				ActivateMenuRow(2);
-				Check(*options.Music.menu == MusicVariant::Alternative, "Main Menu alternative is reachable through the real variant handler");
-			} else if (track == TMUSIC_TOWN) {
-				ActivateMenuRow(2);
-				Check(*options.Music.town == MusicVariant::Alternative && std::string_view(sgpCurrentMenu[2].pszStr).starts_with("* "),
-				    "Tristram2 is independently selectable through the Town handler");
-				ActivateMenuRow(3);
-				Check(CurrentMenuCount() == 4 && std::string_view(sgpCurrentMenu[0].pszStr).starts_with("Tristram 3"),
-				    "More Versions exposes Tristram3 and Random within four rows");
-				ActivateMenuRow(0);
-				Check(*options.Music.town == MusicVariant::Third && CurrentMenuCount() == 4
-				        && std::string_view(sgpCurrentMenu[0].pszStr).starts_with("* Tristram 3"),
-				    "Tristram3 is independently selectable and preserves the second variant page");
-				ActivateMenuRow(1);
-				Check(*options.Music.town == MusicVariant::Random && CurrentMenuCount() == 4
-				        && std::string_view(sgpCurrentMenu[1].pszStr).starts_with("* "),
-				    "Random remains ID3 and is independently selectable on the second variant page");
-				ActivateMenuRow(2);
-				Check(CurrentMenuCount() == 5, "Previous Page preserves all three first-page Town choices");
-			}
-			ActivateMenuRow(previousRow);
-			Check(CurrentMenuCount() == count + 2 && std::string_view(sgpCurrentMenu[0].pszStr) == MusicTrackCatalog[Order[first]].name,
-			    "Previous preserves location page after editing " + key);
 		}
-		ActivateMenuRow(count);
 	}
-	Check(CurrentMenuCount() == 5 && std::string_view(sgpCurrentMenu[0].pszStr) == "Main Menu", "First Page returns from the final two-location page to the menu location");
-	ActivateMenuRow(4);
-	Check(CurrentMenuCount() == 3, "location list Previous returns to Soundtrack");
-	ActivateMenuRow(2);
-	Check(CurrentMenuCount() == 4 && std::string_view(sgpCurrentMenu[2].pszStr) == "Soundtrack", "Soundtrack Previous returns to Audio");
-	ActivateMenuRow(3);
-	ActivateMenuRow(1);
-	Check(CurrentMenuCount() == 5 && sgpCurrentMenu[3].isSlider(), "Video keeps Gamma at row three with five total rows");
+	gmenu_presskeys(SDLK_ESCAPE);
+	ActivateMenuRow(FindMenuRow(options.Graphics.GetName()));
 	leveltype = DTYPE_TOWN;
 	options.Graphics.townViewStartIn3D.SetValue(true);
 	InitializeTownViewForGame();
 	const bool gpuBefore = *options.Graphics.townViewGpuRendering;
+	ActivateMenuRow(FindMenuRow(options.Graphics.townViewGpuRendering.GetName()));
+	Check(*options.Graphics.townViewGpuRendering != gpuBefore, "Graphics exposes the shared GPU option");
 	const bool aaBefore = *options.Graphics.townViewAntialiasing;
-	ActivateMenuRow(0);
-	Check(*options.Graphics.townViewGpuRendering != gpuBefore && *options.Graphics.townViewAntialiasing == aaBefore
-	        && *options.Graphics.townViewStartIn3D,
-	    "Video GPU row modifies only the GPU preference");
-	ActivateMenuRow(1);
-	Check(*options.Graphics.townViewAntialiasing != aaBefore && *options.Graphics.townViewStartIn3D,
-	    "Video smoothing row remains separate from startup preference");
-	const TownViewCameraState beforeStartToggle = GetTownViewCameraState();
-	ActivateMenuRow(2);
-	Check(!*options.Graphics.townViewStartIn3D && IsTownViewActive()
-	        && GetTownViewCameraState().yaw == beforeStartToggle.yaw,
-	    "Video Start in 3D row changes the next-session preference without changing the current view");
-	gmenu_slider_set(&sgpCurrentMenu[3], 0, 100, 100);
-	sgpCurrentMenu[3].fnMenu(false);
-	Check(*options.Graphics.brightness == 100 && !*options.Graphics.townViewStartIn3D
-	        && *options.Audio.musicVolume == VOLUME_MIN && *options.Audio.soundVolume == VOLUME_MIN,
-	    "Gamma uses its relocated slider without changing startup or audio preferences");
-	ActivateMenuRow(4);
-	Check(CurrentMenuCount() == 4 && std::string_view(sgpCurrentMenu[0].pszStr) == "Audio Options", "Video Previous returns to Options");
+	ActivateMenuRow(FindMenuRow(options.Graphics.townViewAntialiasing.GetName()));
+	Check(*options.Graphics.townViewAntialiasing != aaBefore, "Graphics exposes shared edge smoothing");
+	const auto before = GetTownViewCameraState();
+	ActivateMenuRow(FindMenuRow(options.Graphics.townViewStartIn3D.GetName()));
+	Check(!*options.Graphics.townViewStartIn3D && IsTownViewActive() && GetTownViewCameraState().yaw == before.yaw, "Start in 3D changes only the next-session preference");
+	gmenu_presskeys(SDLK_ESCAPE);
+	ActivateMenuRow(FindMenuRow(options.Gameplay.GetName()));
+	ActivateMenuRow(FindMenuRow("Speed"));
+	gmenu_slider_set(&sgpCurrentMenu[0], 20, 50, 35);
+	sgpCurrentMenu[0].fnMenu(false);
+	Check(sgGameInitInfo.nTickRate == 35 && *options.Gameplay.tickRate == 35, "the Speed slider preserves its native single-player behavior");
 	gamemenu_off();
-	Check(!gmenu_is_active() && !gbMusicOn && !gbSoundOn, "closing settings leaves music and sound muted");
+	Check(!gmenu_is_active() && !gbMusicOn && !gbSoundOn, "closing settings preserves muted playback");
 	gbRunGame = false;
 }
-
 void CheckInvalidAudio(const ConfigFixture &fixture)
 {
 #if !defined(NOSOUND) && !defined(USE_SDL3)

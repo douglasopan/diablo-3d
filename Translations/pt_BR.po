@@ -12463,3 +12463,87 @@ msgstr "Mais versões"
 #: Source/gamemenu.cpp
 msgid "Previous Page"
 msgstr "Página anterior"
+
+#: Source/ingame_settings.cpp
+msgid "This setting is controlled by the multiplayer session."
+msgstr "Esta configuração é controlada pela sessão multijogador."
+
+#: Source/ingame_settings.cpp
+msgid "Leave the current game and change this setting in the main menu."
+msgstr "Saia da partida e altere esta configuração no menu principal."
+
+#: Source/ingame_settings.cpp
+msgid "Leave the multiplayer game and change this setting in the main menu."
+msgstr "Saia da partida multijogador e altere esta configuração no menu principal."
+
+#: Source/ingame_settings.cpp
+msgid "This setting recreates the interface. Change it in the main menu."
+msgstr "Esta configuração recria a interface. Altere-a no menu principal."
+
+#: Source/ingame_settings.cpp
+msgid "Applies the next time the game starts."
+msgstr "Vale na próxima vez que o jogo for iniciado."
+
+#: Source/ingame_settings.cpp
+msgid "Saved for the next game session."
+msgstr "Salvo para a próxima sessão de jogo."
+
+#: Source/ingame_settings.cpp
+msgid "Changes the current location immediately; other locations use the choice when entered."
+msgstr "Muda o local atual imediatamente; os demais usam a escolha quando forem acessados."
+
+#: Source/ingame_settings.cpp
+msgid "Applies immediately."
+msgstr "Aplicação imediata."
+
+#: Source/ingame_settings.cpp
+msgid "Adjust music volume or mute music."
+msgstr "Ajusta o volume da música ou a silencia."
+
+#: Source/ingame_settings.cpp
+msgid "Adjust sound volume or mute sound."
+msgstr "Ajusta o volume dos efeitos ou os silencia."
+
+#: Source/ingame_settings.cpp
+msgid "Adjust the volume of navigation audio cues."
+msgstr "Ajusta o volume das dicas sonoras de navegação."
+
+#: Source/ingame_settings.cpp
+msgid "Adjust brightness correction."
+msgstr "Ajusta a correção de brilho."
+
+#: Source/ingame_settings.cpp
+msgid "Adjust the speed of the single-player game."
+msgstr "Ajusta a velocidade da partida de um jogador."
+
+#: Source/ingame_settings.cpp
+msgid "Audio Cues Volume"
+msgstr "Volume das dicas sonoras"
+
+#: Source/ingame_settings.cpp
+msgid "Input cancelled."
+msgstr "Entrada cancelada."
+
+#: Source/ingame_settings.cpp
+msgid "Bind key"
+msgstr "Associar tecla"
+
+#: Source/ingame_settings.cpp
+msgid "Bind button combo"
+msgstr "Associar combinação de botões"
+
+#: Source/ingame_settings.cpp
+msgid "Cancel input and keep the previous binding."
+msgstr "Cancela a entrada e mantém a associação anterior."
+
+#: Source/ingame_settings.cpp
+msgid "Unavailable during play"
+msgstr "Indisponível durante a partida"
+
+#: Source/ingame_settings.cpp
+msgid "This button combination is unavailable."
+msgstr "Esta combinação de botões está indisponível."
+
+#: Source/ingame_settings.cpp
+msgid "Next Page"
+msgstr "Próxima página"

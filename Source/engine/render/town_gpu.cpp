@@ -78,6 +78,7 @@ struct UInt4 { uint32_t x, y, z, w; };
 // the structure before filling it so bytewise batch comparison has no padding.
 struct Constants {
 	Float4 target;
+	Float4 projection;
 	UInt4 flags;
 	Float4 shading;
 	Float4 normal;
@@ -104,7 +105,8 @@ struct GpuVertex {
 	Float4 shadowParameters;
 	std::array<float, 2> fallback;
 };
-static_assert(sizeof(GpuVertex) == 76);
+static_assert(sizeof(TownGpuVertex) == 36);
+static_assert(sizeof(GpuVertex) == 80);
 
 struct CachedTexture {
 	ComOwner<ID3D11ShaderResourceView> codes;
@@ -168,6 +170,7 @@ uint64_t FrameSerial = 0;
 std::vector<GpuVertex> Vertices;
 std::vector<Batch> Batches;
 TownGpuShadow FrameShadow;
+TownGpuProjection FrameProjection;
 uint64_t ShadowKey = 0;
 uint64_t ShadowRevision = 0;
 int ShadowResolution = 0;
@@ -180,6 +183,7 @@ Clock::time_point FrameStart;
 constexpr char ShaderSource[] = R"hlsl(
 cbuffer Frame : register(b0) {
  float4 target;
+ float4 projection;
  uint4 flags;
  float4 shading;
  float4 normalAndRed;
@@ -206,6 +210,7 @@ struct Input {
  float depth : TEXCOORD0;
  float2 uv : TEXCOORD1;
  float3 world : TEXCOORD2;
+ float clipW : TEXCOORD6;
  uint pick : COLOR0;
  float4 normalDiffuse : TEXCOORD3;
  float4 shadowParameters : TEXCOORD4;
@@ -213,9 +218,9 @@ struct Input {
 };
 struct Interpolated {
  float4 position : SV_Position;
- noperspective float depth : TEXCOORD0;
- noperspective float2 uv : TEXCOORD1;
- noperspective float3 world : TEXCOORD2;
+ float depth : TEXCOORD0;
+ float2 uv : TEXCOORD1;
+ float3 world : TEXCOORD2;
  nointerpolation uint pick : COLOR0;
  nointerpolation float4 normalDiffuse : TEXCOORD3;
  nointerpolation float4 shadowParameters : TEXCOORD4;
@@ -223,8 +228,11 @@ struct Interpolated {
 };
 Interpolated VS(Input input) {
  Interpolated output;
- output.position = float4(input.position.x * 2 / target.x - 1,
-  1 - input.position.y * 2 / target.y, input.depth / 4096.0, 1);
+ float normalizedDepth = projection.z != 0
+  ? saturate(projection.y * (input.depth - projection.x) / ((projection.y - projection.x) * input.depth))
+  : input.depth / 4096.0;
+ output.position = float4((input.position.x * 2 / target.x - 1) * input.clipW,
+  (1 - input.position.y * 2 / target.y) * input.clipW, normalizedDepth * input.clipW, input.clipW);
  output.depth = input.depth;
  output.uv = input.uv;
  output.world = input.world;
@@ -464,12 +472,13 @@ bool CreateDevice(bool allowWarp)
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32_FLOAT, 0, 8, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "TEXCOORD", 2, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "COLOR", 0, DXGI_FORMAT_R32_UINT, 0, 32, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 36, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 4, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 52, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 5, DXGI_FORMAT_R32G32_FLOAT, 0, 68, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 6, DXGI_FORMAT_R32_FLOAT, 0, offsetof(TownGpuVertex, clipW), D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "COLOR", 0, DXGI_FORMAT_R32_UINT, 0, offsetof(GpuVertex, pickId), D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, offsetof(GpuVertex, normalDiffuse), D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 4, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, offsetof(GpuVertex, shadowParameters), D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 5, DXGI_FORMAT_R32G32_FLOAT, 0, offsetof(GpuVertex, fallback), D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
-	result = Device->CreateInputLayout(layout, 8, vertexCode->GetBufferPointer(), vertexCode->GetBufferSize(), InputLayout.put());
+	result = Device->CreateInputLayout(layout, 9, vertexCode->GetBufferPointer(), vertexCode->GetBufferSize(), InputLayout.put());
 	if (FAILED(result))
 		return Fail("CreateInputLayout", result);
 	D3D11_BUFFER_DESC constantDescription {};
@@ -678,6 +687,7 @@ bool MakeConstants(const TownGpuMaterial &material, const CachedTexture &texture
 		return Fail("Invalid GPU interior opaque blockers");
 	output = {};
 	output.target = { static_cast<float>(Width), static_cast<float>(Height), 0, 0 };
+	output.projection = { FrameProjection.nearClip, FrameProjection.farClip, FrameProjection.perspective ? 1.0F : 0.0F, 0 };
 	output.flags = { static_cast<uint32_t>(material.lighting), texture.lightLevels, texture.codeCount,
 		static_cast<uint32_t>((material.repeat ? 1 : 0) | (material.transparentZero && !texture.hasOpacity ? 2 : 0)
 		    | (texture.hasOpacity ? 4 : 0) | (FrameShadow.resolution > 0 ? 8 : 0)) };
@@ -740,7 +750,7 @@ bool Readback(Target &target, std::vector<T> &output)
 
 } // namespace
 
-bool TownGpuBeginFrame(int width, int height, bool allowWarpForDiagnostics)
+bool TownGpuBeginFrame(int width, int height, bool allowWarpForDiagnostics, const TownGpuProjection &projection)
 {
 #ifdef _WIN32
 	FrameActive = false;
@@ -757,6 +767,7 @@ bool TownGpuBeginFrame(int width, int height, bool allowWarpForDiagnostics)
 		}
 	}
 	FrameShadow = {};
+	FrameProjection = {};
 	Status.frameSucceeded = false;
 	Status.failure.clear();
 	Status.submittedTriangles = 0;
@@ -766,6 +777,9 @@ bool TownGpuBeginFrame(int width, int height, bool allowWarpForDiagnostics)
 	FrameStart = Clock::now();
 	if (width <= 0 || height <= 0 || width > 16384 || height > 16384 || static_cast<uint64_t>(width) * height > MaxPixels)
 		return Fail("Invalid GPU frame dimensions or pixel budget");
+	if (!Finite(projection.nearClip) || !Finite(projection.farClip) || projection.nearClip <= 0
+	    || projection.farClip <= projection.nearClip || projection.farClip > 4096)
+		return Fail("Invalid GPU projection range (0 < near < far <= 4096 required)");
 	if (Device && Status.warp && !allowWarpForDiagnostics)
 		ResetTownGpuResources();
 	if (!Device && !CreateDevice(allowWarpForDiagnostics)) {
@@ -777,12 +791,14 @@ bool TownGpuBeginFrame(int width, int height, bool allowWarpForDiagnostics)
 	}
 	if (!CreateTargets(width, height))
 		return false;
+	FrameProjection = projection;
 	FrameActive = true;
 	return true;
 #else
 	(void)width;
 	(void)height;
 	(void)allowWarpForDiagnostics;
+	(void)projection;
 	Status = {};
 	Status.failure = "Direct3D11 town rendering is available only on Windows";
 	return false;
@@ -832,10 +848,13 @@ bool TownGpuSubmitProjectedTriangle(const std::array<TownGpuVertex, 3> &vertices
 	if (Status.submittedTriangles >= MaxTriangles)
 		return Fail("GPU triangle budget exceeded");
 	for (const TownGpuVertex &vertex : vertices) {
-		if (!Finite(vertex.x) || !Finite(vertex.y) || !Finite(vertex.depth) || vertex.depth < 0.4F || vertex.depth > 4096
+		if (!Finite(vertex.x) || !Finite(vertex.y) || !Finite(vertex.depth)
+		    || vertex.depth < FrameProjection.nearClip || vertex.depth > FrameProjection.farClip
+		    || !Finite(vertex.clipW) || vertex.clipW != (FrameProjection.perspective ? vertex.depth : 1)
+		    || !Finite((vertex.x * 2 / Width - 1) * vertex.clipW) || !Finite((1 - vertex.y * 2 / Height) * vertex.clipW)
 		    || !Finite(vertex.u) || !Finite(vertex.v)
 		    || !std::all_of(vertex.world.begin(), vertex.world.end(), [](float value) { return Finite(value); }))
-			return Fail("GPU projected vertices must be finite and near-clipped (0.4..4096 depth)");
+			return Fail("GPU projected vertices must be finite, depth-clipped and use clipW=depth (perspective) or 1 (orthographic)");
 	}
 	CachedTexture *uploaded = GetTexture(texture, material.lighting);
 	if (uploaded == nullptr)
@@ -972,6 +991,7 @@ void ResetTownGpuResources()
 	Batches.clear();
 	Vertices.clear();
 	FrameShadow = {};
+	FrameProjection = {};
 	if (Context) {
 		Context->ClearState();
 		Context->Flush();

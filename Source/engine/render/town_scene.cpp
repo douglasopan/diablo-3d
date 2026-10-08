@@ -297,10 +297,10 @@ void FinishBuilder(Builder &builder)
 		artwork.minTile = builder.model.minTile;
 		artwork.maxTile = builder.model.maxTile;
 		if (builder.model.kind == TownSceneKind::Cathedral) {
-			artwork.minTile = { 14, 12 };
+			artwork.minTile = { 10, 8 };
 			artwork.maxTile = { 33, 31 };
 			artwork.fringeMinPiece = 700;
-			artwork.fringeMaxPiece = 834;
+			artwork.fringeMaxPiece = 848;
 		} else if (builder.model.kind == TownSceneKind::Smithy) {
 			artwork.minTile = { 60, 54 };
 			artwork.maxTile = { 71, 65 };
@@ -1366,9 +1366,9 @@ bool TownSceneReplacesTile(Point tile)
 		return false;
 	// The bell and nave source art are painted several cells above their physical
 	// footprint. Restrict this extra mask by both place and native art family.
-	if (tile.x >= 14 && tile.x <= 33 && tile.y >= 12 && tile.y <= 31) {
+	if (tile.x >= 10 && tile.x <= 33 && tile.y >= 8 && tile.y <= 31) {
 		const uint16_t piece = dPiece[tile.x][tile.y];
-		if (piece >= 700 && piece <= 834)
+		if (piece >= 700 && piece <= 848)
 			return true;
 	}
 	for (const TownSceneModel &model : GetTownScene()) {

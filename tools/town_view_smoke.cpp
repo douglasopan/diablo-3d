@@ -66,6 +66,8 @@
 #include "town_editor_snapshot.hpp"
 #include "town_editor_map_checks.hpp"
 #include "town_cabin_light_gpu_checks.hpp"
+#include "town_camera_runtime_entry.hpp"
+#include "town_camera_capture_checks.hpp"
 
 namespace {
 using namespace devilution;
@@ -4661,6 +4663,8 @@ int main(int argc, char **argv)
 	const bool presentation = argc == 5 && std::string(argv[4]) == "--presentation";
 	const bool quality = argc == 5 && std::string(argv[4]) == "--quality";
 	const bool gpu = argc == 5 && std::string(argv[4]) == "--gpu";
+	const bool camera = argc == 5 && std::string(argv[4]) == "--camera";
+	const bool cameraExtra = argc == 5 && std::string(argv[4]) == "--camera-extra";
 	const bool cabinOpenings = argc == 5 && std::string(argv[4]) == "--cabin-openings";
 	const bool cabinReview = argc == 5 && std::string(argv[4]) == "--cabin-review";
 	const bool editorSnapshot = argc == 5 && std::string(argv[4]) == "--editor-snapshot";
@@ -4668,8 +4672,8 @@ int main(int argc, char **argv)
 	const bool layers = argc == 3 && std::string(argv[1]) == "--presentation-layers";
 	const bool gpuFixtures = argc == 3 && std::string(argv[1]) == "--gpu-fixtures";
 	const bool synthetic = layers || gpuFixtures;
-	if (argc != 4 && !presentation && !quality && !gpu && !cabinOpenings && !cabinReview && !editorSnapshot && !editorChecks && !synthetic) {
-		std::cerr << "Usage: town_view_smoke <game-data-directory> <built-assets-directory> <capture-directory> [--presentation|--quality|--gpu|--cabin-openings|--cabin-review|--editor-snapshot|--editor-map-checks]\n"
+	if (argc != 4 && !presentation && !quality && !gpu && !camera && !cameraExtra && !cabinOpenings && !cabinReview && !editorSnapshot && !editorChecks && !synthetic) {
+		std::cerr << "Usage: town_view_smoke <game-data-directory> <built-assets-directory> <capture-directory> [--presentation|--quality|--gpu|--camera|--camera-extra|--cabin-openings|--cabin-review|--editor-snapshot|--editor-map-checks]\n"
 		          << "       town_view_smoke --presentation-layers <synthetic-capture-directory>\n"
 		          << "       town_view_smoke --gpu-fixtures <synthetic-capture-directory>\n";
 		return 2;
@@ -4711,6 +4715,25 @@ int main(int argc, char **argv)
 			RunQuality(output);
 		else if (gpu)
 			RunGpuWorld(output);
+		else if (camera) {
+			RunTownCameraRuntimeEntry(output, InitializeTownDiagnostic, Check, NativeSceneState, ViewportPixels, SavePng, std::cout);
+			FreeTownerGFX();
+		}
+		else if (cameraExtra) {
+			InitializeTownDiagnostic();
+			gnScreenWidth = 960;
+			gnScreenHeight = 540;
+			CalculatePanelAreas();
+			CalcViewportGeometry();
+			OwnedSurface out(960, 540);
+			SDL_SetPaletteColors(out.surface->format->palette, logical_palette.data(), 0, 256);
+			for (const bool useGpu : { false, true }) {
+				const auto directory = output / (useGpu ? "gpu" : "cpu");
+				std::filesystem::create_directories(directory);
+				RunTownCameraCaptureChecks(out, Check, NativeSceneState, ViewportPixels, SavePng, directory, std::cout, useGpu);
+			}
+			FreeTownerGFX();
+		}
 		else if (cabinOpenings)
 			RunCabinOpenings(output);
 		else if (cabinReview)

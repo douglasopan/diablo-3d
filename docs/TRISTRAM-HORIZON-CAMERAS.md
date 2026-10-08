@@ -1,0 +1,101 @@
+# Horizonte e câmeras de Tristram
+
+Atualização: **8 de outubro de 2026**. Documento responsável pelo pedido novo de horizonte frontal/ocular e liberdade de câmera. Segue a etapa e os contratos de [PROJECT-EXECUTION.md](PROJECT-EXECUTION.md); não substitui sua fila. O pedido explícito antecipa este incremento isolado de atmosfera, sem declarar G1/G2 concluídos. Cabana e revisões selecionadas permanecem congeladas; produção Meshy e Godot pertence à frente de Tristram completa.
+
+**Câmeras, horizonte e menu da partida aplicados ao iniciador habitual.** O usuário pediu continuar e aplicar o que já estava pronto. O principal liberou uma janela exclusiva de CMake/cache/build para ligar os módulos e o menu da partida. O build completo Release/NONET passou com MSVC 19.51 x64; o candidato separado `build/devilutionx-tristram-camera-candidate.exe` tem SHA-256 `7720719712c89dab9a6dc0967e0adedbad30fafae27ebca1737b335578d6f14f`. A janela foi devolvida ao principal após os testes. Ele instalou esse binário nos aliases v4/quality/godot às **09:30:47 UTC de 8 de outubro**, com zero partidas abertas e os **26 arquivos do perfil preservados por hash/tamanho/data**. Recibo privado: `diagnostics/camera-apply-20261008/installed-20261008T093046Z/receipt.json`. A leitura posterior desta frente confirmou os hashes v4/quality e o caminho v4 usado por `Iniciar-Tristram.cmd`. Instalação, launcher, perfil, Git e guia central continuam sob o principal.
+
+Evidência nativa final privada: `diagnostics/camera-apply-20261008/runtime-final` passou **491 verificações**, com 24 PNGs e 20 registros CPU/GPU em 960×540 e 1920×1080. `camera-extra-r2` passou **358 verificações**, com 54 PNGs, zero falhas e zero SKIP. São **849 verificações e 78 capturas** nas duas suítes finais, usando Tristram real, CPU e Radeon RX 570 física. O recibo final fixa o executável de diagnóstico `town_view_smoke.exe` em SHA-256 `1a5baf936b6881196304b9f1c7a76737b5d1efc53a8d2aff2978e8d93a211894` e os assets privados por hash. O jogo GOG foi somente lido; configurações e saídas do diagnóstico ficaram no diretório privado, sem saves habituais.
+
+Os quatro modos, horizonte A/B, suavização 1×/2×, mundo interno 2×, oito bordas/cantos e um triângulo real cruzando o plano near foram exercitados. Home produziu índices idênticos ao backend original nas duas resoluções e no suplemento com horizonte/suavização solicitados. A revisão visual das amostras não identificou bloqueador de projeção, clipping ou fog; não é aprovação artística nem teste de uma partida interativa completa. A rodada suplementar r1 é histórica: o PNG do mundo 2× usava paleta branca e algumas buscas de borda eram estreitas demais. Ambos eram defeitos do fixture, corrigidos em r2 sem alterar o renderizador.
+
+O candidato também inclui o menu da partida: **36.612 verificações** do navegador/opções/atalhos, **535** de seleção musical e **55** de reprodução passaram. O primeiro link revelou um include ausente de `GamepadType`; o proprietário autorizou adicionar `controls/control_mode.hpp` a `ingame_settings.cpp`. Uma falha do teste de paginação vinha de uma view temporária de nome de atalho; o proprietário corrigiu a cópia no helper e acrescentou regressões. Detalhes em [INGAME-SETTINGS.md](INGAME-SETTINGS.md). A correção de desenho residual da catedral, entregue pelo principal em `town_scene.cpp`, também integra este binário; seu fixture verifica 145 peças, incluindo 14 da torre e duas escadas preservadas. Os modelos do teste são cópias das revisões selecionadas naquele momento, anteriores a qualquer ajuste posterior de altura da catedral.
+
+O backend D3D11 candidato passou **49.007 verificações, zero falhas**, na Radeon RX 570 real, sem WARP: `diagnostics/horizon-camera/gpu-perspective-20261008-r3`. Verifica UV/world/depth/pick com perspectiva, interseção/oclusão, near/far, entradas inválidas/recuperação e fixtures ortográficas herdadas de luz. O script próprio compila somente backend/teste/luz e bibliotecas Windows, fora do build da engine.
+
+A LUT de fog tem 64×256 índices (16 KiB), construída por mistura RGB linear e seleção determinística na paleta; linha zero identidade, entradas inválidas fallback identidade. O diagnóstico isolado final de módulos passou **239.811 verificações** (188 câmera, 120.794 horizonte/LUT e raster/bordas): `diagnostics/horizon-camera/prototype-20261008-r6`. Inclui regressão de peso negativo mínimo na borda near/far; os 20 PPMs permanecem idênticos por hash à revisão r5. Essa evidência isolada é distinta dos testes nativos acima.
+
+A fonte liga `TownCameraRig` aos controles/opções, aos quatro modos, Home/F4 e à posição interpolada do herói. CPU/GPU recebem o mesmo recorte de seis planos e pesos de perspectiva para UV/world/depth; o D3D11 recebe near/far/clipW por frame. Culling de caixa perspectiva é conservador; o ocular omite somente o desenho de `MyPlayer`. Horizonte opaco externo publica pick inválido, recebe a luz direcional do perfil em espaço linear, e fog/sky são aplicados por um pós-processamento comum após readback/fallback e antes do resolve. O pós-processamento não escreve profundidade ou picking. Revisão de câmera/opções/viewport invalida buffers; pesos negativos tolerados na borda da perspectiva são limitados a zero para não extrapolar além do far plane.
+
+Histórico preservado: `diagnostics/horizon-camera/runtime-wip-pause-20261008` conserva diff/cópias/hashes do WIP pausado após a base `48d63d5bb`; `source-handoff-20261008` conserva o freeze de fonte anterior ao link; `syntax-20261008-r3` registra sete saídas MSVC `/Zs` zero, sem objetos/PDB. Esses recibos não substituem o candidato nativo final. Nenhuma partida foi interrompida por esta frente.
+
+## Estado desta entrega
+
+| Parte | Estado | Limite |
+| --- | --- | --- |
+| Auditoria de projeção, input e bordas | Leitura e fixtures nativos CPU/GPU concluídos | Interação completa de uma partida continua para revisão. |
+| `town_camera.hpp/.cpp` | Compilado na engine e exercitado nos quatro modos | Altura ocular provisória; sem colisão de câmera. |
+| `town_horizon.hpp/.cpp` | Geometria/fog integrados CPU/GPU e revisados por amostra | Horizonte visual 360°; cores, relevo e alturas provisórios. Não completa lacunas do piso nativo. |
+| Diagnóstico CPU sintético | Compilado e executado em diretório privado | Sem MPQ, assets, perfil, saves, janela ou cache do jogo. |
+| Perspectiva CPU/GPU, controles e opções na partida | Link, fixtures reais e instalação habitual comprovados | Avaliação artística/interativa e orçamento de desempenho pendentes. |
+
+O chat principal **DIABLOI 1 3D** é o responsável pela entrega. Na janela exclusiva autorizada, esta frente adicionou `town_camera.cpp`, `town_horizon.cpp` e `ingame_settings.cpp` às fontes, o target `ingame_settings_smoke` e o encerramento do menu em `diablo.cpp`; compilou o candidato separado e executou os testes. O cache ficou com o nome do candidato. Nenhum executável ou configuração habitual foi alterado por esta frente. A entrada continua `D:\Diablo 1 3D\Iniciar-Tristram.cmd`.
+
+## Auditoria da base anterior à integração
+
+- `town_view.cpp:427–473`: projeção ortográfica, olho fixo 256 unidades atrás do alvo; `CameraDistance` muda magnificação. Reduzir distância não produz primeira pessoa.
+- `town_view.cpp:673–740`: CPU interpola UV/world/depth de forma afim e recorta somente near. `town_gpu.cpp:216–227,835–838`: GPU usa `noperspective`, `w=1` e profundidade 0,4–4096. Perspectiva exige mudar ambos juntos.
+- `town_view.cpp:1521–1533`: culling de volumes projeta cantos sem tratar caixa cruzando o olho. Precisa teste conservador de planos; normais importadas também precisam orientação local em direção ao olho.
+- `town_view.cpp:415–424,2352–2358`: já existe posição interpolada do herói, mas todos os jogadores são desenhados. Modo ocular deve omitir somente `MyPlayer`, sem mudar a entidade.
+- `cursor.cpp:914–944` entrega o pixel visível aos índices nativos. `diablo.cpp:249–267` emite os comandos nativos. Não girar `_pdir`, introduzir WASD ou converter raios de céu/horizonte em movimento. Um miss atualmente conserva o tile do herói; testar esse comportamento na integração.
+- Arrasto, HUD/painéis/modal, Esc, foco perdido e Ctrl+roda já têm gates em `diablo.cpp:680–717,791–799,876–903`; preservar os mesmos gates.
+- O desenho cobre o grid inteiro 112×112 (`town_view.cpp:2287–2313`). O quad de chão extrapola cada tile, com mínimos −1,46875 e máximos 111,53125 no grid completo (`:1474`). Usar o AABB conservador da geometria real, não os bounds jogáveis. `dmin/dmax` não validam movimento: `PosOkPlayer` usa bounds do grid/SOL/ocupação. Não mudar nenhum desses dados.
+- `preservePicking=true` conserva o registro anterior: não significa decoração não selecionável. Horizonte opaco deve publicar depth e registro inválido juntos, sem `PickAt`, impedindo selecionar chão escondido.
+
+## Contrato das câmeras e do horizonte
+
+| Modo | Comportamento integrado |
+| --- | --- |
+| Isométrico | Mesmas deltas nativas `(32,-32;16,16)` e altura `−32`, compressão vertical √(2/3), zoom legado, pan limitado ao raio 20. Home restaura yaw π/4, pitch π/6, distância 22, pan zero e usa o backend original. O início da sessão conserva yaw +0,15. |
+| Órbita livre | Perspectiva, rotação e distância físicas em torno do alvo, pan visual limitado. Inclinação mínima 0,005 rad mantém o olho acima do piso do alvo. |
+| Terceira pessoa | Perspectiva a partir de alvo + altura ocular; órbita acompanha a posição interpolada, sem pan. Distância inicial 5. Ainda não faz colisão entre câmera e arquitetura. |
+| Primeira pessoa | Olho exatamente em alvo + altura ocular, distância/pan zero, orientação visual independente, pitch para cima/baixo e indicação para ocultar somente o jogador local. Roda não a transforma numa órbita. |
+
+Cada modo restaura sua própria pose. F4 suspende/retoma sem perdê-la; Home preserva as outras três poses. O adaptador conserva o início isométrico atual em yaw +0,15. `revision()` invalida picking; mudança de modo/preferências encerra arrasto. Shift+botão central desloca somente isométrico/órbita; botão central usa a sensibilidade salva nos quatro modos. O módulo não consome input nem escreve no jogador. Altura ocular 1,1 tile é **provisória**: a calibração por classe/frame e escala dos modelos continua pendente.
+
+A perspectiva usa `focal = viewportHeight / (2*tan(FOV/2))`, divide X/Y por profundidade e recorta os seis planos **antes** da divisão, com capacidade fixa. Interseções são interpoladas em double e fixadas no plano. UV/world/depth usam os mesmos pesos recíprocos. Profundidade para D3D11 é normalizada a [0,1], com `clipW=depth` em perspectiva e `clipW=1` na ortográfica. Raios recebem centros de pixels; são diagnósticos, não comandos de movimento. Um centro deslocado forma frustum assimétrico com o mesmo focal; o FOV configurado é nominal para o centro simétrico.
+
+Fog modifica somente cor linear após visibilidade/opacity. Na perspectiva usa profundidade no eixo da câmera, não distância euclidiana; na ortográfica remove o afastamento artificial de 256 e considera a distância de vista selecionada. Esse ajuste foi necessário após a revisão de imagens r1, que mostrou a cidade próxima totalmente fogged; r2/r3/r4 verificam a correção sem alterar projeção, depth ou seleção. Na integração, CPU/GPU precisam converter a paleta para RGB linear, misturar e requantizar com o mesmo contrato/LUT; não misturar números de índices da paleta. Invalidar LUTs ao mudar paleta ou parâmetros de fog.
+
+O horizonte é fixo no mundo e recebe o AABB real do chão. Cinco bandas fechadas em 360° formam apron, subida/descida da crista próxima e subida/descida da distante. Nenhum triângulo entra no interior do AABB. Defaults sintéticos: distâncias 18/60/120 tiles além da borda, 128 segmentos, **1.280 triângulos / 66.560 bytes**; máximo 256 segmentos / 2.560 triângulos. Hash visual próprio não acessa RNG da engine. O módulo não contém tiles, entidades, colisões, triggers ou IDs de seleção. Bounds, alturas, distâncias e área representável são validados antes de alocar.
+
+## Integração delimitada, sob coordenação do principal
+
+| Arquivo compartilhado | Alteração necessária e critério |
+| --- | --- |
+| `town_view.hpp/.cpp` | Adaptar câmera/projeção/clipping/interpolação CPU; culling conservador; olhar local por face; ocular omitindo `MyPlayer`; horizonte opaco sem pick e fog por superfície; publicar cor/depth/ID da mesma amostra. Preservar Home nativo, reloads, sampling e fallback integral. |
+| `town_gpu.hpp/.cpp` | Transportar clipW e projeção/near/far por frame; atualizar stride/layout/validação; UV/world/cameraDepth com interpolação perspectiva. Falha GPU refaz todo o quadro CPU. Comparar os mesmos fixtures e não ativar modos que a GPU trate como ortográficos. |
+| `options.h/.cpp`, `diablo.cpp`, menus/settings | Preferências e troca/restauração; gates existentes e comandos nativos intactos. Troca/FOV/near/far encerram arrasto e invalidam seleção. `cursor.cpp` e `scrollrt.cpp` permanecem inicialmente somente leitura. |
+| `CMakeLists.txt`, `Source/CMakeLists.txt` | Módulos/menu/diagnóstico adicionados na janela exclusiva liberada pelo principal; link Release concluído. |
+
+Opções em Graphics: modo de câmera (isométrico por padrão), FOV vertical 35–100° (60°), sensibilidade 25–200% (100%, base 0,006 rad/pixel), horizonte/fog ligado por padrão. Flags `None`, aplicação no próximo desenho e persistência normal por perfil; nenhuma escrita no perfil habitual por esta frente. Atalho de ciclo configurável sem tecla padrão evita conflito com F5–F8. Callbacks separados de modo e FOV/sensibilidade preservam Home como mudança da sessão. O chat **Configurações durante a partida — músicas e opções completas** consome `GetEntries` e é dono dos menus da partida. Near/far e altura ocular permanecem parâmetros técnicos até calibração. Os fixtures nativos exercitam callbacks, limites e restauração em memória; não executam o ciclo completo de salvar/reabrir cada nova opção de câmera.
+
+Critérios técnicos executados: CPU e D3D11 real, quatro modos, recorte near em modelo real, miss de céu/decoração, seleção/depth, ausência do corpo local ocular, Home/F4, arrasto/pan, preferências e snapshots. Revisão adicional na partida deve cobrir deslocamento normal, todas as classes, portas/interiores, NPC/item/trigger/HUD/painéis, foco/reload, combate e saves. Medição A/B controlada de frame/readback, draw calls, overdraw e memória continua pendente. Instalação e atualização do guia somente pelo principal, sem interromper partida aberta.
+
+`tools/town_camera_runtime_entry.hpp` liga `--camera` ao smoke real e chama `town_camera_runtime_checks.hpp` em duas resoluções. `town_camera_capture_checks.hpp` liga `--camera-extra` às amostras de suavização/bordas/proximidade. Exigem hardware GPU com zero triângulos CPU no caminho GPU. Restaura-se estado/opções em memória sem salvar; posições e ocupação temporárias dos fixtures de borda são restauradas imediatamente. O snapshot compara `dPiece`, SOL, `dSpecial`, `dMonster`, `dPlayer`, `dFlags`, posição/vida/modo/direção do jogador e posições dos moradores, além do estado RNG. Não cobre cada campo da simulação, `dItem`, `dObject`, triggers ou saves; não afirmar prova completa de invariância da partida.
+
+## Evidência e limites
+
+Reprodução isolada: `tools/run_town_camera_horizon_smoke.ps1 -OutputDirectory <diretório-privado>`. Usa MSVC C++20, otimização, `/W4 /WX`; gera recibo com hashes, `summary.json`, logs e PPMs sintéticos. Não requer assets do jogo. A rodada r4 passou **238.014 verificações** e fundamenta as medições históricas abaixo; r5 acrescentou a LUT e r6 a regressão da borda, chegando às **239.811** verificações atuais. As 20 imagens r6 são idênticas por hash às r5/r4, sem nova alteração visual em relação à revisão r3; inputs conferidos contra o recibo.
+
+O diagnóstico verifica deltas nativas/zoom, perspectiva analítica, raios, seis planos, grandes spans near/far nos dois sentidos, depth D3D11, restauração e entradas inválidas; geometria/topologia/costura/AABB/determinismo/orçamento/fog; raster de decoração e recortes, fog preservando depth/pick, 360° ocular e cobertura de chão nas quatro bordas/quatro cantos. As imagens usam caixas e terreno sintéticos, não demonstram fidelidade visual de Tristram.
+
+As medições CPU no Intel Core i7-14700 incluem inicialização dos buffers e render de toda a cena sintética, oito pares A/B após aquecimento com ordem AB/BA alternada. Carga da sessão e clocks não foram controlados. Rodadas anteriores mostraram drift acentuado; r4 intercalou os pares para reduzir esse viés. p95 de oito amostras é apenas exploratório. GPU, compositor herdado e sampling 2× da partida ainda não foram medidos aqui.
+
+A rodada final r6 confirmou os testes/imagens, mas repetiu a instabilidade de tempo da sessão: terceira pessoa 68,37/87,51 ms em 960×540, contra 13,99/17,84 ms em r4, sem mudança de contagem de geometria/pixels. Não substituir esse conflito por uma promessa de desempenho; medir o candidato real em condição controlada. Os valores r4 abaixo são um registro histórico do fixture, não a estimativa do runtime integrado.
+
+| Modo | CPU mediana sem/com horizonte em 960×540 | Delta pareado 960×540 / 1920×1080 | Cobertura de fragmentos/pixel sem/com, 960×540 |
+| --- | --- | --- | --- |
+| Isométrico | 14,97 / 15,19 ms | ~0 / ~0 ms, dentro do ruído | 1,046 / 1,046; horizonte fora do quadro |
+| Órbita | 12,47 / 16,71 ms | +4,10 / +14,92 ms | 0,684 / 0,902 |
+| Terceira pessoa | 13,99 / 17,84 ms | +3,81 / +13,43 ms | 0,929 / 1,176 |
+| Primeira pessoa | 44,42 / 59,94 ms | +15,51 / +56,38 ms | 0,595 / 0,822 |
+
+O aumento ocular e a variação entre rodadas impedem concluir desempenho sustentado na partida. A aplicação solicitada permite revisão do candidato; não estabelece meta de FPS. Buffers sintéticos ocupam 10.368.000 bytes em 960×540 e 41.472.000 em 1920×1080; o horizonte adiciona somente 66.560 bytes de triângulos, sem buffers de tela próprios. `summary.json` também registra visitas de pixels, rejeições de depth/opacity, fragmentos sombreados e triângulos projetados. Cobertura/pixel usa a área inteira do viewport, incluindo céu; não representa somente overdraw em pixels ocupados.
+
+O módulo isolado usa albedo linear provisório; o adaptador fonte aplica a luz direcional do perfil, com céu/fog e paleta invalidados ao recarregar recursos ou mudar RGB da paleta. Forma e cores não são assets aprovados. A LUT usa 64 níveis, com profundidade quantizada em passos de 1/8 tile; não há exponenciais por pixel. Atores atuais derivam de sprites/volumes inferidos, efeitos usam billboards e parte da arquitetura usa pintura nativa projetada: a perspectiva expõe essas limitações. Colisão de câmera, oclusão automática de telhados e interiores adicionais permanecem pendentes; não regenerar a cabana para compensá-las.
+
+A revisão das capturas reais mostrou faixas fortes de paleta no céu/fog e relevo facetado provisório. Os cantos máximos e a vista isométrica ampla exibem áreas pretas do piso finito nativo, também presentes na referência Home. O horizonte externo respeita o AABB e não preenche essas lacunas internas: continuidade artística do terreno ainda está incompleta. Proximidade pode atravessar/encostar volumes e expõe pixelização e proxies herdados. Essas limitações foram comunicadas ao responsável pela instalação e permanecem para revisão do usuário.
+
+O contador fonte `horizonBytes` soma capacidade dos triângulos, cores por triângulo, LUT/fila de profundidade, céu e assinatura de paleta. Exclui descritores/texturas constantes prelit, overhead do alocador e recursos D3D11; não é medição total de memória residente. `cpuPixelVisits`, `cpuCoveredFragments`, `cpuDepthRejected` e `cpuShadedFragments` instrumentam somente o caminho CPU; overdraw/custo de shader GPU e memória completa devem ser medidos no candidato.
+
+Próxima ação: revisão dos modos pelo usuário na partida e medição controlada de desempenho/memória antes de qualquer afirmação de orçamento ou aprovação artística. Abrir pela entrada habitual e usar Esc → Configurações → Gráficos para trocar a câmera; botão central gira a visão, F4 alterna o 3D e Home retorna ao backend original. Não reabrir geração de assets nem etapas concluídas para compensar limitações de câmera/terreno.

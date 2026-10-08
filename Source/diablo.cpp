@@ -3,6 +3,7 @@
  *
  * Implementation of the main game initialization functions.
  */
+#include <algorithm>
 #include <array>
 #include <cstdint>
 #include <string_view>
@@ -60,6 +61,7 @@
 #include "help.h"
 #include "hwcursor.hpp"
 #include "init.hpp"
+#include "ingame_settings.h"
 #include "inv.h"
 #include "levels/drlg_l1.h"
 #include "levels/drlg_l2.h"
@@ -841,7 +843,7 @@ void GameEventHandler(const SDL_Event &event, uint16_t modState)
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 		if (event.key.repeat) {
 			const auto *action = options.Keymapper.findAction(static_cast<uint32_t>(SDLC_EventKey(event)));
-			if (action != nullptr && action->key == "ToggleTown3D")
+			if (action != nullptr && (action->key == "ToggleTown3D" || action->key == "Town3DCameraMode"))
 				return;
 		}
 #endif
@@ -1056,6 +1058,7 @@ void RunGameLoop(interface_mode uMsg)
 	ClearScreenBuffer();
 	RedrawEverything();
 	scrollrt_draw_game_screen();
+	CloseInGameSettings();
 	previousHandler = SetEventHandler(previousHandler);
 	assert(HeadlessMode || previousHandler == GameEventHandler);
 	FreeGame();
@@ -1904,6 +1907,32 @@ void OptionLanguageCodeChanged()
 
 const auto OptionChangeHandlerLanguage = (GetOptions().Language.code.SetValueChangedCallback(OptionLanguageCodeChanged), true);
 
+void OptionTownViewCameraModeChanged()
+{
+	ReleaseTownCameraDrag();
+	SetTownViewCameraMode(static_cast<TownCameraMode>(std::clamp(*GetOptions().Graphics.townViewCameraMode, 0, 3)));
+	ResetItemlabelHighlighted();
+	RedrawEverything();
+}
+
+void OptionTownViewCameraPreferencesChanged()
+{
+	// FOV/sensitivity changes must not reapply the saved mode after Home.
+	ReleaseTownCameraDrag();
+	ApplyTownViewCameraPreferences();
+	RedrawViewport();
+}
+
+void OptionTownViewHorizonChanged()
+{
+	RedrawViewport();
+}
+
+const auto OptionChangeHandlerTownViewCameraMode = (GetOptions().Graphics.townViewCameraMode.SetValueChangedCallback(OptionTownViewCameraModeChanged), true);
+const auto OptionChangeHandlerTownViewCameraFov = (GetOptions().Graphics.townViewCameraFov.SetValueChangedCallback(OptionTownViewCameraPreferencesChanged), true);
+const auto OptionChangeHandlerTownViewCameraSensitivity = (GetOptions().Graphics.townViewCameraSensitivity.SetValueChangedCallback(OptionTownViewCameraPreferencesChanged), true);
+const auto OptionChangeHandlerTownViewHorizon = (GetOptions().Graphics.townViewHorizon.SetValueChangedCallback(OptionTownViewHorizonChanged), true);
+
 } // namespace
 
 uint32_t GetGameId()
@@ -2029,6 +2058,19 @@ void InitKeymapActions()
 	    },
 	    nullptr,
 	    [] { return CanUseTownCamera(); });
+	options.Keymapper.AddAction(
+	    "Town3DCameraMode",
+	    N_("Cycle Tristram camera mode"),
+	    N_("Cycle and save the Isometric, Free Orbit, Third Person and First Person camera preference. Movement and combat keep their native controls."),
+	    SDLK_UNKNOWN,
+	    [] {
+		    ReleaseTownCameraDrag();
+		    CycleTownViewCameraMode();
+		    ResetItemlabelHighlighted();
+		    RedrawEverything();
+	    },
+	    nullptr,
+	    [] { return CanControlTownCamera(false); });
 	options.Keymapper.AddAction(
 	    "Town3DRotateLeft",
 	    N_("Rotate Tristram camera left"),

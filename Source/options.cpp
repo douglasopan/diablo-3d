@@ -905,6 +905,16 @@ GraphicsOptions::GraphicsOptions()
     , townViewStartIn3D("Start in 3D", OptionEntryFlags::None, N_("Start in 3D"), N_("Start each game in the 3D town view. Applies when starting or loading a game; F4 still switches views during play. Other levels use the original renderer until their 3D version is available."), true)
     , townViewGpuRendering("3D GPU Rendering", OptionEntryFlags::None, N_("3D GPU Rendering"), N_("Use GPU acceleration for the 3D town view when available. Changes apply on the next frame; CPU rendering is used if unavailable."), false)
     , townViewAntialiasing("3D Edge Smoothing", OptionEntryFlags::None, N_("3D Edge Smoothing"), N_("Smooth edges in the 3D town view without resizing the interface. Requires more processing power."), false)
+    , townViewCameraMode("3D Camera Mode", OptionEntryFlags::None, N_("3D Camera Mode"), N_("Choose the saved 3D town camera. Changes apply immediately; Home restores the original view for the current session. Hold the middle mouse button to look independently of the hero. First Person keeps native click movement and combat; it does not add keyboard movement controls."), 0,
+          {
+              { 0, N_("Isometric") },
+              { 1, N_("Free Orbit") },
+              { 2, N_("Third Person") },
+              { 3, N_("First Person") },
+          })
+    , townViewCameraFov("3D Camera Field of View", OptionEntryFlags::None, N_("3D Camera Field of View"), N_("Set the vertical field of view in degrees for Free Orbit, Third Person and First Person. Saved changes apply on the next frame. Isometric keeps the original projection."), 60, { 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100 })
+    , townViewCameraSensitivity("3D Camera Sensitivity", OptionEntryFlags::None, N_("3D Camera Sensitivity"), N_("Set middle mouse look sensitivity as a percentage of the default. Saved changes apply on the next frame without changing movement or combat controls."), 100, { 25, 50, 75, 100, 125, 150, 175, 200 })
+    , townViewHorizon("3D Horizon and Fog", OptionEntryFlags::None, N_("3D Horizon and Fog"), N_("Show decorative distant scenery and distance fog around the 3D town. Saved changes apply on the next frame. The horizon is visual only and adds no walkable terrain, collision or interactions."), true)
     , perPixelLighting("Per-pixel Lighting", OptionEntryFlags::None, N_("Per-pixel Lighting"), N_("Subtile lighting for smoother light gradients."), DEFAULT_PER_PIXEL_LIGHTING)
     , colorCycling("Color Cycling", OptionEntryFlags::None, N_("Color Cycling"), N_("Color cycling effect used for water, lava, and acid animation."), true)
     , alternateNestArt("Alternate nest art", OptionEntryFlags::OnlyHellfire | OptionEntryFlags::CantChangeInGame, N_("Alternate nest art"), N_("The game will use an alternative palette for Hellfire’s nest tileset."), false)
@@ -938,6 +948,10 @@ std::vector<OptionEntryBase *> GraphicsOptions::GetEntries()
 		&townViewStartIn3D,
 		&townViewGpuRendering,
 		&townViewAntialiasing,
+		&townViewCameraMode,
+		&townViewCameraFov,
+		&townViewCameraSensitivity,
+		&townViewHorizon,
 		&showFPS,
 		&perPixelLighting,
 		&colorCycling,

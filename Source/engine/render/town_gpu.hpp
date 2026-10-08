@@ -11,7 +11,9 @@
 
 namespace devilution {
 
-/** Projected raster coordinates and affine world coordinates; no perspective divide. */
+/** Raster coordinates after projection, with unnormalized view depth/world/UV.
+ * clipW is view depth for perspective, exactly one for orthographic frames.
+ * Appended default preserves existing orthographic aggregate initializers. */
 struct TownGpuVertex {
 	float x;
 	float y;
@@ -19,6 +21,16 @@ struct TownGpuVertex {
 	float u;
 	float v;
 	std::array<float, 3> world;
+	float clipW = 1;
+};
+
+/** Frame-wide projection; vertices must already be clipped to near/far.
+ * Valid range is 0 < nearClip < farClip <= 4096. Orthographic hardware depth
+ * retains depth/4096 for compatibility; published depth is always view depth. */
+struct TownGpuProjection {
+	bool perspective = false;
+	float nearClip = 0.4F;
+	float farClip = 4096;
 };
 
 /** Borrowed inputs are uploaded during Submit, never retained by the backend. */
@@ -103,7 +115,8 @@ struct TownGpuStatus {
 };
 
 /** Hardware only by default. WARP fallback requires this explicit diagnostic flag. */
-bool TownGpuBeginFrame(int width, int height, bool allowWarpForDiagnostics = false);
+bool TownGpuBeginFrame(int width, int height, bool allowWarpForDiagnostics = false,
+    const TownGpuProjection &projection = {});
 /** Call after Begin; an empty view disables directional shadows for this frame. */
 bool TownGpuSetShadow(const TownGpuShadow &shadow);
 bool TownGpuSubmitProjectedTriangle(const std::array<TownGpuVertex, 3> &vertices,

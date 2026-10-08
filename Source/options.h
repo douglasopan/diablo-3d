@@ -583,6 +583,14 @@ struct GraphicsOptions : OptionCategoryBase {
 	OptionEntryBoolean townViewGpuRendering;
 	/** @brief Optional smoothing of reconstructed 3D world edges, independent of UI. */
 	OptionEntryBoolean townViewAntialiasing;
+	/** @brief Saved 3D camera mode; Home restores the session view without changing this preference. */
+	OptionEntryEnum<int> townViewCameraMode;
+	/** @brief Vertical perspective field of view in degrees; applies on the next frame. */
+	OptionEntryInt<int> townViewCameraFov;
+	/** @brief Middle mouse look sensitivity as a percentage of the default. */
+	OptionEntryInt<int> townViewCameraSensitivity;
+	/** @brief Visual-only distant scenery and distance fog; never expands gameplay terrain. */
+	OptionEntryBoolean townViewHorizon;
 	/** @brief Subtile lighting for smoother light gradients. */
 	OptionEntryBoolean perPixelLighting;
 	/** @brief Enable color cycling animations. */
