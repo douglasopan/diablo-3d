@@ -29,6 +29,7 @@
 #include "controls/touch/gamepad.h"
 #include "cursor.h"
 #include "cursor_defs.hpp"
+#include "diablo.h"
 #include "doom.h"
 #include "engine/point.hpp"
 #include "engine/points_in_rectangle_range.hpp"
@@ -94,6 +95,9 @@ Point VisualStoreSlot = { 0, 0 };
 int PreviousInventoryColumn = -1;
 bool BeltReturnsToStash = false;
 bool BeltReturnsToVisualStore = false;
+// Only a directional request issued by the first-person keyboard hook owns a
+// later stop. Mouse, interaction and controller requests must keep their paths.
+bool FppWalkOwned = false;
 
 // Forward declaration for use in VisualStoreMove
 void InventoryMove(AxisDirection dir);
@@ -1741,12 +1745,12 @@ bool IsPathBlocked(Point position, Direction dir)
 	return !PosOkPlayer(myPlayer, leftStep) && !PosOkPlayer(myPlayer, rightStep);
 }
 
-void WalkInDir(Player &player, AxisDirection dir)
+bool WalkInDir(Player &player, AxisDirection dir)
 {
 	if (dir.x == AxisDirectionX_NONE && dir.y == AxisDirectionY_NONE) {
 		if (ControlMode != ControlTypes::KeyboardAndMouse && player.walkpath[0] != WALK_NONE && player.destAction == ACTION_NONE)
 			NetSendCmdLoc(player.getId(), true, CMD_WALKXY, player.position.future); // Stop walking
-		return;
+		return false;
 	}
 
 	const Direction pdir = FaceDir[static_cast<std::size_t>(dir.x)][static_cast<std::size_t>(dir.y)];
@@ -1758,16 +1762,17 @@ void WalkInDir(Player &player, AxisDirection dir)
 	if (IsStandingGround()) {
 		if (player._pmode == PM_STAND)
 			StartStand(player, pdir);
-		return;
+		return false;
 	}
 
 	if (PosOkPlayer(player, delta) && IsPathBlocked(player.position.future, pdir)) {
 		if (player._pmode == PM_STAND)
 			StartStand(player, pdir);
-		return; // Don't start backtrack around obstacles
+		return false; // Don't start backtrack around obstacles
 	}
 
 	NetSendCmdLoc(player.getId(), true, CMD_WALKXY, delta);
+	return true;
 }
 
 void QuestLogMove(AxisDirection moveDir)
@@ -1845,14 +1850,82 @@ void ProcessAutomapMovementGamepad()
 		AutomapRight();
 }
 
+bool CanOwnFirstPersonWalk(const Player &player)
+{
+	return &player == MyPlayer && leveltype == DTYPE_TOWN && !MyPlayerIsDead
+	    && player._pmode != PM_DEATH && !player.hasNoLife() && !player._pLvlChanging
+	    && player.isOnActiveLevel() && ControlMode == ControlTypes::KeyboardAndMouse
+	    && ControlDevice == ControlTypes::KeyboardAndMouse;
+}
+
+bool HasOtherFirstPersonAction(const Player &player)
+{
+	return player.destAction != ACTION_NONE || LastPlayerAction != PlayerActionType::None
+	    || sgbMouseDown != CLICK_NONE || ControllerActionHeld != GameActionType_NONE
+	    || (player._pmode != PM_STAND && !player.isWalking());
+}
+
+bool StopOwnedFirstPersonWalk()
+{
+	if (!FppWalkOwned)
+		return false;
+	FppWalkOwned = false;
+	if (MyPlayer == nullptr || !CanOwnFirstPersonWalk(*MyPlayer)
+	    || HasOtherFirstPersonAction(*MyPlayer))
+		return false;
+	// Ownership records a sent request, which may not have reached OnWalk yet.
+	// Queue the stop even with an empty walkpath: OnWalk clears the earlier path
+	// before MakePlrPath sees this current future tile and leaves no next step.
+	// An animation already in progress still completes its native current step.
+	NetSendCmdLoc(MyPlayer->getId(), true, CMD_WALKXY, MyPlayer->position.future);
+	return true;
+}
+
+AxisDirection FirstPersonAxisDirection(Direction direction)
+{
+	// FaceDir consumes screen directions; the camera adapter supplies native
+	// directions. This inverse mapping avoids applying the isometric transform
+	// twice and still delegates all movement to WalkInDir.
+	switch (direction) {
+	case Direction::South: return { AxisDirectionX_NONE, AxisDirectionY_DOWN };
+	case Direction::SouthWest: return { AxisDirectionX_LEFT, AxisDirectionY_DOWN };
+	case Direction::West: return { AxisDirectionX_LEFT, AxisDirectionY_NONE };
+	case Direction::NorthWest: return { AxisDirectionX_LEFT, AxisDirectionY_UP };
+	case Direction::North: return { AxisDirectionX_NONE, AxisDirectionY_UP };
+	case Direction::NorthEast: return { AxisDirectionX_RIGHT, AxisDirectionY_UP };
+	case Direction::East: return { AxisDirectionX_RIGHT, AxisDirectionY_NONE };
+	case Direction::SouthEast: return { AxisDirectionX_RIGHT, AxisDirectionY_DOWN };
+	default: return { AxisDirectionX_NONE, AxisDirectionY_NONE };
+	}
+}
+
 void Movement(Player &player)
 {
-	if (PadMenuNavigatorActive || PadHotspellMenuActive || InGameMenu())
+	const bool mayOwnWalk = CanOwnFirstPersonWalk(player);
+	const bool otherAction = HasOtherFirstPersonAction(player);
+	if (!mayOwnWalk || otherAction)
+		FppWalkOwned = false;
+	const bool uiMovement = PadMenuNavigatorActive || PadHotspellMenuActive || InGameMenu()
+	    || GetLeftStickOrDPadGameUIHandler() != nullptr;
+	const bool firstPersonMovement = mayOwnWalk && !otherAction && !uiMovement
+	    && IsTownFirstPersonInputCaptured()
+	    && !AutomapActive && !DoomFlag && !DropGoldFlag && !IsWithdrawGoldOpen
+	    && !IsChatActive() && !IsLeftPanelOpen() && !IsRightPanelOpen();
+	if (firstPersonMovement) {
+		const AxisDirection direction = FirstPersonAxisDirection(GetTownFirstPersonMoveDirection());
+		if (direction.x == AxisDirectionX_NONE && direction.y == AxisDirectionY_NONE) {
+			StopOwnedFirstPersonWalk();
+		} else if (WalkInDir(player, direction)) {
+			FppWalkOwned = true;
+		}
+		return;
+	}
+	if (StopOwnedFirstPersonWalk())
+		return; // At most one directional/stop request from this logic iteration.
+	if (uiMovement)
 		return;
 
-	if (GetLeftStickOrDPadGameUIHandler() == nullptr) {
-		WalkInDir(player, GetMoveDirection());
-	}
+	WalkInDir(player, GetMoveDirection());
 }
 
 struct RightStickAccumulator {
@@ -2035,6 +2108,16 @@ void LogGamepadChange(GamepadLayout newGamepad)
 
 } // namespace
 
+void CancelTownFirstPersonWalk()
+{
+	FppWalkOwned = false;
+}
+
+void StopTownFirstPersonWalk()
+{
+	StopOwnedFirstPersonWalk();
+}
+
 void FocusOnVisualStore()
 {
 	InvalidateInventorySlot();        // Clear inventory focus
@@ -2069,6 +2152,16 @@ void DetectInputMethod(const SDL_Event &event, const ControllerButtonEvent &game
 	ControlTypes newControlMode = inputType;
 	if (ContinueSimulatedMouseEvent(event, gamepadEvent)) {
 		newControlMode = ControlMode;
+	}
+
+	if ((newControlDevice != ControlDevice || newControlMode != ControlMode)
+	    && (newControlDevice != ControlTypes::KeyboardAndMouse || newControlMode != ControlTypes::KeyboardAndMouse)) {
+		// Drain our queued walk while the old keyboard/mouse ownership is still
+		// valid, even if OnWalk has not populated walkpath yet. A controller's
+		// new native action is dispatched after DetectInputMethod, so this stop
+		// cannot replace that action. Existing native interactions keep ownership.
+		StopOwnedFirstPersonWalk();
+		SuspendTownFirstPersonInput();
 	}
 
 	LogControlDeviceAndModeChange(newControlDevice, newControlMode);

@@ -59,6 +59,7 @@ constexpr std::array<SDL_Rect, 2> LiquidSources { SDL_Rect { 58, 54, 1137, 1136 
 std::optional<OwnedSurface> Base;
 std::optional<OwnedSurface> Foreground;
 std::optional<OwnedSurface> Cursor;
+std::vector<uint8_t> CursorMask;
 std::vector<uint8_t> ForegroundMask;
 SDL_Rect ForegroundBounds {};
 SDL_Surface *FrameSource = nullptr;
@@ -764,12 +765,14 @@ void RecordD3dHudPresentationNativeUiRect(const SDL_Rect &region)
 void ClearD3dHudPresentationCursor()
 {
 	Cursor.reset();
+	CursorMask.clear();
 	CursorUpdated = true;
 }
 
 void CaptureD3dHudPresentationCursor(Rectangle clippedBounds, Point spriteBottomLeft, int cursorId)
 {
 	Cursor.reset();
+	CursorMask.clear();
 	CursorUpdated = true;
 	if (!FrameValid || clippedBounds.size.width <= 0 || clippedBounds.size.height <= 0)
 		return;
@@ -783,6 +786,36 @@ void CaptureD3dHudPresentationCursor(Rectangle clippedBounds, Point spriteBottom
 	// Same palette contract as SetHardwareCursorFromSprite: UI sprites never
 	// use indices 1..127, so black (0) remains real, opaque cursor coverage.
 	DrawSoftwareCursor(*Cursor, spriteBottomLeft - Displacement { clippedBounds.position.x, clippedBounds.position.y }, cursorId);
+	CursorPosition = clippedBounds.position;
+}
+
+void CaptureD3dHudPresentationCursorPixels(const Surface &source, Rectangle clippedBounds,
+    std::span<const uint8_t> opacity)
+{
+	Cursor.reset();
+	CursorMask.clear();
+	CursorUpdated = true;
+	if (!FrameValid)
+		return;
+	const int width = clippedBounds.size.width, height = clippedBounds.size.height;
+	if (source.surface == nullptr || source.surface->pixels == nullptr || SDLC_SURFACE_BITSPERPIXEL(source.surface) != 8
+	    || source.region.x < 0 || source.region.y < 0 || source.w() < 0 || source.h() < 0
+	    || source.region.x > source.surface->w - source.w() || source.region.y > source.surface->h - source.h()
+	    || width <= 0 || height <= 0 || width > 1024 || height > 1024
+	    || clippedBounds.position.x < 0 || clippedBounds.position.y < 0
+	    || clippedBounds.position.x > source.w() - width || clippedBounds.position.y > source.h() - height
+	    || opacity.size() != static_cast<size_t>(width) * height
+	    || !EnsureSurface(Cursor, width, height)) {
+		CursorUpdated = false;
+		return;
+	}
+	CursorMask.assign(opacity.begin(), opacity.end());
+	for (int y = 0; y < height; ++y) {
+		const auto *pixels = source.at(clippedBounds.position.x, clippedBounds.position.y + y);
+		auto *target = Cursor->at(0, y);
+		for (int x = 0; x < width; ++x)
+			target[x] = opacity[static_cast<size_t>(y) * width + x] != 0 ? pixels[x] : TransparentColor;
+	}
 	CursorPosition = clippedBounds.position;
 }
 
@@ -869,7 +902,8 @@ D3dHudPresentationResult RenderD3dHudPresentation(SDL_Renderer *renderer, SDL_Su
 			CursorWidth = Cursor->w();
 			CursorHeight = Cursor->h();
 		}
-		ConvertIndexed(*Cursor, { 0, 0, Cursor->w(), Cursor->h() }, colors, true, CursorColors);
+		ConvertIndexed(*Cursor, { 0, 0, Cursor->w(), Cursor->h() }, colors, true, CursorColors,
+		    CursorMask.empty() ? nullptr : &CursorMask);
 		if (!Upload(CursorTexture.get(), CursorColors, Cursor->w()))
 			return D3dHudPresentationResult::Inactive;
 	}
@@ -900,6 +934,7 @@ D3dHudPresentationResult RenderD3dHudPresentation(SDL_Renderer *renderer, SDL_Su
 void InvalidateD3dHudPresentationFrame()
 {
 	Cursor.reset();
+	CursorMask.clear();
 	FrameSource = nullptr;
 	CapturedRegion = {};
 	FrameValid = false;
@@ -939,6 +974,7 @@ void RecordD3dHudPresentationNativeUiRect(const SDL_Rect &) { }
 } // namespace detail
 void ClearD3dHudPresentationCursor() { }
 void CaptureD3dHudPresentationCursor(Rectangle, Point, int) { }
+void CaptureD3dHudPresentationCursorPixels(const Surface &, Rectangle, std::span<const uint8_t>) { }
 D3dHudPresentationResult RenderD3dHudPresentation(SDL_Renderer *, SDL_Surface *, SDL_Palette *, bool, bool)
 {
 	return D3dHudPresentationResult::Inactive;

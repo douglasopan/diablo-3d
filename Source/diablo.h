@@ -21,6 +21,8 @@
 #ifdef _DEBUG
 #include "tables/monstdat.h"
 #endif
+#include "engine/direction.hpp"
+#include "engine/events.hpp"
 #include "levels/gendung.h"
 #include "utils/attributes.h"
 #include "utils/endian_read.hpp"
@@ -91,6 +93,34 @@ extern PlayerActionType LastPlayerAction;
 
 void InitKeymapActions();
 void SetCursorPos(Point position);
+/** Captured first-person input uses the logical world viewport center. */
+bool IsTownFirstPersonInputCaptured();
+Point GetTownFirstPersonPointer(Point absolute);
+Direction GetTownFirstPersonMoveDirection();
+/** Release capture, owned arrows and only a walk issued by this adapter. */
+void SuspendTownFirstPersonInput();
+void StopTownFirstPersonWalk();
+/** Native interaction takes ownership before its command is dispatched. */
+void CancelTownFirstPersonWalk();
+
+/** Diagnostic seam replaces only SDL capture/focus/keyboard services.
+ * Supplying services permits a headless fixture; it does not bypass game/UI
+ * gates or prove real operating-system capture. nullptr restores SDL services.
+ * The adapter copies this struct and never retains the caller's pointer. */
+struct TownFirstPersonInputServicesForDiagnostics {
+	bool (*setRelativeMouse)(bool) = nullptr;
+	bool (*relativeMouse)() = nullptr;
+	uint8_t (*heldArrows)() = nullptr;
+	bool (*hasFocus)() = nullptr;
+	void (*flushRelativeMouse)() = nullptr;
+};
+void SetTownFirstPersonInputServicesForDiagnostics(const TownFirstPersonInputServicesForDiagnostics *services);
+/** Calls the exact live-session handler and synchronization used by gameplay. */
+void DispatchGameEventForDiagnostics(const SDL_Event &event, uint16_t modState);
+void SyncFirstPersonInputForDiagnostics();
+/** Same post-draw queue flush used by the live game loop. */
+void FlushFirstPersonClicksForDiagnostics();
+EventHandler GetGameEventHandlerForDiagnostics();
 void FreeGameMem();
 bool StartGame(bool bNewGame, bool bSinglePlayer);
 [[noreturn]] void diablo_quit(int exitStatus);

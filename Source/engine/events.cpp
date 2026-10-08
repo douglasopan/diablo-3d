@@ -15,6 +15,7 @@
 
 #include "controls/input.h"
 #include "controls/padmapper.hpp"
+#include "diablo.h"
 #include "engine/demomode.h"
 #include "engine/render/primitive_render.hpp"
 #include "interfac.h"
@@ -31,7 +32,6 @@
 #endif
 
 #ifdef __vita__
-#include "diablo.h"
 #include "platform/vita/touch.h"
 #endif
 
@@ -194,6 +194,8 @@ EventHandler CurrentEventHandler;
 
 EventHandler SetEventHandler(EventHandler eventHandler)
 {
+	if (eventHandler != CurrentEventHandler)
+		SuspendTownFirstPersonInput();
 	PadmapperReleaseAllActiveButtons();
 
 	EventHandler previousHandler = CurrentEventHandler;

@@ -67,6 +67,15 @@ void ClearD3dHudPresentationCursor();
 void CaptureD3dHudPresentationCursor(Rectangle clippedBounds, Point spriteBottomLeft, int cursorId);
 
 /**
+ * Copy only covered pixels from clippedBounds in source's local coordinates.
+ * Opacity is row-major and exactly width*height bytes; zero is transparent.
+ * The explicit mask keeps every covered palette index opaque, including 1.
+ * Invalid input declines the optional presentation, retaining native fallback.
+ */
+void CaptureD3dHudPresentationCursorPixels(const Surface &source, Rectangle clippedBounds,
+    std::span<const uint8_t> opacity);
+
+/**
  * Call after the existing native/Town presentation. townLayersPresented means
  * the retained 2x world was successfully uploaded and presented in THIS call.
  * Fade/other RenderPresent(false) calls conservatively retain the native path.

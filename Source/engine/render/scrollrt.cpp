@@ -5,6 +5,8 @@
  */
 #include "engine/render/scrollrt.h"
 
+#include <algorithm>
+#include <array>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -27,11 +29,13 @@
 #include "controls/plrctrls.h"
 #include "cursor.h"
 #include "dead.h"
+#include "diablo.h"
 #include "diablo_msg.hpp"
 #include "doom.h"
 #include "engine/backbuffer_state.hpp"
 #include "engine/displacement.hpp"
 #include "engine/dx.h"
+#include "engine/palette.h"
 #include "engine/point.hpp"
 #include "engine/render/clx_render.hpp"
 #include "engine/render/dun_render.hpp"
@@ -284,6 +288,45 @@ void DrawCursor(const Surface &out)
 {
 	DrawnCursor &cursor = GetDrawnCursor();
 	ClearD3dHudPresentationCursor();
+	if (IsTownFirstPersonInputCaptured()) {
+		SetHardwareCursorVisible(false);
+		constexpr int Radius = 5;
+		constexpr int Diameter = 2 * Radius + 1;
+		const Point center = GetTownFirstPersonPointer(MousePosition);
+		Rectangle &rect = cursor.rect;
+		rect.position = { std::clamp(center.x - Radius, 0, out.w()), std::clamp(center.y - Radius, 0, out.h()) };
+		rect.size = {
+			std::max(0, std::min(center.x + Radius + 1, out.w()) - rect.position.x),
+			std::max(0, std::min(center.y + Radius + 1, out.h()) - rect.position.y)
+		};
+		if (rect.size.width == 0 || rect.size.height == 0)
+			return;
+		BlitCursor(cursor.behindBuffer, rect.size.width, &out[rect.position], out.pitch(), rect.size.width, rect.size.height);
+		std::array<uint8_t, Diameter * Diameter> opacity {};
+		constexpr auto IsWhite = [](int x, int y) {
+			return (x == 0 && (y <= -2 || y >= 2) && y >= -4 && y <= 4)
+			    || (y == 0 && (x <= -2 || x >= 2) && x >= -4 && x <= 4);
+		};
+		for (int y = 0; y < rect.size.height; ++y) {
+			for (int x = 0; x < rect.size.width; ++x) {
+				const Point pixel = rect.position + Displacement { x, y };
+				const int dx = pixel.x - center.x, dy = pixel.y - center.y;
+				const bool white = IsWhite(dx, dy);
+				const bool outline = IsWhite(dx - 1, dy) || IsWhite(dx + 1, dy)
+				    || IsWhite(dx, dy - 1) || IsWhite(dx, dy + 1);
+				if (!white && !outline)
+					continue;
+				out[pixel] = white ? PAL16_GRAY : PAL16_GRAY + 15;
+				opacity[static_cast<size_t>(y) * rect.size.width + x] = 255;
+				// Called inside BeginUiOverlayCursor: retain only covered pixels
+				// over the 2x world, without registering the background as UI.
+				MarkUiOverlayRect(out, pixel.x, pixel.y, 1, 1);
+			}
+		}
+		CaptureD3dHudPresentationCursorPixels(out, rect,
+		    std::span<const uint8_t> { opacity.data(), static_cast<size_t>(rect.size.width) * rect.size.height });
+		return;
+	}
 	if (IsHardwareCursor()) {
 		SetHardwareCursorVisible(ShouldShowCursor());
 		cursor.rect.size = { 0, 0 };

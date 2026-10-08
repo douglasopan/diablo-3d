@@ -45,6 +45,7 @@ set(libdevilutionx_SRCS
   controls/menu_controls.cpp
   controls/modifier_hints.cpp
   controls/plrctrls.cpp
+  controls/town_first_person_input.cpp
 
   DiabloUI/button.cpp
   DiabloUI/credits.cpp
