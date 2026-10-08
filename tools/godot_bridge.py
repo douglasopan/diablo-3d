@@ -20,6 +20,7 @@ import sys
 
 
 REPO = Path(__file__).resolve().parents[1]
+TARGET_PROFILES = ("perfil-godot-review", "perfil-tristram")
 
 
 def digest(path: Path) -> str:
@@ -77,7 +78,7 @@ def check_closed(profile: Path) -> None:
         "Get-Process -ErrorAction SilentlyContinue | Where-Object ProcessName -Like '*devilution*' | Select-Object -ExpandProperty Id",
     ], capture_output=True, text=True, check=True)
     if result.stdout.strip():
-        raise ValueError("Feche a partida antes de preparar/aplicar o perfil de revisao. Nenhum processo foi encerrado.")
+        raise ValueError("Feche a partida antes de aplicar o perfil de destino. Nenhum processo foi encerrado.")
 
 
 def install_baseline(root: Path, profile: Path) -> dict:
@@ -231,17 +232,25 @@ def parse_pack(pack: Path) -> tuple[bytes, list[tuple[str, str, str]]]:
     return manifest, files
 
 
+def target_profile(args: argparse.Namespace) -> Path:
+    name = getattr(args, "profile", TARGET_PROFILES[0])
+    if name not in TARGET_PROFILES:
+        raise ValueError("Perfil de destino fora das duas pastas permitidas")
+    return contained(args.workspace, name)
+
+
 def apply_pack(args: argparse.Namespace) -> None:
-    profile = args.workspace / "perfil-godot-review"
+    profile = target_profile(args)
     # Require the explicit candidate before creating baseline/config/save files.
     # A legacy v4 can run while silently ignoring this map format.
     executable_sha256 = digest(args.executable)
-    check_closed(profile)
     manifest, files = parse_pack(args.pack)
     # Native binding and triangle validation are also performed by the actual
     # game loader in an isolated staging profile before any live-profile write.
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
     staging = args.project / "local/validation" / stamp
+    if any(staging.resolve().is_relative_to((args.workspace / name).resolve()) for name in TARGET_PROFILES):
+        raise ValueError("A validacao deve usar uma pasta fora dos perfis de jogo")
     baseline = install_baseline(args.workspace, staging)
     for _, relative, expected in files:
         copy_checked(contained(args.pack, relative), contained(staging, relative), expected)
@@ -252,7 +261,7 @@ def apply_pack(args: argparse.Namespace) -> None:
     check_cabin(snapshot, baseline, args.allow_prototypes)
     map_audit = snapshot.get("editorMapAudit", {})
     if map_audit.get("status") != "matched" or map_audit.get("failure"):
-        raise ValueError("O loader real recusou o pacote. O perfil de revisao foi preservado; consulte a validacao local.")
+        raise ValueError("O loader real recusou o pacote. O perfil de destino foi preservado; consulte a validacao local.")
     if map_audit.get("assetPath") != "d3d-maps/tristram.ini" \
             or map_audit.get("sha256") != hashlib.sha256(manifest).hexdigest():
         raise ValueError("O loader encontrou outro manifesto; a origem da validacao diverge do pacote")
@@ -265,6 +274,13 @@ def apply_pack(args: argparse.Namespace) -> None:
         if loaded.get(instance, {}).get("sha256") != expected or audit.get("status") != "matched" \
                 or audit.get("failure") or audit.get("sha256") != expected or audit.get("expectedSha256") != expected:
             raise ValueError(f"O jogo nao carregou o override pedido: {instance}. O perfil foi preservado.")
+    if getattr(args, "validate_only", False):
+        print(f"Pacote validado pelo loader real: {staging}")
+        print("Validacao somente: nenhum perfil de jogo foi modificado.")
+        return
+    # Inspect running games only after staging validation and immediately before
+    # any target-profile write. Validation alone is safe while a game is open.
+    check_closed(profile)
     install_baseline(args.workspace, profile)
     habitual = args.workspace / "perfil-tristram"
     # Only initialize missing local configuration/save files. Existing review
@@ -309,10 +325,13 @@ def apply_pack(args: argparse.Namespace) -> None:
                 target.write_bytes(data)
         raise
     print(f"Pacote validado pelo loader real e aplicado somente em {profile}")
-    print("O perfil habitual e seus saves foram preservados. Teste com Testar-Mapa-Godot.cmd.")
+    if profile.name == "perfil-tristram":
+        print("Configuracao e saves existentes foram preservados. Reabra por Iniciar-Tristram.cmd.")
+    else:
+        print("O perfil habitual e seus saves foram preservados. Teste com Testar-Mapa-Godot.cmd.")
 
 
-def main() -> int:
+def argument_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=("prepare", "apply"))
     parser.add_argument("--workspace", type=Path, default=workspace_root())
@@ -322,8 +341,19 @@ def main() -> int:
     parser.add_argument("--smoke", type=Path)
     parser.add_argument("--executable", type=Path)
     parser.add_argument("--pack", type=Path)
+    parser.add_argument("--profile", choices=TARGET_PROFILES, default=TARGET_PROFILES[0],
+                        help="Perfil de destino da aplicacao explicita")
+    parser.add_argument("--validate-only", action="store_true",
+                        help="Validar apply em staging, sem gravar em qualquer perfil de jogo")
     parser.add_argument("--allow-prototypes", action="store_true", help="Preparar explicitamente sem a cabana privada selecionada")
+    return parser
+
+
+def main() -> int:
+    parser = argument_parser()
     args = parser.parse_args()
+    if args.validate_only and args.action != "apply":
+        parser.error("--validate-only requer a acao apply")
     args.workspace = args.workspace.resolve()
     args.project = args.project.resolve()
     try:

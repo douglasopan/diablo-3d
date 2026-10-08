@@ -121,6 +121,16 @@ Após exportar, execute `Aplicar-Mapa-Godot.cmd` na raiz do workspace. A aplica�
 
 Antes de abrir a partida, **Testar** confere os hashes do executável escolhido, do manifesto e de todos os modelos contra o recibo aplicado. Se o executável ou o pacote mudar, reaplique para renovar a validação. O launcher usa os argumentos suportados pelo jogo, sem `--assets-dir`; o log fica em `perfil-godot-review/prototipo.log`. Para colaboração com protótipos, aplique explicitamente por `.\Godot-Editor.ps1 -Acao Aplicar -AllowPrototypes`.
 
+O aplicador Python também aceita `--profile perfil-tristram` para uma aplicação explicitamente autorizada no perfil habitual. O padrão continua sendo `perfil-godot-review`; são os únicos dois destinos permitidos. Configurações, saves e a cabana selecionada existentes são preservados. A aplicação grava os modelos do pacote e seu manifesto, com backup e recibo; o perfil habitual usa a entrada existente **Iniciar-Tristram.cmd**.
+
+Para validar um pacote de produção enquanto a partida permanece aberta, execute na pasta `devilutionx`:
+
+```powershell
+python tools/godot_bridge.py apply --profile perfil-tristram --pack editor/godot/local/tristram-production/export --executable ../build/devilutionx-tristram-v4.exe --validate-only
+```
+
+`--validate-only` confere formato, hashes, vínculos e geometria pelo loader real em `editor/godot/local/validation/`, sem gravar em nenhum perfil de jogo. Depois de fechar a partida, repita o comando sem `--validate-only` para aplicar: a validação inteira é refeita e a presença de qualquer processo do jogo é conferida imediatamente antes de gravar no destino. A ferramenta não encerra processos. Informe o executável realmente escolhido com `--executable`; o diagnóstico compilado também precisa corresponder à ponte atual.
+
 Confira a revisão carregada, a geometria forçada na câmera original, o giro completo, materiais, contato com o chão, seleção e colisão. O perfil habitual e a aprovação artística da baseline não são substituídos pela validação do editor.
 
 ## Verificação técnica
