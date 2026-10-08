@@ -1,0 +1,363 @@
+id,name,profile,kind,source,line,power,eligibleItemTypes,geometryPolicy
+item.affix.diablo.prefix.000.tin,Tin,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,2,TOHIT_CURSE,"Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.001.brass,Brass,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,3,TOHIT_CURSE,"Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.002.bronze,Bronze,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,4,TOHIT,"Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.003.iron,Iron,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,5,TOHIT,"Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.004.steel,Steel,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,6,TOHIT,"Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.005.silver,Silver,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,7,TOHIT,"Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.006.gold,Gold,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,8,TOHIT,"Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.007.platinum,Platinum,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,9,TOHIT,"Weapon,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.008.mithril,Mithril,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,10,TOHIT,"Weapon,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.009.meteoric,Meteoric,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,11,TOHIT,"Weapon,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.010.weird,Weird,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,12,TOHIT,"Weapon,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.011.strange,Strange,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,13,TOHIT,"Weapon,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.012.useless,Useless,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,14,DAMP_CURSE,"Weapon,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.013.bent,Bent,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,15,DAMP_CURSE,"Weapon,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.014.weak,Weak,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,16,DAMP_CURSE,"Weapon,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.015.jagged,Jagged,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,17,DAMP,"Weapon,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.016.deadly,Deadly,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,18,DAMP,"Weapon,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.017.heavy,Heavy,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,19,DAMP,"Weapon,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.018.vicious,Vicious,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,20,DAMP,"Weapon,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.019.brutal,Brutal,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,21,DAMP,"Weapon,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.020.massive,Massive,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,22,DAMP,"Weapon,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.021.savage,Savage,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,23,DAMP,"Weapon,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.022.ruthless,Ruthless,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,24,DAMP,"Weapon,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.023.merciless,Merciless,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,25,DAMP,"Weapon,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.024.clumsy,Clumsy,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,26,TOHIT_DAMP_CURSE,"Weapon,Staff,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.025.dull,Dull,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,27,TOHIT_DAMP_CURSE,"Weapon,Staff,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.026.sharp,Sharp,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,28,TOHIT_DAMP,"Weapon,Staff,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.027.fine,Fine,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,29,TOHIT_DAMP,"Weapon,Staff,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.028.warrior-s,Warrior's,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,30,TOHIT_DAMP,"Weapon,Staff,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.029.soldier-s,Soldier's,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,31,TOHIT_DAMP,"Weapon,Staff",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.030.lord-s,Lord's,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,32,TOHIT_DAMP,"Weapon,Staff",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.031.knight-s,Knight's,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,33,TOHIT_DAMP,"Weapon,Staff",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.032.master-s,Master's,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,34,TOHIT_DAMP,"Weapon,Staff",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.033.champion-s,Champion's,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,35,TOHIT_DAMP,"Weapon,Staff",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.034.king-s,King's,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,36,TOHIT_DAMP,"Weapon,Staff",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.035.vulnerable,Vulnerable,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,37,ACP_CURSE,"Armor,Shield",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.036.rusted,Rusted,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,38,ACP_CURSE,"Armor,Shield",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.037.fine,Fine,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,39,ACP,"Armor,Shield",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.038.strong,Strong,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,40,ACP,"Armor,Shield",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.039.grand,Grand,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,41,ACP,"Armor,Shield",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.040.valiant,Valiant,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,42,ACP,"Armor,Shield",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.041.glorious,Glorious,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,43,ACP,"Armor,Shield",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.042.blessed,Blessed,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,44,ACP,"Armor,Shield",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.043.saintly,Saintly,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,45,ACP,"Armor,Shield",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.044.awesome,Awesome,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,46,ACP,"Armor,Shield",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.045.holy,Holy,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,47,ACP,"Armor,Shield",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.046.godly,Godly,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,48,ACP,"Armor,Shield",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.047.red,Red,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,49,FIRERES,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.048.crimson,Crimson,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,50,FIRERES,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.049.crimson,Crimson,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,51,FIRERES,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.050.garnet,Garnet,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,52,FIRERES,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.051.ruby,Ruby,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,53,FIRERES,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.052.blue,Blue,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,54,LIGHTRES,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.053.azure,Azure,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,55,LIGHTRES,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.054.lapis,Lapis,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,56,LIGHTRES,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.055.cobalt,Cobalt,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,57,LIGHTRES,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.056.sapphire,Sapphire,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,58,LIGHTRES,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.057.white,White,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,59,MAGICRES,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.058.pearl,Pearl,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,60,MAGICRES,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.059.ivory,Ivory,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,61,MAGICRES,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.060.crystal,Crystal,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,62,MAGICRES,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.061.diamond,Diamond,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,63,MAGICRES,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.062.topaz,Topaz,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,64,ALLRES,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.063.amber,Amber,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,65,ALLRES,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.064.jade,Jade,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,66,ALLRES,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.065.obsidian,Obsidian,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,67,ALLRES,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.066.emerald,Emerald,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,68,ALLRES,"Shield,Weapon,Staff,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.067.hyena-s,Hyena's,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,69,MANA_CURSE,"Staff,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.068.frog-s,Frog's,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,70,MANA_CURSE,"Staff,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.069.spider-s,Spider's,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,71,MANA,"Staff,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.070.raven-s,Raven's,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,72,MANA,"Staff,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.071.snake-s,Snake's,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,73,MANA,"Staff,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.072.serpent-s,Serpent's,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,74,MANA,"Staff,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.073.drake-s,Drake's,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,75,MANA,"Staff,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.074.dragon-s,Dragon's,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,76,MANA,"Staff,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.075.wyrm-s,Wyrm's,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,77,MANA,Staff,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.076.hydra-s,Hydra's,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,78,MANA,Staff,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.077.angel-s,Angel's,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,79,SPLLVLADD,Staff,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.078.arch-angel-s,Arch-Angel's,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,80,SPLLVLADD,Staff,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.079.plentiful,Plentiful,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,81,CHARGES,Staff,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.080.bountiful,Bountiful,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,82,CHARGES,Staff,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.081.flaming,Flaming,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,83,FIREDAM,"Weapon,Staff",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.prefix.082.lightning,Lightning,diablo,prefix,assets/txtdata/items/item_prefixes.tsv,84,LIGHTDAM,"Weapon,Staff",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.000.quality,quality,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,2,DAMMOD,"Weapon,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.001.maiming,maiming,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,3,DAMMOD,"Weapon,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.002.slaying,slaying,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,4,DAMMOD,Weapon,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.003.gore,gore,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,5,DAMMOD,Weapon,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.004.carnage,carnage,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,6,DAMMOD,Weapon,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.005.slaughter,slaughter,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,7,DAMMOD,Weapon,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.006.pain,pain,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,8,GETHIT_CURSE,"Armor,Shield,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.007.tears,tears,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,9,GETHIT_CURSE,"Armor,Shield,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.008.health,health,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,10,GETHIT,"Armor,Shield,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.009.protection,protection,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,11,GETHIT,"Armor,Shield",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.010.absorption,absorption,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,12,GETHIT,"Armor,Shield",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.011.deflection,deflection,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,13,GETHIT,Armor,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.012.osmosis,osmosis,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,14,GETHIT,Armor,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.013.frailty,frailty,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,15,STR_CURSE,"Armor,Shield,Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.014.weakness,weakness,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,16,STR_CURSE,"Armor,Shield,Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.015.strength,strength,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,17,STR,"Armor,Shield,Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.016.might,might,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,18,STR,"Armor,Shield,Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.017.power,power,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,19,STR,"Armor,Shield,Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.018.giants,giants,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,20,STR,"Armor,Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.019.titans,titans,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,21,STR,"Weapon,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.020.paralysis,paralysis,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,22,DEX_CURSE,"Armor,Shield,Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.021.atrophy,atrophy,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,23,DEX_CURSE,"Armor,Shield,Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.022.dexterity,dexterity,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,24,DEX,"Armor,Shield,Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.023.skill,skill,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,25,DEX,"Armor,Shield,Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.024.accuracy,accuracy,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,26,DEX,"Armor,Shield,Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.025.precision,precision,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,27,DEX,"Armor,Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.026.perfection,perfection,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,28,DEX,"Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.027.the-fool,the fool,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,29,MAG_CURSE,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.028.dyslexia,dyslexia,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,30,MAG_CURSE,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.029.magic,magic,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,31,MAG,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.030.the-mind,the mind,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,32,MAG,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.031.brilliance,brilliance,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,33,MAG,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.032.sorcery,sorcery,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,34,MAG,"Armor,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.033.wizardry,wizardry,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,35,MAG,"Staff,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.034.illness,illness,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,36,VIT_CURSE,"Armor,Shield,Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.035.disease,disease,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,37,VIT_CURSE,"Armor,Shield,Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.036.vitality,vitality,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,38,VIT,"Armor,Shield,Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.037.zest,zest,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,39,VIT,"Armor,Shield,Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.038.vim,vim,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,40,VIT,"Armor,Shield,Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.039.vigor,vigor,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,41,VIT,"Armor,Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.040.life,life,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,42,VIT,Misc,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.041.trouble,trouble,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,43,ATTRIBS_CURSE,"Armor,Shield,Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.042.the-pit,the pit,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,44,ATTRIBS_CURSE,"Armor,Shield,Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.043.the-sky,the sky,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,45,ATTRIBS,"Armor,Shield,Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.044.the-moon,the moon,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,46,ATTRIBS,"Armor,Shield,Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.045.the-stars,the stars,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,47,ATTRIBS,"Armor,Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.046.the-heavens,the heavens,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,48,ATTRIBS,"Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.047.the-zodiac,the zodiac,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,49,ATTRIBS,Misc,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.048.the-vulture,the vulture,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,50,LIFE_CURSE,"Armor,Shield,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.049.the-jackal,the jackal,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,51,LIFE_CURSE,"Armor,Shield,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.050.the-fox,the fox,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,52,LIFE,"Armor,Shield,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.051.the-jaguar,the jaguar,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,53,LIFE,"Armor,Shield,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.052.the-eagle,the eagle,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,54,LIFE,"Armor,Shield,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.053.the-wolf,the wolf,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,55,LIFE,"Armor,Shield,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.054.the-tiger,the tiger,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,56,LIFE,"Armor,Shield,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.055.the-lion,the lion,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,57,LIFE,"Armor,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.056.the-mammoth,the mammoth,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,58,LIFE,Armor,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.057.the-whale,the whale,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,59,LIFE,Armor,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.058.fragility,fragility,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,60,DUR_CURSE,"Armor,Shield,Weapon",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.059.brittleness,brittleness,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,61,DUR_CURSE,"Armor,Shield,Weapon",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.060.sturdiness,sturdiness,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,62,DUR,"Armor,Shield,Weapon",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.061.craftsmanship,craftsmanship,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,63,DUR,"Armor,Shield,Weapon",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.062.structure,structure,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,64,DUR,"Armor,Shield,Weapon",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.063.the-ages,the ages,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,65,INDESTRUCTIBLE,"Armor,Shield,Weapon",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.064.the-dark,the dark,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,66,LIGHT_CURSE,"Armor,Weapon,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.065.the-night,the night,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,67,LIGHT_CURSE,"Armor,Weapon,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.066.light,light,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,68,LIGHT,"Armor,Weapon,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.067.radiance,radiance,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,69,LIGHT,"Armor,Weapon,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.068.flame,flame,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,70,FIRE_ARROWS,Bow,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.069.fire,fire,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,71,FIRE_ARROWS,Bow,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.070.burning,burning,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,72,FIRE_ARROWS,Bow,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.071.shock,shock,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,73,LIGHT_ARROWS,Bow,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.072.lightning,lightning,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,74,LIGHT_ARROWS,Bow,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.073.thunder,thunder,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,75,LIGHT_ARROWS,Bow,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.074.many,many,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,76,DUR,Bow,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.075.plenty,plenty,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,77,DUR,Bow,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.076.thorns,thorns,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,78,THORNS,"Armor,Shield",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.077.corruption,corruption,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,79,NOMANA,"Armor,Shield,Weapon",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.078.thieves,thieves,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,80,ABSHALFTRAP,"Armor,Shield,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.079.the-bear,the bear,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,81,KNOCKBACK,"Weapon,Staff,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.080.the-bat,the bat,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,82,STEALMANA,Weapon,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.081.vampires,vampires,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,83,STEALMANA,Weapon,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.082.the-leech,the leech,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,84,STEALLIFE,Weapon,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.083.blood,blood,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,85,STEALLIFE,Weapon,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.084.piercing,piercing,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,86,TARGAC,"Weapon,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.085.puncturing,puncturing,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,87,TARGAC,"Weapon,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.086.bashing,bashing,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,88,TARGAC,Weapon,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.087.readiness,readiness,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,89,FASTATTACK,"Weapon,Staff,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.088.swiftness,swiftness,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,90,FASTATTACK,"Weapon,Staff,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.089.speed,speed,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,91,FASTATTACK,"Weapon,Staff",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.090.haste,haste,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,92,FASTATTACK,"Weapon,Staff",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.091.balance,balance,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,93,FASTRECOVER,"Armor,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.092.stability,stability,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,94,FASTRECOVER,"Armor,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.093.harmony,harmony,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,95,FASTRECOVER,"Armor,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.diablo.suffix.094.blocking,blocking,diablo,suffix,assets/txtdata/items/item_suffixes.tsv,96,FASTBLOCK,Shield,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.000.tin,Tin,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,2,TOHIT_CURSE,"Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.001.brass,Brass,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,3,TOHIT_CURSE,"Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.002.bronze,Bronze,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,4,TOHIT,"Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.003.iron,Iron,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,5,TOHIT,"Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.004.steel,Steel,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,6,TOHIT,"Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.005.silver,Silver,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,7,TOHIT,"Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.006.gold,Gold,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,8,TOHIT,"Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.007.platinum,Platinum,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,9,TOHIT,"Weapon,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.008.mithril,Mithril,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,10,TOHIT,"Weapon,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.009.meteoric,Meteoric,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,11,TOHIT,"Weapon,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.010.weird,Weird,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,12,TOHIT,"Weapon,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.011.strange,Strange,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,13,TOHIT,"Weapon,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.012.useless,Useless,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,14,DAMP_CURSE,"Weapon,Staff,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.013.bent,Bent,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,15,DAMP_CURSE,"Weapon,Staff,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.014.weak,Weak,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,16,DAMP_CURSE,"Weapon,Staff,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.015.jagged,Jagged,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,17,DAMP,"Weapon,Staff,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.016.deadly,Deadly,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,18,DAMP,"Weapon,Staff,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.017.heavy,Heavy,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,19,DAMP,"Weapon,Staff,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.018.vicious,Vicious,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,20,DAMP,"Weapon,Staff,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.019.brutal,Brutal,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,21,DAMP,"Weapon,Staff,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.020.massive,Massive,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,22,DAMP,"Weapon,Staff,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.021.savage,Savage,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,23,DAMP,"Weapon,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.022.ruthless,Ruthless,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,24,DAMP,"Weapon,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.023.merciless,Merciless,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,25,DAMP,"Weapon,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.024.clumsy,Clumsy,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,26,TOHIT_DAMP_CURSE,"Weapon,Staff,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.025.dull,Dull,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,27,TOHIT_DAMP_CURSE,"Weapon,Staff,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.026.sharp,Sharp,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,28,TOHIT_DAMP,"Weapon,Staff,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.027.fine,Fine,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,29,TOHIT_DAMP,"Weapon,Staff,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.028.warrior-s,Warrior's,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,30,TOHIT_DAMP,"Weapon,Staff,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.029.soldier-s,Soldier's,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,31,TOHIT_DAMP,"Weapon,Staff",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.030.lord-s,Lord's,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,32,TOHIT_DAMP,"Weapon,Staff",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.031.knight-s,Knight's,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,33,TOHIT_DAMP,"Weapon,Staff",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.032.master-s,Master's,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,34,TOHIT_DAMP,"Weapon,Staff",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.033.champion-s,Champion's,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,35,TOHIT_DAMP,"Weapon,Staff",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.034.king-s,King's,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,36,TOHIT_DAMP,"Weapon,Staff",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.035.vulnerable,Vulnerable,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,37,ACP_CURSE,"Armor,Shield",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.036.rusted,Rusted,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,38,ACP_CURSE,"Armor,Shield",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.037.fine,Fine,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,39,ACP,"Armor,Shield",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.038.strong,Strong,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,40,ACP,"Armor,Shield",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.039.grand,Grand,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,41,ACP,"Armor,Shield",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.040.valiant,Valiant,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,42,ACP,"Armor,Shield",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.041.glorious,Glorious,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,43,ACP,"Armor,Shield",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.042.blessed,Blessed,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,44,ACP,"Armor,Shield",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.043.saintly,Saintly,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,45,ACP,"Armor,Shield",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.044.awesome,Awesome,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,46,ACP,"Armor,Shield",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.045.holy,Holy,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,47,ACP,"Armor,Shield",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.046.godly,Godly,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,48,ACP,"Armor,Shield",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.047.red,Red,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,49,FIRERES,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.048.crimson,Crimson,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,50,FIRERES,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.049.crimson,Crimson,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,51,FIRERES,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.050.garnet,Garnet,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,52,FIRERES,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.051.ruby,Ruby,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,53,FIRERES,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.052.blue,Blue,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,54,LIGHTRES,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.053.azure,Azure,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,55,LIGHTRES,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.054.lapis,Lapis,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,56,LIGHTRES,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.055.cobalt,Cobalt,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,57,LIGHTRES,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.056.sapphire,Sapphire,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,58,LIGHTRES,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.057.white,White,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,59,MAGICRES,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.058.pearl,Pearl,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,60,MAGICRES,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.059.ivory,Ivory,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,61,MAGICRES,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.060.crystal,Crystal,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,62,MAGICRES,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.061.diamond,Diamond,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,63,MAGICRES,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.062.topaz,Topaz,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,64,ALLRES,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.063.amber,Amber,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,65,ALLRES,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.064.jade,Jade,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,66,ALLRES,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.065.obsidian,Obsidian,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,67,ALLRES,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.066.emerald,Emerald,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,68,ALLRES,"Shield,Weapon,Staff,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.067.hyena-s,Hyena's,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,69,MANA_CURSE,"Staff,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.068.frog-s,Frog's,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,70,MANA_CURSE,"Staff,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.069.spider-s,Spider's,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,71,MANA,"Staff,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.070.raven-s,Raven's,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,72,MANA,"Staff,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.071.snake-s,Snake's,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,73,MANA,"Staff,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.072.serpent-s,Serpent's,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,74,MANA,"Staff,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.073.drake-s,Drake's,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,75,MANA,"Staff,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.074.dragon-s,Dragon's,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,76,MANA,"Staff,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.075.wyrm-s,Wyrm's,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,77,MANA,Staff,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.076.hydra-s,Hydra's,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,78,MANA,Staff,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.077.angel-s,Angel's,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,79,SPLLVLADD,Staff,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.078.arch-angel-s,Arch-Angel's,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,80,SPLLVLADD,Staff,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.079.plentiful,Plentiful,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,81,CHARGES,Staff,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.080.bountiful,Bountiful,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,82,CHARGES,Staff,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.081.flaming,Flaming,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,83,FIREDAM,"Weapon,Staff",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.082.lightning,Lightning,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,84,LIGHTDAM,"Weapon,Staff",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.083.jester-s,Jester's,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,85,JESTERS,Weapon,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.084.crystalline,Crystalline,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,86,CRYSTALLINE,Weapon,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.prefix.085.doppelganger-s,Doppelganger's,hellfire,prefix,mods/hf/txtdata/items/item_prefixes.tsv,87,DOPPELGANGER,"Weapon,Staff",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.000.quality,quality,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,2,DAMMOD,"Weapon,Staff,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.001.maiming,maiming,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,3,DAMMOD,"Weapon,Staff,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.002.slaying,slaying,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,4,DAMMOD,Weapon,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.003.gore,gore,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,5,DAMMOD,Weapon,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.004.carnage,carnage,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,6,DAMMOD,Weapon,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.005.slaughter,slaughter,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,7,DAMMOD,Weapon,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.006.pain,pain,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,8,GETHIT_CURSE,"Armor,Shield,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.007.tears,tears,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,9,GETHIT_CURSE,"Armor,Shield,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.008.health,health,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,10,GETHIT,"Armor,Shield,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.009.protection,protection,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,11,GETHIT,"Armor,Shield",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.010.absorption,absorption,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,12,GETHIT,"Armor,Shield",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.011.deflection,deflection,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,13,GETHIT,Armor,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.012.osmosis,osmosis,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,14,GETHIT,Armor,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.013.frailty,frailty,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,15,STR_CURSE,"Armor,Shield,Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.014.weakness,weakness,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,16,STR_CURSE,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.015.strength,strength,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,17,STR,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.016.might,might,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,18,STR,"Armor,Shield,Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.017.power,power,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,19,STR,"Armor,Shield,Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.018.giants,giants,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,20,STR,"Armor,Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.019.titans,titans,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,21,STR,"Weapon,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.020.paralysis,paralysis,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,22,DEX_CURSE,"Armor,Shield,Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.021.atrophy,atrophy,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,23,DEX_CURSE,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.022.dexterity,dexterity,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,24,DEX,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.023.skill,skill,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,25,DEX,"Armor,Shield,Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.024.accuracy,accuracy,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,26,DEX,"Armor,Shield,Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.025.precision,precision,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,27,DEX,"Armor,Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.026.perfection,perfection,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,28,DEX,"Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.027.the-fool,the fool,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,29,MAG_CURSE,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.028.dyslexia,dyslexia,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,30,MAG_CURSE,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.029.magic,magic,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,31,MAG,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.030.the-mind,the mind,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,32,MAG,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.031.brilliance,brilliance,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,33,MAG,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.032.sorcery,sorcery,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,34,MAG,"Armor,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.033.wizardry,wizardry,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,35,MAG,"Staff,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.034.illness,illness,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,36,VIT_CURSE,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.035.disease,disease,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,37,VIT_CURSE,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.036.vitality,vitality,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,38,VIT,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.037.zest,zest,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,39,VIT,"Armor,Shield,Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.038.vim,vim,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,40,VIT,"Armor,Shield,Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.039.vigor,vigor,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,41,VIT,"Armor,Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.040.life,life,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,42,VIT,Misc,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.041.trouble,trouble,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,43,ATTRIBS_CURSE,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.042.the-pit,the pit,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,44,ATTRIBS_CURSE,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.043.the-sky,the sky,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,45,ATTRIBS,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.044.the-moon,the moon,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,46,ATTRIBS,"Armor,Shield,Weapon,Staff,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.045.the-stars,the stars,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,47,ATTRIBS,"Armor,Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.046.the-heavens,the heavens,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,48,ATTRIBS,"Weapon,Bow,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.047.the-zodiac,the zodiac,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,49,ATTRIBS,Misc,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.048.the-vulture,the vulture,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,50,LIFE_CURSE,"Armor,Shield,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.049.the-jackal,the jackal,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,51,LIFE_CURSE,"Armor,Shield,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.050.the-fox,the fox,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,52,LIFE,"Armor,Shield,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.051.the-jaguar,the jaguar,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,53,LIFE,"Armor,Shield,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.052.the-eagle,the eagle,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,54,LIFE,"Armor,Shield,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.053.the-wolf,the wolf,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,55,LIFE,"Armor,Shield,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.054.the-tiger,the tiger,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,56,LIFE,"Armor,Shield,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.055.the-lion,the lion,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,57,LIFE,"Armor,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.056.the-mammoth,the mammoth,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,58,LIFE,Armor,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.057.the-whale,the whale,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,59,LIFE,Armor,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.058.fragility,fragility,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,60,DUR_CURSE,"Armor,Shield,Weapon",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.059.brittleness,brittleness,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,61,DUR_CURSE,"Armor,Shield,Weapon",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.060.sturdiness,sturdiness,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,62,DUR,"Armor,Shield,Weapon,Staff",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.061.craftsmanship,craftsmanship,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,63,DUR,"Armor,Shield,Weapon,Staff",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.062.structure,structure,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,64,DUR,"Armor,Shield,Weapon,Staff",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.063.the-ages,the ages,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,65,INDESTRUCTIBLE,"Armor,Shield,Weapon,Staff",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.064.the-dark,the dark,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,66,LIGHT_CURSE,"Armor,Weapon,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.065.the-night,the night,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,67,LIGHT_CURSE,"Armor,Weapon,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.066.light,light,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,68,LIGHT,"Armor,Weapon,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.067.radiance,radiance,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,69,LIGHT,"Armor,Weapon,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.068.flame,flame,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,70,FIRE_ARROWS,Bow,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.069.fire,fire,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,71,FIRE_ARROWS,Bow,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.070.burning,burning,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,72,FIRE_ARROWS,Bow,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.071.shock,shock,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,73,LIGHT_ARROWS,Bow,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.072.lightning,lightning,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,74,LIGHT_ARROWS,Bow,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.073.thunder,thunder,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,75,LIGHT_ARROWS,Bow,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.074.many,many,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,76,DUR,Bow,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.075.plenty,plenty,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,77,DUR,Bow,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.076.thorns,thorns,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,78,THORNS,"Armor,Shield",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.077.corruption,corruption,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,79,NOMANA,"Armor,Shield,Weapon",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.078.thieves,thieves,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,80,ABSHALFTRAP,"Armor,Shield,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.079.the-bear,the bear,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,81,KNOCKBACK,"Weapon,Staff,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.080.the-bat,the bat,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,82,STEALMANA,Weapon,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.081.vampires,vampires,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,83,STEALMANA,Weapon,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.082.the-leech,the leech,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,84,STEALLIFE,Weapon,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.083.blood,blood,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,85,STEALLIFE,Weapon,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.084.piercing,piercing,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,86,TARGAC,"Weapon,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.085.puncturing,puncturing,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,87,TARGAC,"Weapon,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.086.bashing,bashing,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,88,TARGAC,Weapon,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.087.readiness,readiness,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,89,FASTATTACK,"Weapon,Staff,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.088.swiftness,swiftness,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,90,FASTATTACK,"Weapon,Staff,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.089.speed,speed,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,91,FASTATTACK,"Weapon,Staff",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.090.haste,haste,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,92,FASTATTACK,"Weapon,Staff",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.091.balance,balance,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,93,FASTRECOVER,"Armor,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.092.stability,stability,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,94,FASTRECOVER,"Armor,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.093.harmony,harmony,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,95,FASTRECOVER,"Armor,Misc",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.094.blocking,blocking,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,96,FASTBLOCK,Shield,reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.095.devastation,devastation,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,97,DEVASTATION,"Weapon,Staff,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.096.decay,decay,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,98,DECAY,"Weapon,Staff,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll
+item.affix.hellfire.suffix.097.peril,peril,hellfire,suffix,mods/hf/txtdata/items/item_suffixes.tsv,99,PERIL,"Weapon,Staff,Bow",reuse-base-or-unique-master-no-new-mesh-per-roll

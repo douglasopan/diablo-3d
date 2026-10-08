@@ -1,0 +1,369 @@
+kind,id,name,profile,source,line,nativeIndex,enumId,type,cursor,productionId,status
+base,item.base.000.idi-gold,Gold,diablo+hellfire,assets/txtdata/items/itemdat.tsv,2,0,IDI_GOLD,Gold,GOLD_SMALL,item.design.base.gold,concept-needed
+base,item.base.001.idi-warrior,Short Sword,diablo+hellfire,assets/txtdata/items/itemdat.tsv,3,1,IDI_WARRIOR,Sword,SHORT_SWORD,item.design.base.short-sword,concept-needed
+base,item.base.002.idi-warrshld,Buckler,diablo+hellfire,assets/txtdata/items/itemdat.tsv,4,2,IDI_WARRSHLD,Shield,BUCKLER,item.design.base.buckler,concept-needed
+base,item.base.003.idi-warrclub,Club,diablo+hellfire,assets/txtdata/items/itemdat.tsv,5,3,IDI_WARRCLUB,Mace,CLUB,item.design.base.club,concept-needed
+base,item.base.004.idi-rogue,Short Bow,diablo+hellfire,assets/txtdata/items/itemdat.tsv,6,4,IDI_ROGUE,Bow,SHORT_BOW,item.design.base.short-bow,concept-needed
+base,item.base.005.idi-sorcerer,Short Staff of Mana,hellfire,assets/txtdata/items/itemdat.tsv,7,5,IDI_SORCERER,Staff,SHORT_STAFF,item.design.base.short-staff,concept-needed
+base,item.base.006.idi-cleaver,Cleaver,diablo+hellfire,assets/txtdata/items/itemdat.tsv,8,6,IDI_CLEAVER,Axe,CLEAVER,item.design.unique.the-butcher-s-cleaver,concept-needed
+base,item.base.007.idi-skcrown,The Undead Crown,diablo+hellfire,assets/txtdata/items/itemdat.tsv,9,7,IDI_SKCROWN,Helm,THE_UNDEAD_CROWN,item.design.unique.the-undead-crown,concept-needed
+base,item.base.008.idi-infraring,Empyrean Band,diablo+hellfire,assets/txtdata/items/itemdat.tsv,10,8,IDI_INFRARING,Ring,EMPYREAN_BAND,item.design.unique.empyrean-band,concept-needed
+base,item.base.009.idi-rock,Magic Rock,diablo+hellfire,assets/txtdata/items/itemdat.tsv,11,9,IDI_ROCK,Misc,MAGIC_ROCK,item.design.base.magic-rock,concept-needed
+base,item.base.010.idi-optamulet,Optic Amulet,diablo+hellfire,assets/txtdata/items/itemdat.tsv,12,10,IDI_OPTAMULET,Amulet,OPTIC_AMULET,item.design.unique.optic-amulet,concept-needed
+base,item.base.011.idi-tring,Ring of Truth,diablo+hellfire,assets/txtdata/items/itemdat.tsv,13,11,IDI_TRING,Ring,RING_OF_TRUTH,item.design.unique.ring-of-truth,concept-needed
+base,item.base.012.idi-banner,Tavern Sign,diablo+hellfire,assets/txtdata/items/itemdat.tsv,14,12,IDI_BANNER,Misc,TAVERN_SIGN,item.design.base.tavern-sign,concept-needed
+base,item.base.013.idi-harcrest,Harlequin Crest,diablo+hellfire,assets/txtdata/items/itemdat.tsv,15,13,IDI_HARCREST,Helm,HARLEQUIN_CREST,item.design.unique.harlequin-crest,concept-needed
+base,item.base.014.idi-steelveil,Veil of Steel,diablo+hellfire,assets/txtdata/items/itemdat.tsv,16,14,IDI_STEELVEIL,Helm,VEIL_OF_STEEL,item.design.unique.veil-of-steel,concept-needed
+base,item.base.015.idi-gldnelix,Golden Elixir,diablo+hellfire,assets/txtdata/items/itemdat.tsv,17,15,IDI_GLDNELIX,Misc,GOLDEN_ELIXIR,item.design.base.golden-elixir,concept-needed
+base,item.base.016.idi-anvil,Anvil of Fury,diablo+hellfire,assets/txtdata/items/itemdat.tsv,18,16,IDI_ANVIL,Misc,ANVIL_OF_FURY,item.design.base.anvil-of-fury,concept-needed
+base,item.base.017.idi-mushroom,Black Mushroom,diablo+hellfire,assets/txtdata/items/itemdat.tsv,19,17,IDI_MUSHROOM,Misc,BLACK_MUSHROOM,item.design.base.black-mushroom,concept-needed
+base,item.base.018.idi-brain,Brain,diablo+hellfire,assets/txtdata/items/itemdat.tsv,20,18,IDI_BRAIN,Misc,BRAIN,item.design.base.brain,concept-needed
+base,item.base.019.idi-fungaltm,Fungal Tome,diablo+hellfire,assets/txtdata/items/itemdat.tsv,21,19,IDI_FUNGALTM,Misc,FUNGAL_TOME,item.design.base.fungal-tome,concept-needed
+base,item.base.020.idi-specelix,Spectral Elixir,diablo+hellfire,assets/txtdata/items/itemdat.tsv,22,20,IDI_SPECELIX,Misc,SPECTRAL_ELIXIR,item.design.base.spectral-elixir,concept-needed
+base,item.base.021.idi-bldstone,Blood Stone,diablo+hellfire,assets/txtdata/items/itemdat.tsv,23,21,IDI_BLDSTONE,Misc,BLOOD_STONE,item.design.base.blood-stone,concept-needed
+base,item.base.022.idi-mapofdoom,Cathedral Map,hellfire,assets/txtdata/items/itemdat.tsv,24,22,IDI_MAPOFDOOM,Misc,MAP_OF_THE_STARS,item.design.base.cathedral-map,concept-needed
+base,item.base.023.idi-ear,Ear,diablo+hellfire,assets/txtdata/items/itemdat.tsv,25,23,IDI_EAR,Misc,,item.design.base.ear,concept-needed
+base,item.base.024.idi-heal,Potion of Healing,diablo+hellfire,assets/txtdata/items/itemdat.tsv,26,24,IDI_HEAL,Misc,POTION_OF_HEALING,item.design.base.potion-of-healing,concept-needed
+base,item.base.025.idi-mana,Potion of Mana,diablo+hellfire,assets/txtdata/items/itemdat.tsv,27,25,IDI_MANA,Misc,POTION_OF_MANA,item.design.base.potion-of-mana,concept-needed
+base,item.base.026.idi-identify,Scroll of Identify,diablo+hellfire,assets/txtdata/items/itemdat.tsv,28,26,IDI_IDENTIFY,Misc,SCROLL_OF,item.design.base.scroll,concept-needed
+base,item.base.027.idi-portal,Scroll of Town Portal,diablo+hellfire,assets/txtdata/items/itemdat.tsv,29,27,IDI_PORTAL,Misc,SCROLL_OF,item.design.base.scroll,concept-needed
+base,item.base.028.idi-armofval,Arkaine's Valor,diablo+hellfire,assets/txtdata/items/itemdat.tsv,30,28,IDI_ARMOFVAL,MediumArmor,ARKAINES_VALOR,item.design.unique.arkaine-s-valor,concept-needed
+base,item.base.029.idi-fullheal,Potion of Full Healing,diablo+hellfire,assets/txtdata/items/itemdat.tsv,31,29,IDI_FULLHEAL,Misc,POTION_OF_FULL_HEALING,item.design.base.potion-of-full-healing,concept-needed
+base,item.base.030.idi-fullmana,Potion of Full Mana,diablo+hellfire,assets/txtdata/items/itemdat.tsv,32,30,IDI_FULLMANA,Misc,POTION_OF_FULL_MANA,item.design.base.potion-of-full-mana,concept-needed
+base,item.base.031.idi-griswold,Griswold's Edge,diablo+hellfire,assets/txtdata/items/itemdat.tsv,33,31,IDI_GRISWOLD,Sword,BROAD_SWORD,item.design.unique.griswold-s-edge,concept-needed
+base,item.base.032.idi-lgtforge,Bovine Plate,hellfire,assets/txtdata/items/itemdat.tsv,34,32,IDI_LGTFORGE,HeavyArmor,BOVINE,item.design.unique.bovine-plate,concept-needed
+base,item.base.033.idi-lazstaff,Staff of Lazarus,diablo+hellfire,assets/txtdata/items/itemdat.tsv,35,33,IDI_LAZSTAFF,Misc,STAFF_OF_LAZARUS,item.design.base.staff-of-lazarus,concept-needed
+base,item.base.034.idi-resurrect,Scroll of Resurrect,diablo+hellfire,assets/txtdata/items/itemdat.tsv,36,34,IDI_RESURRECT,Misc,SCROLL_OF,item.design.base.scroll,concept-needed
+base,item.base.035.idi-oil,Blacksmith Oil,hellfire,assets/txtdata/items/itemdat.tsv,37,35,IDI_OIL,Misc,OIL,item.design.base.oil-flask,concept-needed
+base,item.base.036.idi-shortstaff,Short Staff,hellfire,assets/txtdata/items/itemdat.tsv,38,36,IDI_SHORTSTAFF,Staff,SHORT_STAFF,item.design.base.short-staff,concept-needed
+base,item.base.037.idi-bardsword,Sword,hellfire,assets/txtdata/items/itemdat.tsv,39,37,IDI_BARDSWORD,Sword,SHORT_SWORD,item.design.base.short-sword,concept-needed
+base,item.base.038.idi-barddagger,Dagger,hellfire,assets/txtdata/items/itemdat.tsv,40,38,IDI_BARDDAGGER,Sword,DAGGER,item.design.base.dagger,concept-needed
+base,item.base.039.idi-runebomb,Rune Bomb,hellfire,assets/txtdata/items/itemdat.tsv,41,39,IDI_RUNEBOMB,Misc,RUNE_BOMB,item.design.base.rune-bomb,concept-needed
+base,item.base.040.idi-theodore,Theodore,hellfire,assets/txtdata/items/itemdat.tsv,42,40,IDI_THEODORE,Misc,THEODORE,item.design.base.theodore,concept-needed
+base,item.base.041.idi-auric,Auric Amulet,hellfire,assets/txtdata/items/itemdat.tsv,43,41,IDI_AURIC,Misc,AURIC_AMULET,item.design.base.auric-amulet,concept-needed
+base,item.base.042.idi-note1,Torn Note 1,hellfire,assets/txtdata/items/itemdat.tsv,44,42,IDI_NOTE1,Misc,TORN_NOTE_1,item.design.base.torn-note-1,concept-needed
+base,item.base.043.idi-note2,Torn Note 2,hellfire,assets/txtdata/items/itemdat.tsv,45,43,IDI_NOTE2,Misc,TORN_NOTE_2,item.design.base.torn-note-2,concept-needed
+base,item.base.044.idi-note3,Torn Note 3,hellfire,assets/txtdata/items/itemdat.tsv,46,44,IDI_NOTE3,Misc,TORN_NOTE_3,item.design.base.torn-note-3,concept-needed
+base,item.base.045.idi-fullnote,Reconstructed Note,hellfire,assets/txtdata/items/itemdat.tsv,47,45,IDI_FULLNOTE,Misc,RECONSTRUCTED_NOTE,item.design.base.reconstructed-note,concept-needed
+base,item.base.046.idi-brownsuit,Brown Suit,hellfire,assets/txtdata/items/itemdat.tsv,48,46,IDI_BROWNSUIT,Misc,BROWN_SUIT,item.design.base.brown-suit,concept-needed
+base,item.base.047.idi-greysuit,Grey Suit,hellfire,assets/txtdata/items/itemdat.tsv,49,47,IDI_GREYSUIT,Misc,GREY_SUIT,item.design.base.grey-suit,concept-needed
+base,item.base.048.cap,Cap,diablo+hellfire,assets/txtdata/items/itemdat.tsv,50,48,,Helm,CAP,item.design.base.cap,concept-needed
+base,item.base.049.skull-cap,Skull Cap,diablo+hellfire,assets/txtdata/items/itemdat.tsv,51,49,,Helm,SKULL_CAP,item.design.base.skull-cap,concept-needed
+base,item.base.050.helm,Helm,diablo+hellfire,assets/txtdata/items/itemdat.tsv,52,50,,Helm,HELM,item.design.base.helm,concept-needed
+base,item.base.051.full-helm,Full Helm,diablo+hellfire,assets/txtdata/items/itemdat.tsv,53,51,,Helm,FULL_HELM,item.design.base.full-helm,concept-needed
+base,item.base.052.crown,Crown,diablo+hellfire,assets/txtdata/items/itemdat.tsv,54,52,,Helm,CROWN,item.design.base.crown,concept-needed
+base,item.base.053.great-helm,Great Helm,diablo+hellfire,assets/txtdata/items/itemdat.tsv,55,53,,Helm,GREAT_HELM,item.design.base.great-helm,concept-needed
+base,item.base.054.cape,Cape,diablo+hellfire,assets/txtdata/items/itemdat.tsv,56,54,,LightArmor,CAPE,item.design.base.cape,concept-needed
+base,item.base.055.rags,Rags,diablo+hellfire,assets/txtdata/items/itemdat.tsv,57,55,,LightArmor,RAGS,item.design.base.rags,concept-needed
+base,item.base.056.cloak,Cloak,diablo+hellfire,assets/txtdata/items/itemdat.tsv,58,56,,LightArmor,CLOAK,item.design.base.cloak,concept-needed
+base,item.base.057.robe,Robe,diablo+hellfire,assets/txtdata/items/itemdat.tsv,59,57,,LightArmor,ROBE,item.design.base.robe,concept-needed
+base,item.base.058.quilted-armor,Quilted Armor,diablo+hellfire,assets/txtdata/items/itemdat.tsv,60,58,,LightArmor,QUILTED_ARMOR,item.design.base.quilted-armor,concept-needed
+base,item.base.059.leather-armor,Leather Armor,diablo+hellfire,assets/txtdata/items/itemdat.tsv,61,59,,LightArmor,LEATHER_ARMOR,item.design.base.leather-armor,concept-needed
+base,item.base.060.hard-leather-armor,Hard Leather Armor,diablo+hellfire,assets/txtdata/items/itemdat.tsv,62,60,,LightArmor,HARD_LEATHER_ARMOR,item.design.base.hard-leather-armor,concept-needed
+base,item.base.061.studded-leather-armor,Studded Leather Armor,diablo+hellfire,assets/txtdata/items/itemdat.tsv,63,61,,LightArmor,STUDDED_LEATHER_ARMOR,item.design.base.studded-leather-armor,concept-needed
+base,item.base.062.ring-mail,Ring Mail,diablo+hellfire,assets/txtdata/items/itemdat.tsv,64,62,,MediumArmor,RING_MAIL,item.design.base.ring-mail,concept-needed
+base,item.base.063.chain-mail,Chain Mail,diablo+hellfire,assets/txtdata/items/itemdat.tsv,65,63,,MediumArmor,CHAIN_MAIL,item.design.base.chain-mail,concept-needed
+base,item.base.064.scale-mail,Scale Mail,diablo+hellfire,assets/txtdata/items/itemdat.tsv,66,64,,MediumArmor,SCALE_MAIL,item.design.base.scale-mail,concept-needed
+base,item.base.065.breast-plate,Breast Plate,diablo+hellfire,assets/txtdata/items/itemdat.tsv,67,65,,HeavyArmor,BREAST_PLATE,item.design.base.breast-plate,concept-needed
+base,item.base.066.splint-mail,Splint Mail,diablo+hellfire,assets/txtdata/items/itemdat.tsv,68,66,,MediumArmor,SPLINT_MAIL,item.design.base.splint-mail,concept-needed
+base,item.base.067.plate-mail,Plate Mail,diablo+hellfire,assets/txtdata/items/itemdat.tsv,69,67,,HeavyArmor,FIELD_PLATE,item.design.base.plate-mail,concept-needed
+base,item.base.068.field-plate,Field Plate,diablo+hellfire,assets/txtdata/items/itemdat.tsv,70,68,,HeavyArmor,FIELD_PLATE,item.design.base.field-plate,concept-needed
+base,item.base.069.gothic-plate,Gothic Plate,diablo+hellfire,assets/txtdata/items/itemdat.tsv,71,69,,HeavyArmor,GOTHIC_PLATE,item.design.base.gothic-plate,concept-needed
+base,item.base.070.full-plate-mail,Full Plate Mail,diablo+hellfire,assets/txtdata/items/itemdat.tsv,72,70,,HeavyArmor,FULL_PLATE_MAIL,item.design.base.full-plate-mail,concept-needed
+base,item.base.071.buckler,Buckler,diablo+hellfire,assets/txtdata/items/itemdat.tsv,73,71,,Shield,BUCKLER,item.design.base.buckler,concept-needed
+base,item.base.072.small-shield,Small Shield,diablo+hellfire,assets/txtdata/items/itemdat.tsv,74,72,,Shield,SMALL_SHIELD,item.design.base.small-shield,concept-needed
+base,item.base.073.large-shield,Large Shield,diablo+hellfire,assets/txtdata/items/itemdat.tsv,75,73,,Shield,LARGE_SHIELD,item.design.base.large-shield,concept-needed
+base,item.base.074.kite-shield,Kite Shield,diablo+hellfire,assets/txtdata/items/itemdat.tsv,76,74,,Shield,KITE_SHIELD,item.design.base.kite-shield,concept-needed
+base,item.base.075.tower-shield,Tower Shield,diablo+hellfire,assets/txtdata/items/itemdat.tsv,77,75,,Shield,TOWER_SHIELD,item.design.base.tower-shield,concept-needed
+base,item.base.076.gothic-shield,Gothic Shield,diablo+hellfire,assets/txtdata/items/itemdat.tsv,78,76,,Shield,GOTHIC_SHIELD,item.design.base.gothic-shield,concept-needed
+base,item.base.077.potion-of-healing,Potion of Healing,diablo+hellfire,assets/txtdata/items/itemdat.tsv,79,77,,Misc,POTION_OF_HEALING,item.design.base.potion-of-healing,concept-needed
+base,item.base.078.potion-of-full-healing,Potion of Full Healing,diablo+hellfire,assets/txtdata/items/itemdat.tsv,80,78,,Misc,POTION_OF_FULL_HEALING,item.design.base.potion-of-full-healing,concept-needed
+base,item.base.079.potion-of-mana,Potion of Mana,diablo+hellfire,assets/txtdata/items/itemdat.tsv,81,79,,Misc,POTION_OF_MANA,item.design.base.potion-of-mana,concept-needed
+base,item.base.080.potion-of-full-mana,Potion of Full Mana,diablo+hellfire,assets/txtdata/items/itemdat.tsv,82,80,,Misc,POTION_OF_FULL_MANA,item.design.base.potion-of-full-mana,concept-needed
+base,item.base.081.potion-of-rejuvenation,Potion of Rejuvenation,diablo+hellfire,assets/txtdata/items/itemdat.tsv,83,81,,Misc,POTION_OF_REJUVENATION,item.design.base.potion-of-rejuvenation,concept-needed
+base,item.base.082.potion-of-full-rejuvenation,Potion of Full Rejuvenation,diablo+hellfire,assets/txtdata/items/itemdat.tsv,84,82,,Misc,POTION_OF_FULL_REJUVENATION,item.design.base.potion-of-full-rejuvenation,concept-needed
+base,item.base.083.blacksmith-oil,Blacksmith Oil,hellfire,assets/txtdata/items/itemdat.tsv,85,83,,Misc,OIL,item.design.base.oil-flask,concept-needed
+base,item.base.084.oil-of-accuracy,Oil of Accuracy,hellfire,assets/txtdata/items/itemdat.tsv,86,84,,Misc,OIL,item.design.base.oil-flask,concept-needed
+base,item.base.085.oil-of-sharpness,Oil of Sharpness,hellfire,assets/txtdata/items/itemdat.tsv,87,85,,Misc,OIL,item.design.base.oil-flask,concept-needed
+base,item.base.086.oil,Oil,hellfire,assets/txtdata/items/itemdat.tsv,88,86,,Misc,OIL,item.design.base.oil-flask,concept-needed
+base,item.base.087.elixir-of-strength,Elixir of Strength,diablo+hellfire,assets/txtdata/items/itemdat.tsv,89,87,,Misc,ELIXIR_OF_STRENGTH,item.design.base.elixir-of-strength,concept-needed
+base,item.base.088.elixir-of-magic,Elixir of Magic,diablo+hellfire,assets/txtdata/items/itemdat.tsv,90,88,,Misc,ELIXIR_OF_MAGIC,item.design.base.elixir-of-magic,concept-needed
+base,item.base.089.elixir-of-dexterity,Elixir of Dexterity,diablo+hellfire,assets/txtdata/items/itemdat.tsv,91,89,,Misc,ELIXIR_OF_DEXTERITY,item.design.base.elixir-of-dexterity,concept-needed
+base,item.base.090.elixir-of-vitality,Elixir of Vitality,diablo+hellfire,assets/txtdata/items/itemdat.tsv,92,90,,Misc,ELIXIR_OF_VITALITY,item.design.base.elixir-of-vitality,concept-needed
+base,item.base.091.scroll-of-healing,Scroll of Healing,diablo+hellfire,assets/txtdata/items/itemdat.tsv,93,91,,Misc,SCROLL_OF,item.design.base.scroll,concept-needed
+base,item.base.092.scroll-of-search,Scroll of Search,hellfire,assets/txtdata/items/itemdat.tsv,94,92,,Misc,SCROLL_OF,item.design.base.scroll,concept-needed
+base,item.base.093.scroll-of-lightning,Scroll of Lightning,diablo+hellfire,assets/txtdata/items/itemdat.tsv,95,93,,Misc,SCROLL_OF,item.design.base.scroll,concept-needed
+base,item.base.094.scroll-of-identify,Scroll of Identify,diablo+hellfire,assets/txtdata/items/itemdat.tsv,96,94,,Misc,SCROLL_OF,item.design.base.scroll,concept-needed
+base,item.base.095.scroll-of-resurrect,Scroll of Resurrect,diablo+hellfire,assets/txtdata/items/itemdat.tsv,97,95,,Misc,SCROLL_OF,item.design.base.scroll,concept-needed
+base,item.base.096.scroll-of-fire-wall,Scroll of Fire Wall,diablo+hellfire,assets/txtdata/items/itemdat.tsv,98,96,,Misc,SCROLL_OF,item.design.base.scroll,concept-needed
+base,item.base.097.scroll-of-inferno,Scroll of Inferno,diablo+hellfire,assets/txtdata/items/itemdat.tsv,99,97,,Misc,SCROLL_OF,item.design.base.scroll,concept-needed
+base,item.base.098.scroll-of-town-portal,Scroll of Town Portal,diablo+hellfire,assets/txtdata/items/itemdat.tsv,100,98,,Misc,SCROLL_OF,item.design.base.scroll,concept-needed
+base,item.base.099.scroll-of-flash,Scroll of Flash,diablo+hellfire,assets/txtdata/items/itemdat.tsv,101,99,,Misc,SCROLL_OF,item.design.base.scroll,concept-needed
+base,item.base.100.scroll-of-infravision,Scroll of Infravision,diablo+hellfire,assets/txtdata/items/itemdat.tsv,102,100,,Misc,SCROLL_OF,item.design.base.scroll,concept-needed
+base,item.base.101.scroll-of-phasing,Scroll of Phasing,diablo+hellfire,assets/txtdata/items/itemdat.tsv,103,101,,Misc,SCROLL_OF,item.design.base.scroll,concept-needed
+base,item.base.102.scroll-of-mana-shield,Scroll of Mana Shield,diablo+hellfire,assets/txtdata/items/itemdat.tsv,104,102,,Misc,SCROLL_OF,item.design.base.scroll,concept-needed
+base,item.base.103.scroll-of-flame-wave,Scroll of Flame Wave,diablo+hellfire,assets/txtdata/items/itemdat.tsv,105,103,,Misc,SCROLL_OF,item.design.base.scroll,concept-needed
+base,item.base.104.scroll-of-fireball,Scroll of Fireball,diablo+hellfire,assets/txtdata/items/itemdat.tsv,106,104,,Misc,SCROLL_OF,item.design.base.scroll,concept-needed
+base,item.base.105.scroll-of-stone-curse,Scroll of Stone Curse,diablo+hellfire,assets/txtdata/items/itemdat.tsv,107,105,,Misc,SCROLL_OF,item.design.base.scroll,concept-needed
+base,item.base.106.scroll-of-chain-lightning,Scroll of Chain Lightning,diablo+hellfire,assets/txtdata/items/itemdat.tsv,108,106,,Misc,SCROLL_OF,item.design.base.scroll,concept-needed
+base,item.base.107.scroll-of-guardian,Scroll of Guardian,diablo+hellfire,assets/txtdata/items/itemdat.tsv,109,107,,Misc,SCROLL_OF,item.design.base.scroll,concept-needed
+base,item.base.108.reserved-placeholder,,diablo+hellfire,assets/txtdata/items/itemdat.tsv,110,108,,Misc,,,not-applicable
+base,item.base.109.scroll-of-nova,Scroll of Nova,diablo+hellfire,assets/txtdata/items/itemdat.tsv,111,109,,Misc,SCROLL_OF,item.design.base.scroll,concept-needed
+base,item.base.110.scroll-of-golem,Scroll of Golem,diablo+hellfire,assets/txtdata/items/itemdat.tsv,112,110,,Misc,SCROLL_OF,item.design.base.scroll,concept-needed
+base,item.base.111.reserved-placeholder,,diablo+hellfire,assets/txtdata/items/itemdat.tsv,113,111,,Misc,,,not-applicable
+base,item.base.112.scroll-of-teleport,Scroll of Teleport,diablo+hellfire,assets/txtdata/items/itemdat.tsv,114,112,,Misc,SCROLL_OF,item.design.base.scroll,concept-needed
+base,item.base.113.scroll-of-apocalypse,Scroll of Apocalypse,diablo+hellfire,assets/txtdata/items/itemdat.tsv,115,113,,Misc,SCROLL_OF,item.design.base.scroll,concept-needed
+base,item.base.114.book-of,Book of ,diablo+hellfire,assets/txtdata/items/itemdat.tsv,116,114,IDI_BOOK1,Misc,BOOK_BLUE,item.design.base.spellbook-blue,concept-needed
+base,item.base.115.book-of,Book of ,diablo+hellfire,assets/txtdata/items/itemdat.tsv,117,115,IDI_BOOK2,Misc,BOOK_BLUE,item.design.base.spellbook-blue,concept-needed
+base,item.base.116.book-of,Book of ,diablo+hellfire,assets/txtdata/items/itemdat.tsv,118,116,IDI_BOOK3,Misc,BOOK_BLUE,item.design.base.spellbook-blue,concept-needed
+base,item.base.117.book-of,Book of ,diablo+hellfire,assets/txtdata/items/itemdat.tsv,119,117,IDI_BOOK4,Misc,BOOK_BLUE,item.design.base.spellbook-blue,concept-needed
+base,item.base.118.dagger,Dagger,diablo+hellfire,assets/txtdata/items/itemdat.tsv,120,118,,Sword,DAGGER,item.design.base.dagger,concept-needed
+base,item.base.119.short-sword,Short Sword,diablo+hellfire,assets/txtdata/items/itemdat.tsv,121,119,,Sword,SHORT_SWORD,item.design.base.short-sword,concept-needed
+base,item.base.120.falchion,Falchion,diablo+hellfire,assets/txtdata/items/itemdat.tsv,122,120,,Sword,FALCHION,item.design.base.falchion,concept-needed
+base,item.base.121.scimitar,Scimitar,diablo+hellfire,assets/txtdata/items/itemdat.tsv,123,121,,Sword,SCIMITAR,item.design.base.scimitar,concept-needed
+base,item.base.122.claymore,Claymore,diablo+hellfire,assets/txtdata/items/itemdat.tsv,124,122,,Sword,CLAYMORE,item.design.base.claymore,concept-needed
+base,item.base.123.blade,Blade,diablo+hellfire,assets/txtdata/items/itemdat.tsv,125,123,,Sword,BLADE,item.design.base.blade,concept-needed
+base,item.base.124.sabre,Sabre,diablo+hellfire,assets/txtdata/items/itemdat.tsv,126,124,,Sword,SABRE,item.design.base.sabre,concept-needed
+base,item.base.125.long-sword,Long Sword,diablo+hellfire,assets/txtdata/items/itemdat.tsv,127,125,,Sword,LONG_SWORD,item.design.base.long-sword,concept-needed
+base,item.base.126.broad-sword,Broad Sword,diablo+hellfire,assets/txtdata/items/itemdat.tsv,128,126,,Sword,BROAD_SWORD,item.design.base.broad-sword,concept-needed
+base,item.base.127.bastard-sword,Bastard Sword,diablo+hellfire,assets/txtdata/items/itemdat.tsv,129,127,,Sword,BASTARD_SWORD,item.design.base.bastard-sword,concept-needed
+base,item.base.128.two-handed-sword,Two-Handed Sword,diablo+hellfire,assets/txtdata/items/itemdat.tsv,130,128,,Sword,TWO_HANDED_SWORD,item.design.base.two-handed-sword,concept-needed
+base,item.base.129.great-sword,Great Sword,diablo+hellfire,assets/txtdata/items/itemdat.tsv,131,129,,Sword,GREAT_SWORD,item.design.base.great-sword,concept-needed
+base,item.base.130.small-axe,Small Axe,diablo+hellfire,assets/txtdata/items/itemdat.tsv,132,130,,Axe,SMALL_AXE,item.design.base.small-axe,concept-needed
+base,item.base.131.axe,Axe,diablo+hellfire,assets/txtdata/items/itemdat.tsv,133,131,,Axe,AXE,item.design.base.axe,concept-needed
+base,item.base.132.large-axe,Large Axe,diablo+hellfire,assets/txtdata/items/itemdat.tsv,134,132,,Axe,LARGE_AXE,item.design.base.large-axe,concept-needed
+base,item.base.133.broad-axe,Broad Axe,diablo+hellfire,assets/txtdata/items/itemdat.tsv,135,133,,Axe,BROAD_AXE,item.design.base.broad-axe,concept-needed
+base,item.base.134.battle-axe,Battle Axe,diablo+hellfire,assets/txtdata/items/itemdat.tsv,136,134,,Axe,BATTLE_AXE,item.design.base.battle-axe,concept-needed
+base,item.base.135.great-axe,Great Axe,diablo+hellfire,assets/txtdata/items/itemdat.tsv,137,135,,Axe,GREAT_AXE,item.design.base.great-axe,concept-needed
+base,item.base.136.mace,Mace,diablo+hellfire,assets/txtdata/items/itemdat.tsv,138,136,,Mace,MACE,item.design.base.mace,concept-needed
+base,item.base.137.morning-star,Morning Star,diablo+hellfire,assets/txtdata/items/itemdat.tsv,139,137,,Mace,MORNING_STAR,item.design.base.morning-star,concept-needed
+base,item.base.138.war-hammer,War Hammer,diablo+hellfire,assets/txtdata/items/itemdat.tsv,140,138,,Mace,WAR_HAMMER,item.design.base.war-hammer,concept-needed
+base,item.base.139.spiked-club,Spiked Club,diablo+hellfire,assets/txtdata/items/itemdat.tsv,141,139,IDI_BARBARIAN,Mace,SPIKED_CLUB,item.design.base.spiked-club,concept-needed
+base,item.base.140.club,Club,diablo+hellfire,assets/txtdata/items/itemdat.tsv,142,140,,Mace,CLUB,item.design.base.club,concept-needed
+base,item.base.141.flail,Flail,diablo+hellfire,assets/txtdata/items/itemdat.tsv,143,141,,Mace,FLAIL,item.design.base.flail,concept-needed
+base,item.base.142.maul,Maul,diablo+hellfire,assets/txtdata/items/itemdat.tsv,144,142,,Mace,MAUL,item.design.base.maul,concept-needed
+base,item.base.143.short-bow,Short Bow,diablo+hellfire,assets/txtdata/items/itemdat.tsv,145,143,,Bow,SHORT_BOW,item.design.base.short-bow,concept-needed
+base,item.base.144.hunter-s-bow,Hunter's Bow,diablo+hellfire,assets/txtdata/items/itemdat.tsv,146,144,,Bow,HUNTERS_BOW,item.design.base.hunter-s-bow,concept-needed
+base,item.base.145.long-bow,Long Bow,diablo+hellfire,assets/txtdata/items/itemdat.tsv,147,145,,Bow,HUNTERS_BOW,item.design.base.long-bow,concept-needed
+base,item.base.146.composite-bow,Composite Bow,diablo+hellfire,assets/txtdata/items/itemdat.tsv,148,146,,Bow,COMPOSITE_BOW,item.design.base.composite-bow,concept-needed
+base,item.base.147.idi-short-battle-bow,Short Battle Bow,diablo+hellfire,assets/txtdata/items/itemdat.tsv,149,147,,Bow,SHORT_BATTLE_BOW,item.design.base.short-battle-bow,concept-needed
+base,item.base.148.long-battle-bow,Long Battle Bow,diablo+hellfire,assets/txtdata/items/itemdat.tsv,150,148,IDI_SHORT_BATTLE_BOW,Bow,LONG_BATTLE_BOW,item.design.base.long-battle-bow,concept-needed
+base,item.base.149.short-war-bow,Short War Bow,diablo+hellfire,assets/txtdata/items/itemdat.tsv,151,149,,Bow,SHORT_WAR_BOW,item.design.base.short-war-bow,concept-needed
+base,item.base.150.long-war-bow,Long War Bow,diablo+hellfire,assets/txtdata/items/itemdat.tsv,152,150,,Bow,LONG_WAR_BOW,item.design.base.long-war-bow,concept-needed
+base,item.base.151.short-staff,Short Staff,diablo+hellfire,assets/txtdata/items/itemdat.tsv,153,151,,Staff,SHORT_STAFF,item.design.base.short-staff,concept-needed
+base,item.base.152.long-staff,Long Staff,diablo+hellfire,assets/txtdata/items/itemdat.tsv,154,152,,Staff,LONG_STAFF,item.design.base.long-staff,concept-needed
+base,item.base.153.composite-staff,Composite Staff,diablo+hellfire,assets/txtdata/items/itemdat.tsv,155,153,,Staff,COMPOSITE_STAFF,item.design.base.composite-staff,concept-needed
+base,item.base.154.quarter-staff,Quarter Staff,diablo+hellfire,assets/txtdata/items/itemdat.tsv,156,154,,Staff,SHORT_STAFF,item.design.base.quarter-staff,concept-needed
+base,item.base.155.war-staff,War Staff,diablo+hellfire,assets/txtdata/items/itemdat.tsv,157,155,,Staff,WAR_STAFF,item.design.base.war-staff,concept-needed
+base,item.base.156.ring,Ring,diablo+hellfire,assets/txtdata/items/itemdat.tsv,158,156,,Ring,RING,item.design.base.ring,concept-needed
+base,item.base.157.ring,Ring,diablo+hellfire,assets/txtdata/items/itemdat.tsv,159,157,,Ring,RING,item.design.base.ring,concept-needed
+base,item.base.158.ring,Ring,diablo+hellfire,assets/txtdata/items/itemdat.tsv,160,158,,Ring,RING,item.design.base.ring,concept-needed
+base,item.base.159.amulet,Amulet,diablo+hellfire,assets/txtdata/items/itemdat.tsv,161,159,,Amulet,AMULET,item.design.base.amulet,concept-needed
+base,item.base.160.amulet,Amulet,diablo+hellfire,assets/txtdata/items/itemdat.tsv,162,160,,Amulet,AMULET,item.design.base.amulet,concept-needed
+base,item.base.161.rune-of-fire,Rune of Fire,hellfire,assets/txtdata/items/itemdat.tsv,163,161,,Misc,RUNE_OF_FIRE,item.design.base.rune-of-fire,concept-needed
+base,item.base.162.rune-of-lightning,Rune of Lightning,hellfire,assets/txtdata/items/itemdat.tsv,164,162,,Misc,RUNE_OF_LIGHTNING,item.design.base.rune-of-lightning,concept-needed
+base,item.base.163.greater-rune-of-fire,Greater Rune of Fire,hellfire,assets/txtdata/items/itemdat.tsv,165,163,,Misc,GREATER_RUNE_OF_FIRE,item.design.base.greater-rune-of-fire,concept-needed
+base,item.base.164.greater-rune-of-lightning,Greater Rune of Lightning,hellfire,assets/txtdata/items/itemdat.tsv,166,164,,Misc,GREATER_RUNE_OF_LIGHTNING,item.design.base.greater-rune-of-lightning,concept-needed
+base,item.base.165.rune-of-stone,Rune of Stone,hellfire,assets/txtdata/items/itemdat.tsv,167,165,IDI_RUNEOFSTONE,Misc,RUNE_OF_STONE,item.design.base.rune-of-stone,concept-needed
+base,item.base.166.short-staff-of-charged-bolt,Short Staff of Charged Bolt,diablo+hellfire,assets/txtdata/items/itemdat.tsv,168,166,IDI_SORCERER_DIABLO,Staff,SHORT_STAFF,item.design.base.short-staff,concept-needed
+base,item.base.167.idi-arenapot,Arena Potion,diablo+hellfire,assets/txtdata/items/itemdat.tsv,169,167,IDI_ARENAPOT,Misc,ARENA_POTION,item.design.base.arena-potion,concept-needed
+unique,item.unique.the-butcher-s-cleaver,The Butcher's Cleaver,diablo,assets/txtdata/items/unique_itemdat.tsv,2,0,UITEM_CLEAVER,CLEAVER,CLEAVER,item.design.unique.the-butcher-s-cleaver,resolved
+unique,item.unique.the-butcher-s-cleaver,The Butcher's Cleaver,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,2,0,UITEM_CLEAVER,CLEAVER,CLEAVER,item.design.unique.the-butcher-s-cleaver,resolved
+unique,item.unique.the-undead-crown,The Undead Crown,diablo,assets/txtdata/items/unique_itemdat.tsv,3,1,UITEM_SKCROWN,SKCROWN,HELM_OF_SPIRITS,item.design.unique.the-undead-crown,resolved
+unique,item.unique.the-undead-crown,The Undead Crown,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,3,1,UITEM_SKCROWN,SKCROWN,HELM_OF_SPIRITS,item.design.unique.the-undead-crown,resolved
+unique,item.unique.empyrean-band,Empyrean Band,diablo,assets/txtdata/items/unique_itemdat.tsv,4,2,UITEM_INFRARING,INFRARING,EMPYREAN_BAND,item.design.unique.empyrean-band,resolved
+unique,item.unique.empyrean-band,Empyrean Band,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,4,2,UITEM_INFRARING,INFRARING,EMPYREAN_BAND,item.design.unique.empyrean-band,resolved
+unique,item.unique.optic-amulet,Optic Amulet,diablo,assets/txtdata/items/unique_itemdat.tsv,5,3,UITEM_OPTAMULET,OPTAMULET,OPTIC_AMULET,item.design.unique.optic-amulet,resolved
+unique,item.unique.optic-amulet,Optic Amulet,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,5,3,UITEM_OPTAMULET,OPTAMULET,OPTIC_AMULET,item.design.unique.optic-amulet,resolved
+unique,item.unique.ring-of-truth,Ring of Truth,diablo,assets/txtdata/items/unique_itemdat.tsv,6,4,UITEM_TRING,TRING,RING_OF_TRUTH,item.design.unique.ring-of-truth,resolved
+unique,item.unique.ring-of-truth,Ring of Truth,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,6,4,UITEM_TRING,TRING,RING_OF_TRUTH,item.design.unique.ring-of-truth,resolved
+unique,item.unique.harlequin-crest,Harlequin Crest,diablo,assets/txtdata/items/unique_itemdat.tsv,7,5,UITEM_HARCREST,HARCREST,HARLEQUIN_CREST,item.design.unique.harlequin-crest,resolved
+unique,item.unique.harlequin-crest,Harlequin Crest,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,7,5,UITEM_HARCREST,HARCREST,HARLEQUIN_CREST,item.design.unique.harlequin-crest,resolved
+unique,item.unique.veil-of-steel,Veil of Steel,diablo,assets/txtdata/items/unique_itemdat.tsv,8,6,UITEM_STEELVEIL,STEELVEIL,VEIL_OF_STEEL,item.design.unique.veil-of-steel,resolved
+unique,item.unique.veil-of-steel,Veil of Steel,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,8,6,UITEM_STEELVEIL,STEELVEIL,VEIL_OF_STEEL,item.design.unique.veil-of-steel,resolved
+unique,item.unique.arkaine-s-valor,Arkaine's Valor,diablo,assets/txtdata/items/unique_itemdat.tsv,9,7,UITEM_ARMOFVAL,ARMOFVAL,ARKAINES_VALOR,item.design.unique.arkaine-s-valor,resolved
+unique,item.unique.arkaine-s-valor,Arkaine's Valor,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,9,7,UITEM_ARMOFVAL,ARMOFVAL,ARKAINES_VALOR,item.design.unique.arkaine-s-valor,resolved
+unique,item.unique.griswold-s-edge,Griswold's Edge,diablo,assets/txtdata/items/unique_itemdat.tsv,10,8,UITEM_GRISWOLD,GRISWOLD,BROAD_SWORD,item.design.unique.griswold-s-edge,resolved
+unique,item.unique.griswold-s-edge,Griswold's Edge,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,10,8,UITEM_GRISWOLD,GRISWOLD,BROAD_SWORD,item.design.unique.griswold-s-edge,resolved
+unique,item.unique.lightforge,Lightforge,diablo,assets/txtdata/items/unique_itemdat.tsv,11,9,UITEM_BOVINE,LGTFORGE,,item.design.unique.lightforge,orphan-unique-base-no-itemdat-match
+unique,item.unique.the-rift-bow,The Rift Bow,diablo,assets/txtdata/items/unique_itemdat.tsv,12,10,UITEM_RIFTBOW,SHORTBOW,SHORT_BOW,item.design.unique.the-rift-bow,resolved
+unique,item.unique.the-rift-bow,The Rift Bow,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,12,10,UITEM_RIFTBOW,SHORTBOW,SHORT_BOW,item.design.unique.the-rift-bow,resolved
+unique,item.unique.the-needler,The Needler,diablo,assets/txtdata/items/unique_itemdat.tsv,13,11,UITEM_NEEDLER,SHORTBOW,THE_NEEDLER,item.design.unique.the-needler,resolved
+unique,item.unique.the-needler,The Needler,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,13,11,UITEM_NEEDLER,SHORTBOW,THE_NEEDLER,item.design.unique.the-needler,resolved
+unique,item.unique.the-celestial-bow,The Celestial Bow,diablo,assets/txtdata/items/unique_itemdat.tsv,14,12,UITEM_CELESTBOW,LONGBOW,COMPOSITE_BOW,item.design.unique.the-celestial-bow,resolved
+unique,item.unique.the-celestial-bow,The Celestial Bow,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,14,12,UITEM_CELESTBOW,LONGBOW,COMPOSITE_BOW,item.design.unique.the-celestial-bow,resolved
+unique,item.unique.deadly-hunter,Deadly Hunter,diablo,assets/txtdata/items/unique_itemdat.tsv,15,13,UITEM_DEADLYHUNT,COMPBOW,DEADLY_HUNTER,item.design.unique.deadly-hunter,resolved
+unique,item.unique.deadly-hunter,Deadly Hunter,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,15,13,UITEM_DEADLYHUNT,COMPBOW,DEADLY_HUNTER,item.design.unique.deadly-hunter,resolved
+unique,item.unique.bow-of-the-dead,Bow of the Dead,diablo,assets/txtdata/items/unique_itemdat.tsv,16,14,UITEM_BOWOFDEAD,COMPBOW,DEADLY_HUNTER,item.design.unique.bow-of-the-dead,resolved
+unique,item.unique.bow-of-the-dead,Bow of the Dead,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,16,14,UITEM_BOWOFDEAD,COMPBOW,DEADLY_HUNTER,item.design.unique.bow-of-the-dead,resolved
+unique,item.unique.the-blackoak-bow,The Blackoak Bow,diablo,assets/txtdata/items/unique_itemdat.tsv,17,15,UITEM_BLKOAKBOW,LONGBOW,HUNTERS_BOW,item.design.unique.the-blackoak-bow,resolved
+unique,item.unique.the-blackoak-bow,The Blackoak Bow,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,17,15,UITEM_BLKOAKBOW,LONGBOW,HUNTERS_BOW,item.design.unique.the-blackoak-bow,resolved
+unique,item.unique.flamedart,Flamedart,diablo,assets/txtdata/items/unique_itemdat.tsv,18,16,UITEM_FLAMEDART,HUNTBOW,HUNTERS_BOW,item.design.unique.flamedart,resolved
+unique,item.unique.flamedart,Flamedart,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,18,16,UITEM_FLAMEDART,HUNTBOW,HUNTERS_BOW,item.design.unique.flamedart,resolved
+unique,item.unique.fleshstinger,Fleshstinger,diablo,assets/txtdata/items/unique_itemdat.tsv,19,17,UITEM_FLESHSTING,LONGBOW,HUNTERS_BOW,item.design.unique.fleshstinger,resolved
+unique,item.unique.fleshstinger,Fleshstinger,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,19,17,UITEM_FLESHSTING,LONGBOW,HUNTERS_BOW,item.design.unique.fleshstinger,resolved
+unique,item.unique.windforce,Windforce,diablo,assets/txtdata/items/unique_itemdat.tsv,20,18,UITEM_WINDFORCE,WARBOW,WINDFORCE,item.design.unique.windforce,resolved
+unique,item.unique.windforce,Windforce,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,20,18,UITEM_WINDFORCE,WARBOW,WINDFORCE,item.design.unique.windforce,resolved
+unique,item.unique.eaglehorn,Eaglehorn,diablo,assets/txtdata/items/unique_itemdat.tsv,21,19,UITEM_EAGLEHORN,BATTLEBOW,DEADLY_HUNTER,item.design.unique.eaglehorn,resolved
+unique,item.unique.eaglehorn,Eaglehorn,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,21,19,UITEM_EAGLEHORN,BATTLEBOW,DEADLY_HUNTER,item.design.unique.eaglehorn,resolved
+unique,item.unique.gonnagal-s-dirk,Gonnagal's Dirk,diablo,assets/txtdata/items/unique_itemdat.tsv,22,20,UITEM_GONNAGALDIRK,DAGGER,GONNAGALS_DIRK,item.design.unique.gonnagal-s-dirk,resolved
+unique,item.unique.gonnagal-s-dirk,Gonnagal's Dirk,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,22,20,UITEM_GONNAGALDIRK,DAGGER,GONNAGALS_DIRK,item.design.unique.gonnagal-s-dirk,resolved
+unique,item.unique.the-defender,The Defender,diablo,assets/txtdata/items/unique_itemdat.tsv,23,21,UITEM_DEFENDER,SABRE,SABRE,item.design.unique.the-defender,resolved
+unique,item.unique.the-defender,The Defender,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,23,21,UITEM_DEFENDER,SABRE,SABRE,item.design.unique.the-defender,resolved
+unique,item.unique.gryphon-s-claw,Gryphon's Claw,diablo,assets/txtdata/items/unique_itemdat.tsv,24,22,UITEM_GRYPHONCLAW,FALCHION,GRYPHONS_CLAW,item.design.unique.gryphon-s-claw,resolved
+unique,item.unique.gryphon-s-claw,Gryphon's Claw,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,24,22,UITEM_GRYPHONCLAW,FALCHION,GRYPHONS_CLAW,item.design.unique.gryphon-s-claw,resolved
+unique,item.unique.black-razor,Black Razor,diablo,assets/txtdata/items/unique_itemdat.tsv,25,23,UITEM_BLACKRAZOR,DAGGER,BLACK_RAZOR,item.design.unique.black-razor,resolved
+unique,item.unique.black-razor,Black Razor,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,25,23,UITEM_BLACKRAZOR,DAGGER,BLACK_RAZOR,item.design.unique.black-razor,resolved
+unique,item.unique.gibbous-moon,Gibbous Moon,diablo,assets/txtdata/items/unique_itemdat.tsv,26,24,UITEM_GIBBOUSMOON,BROADSWR,BROAD_SWORD,item.design.unique.gibbous-moon,resolved
+unique,item.unique.gibbous-moon,Gibbous Moon,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,26,24,UITEM_GIBBOUSMOON,BROADSWR,BROAD_SWORD,item.design.unique.gibbous-moon,resolved
+unique,item.unique.ice-shank,Ice Shank,diablo,assets/txtdata/items/unique_itemdat.tsv,27,25,UITEM_ICESHANK,LONGSWR,LONG_SWORD,item.design.unique.ice-shank,resolved
+unique,item.unique.ice-shank,Ice Shank,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,27,25,UITEM_ICESHANK,LONGSWR,LONG_SWORD,item.design.unique.ice-shank,resolved
+unique,item.unique.the-executioner-s-blade,The Executioner's Blade,diablo,assets/txtdata/items/unique_itemdat.tsv,28,26,UITEM_EXECUTIONER,FALCHION,THE_EXECUTIONERS_BLADE,item.design.unique.the-executioner-s-blade,resolved
+unique,item.unique.the-executioner-s-blade,The Executioner's Blade,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,28,26,UITEM_EXECUTIONER,FALCHION,THE_EXECUTIONERS_BLADE,item.design.unique.the-executioner-s-blade,resolved
+unique,item.unique.the-bonesaw,The Bonesaw,diablo,assets/txtdata/items/unique_itemdat.tsv,29,27,UITEM_BONESAW,CLAYMORE,CLAYMORE,item.design.unique.the-bonesaw,resolved
+unique,item.unique.the-bonesaw,The Bonesaw,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,29,27,UITEM_BONESAW,CLAYMORE,CLAYMORE,item.design.unique.the-bonesaw,resolved
+unique,item.unique.shadowhawk,Shadowhawk,diablo,assets/txtdata/items/unique_itemdat.tsv,30,28,UITEM_SHADHAWK,BROADSWR,BROAD_SWORD,item.design.unique.shadowhawk,resolved
+unique,item.unique.shadowhawk,Shadowhawk,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,30,28,UITEM_SHADHAWK,BROADSWR,BROAD_SWORD,item.design.unique.shadowhawk,resolved
+unique,item.unique.wizardspike,Wizardspike,diablo,assets/txtdata/items/unique_itemdat.tsv,31,29,UITEM_WIZSPIKE,DAGGER,WIZARDSPIKE,item.design.unique.wizardspike,resolved
+unique,item.unique.wizardspike,Wizardspike,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,31,29,UITEM_WIZSPIKE,DAGGER,WIZARDSPIKE,item.design.unique.wizardspike,resolved
+unique,item.unique.lightsabre,Lightsabre,diablo,assets/txtdata/items/unique_itemdat.tsv,32,30,UITEM_LGTSABRE,SABRE,SABRE,item.design.unique.lightsabre,resolved
+unique,item.unique.lightsabre,Lightsabre,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,32,30,UITEM_LGTSABRE,SABRE,SABRE,item.design.unique.lightsabre,resolved
+unique,item.unique.the-falcon-s-talon,The Falcon's Talon,diablo,assets/txtdata/items/unique_itemdat.tsv,33,31,UITEM_FALCONTALON,SCIMITAR,GRYPHONS_CLAW,item.design.unique.the-falcon-s-talon,resolved
+unique,item.unique.the-falcon-s-talon,The Falcon's Talon,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,33,31,UITEM_FALCONTALON,SCIMITAR,GRYPHONS_CLAW,item.design.unique.the-falcon-s-talon,resolved
+unique,item.unique.inferno,Inferno,diablo,assets/txtdata/items/unique_itemdat.tsv,34,32,UITEM_INFERNO,LONGSWR,LONG_SWORD,item.design.unique.inferno,resolved
+unique,item.unique.inferno,Inferno,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,34,32,UITEM_INFERNO,LONGSWR,LONG_SWORD,item.design.unique.inferno,resolved
+unique,item.unique.doombringer,Doombringer,diablo,assets/txtdata/items/unique_itemdat.tsv,35,33,UITEM_DOOMBRINGER,BASTARDSWR,BASTARD_SWORD,item.design.unique.doombringer,resolved
+unique,item.unique.doombringer,Doombringer,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,35,33,UITEM_DOOMBRINGER,BASTARDSWR,BASTARD_SWORD,item.design.unique.doombringer,resolved
+unique,item.unique.the-grizzly,The Grizzly,diablo,assets/txtdata/items/unique_itemdat.tsv,36,34,UITEM_GRIZZLY,TWOHANDSWR,THE_GRIZZLY,item.design.unique.the-grizzly,resolved
+unique,item.unique.the-grizzly,The Grizzly,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,36,34,UITEM_GRIZZLY,TWOHANDSWR,THE_GRIZZLY,item.design.unique.the-grizzly,resolved
+unique,item.unique.the-grandfather,The Grandfather,diablo,assets/txtdata/items/unique_itemdat.tsv,37,35,UITEM_GRANDFATHER,GREATSWR,THE_GRANDFATHER,item.design.unique.the-grandfather,resolved
+unique,item.unique.the-grandfather,The Grandfather,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,37,35,UITEM_GRANDFATHER,GREATSWR,THE_GRANDFATHER,item.design.unique.the-grandfather,resolved
+unique,item.unique.the-mangler,The Mangler,diablo,assets/txtdata/items/unique_itemdat.tsv,38,36,UITEM_MANGLER,LARGEAXE,AXE,item.design.unique.the-mangler,resolved
+unique,item.unique.the-mangler,The Mangler,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,38,36,UITEM_MANGLER,LARGEAXE,AXE,item.design.unique.the-mangler,resolved
+unique,item.unique.sharp-beak,Sharp Beak,diablo,assets/txtdata/items/unique_itemdat.tsv,39,37,UITEM_SHARPBEAK,LARGEAXE,GREAT_AXE,item.design.unique.sharp-beak,resolved
+unique,item.unique.sharp-beak,Sharp Beak,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,39,37,UITEM_SHARPBEAK,LARGEAXE,GREAT_AXE,item.design.unique.sharp-beak,resolved
+unique,item.unique.bloodslayer,Bloodslayer,diablo,assets/txtdata/items/unique_itemdat.tsv,40,38,UITEM_BLOODLSLAYER,BROADAXE,AXE,item.design.unique.bloodslayer,resolved
+unique,item.unique.bloodslayer,BloodSlayer,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,40,38,UITEM_BLOODLSLAYER,BROADAXE,AXE,item.design.unique.bloodslayer,resolved
+unique,item.unique.the-celestial-axe,The Celestial Axe,diablo,assets/txtdata/items/unique_itemdat.tsv,41,39,UITEM_CELESTAXE,BATTLEAXE,BATTLE_AXE,item.design.unique.the-celestial-axe,resolved
+unique,item.unique.the-celestial-axe,The Celestial Axe,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,41,39,UITEM_CELESTAXE,BATTLEAXE,BATTLE_AXE,item.design.unique.the-celestial-axe,resolved
+unique,item.unique.wicked-axe,Wicked Axe,diablo,assets/txtdata/items/unique_itemdat.tsv,42,40,UITEM_WICKEDAXE,LARGEAXE,GREAT_AXE,item.design.unique.wicked-axe,resolved
+unique,item.unique.wicked-axe,Wicked Axe,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,42,40,UITEM_WICKEDAXE,LARGEAXE,GREAT_AXE,item.design.unique.wicked-axe,resolved
+unique,item.unique.stonecleaver,Stonecleaver,diablo,assets/txtdata/items/unique_itemdat.tsv,43,41,UITEM_STONECLEAV,BROADAXE,STONECLEAVER,item.design.unique.stonecleaver,resolved
+unique,item.unique.stonecleaver,Stonecleaver,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,43,41,UITEM_STONECLEAV,BROADAXE,STONECLEAVER,item.design.unique.stonecleaver,resolved
+unique,item.unique.aguinara-s-hatchet,Aguinara's Hatchet,diablo,assets/txtdata/items/unique_itemdat.tsv,44,42,UITEM_AGUHATCHET,SMALLAXE,SMALL_AXE,item.design.unique.aguinara-s-hatchet,resolved
+unique,item.unique.aguinara-s-hatchet,Aguinara's Hatchet,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,44,42,UITEM_AGUHATCHET,SMALLAXE,SMALL_AXE,item.design.unique.aguinara-s-hatchet,resolved
+unique,item.unique.hellslayer,Hellslayer,diablo,assets/txtdata/items/unique_itemdat.tsv,45,43,UITEM_HELLSLAYER,BATTLEAXE,BATTLE_AXE,item.design.unique.hellslayer,resolved
+unique,item.unique.hellslayer,Hellslayer,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,45,43,UITEM_HELLSLAYER,BATTLEAXE,BATTLE_AXE,item.design.unique.hellslayer,resolved
+unique,item.unique.messerschmidt-s-reaver,Messerschmidt's Reaver,diablo,assets/txtdata/items/unique_itemdat.tsv,46,44,UITEM_MESSERREAVER,GREATAXE,MESSERSCHMIDTS_REAVER,item.design.unique.messerschmidt-s-reaver,resolved
+unique,item.unique.messerschmidt-s-reaver,Messerschmidt's Reaver,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,46,44,UITEM_MESSERREAVER,GREATAXE,MESSERSCHMIDTS_REAVER,item.design.unique.messerschmidt-s-reaver,resolved
+unique,item.unique.crackrust,Crackrust,diablo,assets/txtdata/items/unique_itemdat.tsv,47,45,UITEM_CRACKRUST,MACE,MACE,item.design.unique.crackrust,resolved
+unique,item.unique.crackrust,Crackrust,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,47,45,UITEM_CRACKRUST,MACE,MACE,item.design.unique.crackrust,resolved
+unique,item.unique.hammer-of-jholm,Hammer of Jholm,diablo,assets/txtdata/items/unique_itemdat.tsv,48,46,UITEM_JHOLMHAMM,MAUL,MAUL,item.design.unique.hammer-of-jholm,resolved
+unique,item.unique.hammer-of-jholm,Hammer of Jholm,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,48,46,UITEM_JHOLMHAMM,MAUL,MAUL,item.design.unique.hammer-of-jholm,resolved
+unique,item.unique.civerb-s-cudgel,Civerb's Cudgel,diablo,assets/txtdata/items/unique_itemdat.tsv,49,47,UITEM_CIVERBS,MACE,MACE,item.design.unique.civerb-s-cudgel,resolved
+unique,item.unique.civerb-s-cudgel,Civerb's Cudgel,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,49,47,UITEM_CIVERBS,MACE,MACE,item.design.unique.civerb-s-cudgel,resolved
+unique,item.unique.the-celestial-star,The Celestial Star,diablo,assets/txtdata/items/unique_itemdat.tsv,50,48,UITEM_CELESTSTAR,FLAIL,FLAIL,item.design.unique.the-celestial-star,resolved
+unique,item.unique.the-celestial-star,The Celestial Star,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,50,48,UITEM_CELESTSTAR,FLAIL,FLAIL,item.design.unique.the-celestial-star,resolved
+unique,item.unique.baranar-s-star,Baranar's Star,diablo,assets/txtdata/items/unique_itemdat.tsv,51,49,UITEM_BARANSTAR,MORNSTAR,MORNING_STAR,item.design.unique.baranar-s-star,resolved
+unique,item.unique.baranar-s-star,Baranar's Star,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,51,49,UITEM_BARANSTAR,MORNSTAR,MORNING_STAR,item.design.unique.baranar-s-star,resolved
+unique,item.unique.gnarled-root,Gnarled Root,diablo,assets/txtdata/items/unique_itemdat.tsv,52,50,UITEM_GNARLROOT,SPIKCLUB,CLUB|SPIKED_CLUB,item.design.unique.gnarled-root,resolved
+unique,item.unique.gnarled-root,Gnarled Root,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,52,50,UITEM_GNARLROOT,SPIKCLUB,CLUB|SPIKED_CLUB,item.design.unique.gnarled-root,resolved
+unique,item.unique.the-cranium-basher,The Cranium Basher,diablo,assets/txtdata/items/unique_itemdat.tsv,53,51,UITEM_CRANBASH,MAUL,MAUL,item.design.unique.the-cranium-basher,resolved
+unique,item.unique.the-cranium-basher,The Cranium Basher,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,53,51,UITEM_CRANBASH,MAUL,MAUL,item.design.unique.the-cranium-basher,resolved
+unique,item.unique.schaefer-s-hammer,Schaefer's Hammer,diablo,assets/txtdata/items/unique_itemdat.tsv,54,52,UITEM_SCHAEFHAMM,WARHAMMER,WAR_HAMMER,item.design.unique.schaefer-s-hammer,resolved
+unique,item.unique.schaefer-s-hammer,Schaefer's Hammer,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,54,52,UITEM_SCHAEFHAMM,WARHAMMER,WAR_HAMMER,item.design.unique.schaefer-s-hammer,resolved
+unique,item.unique.dreamflange,Dreamflange,diablo,assets/txtdata/items/unique_itemdat.tsv,55,53,UITEM_DREAMFLANGE,MACE,MACE,item.design.unique.dreamflange,resolved
+unique,item.unique.dreamflange,Dreamflange,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,55,53,UITEM_DREAMFLANGE,MACE,MACE,item.design.unique.dreamflange,resolved
+unique,item.unique.staff-of-shadows,Staff of Shadows,diablo,assets/txtdata/items/unique_itemdat.tsv,56,54,UITEM_STAFFOFSHAD,LONGSTAFF,LONG_STAFF,item.design.unique.staff-of-shadows,resolved
+unique,item.unique.staff-of-shadows,Staff of Shadows,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,56,54,UITEM_STAFFOFSHAD,LONGSTAFF,LONG_STAFF,item.design.unique.staff-of-shadows,resolved
+unique,item.unique.immolator,Immolator,diablo,assets/txtdata/items/unique_itemdat.tsv,57,55,UITEM_IMMOLATOR,LONGSTAFF,LONG_STAFF,item.design.unique.immolator,resolved
+unique,item.unique.immolator,Immolator,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,57,55,UITEM_IMMOLATOR,LONGSTAFF,LONG_STAFF,item.design.unique.immolator,resolved
+unique,item.unique.storm-spire,Storm Spire,diablo,assets/txtdata/items/unique_itemdat.tsv,58,56,UITEM_STORMSPIRE,WARSTAFF,WAR_STAFF,item.design.unique.storm-spire,resolved
+unique,item.unique.storm-spire,Storm Spire,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,58,56,UITEM_STORMSPIRE,WARSTAFF,WAR_STAFF,item.design.unique.storm-spire,resolved
+unique,item.unique.gleamsong,Gleamsong,diablo,assets/txtdata/items/unique_itemdat.tsv,59,57,UITEM_GLEAMSONG,SHORTSTAFF,SHORT_STAFF,item.design.unique.gleamsong,resolved
+unique,item.unique.gleamsong,Gleamsong,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,59,57,UITEM_GLEAMSONG,SHORTSTAFF,SHORT_STAFF,item.design.unique.gleamsong,resolved
+unique,item.unique.thundercall,Thundercall,diablo,assets/txtdata/items/unique_itemdat.tsv,60,58,UITEM_THUNDERCALL,COMPSTAFF,COMPOSITE_STAFF,item.design.unique.thundercall,resolved
+unique,item.unique.thundercall,Thundercall,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,60,58,UITEM_THUNDERCALL,COMPSTAFF,COMPOSITE_STAFF,item.design.unique.thundercall,resolved
+unique,item.unique.the-protector,The Protector,diablo,assets/txtdata/items/unique_itemdat.tsv,61,59,UITEM_PROTECTOR,SHORTSTAFF,THE_PROTECTOR,item.design.unique.the-protector,resolved
+unique,item.unique.the-protector,The Protector,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,61,59,UITEM_PROTECTOR,SHORTSTAFF,THE_PROTECTOR,item.design.unique.the-protector,resolved
+unique,item.unique.naj-s-puzzler,Naj's Puzzler,diablo,assets/txtdata/items/unique_itemdat.tsv,62,60,UITEM_NAJPUZZLE,LONGSTAFF,LONG_STAFF,item.design.unique.naj-s-puzzler,resolved
+unique,item.unique.naj-s-puzzler,Naj's Puzzler,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,62,60,UITEM_NAJPUZZLE,LONGSTAFF,LONG_STAFF,item.design.unique.naj-s-puzzler,resolved
+unique,item.unique.mindcry,Mindcry,diablo,assets/txtdata/items/unique_itemdat.tsv,63,61,UITEM_MINDCRY,QUARSTAFF,SHORT_STAFF,item.design.unique.mindcry,resolved
+unique,item.unique.mindcry,Mindcry,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,63,61,UITEM_MINDCRY,QUARSTAFF,SHORT_STAFF,item.design.unique.mindcry,resolved
+unique,item.unique.rod-of-onan,Rod of Onan,diablo,assets/txtdata/items/unique_itemdat.tsv,64,62,UITEM_RODOFONAN,WARSTAFF,WAR_STAFF,item.design.unique.rod-of-onan,resolved
+unique,item.unique.rod-of-onan,Rod of Onan,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,64,62,UITEM_RODOFONAN,WARSTAFF,WAR_STAFF,item.design.unique.rod-of-onan,resolved
+unique,item.unique.helm-of-spirits,Helm of Spirits,diablo,assets/txtdata/items/unique_itemdat.tsv,65,63,UITEM_SPIRITSHELM,HELM,HELM_OF_SPIRITS,item.design.unique.helm-of-spirits,resolved
+unique,item.unique.helm-of-spirits,Helm of Spirits,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,65,63,UITEM_SPIRITSHELM,HELM,HELM_OF_SPIRITS,item.design.unique.helm-of-spirits,resolved
+unique,item.unique.thinking-cap,Thinking Cap,diablo,assets/txtdata/items/unique_itemdat.tsv,66,64,UITEM_THINKINGCAP,SKULLCAP,THINKING_CAP,item.design.unique.thinking-cap,resolved
+unique,item.unique.thinking-cap,Thinking Cap,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,66,64,UITEM_THINKINGCAP,SKULLCAP,THINKING_CAP,item.design.unique.thinking-cap,resolved
+unique,item.unique.overlord-s-helm,OverLord's Helm,diablo,assets/txtdata/items/unique_itemdat.tsv,67,65,UITEM_OVERLORDHELM,HELM,OVERLORDS_HELM,item.design.unique.overlord-s-helm,resolved
+unique,item.unique.overlord-s-helm,OverLord's Helm,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,67,65,UITEM_OVERLORDHELM,HELM,OVERLORDS_HELM,item.design.unique.overlord-s-helm,resolved
+unique,item.unique.fool-s-crest,Fool's Crest,diablo,assets/txtdata/items/unique_itemdat.tsv,68,66,UITEM_FOOLSCREST,HELM,FOOLS_CREST,item.design.unique.fool-s-crest,resolved
+unique,item.unique.fool-s-crest,Fool's Crest,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,68,66,UITEM_FOOLSCREST,HELM,FOOLS_CREST,item.design.unique.fool-s-crest,resolved
+unique,item.unique.gotterdamerung,Gotterdamerung,diablo,assets/txtdata/items/unique_itemdat.tsv,69,67,UITEM_GOTTERDAM,GREATHELM,VEIL_OF_STEEL,item.design.unique.gotterdamerung,resolved
+unique,item.unique.gotterdamerung,Gotterdamerung,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,69,67,UITEM_GOTTERDAM,GREATHELM,VEIL_OF_STEEL,item.design.unique.gotterdamerung,resolved
+unique,item.unique.royal-circlet,Royal Circlet,diablo,assets/txtdata/items/unique_itemdat.tsv,70,68,UITEM_ROYCIRCLET,CROWN,ROYAL_CIRCLET,item.design.unique.royal-circlet,resolved
+unique,item.unique.royal-circlet,Royal Circlet,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,70,68,UITEM_ROYCIRCLET,CROWN,ROYAL_CIRCLET,item.design.unique.royal-circlet,resolved
+unique,item.unique.torn-flesh-of-souls,Torn Flesh of Souls,diablo,assets/txtdata/items/unique_itemdat.tsv,71,69,UITEM_TORNFLESH,RAGS,TORN_FLESH_OF_SOULS,item.design.unique.torn-flesh-of-souls,resolved
+unique,item.unique.torn-flesh-of-souls,Torn Flesh of Souls,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,71,69,UITEM_TORNFLESH,RAGS,TORN_FLESH_OF_SOULS,item.design.unique.torn-flesh-of-souls,resolved
+unique,item.unique.the-gladiator-s-bane,The Gladiator's Bane,diablo,assets/txtdata/items/unique_itemdat.tsv,72,70,UITEM_GLADBANE,STUDARMOR,STUDDED_LEATHER_ARMOR,item.design.unique.the-gladiator-s-bane,resolved
+unique,item.unique.the-gladiator-s-bane,The Gladiator's Bane,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,72,70,UITEM_GLADBANE,STUDARMOR,STUDDED_LEATHER_ARMOR,item.design.unique.the-gladiator-s-bane,resolved
+unique,item.unique.the-rainbow-cloak,The Rainbow Cloak,diablo,assets/txtdata/items/unique_itemdat.tsv,73,71,UITEM_RAINCLOAK,CLOAK,THE_RAINBOW_CLOAK,item.design.unique.the-rainbow-cloak,resolved
+unique,item.unique.the-rainbow-cloak,The Rainbow Cloak,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,73,71,UITEM_RAINCLOAK,CLOAK,THE_RAINBOW_CLOAK,item.design.unique.the-rainbow-cloak,resolved
+unique,item.unique.leather-of-aut,Leather of Aut,diablo,assets/txtdata/items/unique_itemdat.tsv,74,72,UITEM_LEATHAUT,LEATHARMOR,LEATHER_ARMOR,item.design.unique.leather-of-aut,resolved
+unique,item.unique.leather-of-aut,Leather of Aut,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,74,72,UITEM_LEATHAUT,LEATHARMOR,LEATHER_ARMOR,item.design.unique.leather-of-aut,resolved
+unique,item.unique.wisdom-s-wrap,Wisdom's Wrap,diablo,assets/txtdata/items/unique_itemdat.tsv,75,73,UITEM_WISDWRAP,ROBE,THE_RAINBOW_CLOAK,item.design.unique.wisdom-s-wrap,resolved
+unique,item.unique.wisdom-s-wrap,Wisdom's Wrap,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,75,73,UITEM_WISDWRAP,ROBE,THE_RAINBOW_CLOAK,item.design.unique.wisdom-s-wrap,resolved
+unique,item.unique.sparking-mail,Sparking Mail,diablo,assets/txtdata/items/unique_itemdat.tsv,76,74,UITEM_SPARKMAIL,CHAINMAIL,CHAIN_MAIL,item.design.unique.sparking-mail,resolved
+unique,item.unique.sparking-mail,Sparking Mail,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,76,74,UITEM_SPARKMAIL,CHAINMAIL,CHAIN_MAIL,item.design.unique.sparking-mail,resolved
+unique,item.unique.scavenger-carapace,Scavenger Carapace,diablo,assets/txtdata/items/unique_itemdat.tsv,77,75,UITEM_SCAVCARAP,BREASTPLATE,BREAST_PLATE,item.design.unique.scavenger-carapace,resolved
+unique,item.unique.scavenger-carapace,Scavenger Carapace,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,77,75,UITEM_SCAVCARAP,BREASTPLATE,BREAST_PLATE,item.design.unique.scavenger-carapace,resolved
+unique,item.unique.nightscape,Nightscape,diablo,assets/txtdata/items/unique_itemdat.tsv,78,76,UITEM_NIGHTSCAPE,CAPE,THE_RAINBOW_CLOAK,item.design.unique.nightscape,resolved
+unique,item.unique.nightscape,Nightscape,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,78,76,UITEM_NIGHTSCAPE,CAPE,THE_RAINBOW_CLOAK,item.design.unique.nightscape,resolved
+unique,item.unique.naj-s-light-plate,Naj's Light Plate,diablo,assets/txtdata/items/unique_itemdat.tsv,79,77,UITEM_NAJPLATE,PLATEMAIL,NAJS_LIGHT_PLATE,item.design.unique.naj-s-light-plate,resolved
+unique,item.unique.naj-s-light-plate,Naj's Light Plate,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,79,77,UITEM_NAJPLATE,PLATEMAIL,NAJS_LIGHT_PLATE,item.design.unique.naj-s-light-plate,resolved
+unique,item.unique.demonspike-coat,Demonspike Coat,diablo,assets/txtdata/items/unique_itemdat.tsv,80,78,UITEM_DEMONSPIKE,FULLPLATE,FULL_PLATE_MAIL,item.design.unique.demonspike-coat,resolved
+unique,item.unique.demonspike-coat,Demonspike Coat,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,80,78,UITEM_DEMONSPIKE,FULLPLATE,FULL_PLATE_MAIL,item.design.unique.demonspike-coat,resolved
+unique,item.unique.the-deflector,The Deflector,diablo,assets/txtdata/items/unique_itemdat.tsv,81,79,UITEM_DEFLECTOR,BUCKLER,BUCKLER,item.design.unique.the-deflector,resolved
+unique,item.unique.the-deflector,The Deflector,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,81,79,UITEM_DEFLECTOR,BUCKLER,BUCKLER,item.design.unique.the-deflector,resolved
+unique,item.unique.split-skull-shield,Split Skull Shield,diablo,assets/txtdata/items/unique_itemdat.tsv,82,80,UITEM_SKULLSHLD,BUCKLER,SPLIT_SKULL_SHIELD,item.design.unique.split-skull-shield,resolved
+unique,item.unique.split-skull-shield,Split Skull Shield,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,82,80,UITEM_SKULLSHLD,BUCKLER,SPLIT_SKULL_SHIELD,item.design.unique.split-skull-shield,resolved
+unique,item.unique.dragon-s-breach,Dragon's Breach,diablo,assets/txtdata/items/unique_itemdat.tsv,83,81,UITEM_DRAGONBRCH,KITESHIELD,DRAGONS_BREACH,item.design.unique.dragon-s-breach,resolved
+unique,item.unique.dragon-s-breach,Dragon's Breach,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,83,81,UITEM_DRAGONBRCH,KITESHIELD,DRAGONS_BREACH,item.design.unique.dragon-s-breach,resolved
+unique,item.unique.blackoak-shield,Blackoak Shield,diablo,assets/txtdata/items/unique_itemdat.tsv,84,82,UITEM_BLKOAKSHLD,SMALLSHIELD,BLACKOAK_SHIELD,item.design.unique.blackoak-shield,resolved
+unique,item.unique.blackoak-shield,Blackoak Shield,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,84,82,UITEM_BLKOAKSHLD,SMALLSHIELD,BLACKOAK_SHIELD,item.design.unique.blackoak-shield,resolved
+unique,item.unique.holy-defender,Holy Defender,diablo,assets/txtdata/items/unique_itemdat.tsv,85,83,UITEM_HOLYDEF,LARGESHIELD,BLACKOAK_SHIELD,item.design.unique.holy-defender,resolved
+unique,item.unique.holy-defender,Holy Defender,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,85,83,UITEM_HOLYDEF,LARGESHIELD,BLACKOAK_SHIELD,item.design.unique.holy-defender,resolved
+unique,item.unique.stormshield,Stormshield,diablo,assets/txtdata/items/unique_itemdat.tsv,86,84,UITEM_STORMSHLD,GOTHSHIELD,GOTHIC_SHIELD,item.design.unique.stormshield,resolved
+unique,item.unique.stormshield,Stormshield,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,86,84,UITEM_STORMSHLD,GOTHSHIELD,GOTHIC_SHIELD,item.design.unique.stormshield,resolved
+unique,item.unique.bramble,Bramble,diablo,assets/txtdata/items/unique_itemdat.tsv,87,85,UITEM_BRAMBLE,RING,BRAMBLE,item.design.unique.bramble,resolved
+unique,item.unique.bramble,Bramble,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,87,85,UITEM_BRAMBLE,RING,BRAMBLE,item.design.unique.bramble,resolved
+unique,item.unique.ring-of-regha,Ring of Regha,diablo,assets/txtdata/items/unique_itemdat.tsv,88,86,UITEM_REGHA,RING,RING_OF_REGHA,item.design.unique.ring-of-regha,resolved
+unique,item.unique.ring-of-regha,Ring of Regha,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,88,86,UITEM_REGHA,RING,RING_OF_REGHA,item.design.unique.ring-of-regha,resolved
+unique,item.unique.the-bleeder,The Bleeder,diablo,assets/txtdata/items/unique_itemdat.tsv,89,87,UITEM_BLEEDER,RING,THE_BLEEDER,item.design.unique.the-bleeder,resolved
+unique,item.unique.the-bleeder,The Bleeder,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,89,87,UITEM_BLEEDER,RING,THE_BLEEDER,item.design.unique.the-bleeder,resolved
+unique,item.unique.constricting-ring,Constricting Ring,diablo,assets/txtdata/items/unique_itemdat.tsv,90,88,UITEM_CONSTRICT,RING,CONSTRICTING_RING,item.design.unique.constricting-ring,resolved
+unique,item.unique.constricting-ring,Constricting Ring,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,90,88,UITEM_CONSTRICT,RING,CONSTRICTING_RING,item.design.unique.constricting-ring,resolved
+unique,item.unique.ring-of-engagement,Ring of Engagement,diablo,assets/txtdata/items/unique_itemdat.tsv,91,89,UITEM_ENGAGE,RING,RING_OF_ENGAGEMENT,item.design.unique.ring-of-engagement,resolved
+unique,item.unique.ring-of-engagement,Ring of Engagement,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,91,89,UITEM_ENGAGE,RING,RING_OF_ENGAGEMENT,item.design.unique.ring-of-engagement,resolved
+unique,item.unique.bovine-plate,Bovine Plate,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,11,9,UITEM_BOVINE,BOVINE,BOVINE,item.design.unique.bovine-plate,resolved
+unique,item.unique.giant-s-knuckle,Giant's Knuckle,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,92,90,,RING,GIANTS_KNUCKLE,item.design.unique.giant-s-knuckle,resolved
+unique,item.unique.mercurial-ring,Mercurial Ring,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,93,91,,RING,MERCURIAL_RING,item.design.unique.mercurial-ring,resolved
+unique,item.unique.xorine-s-ring,Xorine's Ring,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,94,92,,RING,XORINES_RING,item.design.unique.xorine-s-ring,resolved
+unique,item.unique.karik-s-ring,Karik's Ring,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,95,93,,RING,KARIKS_RING,item.design.unique.karik-s-ring,resolved
+unique,item.unique.ring-of-magma,Ring of Magma,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,96,94,,RING,RING_OF_MAGMA,item.design.unique.ring-of-magma,resolved
+unique,item.unique.ring-of-the-mystics,Ring of the Mystics,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,97,95,,RING,RING_OF_THE_MYSTICS,item.design.unique.ring-of-the-mystics,resolved
+unique,item.unique.ring-of-thunder,Ring of Thunder,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,98,96,,RING,RING_OF_THUNDER,item.design.unique.ring-of-thunder,resolved
+unique,item.unique.amulet-of-warding,Amulet of Warding,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,99,97,,AMULET,AMULET_OF_WARDING,item.design.unique.amulet-of-warding,resolved
+unique,item.unique.gnat-sting,Gnat Sting,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,100,98,,HUNTBOW,GNAT_STING,item.design.unique.gnat-sting,resolved
+unique,item.unique.flambeau,Flambeau,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,101,99,,COMPBOW,FLAMBEAU,item.design.unique.flambeau,resolved
+unique,item.unique.armor-of-gloom,Armor of Gloom,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,102,100,,FULLPLATE,ARMOR_OF_GLOOM,item.design.unique.armor-of-gloom,resolved
+unique,item.unique.blitzen,Blitzen,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,103,101,,COMPBOW,BLITZEN,item.design.unique.blitzen,resolved
+unique,item.unique.thunderclap,Thunderclap,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,104,102,,WARHAMMER,THUNDERCLAP,item.design.unique.thunderclap,resolved
+unique,item.unique.shirotachi,Shirotachi,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,105,103,,GREATSWR,GREAT_SWORD,item.design.unique.shirotachi,resolved
+unique,item.unique.eater-of-souls,Eater of Souls,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,106,104,,TWOHANDSWR,EATER_OF_SOULS,item.design.unique.eater-of-souls,resolved
+unique,item.unique.diamondedge,Diamondedge,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,107,105,,LONGSWR,DIAMONDEDGE,item.design.unique.diamondedge,resolved
+unique,item.unique.bone-chain-armor,Bone Chain Armor,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,108,106,,CHAINMAIL,BONE_CHAIN_ARMOR,item.design.unique.bone-chain-armor,resolved
+unique,item.unique.demon-plate-armor,Demon Plate Armor,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,109,107,,FULLPLATE,DEMON_PLATE_ARMOR,item.design.unique.demon-plate-armor,resolved
+unique,item.unique.acolyte-s-amulet,Acolyte's Amulet,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,110,108,,AMULET,ACOLYTES_AMULET,item.design.unique.acolyte-s-amulet,resolved
+unique,item.unique.gladiator-s-ring,Gladiator's Ring,hellfire,mods/hf/txtdata/items/unique_itemdat.tsv,111,109,,RING,GLADIATORS_RING,item.design.unique.gladiator-s-ring,resolved

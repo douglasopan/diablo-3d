@@ -1,0 +1,275 @@
+{
+  "format": "d3d.item-concept-art",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "scope": "First individual concept batch; full remaining catalog stays pending.",
+  "catalogSha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d",
+  "generationTool": "built-in image_gen.imagegen",
+  "postProcessing": "none; original generated PNG bytes copied unchanged",
+  "originalGameImagesIncluded": false,
+  "visualApproval": false,
+  "runtimeInstalled": false,
+  "summary": {
+    "productionUnits": 228,
+    "conceptCandidates": 9,
+    "pendingUnits": 219,
+    "modelsGenerated": 0,
+    "runtimeIconsGenerated": 0
+  },
+  "entries": [
+    {
+      "productionId": "item.design.base.short-sword",
+      "conceptId": "item.design.base.short-sword.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/short-sword-r1.png",
+      "sha256": "d944a5855290a5fc604ce5ff3970c7c0e908eeda531a43515fd02dfc5c1ab059",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D item modeling reference, candidate concept turnaround, not a final game icon.\nSubject: ONE Short Sword, catalog ID item.design.base.short-sword, original inventory cursor 64.\nInput image 1 is the original pixel-art inventory silhouette and material/color reference. Reconstruct its exact readable silhouette: short straight double-edged steel blade, tapered spear point, clearly defined central bevel, modest straight silver crossguard, cylindrical reddish brown leather grip, simple stacked steel disc pommel. Keep original proportions, especially blade to handle. Do not add a large ornate golden guard, gems, spikes or a fantasy broad blade.\nCreate a professional high-detail 3D concept turnaround board with the exact SAME sword in four isolated views: large FRONT flat view, SIDE thickness view, BACK flat view, and perspective THREE-QUARTER view. Include one small inventory-composition thumbnail of that same sword oriented blade-up. All views must agree on geometry, grip and materials; no divergent variants.\nDark medieval Diablo 1 aesthetic, restrained realistic wrought steel with fine wear and slightly tarnished silver, tight dark red-brown leather wrapping. Subtle edge wear only, high-quality game prop, no excessive corrosion. Neutral soft studio light, enough brightness to read geometry; no colored light, baked dramatic shadows, scenery or hands. Plain charcoal gray background. Labels only SHORT SWORD / FRONT / SIDE / BACK / 3/4 / ICON. Clean spaced technical art board, whole blade and pommel always visible. Designed for later 3D generation and matching inventory/equipped views.",
+      "revisionPrompts": [
+        "Edit only the small ICON inset at the right of this Short Sword concept board. Replace its pixel-art sword with a NEW high-detail realistic HD render of the exact same steel short sword already shown in the four main views: silver straight crossguard, reddish brown leather grip, stacked silver disc pommel, short pointed straight blade with central bevel. The inset sword must be crisp detailed 3D, no pixel-art or source sprite. Keep all four main views, all labels, overall layout, backdrop, geometry, colors and lighting exactly unchanged. This is a candidate modeling board, not a finished runtime icon."
+      ],
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "cursorId": 64,
+        "sha256": "991a06cfc700b3f5f93352f5785602adf786501b97ab371f02bef6f18d9218e9",
+        "availability": "local-private"
+      },
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "notes": "Candidate concept only. Rear surfaces and thickness are inferred; modeling must reconcile view consistency. Inset is a new concept preview, not the final runtime icon."
+    },
+    {
+      "productionId": "item.design.base.dagger",
+      "conceptId": "item.design.base.dagger.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/dagger-r1.png",
+      "sha256": "7f5b9b335ab72dfa2360a8eace6903fb71e6e8e6fa3236ceabdbe29a3e03f1f1",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept. Asset type: Diablo 3D candidate modeling reference. Reconstruct the SINGLE medieval item described below using input image only as silhouette/color reference. Produce a clean technical turnaround board showing the exact SAME item in FRONT, SIDE thickness, BACK, and THREE-QUARTER views, plus a small NEW high-detail rendered inventory thumbnail of that same concept. Do not paste, repeat or trace a pixel-art inset from the input. All geometry/materials agree between views; no alternate designs. Whole object visible, generous spacing, plain charcoal-gray backdrop, neutral soft studio light with no colored lighting. Realistic restrained dark medieval Diablo 1 aesthetic, finely worn metal and leather, sharp legible silhouette, no neon, futuristic parts or gratuitous jewels/spikes. Surface color is material, not a baked light effect. Only labels item name and FRONT/SIDE/BACK/3-4/ICON.\nDAGGER. ID item.design.base.dagger. Preserve short narrow straight bright steel double-edged blade, simple central bevel, pointed tip, small warm brass guard with gently upturned ends, dark red leather grip, small gold/brass pommel. Proportions and original red/brass material contrast closely follow reference. Anatomically usable grip. No serrations or added skulls.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "cursorId": 51,
+        "sha256": "529a50e69bcd4645ec4acb6ec0d3c771d8b263fe4fa1058c70b0b2eeaf5a9a08",
+        "availability": "local-private"
+      },
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "notes": "Candidate concept only. Rear surfaces and thickness are inferred; modeling must reconcile view consistency. Inset is a new concept preview, not the final runtime icon."
+    },
+    {
+      "productionId": "item.design.base.falchion",
+      "conceptId": "item.design.base.falchion.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/falchion-r1.png",
+      "sha256": "acb74f09bc2289db0bed102e4ec5b4f75e7afa9c65822b57fd72357a7a1a3cba",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept. Asset type: Diablo 3D candidate modeling reference. Reconstruct the SINGLE medieval item described below using input image only as silhouette/color reference. Produce a clean technical turnaround board showing the exact SAME item in FRONT, SIDE thickness, BACK, and THREE-QUARTER views, plus a small NEW high-detail rendered inventory thumbnail of that same concept. Do not paste, repeat or trace a pixel-art inset from the input. All geometry/materials agree between views; no alternate designs. Whole object visible, generous spacing, plain charcoal-gray backdrop, neutral soft studio light with no colored lighting. Realistic restrained dark medieval Diablo 1 aesthetic, finely worn metal and leather, sharp legible silhouette, no neon, futuristic parts or gratuitous jewels/spikes. Surface color is material, not a baked light effect. Only labels item name and FRONT/SIDE/BACK/3-4/ICON.\nFALCHION. ID item.design.base.falchion. Preserve the unusual very broad steel single cutting blade with strong S profile and deep inward waist followed by outward bulging upper blade, aggressive curved pointed end; this is emphatically NOT a generic straight sword. Long smooth sweeping edge, thick curved spine, oblique brass/gold crossguard, dark burgundy red-brown leather grip, small tapered brass pommel. Exact silhouette/proportions from reference; front/back mirrored, side shows plausible thickness and bevel. No added hooks or decorative gemstones.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "cursorId": 62,
+        "sha256": "3d73853685d98f1f6206ed0004ac8eb3cf06101c560635b91071f62e11187ccc",
+        "availability": "local-private"
+      },
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "notes": "Candidate concept only. Rear surfaces and thickness are inferred; modeling must reconcile view consistency. Inset is a new concept preview, not the final runtime icon."
+    },
+    {
+      "productionId": "item.design.base.scimitar",
+      "conceptId": "item.design.base.scimitar.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/scimitar-r1.png",
+      "sha256": "a435efd6c248bc8a9c43a051f239458abd077af6371cc0ed6c225c20ceacd132",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept. Asset type: Diablo 3D candidate modeling reference. Reconstruct the SINGLE medieval item described below using input image only as silhouette/color reference. A clean technical turnaround board with the exact SAME item in FRONT, SIDE thickness, BACK, and THREE-QUARTER views, plus a small NEW high-detail rendered inventory thumbnail of that same concept. Never paste or repeat the pixel-art source. All geometry/materials agree; no alternate designs. Whole object visible with spacing, charcoal-gray backdrop, neutral soft studio light, no colored illumination. Realistic restrained dark medieval Diablo 1 materials, fine wear, no neon or gratuitous spikes. Only labels item name and FRONT/SIDE/BACK/3-4/ICON.\nSCIMITAR. ID item.design.base.scimitar. A slender long continuously curved single-edged steel blade, much thinner in silhouette than the falchion. Gentle sweeping inward edge, fine pointed tip angled back. Preserve original elliptical warm brass basket-like cup guard and dark red wrapped grip with small brass pommel. No huge blade, no straight crossguard. Reference proportions closely; thin coherent thickness in SIDE.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "cursorId": 72,
+        "sha256": "d2838180d8561358f9db4b16b7fff15a8164232a6a60184518b68ea2d1564e07",
+        "availability": "local-private"
+      },
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "notes": "Candidate concept only. Rear surfaces and thickness are inferred; modeling must reconcile view consistency. Inset is a new concept preview, not the final runtime icon."
+    },
+    {
+      "productionId": "item.design.base.broad-sword",
+      "conceptId": "item.design.base.broad-sword.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/broad-sword-r1.png",
+      "sha256": "0dc474e34eb7789dd7be10a7990840bb1f017aed30b2bab012cffbe550863ffa",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept. Asset type: Diablo 3D candidate modeling reference. Reconstruct the SINGLE medieval item described below using input image only as silhouette/color reference. A clean technical turnaround board with the exact SAME item in FRONT, SIDE thickness, BACK, and THREE-QUARTER views, plus a small NEW high-detail rendered inventory thumbnail of that same concept. Never paste or repeat the pixel-art source. All geometry/materials agree; no alternate designs. Whole object visible with spacing, charcoal-gray backdrop, neutral soft studio light, no colored illumination. Realistic restrained dark medieval Diablo 1 materials, fine wear, no neon or gratuitous spikes. Only labels item name and FRONT/SIDE/BACK/3-4/ICON.\nBROAD SWORD. ID item.design.base.broad-sword. Preserve reference: long straight relatively narrow double-edged steel blade with slender elongated point and central ridge, a wide ornate but modest brass-gold crossguard with ridged small rectangular ends and central fitting, dark very muted olive leather grip, small rectangular gold/brass pommel. The original named broad sword has this thin silhouette: do not exaggerate width. No glowing magic, gemstone or oversized shoulders.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "cursorId": 61,
+        "sha256": "e292e808010849c72bc240b311c4553aba7f0fafdafe5506b07d6bfb0411f59a",
+        "availability": "local-private"
+      },
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "notes": "Candidate concept only. Rear surfaces and thickness are inferred; modeling must reconcile view consistency. Inset is a new concept preview, not the final runtime icon."
+    },
+    {
+      "productionId": "item.design.base.potion-of-healing",
+      "conceptId": "item.design.base.potion-of-healing.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/potion-of-healing-r1.png",
+      "sha256": "fbfeaad3e56dc88ff64bf54d6238ed1390ad70362e1d121a7703b880b227f63e",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept. Asset type: single Diablo 3D item design reference sheet, item.design.base.potion-of-healing, ICURS32. The attached image is the ORIGINAL GAME INVENTORY ICON and defines the exact silhouette, proportions, palette and recognizable details. Reconstruct ONLY this item at high fidelity as a physically plausible dark medieval worn PBR object. A compact squat rectangular, flat-sided clear smoky glass medicine vial with softly rounded shoulders, short narrow neck, dark burgundy cork stopper, several coils of aged brass-gold cord around the neck and one tied dangling end at the right. Deep dark crimson red healing liquid fills roughly the lower two thirds of the squared body, visible through glass. Match its narrow horizontal profile and simple original outline; no ornate fantasy embellishments. Produce one coherent technical art sheet showing the SAME vial in a large front view, side view, rear view, three-quarter view, and a small new inventory thumbnail, all without changing shape or details between views. Dark neutral charcoal gray background, neutral soft white studio illumination without warm tint, materials and local albedo color readable independently of lighting. Minimal contact shadows, no ground scenery. Very subtle scratches and handmade glass irregularities, cord fibers clear. Small clean label at top exactly 'Potion of Healing • ICURS32'; small view labels permitted. Do NOT paste or reproduce the pixel reference icon in the output; the small inventory thumbnail must be a new render of this same object. No sci-fi, no neon, no self-emission, no electric light, no extra objects, no watermark. Candidate concept art for later 3D modelling, not runtime icon.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "cursorId": 32,
+        "sha256": "1429531844620003c84f6d7cdd239a468b619dd914d90e20089a8fad2b624213",
+        "availability": "local-private"
+      },
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "notes": "Candidate concept only. Rear surfaces and thickness are inferred; modeling must reconcile view consistency. Inset is a new concept preview, not the final runtime icon."
+    },
+    {
+      "productionId": "item.design.base.potion-of-mana",
+      "conceptId": "item.design.base.potion-of-mana.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/potion-of-mana-r1.png",
+      "sha256": "92a7527bfd54ef0844e52eeb56d4af8ceded077ef1af8d4e1ef16c22969cc177",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept. Asset type: single Diablo 3D item design reference sheet, item.design.base.potion-of-mana, ICURS39. Image1 is the original game inventory icon and defines exact silhouette/palette. Image2 is the new Healing concept and is ONLY a geometric/material consistency reference: the Mana potion MUST be the exact same flat rectangular glass bottle, narrow side thickness, short neck, burgundy cork, aged brass-gold tied cord with dangling end. Change ONLY the liquid to saturated deep cobalt blue consistent with Image1. The potion is NOT emissive; no neon. Dark medieval worn PBR object, compact rectangular flat-sided clear smoky glass medicine vial, gently rounded shoulders. Blue liquid fills approximately lower two thirds, transparent headspace above. Produce one coherent technical art sheet with SAME vial in large front, narrow side, rear, three-quarter views and a small NEW high-definition rendered inventory thumbnail of the same object. Never paste/reproduce pixel reference icon, reference board, Healing item, or crimson liquid. Dark neutral charcoal gray background, neutral soft white studio illumination without warm tint, readable albedo, minimal contact shadow. Handmade glass imperfections and restrained scratches; avoid ornate fantasy embellishment, sci-fi, additional objects, scenery or watermark. Small title exactly 'Potion of Mana • ICURS39'; view labels permitted. All views must retain same consistent dimensions/details/materials. Candidate concept only for 3D modelling.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "cursorId": 39,
+        "sha256": "77ee63f368ace70f6f22569a4827bb480c28e5013dd2615e35ef4cd6eec850fa",
+        "availability": "local-private"
+      },
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "notes": "Candidate concept only. Rear surfaces and thickness are inferred; modeling must reconcile view consistency. Inset is a new concept preview, not the final runtime icon."
+    },
+    {
+      "productionId": "item.design.base.gold",
+      "conceptId": "item.design.base.gold.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/gold-r1.png",
+      "sha256": "1a30d2413cfeab90d8ed4f3d295eb3344ff76fa2a331cc5ef6bd34e6084c212f",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept. Asset type: single Diablo 3D item design reference sheet, item.design.base.gold, small gold pile, ICURS4. The attached image is the ORIGINAL GAME INVENTORY ICON and defines the exact minimal small-pile arrangement and palette. Reconstruct ONLY that three-coin small gold pile at high fidelity as worn medieval PBR game art. Three thick squat circular yellow-gold coins, one at rear center, two at front left and front right, all resting flat and slightly overlapping as in the icon. Round coin silhouette, chunky thickness, subdued warm aged yellow gold, hammered softly irregular edges, very faint simple worn border on coin faces, no visible numerals, no new heraldic/fantasy symbols or dragons. An intentionally simple generic currency object consistent with Diablo1. Produce one coherent technical art sheet with the SAME small three-coin arrangement in a large perspective matching the reference, top view, low side view, reverse three-quarter view, and a small NEW high-definition rendered inventory thumbnail, with all views preserving same coin count, sizes and placement. Dark neutral charcoal gray background, neutral soft white studio illumination, readable albedo, soft minimal contact shadows. Do NOT paste/reproduce pixel reference icon in the output; thumbnail must be a new render of these same coins. Small title exactly 'Gold • ICURS4'; view labels permitted. No bags, extra coins, treasure chest, gems, vegetation, dramatic glow, neon, sci-fi, modern currency, scenery, watermark. Candidate concept only for 3D modelling; larger gold piles are separate future variants.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "cursorId": 4,
+        "sha256": "f94292924c19469e36c39e2a8376754c8ce555545853c16d16a449b736e34436",
+        "availability": "local-private"
+      },
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "notes": "Candidate concept only. Rear surfaces and thickness are inferred; modeling must reconcile view consistency. Inset is a new concept preview, not the final runtime icon."
+    },
+    {
+      "productionId": "item.design.base.scroll",
+      "conceptId": "item.design.base.scroll.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/scroll-r1.png",
+      "sha256": "efb23d5d5582b550de65231a3de659474923d63bc47f40e595b6eb60457ab28d",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept. Asset type: single Diablo 3D item design reference sheet, item.design.base.scroll, ICURS1. The attached image is the ORIGINAL GAME INVENTORY ICON and defines the recognizable silhouette, proportions, orientation and colors. Reconstruct ONLY that compact rolled parchment scroll tied around its middle with a worn dark crimson ribbon/cord bow, at high fidelity as a physically plausible medieval PBR object. Long narrow grey ivory aged parchment cylinder with visible tightly rolled spiral layers at the ends, slightly uneven worn paper edges, tied central burgundy red textile ribbon with modest hanging tails toward left. The scroll axis in the hero inventory-style view runs from bottom-left to top-right exactly like the reference. Plain closed roll, no open pages, wax seals, wooden rods, handles, shiny metal, invented runes, writing or new magic symbols. Produce one coherent technical art sheet showing the SAME tied scroll in a large original-angle three-quarter view, front view, rear view, end-on spiral view and a small NEW high-definition rendered inventory thumbnail. Every view must have coherent same tie placement, proportions, layers and materials. Dark neutral charcoal gray background, neutral soft white studio illumination with restrained contact shadows, readable ivory gray albedo and dark crimson textile. Match the original muted palette rather than yellow parchment. Small title exactly 'Scroll • ICURS1'; view labels permitted. Do NOT paste/reproduce the pixel reference icon anywhere; the thumbnail must be a new render of the same high definition concept. No neon, glowing spells, sci-fi, scenery, extra objects or watermark. Candidate concept for later 3D modelling. This is only the generic physical scroll; spell-specific markings are not defined or invented.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "cursorId": 1,
+        "sha256": "e9f670289b47f683e769724d70df2184679666c043e3f34372ee5e00d674e45a",
+        "availability": "local-private"
+      },
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "notes": "Candidate concept only. Rear surfaces and thickness are inferred; modeling must reconcile view consistency. Inset is a new concept preview, not the final runtime icon."
+    }
+  ]
+}

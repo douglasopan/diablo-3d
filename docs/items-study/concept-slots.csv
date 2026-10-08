@@ -1,0 +1,229 @@
+id,name,family,kind,nativeCursors,sourceBaseIds,sourceUniqueIds,sourceDynamicIds,conceptStatus,modelStatus,iconStatus
+item.design.unique.the-butcher-s-cleaver,The Butcher's Cleaver,axes,unique-identity,CLEAVER,item.base.006.idi-cleaver,item.unique.the-butcher-s-cleaver,,not-generated,not-generated,not-generated
+item.design.unique.the-undead-crown,The Undead Crown,headgear,unique-identity,HELM_OF_SPIRITS|THE_UNDEAD_CROWN,item.base.007.idi-skcrown,item.unique.the-undead-crown,,not-generated,not-generated,not-generated
+item.design.unique.empyrean-band,Empyrean Band,jewelry,unique-identity,EMPYREAN_BAND,item.base.008.idi-infraring,item.unique.empyrean-band,,not-generated,not-generated,not-generated
+item.design.unique.optic-amulet,Optic Amulet,jewelry,unique-identity,OPTIC_AMULET,item.base.010.idi-optamulet,item.unique.optic-amulet,,not-generated,not-generated,not-generated
+item.design.unique.ring-of-truth,Ring of Truth,jewelry,unique-identity,RING_OF_TRUTH,item.base.011.idi-tring,item.unique.ring-of-truth,,not-generated,not-generated,not-generated
+item.design.unique.harlequin-crest,Harlequin Crest,headgear,unique-identity,HARLEQUIN_CREST,item.base.013.idi-harcrest,item.unique.harlequin-crest,,not-generated,not-generated,not-generated
+item.design.unique.veil-of-steel,Veil of Steel,headgear,unique-identity,VEIL_OF_STEEL,item.base.014.idi-steelveil,item.unique.veil-of-steel,,not-generated,not-generated,not-generated
+item.design.unique.arkaine-s-valor,Arkaine's Valor,body-armor,unique-identity,ARKAINES_VALOR,item.base.028.idi-armofval,item.unique.arkaine-s-valor,,not-generated,not-generated,not-generated
+item.design.unique.griswold-s-edge,Griswold's Edge,blades,unique-identity,BROAD_SWORD,item.base.031.idi-griswold,item.unique.griswold-s-edge,,not-generated,not-generated,not-generated
+item.design.unique.lightforge,Lightforge,quest-objects,unique-identity,,,item.unique.lightforge,,not-generated,not-generated,not-generated
+item.design.unique.the-rift-bow,The Rift Bow,bows,unique-identity,SHORT_BOW,item.base.143.short-bow,item.unique.the-rift-bow,,not-generated,not-generated,not-generated
+item.design.unique.the-needler,The Needler,bows,unique-identity,THE_NEEDLER,item.base.143.short-bow,item.unique.the-needler,,not-generated,not-generated,not-generated
+item.design.unique.the-celestial-bow,The Celestial Bow,bows,unique-identity,COMPOSITE_BOW,item.base.145.long-bow,item.unique.the-celestial-bow,,not-generated,not-generated,not-generated
+item.design.unique.deadly-hunter,Deadly Hunter,bows,unique-identity,DEADLY_HUNTER,item.base.146.composite-bow,item.unique.deadly-hunter,,not-generated,not-generated,not-generated
+item.design.unique.bow-of-the-dead,Bow of the Dead,bows,unique-identity,DEADLY_HUNTER,item.base.146.composite-bow,item.unique.bow-of-the-dead,,not-generated,not-generated,not-generated
+item.design.unique.the-blackoak-bow,The Blackoak Bow,bows,unique-identity,HUNTERS_BOW,item.base.145.long-bow,item.unique.the-blackoak-bow,,not-generated,not-generated,not-generated
+item.design.unique.flamedart,Flamedart,bows,unique-identity,HUNTERS_BOW,item.base.144.hunter-s-bow,item.unique.flamedart,,not-generated,not-generated,not-generated
+item.design.unique.fleshstinger,Fleshstinger,bows,unique-identity,HUNTERS_BOW,item.base.145.long-bow,item.unique.fleshstinger,,not-generated,not-generated,not-generated
+item.design.unique.windforce,Windforce,bows,unique-identity,WINDFORCE,item.base.150.long-war-bow,item.unique.windforce,,not-generated,not-generated,not-generated
+item.design.unique.eaglehorn,Eaglehorn,bows,unique-identity,DEADLY_HUNTER,item.base.148.long-battle-bow,item.unique.eaglehorn,,not-generated,not-generated,not-generated
+item.design.unique.gonnagal-s-dirk,Gonnagal's Dirk,blades,unique-identity,GONNAGALS_DIRK,item.base.118.dagger,item.unique.gonnagal-s-dirk,,not-generated,not-generated,not-generated
+item.design.unique.the-defender,The Defender,blades,unique-identity,SABRE,item.base.124.sabre,item.unique.the-defender,,not-generated,not-generated,not-generated
+item.design.unique.gryphon-s-claw,Gryphon's Claw,blades,unique-identity,GRYPHONS_CLAW,item.base.120.falchion,item.unique.gryphon-s-claw,,not-generated,not-generated,not-generated
+item.design.unique.black-razor,Black Razor,blades,unique-identity,BLACK_RAZOR,item.base.118.dagger,item.unique.black-razor,,not-generated,not-generated,not-generated
+item.design.unique.gibbous-moon,Gibbous Moon,blades,unique-identity,BROAD_SWORD,item.base.126.broad-sword,item.unique.gibbous-moon,,not-generated,not-generated,not-generated
+item.design.unique.ice-shank,Ice Shank,blades,unique-identity,LONG_SWORD,item.base.125.long-sword,item.unique.ice-shank,,not-generated,not-generated,not-generated
+item.design.unique.the-executioner-s-blade,The Executioner's Blade,blades,unique-identity,THE_EXECUTIONERS_BLADE,item.base.120.falchion,item.unique.the-executioner-s-blade,,not-generated,not-generated,not-generated
+item.design.unique.the-bonesaw,The Bonesaw,blades,unique-identity,CLAYMORE,item.base.122.claymore,item.unique.the-bonesaw,,not-generated,not-generated,not-generated
+item.design.unique.shadowhawk,Shadowhawk,blades,unique-identity,BROAD_SWORD,item.base.126.broad-sword,item.unique.shadowhawk,,not-generated,not-generated,not-generated
+item.design.unique.wizardspike,Wizardspike,blades,unique-identity,WIZARDSPIKE,item.base.118.dagger,item.unique.wizardspike,,not-generated,not-generated,not-generated
+item.design.unique.lightsabre,Lightsabre,blades,unique-identity,SABRE,item.base.124.sabre,item.unique.lightsabre,,not-generated,not-generated,not-generated
+item.design.unique.the-falcon-s-talon,The Falcon's Talon,blades,unique-identity,GRYPHONS_CLAW,item.base.121.scimitar,item.unique.the-falcon-s-talon,,not-generated,not-generated,not-generated
+item.design.unique.inferno,Inferno,blades,unique-identity,LONG_SWORD,item.base.125.long-sword,item.unique.inferno,,not-generated,not-generated,not-generated
+item.design.unique.doombringer,Doombringer,blades,unique-identity,BASTARD_SWORD,item.base.127.bastard-sword,item.unique.doombringer,,not-generated,not-generated,not-generated
+item.design.unique.the-grizzly,The Grizzly,blades,unique-identity,THE_GRIZZLY,item.base.128.two-handed-sword,item.unique.the-grizzly,,not-generated,not-generated,not-generated
+item.design.unique.the-grandfather,The Grandfather,blades,unique-identity,THE_GRANDFATHER,item.base.129.great-sword,item.unique.the-grandfather,,not-generated,not-generated,not-generated
+item.design.unique.the-mangler,The Mangler,axes,unique-identity,AXE,item.base.132.large-axe,item.unique.the-mangler,,not-generated,not-generated,not-generated
+item.design.unique.sharp-beak,Sharp Beak,axes,unique-identity,GREAT_AXE,item.base.132.large-axe,item.unique.sharp-beak,,not-generated,not-generated,not-generated
+item.design.unique.bloodslayer,Bloodslayer,axes,unique-identity,AXE,item.base.133.broad-axe,item.unique.bloodslayer,,not-generated,not-generated,not-generated
+item.design.unique.the-celestial-axe,The Celestial Axe,axes,unique-identity,BATTLE_AXE,item.base.134.battle-axe,item.unique.the-celestial-axe,,not-generated,not-generated,not-generated
+item.design.unique.wicked-axe,Wicked Axe,axes,unique-identity,GREAT_AXE,item.base.132.large-axe,item.unique.wicked-axe,,not-generated,not-generated,not-generated
+item.design.unique.stonecleaver,Stonecleaver,axes,unique-identity,STONECLEAVER,item.base.133.broad-axe,item.unique.stonecleaver,,not-generated,not-generated,not-generated
+item.design.unique.aguinara-s-hatchet,Aguinara's Hatchet,axes,unique-identity,SMALL_AXE,item.base.130.small-axe,item.unique.aguinara-s-hatchet,,not-generated,not-generated,not-generated
+item.design.unique.hellslayer,Hellslayer,axes,unique-identity,BATTLE_AXE,item.base.134.battle-axe,item.unique.hellslayer,,not-generated,not-generated,not-generated
+item.design.unique.messerschmidt-s-reaver,Messerschmidt's Reaver,axes,unique-identity,MESSERSCHMIDTS_REAVER,item.base.135.great-axe,item.unique.messerschmidt-s-reaver,,not-generated,not-generated,not-generated
+item.design.unique.crackrust,Crackrust,blunt-weapons,unique-identity,MACE,item.base.136.mace,item.unique.crackrust,,not-generated,not-generated,not-generated
+item.design.unique.hammer-of-jholm,Hammer of Jholm,blunt-weapons,unique-identity,MAUL,item.base.142.maul,item.unique.hammer-of-jholm,,not-generated,not-generated,not-generated
+item.design.unique.civerb-s-cudgel,Civerb's Cudgel,blunt-weapons,unique-identity,MACE,item.base.136.mace,item.unique.civerb-s-cudgel,,not-generated,not-generated,not-generated
+item.design.unique.the-celestial-star,The Celestial Star,blunt-weapons,unique-identity,FLAIL,item.base.141.flail,item.unique.the-celestial-star,,not-generated,not-generated,not-generated
+item.design.unique.baranar-s-star,Baranar's Star,blunt-weapons,unique-identity,MORNING_STAR,item.base.137.morning-star,item.unique.baranar-s-star,,not-generated,not-generated,not-generated
+item.design.unique.gnarled-root,Gnarled Root,blunt-weapons,unique-identity,CLUB|SPIKED_CLUB,item.base.003.idi-warrclub|item.base.139.spiked-club|item.base.140.club,item.unique.gnarled-root,,not-generated,not-generated,not-generated
+item.design.unique.the-cranium-basher,The Cranium Basher,blunt-weapons,unique-identity,MAUL,item.base.142.maul,item.unique.the-cranium-basher,,not-generated,not-generated,not-generated
+item.design.unique.schaefer-s-hammer,Schaefer's Hammer,blunt-weapons,unique-identity,WAR_HAMMER,item.base.138.war-hammer,item.unique.schaefer-s-hammer,,not-generated,not-generated,not-generated
+item.design.unique.dreamflange,Dreamflange,blunt-weapons,unique-identity,MACE,item.base.136.mace,item.unique.dreamflange,,not-generated,not-generated,not-generated
+item.design.unique.staff-of-shadows,Staff of Shadows,staves,unique-identity,LONG_STAFF,item.base.152.long-staff,item.unique.staff-of-shadows,,not-generated,not-generated,not-generated
+item.design.unique.immolator,Immolator,staves,unique-identity,LONG_STAFF,item.base.152.long-staff,item.unique.immolator,,not-generated,not-generated,not-generated
+item.design.unique.storm-spire,Storm Spire,staves,unique-identity,WAR_STAFF,item.base.155.war-staff,item.unique.storm-spire,,not-generated,not-generated,not-generated
+item.design.unique.gleamsong,Gleamsong,staves,unique-identity,SHORT_STAFF,item.base.151.short-staff,item.unique.gleamsong,,not-generated,not-generated,not-generated
+item.design.unique.thundercall,Thundercall,staves,unique-identity,COMPOSITE_STAFF,item.base.153.composite-staff,item.unique.thundercall,,not-generated,not-generated,not-generated
+item.design.unique.the-protector,The Protector,staves,unique-identity,THE_PROTECTOR,item.base.151.short-staff,item.unique.the-protector,,not-generated,not-generated,not-generated
+item.design.unique.naj-s-puzzler,Naj's Puzzler,staves,unique-identity,LONG_STAFF,item.base.152.long-staff,item.unique.naj-s-puzzler,,not-generated,not-generated,not-generated
+item.design.unique.mindcry,Mindcry,staves,unique-identity,SHORT_STAFF,item.base.154.quarter-staff,item.unique.mindcry,,not-generated,not-generated,not-generated
+item.design.unique.rod-of-onan,Rod of Onan,staves,unique-identity,WAR_STAFF,item.base.155.war-staff,item.unique.rod-of-onan,,not-generated,not-generated,not-generated
+item.design.unique.helm-of-spirits,Helm of Spirits,headgear,unique-identity,HELM_OF_SPIRITS,item.base.050.helm,item.unique.helm-of-spirits,,not-generated,not-generated,not-generated
+item.design.unique.thinking-cap,Thinking Cap,headgear,unique-identity,THINKING_CAP,item.base.049.skull-cap,item.unique.thinking-cap,,not-generated,not-generated,not-generated
+item.design.unique.overlord-s-helm,OverLord's Helm,headgear,unique-identity,OVERLORDS_HELM,item.base.050.helm,item.unique.overlord-s-helm,,not-generated,not-generated,not-generated
+item.design.unique.fool-s-crest,Fool's Crest,headgear,unique-identity,FOOLS_CREST,item.base.050.helm,item.unique.fool-s-crest,,not-generated,not-generated,not-generated
+item.design.unique.gotterdamerung,Gotterdamerung,headgear,unique-identity,VEIL_OF_STEEL,item.base.053.great-helm,item.unique.gotterdamerung,,not-generated,not-generated,not-generated
+item.design.unique.royal-circlet,Royal Circlet,headgear,unique-identity,ROYAL_CIRCLET,item.base.052.crown,item.unique.royal-circlet,,not-generated,not-generated,not-generated
+item.design.unique.torn-flesh-of-souls,Torn Flesh of Souls,body-armor,unique-identity,TORN_FLESH_OF_SOULS,item.base.055.rags,item.unique.torn-flesh-of-souls,,not-generated,not-generated,not-generated
+item.design.unique.the-gladiator-s-bane,The Gladiator's Bane,body-armor,unique-identity,STUDDED_LEATHER_ARMOR,item.base.061.studded-leather-armor,item.unique.the-gladiator-s-bane,,not-generated,not-generated,not-generated
+item.design.unique.the-rainbow-cloak,The Rainbow Cloak,body-armor,unique-identity,THE_RAINBOW_CLOAK,item.base.056.cloak,item.unique.the-rainbow-cloak,,not-generated,not-generated,not-generated
+item.design.unique.leather-of-aut,Leather of Aut,body-armor,unique-identity,LEATHER_ARMOR,item.base.059.leather-armor,item.unique.leather-of-aut,,not-generated,not-generated,not-generated
+item.design.unique.wisdom-s-wrap,Wisdom's Wrap,body-armor,unique-identity,THE_RAINBOW_CLOAK,item.base.057.robe,item.unique.wisdom-s-wrap,,not-generated,not-generated,not-generated
+item.design.unique.sparking-mail,Sparking Mail,body-armor,unique-identity,CHAIN_MAIL,item.base.063.chain-mail,item.unique.sparking-mail,,not-generated,not-generated,not-generated
+item.design.unique.scavenger-carapace,Scavenger Carapace,body-armor,unique-identity,BREAST_PLATE,item.base.065.breast-plate,item.unique.scavenger-carapace,,not-generated,not-generated,not-generated
+item.design.unique.nightscape,Nightscape,body-armor,unique-identity,THE_RAINBOW_CLOAK,item.base.054.cape,item.unique.nightscape,,not-generated,not-generated,not-generated
+item.design.unique.naj-s-light-plate,Naj's Light Plate,body-armor,unique-identity,NAJS_LIGHT_PLATE,item.base.067.plate-mail,item.unique.naj-s-light-plate,,not-generated,not-generated,not-generated
+item.design.unique.demonspike-coat,Demonspike Coat,body-armor,unique-identity,FULL_PLATE_MAIL,item.base.070.full-plate-mail,item.unique.demonspike-coat,,not-generated,not-generated,not-generated
+item.design.unique.the-deflector,The Deflector,shields,unique-identity,BUCKLER,item.base.071.buckler,item.unique.the-deflector,,not-generated,not-generated,not-generated
+item.design.unique.split-skull-shield,Split Skull Shield,shields,unique-identity,SPLIT_SKULL_SHIELD,item.base.071.buckler,item.unique.split-skull-shield,,not-generated,not-generated,not-generated
+item.design.unique.dragon-s-breach,Dragon's Breach,shields,unique-identity,DRAGONS_BREACH,item.base.074.kite-shield,item.unique.dragon-s-breach,,not-generated,not-generated,not-generated
+item.design.unique.blackoak-shield,Blackoak Shield,shields,unique-identity,BLACKOAK_SHIELD,item.base.072.small-shield,item.unique.blackoak-shield,,not-generated,not-generated,not-generated
+item.design.unique.holy-defender,Holy Defender,shields,unique-identity,BLACKOAK_SHIELD,item.base.073.large-shield,item.unique.holy-defender,,not-generated,not-generated,not-generated
+item.design.unique.stormshield,Stormshield,shields,unique-identity,GOTHIC_SHIELD,item.base.075.tower-shield|item.base.076.gothic-shield,item.unique.stormshield,,not-generated,not-generated,not-generated
+item.design.unique.bramble,Bramble,jewelry,unique-identity,BRAMBLE,item.base.156.ring|item.base.157.ring|item.base.158.ring,item.unique.bramble,,not-generated,not-generated,not-generated
+item.design.unique.ring-of-regha,Ring of Regha,jewelry,unique-identity,RING_OF_REGHA,item.base.156.ring|item.base.157.ring|item.base.158.ring,item.unique.ring-of-regha,,not-generated,not-generated,not-generated
+item.design.unique.the-bleeder,The Bleeder,jewelry,unique-identity,THE_BLEEDER,item.base.156.ring|item.base.157.ring|item.base.158.ring,item.unique.the-bleeder,,not-generated,not-generated,not-generated
+item.design.unique.constricting-ring,Constricting Ring,jewelry,unique-identity,CONSTRICTING_RING,item.base.156.ring|item.base.157.ring|item.base.158.ring,item.unique.constricting-ring,,not-generated,not-generated,not-generated
+item.design.unique.ring-of-engagement,Ring of Engagement,jewelry,unique-identity,RING_OF_ENGAGEMENT,item.base.156.ring|item.base.157.ring|item.base.158.ring,item.unique.ring-of-engagement,,not-generated,not-generated,not-generated
+item.design.unique.bovine-plate,Bovine Plate,body-armor,unique-identity,BOVINE,item.base.032.idi-lgtforge,item.unique.bovine-plate,,not-generated,not-generated,not-generated
+item.design.unique.giant-s-knuckle,Giant's Knuckle,jewelry,unique-identity,GIANTS_KNUCKLE,item.base.156.ring|item.base.157.ring|item.base.158.ring,item.unique.giant-s-knuckle,,not-generated,not-generated,not-generated
+item.design.unique.mercurial-ring,Mercurial Ring,jewelry,unique-identity,MERCURIAL_RING,item.base.156.ring|item.base.157.ring|item.base.158.ring,item.unique.mercurial-ring,,not-generated,not-generated,not-generated
+item.design.unique.xorine-s-ring,Xorine's Ring,jewelry,unique-identity,XORINES_RING,item.base.156.ring|item.base.157.ring|item.base.158.ring,item.unique.xorine-s-ring,,not-generated,not-generated,not-generated
+item.design.unique.karik-s-ring,Karik's Ring,jewelry,unique-identity,KARIKS_RING,item.base.156.ring|item.base.157.ring|item.base.158.ring,item.unique.karik-s-ring,,not-generated,not-generated,not-generated
+item.design.unique.ring-of-magma,Ring of Magma,jewelry,unique-identity,RING_OF_MAGMA,item.base.156.ring|item.base.157.ring|item.base.158.ring,item.unique.ring-of-magma,,not-generated,not-generated,not-generated
+item.design.unique.ring-of-the-mystics,Ring of the Mystics,jewelry,unique-identity,RING_OF_THE_MYSTICS,item.base.156.ring|item.base.157.ring|item.base.158.ring,item.unique.ring-of-the-mystics,,not-generated,not-generated,not-generated
+item.design.unique.ring-of-thunder,Ring of Thunder,jewelry,unique-identity,RING_OF_THUNDER,item.base.156.ring|item.base.157.ring|item.base.158.ring,item.unique.ring-of-thunder,,not-generated,not-generated,not-generated
+item.design.unique.amulet-of-warding,Amulet of Warding,jewelry,unique-identity,AMULET_OF_WARDING,item.base.159.amulet|item.base.160.amulet,item.unique.amulet-of-warding,,not-generated,not-generated,not-generated
+item.design.unique.gnat-sting,Gnat Sting,bows,unique-identity,GNAT_STING,item.base.144.hunter-s-bow,item.unique.gnat-sting,,not-generated,not-generated,not-generated
+item.design.unique.flambeau,Flambeau,bows,unique-identity,FLAMBEAU,item.base.146.composite-bow,item.unique.flambeau,,not-generated,not-generated,not-generated
+item.design.unique.armor-of-gloom,Armor of Gloom,body-armor,unique-identity,ARMOR_OF_GLOOM,item.base.070.full-plate-mail,item.unique.armor-of-gloom,,not-generated,not-generated,not-generated
+item.design.unique.blitzen,Blitzen,bows,unique-identity,BLITZEN,item.base.146.composite-bow,item.unique.blitzen,,not-generated,not-generated,not-generated
+item.design.unique.thunderclap,Thunderclap,blunt-weapons,unique-identity,THUNDERCLAP,item.base.138.war-hammer,item.unique.thunderclap,,not-generated,not-generated,not-generated
+item.design.unique.shirotachi,Shirotachi,blades,unique-identity,GREAT_SWORD,item.base.129.great-sword,item.unique.shirotachi,,not-generated,not-generated,not-generated
+item.design.unique.eater-of-souls,Eater of Souls,blades,unique-identity,EATER_OF_SOULS,item.base.128.two-handed-sword,item.unique.eater-of-souls,,not-generated,not-generated,not-generated
+item.design.unique.diamondedge,Diamondedge,blades,unique-identity,DIAMONDEDGE,item.base.125.long-sword,item.unique.diamondedge,,not-generated,not-generated,not-generated
+item.design.unique.bone-chain-armor,Bone Chain Armor,body-armor,unique-identity,BONE_CHAIN_ARMOR,item.base.063.chain-mail,item.unique.bone-chain-armor,,not-generated,not-generated,not-generated
+item.design.unique.demon-plate-armor,Demon Plate Armor,body-armor,unique-identity,DEMON_PLATE_ARMOR,item.base.070.full-plate-mail,item.unique.demon-plate-armor,,not-generated,not-generated,not-generated
+item.design.unique.acolyte-s-amulet,Acolyte's Amulet,jewelry,unique-identity,ACOLYTES_AMULET,item.base.159.amulet|item.base.160.amulet,item.unique.acolyte-s-amulet,,not-generated,not-generated,not-generated
+item.design.unique.gladiator-s-ring,Gladiator's Ring,jewelry,unique-identity,GLADIATORS_RING,item.base.156.ring|item.base.157.ring|item.base.158.ring,item.unique.gladiator-s-ring,,not-generated,not-generated,not-generated
+item.design.base.gold,Gold,gold,base-design,GOLD_SMALL,item.base.000.idi-gold,,item.dynamic.gold-small,not-generated,not-generated,not-generated
+item.design.base.short-sword,Short Sword,blades,base-design,SHORT_SWORD,item.base.001.idi-warrior|item.base.037.idi-bardsword|item.base.119.short-sword,,,not-generated,not-generated,not-generated
+item.design.base.buckler,Buckler,shields,base-design,BUCKLER,item.base.002.idi-warrshld|item.base.071.buckler,,,not-generated,not-generated,not-generated
+item.design.base.club,Club,blunt-weapons,base-design,CLUB,item.base.003.idi-warrclub|item.base.140.club,,,not-generated,not-generated,not-generated
+item.design.base.short-bow,Short Bow,bows,base-design,SHORT_BOW,item.base.004.idi-rogue|item.base.143.short-bow,,,not-generated,not-generated,not-generated
+item.design.base.short-staff,Short Staff,staves,base-design,SHORT_STAFF,item.base.005.idi-sorcerer|item.base.036.idi-shortstaff|item.base.151.short-staff|item.base.166.short-staff-of-charged-bolt,,,not-generated,not-generated,not-generated
+item.design.base.magic-rock,Magic Rock,quest-objects,base-design,MAGIC_ROCK,item.base.009.idi-rock,,,not-generated,not-generated,not-generated
+item.design.base.tavern-sign,Tavern Sign,quest-objects,base-design,TAVERN_SIGN,item.base.012.idi-banner,,,not-generated,not-generated,not-generated
+item.design.base.golden-elixir,Golden Elixir,potions-elixirs,base-design,GOLDEN_ELIXIR,item.base.015.idi-gldnelix,,,not-generated,not-generated,not-generated
+item.design.base.anvil-of-fury,Anvil of Fury,quest-objects,base-design,ANVIL_OF_FURY,item.base.016.idi-anvil,,,not-generated,not-generated,not-generated
+item.design.base.black-mushroom,Black Mushroom,quest-objects,base-design,BLACK_MUSHROOM,item.base.017.idi-mushroom,,,not-generated,not-generated,not-generated
+item.design.base.brain,Brain,quest-objects,base-design,BRAIN,item.base.018.idi-brain,,,not-generated,not-generated,not-generated
+item.design.base.fungal-tome,Fungal Tome,quest-objects,base-design,FUNGAL_TOME,item.base.019.idi-fungaltm,,,not-generated,not-generated,not-generated
+item.design.base.spectral-elixir,Spectral Elixir,potions-elixirs,base-design,SPECTRAL_ELIXIR,item.base.020.idi-specelix,,,not-generated,not-generated,not-generated
+item.design.base.blood-stone,Blood Stone,quest-objects,base-design,BLOOD_STONE,item.base.021.idi-bldstone,,,not-generated,not-generated,not-generated
+item.design.base.cathedral-map,Cathedral Map,quest-objects,base-design,MAP_OF_THE_STARS,item.base.022.idi-mapofdoom,,,not-generated,not-generated,not-generated
+item.design.base.ear,Ear,ears,base-design,,item.base.023.idi-ear,,,not-generated,not-generated,not-generated
+item.design.base.potion-of-healing,Potion of Healing,potions-elixirs,base-design,POTION_OF_HEALING,item.base.024.idi-heal|item.base.077.potion-of-healing,,,not-generated,not-generated,not-generated
+item.design.base.potion-of-mana,Potion of Mana,potions-elixirs,base-design,POTION_OF_MANA,item.base.025.idi-mana|item.base.079.potion-of-mana,,,not-generated,not-generated,not-generated
+item.design.base.scroll,Scroll physical family (spell-specific markings),scrolls,base-design,SCROLL_OF,item.base.026.idi-identify|item.base.027.idi-portal|item.base.034.idi-resurrect|item.base.091.scroll-of-healing|item.base.092.scroll-of-search|item.base.093.scroll-of-lightning|item.base.094.scroll-of-identify|item.base.095.scroll-of-resurrect|item.base.096.scroll-of-fire-wall|item.base.097.scroll-of-inferno|item.base.098.scroll-of-town-portal|item.base.099.scroll-of-flash|item.base.100.scroll-of-infravision|item.base.101.scroll-of-phasing|item.base.102.scroll-of-mana-shield|item.base.103.scroll-of-flame-wave|item.base.104.scroll-of-fireball|item.base.105.scroll-of-stone-curse|item.base.106.scroll-of-chain-lightning|item.base.107.scroll-of-guardian|item.base.109.scroll-of-nova|item.base.110.scroll-of-golem|item.base.112.scroll-of-teleport|item.base.113.scroll-of-apocalypse,,,not-generated,not-generated,not-generated
+item.design.base.potion-of-full-healing,Potion of Full Healing,potions-elixirs,base-design,POTION_OF_FULL_HEALING,item.base.029.idi-fullheal|item.base.078.potion-of-full-healing,,,not-generated,not-generated,not-generated
+item.design.base.potion-of-full-mana,Potion of Full Mana,potions-elixirs,base-design,POTION_OF_FULL_MANA,item.base.030.idi-fullmana|item.base.080.potion-of-full-mana,,,not-generated,not-generated,not-generated
+item.design.base.staff-of-lazarus,Staff of Lazarus,quest-objects,base-design,STAFF_OF_LAZARUS,item.base.033.idi-lazstaff,,,not-generated,not-generated,not-generated
+item.design.base.oil-flask,Oil flask physical family (label variants),oils,base-design,OIL,item.base.035.idi-oil|item.base.083.blacksmith-oil|item.base.084.oil-of-accuracy|item.base.085.oil-of-sharpness|item.base.086.oil,,item.dynamic.oil-oil-of-accuracy|item.dynamic.oil-oil-of-mastery|item.dynamic.oil-oil-of-sharpness|item.dynamic.oil-oil-of-death|item.dynamic.oil-oil-of-skill|item.dynamic.oil-blacksmith-oil|item.dynamic.oil-oil-of-fortitude|item.dynamic.oil-oil-of-permanence|item.dynamic.oil-oil-of-hardening|item.dynamic.oil-oil-of-imperviousness,not-generated,not-generated,not-generated
+item.design.base.dagger,Dagger,blades,base-design,DAGGER,item.base.038.idi-barddagger|item.base.118.dagger,,,not-generated,not-generated,not-generated
+item.design.base.rune-bomb,Rune Bomb,quest-objects,base-design,RUNE_BOMB,item.base.039.idi-runebomb,,,not-generated,not-generated,not-generated
+item.design.base.theodore,Theodore,quest-objects,base-design,THEODORE,item.base.040.idi-theodore,,,not-generated,not-generated,not-generated
+item.design.base.auric-amulet,Auric Amulet,jewelry,base-design,AURIC_AMULET,item.base.041.idi-auric,,,not-generated,not-generated,not-generated
+item.design.base.torn-note-1,Torn Note 1,quest-objects,base-design,TORN_NOTE_1,item.base.042.idi-note1,,,not-generated,not-generated,not-generated
+item.design.base.torn-note-2,Torn Note 2,quest-objects,base-design,TORN_NOTE_2,item.base.043.idi-note2,,,not-generated,not-generated,not-generated
+item.design.base.torn-note-3,Torn Note 3,quest-objects,base-design,TORN_NOTE_3,item.base.044.idi-note3,,,not-generated,not-generated,not-generated
+item.design.base.reconstructed-note,Reconstructed Note,quest-objects,base-design,RECONSTRUCTED_NOTE,item.base.045.idi-fullnote,,,not-generated,not-generated,not-generated
+item.design.base.brown-suit,Brown Suit,quest-objects,base-design,BROWN_SUIT,item.base.046.idi-brownsuit,,,not-generated,not-generated,not-generated
+item.design.base.grey-suit,Grey Suit,quest-objects,base-design,GREY_SUIT,item.base.047.idi-greysuit,,,not-generated,not-generated,not-generated
+item.design.base.cap,Cap,headgear,base-design,CAP,item.base.048.cap,,,not-generated,not-generated,not-generated
+item.design.base.skull-cap,Skull Cap,headgear,base-design,SKULL_CAP,item.base.049.skull-cap,,,not-generated,not-generated,not-generated
+item.design.base.helm,Helm,headgear,base-design,HELM,item.base.050.helm,,,not-generated,not-generated,not-generated
+item.design.base.full-helm,Full Helm,headgear,base-design,FULL_HELM,item.base.051.full-helm,,,not-generated,not-generated,not-generated
+item.design.base.crown,Crown,headgear,base-design,CROWN,item.base.052.crown,,,not-generated,not-generated,not-generated
+item.design.base.great-helm,Great Helm,headgear,base-design,GREAT_HELM,item.base.053.great-helm,,,not-generated,not-generated,not-generated
+item.design.base.cape,Cape,body-armor,base-design,CAPE,item.base.054.cape,,,not-generated,not-generated,not-generated
+item.design.base.rags,Rags,body-armor,base-design,RAGS,item.base.055.rags,,,not-generated,not-generated,not-generated
+item.design.base.cloak,Cloak,body-armor,base-design,CLOAK,item.base.056.cloak,,,not-generated,not-generated,not-generated
+item.design.base.robe,Robe,body-armor,base-design,ROBE,item.base.057.robe,,,not-generated,not-generated,not-generated
+item.design.base.quilted-armor,Quilted Armor,body-armor,base-design,QUILTED_ARMOR,item.base.058.quilted-armor,,,not-generated,not-generated,not-generated
+item.design.base.leather-armor,Leather Armor,body-armor,base-design,LEATHER_ARMOR,item.base.059.leather-armor,,,not-generated,not-generated,not-generated
+item.design.base.hard-leather-armor,Hard Leather Armor,body-armor,base-design,HARD_LEATHER_ARMOR,item.base.060.hard-leather-armor,,,not-generated,not-generated,not-generated
+item.design.base.studded-leather-armor,Studded Leather Armor,body-armor,base-design,STUDDED_LEATHER_ARMOR,item.base.061.studded-leather-armor,,,not-generated,not-generated,not-generated
+item.design.base.ring-mail,Ring Mail,body-armor,base-design,RING_MAIL,item.base.062.ring-mail,,,not-generated,not-generated,not-generated
+item.design.base.chain-mail,Chain Mail,body-armor,base-design,CHAIN_MAIL,item.base.063.chain-mail,,,not-generated,not-generated,not-generated
+item.design.base.scale-mail,Scale Mail,body-armor,base-design,SCALE_MAIL,item.base.064.scale-mail,,,not-generated,not-generated,not-generated
+item.design.base.breast-plate,Breast Plate,body-armor,base-design,BREAST_PLATE,item.base.065.breast-plate,,,not-generated,not-generated,not-generated
+item.design.base.splint-mail,Splint Mail,body-armor,base-design,SPLINT_MAIL,item.base.066.splint-mail,,,not-generated,not-generated,not-generated
+item.design.base.plate-mail,Plate Mail,body-armor,base-design,FIELD_PLATE,item.base.067.plate-mail,,,not-generated,not-generated,not-generated
+item.design.base.field-plate,Field Plate,body-armor,base-design,FIELD_PLATE,item.base.068.field-plate,,,not-generated,not-generated,not-generated
+item.design.base.gothic-plate,Gothic Plate,body-armor,base-design,GOTHIC_PLATE,item.base.069.gothic-plate,,,not-generated,not-generated,not-generated
+item.design.base.full-plate-mail,Full Plate Mail,body-armor,base-design,FULL_PLATE_MAIL,item.base.070.full-plate-mail,,,not-generated,not-generated,not-generated
+item.design.base.small-shield,Small Shield,shields,base-design,SMALL_SHIELD,item.base.072.small-shield,,,not-generated,not-generated,not-generated
+item.design.base.large-shield,Large Shield,shields,base-design,LARGE_SHIELD,item.base.073.large-shield,,,not-generated,not-generated,not-generated
+item.design.base.kite-shield,Kite Shield,shields,base-design,KITE_SHIELD,item.base.074.kite-shield,,,not-generated,not-generated,not-generated
+item.design.base.tower-shield,Tower Shield,shields,base-design,TOWER_SHIELD,item.base.075.tower-shield,,,not-generated,not-generated,not-generated
+item.design.base.gothic-shield,Gothic Shield,shields,base-design,GOTHIC_SHIELD,item.base.076.gothic-shield,,,not-generated,not-generated,not-generated
+item.design.base.potion-of-rejuvenation,Potion of Rejuvenation,potions-elixirs,base-design,POTION_OF_REJUVENATION,item.base.081.potion-of-rejuvenation,,,not-generated,not-generated,not-generated
+item.design.base.potion-of-full-rejuvenation,Potion of Full Rejuvenation,potions-elixirs,base-design,POTION_OF_FULL_REJUVENATION,item.base.082.potion-of-full-rejuvenation,,,not-generated,not-generated,not-generated
+item.design.base.elixir-of-strength,Elixir of Strength,potions-elixirs,base-design,ELIXIR_OF_STRENGTH,item.base.087.elixir-of-strength,,,not-generated,not-generated,not-generated
+item.design.base.elixir-of-magic,Elixir of Magic,potions-elixirs,base-design,ELIXIR_OF_MAGIC,item.base.088.elixir-of-magic,,,not-generated,not-generated,not-generated
+item.design.base.elixir-of-dexterity,Elixir of Dexterity,potions-elixirs,base-design,ELIXIR_OF_DEXTERITY,item.base.089.elixir-of-dexterity,,,not-generated,not-generated,not-generated
+item.design.base.elixir-of-vitality,Elixir of Vitality,potions-elixirs,base-design,ELIXIR_OF_VITALITY,item.base.090.elixir-of-vitality,,,not-generated,not-generated,not-generated
+item.design.base.spellbook-blue,Spellbook blue (Lightning),spellbooks,base-design,BOOK_BLUE,item.base.114.book-of|item.base.115.book-of|item.base.116.book-of|item.base.117.book-of,,item.dynamic.book-lightning,not-generated,not-generated,not-generated
+item.design.base.falchion,Falchion,blades,base-design,FALCHION,item.base.120.falchion,,,not-generated,not-generated,not-generated
+item.design.base.scimitar,Scimitar,blades,base-design,SCIMITAR,item.base.121.scimitar,,,not-generated,not-generated,not-generated
+item.design.base.claymore,Claymore,blades,base-design,CLAYMORE,item.base.122.claymore,,,not-generated,not-generated,not-generated
+item.design.base.blade,Blade,blades,base-design,BLADE,item.base.123.blade,,,not-generated,not-generated,not-generated
+item.design.base.sabre,Sabre,blades,base-design,SABRE,item.base.124.sabre,,,not-generated,not-generated,not-generated
+item.design.base.long-sword,Long Sword,blades,base-design,LONG_SWORD,item.base.125.long-sword,,,not-generated,not-generated,not-generated
+item.design.base.broad-sword,Broad Sword,blades,base-design,BROAD_SWORD,item.base.126.broad-sword,,,not-generated,not-generated,not-generated
+item.design.base.bastard-sword,Bastard Sword,blades,base-design,BASTARD_SWORD,item.base.127.bastard-sword,,,not-generated,not-generated,not-generated
+item.design.base.two-handed-sword,Two-Handed Sword,blades,base-design,TWO_HANDED_SWORD,item.base.128.two-handed-sword,,,not-generated,not-generated,not-generated
+item.design.base.great-sword,Great Sword,blades,base-design,GREAT_SWORD,item.base.129.great-sword,,,not-generated,not-generated,not-generated
+item.design.base.small-axe,Small Axe,axes,base-design,SMALL_AXE,item.base.130.small-axe,,,not-generated,not-generated,not-generated
+item.design.base.axe,Axe,axes,base-design,AXE,item.base.131.axe,,,not-generated,not-generated,not-generated
+item.design.base.large-axe,Large Axe,axes,base-design,LARGE_AXE,item.base.132.large-axe,,,not-generated,not-generated,not-generated
+item.design.base.broad-axe,Broad Axe,axes,base-design,BROAD_AXE,item.base.133.broad-axe,,,not-generated,not-generated,not-generated
+item.design.base.battle-axe,Battle Axe,axes,base-design,BATTLE_AXE,item.base.134.battle-axe,,,not-generated,not-generated,not-generated
+item.design.base.great-axe,Great Axe,axes,base-design,GREAT_AXE,item.base.135.great-axe,,,not-generated,not-generated,not-generated
+item.design.base.mace,Mace,blunt-weapons,base-design,MACE,item.base.136.mace,,,not-generated,not-generated,not-generated
+item.design.base.morning-star,Morning Star,blunt-weapons,base-design,MORNING_STAR,item.base.137.morning-star,,,not-generated,not-generated,not-generated
+item.design.base.war-hammer,War Hammer,blunt-weapons,base-design,WAR_HAMMER,item.base.138.war-hammer,,,not-generated,not-generated,not-generated
+item.design.base.spiked-club,Spiked Club,blunt-weapons,base-design,SPIKED_CLUB,item.base.139.spiked-club,,,not-generated,not-generated,not-generated
+item.design.base.flail,Flail,blunt-weapons,base-design,FLAIL,item.base.141.flail,,,not-generated,not-generated,not-generated
+item.design.base.maul,Maul,blunt-weapons,base-design,MAUL,item.base.142.maul,,,not-generated,not-generated,not-generated
+item.design.base.hunter-s-bow,Hunter's Bow,bows,base-design,HUNTERS_BOW,item.base.144.hunter-s-bow,,,not-generated,not-generated,not-generated
+item.design.base.long-bow,Long Bow,bows,base-design,HUNTERS_BOW,item.base.145.long-bow,,,not-generated,not-generated,not-generated
+item.design.base.composite-bow,Composite Bow,bows,base-design,COMPOSITE_BOW,item.base.146.composite-bow,,,not-generated,not-generated,not-generated
+item.design.base.short-battle-bow,Short Battle Bow,bows,base-design,SHORT_BATTLE_BOW,item.base.147.idi-short-battle-bow,,,not-generated,not-generated,not-generated
+item.design.base.long-battle-bow,Long Battle Bow,bows,base-design,LONG_BATTLE_BOW,item.base.148.long-battle-bow,,,not-generated,not-generated,not-generated
+item.design.base.short-war-bow,Short War Bow,bows,base-design,SHORT_WAR_BOW,item.base.149.short-war-bow,,,not-generated,not-generated,not-generated
+item.design.base.long-war-bow,Long War Bow,bows,base-design,LONG_WAR_BOW,item.base.150.long-war-bow,,,not-generated,not-generated,not-generated
+item.design.base.long-staff,Long Staff,staves,base-design,LONG_STAFF,item.base.152.long-staff,,,not-generated,not-generated,not-generated
+item.design.base.composite-staff,Composite Staff,staves,base-design,COMPOSITE_STAFF,item.base.153.composite-staff,,,not-generated,not-generated,not-generated
+item.design.base.quarter-staff,Quarter Staff,staves,base-design,SHORT_STAFF,item.base.154.quarter-staff,,,not-generated,not-generated,not-generated
+item.design.base.war-staff,War Staff,staves,base-design,WAR_STAFF,item.base.155.war-staff,,,not-generated,not-generated,not-generated
+item.design.base.ring,Ring,jewelry,base-design,RING,item.base.156.ring|item.base.157.ring|item.base.158.ring,,,not-generated,not-generated,not-generated
+item.design.base.amulet,Amulet,jewelry,base-design,AMULET,item.base.159.amulet|item.base.160.amulet,,,not-generated,not-generated,not-generated
+item.design.base.rune-of-fire,Rune of Fire,runes,base-design,RUNE_OF_FIRE,item.base.161.rune-of-fire,,,not-generated,not-generated,not-generated
+item.design.base.rune-of-lightning,Rune of Lightning,runes,base-design,RUNE_OF_LIGHTNING,item.base.162.rune-of-lightning,,,not-generated,not-generated,not-generated
+item.design.base.greater-rune-of-fire,Greater Rune of Fire,runes,base-design,GREATER_RUNE_OF_FIRE,item.base.163.greater-rune-of-fire,,,not-generated,not-generated,not-generated
+item.design.base.greater-rune-of-lightning,Greater Rune of Lightning,runes,base-design,GREATER_RUNE_OF_LIGHTNING,item.base.164.greater-rune-of-lightning,,,not-generated,not-generated,not-generated
+item.design.base.rune-of-stone,Rune of Stone,runes,base-design,RUNE_OF_STONE,item.base.165.rune-of-stone,,,not-generated,not-generated,not-generated
+item.design.base.arena-potion,Arena Potion,potions-elixirs,base-design,ARENA_POTION,item.base.167.idi-arenapot,,,not-generated,not-generated,not-generated
+item.design.dynamic.gold-medium,Gold pile medium,gold,runtime-appearance,GOLD_MEDIUM,,,item.dynamic.gold-medium,not-generated,not-generated,not-generated
+item.design.dynamic.gold-large,Gold pile large,gold,runtime-appearance,GOLD_LARGE,,,item.dynamic.gold-large,not-generated,not-generated,not-generated
+item.design.dynamic.ear-sorcerer,Ear trophy sorcerer,ears,runtime-appearance,EAR_SORCERER,,,item.dynamic.ear-sorcerer,not-generated,not-generated,not-generated
+item.design.dynamic.ear-warrior,Ear trophy warrior,ears,runtime-appearance,EAR_WARRIOR,,,item.dynamic.ear-warrior,not-generated,not-generated,not-generated
+item.design.dynamic.ear-rogue,Ear trophy rogue,ears,runtime-appearance,EAR_ROGUE,,,item.dynamic.ear-rogue,not-generated,not-generated,not-generated
+item.design.base.spellbook-red,Spellbook Fire,spellbooks,runtime-appearance,BOOK_RED,,,item.dynamic.book-fire,not-generated,not-generated,not-generated
+item.design.base.spellbook-grey,Spellbook Magic,spellbooks,runtime-appearance,BOOK_GREY,,,item.dynamic.book-magic,not-generated,not-generated,not-generated

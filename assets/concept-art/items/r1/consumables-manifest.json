@@ -1,0 +1,215 @@
+{
+  "schemaVersion": 1,
+  "revision": "r1",
+  "createdOn": "2026-10-08",
+  "collection": "consumables-and-small-props",
+  "generation": {
+    "tool": "built-in image_gen.imagegen",
+    "useCase": "stylized-concept",
+    "calls": 4,
+    "postProcessing": "none; original generated PNG bytes copied unchanged"
+  },
+  "status": "candidate",
+  "scope": "concept-only",
+  "artisticApproval": false,
+  "runtimeInstalled": false,
+  "notes": [
+    "Generated reference sheets are new concept art, not extracted inventory sprites.",
+    "Private original-game reference PNGs are identified only by filename and SHA-256; their bytes are not included.",
+    "Views are concept proposals, not mechanically guaranteed orthographic geometry. Validate consistency while modelling.",
+    "Inventory thumbnails embedded in the sheets are previews of the new concepts; they are not final runtime icons.",
+    "No native item IDs, statistics, source tables, selected runtime assets or registry approval states changed."
+  ],
+  "assets": [
+    {
+      "productionId": "item.design.base.potion-of-healing",
+      "conceptId": "item.design.base.potion-of-healing.concept.r1",
+      "name": "Potion of Healing",
+      "family": "potions-elixirs",
+      "sourceBaseIds": [
+        "item.base.024.idi-heal",
+        "item.base.077.potion-of-healing"
+      ],
+      "sourceDynamicIds": [],
+      "nativeCursor": {
+        "name": "POTION_OF_HEALING",
+        "value": 32
+      },
+      "image": {
+        "path": "potion-of-healing-r1.png",
+        "sha256": "fbfeaad3e56dc88ff64bf54d6238ed1390ad70362e1d121a7703b880b227f63e",
+        "width": 1536,
+        "height": 1024,
+        "format": "PNG",
+        "background": "opaque dark charcoal"
+      },
+      "originalReference": {
+        "private": true,
+        "filename": "icurs-032-potion-of-healing-6x.png",
+        "sha256": "1429531844620003c84f6d7cdd239a468b619dd914d90e20089a8fad2b624213",
+        "role": "local original inventory appearance"
+      },
+      "additionalConceptReferences": [],
+      "prompt": "Use case: stylized-concept. Asset type: single Diablo 3D item design reference sheet, item.design.base.potion-of-healing, ICURS32. The attached image is the ORIGINAL GAME INVENTORY ICON and defines the exact silhouette, proportions, palette and recognizable details. Reconstruct ONLY this item at high fidelity as a physically plausible dark medieval worn PBR object. A compact squat rectangular, flat-sided clear smoky glass medicine vial with softly rounded shoulders, short narrow neck, dark burgundy cork stopper, several coils of aged brass-gold cord around the neck and one tied dangling end at the right. Deep dark crimson red healing liquid fills roughly the lower two thirds of the squared body, visible through glass. Match its narrow horizontal profile and simple original outline; no ornate fantasy embellishments. Produce one coherent technical art sheet showing the SAME vial in a large front view, side view, rear view, three-quarter view, and a small new inventory thumbnail, all without changing shape or details between views. Dark neutral charcoal gray background, neutral soft white studio illumination without warm tint, materials and local albedo color readable independently of lighting. Minimal contact shadows, no ground scenery. Very subtle scratches and handmade glass irregularities, cord fibers clear. Small clean label at top exactly 'Potion of Healing • ICURS32'; small view labels permitted. Do NOT paste or reproduce the pixel reference icon in the output; the small inventory thumbnail must be a new render of this same object. No sci-fi, no neon, no self-emission, no electric light, no extra objects, no watermark. Candidate concept art for later 3D modelling, not runtime icon.",
+      "review": {
+        "visualInspected": true,
+        "sourcePixelIconPasted": false,
+        "candidate": true,
+        "artisticApproval": false,
+        "modelGenerated": false,
+        "runtimeIconGenerated": false,
+        "notes": "Compact flat rectangular vial, burgundy cork, aged gold cord and dark crimson liquid. Rear and side surfaces are inferred; artist review still required."
+      }
+    },
+    {
+      "productionId": "item.design.base.potion-of-mana",
+      "conceptId": "item.design.base.potion-of-mana.concept.r1",
+      "name": "Potion of Mana",
+      "family": "potions-elixirs",
+      "sourceBaseIds": [
+        "item.base.025.idi-mana",
+        "item.base.079.potion-of-mana"
+      ],
+      "sourceDynamicIds": [],
+      "nativeCursor": {
+        "name": "POTION_OF_MANA",
+        "value": 39
+      },
+      "image": {
+        "path": "potion-of-mana-r1.png",
+        "sha256": "92a7527bfd54ef0844e52eeb56d4af8ceded077ef1af8d4e1ef16c22969cc177",
+        "width": 1536,
+        "height": 1024,
+        "format": "PNG",
+        "background": "opaque dark charcoal"
+      },
+      "originalReference": {
+        "private": true,
+        "filename": "icurs-039-potion-of-mana-6x.png",
+        "sha256": "77ee63f368ace70f6f22569a4827bb480c28e5013dd2615e35ef4cd6eec850fa",
+        "role": "local original inventory appearance"
+      },
+      "additionalConceptReferences": [
+        {
+          "conceptId": "item.design.base.potion-of-healing.concept.r1",
+          "imagePath": "potion-of-healing-r1.png",
+          "sha256": "fbfeaad3e56dc88ff64bf54d6238ed1390ad70362e1d121a7703b880b227f63e",
+          "role": "shared glass bottle geometry and material consistency"
+        }
+      ],
+      "prompt": "Use case: stylized-concept. Asset type: single Diablo 3D item design reference sheet, item.design.base.potion-of-mana, ICURS39. Image1 is the original game inventory icon and defines exact silhouette/palette. Image2 is the new Healing concept and is ONLY a geometric/material consistency reference: the Mana potion MUST be the exact same flat rectangular glass bottle, narrow side thickness, short neck, burgundy cork, aged brass-gold tied cord with dangling end. Change ONLY the liquid to saturated deep cobalt blue consistent with Image1. The potion is NOT emissive; no neon. Dark medieval worn PBR object, compact rectangular flat-sided clear smoky glass medicine vial, gently rounded shoulders. Blue liquid fills approximately lower two thirds, transparent headspace above. Produce one coherent technical art sheet with SAME vial in large front, narrow side, rear, three-quarter views and a small NEW high-definition rendered inventory thumbnail of the same object. Never paste/reproduce pixel reference icon, reference board, Healing item, or crimson liquid. Dark neutral charcoal gray background, neutral soft white studio illumination without warm tint, readable albedo, minimal contact shadow. Handmade glass imperfections and restrained scratches; avoid ornate fantasy embellishment, sci-fi, additional objects, scenery or watermark. Small title exactly 'Potion of Mana • ICURS39'; view labels permitted. All views must retain same consistent dimensions/details/materials. Candidate concept only for 3D modelling.",
+      "review": {
+        "visualInspected": true,
+        "sourcePixelIconPasted": false,
+        "candidate": true,
+        "artisticApproval": false,
+        "modelGenerated": false,
+        "runtimeIconGenerated": false,
+        "notes": "Same conceptual bottle as Healing, cobalt-blue liquid. No glowing material is intended; studio reflections are not albedo."
+      }
+    },
+    {
+      "productionId": "item.design.base.gold",
+      "conceptId": "item.design.base.gold.concept.r1",
+      "name": "Gold",
+      "family": "gold",
+      "sourceBaseIds": [
+        "item.base.000.idi-gold"
+      ],
+      "sourceDynamicIds": [
+        "item.dynamic.gold-small"
+      ],
+      "nativeCursor": {
+        "name": "GOLD_SMALL",
+        "value": 4
+      },
+      "image": {
+        "path": "gold-r1.png",
+        "sha256": "1a30d2413cfeab90d8ed4f3d295eb3344ff76fa2a331cc5ef6bd34e6084c212f",
+        "width": 1536,
+        "height": 1024,
+        "format": "PNG",
+        "background": "opaque dark charcoal"
+      },
+      "originalReference": {
+        "private": true,
+        "filename": "icurs-004-gold-small-6x.png",
+        "sha256": "f94292924c19469e36c39e2a8376754c8ce555545853c16d16a449b736e34436",
+        "role": "local original inventory appearance"
+      },
+      "additionalConceptReferences": [],
+      "prompt": "Use case: stylized-concept. Asset type: single Diablo 3D item design reference sheet, item.design.base.gold, small gold pile, ICURS4. The attached image is the ORIGINAL GAME INVENTORY ICON and defines the exact minimal small-pile arrangement and palette. Reconstruct ONLY that three-coin small gold pile at high fidelity as worn medieval PBR game art. Three thick squat circular yellow-gold coins, one at rear center, two at front left and front right, all resting flat and slightly overlapping as in the icon. Round coin silhouette, chunky thickness, subdued warm aged yellow gold, hammered softly irregular edges, very faint simple worn border on coin faces, no visible numerals, no new heraldic/fantasy symbols or dragons. An intentionally simple generic currency object consistent with Diablo1. Produce one coherent technical art sheet with the SAME small three-coin arrangement in a large perspective matching the reference, top view, low side view, reverse three-quarter view, and a small NEW high-definition rendered inventory thumbnail, with all views preserving same coin count, sizes and placement. Dark neutral charcoal gray background, neutral soft white studio illumination, readable albedo, soft minimal contact shadows. Do NOT paste/reproduce pixel reference icon in the output; thumbnail must be a new render of these same coins. Small title exactly 'Gold • ICURS4'; view labels permitted. No bags, extra coins, treasure chest, gems, vegetation, dramatic glow, neon, sci-fi, modern currency, scenery, watermark. Candidate concept only for 3D modelling; larger gold piles are separate future variants.",
+      "review": {
+        "visualInspected": true,
+        "sourcePixelIconPasted": false,
+        "candidate": true,
+        "artisticApproval": false,
+        "modelGenerated": false,
+        "runtimeIconGenerated": false,
+        "notes": "Small three-coin arrangement. Medium and large gold piles are separate catalog slots and are not delivered by this sheet."
+      }
+    },
+    {
+      "productionId": "item.design.base.scroll",
+      "conceptId": "item.design.base.scroll.concept.r1",
+      "name": "Scroll physical family (spell-specific markings)",
+      "family": "scrolls",
+      "sourceBaseIds": [
+        "item.base.026.idi-identify",
+        "item.base.027.idi-portal",
+        "item.base.034.idi-resurrect",
+        "item.base.091.scroll-of-healing",
+        "item.base.092.scroll-of-search",
+        "item.base.093.scroll-of-lightning",
+        "item.base.094.scroll-of-identify",
+        "item.base.095.scroll-of-resurrect",
+        "item.base.096.scroll-of-fire-wall",
+        "item.base.097.scroll-of-inferno",
+        "item.base.098.scroll-of-town-portal",
+        "item.base.099.scroll-of-flash",
+        "item.base.100.scroll-of-infravision",
+        "item.base.101.scroll-of-phasing",
+        "item.base.102.scroll-of-mana-shield",
+        "item.base.103.scroll-of-flame-wave",
+        "item.base.104.scroll-of-fireball",
+        "item.base.105.scroll-of-stone-curse",
+        "item.base.106.scroll-of-chain-lightning",
+        "item.base.107.scroll-of-guardian",
+        "item.base.109.scroll-of-nova",
+        "item.base.110.scroll-of-golem",
+        "item.base.112.scroll-of-teleport",
+        "item.base.113.scroll-of-apocalypse"
+      ],
+      "sourceDynamicIds": [],
+      "nativeCursor": {
+        "name": "SCROLL_OF",
+        "value": 1
+      },
+      "image": {
+        "path": "scroll-r1.png",
+        "sha256": "efb23d5d5582b550de65231a3de659474923d63bc47f40e595b6eb60457ab28d",
+        "width": 1536,
+        "height": 1024,
+        "format": "PNG",
+        "background": "opaque dark charcoal"
+      },
+      "originalReference": {
+        "private": true,
+        "filename": "icurs-001-scroll-of-6x.png",
+        "sha256": "e9f670289b47f683e769724d70df2184679666c043e3f34372ee5e00d674e45a",
+        "role": "local original inventory appearance"
+      },
+      "additionalConceptReferences": [],
+      "prompt": "Use case: stylized-concept. Asset type: single Diablo 3D item design reference sheet, item.design.base.scroll, ICURS1. The attached image is the ORIGINAL GAME INVENTORY ICON and defines the recognizable silhouette, proportions, orientation and colors. Reconstruct ONLY that compact rolled parchment scroll tied around its middle with a worn dark crimson ribbon/cord bow, at high fidelity as a physically plausible medieval PBR object. Long narrow grey ivory aged parchment cylinder with visible tightly rolled spiral layers at the ends, slightly uneven worn paper edges, tied central burgundy red textile ribbon with modest hanging tails toward left. The scroll axis in the hero inventory-style view runs from bottom-left to top-right exactly like the reference. Plain closed roll, no open pages, wax seals, wooden rods, handles, shiny metal, invented runes, writing or new magic symbols. Produce one coherent technical art sheet showing the SAME tied scroll in a large original-angle three-quarter view, front view, rear view, end-on spiral view and a small NEW high-definition rendered inventory thumbnail. Every view must have coherent same tie placement, proportions, layers and materials. Dark neutral charcoal gray background, neutral soft white studio illumination with restrained contact shadows, readable ivory gray albedo and dark crimson textile. Match the original muted palette rather than yellow parchment. Small title exactly 'Scroll • ICURS1'; view labels permitted. Do NOT paste/reproduce the pixel reference icon anywhere; the thumbnail must be a new render of the same high definition concept. No neon, glowing spells, sci-fi, scenery, extra objects or watermark. Candidate concept for later 3D modelling. This is only the generic physical scroll; spell-specific markings are not defined or invented.",
+      "review": {
+        "visualInspected": true,
+        "sourcePixelIconPasted": false,
+        "candidate": true,
+        "artisticApproval": false,
+        "modelGenerated": false,
+        "runtimeIconGenerated": false,
+        "notes": "Generic closed grey-ivory parchment roll with burgundy cloth tie. Spell-specific markings are deliberately undefined."
+      }
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "format": "d3d.item-study-coverage",
+  "schemaVersion": 1,
+  "passed": true,
+  "errors": [],
+  "sourceRowsCovered": 730,
+  "nativeCursorDefinitionsCovered": 170,
+  "productionBindingsChecked": 279,
+  "sourceImagesRead": 0,
+  "modelsGenerated": 0,
+  "runtimeChanged": false,
+  "limits": [
+    "Structural coverage of current source tables only.",
+    "Does not prove artwork, spawnability, rig compatibility or installed assets.",
+    "An orphan Lightforge source relationship is explicitly retained as unresolved, not silently repaired."
+  ]
+}

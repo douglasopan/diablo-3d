@@ -12,6 +12,8 @@ A community project to bring **the whole Diablo 1 game into 3D**, including its 
 
 **[Community model inspector / Inspetor de modelos](docs/MODEL-INSPECTOR.md)** — review public metadata identifying **130 distinct GLB files**, including source revisions, derivatives, candidates, rigs and animation clips. Compare locally available original GLB and converted D3D files, distinguish map bindings and export review notes. This is a review catalog, not 130 finished or approved assets. Model and reference media are kept separate and are not bundled with the public catalog.
 
+**[Items, concepts and matching inventory icons / Itens e conceitos](docs/ITEM-ASSET-CATALOG.md)** — a source-linked inventory of all current Diablo/Hellfire item tables, with **nine initial concept turnarounds** and a searchable [review gallery](docs/items-study/gallery.html). The intended pipeline uses the same accepted 3D master for equipped items, ground objects and rendered inventory icons. The remaining concepts, models and runtime bindings are still pending.
+
 > This is modified DevilutionX software, distributed under its inherited **[Sustainable Use License](LICENSE.md)**. Source is public for collaboration; distribution must be free of charge and non-commercial. This is not an MIT/GPL release or an OSI-approved open-source license. Preserve upstream notices. Original Diablo game data is required and is not included.
 
 ## What works today
