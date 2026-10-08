@@ -1,10 +1,11 @@
 ---
 title: "Primeira pessoa: olhar com o mouse, andar com as setas"
 date: 2026-10-08
+updated: 2026-10-08
 description: "Os controles de primeira pessoa chegaram ao iniciador habitual: mouse para olhar, setas relativas à câmera e seleção central, com a caminhada nativa preservada."
 slug: controles-primeira-pessoa
 image: /assets/captures/tristram-camera-modes.webp
-image_alt: "Comparação técnica histórica dos quatro modos de câmera em Tristram, usada como contexto; não mostra os novos controles nem a validação visual do retículo."
+image_alt: "Comparação técnica histórica dos quatro modos de câmera em Tristram, usada como contexto; não mostra os novos controles, a calibração ocular nem a validação visual do retículo."
 category: Protótipo
 order: 18
 status: published
@@ -45,6 +46,14 @@ Um clique recebido antes do próximo desenho agora **aguarda uma seleção atual
 
 A correção foi exercitada com seleção de chão pelo caminho CPU. Interações com NPCs, itens e combate ainda precisam de revisão em uma partida real, assim como a aparência do novo retículo nas diferentes escalas.
 
+## Altura dos olhos
+
+**Atualização de 8 de outubro, às 18:18:44 de Brasília:** o relato de câmera baixa diante dos NPCs levou a uma calibração independente. A altura dos olhos na primeira pessoa passou de **1,1 para 1,7 unidade**; o alvo da terceira pessoa permanece em **1,1**. A correção do [commit 4a276a10b](https://github.com/douglasopan/diablo-3d/commit/4a276a10b090c6bb46f8db5c59c0383bff3bcc84) já está instalada no mesmo iniciador.
+
+Passaram **202 verificações de câmera** e novamente **1.652 verificações dos controles**. Uma comparação nativa CPU, em um ponto diante de Griswold e da ferraria, em 640×480, conservou a imagem indexada e a paleta da terceira pessoa byte a byte. Os **44 arquivos do perfil** preservaram bytes, tamanho e data nessa instalação.
+
+**1,7 é uma calibração inicial**, ainda sujeita à avaliação na partida diante de outros moradores e com outras classes e poses. Não houve mudança de modelos, materiais ou iluminação, nem teste de mouse físico, execução GPU ou medição de FPS nesta correção. A [documentação da calibração](https://github.com/douglasopan/diablo-3d/blob/4a276a10b090c6bb46f8db5c59c0383bff3bcc84/docs/TRISTRAM-HORIZON-CAMERAS.md#calibração-da-altura-ocular--8-de-outubro) registra os limites da amostra.
+
 ## O que passou nos testes
 
 O build **Release/NONET x64** foi aprovado. A validação passou **673 verificações da política de entrada** e **1.652 verificações do caminho produtivo**, além das regressões de **946 verificações do HUD** e **59.452 das configurações**.
@@ -55,10 +64,10 @@ O diagnóstico produtivo usa o handler real do jogo e comandos nativos, mas subs
 
 ## Instalação e próxima avaliação
 
-Os **41 arquivos do perfil habitual** preservaram bytes, tamanho e data na instalação. A preparação posterior do iniciador alterou somente o recibo esperado de runtime. Modelos, texturas, iluminação e o backend GPU não foram alterados por esta entrega.
+Na instalação inicial dos controles, os **41 arquivos do perfil habitual** preservaram bytes, tamanho e data. A preparação posterior do iniciador alterou somente o recibo esperado de runtime. Modelos, texturas, iluminação e o backend GPU não foram alterados por esta entrega.
 
 Após o lote anterior de melhorias na GPU, o autor relatou que “melhorou muito o desempenho do jogo!”. Esse retorno é uma **avaliação subjetiva daquela entrega anterior**; os controles de primeira pessoa não acrescentam uma medição de FPS nem um novo benchmark. A [correção do zoom e recuperação da GPU](/devlog/gpu-zoom-recuperacao/) permanece registrada separadamente.
 
-O próximo passo é testar pelo iniciador habitual: captura e liberação do mouse, Alt+Tab, interfaces, retículo e cliques em NPCs e itens. Gravação/reprodução de demos legadas, captura em SDL1 e colisão da câmera com a arquitetura ficam fora deste incremento.
+O próximo passo é testar pelo iniciador habitual: altura dos olhos diante dos moradores, captura e liberação do mouse, Alt+Tab, interfaces, retículo e cliques em NPCs e itens. Gravação/reprodução de demos legadas, captura em SDL1 e colisão da câmera com a arquitetura ficam fora deste incremento.
 
 O objetivo continua sendo **Diablo 1 inteiro em 3D**. Estes controles valem para o protótipo de Tristram; os demais níveis ainda usam a renderização original. A [fila dessa revisão](https://github.com/douglasopan/diablo-3d/blob/a227d4afcab5829cfa82ab9bad9e0eac34a2c9c9/docs/PROJECT-EXECUTION.md) mantém a revisão dos modelos e as próximas dependências.

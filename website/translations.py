@@ -8,14 +8,17 @@ from __future__ import annotations
 
 TRANSLATIONS: dict[str, str] = {
     'Primeira pessoa: mouse e setas': 'First person: mouse and arrow keys',
-    'Olhar com o mouse e caminhar em relação à câmera já estão instalados em Tristram, com movimento nativo e cliques ordenados após o giro. A avaliação do mouse físico e das interações na partida é o próximo passo.': 'Mouse look and camera-relative movement are installed in Tristram, retaining native movement and ordered clicks after turning. Physical mouse and gameplay interaction review is the next step.',
+    'Olhar com o mouse e caminhar em relação à câmera já estão instalados em Tristram, com movimento nativo e cliques ordenados após o giro. A altura dos olhos recebeu uma calibração inicial; sua avaliação na partida acompanha a revisão do mouse físico e das interações.': 'Mouse look and camera-relative movement are installed in Tristram, retaining native movement and ordered clicks after turning. Eye height received an initial calibration; gameplay review of that height accompanies physical mouse and interaction review.',
     'Correção do zoom na GPU': 'GPU zoom fix',
     'percorre os modos de câmera ·': 'cycles through camera modes ·',
     'A entrega técnica mais recente são os': 'The latest technical delivery is',
+    'A entrega técnica mais recente é a': 'The latest technical delivery is the',
+    'calibração da altura ocular da primeira pessoa': 'first-person eye-height calibration',
     'controles de primeira pessoa com mouse e setas': 'first-person controls with the mouse and arrow keys',
     '. Implementação, testes técnicos e avaliação pendente na partida estão separados no': '. Implementation, technical tests and pending gameplay review are distinguished in the',
     'novo registro': 'new entry',
     'Controles de primeira pessoa': 'First-person controls',
+    'A altura ocular da primeira pessoa foi calibrada de 1,1 para 1,7 unidade, sem alterar o alvo da terceira pessoa. A avaliação artística dessa altura continua na partida.': 'First-person eye height was calibrated from 1.1 to 1.7 units, preserving the third-person target. Artistic review of this height continues in gameplay.',
     'Em Tristram, K percorre os modos de câmera. Na primeira pessoa, o mouse controla o olhar e as setas movem nas oito direções nativas em relação à câmera. Esc libera o mouse; um clique no mundo retoma a captura após uma suspensão.': 'In Tristram, K cycles through camera modes. In first person, the mouse controls the view and arrow keys move in the eight native directions relative to the camera. Esc releases the mouse; a click in the world resumes capture after suspension.',
     'O caminho produtivo passou nos testes técnicos com serviços de captura simulados. Mouse físico, Alt+Tab, aparência do retículo e interações com NPCs, itens e combate ainda precisam de revisão na partida.': 'The production path passed technical tests with simulated capture services. Physical mouse capture, Alt+Tab, crosshair appearance and NPC, item and combat interactions still need gameplay review.',
     'Conhecer os controles e os limites': 'Read about the controls and limitations',

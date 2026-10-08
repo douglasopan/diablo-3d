@@ -1,10 +1,11 @@
 ---
 title: "First person: look with the mouse, walk with the arrow keys"
 date: 2026-10-08
+updated: 2026-10-08
 description: "First-person controls have reached the usual launcher: mouse look, camera-relative arrow keys and center selection, while preserving native movement."
 slug: controles-primeira-pessoa
 image: /assets/captures/tristram-camera-modes.webp
-image_alt: "Historical technical comparison of Tristram's four camera modes, used as context; it does not show the new controls or visual validation of the crosshair."
+image_alt: "Historical technical comparison of Tristram's four camera modes, used as context; it does not show the new controls, eye-height calibration or visual validation of the crosshair."
 category: Protótipo
 order: 18
 status: published
@@ -45,6 +46,14 @@ A click received before the next draw now **waits for an updated selection**, pr
 
 The fix was exercised with ground selection through the CPU path. NPC and item interactions and combat still need review in a real play session, as does the new crosshair's appearance at different scales.
 
+## Eye height
+
+**October 8 update, at 18:18:44 Brasília time:** a report that the camera sat too low in front of NPCs led to an independent calibration. First-person eye height increased from **1.1 to 1.7 units**; the third-person target remains at **1.1**. The fix in [commit 4a276a10b](https://github.com/douglasopan/diablo-3d/commit/4a276a10b090c6bb46f8db5c59c0383bff3bcc84) is installed through the same launcher.
+
+**202 camera checks** passed, along with a repeat of the **1,652 control checks**. A native CPU comparison at one position facing Griswold and the smithy, at 640×480, kept the third-person indexed image and palette byte-for-byte identical. The **44 profile files** retained their bytes, sizes and timestamps during this installation.
+
+**1.7 is an initial calibration**, still awaiting gameplay review around other townspeople and with other classes and poses. This fix changed no models, materials or lighting and included no physical mouse test, GPU run or FPS measurement. The [calibration documentation](https://github.com/douglasopan/diablo-3d/blob/4a276a10b090c6bb46f8db5c59c0383bff3bcc84/docs/TRISTRAM-HORIZON-CAMERAS.md#calibração-da-altura-ocular--8-de-outubro) records the sample's limitations.
+
 ## What passed the tests
 
 The **Release/NONET x64** build passed. Validation passed **673 input-policy checks** and **1,652 production-path checks**, along with regression suites of **946 HUD checks** and **59,452 settings checks**.
@@ -55,10 +64,10 @@ The production diagnostic uses the game's real handler and native commands, but 
 
 ## Installation and the next review
 
-The **41 files in the usual profile** retained their bytes, sizes and timestamps during installation. Subsequent launcher preparation changed only the expected runtime receipt. Models, textures, lighting and the GPU backend were not changed by this update.
+During the initial controls installation, the **41 files in the usual profile** retained their bytes, sizes and timestamps. Subsequent launcher preparation changed only the expected runtime receipt. Models, textures, lighting and the GPU backend were not changed by this update.
 
 After the previous batch of GPU improvements, the author reported that “the game's performance improved a lot!” That feedback is a **subjective assessment of the earlier update**; first-person controls add neither an FPS measurement nor a new benchmark. The [zoom fix and GPU recovery](/devlog/gpu-zoom-recuperacao/) remain documented separately.
 
-The next step is to test through the usual launcher: mouse capture and release, Alt+Tab, interfaces, the crosshair and clicks on NPCs and items. Legacy demo recording/playback, capture in SDL1 and camera collision with architecture are outside this increment.
+The next step is to test through the usual launcher: eye height around townspeople, mouse capture and release, Alt+Tab, interfaces, the crosshair and clicks on NPCs and items. Legacy demo recording/playback, capture in SDL1 and camera collision with architecture are outside this increment.
 
 The goal remains **all of Diablo 1 in 3D**. These controls apply to the Tristram prototype; the other levels still use the original rendering. The [queue for this revision](https://github.com/douglasopan/diablo-3d/blob/a227d4afcab5829cfa82ab9bad9e0eac34a2c9c9/docs/PROJECT-EXECUTION.md) retains model review and the next dependencies.
