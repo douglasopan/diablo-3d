@@ -285,6 +285,8 @@ void ResetMeshResources()
 
 bool MakeMeshRoom(size_t bytes)
 {
+	if (bytes > MaxMeshBytes)
+		return Fail("GPU mesh payload exceeds the mesh-cache budget", S_OK, TownGpuFailureKind::Capacity);
 	while (MeshBytes > MaxMeshBytes - bytes) {
 		auto oldest = MeshCache.end();
 		for (auto entry = MeshCache.begin(); entry != MeshCache.end(); ++entry) {
@@ -293,7 +295,7 @@ bool MakeMeshRoom(size_t bytes)
 				oldest = entry;
 		}
 		if (oldest == MeshCache.end())
-			return Fail("GPU mesh-cache budget exceeded by current-frame resources");
+			return Fail("GPU mesh-cache budget exceeded by current-frame resources", S_OK, TownGpuFailureKind::Capacity);
 		MeshBytes -= oldest->second.bytes;
 		MeshCache.erase(oldest);
 		++MeshStats.evictions;
@@ -394,8 +396,7 @@ bool TownGpuUploadMesh(const TownGpuMeshUpload &input)
 #ifdef _WIN32
 	if (!FrameActive || FrameFailed)
 		return Fail("No valid GPU frame is recording a mesh upload");
-	if (input.identity.stableKey == 0 || input.vertices.empty() || input.indices.empty()
-	    || input.vertices.size() > MaxTriangles * 3 || input.indices.size() > MaxTriangles * 3 || input.indices.size() % 3 != 0)
+	if (input.identity.stableKey == 0 || input.vertices.empty() || input.indices.empty() || input.indices.size() % 3 != 0)
 		return Fail("Invalid GPU mesh identity, vertex/index count or triangle-list layout");
 	const TextureKey key { input.identity.stableKey, input.identity.revision };
 	const auto found = MeshCache.find(key);
@@ -405,11 +406,15 @@ bool TownGpuUploadMesh(const TownGpuMeshUpload &input)
 		found->second.lastSeenFrame = FrameSerial;
 		return true;
 	}
+	// Check before multiplication. Mesh capacity is payload bytes, independent
+	// of how many times its index ranges are drawn in the current frame.
+	if (input.vertices.size() > MaxMeshBytes / sizeof(TownGpuMeshVertex) || input.indices.size() > MaxMeshBytes / sizeof(uint32_t))
+		return Fail("GPU immutable mesh buffer/cache budget exceeded", S_OK, TownGpuFailureKind::Capacity);
 	const size_t vertexBytes = input.vertices.size() * sizeof(TownGpuMeshVertex);
 	const size_t indexBytes = input.indices.size() * sizeof(uint32_t);
 	if (vertexBytes > std::numeric_limits<UINT>::max() || indexBytes > std::numeric_limits<UINT>::max()
 	    || vertexBytes > MaxMeshBytes || indexBytes > MaxMeshBytes - vertexBytes)
-		return Fail("GPU immutable mesh buffer/cache budget exceeded");
+		return Fail("GPU immutable mesh buffer/cache budget exceeded", S_OK, TownGpuFailureKind::Capacity);
 	for (const TownGpuMeshVertex &vertex : input.vertices) {
 		if (!BoundedMeshValues(vertex.position) || !BoundedMeshValues(vertex.uv) || !BoundedMeshValues(vertex.normal))
 			return Fail("GPU mesh vertices must have finite bounded position, UV and normal");
@@ -468,8 +473,10 @@ bool TownGpuSubmitMeshInstance(const TownGpuMeshInstance &instance, const TownGp
 	if (instance.firstIndex >= mesh.indexCount || instance.firstIndex % 3 != 0)
 		return Fail("Invalid GPU mesh first index");
 	const size_t count = instance.indexCount == 0 ? mesh.indexCount - instance.firstIndex : instance.indexCount;
-	if (count % 3 != 0 || count > mesh.indexCount - instance.firstIndex || count / 3 > MaxTriangles - Status.submittedTriangles)
-		return Fail("Invalid GPU mesh index range or frame triangle budget");
+	if (count % 3 != 0 || count > mesh.indexCount - instance.firstIndex)
+		return Fail("Invalid GPU mesh index range");
+	if (count / 3 > std::numeric_limits<size_t>::max() - Status.submittedTriangles)
+		return Fail("GPU submitted-triangle counter overflow", S_OK, TownGpuFailureKind::Capacity);
 	if (!ValidMeshAffine(instance.localToWorld) || !BoundedMeshValues(instance.toLight)
 	    || !Finite(instance.shadowDepthBias) || !Finite(instance.shadowSlopeBias)
 	    || instance.shadowDepthBias < 0 || instance.shadowDepthBias > 1 || instance.shadowSlopeBias < 0 || instance.shadowSlopeBias > 1

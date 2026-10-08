@@ -406,6 +406,151 @@ void CommandOrder()
 	EmptyFailure("late mesh camera mutation");
 }
 
+void ResidentDrawCountIsNotProjectedCapacity()
+{
+	std::cout << "CASE >1M resident triangles with a small immutable payload and ordered projected commands\n";
+	ResetTownGpuResources();
+	constexpr size_t TrianglesPerInstance = 4096;
+	constexpr size_t Instances = 257;
+	Mesh bulk;
+	// Three shared vertices, wholly offscreen. Repeated indices exercise draw
+	// count without a large payload or rasterizing a million overlapping faces.
+	bulk.vertices = {
+		{ { Width + 8.0F, -8, 100 }, { 0, 0 } },
+		{ { Width + 16.0F, -8, 100 }, { 1, 0 } },
+		{ { Width + 8.0F, -16, 100 }, { 0, 1 } },
+	};
+	bulk.indices.reserve(TrianglesPerInstance * 3);
+	for (size_t i = 0; i < TrianglesPerInstance; ++i)
+		bulk.indices.insert(bulk.indices.end(), { 0, 1, 2 });
+	Mesh marker = Quad(0, 0, 48, 48, 100);
+	Texture first;
+	first.codes[0] = 11;
+	Texture middle;
+	middle.codes[0] = 55;
+	Texture last;
+	last.codes[0] = 99;
+	if (!Begin())
+		return;
+	Check(marker.Upload(), "upload visible ordering marker");
+	Check(Projected(marker, Instance(marker, 971, 8, 8), first, {})
+	        && TownGpuSubmitMeshInstance(Instance(marker, 972, 8, 8), middle.View(), {})
+	        && Projected(marker, Instance(marker, 973, 24, 24), last, {}),
+	    "small projected/resident/projected reference");
+	const auto reference = End();
+	const size_t referenceProjectedBytes = GetTownGpuMeshStats().projectedUploadBytes;
+	for (const bool warm : { false, true }) {
+		if (!Begin())
+			return;
+		Check(bulk.Upload() && marker.Upload(), "cache small resident bulk and visible marker");
+		Check(Projected(marker, Instance(marker, 971, 8, 8), first, {}), "projected command before resident bulk");
+		bool recorded = true;
+		for (size_t i = 0; recorded && i < Instances; ++i) {
+			recorded = TownGpuSubmitMeshInstance(Instance(bulk, 974), first.View(), {});
+			if (recorded && i == Instances / 2)
+				recorded = TownGpuSubmitMeshInstance(Instance(marker, 972, 8, 8), middle.View(), {});
+		}
+		Check(recorded && GetTownGpuStatus().submittedTriangles > 1024 * 1024,
+		    "resident aggregate exceeds the old 1M cap without consuming projected capacity");
+		Check(Projected(marker, Instance(marker, 973, 24, 24), last, {}), "projected command still records after >1M resident triangles");
+		const auto actual = End();
+		SameFrame(reference, actual, "resident bulk preserves mixed command colors, IDs and depth");
+		Pixel(actual, 12, 12, 55, 972, 100, "middle visible resident command retains its order and pick");
+		Pixel(actual, 32, 32, 99, 973, 100, "last projected command wins after the resident aggregate");
+		const auto &stats = GetTownGpuMeshStats();
+		Check(GetTownGpuStatus().submittedTriangles == TrianglesPerInstance * Instances + 6
+		        && GetTownGpuStatus().drawCalls == Instances + 3 && stats.instances == Instances + 1,
+		    "total counters retain every resident triangle and ordered draw");
+		Check(referenceProjectedBytes > 0 && referenceProjectedBytes < 1024
+		        && stats.projectedUploadBytes == referenceProjectedBytes,
+		    "actual projected stream uploads only the four visible projected triangles");
+		Check(stats.residentBytes < 64 * 1024 && stats.uploadedVertexBytes + stats.uploadedIndexBytes < 64 * 1024,
+		    "million resident triangles reuse less than 64 KiB of immutable geometry");
+		Check(!warm || (stats.uploads == 0 && stats.uploadedVertexBytes == 0 && stats.uploadedIndexBytes == 0),
+		    "warm >1M resident draw frame performs zero geometry uploads");
+		Check(GetTownGpuStatus().failureKind == TownGpuFailureKind::None,
+		    "large resident aggregate publishes with no failure kind");
+	}
+}
+
+void FailureKindsAndFirstCause()
+{
+	std::cout << "CASE capacity/invalid-input classification, first cause and Begin/Reset lifecycle\n";
+	ResetTownGpuResources();
+	Check(GetTownGpuStatus().failureKind == TownGpuFailureKind::None && GetTownGpuStatus().failure.empty(),
+	    "reset clears typed failure and message");
+	Check(!TownGpuBeginFrame(0, Height, true) && GetTownGpuStatus().failureKind == TownGpuFailureKind::InvalidInput,
+	    "nonpositive frame dimensions are invalid input");
+	EmptyFailure("invalid dimensions");
+	Check(!TownGpuBeginFrame(2049, 2048, true) && GetTownGpuStatus().failureKind == TownGpuFailureKind::Capacity,
+	    "real pixel budget is recoverable capacity pressure");
+	const auto capacity = GetTownGpuStatus();
+	Texture texture;
+	Check(!TownGpuSubmitProjectedTriangle({}, texture.View(), {}, 0)
+	        && !TownGpuSubmitMeshInstance({}, texture.View(), {}) && !TownGpuSetShadow({}),
+	    "later recording guards reject a failed capacity frame");
+	Check(GetTownGpuStatus().failureKind == capacity.failureKind && GetTownGpuStatus().failure == capacity.failure,
+	    "later invalid-frame guards preserve the first capacity cause");
+	EmptyFailure("pixel capacity");
+	if (!Begin())
+		return;
+	Check(GetTownGpuStatus().failureKind == TownGpuFailureKind::None && GetTownGpuStatus().failure.empty(),
+	    "new Begin resets the first cause for a new workload");
+	Mesh marker = Quad(8, 8, 24, 24, 100);
+	Check(marker.Upload(), "upload valid range fixture");
+	auto invalid = Instance(marker, 975);
+	invalid.indexCount = 9;
+	Check(!TownGpuSubmitMeshInstance(invalid, texture.View(), {})
+	        && GetTownGpuStatus().failureKind == TownGpuFailureKind::InvalidInput,
+	    "invalid resident range is not recoverable capacity pressure");
+	const auto input = GetTownGpuStatus();
+	Check(!TownGpuSetMeshCamera({}) && GetTownGpuStatus().failure == input.failure
+	        && GetTownGpuStatus().failureKind == input.failureKind,
+	    "later camera guard preserves the first invalid-input cause");
+	EmptyFailure("invalid resident range");
+	ResetTownGpuResources();
+	Check(GetTownGpuStatus().failureKind == TownGpuFailureKind::None && GetTownGpuStatus().failure.empty(),
+	    "explicit resource reset clears typed failure");
+}
+
+void ProjectedStreamCapacity()
+{
+	std::cout << "CASE actual projected-stream boundary; bounded CPU recording, no large GPU upload\n";
+	// This is the real 240 MiB CPU-expanded stream limit. Never submit it to
+	// EndFrame successfully: the next triangle must fail before a GPU upload.
+	constexpr size_t ProjectedTriangleCapacity = 1024 * 1024;
+	Texture texture;
+	const std::array<TownGpuVertex, 3> triangle { {
+		{ Width + 8.0F, 8, 100, 0, 0, { Width + 8.0F, -8, 100 } },
+		{ Width + 16.0F, 8, 100, 1, 0, { Width + 16.0F, -8, 100 } },
+		{ Width + 8.0F, 16, 100, 0, 1, { Width + 8.0F, -16, 100 } },
+	} };
+	if (!Begin())
+		return;
+	size_t recorded = 0;
+	while (recorded < ProjectedTriangleCapacity && TownGpuSubmitProjectedTriangle(triangle, texture.View(), {}, 976))
+		++recorded;
+	Check(recorded == ProjectedTriangleCapacity && GetTownGpuStatus().submittedTriangles == recorded,
+	    "real projected capacity accepts exactly 1M expanded triangles");
+	Check(!TownGpuSubmitProjectedTriangle(triangle, texture.View(), {}, 976)
+	        && GetTownGpuStatus().failureKind == TownGpuFailureKind::Capacity,
+	    "one extra projected triangle fails at the actual CPU vertex-stream bound");
+	const auto capacity = GetTownGpuStatus();
+	Check(!TownGpuSetShadow({}) && !TownGpuSubmitMeshInstance({}, texture.View(), {})
+	        && GetTownGpuStatus().failure == capacity.failure && GetTownGpuStatus().failureKind == capacity.failureKind,
+	    "projected-stream capacity remains the first cause after later invalid guards");
+	Check(GetTownGpuMeshStats().projectedUploadBytes == 0 && GetTownGpuStatus().submittedTriangles == recorded,
+	    "overflow appends no triangle and sends zero expanded vertices to the GPU");
+	EmptyFailure("projected stream capacity");
+	if (!Begin())
+		return;
+	Check(GetTownGpuStatus().failureKind == TownGpuFailureKind::None && GetTownGpuStatus().failure.empty(),
+	    "smaller workload Begin clears the capacity state");
+	Mesh marker = Quad(8, 8, 24, 24, 100);
+	Check(Projected(marker, Instance(marker, 977), texture, {}), "small projected workload records after capacity failure");
+	Pixel(End(), 16, 16, 73, 977, 100, "small new frame succeeds after capacity rejection");
+}
+
 void MaterialParity(const std::string &name, Mesh &mesh, Texture &texture, const TownGpuMaterial &material,
     const TownGpuShadow &shadow = {})
 {
@@ -942,12 +1087,15 @@ int main()
 	IdentityAndRanges();
 	LargeIndicesAndState();
 	CommandOrder();
+	ResidentDrawCountIsNotProjectedCapacity();
+	FailureKindsAndFirstCause();
 	Materials();
 	BorrowedLighting();
 	VertexNormals();
 	UnequalAxisNormals();
 	Clipping();
 	LegacyVolumes();
+	ProjectedStreamCapacity();
 	ResetTownGpuResources();
 	std::cout << (Failures == 0 ? "PASS " : "FAIL ") << Checks << " checks; " << Failures << " failures\n";
 	return Failures == 0 ? 0 : 1;

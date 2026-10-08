@@ -70,6 +70,7 @@
 #include "town_camera_capture_checks.hpp"
 #include "town_architecture_culling_checks.hpp"
 #include "town_resident_mesh_checks.hpp"
+#include "town_gpu_recovery_checks.hpp"
 #include "ingame_menu_visual_checks.hpp"
 
 namespace {
@@ -4228,7 +4229,7 @@ std::string CheckGpuWorldBudgetFallback()
 		failure = fallback.failure;
 		Check(fallback.requestedGpu && !fallback.usedGpu && fallback.cpuRasterizedTriangles > 0
 		        && fallback.gpuSubmittedTriangles == 0 && !rejected.frameSucceeded && rejected.drawCalls == 0
-		        && failure.find("pixel budget") != std::string::npos,
+		        && rejected.failureKind == TownGpuFailureKind::Capacity && failure.find("pixel budget") != std::string::npos,
 		    "real GPU budget failure is explicit and occurs before any triangle submission: " + failure);
 		Check(GetTownViewSamplingState().factor == 1 && GetTownViewHighResolutionFrame() == nullptr
 		        && ViewportPixels(out) == referencePixels && InspectQualityPicking(out).hash == referencePicking.hash,
@@ -4253,6 +4254,14 @@ std::string CheckGpuWorldBudgetFallback()
 	OwnedSurface recovery(640, 482);
 	SDL_FillRect(recovery.surface, nullptr, 255);
 	const Surface out = recovery.subregionY(0, 480);
+	// The request stays ON. Capacity recovery must notice a supported workload
+	// without requiring the player to toggle the renderer manually.
+	SDL_Delay(TownGpuRecoveryPolicy::RetryDelayMilliseconds);
+	Check(DrawTownView(out, true) && GetTownViewRendererState().requestedGpu && GetTownViewRendererState().usedGpu
+	        && GetTownViewRendererState().cpuRasterizedTriangles == 0 && GetTownViewRendererState().failure.empty()
+	        && GetTownGpuStatus().frameSucceeded && !GetTownGpuStatus().warp
+	        && GetTownGpuStatus().failureKind == TownGpuFailureKind::None && InspectQualityPicking(out).valid,
+	    "capacity pressure recovers hardware automatically after viewport change without OFF/ON");
 	GetOptions().Graphics.townViewGpuRendering.SetValue(false);
 	Check(DrawTownView(out, true) && !GetTownViewRendererState().usedGpu && GetTownViewRendererState().failure.empty(),
 	    "switching GPU off clears the blocked backend after returning to a supported viewport");
@@ -4271,7 +4280,7 @@ std::string CheckGpuWorldBudgetFallback()
 	std::ostringstream result;
 	result << "{\"width\":2304,\"viewportHeight\":" << budgetViewportHeight
 	       << ",\"qualityRequested\":false,\"requestedGpu\":true,\"usedGpu\":false,\"failure\":" << std::quoted(failure)
-	       << ",\"exactCpuFallback\":true,\"repeatedBlockedFrameExact\":true,\"hardwareRecoveredAfterOffOn\":true,\"fallbackFullDrawMilliseconds\":"
+	       << ",\"exactCpuFallback\":true,\"repeatedBlockedFrameExact\":true,\"hardwareRecoveredAutomaticallyAfterResize\":true,\"hardwareRecoveredAfterOffOn\":true,\"fallbackFullDrawMilliseconds\":"
 	       << fallbackMilliseconds << '}';
 	Record("INFO GPU real budget fallback " + result.str());
 	return result.str();
@@ -4677,12 +4686,14 @@ int main(int argc, char **argv)
 	const bool presentation = argc == 5 && std::string(argv[4]) == "--presentation";
 	const bool quality = argc == 5 && std::string(argv[4]) == "--quality";
 	const bool gpu = argc == 5 && std::string(argv[4]) == "--gpu";
+	const bool gpuRecovery = argc == 5 && std::string(argv[4]) == "--gpu-recovery";
 	const bool camera = argc == 5 && std::string(argv[4]) == "--camera";
 	const bool cameraExtra = argc == 5 && std::string(argv[4]) == "--camera-extra";
 	const bool architectureCulling = argc == 5 && std::string(argv[4]) == "--architecture-culling";
 	const bool firstPersonPerformance = argc == 5 && std::string(argv[4]) == "--first-person-performance";
 	const bool residentMeshes = argc == 5 && (std::string(argv[4]) == "--resident-meshes" || std::string(argv[4]) == "--resident-fullhd");
 	const bool residentFullHd = residentMeshes && std::string(argv[4]) == "--resident-fullhd";
+	const bool residentZoomStress = argc == 5 && std::string(argv[4]) == "--resident-zoom-stress";
 	const bool ingameMenuVisual = argc == 5 && std::string(argv[4]) == "--ingame-menu-visual";
 	const bool cabinOpenings = argc == 5 && std::string(argv[4]) == "--cabin-openings";
 	const bool cabinReview = argc == 5 && std::string(argv[4]) == "--cabin-review";
@@ -4691,8 +4702,8 @@ int main(int argc, char **argv)
 	const bool layers = argc == 3 && std::string(argv[1]) == "--presentation-layers";
 	const bool gpuFixtures = argc == 3 && std::string(argv[1]) == "--gpu-fixtures";
 	const bool synthetic = layers || gpuFixtures;
-	if (argc != 4 && !presentation && !quality && !gpu && !camera && !cameraExtra && !architectureCulling && !firstPersonPerformance && !residentMeshes && !ingameMenuVisual && !cabinOpenings && !cabinReview && !editorSnapshot && !editorChecks && !synthetic) {
-		std::cerr << "Usage: town_view_smoke <game-data-directory> <built-assets-directory> <capture-directory> [--presentation|--quality|--gpu|--camera|--camera-extra|--architecture-culling|--first-person-performance|--resident-meshes|--resident-fullhd|--ingame-menu-visual|--cabin-openings|--cabin-review|--editor-snapshot|--editor-map-checks]\n"
+	if (argc != 4 && !presentation && !quality && !gpu && !gpuRecovery && !camera && !cameraExtra && !architectureCulling && !firstPersonPerformance && !residentMeshes && !residentZoomStress && !ingameMenuVisual && !cabinOpenings && !cabinReview && !editorSnapshot && !editorChecks && !synthetic) {
+		std::cerr << "Usage: town_view_smoke <game-data-directory> <built-assets-directory> <capture-directory> [--presentation|--quality|--gpu|--gpu-recovery|--camera|--camera-extra|--architecture-culling|--first-person-performance|--resident-meshes|--resident-fullhd|--resident-zoom-stress|--ingame-menu-visual|--cabin-openings|--cabin-review|--editor-snapshot|--editor-map-checks]\n"
 		          << "       town_view_smoke --presentation-layers <synthetic-capture-directory>\n"
 		          << "       town_view_smoke --gpu-fixtures <synthetic-capture-directory>\n";
 		return 2;
@@ -4734,6 +4745,14 @@ int main(int argc, char **argv)
 			RunQuality(output);
 		else if (gpu)
 			RunGpuWorld(output);
+		else if (gpuRecovery) {
+			RunTownGpuRecoveryPolicyChecks(Check);
+			InitializeTownDiagnostic();
+			if (!IsTownViewActive())
+				ToggleTownView();
+			CheckGpuWorldBudgetFallback();
+			FreeTownerGFX();
+		}
 		else if (camera) {
 			RunTownCameraRuntimeEntry(output, InitializeTownDiagnostic, Check, NativeSceneState, ViewportPixels, SavePng, std::cout);
 			FreeTownerGFX();
@@ -4753,19 +4772,22 @@ int main(int argc, char **argv)
 			}
 			FreeTownerGFX();
 		}
-		else if (residentMeshes) {
+		else if (residentMeshes || residentZoomStress) {
 			InitializeTownDiagnostic();
-			gnScreenWidth = residentFullHd ? 1920 : 960;
-			gnScreenHeight = residentFullHd ? 1080 : 540;
+			gnScreenWidth = residentFullHd || residentZoomStress ? 1920 : 960;
+			gnScreenHeight = residentFullHd || residentZoomStress ? 1080 : 540;
 			CalculatePanelAreas();
 			CalcViewportGeometry();
 			OwnedSurface out(gnScreenWidth, gnScreenHeight);
 			SDL_SetPaletteColors(out.surface->format->palette, logical_palette.data(), 0, 256);
-			GetOptions().Graphics.townViewCameraFov.SetValue(80);
-			if (residentFullHd) {
+			if (residentZoomStress) {
+				RunTownResidentZoomStressChecks(out, Check, NativeSceneState, ViewportPixels, std::cout);
+			} else if (residentFullHd) {
+				GetOptions().Graphics.townViewCameraFov.SetValue(80);
 				for (const int mode : { 2, 3 })
 					RunTownResidentMeshCaptureChecks(out, Check, NativeSceneState, ViewportPixels, std::cout, mode, false);
 			} else {
+				GetOptions().Graphics.townViewCameraFov.SetValue(80);
 				RunTownResidentMeshCaptureChecks(out, Check, NativeSceneState, ViewportPixels, std::cout);
 			}
 			FreeTownerGFX();

@@ -110,6 +110,17 @@ struct TownGpuFrame {
 	std::vector<float> depth;
 };
 
+/** Capacity is a bounded workload/resource limit, distinct from invalid input
+ * or device failure. A failed recording retains its first cause until Begin
+ * or Reset; callers may retry capacity pressure after the workload changes. */
+enum class TownGpuFailureKind {
+	None,
+	Capacity,
+	InvalidInput,
+	Device,
+	Unsupported,
+};
+
 struct TownGpuStatus {
 	bool available = false;
 	bool frameSucceeded = false;
@@ -117,6 +128,8 @@ struct TownGpuStatus {
 	std::string adapter;
 	uint32_t featureLevel = 0;
 	std::string failure;
+	TownGpuFailureKind failureKind = TownGpuFailureKind::None;
+	/** Aggregate draws, including reused resident indices. Not a stream budget. */
 	size_t submittedTriangles = 0;
 	size_t drawCalls = 0;
 	size_t cachedTextures = 0;

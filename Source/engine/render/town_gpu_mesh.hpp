@@ -97,11 +97,13 @@ bool TownGpuSetMeshCamera(const TownGpuMeshCamera &camera);
  * mark the frame failed or retain the mesh. Upload again on a cache miss. */
 bool TownGpuHasMesh(TownGpuMeshIdentity identity);
 /** Requires a valid recording frame. Repeated identity/layout is O(1), without
- * scanning payloads; identical identity means identical immutable contents. */
+ * scanning payloads; identical identity means identical immutable contents.
+ * Capacity is the 256 MiB immutable payload budget, not projected vertices. */
 bool TownGpuUploadMesh(const TownGpuMeshUpload &mesh);
 /** Preserves the exact submission order with SubmitProjectedTriangle. GPU
  * performs homogeneous clipping and projection; spans are not needed on hits.
  * Material, texture, light/room/blocker spans are consumed before returning.
+ * Repeated draws do not consume the separate CPU projected-vertex capacity.
  * Any failure invalidates the entire frame, using the existing CPU fallback. */
 bool TownGpuSubmitMeshInstance(const TownGpuMeshInstance &instance,
     const TownGpuTexture &texture, const TownGpuMaterial &material);

@@ -324,4 +324,241 @@ void RunTownResidentMeshCaptureChecks(const Surface &out, CheckFn check,
 	check(nativeSnapshot() == native && GetLCGEngineState() == random, "resident fixture restores native state and RNG");
 }
 
+/** Reproduces the wide third-person view which exhausted the former shared
+ * 1,048,576-triangle budget. Uses the caller's real map/assets, never trims the
+ * scene, and requires a completed hardware frame beyond that former limit.
+ * Exact full-color and bounded semantic/depth probes compare repeated frames
+ * of this same resident path; projected/resident parity remains in the suite
+ * above. No profile/save writes or simulation/RNG operations are performed. */
+template <typename CheckFn, typename SnapshotFn, typename PixelsFn>
+void RunTownResidentZoomStressChecks(const Surface &out, CheckFn check,
+    SnapshotFn nativeSnapshot, PixelsFn viewportPixels, std::ostream &report,
+    bool restoreResidentEnabled = true, double restoreFireTime = 0)
+{
+	struct Probe {
+		Point point;
+		Point tile { -1, -1 };
+		int npc = -1, item = -1, player = -1, architecture = -1;
+		float depth = std::numeric_limits<float>::infinity();
+		bool picked = false;
+		bool Same(const Probe &other) const
+		{
+			return point == other.point && tile == other.tile && npc == other.npc && item == other.item
+			    && player == other.player && architecture == other.architecture && depth == other.depth && picked == other.picked;
+		}
+	};
+	struct Frame {
+		std::vector<uint8_t> color;
+		std::vector<Probe> probes;
+		TownGpuStatus gpu;
+		TownGpuMeshStats meshes;
+	};
+	GraphicsOptions &graphics = GetOptions().Graphics;
+	const auto native = nativeSnapshot();
+	const auto random = GetLCGEngineState();
+	const bool active = IsTownViewActive();
+	const auto originalMode = GetTownViewCameraMode();
+	const bool originalGpu = *graphics.townViewGpuRendering;
+	const bool originalAA = *graphics.townViewAntialiasing;
+	const bool originalCulling = *graphics.townViewFrustumCulling;
+	const bool originalHorizon = *graphics.townViewHorizon;
+	const bool originalZoom = *graphics.zoom;
+	const auto originalFov = *graphics.townViewCameraFov;
+	const auto originalStartupMode = *graphics.townViewCameraMode;
+	const bool originalFire = GetTownViewLightingState().cabinFireEnabled;
+	const bool originalShadows = GetTownViewLightingState().directionalShadowsEnabled;
+	std::array<TownCameraPose, 4> originalPoses;
+	for (size_t i = 0; i < originalPoses.size(); ++i) {
+		SetTownViewCameraMode(static_cast<TownCameraMode>(i));
+		const auto state = GetTownViewCameraState();
+		originalPoses[i] = { state.yaw, state.pitch, state.distance, { state.offsetX, 0, state.offsetZ } };
+	}
+	const auto restore = [&]() {
+		graphics.townViewGpuRendering.SetValue(originalGpu);
+		graphics.townViewAntialiasing.SetValue(originalAA);
+		graphics.townViewFrustumCulling.SetValue(originalCulling);
+		graphics.townViewHorizon.SetValue(originalHorizon);
+		graphics.zoom.SetValue(originalZoom);
+		graphics.townViewCameraFov.SetValue(originalFov);
+		ApplyTownViewCameraPreferences();
+		SetTownViewResidentMeshesEnabledForDiagnostics(restoreResidentEnabled);
+		SetTownViewRasterJitterForDiagnostics(0, 0);
+		SetTownViewCabinFireEnabledForDiagnostics(originalFire);
+		SetTownViewDirectionalShadowsEnabledForDiagnostics(originalShadows);
+		SetTownViewFireTimeForDiagnostics(restoreFireTime);
+		for (size_t i = 0; i < originalPoses.size(); ++i) {
+			SetTownViewCameraMode(static_cast<TownCameraMode>(i));
+			SetTownViewCameraPoseForDiagnostics(originalPoses[i]);
+		}
+		SetTownViewCameraMode(originalMode);
+		if (IsTownViewActive() != active)
+			ToggleTownView();
+	};
+	// Check() throws on failure in the real caller: restore options/poses even
+	// when an old executable reproduces the budget error on its first wide view.
+	struct RestoreOnExit {
+		const decltype(restore) &callback;
+		bool enabled = true;
+		~RestoreOnExit() { if (enabled) callback(); }
+	} restoreOnExit { restore };
+	if (!IsTownViewActive())
+		ToggleTownView();
+	graphics.townViewGpuRendering.SetValue(true);
+	graphics.townViewAntialiasing.SetValue(true);
+	graphics.townViewFrustumCulling.SetValue(true);
+	graphics.townViewHorizon.SetValue(true);
+	graphics.zoom.SetValue(true);
+	graphics.townViewCameraFov.SetValue(80);
+	ApplyTownViewCameraPreferences();
+	SetTownViewResidentMeshesEnabledForDiagnostics(true);
+	SetTownViewFireTimeForDiagnostics(1.25);
+	SetTownViewCabinFireEnabledForDiagnostics(true);
+	SetTownViewDirectionalShadowsEnabledForDiagnostics(true);
+	SetTownViewRasterJitterForDiagnostics(0, 0);
+	ResetTownGpuResources();
+	constexpr size_t FormerSharedTriangleLimit = 1024 * 1024;
+	size_t maximumTriangles = 0;
+	const auto capture = [&]() {
+		Frame frame;
+		frame.color = viewportPixels(out);
+		frame.gpu = GetTownGpuStatus();
+		frame.meshes = GetTownGpuMeshStats();
+		// Full color comparison is cheap. Picking APIs are sampled on a fixed
+		// 33 x 19 grid rather than visiting every Full HD pixel for every pose.
+		for (int row = 0; row < 19; ++row) {
+			for (int column = 0; column < 33; ++column) {
+				Probe probe;
+				probe.point = { column * (out.w() - 1) / 32, row * (gnViewportHeight - 1) / 18 };
+				probe.picked = PickTownView(probe.point, probe.tile, probe.npc, probe.item, probe.player);
+				probe.architecture = TownViewArchitectureAt(probe.point);
+				probe.depth = TownViewDepthAt(probe.point);
+				frame.probes.push_back(probe);
+			}
+		}
+		return frame;
+	};
+	const auto draw = [&](const std::string &label, bool expectResident) {
+		const bool drawn = DrawTownView(out, true);
+		const auto renderer = GetTownViewRendererState();
+		const auto &gpu = GetTownGpuStatus();
+		const auto &mesh = GetTownGpuMeshStats();
+		const auto camera = GetTownViewCameraState();
+		const auto sampling = GetTownViewSamplingState();
+		report << "RESIDENT_ZOOM_FRAME label=" << label << " mode=" << static_cast<int>(camera.mode)
+		       << " yaw=" << camera.yaw << " pitch=" << camera.pitch << " distance=" << camera.distance
+		       << " pan=" << camera.offsetX << ',' << camera.offsetZ << " fov=" << camera.verticalFovDegrees
+		       << " raster=" << sampling.width << 'x' << sampling.height << " requestedAA=" << sampling.requested
+		       << " sampling=" << sampling.factor << " limited=" << sampling.limited
+		       << " usedGpu=" << renderer.usedGpu << " cpuTriangles=" << renderer.cpuRasterizedTriangles
+		       << " triangles=" << gpu.submittedTriangles << " instances=" << mesh.instances
+		       << " reused=" << mesh.reusedInstances << " cachedMeshes=" << mesh.cachedMeshes
+		       << " residentBytes=" << mesh.residentBytes << " geometryUploads=" << mesh.uploads
+		       << " projectedUploadBytes=" << mesh.projectedUploadBytes << " evictions=" << mesh.evictions
+		       << " texelUploadBytes=" << gpu.uploadedTexelBytes << " lutUploadBytes=" << gpu.uploadedLutBytes
+		       << " worldMs=" << renderer.worldMilliseconds << " adapter=" << gpu.adapter
+		       << " rendererFailure=" << renderer.failure << " gpuFailure=" << gpu.failure << '\n';
+		check(drawn && renderer.requestedGpu && renderer.usedGpu && renderer.cpuRasterizedTriangles == 0
+		        && renderer.failure.empty() && gpu.frameSucceeded && !gpu.warp,
+		    label + " hardware GPU completes the entire wide frame without CPU/WARP fallback");
+		check(camera.verticalFovDegrees == 80 && sampling.requested && *graphics.zoom
+		        && *graphics.townViewFrustumCulling && *graphics.townViewHorizon
+		        && GetTownViewLightingState().cabinFireEnabled && GetTownViewLightingState().directionalShadowsEnabled,
+		    label + " real profile FOV/AA/culling/horizon/fire/shadows stay enabled");
+		check(out.w() == 1920 && gnViewportHeight == 1080 && sampling.factor == 1 && sampling.limited,
+		    label + " Full HD keeps requested smoothing and its declared effective 1x budget");
+		check(expectResident ? mesh.instances > 0 : mesh.instances == 0,
+		    label + " expected perspective resident or orthographic projected path is exercised");
+		maximumTriangles = std::max(maximumTriangles, gpu.submittedTriangles);
+		return capture();
+	};
+	const auto compare = [&](const Frame &a, const Frame &b, const std::string &label) {
+		check(a.color.size() == static_cast<size_t>(out.w()) * gnViewportHeight && a.color == b.color,
+		    label + " complete repeated-frame color is exact");
+		check(a.probes.size() == 33 * 19 && a.probes.size() == b.probes.size()
+		        && std::equal(a.probes.begin(), a.probes.end(), b.probes.begin(), [](const Probe &x, const Probe &y) { return x.Same(y); }),
+		    label + " fixed-grid semantic picking and depth remain exact");
+	};
+	const auto warm = [&](const Frame &frame, const std::string &label, bool resident) {
+		check(frame.meshes.uploads == 0 && frame.meshes.uploadedVertexBytes == 0 && frame.meshes.uploadedIndexBytes == 0
+		        && frame.meshes.evictions == 0 && (!resident || frame.meshes.instances == frame.meshes.reusedInstances),
+		    label + " warmed geometry is resident without uploads or eviction");
+		check(frame.gpu.uploadedTexelBytes == 0 && frame.gpu.uploadedLutBytes == 0,
+		    label + " warmed texture/LUT payloads are reused");
+	};
+	struct Case {
+		const char *name;
+		TownCameraMode mode;
+		TownCameraPose pose;
+		bool wheelToMaximum = false;
+	};
+	const std::array<Case, 8> cases { {
+		{ "third-near", TownCameraMode::ThirdPerson, { 0.7853981634F, 0.3F, 5, {} } },
+		{ "third-distance22", TownCameraMode::ThirdPerson, { 0.7853981634F, 0.3F, 22, {} } },
+		{ "third-distance52", TownCameraMode::ThirdPerson, { 0.7853981634F, 0.3F, 52, {} } },
+		{ "third-wheel-maximum", TownCameraMode::ThirdPerson, { 0.7853981634F, 0.3F, 5, {} }, true },
+		{ "third-maximum-high", TownCameraMode::ThirdPerson, { 0.7853981634F, 0.7F, 80, {} } },
+		{ "third-maximum-rotated", TownCameraMode::ThirdPerson, { 1.5707963268F, 0.55F, 80, {} } },
+		{ "third-maximum-opposite", TownCameraMode::ThirdPerson, { -2.3561944902F, 0.7F, 80, {} } },
+		{ "orbit-whole-town", TownCameraMode::FreeOrbit, { 0.7853981634F, 0.7F, 80, { -20, 0, -20 } } }
+	} };
+	std::vector<float> shadowDepth;
+	uint64_t shadowHash = 0;
+	for (const Case &test : cases) {
+		SetTownViewCameraMode(test.mode);
+		SetTownViewCameraPoseForDiagnostics(test.pose);
+		if (test.wheelToMaximum) {
+			ZoomTownView(-50);
+			check(GetTownViewCameraState().distance == 80, "negative mouse wheel reaches the supported third-person maximum distance");
+		}
+		const std::string label = std::string("resident zoom ") + test.name;
+		const Frame cold = draw(label + " first", true);
+		if (shadowDepth.empty()) {
+			const auto view = GetTownShadowMapView();
+			shadowDepth.assign(view.depth.begin(), view.depth.end());
+			shadowHash = GetTownShadowStats().sceneHash;
+			check(!shadowDepth.empty(), "zoom stress uses the complete actual-asset shadow map");
+		}
+		const Frame repeated = draw(label + " warm", true);
+		warm(repeated, label, true);
+		compare(cold, repeated, label);
+		check(nativeSnapshot() == native && GetLCGEngineState() == random, label + " native state/collision/actors/RNG preserved");
+	}
+	check(maximumTriangles > FormerSharedTriangleLimit,
+	    "actual-asset zoom stress completes at least one frame above the former shared million-triangle cap");
+	SetTownViewCameraMode(TownCameraMode::Isometric);
+	SetTownViewCameraPoseForDiagnostics({ 1.0053981634F, 0.5235987756F, 52, {} });
+	const Frame iso = draw("resident zoom isometric return", false);
+	const Frame isoWarm = draw("resident zoom isometric warm", false);
+	warm(isoWarm, "resident zoom isometric", false);
+	compare(iso, isoWarm, "resident zoom isometric return");
+	SetTownViewCameraMode(TownCameraMode::ThirdPerson);
+	SetTownViewCameraPoseForDiagnostics({ 0.7853981634F, 0.7F, 80, {} });
+	const Frame beforeReset = draw("resident zoom wide return", true);
+	ResetTownGpuResources();
+	const Frame resetCold = draw("resident zoom resource reset cold", true);
+	check(resetCold.meshes.uploads > 0 && resetCold.meshes.uploadedVertexBytes > 0 && resetCold.meshes.uploadedIndexBytes > 0,
+	    "resident zoom resource reset recreates actual immutable mesh buffers");
+	compare(beforeReset, resetCold, "resident zoom resource reset");
+	const Frame resetWarm = draw("resident zoom resource reset warm", true);
+	warm(resetWarm, "resident zoom resource reset", true);
+	compare(resetCold, resetWarm, "resident zoom resource reset warm");
+	const auto shadowAfter = GetTownShadowMapView();
+	check(GetTownShadowStats().sceneHash == shadowHash && shadowAfter.depth.size() == shadowDepth.size()
+	        && std::equal(shadowDepth.begin(), shadowDepth.end(), shadowAfter.depth.begin()),
+	    "wide views, isometric return and GPU reset preserve the complete shadow map");
+	report << "RESIDENT_ZOOM_RESULT maximumCompletedTriangles=" << maximumTriangles
+	       << " formerLimit=" << FormerSharedTriangleLimit << " poses=" << cases.size()
+	       << " colorComparison=full semanticDepthGrid=33x19 cpuFallback=0 hardwareRequired=1 sustainedGameplayFps=0\n";
+	restore();
+	restoreOnExit.enabled = false;
+	check(*graphics.townViewGpuRendering == originalGpu && *graphics.townViewAntialiasing == originalAA
+	        && *graphics.townViewFrustumCulling == originalCulling && *graphics.townViewHorizon == originalHorizon
+	        && *graphics.zoom == originalZoom
+	        && *graphics.townViewCameraFov == originalFov && *graphics.townViewCameraMode == originalStartupMode
+	        && GetTownViewCameraMode() == originalMode && IsTownViewActive() == active,
+	    "zoom stress restores graphics preferences, startup mode and active camera mode");
+	check(nativeSnapshot() == native && GetLCGEngineState() == random,
+	    "zoom stress restores native state and RNG without profile/save writes");
+}
+
 } // namespace devilution

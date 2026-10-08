@@ -32,6 +32,7 @@
 #include "engine/render/town_ground_shadow.hpp"
 #include "engine/render/town_gpu.hpp"
 #include "engine/render/town_gpu_mesh.hpp"
+#include "engine/render/town_gpu_recovery.hpp"
 #include "engine/render/town_horizon.hpp"
 #include "engine/render/town_lighting.hpp"
 #include "engine/render/town_lighting_profile.hpp"
@@ -277,7 +278,7 @@ bool CaptureGpu = false;
 bool CaptureGpuFailed = false;
 bool ResidentMeshesEnabledForDiagnostics = true;
 std::array<float, 2> RasterJitterForDiagnostics {};
-bool GpuBlocked = false;
+TownGpuRecoveryPolicy GpuRecovery;
 std::string GpuFailure;
 uint64_t GpuFrameNumber = 0;
 TownGpuFrame GpuFrame;
@@ -571,7 +572,8 @@ void ClearGpuSceneResources()
 	GpuPickIds.clear();
 	GpuFrame = {};
 	RendererState = {};
-	CaptureGpu = CaptureGpuFailed = GpuBlocked = false;
+	CaptureGpu = CaptureGpuFailed = false;
+	GpuRecovery.DisableOrReset();
 	GpuFailure.clear();
 }
 
@@ -2700,7 +2702,8 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 	RendererState.requestedGpu = *GetOptions().Graphics.townViewGpuRendering;
 	CaptureGpu = CaptureGpuFailed = false;
 	if (!RendererState.requestedGpu) {
-		GpuBlocked = false;
+		if (GpuRecovery.DisableOrReset())
+			ResetTownGpuResources();
 		GpuFailure.clear();
 	}
 	if (!IsTownViewActive() || !pDungeonCels || MicroTileLen == 0 || MyPlayer == nullptr) {
@@ -2774,7 +2777,13 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 	shadowConfig.toLight = { SceneLightingConfig.toLight.x, SceneLightingConfig.toLight.height, SceneLightingConfig.toLight.z };
 	BuildTownShadowMap(GetTownScene(), shadowConfig);
 	++GpuFrameNumber;
-	if (RendererState.requestedGpu && !GpuBlocked) {
+	const TownGpuRecoveryKey recoveryKey {
+		CameraRig.revision(), GetTownSceneRevision(),
+		{ ViewCamera.projection.eye.x, ViewCamera.projection.eye.height, ViewCamera.projection.eye.z },
+		{ ViewCamera.projection.centerX, ViewCamera.projection.centerY },
+		out.w(), out.h(), RasterSampleFactor, horizonEnabled, ArchitectureCullingState.requested, *GetOptions().Graphics.zoom
+	};
+	if (GpuRecovery.ShouldAttempt(RendererState.requestedGpu, recoveryKey, SDL_GetTicks())) {
 		PrepareFrameImportedAlbedo();
 		CaptureGpu = TownGpuBeginFrame(out.w(), out.h(), false,
 		    { ViewCamera.projection.perspective, ViewCamera.projection.nearClip, ViewCamera.projection.farClip });
@@ -2801,7 +2810,7 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 			if (!CaptureGpuFailed && ResidentMeshesEnabledForDiagnostics)
 				ConfigureResidentMeshCamera();
 		} else {
-			GpuBlocked = true;
+			GpuRecovery.RecordFailure(GetTownGpuStatus().failureKind, recoveryKey, SDL_GetTicks());
 			GpuFailure = GetTownGpuStatus().failure;
 		}
 	}
@@ -2914,8 +2923,10 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 			for (size_t i = 0; i < PickBuffer.size(); ++i)
 				PickBuffer[i] = GpuPickRecords[GpuFrame.pickIds[i]];
 			RendererState.usedGpu = true;
+			GpuRecovery.RecordSuccess();
+			GpuFailure.clear();
 		} else {
-			GpuBlocked = true;
+			GpuRecovery.RecordFailure(GetTownGpuStatus().failureKind, recoveryKey, SDL_GetTicks());
 			GpuFailure = GetTownGpuStatus().failure;
 			if (GpuFailure.empty())
 				GpuFailure = "GPU frame validation failed";
@@ -2958,10 +2969,10 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 		if (lastReport == 0 || lastGpu != RendererState.usedGpu || lastFailure != RendererState.failure || now - lastReport >= 10000) {
 			const auto &gpu = GetTownGpuStatus();
 			const auto &mesh = GetTownGpuMeshStats();
-			Log("Tristram renderer: GPU={}, adapter={}, mode={}, raster={}x{}, world={:.2f}ms, record={:.2f}ms, draws={}, inputTriangles={}, residentInstances={}, geometryUpload={}B, projectedUpload={}B, fallback={}",
+			Log("Tristram renderer: GPU={}, adapter={}, mode={}, raster={}x{}, world={:.2f}ms, record={:.2f}ms, draws={}, inputTriangles={}, residentInstances={}, geometryUpload={}B, projectedUpload={}B, failureKind={}, fallback={}",
 				RendererState.usedGpu, gpu.adapter, static_cast<int>(CameraRig.mode()), out.w(), out.h(), RendererState.worldMilliseconds,
 				RendererState.sceneRecordMilliseconds, gpu.drawCalls, gpu.submittedTriangles, mesh.instances,
-				mesh.uploadedVertexBytes + mesh.uploadedIndexBytes, mesh.projectedUploadBytes, RendererState.failure);
+				mesh.uploadedVertexBytes + mesh.uploadedIndexBytes, mesh.projectedUploadBytes, static_cast<int>(GpuRecovery.failureKind()), RendererState.failure);
 			lastReport = now;
 			lastGpu = RendererState.usedGpu;
 			lastFailure = RendererState.failure;

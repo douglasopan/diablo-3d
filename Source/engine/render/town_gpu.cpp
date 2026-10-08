@@ -33,7 +33,9 @@ TownGpuStatus Status;
 using Clock = std::chrono::steady_clock;
 constexpr size_t MaxPixels = 4 * 1024 * 1024;
 constexpr size_t MaxTextureBytes = 256 * 1024 * 1024;
-constexpr size_t MaxTriangles = 1024 * 1024;
+// Only the CPU-expanded, per-frame vertex stream consumes this capacity.
+// Reused resident index ranges have their own immutable-cache byte budget.
+constexpr size_t MaxProjectedTriangles = 1024 * 1024;
 
 template <typename T>
 class ComOwner {
@@ -462,10 +464,14 @@ Pixel PS(Interpolated input) {
 }
 )hlsl";
 
-bool Fail(const std::string &message, HRESULT result = S_OK)
+bool Fail(const std::string &message, HRESULT result = S_OK, TownGpuFailureKind kind = TownGpuFailureKind::None)
 {
+	if (FrameFailed)
+		return false;
 	Status.frameSucceeded = false;
 	Status.failure = message;
+	Status.failureKind = kind != TownGpuFailureKind::None ? kind
+	    : FAILED(result) ? TownGpuFailureKind::Device : TownGpuFailureKind::InvalidInput;
 	if (FAILED(result)) {
 		char code[24];
 		std::snprintf(code, sizeof(code), " (HRESULT %08lX)", static_cast<unsigned long>(result));
@@ -502,7 +508,7 @@ bool CreateDevice(bool allowWarp)
 		Status.warp = SUCCEEDED(result);
 	}
 	if (FAILED(result))
-		return Fail("D3D11 hardware device unavailable; no production software fallback", result);
+		return Fail("D3D11 hardware device unavailable; no production software fallback", result, TownGpuFailureKind::Unsupported);
 	Status.featureLevel = static_cast<uint32_t>(feature);
 	ComOwner<IDXGIDevice> dxgiDevice;
 	ComOwner<IDXGIAdapter> adapter;
@@ -657,7 +663,7 @@ void UpdateTextureStatus()
 bool MakeTextureRoom(size_t bytes)
 {
 	if (bytes > MaxTextureBytes)
-		return Fail("GPU texture payload exceeds the texture-cache budget");
+		return Fail("GPU texture payload exceeds the texture-cache budget", S_OK, TownGpuFailureKind::Capacity);
 	while (TextureBytes > MaxTextureBytes - bytes) {
 		auto oldestTexels = TexelCache.end();
 		for (auto entry = TexelCache.begin(); entry != TexelCache.end(); ++entry) {
@@ -672,7 +678,7 @@ bool MakeTextureRoom(size_t bytes)
 				oldestLut = entry;
 		}
 		if (oldestTexels == TexelCache.end() && oldestLut == LightLutCache.end())
-			return Fail("GPU texture-cache budget exceeded by current-frame resources");
+			return Fail("GPU texture-cache budget exceeded by current-frame resources", S_OK, TownGpuFailureKind::Capacity);
 		if (oldestLut == LightLutCache.end() || (oldestTexels != TexelCache.end() && oldestTexels->second.lastSeenFrame <= oldestLut->second.lastSeenFrame)) {
 			TextureBytes -= oldestTexels->second.bytes;
 			TexelCache.erase(oldestTexels);
@@ -688,15 +694,22 @@ bool MakeTextureRoom(size_t bytes)
 
 CachedTexture *GetTexture(const TownGpuTexture &input, TownGpuLighting lighting)
 {
-	if (input.width <= 0 || input.height <= 0 || input.width > 16384 || input.height > 16384
-	    || input.lightLevels == 0 || input.lightLevels > 16384) {
+	if (input.width <= 0 || input.height <= 0 || input.lightLevels == 0) {
 		Fail("Invalid GPU texture dimensions or light-level count");
 		return nullptr;
 	}
+	if (input.width > 16384 || input.height > 16384 || input.lightLevels > 16384) {
+		Fail("GPU texture dimensions or light-level capacity exceeded", S_OK, TownGpuFailureKind::Capacity);
+		return nullptr;
+	}
 	const size_t count = static_cast<size_t>(input.width) * input.height;
-	if (count > MaxPixels || (!input.texelCodes.empty() && input.texelCodes.size() != count)
+	if (count > MaxPixels || input.lightLut.size() / input.lightLevels > 262144) {
+		Fail("GPU texture pixel or palette/LUT capacity exceeded", S_OK, TownGpuFailureKind::Capacity);
+		return nullptr;
+	}
+	if ((!input.texelCodes.empty() && input.texelCodes.size() != count)
 	    || (!input.opacity.empty() && input.opacity.size() != count)
-	    || input.lightLut.size() % input.lightLevels != 0 || input.lightLut.size() / input.lightLevels > 262144) {
+	    || input.lightLut.size() % input.lightLevels != 0) {
 		Fail("Invalid GPU texture payload");
 		return nullptr;
 	}
@@ -733,7 +746,7 @@ CachedTexture *GetTexture(const TownGpuTexture &input, TownGpuLighting lighting)
 	const size_t lutHeight = lutWidth == 0 ? 0 : (input.lightLut.size() + lutWidth - 1) / lutWidth;
 	const size_t lutBytes = lut == nullptr ? lutHeight * lutWidth : 0;
 	if (lutHeight > 16384 || texelBytes > MaxTextureBytes || lutBytes > MaxTextureBytes - texelBytes) {
-		Fail("GPU texture/LUT payload exceeds resource dimensions or cache budget");
+		Fail("GPU texture/LUT payload exceeds resource dimensions or cache budget", S_OK, TownGpuFailureKind::Capacity);
 		return nullptr;
 	}
 	// Pin hits before making room: a new LUT revision can reuse the exact texel
@@ -916,6 +929,7 @@ bool TownGpuBeginFrame(int width, int height, bool allowWarpForDiagnostics, cons
 	FrameProjection = {};
 	Status.frameSucceeded = false;
 	Status.failure.clear();
+	Status.failureKind = TownGpuFailureKind::None;
 	Status.submittedTriangles = 0;
 	Status.drawCalls = 0;
 	Status.uploadedTexelBytes = 0;
@@ -925,8 +939,10 @@ bool TownGpuBeginFrame(int width, int height, bool allowWarpForDiagnostics, cons
 	Status.frameMilliseconds = 0;
 	Status.readbackMilliseconds = 0;
 	FrameStart = Clock::now();
-	if (width <= 0 || height <= 0 || width > 16384 || height > 16384 || static_cast<uint64_t>(width) * height > MaxPixels)
-		return Fail("Invalid GPU frame dimensions or pixel budget");
+	if (width <= 0 || height <= 0)
+		return Fail("Invalid GPU frame dimensions");
+	if (width > 16384 || height > 16384 || static_cast<uint64_t>(width) * height > MaxPixels)
+		return Fail("GPU frame dimensions or pixel budget exceeded", S_OK, TownGpuFailureKind::Capacity);
 	if (!Finite(projection.nearClip) || !Finite(projection.farClip) || projection.nearClip <= 0
 	    || projection.farClip <= projection.nearClip || projection.farClip > 4096)
 		return Fail("Invalid GPU projection range (0 < near < far <= 4096 required)");
@@ -937,6 +953,7 @@ bool TownGpuBeginFrame(int width, int height, bool allowWarpForDiagnostics, cons
 		ResetTownGpuResources();
 		Status = failed;
 		Status.available = false;
+		FrameFailed = true;
 		return false;
 	}
 	if (!CreateTargets(width, height))
@@ -951,6 +968,7 @@ bool TownGpuBeginFrame(int width, int height, bool allowWarpForDiagnostics, cons
 	(void)projection;
 	Status = {};
 	Status.failure = "Direct3D11 town rendering is available only on Windows";
+	Status.failureKind = TownGpuFailureKind::Unsupported;
 	return false;
 #endif
 }
@@ -995,8 +1013,10 @@ bool TownGpuSubmitProjectedTriangle(const std::array<TownGpuVertex, 3> &vertices
 #ifdef _WIN32
 	if (!FrameActive || FrameFailed)
 		return Fail("No valid GPU frame is recording");
-	if (Status.submittedTriangles >= MaxTriangles)
-		return Fail("GPU triangle budget exceeded");
+	if (Vertices.size() >= MaxProjectedTriangles * 3)
+		return Fail("GPU projected vertex-stream budget exceeded", S_OK, TownGpuFailureKind::Capacity);
+	if (Status.submittedTriangles == std::numeric_limits<size_t>::max())
+		return Fail("GPU submitted-triangle counter overflow", S_OK, TownGpuFailureKind::Capacity);
 	for (const TownGpuVertex &vertex : vertices) {
 		if (!Finite(vertex.x) || !Finite(vertex.y) || !Finite(vertex.depth)
 		    || vertex.depth < FrameProjection.nearClip || vertex.depth > FrameProjection.farClip
@@ -1073,7 +1093,7 @@ bool TownGpuEndFrame(TownGpuFrame &output)
 	Context->PSSetConstantBuffers(0, 1, &constantBuffer);
 	if (!Vertices.empty()) {
 		if (VertexCapacity < Vertices.size()) {
-			const size_t capacity = std::min<size_t>(MaxTriangles * 3, std::max(Vertices.size(), VertexCapacity * 2));
+			const size_t capacity = std::min<size_t>(MaxProjectedTriangles * 3, std::max(Vertices.size(), VertexCapacity * 2));
 			D3D11_BUFFER_DESC description {};
 			description.ByteWidth = static_cast<UINT>(capacity * sizeof(GpuVertex));
 			description.Usage = D3D11_USAGE_DYNAMIC;
