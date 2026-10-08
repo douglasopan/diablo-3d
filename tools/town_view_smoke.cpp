@@ -2537,7 +2537,7 @@ void CaptureObjectTurntables(const Surface &originalOut, const std::filesystem::
 	Check(coverageValid, "opaque east/west cabin and well surfaces cover all independent interior ray samples across ten angles");
 }
 
-void Run(const std::filesystem::path &output)
+void InitializeTownDiagnostic()
 {
 	SetTownViewFireTimeForDiagnostics(0);
 	HeadlessMode = true;
@@ -2573,6 +2573,193 @@ void Run(const std::filesystem::path &output)
 		dFlags[tile.x][tile.y] |= DungeonFlag::Lit | DungeonFlag::Visible;
 	}
 	Check(!Towners.empty(), "original Tristram NPC sprites loaded");
+}
+
+// A resolution experiment, deliberately separate from the broad smoke suite.
+// It measures warm CPU world rendering, not a running game's frame rate.
+void RunPresentation(const std::filesystem::path &output)
+{
+	InitializeTownDiagnostic();
+	Check(!IsTownViewActive(), "presentation experiment starts with the optional view disabled");
+	ToggleTownView();
+	ResetTownViewCamera();
+	const auto initialCamera = GetTownViewCameraState();
+	const std::string originalState = NativeSceneState();
+	const auto cameraUnchanged = [&] {
+		const auto camera = GetTownViewCameraState();
+		return camera.yaw == initialCamera.yaw && camera.pitch == initialCamera.pitch
+		    && camera.distance == initialCamera.distance && camera.offsetX == initialCamera.offsetX
+		    && camera.offsetZ == initialCamera.offsetZ;
+	};
+	const size_t importedModels = std::count_if(GetTownScene().begin(), GetTownScene().end(),
+	    [](const TownSceneModel &model) { return model.externalModel; });
+	std::ofstream manifest(output / "presentation.json");
+	manifest << std::setprecision(9)
+		<< "{\"experiment\":\"warm offscreen CPU world rendering; not game FPS\","
+		<< "\"archiveMode\":\"" << (gbIsSpawn ? "shareware" : "retail") << "\","
+		<< "\"uiDrawn\":false,\"gpuPresentationMeasured\":false,\"windowDpiOrScalingValidated\":false,"
+		<< "\"warmupDraws\":3,\"measuredDraws\":5,\"fireTimeSeconds\":0,"
+		<< "\"cameraPolicy\":\"original yaw/pitch/distance; no resolution-dependent zoom\","
+		<< "\"fieldOfViewEquivalent\":false,\"largerCanvasShowsMoreWorld\":true,"
+		<< "\"sourceArtAddsDetail\":false,\"importedModels\":" << importedModels
+		<< ",\"focusTile\":[" << ViewPosition.x << ',' << ViewPosition.y << ']'
+		<< ",\"playerTile\":[" << static_cast<int>(MyPlayer->position.tile.x) << ',' << static_cast<int>(MyPlayer->position.tile.y) << ']'
+		<< ",\"cases\":[\n";
+	bool firstCase = true;
+	Point previousNativeStep, previousGeometryStep;
+	bool havePreviousStep = false;
+	for (const Point dimensions : { Point { 960, 540 }, Point { 1280, 720 }, Point { 1920, 1080 } }) {
+		gnScreenWidth = dimensions.x;
+		gnScreenHeight = dimensions.y;
+		CalculatePanelAreas();
+		CalcViewportGeometry();
+		Check(gnViewportHeight == dimensions.y, "wide presentation canvas retains the real engine world viewport");
+		constexpr int GuardRows = 2;
+		OwnedSurface allocation(dimensions.x, dimensions.y + GuardRows);
+		SDL_SetPaletteColors(allocation.surface->format->palette, logical_palette.data(), 0, 256);
+		SDL_FillRect(allocation.surface, nullptr, 255);
+		const Surface out = allocation.subregionY(0, dimensions.y);
+		const auto guardsIntact = [&] {
+			for (int y = out.h(); y < allocation.h(); ++y)
+				for (int x = 0; x < allocation.w(); ++x)
+					if (allocation[{ x, y }] != 255)
+						return false;
+			return true;
+		};
+		for (const bool geometry : { false, true }) {
+			const std::string renderer = geometry ? "forced-geometry" : "actual-native";
+			const auto draw = [&] {
+				ClearWorld(out);
+				return geometry ? DrawTownView(out, true) : DrawNativeTownViewReference(out, ViewPosition);
+			};
+			std::array<double, 3> warmup;
+			std::array<double, 5> samples;
+			const auto timed = [&] {
+				const auto begin = std::chrono::steady_clock::now();
+				const bool drawn = draw();
+				const auto end = std::chrono::steady_clock::now();
+				if (!drawn)
+					throw std::runtime_error("presentation world draw failed: " + renderer);
+				return std::chrono::duration<double, std::milli>(end - begin).count();
+			};
+			for (double &milliseconds : warmup)
+				milliseconds = timed();
+			const auto expectedPixels = ViewportPixels(out);
+			bool deterministic = true;
+			for (double &milliseconds : samples) {
+				milliseconds = timed();
+				// Pixel copying and comparisons are outside the measured interval.
+				deterministic = deterministic && ViewportPixels(out) == expectedPixels;
+			}
+			Check(deterministic, renderer + " repeated frames are identical with animation/fire frozen");
+			Check(guardsIntact(), renderer + " preserves padding rows beyond the real viewport");
+			Check(NativeSceneState() == originalState && cameraUnchanged(), renderer + " resolution draws preserve native state and camera");
+			auto sorted = samples;
+			std::sort(sorted.begin(), sorted.end());
+			double mean = 0;
+			for (double milliseconds : samples)
+				mean += milliseconds / samples.size();
+			const std::string filename = renderer + "-" + std::to_string(out.w()) + "x" + std::to_string(out.h()) + ".png";
+			SavePng(out, output / filename);
+			const Point nativeCenter = GetScreenPosition(ViewPosition) + Displacement { 32, -16 };
+			const Point nativeNext = GetScreenPosition(ViewPosition + Displacement { 1, 0 }) + Displacement { 32, -16 };
+			const Point nativeStep { nativeNext.x - nativeCenter.x, nativeNext.y - nativeCenter.y };
+			Point geometryCenter, geometryStep;
+			size_t pickedPixels = 0, groundPixels = 0, architecturePixels = 0, playerPixels = 0, npcPixels = 0;
+			bool validIds = true;
+			int visibleGroundRoundtrips = 0;
+			if (geometry) {
+				geometryCenter = TownViewScreenPosition(ViewPosition);
+				const Point next = TownViewScreenPosition(ViewPosition + Displacement { 1, 0 });
+				geometryStep = { next.x - geometryCenter.x, next.y - geometryCenter.y };
+				for (int y = 0; y < out.h(); ++y) {
+					for (int x = 0; x < out.w(); ++x) {
+						Point tile;
+						int npc, item, player;
+						if (!Pick({ x, y }, tile, npc, item, player))
+							continue;
+						++pickedPixels;
+						const int architecture = TownViewArchitectureAt({ x, y });
+						architecturePixels += architecture >= 0 ? 1 : 0;
+						playerPixels += player >= 0 ? 1 : 0;
+						npcPixels += npc >= 0 ? 1 : 0;
+						groundPixels += architecture < 0 && player < 0 && npc < 0 && item < 0 ? 1 : 0;
+						validIds = validIds && tile.x >= 0 && tile.y >= 0 && tile.x < MAXDUNX && tile.y < MAXDUNY
+						    && std::isfinite(TownViewDepthAt({ x, y })) && architecture < static_cast<int>(GetTownScene().size())
+						    && (player < 0 || (player < static_cast<int>(Players.size()) && tile == Players[player].position.tile))
+						    && (npc < 0 || (npc < static_cast<int>(Towners.size()) && tile == Towners[npc].position));
+					}
+				}
+				for (int y = ViewPosition.y - 10; y <= ViewPosition.y + 10; ++y) {
+					for (int x = ViewPosition.x - 10; x <= ViewPosition.x + 10; ++x) {
+						const Point expected { x, y };
+						if (!InDungeonBounds(expected) || !IsTileNotSolid(expected))
+							continue;
+						const Point screen = TownViewScreenPosition(expected);
+						Point tile;
+						int npc, item, player;
+						if (out.InBounds(screen) && Pick(screen, tile, npc, item, player) && tile == expected
+						    && npc < 0 && item < 0 && player < 0 && TownViewArchitectureAt(screen) < 0)
+							++visibleGroundRoundtrips;
+					}
+				}
+				Check(validIds && pickedPixels > 0 && visibleGroundRoundtrips > 0, "presentation geometry retains valid live picking and visible walkable tile roundtrips");
+				for (Point screen : { Point { -1, 0 }, Point { out.w(), 0 }, Point { 0, out.h() }, Point { 0, -1 } }) {
+					Point tile;
+					int npc, item, player;
+					Check(!Pick(screen, tile, npc, item, player), "presentation picking rejects points outside the world viewport");
+				}
+				if (havePreviousStep)
+					Check(nativeStep == previousNativeStep && geometryStep == previousGeometryStep,
+					    "larger presentation canvases preserve measured native and geometric tile scale");
+				previousNativeStep = nativeStep;
+				previousGeometryStep = geometryStep;
+				havePreviousStep = true;
+			}
+			if (!firstCase)
+				manifest << ",\n";
+			firstCase = false;
+			manifest << "{\"renderer\":\"" << renderer << "\",\"file\":\"" << filename << "\",\"width\":" << out.w()
+				<< ",\"height\":" << out.h() << ",\"viewportHeight\":" << gnViewportHeight
+				<< ",\"uiPanelHeight\":" << GetMainPanel().size.height << ",\"uiPanelPosition\":["
+				<< GetMainPanel().position.x << ',' << GetMainPanel().position.y << ']'
+				<< ",\"worldExtendsBehindPanel\":true,\"paddingGuardRows\":" << GuardRows
+				<< ",\"camera\":{\"yaw\":" << initialCamera.yaw << ",\"pitch\":" << initialCamera.pitch
+				<< ",\"distance\":" << initialCamera.distance << ",\"pan\":[" << initialCamera.offsetX << ',' << initialCamera.offsetZ << "]}"
+				<< ",\"nativeGroundCenter\":[" << nativeCenter.x << ',' << nativeCenter.y << ']'
+				<< ",\"nativeTileXStepPixels\":[" << nativeStep.x << ',' << nativeStep.y << ']';
+			if (geometry)
+				manifest << ",\"geometryGroundCenter\":[" << geometryCenter.x << ',' << geometryCenter.y << ']'
+					<< ",\"geometryTileXStepPixels\":[" << geometryStep.x << ',' << geometryStep.y << ']'
+					<< ",\"picking\":{\"pickedPixels\":" << pickedPixels << ",\"nonEntityNonArchitecturePixels\":" << groundPixels
+					<< ",\"architecturePixels\":" << architecturePixels << ",\"playerPixels\":" << playerPixels
+					<< ",\"npcPixels\":" << npcPixels << ",\"visibleWalkableRoundtrips\":" << visibleGroundRoundtrips << ",\"valid\":true}";
+			else
+				manifest << ",\"picking\":{\"tested\":false,\"reason\":\"native cursor backend requires an interactive game; geometric IDs are not used as native proof\"}";
+			manifest << ",\"warmupMilliseconds\":[";
+			for (size_t i = 0; i < warmup.size(); ++i)
+				manifest << (i == 0 ? "" : ",") << warmup[i];
+			manifest << "],\"renderMilliseconds\":[";
+			for (size_t i = 0; i < samples.size(); ++i)
+				manifest << (i == 0 ? "" : ",") << samples[i];
+			manifest << "],\"meanMilliseconds\":" << mean << ",\"medianMilliseconds\":" << sorted[sorted.size() / 2]
+				<< ",\"minimumMilliseconds\":" << sorted.front() << ",\"maximumMilliseconds\":" << sorted.back()
+				<< ",\"frameDeterministic\":true,\"paddingPreserved\":true,\"statePreserved\":true}";
+			Record("INFO presentation " + renderer + " " + std::to_string(out.w()) + "x" + std::to_string(out.h())
+			    + " median CPU world draw=" + std::to_string(sorted[sorted.size() / 2]) + " ms");
+		}
+	}
+	manifest << "\n]}\n";
+	Check(manifest.good(), "record presentation resolution costs, fixed tile scale and measurement limits");
+	SaveTownShadowStats(output / "shadow-map.json");
+	SaveTownLightingStats(output / "lighting-state.json");
+	Check(NativeSceneState() == originalState && cameraUnchanged(), "complete presentation experiment preserves live data and camera");
+	FreeTownerGFX();
+}
+
+void Run(const std::filesystem::path &output)
+{
+	InitializeTownDiagnostic();
 	CheckTownSceneMeshes();
 	CheckTownModelImporter();
 	CheckNativeVegetationGroups();
@@ -2686,8 +2873,9 @@ int main(int argc, char **argv)
 {
 	std::cout << std::unitbuf;
 	std::cerr << std::unitbuf;
-	if (argc != 4) {
-		std::cerr << "Usage: town_view_smoke <game-data-directory> <built-assets-directory> <capture-directory>\n";
+	const bool presentation = argc == 5 && std::string(argv[4]) == "--presentation";
+	if (argc != 4 && !presentation) {
+		std::cerr << "Usage: town_view_smoke <game-data-directory> <built-assets-directory> <capture-directory> [--presentation]\n";
 		return 2;
 	}
 	const std::filesystem::path output = std::filesystem::absolute(argv[3]);
@@ -2711,7 +2899,10 @@ int main(int argc, char **argv)
 	const auto start = std::chrono::steady_clock::now();
 	int status = 0;
 	try {
-		Run(output);
+		if (presentation)
+			RunPresentation(output);
+		else
+			Run(output);
 	} catch (const std::exception &error) {
 		std::cerr << "Smoke check stopped: " << error.what() << '\n';
 		status = 1;

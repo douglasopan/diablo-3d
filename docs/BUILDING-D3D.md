@@ -103,6 +103,10 @@ Compare matched `native-*` and `calibrated-*` captures and assemble turntables:
 
 The release helper records an executable hash and summarizes the existing reports. It does not generate missing game data, run the game itself, perform a network test or approve raw mesh fidelity. If only one data edition is available, report that limitation rather than fabricating the second dataset.
 
+## Display comparison
+
+For separate sharp, filtered and wider-view review profiles, see [display presentation](DISPLAY-PRESENTATION.md). Run `Comparar-Apresentacao.cmd`, or select `-Presentation Nitido`, `Suave` or `Amplo` in the existing launcher. These settings do not replace sprites with HD artwork. The [Belzebub binary study](BELZEBUB-BINARY-ANALYSIS.md) records reverse-engineering findings; [engine bases and credits](ENGINE-BASES-AND-CREDITS.md) records lineage and the future menu/credit plan.
+
 ## Optional animated logo
 
 The normal build includes the owner's new 240-frame logo for the main, title and Escape menus. It repeats over eight seconds. See [ANIMATED-LOGO.md](ANIMATED-LOGO.md) for source provenance and conversion.

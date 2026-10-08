@@ -82,6 +82,12 @@ More players, shared hubs or multiple world instances and optional proximity voi
 
 Track evidence and open decisions in [networking research](NETWORKING-RESEARCH.md). Its recommendations are research, not a shipped API. The current local `NONET` build remains the baseline until a separately tested networking implementation exists.
 
+## 7. Evolve presentation, entry screens and project identity
+
+The existing D3D logo already covers title, main and Escape menus. A complete new entry/menu layout remains planned. Build project-specific screens on the inherited character, settings and input flows, with readable interface scale across display sizes and preserved upstream credits. Record the actual [engine bases and reference influences](ENGINE-BASES-AND-CREDITS.md): DevilutionX is modified source; Belzebub is studied through [binary reverse engineering](BELZEBUB-BINARY-ANALYSIS.md), with no code incorporated.
+
+[Presentation review profiles](DISPLAY-PRESENTATION.md) now compare output sampling and wider view areas separately. Higher internal resolution increases CPU rasterization cost and does not independently preserve object/UI size. The next rendering work should define world framing, pixel density and UI scale as separate choices, then evaluate acceleration with actual performance and image evidence. Keep gameplay timing, collision, saves and the original comparison renderer while extending this to the whole game.
+
 ## How to propose work
 
 Read the [contribution guide](CONTRIBUTING.md), select a bounded object or subsystem, and state the current problem, intended result and validation fixture. Use the 3D asset issue form for complete objects or imports. Discuss large rendering and networking changes before implementation so interfaces and ownership can be agreed without duplicate work.

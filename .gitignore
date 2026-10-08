@@ -481,6 +481,7 @@ uwp-project/Assets/ui_art
 /data/
 /perfil-tristram/
 /perfil-meshy-review/
+/perfil-apresentacao-*/
 *.d3d
 /diagnostics/
 /models/meshy/
