@@ -112,6 +112,10 @@ def verify():
         assert any(t == 'audio' and a.get('id') == 'soundtrack-player' and 'autoplay' not in a for t, a in library.tags)
         downloads = [a for t, a in library.tags if t == 'a' and 'download' in a]
         assert len(downloads) == len(soundtrack['tracks']), 'Every custom track needs a free direct download'
+        expected_youtube = [build.SOUNDTRACK_YOUTUBE[track['id']] for track in soundtrack['tracks'] if track['id'] in build.SOUNDTRACK_YOUTUBE]
+        expected_youtube.append(build.SOUNDTRACK_YOUTUBE_PLAYLIST)
+        youtube_links = [a.get('href') for t, a in library.tags if t == 'a' and a.get('href', '').startswith('https://www.youtube.com/')]
+        assert sorted(youtube_links) == sorted(expected_youtube), 'Published YouTube links must match the custom track mapping and playlist once each'
     expected_audio = {track['public_path'] for track in soundtrack['tracks']} | {soundtrack['background']['public_path']}
     assert {'/' + p.relative_to(root).as_posix() for p in files if p.is_file() and p.suffix.lower() == '.mp3'} == expected_audio, 'Unexpected MP3 in publication artifact'
     for track in soundtrack['tracks']:

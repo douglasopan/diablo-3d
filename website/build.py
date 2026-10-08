@@ -32,6 +32,14 @@ PREFIX = parsed_base.path.rstrip('/')
 GITHUB = 'https://github.com/douglasopan/diablo-3d'
 SNAPSHOT = 'ae43f0470134af6bb470c68d20fa37647c8a0ec4'
 DISCORD = 'https://discord.gg/4YxQ7s69S'
+SOUNDTRACK_YOUTUBE_PLAYLIST = 'https://www.youtube.com/playlist?list=PLPiXmw2nj9BM'
+SOUNDTRACK_YOUTUBE = {
+    'menu-rock2': 'https://www.youtube.com/watch?v=KWlri7ryuR0',
+    'menu-alternative': 'https://www.youtube.com/watch?v=YcaFpTO9C6Y',
+    'town-rock': 'https://www.youtube.com/watch?v=t9dujaCADMg',
+    'town-alternative': 'https://www.youtube.com/watch?v=m59pZHxSQ_w',
+    'town-third': 'https://www.youtube.com/watch?v=TkMiffWTzPA',
+}
 NAV = [('Início', '/'), ('Devlog', '/devlog/'), ('Música', '/musica/'), ('Projeto', '/projeto/'), ('Tecnologia', '/tecnologia/'), ('Participar', '/participar/'), ('Apoiar', '/apoiar/'), ('Roadmap', '/roadmap/'), ('Galeria', '/galeria/')]
 CATEGORIES = ('Protótipo', 'Geometria', 'Personagens', 'Comunidade', 'Ferramentas', 'Luz')
 MONTHS = ('janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro')
@@ -452,11 +460,13 @@ def soundtrack_page(music):
     tracks = []
     for number, track in enumerate(music['tracks'], 1):
         asset = versioned_asset(track['public_path'])
-        title = esc(track['title'])
+        title = esc(track['title'] + (' — Alternate Export' if track['id'] == 'town-third' else ''))
+        youtube_url = SOUNDTRACK_YOUTUBE.get(track['id'])
+        youtube_link = button('Ouvir no YouTube', youtube_url, True) if youtube_url else ''
         size = f"{track['size_bytes'] / 1_000_000:.1f} MB"
-        tracks.append(f'''<li class="soundtrack-track panel"><span class="track-number" aria-hidden="true">{number:02}</span><div class="track-copy"><p class="eyebrow">{esc(contexts.get(track['id'], track['environment']))}</p><h2>{title}</h2><p class="meta">Douglas Pan <span aria-hidden="true">·</span> {esc(track['duration_label'])} <span aria-hidden="true">·</span> MP3 · {size}</p></div><div class="actions"><button class="button secondary" type="button" data-soundtrack-src="{esc(asset)}" data-soundtrack-title="{title}" aria-label="{esc(translated('Tocar') + ' ' + track['title'])}" aria-pressed="false" hidden data-enhancement><span data-soundtrack-label>Tocar</span></button><a class="button" href="{esc(asset)}" download="Douglas-Pan--{esc(track['id'])}.mp3" aria-label="{esc(translated('Baixar MP3') + ' · ' + track['title'])}">Baixar MP3 <span aria-hidden="true">↓</span></a><noscript><a href="{esc(asset)}">Ouvir MP3 ↗</a></noscript></div></li>''')
+        tracks.append(f'''<li class="soundtrack-track panel"><span class="track-number" aria-hidden="true">{number:02}</span><div class="track-copy"><p class="eyebrow">{esc(contexts.get(track['id'], track['environment']))}</p><h2>{title}</h2><p class="meta">Douglas Pan <span aria-hidden="true">·</span> {esc(track['duration_label'])} <span aria-hidden="true">·</span> MP3 · {size}</p></div><div class="actions"><button class="button secondary" type="button" data-soundtrack-src="{esc(asset)}" data-soundtrack-title="{title}" aria-label="{esc(translated('Tocar') + ' ' + track['title'])}" aria-pressed="false" hidden data-enhancement><span data-soundtrack-label>Tocar</span></button><a class="button" href="{esc(asset)}" download="Douglas-Pan--{esc(track['id'])}.mp3" aria-label="{esc(translated('Baixar MP3') + ' · ' + track['title'])}">Baixar MP3 <span aria-hidden="true">↓</span></a>{youtube_link}<noscript><a href="{esc(asset)}">Ouvir MP3 ↗</a></noscript></div></li>''')
     return intro('TRILHA PERSONALIZADA', 'A música do projeto.<br>Por Douglas Pan.', 'Ouça e baixe gratuitamente as versões personalizadas que já estão no catálogo do jogo. Começamos pelo menu principal e por Tristram; os demais ambientes receberão suas faixas ao longo do desenvolvimento.') + f'''
-<section class="soundtrack-player panel" aria-label="Player da trilha"><p class="eyebrow">ESCUTE A TRILHA</p><h2 id="soundtrack-title">{esc(first['title'])}</h2><p>Douglas Pan</p><audio id="soundtrack-player" controls preload="none" src="{esc(versioned_asset(first['public_path']))}" aria-label="{esc(translated('Ouvir') + ' ' + first['title'])}">Seu navegador pode baixar as faixas pelos links abaixo.</audio><p id="soundtrack-status" class="meta" role="status" aria-live="polite">Escolha uma faixa para ouvir.</p></section>
+<section class="soundtrack-player panel" aria-label="Player da trilha"><p class="eyebrow">ESCUTE A TRILHA</p><h2 id="soundtrack-title">{esc(first['title'])}</h2><p>Douglas Pan</p><audio id="soundtrack-player" controls preload="none" src="{esc(versioned_asset(first['public_path']))}" aria-label="{esc(translated('Ouvir') + ' ' + first['title'])}">Seu navegador pode baixar as faixas pelos links abaixo.</audio><p id="soundtrack-status" class="meta" role="status" aria-live="polite">Escolha uma faixa para ouvir.</p><p>{button('Ouvir a playlist no YouTube', SOUNDTRACK_YOUTUBE_PLAYLIST, True)}</p></section>
 <ol class="soundtrack-list" aria-label="Faixas para ouvir e baixar">{''.join(tracks)}</ol>
 <aside class="notice prose"><h2>Versões do projeto</h2><p>{esc(translated('Esta biblioteca reúne {count} arquivos personalizados.').format(count=len(music['tracks'])))}</p><p>Tristram 3 aparenta ser outra exportação da primeira opção; a lista reúne versões disponíveis, sem contar cada arquivo como uma composição distinta.</p><p>O crédito Douglas Pan está também nos metadados internos dos MP3s. A biblioteca contém apenas a trilha personalizada; as músicas originais do jogo não são distribuídas aqui.</p><p>Não é necessário cadastrar e-mail para ouvir ou baixar.</p></aside>
 <section class="panel prose"><h2>Acompanhe os próximos capítulos.</h2><p>O objetivo é reconstruir todo Diablo 1 em 3D. Novas faixas e avanços aparecem no devlog.</p><div class="actions">{button('Acompanhar o devlog', '/devlog/')}{button('Apoiar o projeto', '/apoiar/', True)}</div></section>'''

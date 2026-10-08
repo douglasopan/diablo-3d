@@ -450,6 +450,8 @@ TRANSLATIONS.update({
     'Baixar MP3': 'Download MP3',
     'Ouvir': 'Listen to',
     'Ouvir MP3 ↗': 'Listen to MP3 ↗',
+    'Ouvir no YouTube': 'Listen on YouTube',
+    'Ouvir a playlist no YouTube': 'Listen to the playlist on YouTube',
     'Versões do projeto': 'Project versions',
     'Esta biblioteca reúne {count} arquivos personalizados.': 'This library contains {count} custom files.',
     'Tristram 3 aparenta ser outra exportação da primeira opção; a lista reúne versões disponíveis, sem contar cada arquivo como uma composição distinta.': 'Tristram 3 appears to be another export of the first option; the list presents the available versions without counting every file as a separate composition.',
