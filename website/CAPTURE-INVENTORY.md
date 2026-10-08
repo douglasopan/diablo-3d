@@ -79,6 +79,8 @@ As três capturas de 08/10 preservam a resolução e os pixels originais após c
 
 ## Comparações da versão publicada
 
+Correção de procedência em 08/10/2026: `cabin-interior-final.webp` e `cabin-angles-final.webp` são pranchas históricas de renders técnicos offscreen, com recortes e composição, associadas ao release `63e5e749`. As fontes PNG registradas em `evidence.json` e os WebPs têm pixels RGBA idênticos. O pipeline usa turntables e `qa_cabin_lighting.py`; essas imagens não são screenshots da janela do jogo, não provam o estado atual da partida e não representam aprovação integral do modelo. A correção altera a classificação e as legendas PT/EN, preservando arquivos, hashes, dimensões e vínculo histórico.
+
 As cinco comparações finais pertencem ao [commit `63e5e749`](https://github.com/douglasopan/diablo-3d/commit/63e5e749d73c213aecf4b77b400aa04acc5a0598). Foram revisadas individualmente e mantidas em WebP lossless na resolução recebida.
 
 - `cabin-interior-final.webp`: referência original, malha antes e cabana com janela amarela depois.

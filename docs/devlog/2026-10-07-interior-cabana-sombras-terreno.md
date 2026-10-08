@@ -1,10 +1,11 @@
 ---
 title: "Uma janela de luz e um chão sem a sombra antiga"
 date: 2026-10-07
+updated: 2026-10-08
 description: "O perfil opcional da cabana Meshy recebeu interior físico e luz amarela; oito peças de terreno foram revisadas para retirar sombras pintadas."
 slug: interior-cabana-sombras-terreno
 image: /assets/captures/cabin-interior-final.webp
-image_alt: "Comparação da cabana: referência original, modelo antes e modelo depois do interior iluminado e da limpeza das sombras pintadas no terreno."
+image_alt: "Comparação técnica histórica offscreen da cabana no release 63e5e749: referência original e modelo antes e depois do interior iluminado e da limpeza das sombras pintadas no terreno."
 category: Luz
 order: 9
 status: published
@@ -13,6 +14,8 @@ status: published
 A janela da cabana leste agora permite ver luz amarela vindo de um cômodo físico. O terreno próximo também recebeu uma revisão para retirar fragmentos da sombra antiga pintada, deixando a sombra calculada pela geometria ocupar esse papel.
 
 O trabalho foi publicado em 7 de outubro de 2026, às 19:33 no horário de São Paulo, no [commit 63e5e749](https://github.com/douglasopan/diablo-3d/commit/63e5e749d73c213aecf4b77b400aa04acc5a0598). O interior pertence ao perfil opcional de revisão Meshy. As capturas finais comparam esse estado à calibração exterior anterior; a primeira tentativa de iluminação tem resultados próprios, separados abaixo.
+
+A comparação de abertura e a prancha de quatro ângulos são comparações técnicas históricas feitas offscreen, associadas ao release `63e5e749`. Não são capturas da janela do jogo nem comprovam o estado atual da partida ou a aprovação integral do modelo.
 
 ## Um cômodo por trás da abertura
 
@@ -53,7 +56,7 @@ As rodadas finais passaram nos testes de iluminação e cena com dados GOG, shar
 
 ![Comparação antes e depois nos giros de menos cinco, zero e mais cinco graus.](/assets/captures/cabin-orbits-final.webp)
 
-![Comparação da cabana antes e depois em quatro ângulos principais.](/assets/captures/cabin-angles-final.webp)
+![Comparação técnica histórica offscreen da cabana antes e depois em quatro ângulos, no release 63e5e749.](/assets/captures/cabin-angles-final.webp)
 
 A janela importada ainda difere da referência em posição e material. Topologia, texturas e outros interiores precisam de revisão; os testes não aprovam a fidelidade completa do modelo. Árvores, pedras e personagens ainda não lançam sombras pelo mapa da arquitetura. Dia/noite, horizonte e neblina permanecem futuros no [roadmap](https://github.com/douglasopan/diablo-3d/blob/63e5e749d73c213aecf4b77b400aa04acc5a0598/docs/ROADMAP.md), com Tristram como prioridade.
 

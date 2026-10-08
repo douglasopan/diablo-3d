@@ -400,17 +400,19 @@
   },
   {
     "file": "/assets/captures/cabin-interior-final.webp",
-    "title": "Cabana com interior publicado",
-    "alt": "Comparação da cabana no jogo original e do modelo 3D antes e depois da janela com iluminação amarela real.",
-    "caption": "A versão publicada acrescenta luz amarela real ao interior e revisa o terreno externo. A janela acesa é visível nesta perspectiva; o detalhe das tábuas do piso interno não fica legível pela janela pequena.",
+    "title": "Cabana: comparação histórica offscreen do interior",
+    "alt": "Prancha técnica histórica offscreen da cabana no release 63e5e749: renderizador original e modelo 3D antes e depois do interior com luz amarela.",
+    "caption": "Comparação histórica offscreen do release 63e5e749, com recortes e composição de renders técnicos. A janela amarela é visível, mas o detalhe das tábuas não fica legível. Não é captura da janela do jogo nem comprova o estado atual da partida ou a aprovação integral do modelo.",
     "category": "Luz",
-    "stage": "V4 · interior publicado",
+    "stage": "V4 · 63e5e749 · offscreen histórico",
     "source": "diagnostics/v4-interior-final-meshy-gog/cabin-review/original-before-after.png",
     "sha256": "ef557e877663da09df5978c10599cfbd371ef04ba6b1e5fa840900b0bfbdcc18",
     "duplicate_sources": [],
     "width": 1200,
     "height": 350,
-    "release_commit": "63e5e749d73c213aecf4b77b400aa04acc5a0598"
+    "release_commit": "63e5e749d73c213aecf4b77b400aa04acc5a0598",
+    "classification": "historical-offscreen-comparison",
+    "game_window_capture": false
   },
   {
     "file": "/assets/captures/cabin-floor-final.webp",
@@ -456,17 +458,19 @@
   },
   {
     "file": "/assets/captures/cabin-angles-final.webp",
-    "title": "Cabana publicada em quatro ângulos",
-    "alt": "Cabana 3D antes e depois da revisão final nos giros de zero, noventa, cento e oitenta e duzentos e setenta graus.",
-    "caption": "A revisão publicada é conferida em 0°, 90°, 180° e 270°, incluindo a janela amarela, as outras faces e a sombra física junto ao terreno. Os giros documentam a cena externa; o detalhe do piso interno não é legível através da janela pequena.",
+    "title": "Cabana: comparação histórica offscreen em quatro ângulos",
+    "alt": "Prancha técnica histórica offscreen da cabana antes e depois nos giros de zero, noventa, cento e oitenta e duzentos e setenta graus, no release 63e5e749.",
+    "caption": "Comparação histórica offscreen do release 63e5e749 em 0°, 90°, 180° e 270°, com recortes e composição de renders técnicos da cena externa. O detalhe do piso interno não é legível. Não é captura da janela do jogo nem comprova o estado atual da partida ou a aprovação integral do modelo.",
     "category": "Luz",
-    "stage": "V4 · interior publicado",
+    "stage": "V4 · 63e5e749 · offscreen histórico",
     "source": "diagnostics/v4-interior-final-meshy-gog/cabin-review/four-angles-before-after.png",
     "sha256": "8b5e8d0958432df78bf747d66180be605a1f1edaebf0d1aa51bdd8707a8db8f2",
     "duplicate_sources": [],
     "width": 800,
     "height": 1400,
-    "release_commit": "63e5e749d73c213aecf4b77b400aa04acc5a0598"
+    "release_commit": "63e5e749d73c213aecf4b77b400aa04acc5a0598",
+    "classification": "historical-offscreen-comparison",
+    "game_window_capture": false
   },
   {
     "file": "/assets/captures/cabin-fire-tone.webp",

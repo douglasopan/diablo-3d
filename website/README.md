@@ -5,7 +5,7 @@ Static development journal in Brazilian Portuguese and complete English for the 
 - `build.py` reads versioned articles and generates all HTML at build time.
 - `content/en/devlog/` contains a complete English Markdown translation of every published article in `docs/devlog/`, with the same filename. Titles, descriptions, alternative text and full bodies are translated; canonical slugs, dates, update dates, images, categories, order and publication status match the original.
 - `public/` supplies the site assets; the selected R2 study media is additionally copied from its validated document sources during the build.
-- `evidence.json` describes curated, visually audited real captures.
+- `evidence.json` describes curated, visually audited captures and technical comparisons.
 - `translations.py` supplies complete English interface strings and the `EVIDENCE_EN` gallery overlay. The overlay translates titles, alternative text and captions without changing capture files, source references, original hashes or duplicate provenance.
 - `design-references/v2/` contains five revised imagegen boards covering every page, desktop/mobile and interaction states, plus exact prompts. The original four boards are preserved for comparison. These are design concepts, excluded from deployment.
 - `verify.py` checks the actual output, including local links/fragments, metadata, feeds, assets and deduplication.

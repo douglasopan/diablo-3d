@@ -1,10 +1,11 @@
 ---
 title: "A lit window and ground without the old shadow"
 date: 2026-10-07
+updated: 2026-10-08
 description: "The optional Meshy hut profile received a physical interior and yellow light; eight terrain tiles were reviewed to remove painted shadows."
 slug: interior-cabana-sombras-terreno
 image: /assets/captures/cabin-interior-final.webp
-image_alt: "Hut comparison: original reference, model before and model after the lit interior and removal of painted terrain shadows."
+image_alt: "Historical offscreen technical comparison of the hut in release 63e5e749: original reference and model before and after the lit interior and removal of painted terrain shadows."
 category: Luz
 order: 9
 status: published
@@ -12,7 +13,9 @@ status: published
 
 The eastern hut's window now reveals yellow light coming from a physical room. The nearby terrain was also revised to remove fragments of the old painted shadow, allowing the shadow calculated from geometry to take that role.
 
-The work was published on October 7, 2026, at 19:33, São Paulo time, in [commit 63e5e749](https://github.com/douglasopan/diablo-3d/commit/63e5e749d73c213aecf4b77b400aa04acc5a0598). The interior belongs to the optional Meshy review profile. The final captures compare this state with the previous exterior calibration; the first lighting attempt has its own results, separated below.
+The work was published on October 7, 2026, at 19:33, São Paulo time, in [commit 63e5e749](https://github.com/douglasopan/diablo-3d/commit/63e5e749d73c213aecf4b77b400aa04acc5a0598). The interior belongs to the optional Meshy review profile. The final offscreen comparison boards compare this state with the previous exterior calibration; the first lighting attempt has its own results, separated below.
+
+The opening comparison and the four-angle board are historical technical comparisons produced offscreen, associated with release `63e5e749`. They are not game-window captures and do not establish the current in-game state or full approval of the model.
 
 ## A room behind the opening
 
@@ -53,7 +56,7 @@ The final runs passed lighting and scene tests with GOG data, shareware and the 
 
 ![Before and after comparison at rotations of minus five, zero and plus five degrees.](/assets/captures/cabin-orbits-final.webp)
 
-![Hut comparison before and after from four main angles.](/assets/captures/cabin-angles-final.webp)
+![Historical offscreen technical comparison of the hut before and after from four angles, in release 63e5e749.](/assets/captures/cabin-angles-final.webp)
 
 The imported window still differs from the reference in position and material. Topology, textures and other interiors need review; the tests do not approve the model's complete fidelity. Trees, rocks and characters still do not cast shadows through the architecture's shadow map. Day/night, horizon and fog remain future work in the [roadmap](https://github.com/douglasopan/diablo-3d/blob/63e5e749d73c213aecf4b77b400aa04acc5a0598/docs/ROADMAP.md), with Tristram as the priority.
 
@@ -61,4 +64,4 @@ The imported window still differs from the reference in position and material. T
 
 The later direction requested fire sources with multiple emitters and subtle flicker, as well as a physical, visible opening in the rear window. The two-candle revision was published in `cdeaaab0d` and is documented in [Two candles, two windows and the same room](/devlog/velas-janelas-cabana/).
 
-The captures and tests above continue to document the historical emitter in `63e5e749` and the closed rear wall at that stage. Evidence of the new source and open window belongs to the next record.
+The offscreen comparisons and tests above continue to document the historical emitter in `63e5e749` and the closed rear wall at that stage. Evidence of the new source and open window belongs to the next record.
