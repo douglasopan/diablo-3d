@@ -201,6 +201,7 @@ main > .actions + section, main > .notice + section { margin-top: 48px; }
 .prose p, .prose ul, .prose ol { margin-block: 0 23px; }
 .prose img { width: 100%; height: auto; margin-block: 28px 12px; border: 1px solid var(--line); border-radius: var(--radius); background: #090a09; }
 .prose figure { margin-block: 32px; }
+.prose .gallery-grid > figure { margin: 0; }
 .prose figure img { margin: 0; }
 .prose figure figcaption { font-size: .82rem; }
 .prose blockquote { margin: 32px 0; padding: 5px 0 5px 24px; border-left: 2px solid var(--gold); color: var(--muted); font: italic 1.15rem/1.7 var(--serif); }

@@ -309,11 +309,11 @@ def no_results():
 
 
 def devlog_highlight():
-    return f'''<section class="panel prose"><h2>Tristram de perto</h2><p>Quatro câmeras, revisão dos modelos, desempenho e uma comunidade bilíngue. Conheça os grandes avanços desta rodada, as comparações reais e o que ainda está em teste.</p><div class="actions">{button('Ler a nova rodada', '/devlog/tristram-de-perto/')}{button('Conhecer o editor', '/devlog/editor-godot-arquitetura/', True)}</div></section>'''
+    return f'''<section class="panel prose"><h2>Itens e novo HUD</h2><p>Nove conceitos de itens ligados ao catálogo e o novo HUD instalado. Veja as artes em revisão, a composição técnica da interface e os próximos passos.</p><div class="actions">{button('Ler o novo registro', '/devlog/itens-e-novo-hud/')}{button('Acompanhar Tristram', '/devlog/tristram-de-perto/', True)}</div></section>'''
 
 
 def lightbox():
-    return '''<dialog id="image-dialog" aria-label="Visualizador de captura" aria-describedby="dialog-caption"><div class="dialog-toolbar"><span id="dialog-counter"></span><button type="button" class="dialog-close" aria-label="Fechar captura">Fechar ×</button></div><img id="dialog-image" alt=""><p id="dialog-caption"></p><div class="dialog-controls"><button type="button" id="dialog-prev" aria-label="Captura anterior">← Anterior</button><button type="button" id="dialog-next" aria-label="Próxima captura">Próxima →</button></div></dialog>'''
+    return '''<dialog id="image-dialog" aria-label="Visualizador de imagens" aria-describedby="dialog-caption"><div class="dialog-toolbar"><span id="dialog-counter"></span><button type="button" class="dialog-close" aria-label="Fechar imagem">Fechar ×</button></div><img id="dialog-image" alt=""><p id="dialog-caption"></p><div class="dialog-controls"><button type="button" id="dialog-prev" aria-label="Imagem anterior">← Anterior</button><button type="button" id="dialog-next" aria-label="Próxima imagem">Próxima →</button></div></dialog>'''
 
 
 def background_music():
