@@ -315,6 +315,10 @@ def lightbox():
     return '''<dialog id="image-dialog" aria-label="Visualizador de captura" aria-describedby="dialog-caption"><div class="dialog-toolbar"><span id="dialog-counter"></span><button type="button" class="dialog-close" aria-label="Fechar captura">Fechar ×</button></div><img id="dialog-image" alt=""><p id="dialog-caption"></p><div class="dialog-controls"><button type="button" id="dialog-prev" aria-label="Captura anterior">← Anterior</button><button type="button" id="dialog-next" aria-label="Próxima captura">Próxima →</button></div></dialog>'''
 
 
+def background_music():
+    return f'''<aside class="music-player" aria-label="Música de fundo"><div class="music-heading"><span>Música de fundo</span><span id="music-status" role="status">Toque para ouvir</span></div><audio id="background-music" controls loop preload="none" playsinline aria-label="Reproduzir música de fundo" data-icon-url="{url('/vendor/plyr/plyr.svg')}" src="{versioned_asset('/assets/audio/background-music.mp3')}">Seu navegador não oferece reprodução de áudio.</audio></aside>'''
+
+
 def frame(title, description, path, content, image='/assets/banner.webp', article=None, noindex=False):
     title, description = translated(title), translated(description)
     canonical = absolute(path)
@@ -337,10 +341,10 @@ def frame(title, description, path, content, image='/assets/banner.webp', articl
 <title>{esc(title)} · Diablo 3D</title><meta name="description" content="{esc(description)}"><meta name="robots" content="{'noindex, follow' if noindex else 'index, follow'}"><link rel="canonical" href="{canonical}">
 <meta name="theme-color" content="#111211"><meta property="og:locale" content="{'en_US' if LANG == 'en' else 'pt_BR'}"><meta property="og:type" content="{'article' if article else 'website'}"><meta property="og:site_name" content="Diablo 3D · D3D"><meta property="og:title" content="{esc(title)}"><meta property="og:description" content="{esc(description)}"><meta property="og:url" content="{canonical}"><meta property="og:image" content="{absolute(image)}"><meta property="og:image:alt" content="{esc(article['image_alt'] if article else 'Banner oficial do projeto Diablo 3D')}">{article_meta}
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{esc(title)}"><meta name="twitter:description" content="{esc(description)}"><meta name="twitter:image" content="{absolute(image)}">
-<link rel="icon" type="image/png" href="{url('/assets/d3d-icon.png')}"><link rel="apple-touch-icon" href="{url('/assets/d3d-touch.png')}"><link rel="alternate" type="application/rss+xml" title="Diablo 3D — Devlog" href="{url('/rss.xml')}"><link rel="stylesheet" href="{versioned_asset('/site.css')}">
-{alternates}<script src="{versioned_asset('/language.js')}"></script><script type="application/ld+json">{json.dumps(structured, ensure_ascii=False).replace('<', chr(92) + 'u003c')}</script><script src="{versioned_asset('/site.js')}" defer></script></head>
+<link rel="icon" type="image/png" href="{url('/assets/d3d-icon.png')}"><link rel="apple-touch-icon" href="{url('/assets/d3d-touch.png')}"><link rel="alternate" type="application/rss+xml" title="Diablo 3D — Devlog" href="{url('/rss.xml')}"><link rel="stylesheet" href="{versioned_asset('/vendor/plyr/plyr.css')}"><link rel="stylesheet" href="{versioned_asset('/site.css')}">
+{alternates}<script src="{versioned_asset('/language.js')}"></script><script type="application/ld+json">{json.dumps(structured, ensure_ascii=False).replace('<', chr(92) + 'u003c')}</script><script src="{versioned_asset('/site.js')}" defer></script><script src="{versioned_asset('/vendor/plyr/plyr.js')}" defer></script><script src="{versioned_asset('/music.js')}" defer></script></head>
 <body><a class="skip-link" href="#main">Pular para o conteúdo</a><header class="site-header"><div class="wrap"><a class="brand" href="{url('/')}" aria-label="D3D — Início">{logo(True, True)}</a><button class="menu-toggle" type="button" aria-controls="navigation" aria-expanded="false" hidden data-enhancement>Menu <span aria-hidden="true">☰</span></button><nav id="navigation" class="main-nav" aria-label="Navegação principal">{nav}</nav>{languages}</div></header>
-<main id="main" class="wrap">{content}</main><footer class="site-footer"><div class="wrap"><div class="footer-top"><a class="brand" href="{url('/')}">{logo()}</a><nav aria-label="Links do projeto"><a href="{GITHUB}">GitHub ↗</a><a href="{DISCORD}">Discord ↗</a><a href="{url('/apoiar/')}">Apoiar ↗</a><a href="{url('/rss.xml')}">RSS ↗</a><a href="{source('LICENSE.md', False)}">Licença ↗</a></nav></div><p>Projeto de fã independente, sem afiliação com a Blizzard Entertainment. Diablo e suas marcas pertencem aos respectivos titulares.</p><p>Código público sob <a href="{source('LICENSE.md', False)}">Sustainable Use License</a>: distribuição gratuita e não comercial. Dados originais do jogo não são distribuídos.</p></div></footer>{lightbox()}</body></html>'''
+<main id="main" class="wrap">{content}</main><footer class="site-footer"><div class="wrap"><div class="footer-top"><a class="brand" href="{url('/')}">{logo()}</a><nav aria-label="Links do projeto"><a href="{GITHUB}">GitHub ↗</a><a href="{DISCORD}">Discord ↗</a><a href="{url('/apoiar/')}">Apoiar ↗</a><a href="{url('/rss.xml')}">RSS ↗</a><a href="{source('LICENSE.md', False)}">Licença ↗</a></nav></div><p>Projeto de fã independente, sem afiliação com a Blizzard Entertainment. Diablo e suas marcas pertencem aos respectivos titulares.</p><p>Código público sob <a href="{source('LICENSE.md', False)}">Sustainable Use License</a>: distribuição gratuita e não comercial. Dados originais do jogo não são distribuídos.</p></div></footer>{background_music()}{lightbox()}</body></html>'''
     return localize_html(document)
 
 
@@ -463,8 +467,9 @@ def build():
         if not all(entry.get(k) for k in ('title', 'alt', 'caption', 'category', 'stage', 'source', 'sha256')):
             raise ValueError('Incomplete evidence metadata')
     allowed = {'.css', '.js', '.png', '.webp', '.svg', '.woff', '.woff2'}
+    public_extras = {PUBLIC / 'assets/audio/background-music.mp3', PUBLIC / 'vendor/plyr/LICENSE.txt'}
     for path in PUBLIC.rglob('*'):
-        if path.is_symlink() or (path.is_file() and path.suffix.lower() not in allowed and not (path.parent == PUBLIC / 'assets/fonts' and path.suffix == '.txt')):
+        if path.is_symlink() or (path.is_file() and path.suffix.lower() not in allowed and path not in public_extras and not (path.parent == PUBLIC / 'assets/fonts' and path.suffix == '.txt')):
             raise ValueError(f'Unexpected public file: {path.relative_to(PUBLIC)}')
     # Output deletion is deliberately constrained to this generator's own directory.
     if OUT.resolve().parent != ROOT.resolve() or OUT.name != 'dist':

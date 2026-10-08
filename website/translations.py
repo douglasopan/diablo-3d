@@ -7,6 +7,10 @@ audit. URLs, filenames, commits and evidence hashes are language independent.
 from __future__ import annotations
 
 TRANSLATIONS: dict[str, str] = {
+    'Música de fundo': 'Background music',
+    'Toque para ouvir': 'Press play to listen',
+    'Reproduzir música de fundo': 'Play background music',
+    'Seu navegador não oferece reprodução de áudio.': 'Your browser does not support audio playback.',
     'Godot para revisar a arquitetura': 'Reviewing architecture in Godot',
     'O editor externo já permite inspecionar a cena, salvar o trabalho e exportar arquitetura estática para um perfil de revisão. A partida continua no DevilutionX, com suas regras e colisões.': 'The external editor now lets you inspect the scene, save your work and export static architecture to a review profile. Gameplay remains in DevilutionX, with its rules and collisions.',
     'Conhecer o editor': 'Explore the editor',

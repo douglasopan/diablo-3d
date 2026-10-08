@@ -8,6 +8,10 @@ Os registros são arquivos Markdown versionados em `docs/devlog/`. O gerador em 
 
 A publicação é completa em português brasileiro e inglês: a versão PT-BR fica na raiz do projeto e a inglesa em `/en/`. O seletor PT/EN abre a página equivalente e conserva a seção de um artigo. A escolha fica salva no navegador quando o armazenamento local está disponível. Sem uma escolha salva, a página portuguesa direciona para inglês quando esse é o idioma principal do navegador. Links diretos de `/en/` funcionam de forma independente; os dois idiomas têm HTML pronto e continuam legíveis sem JavaScript.
 
+## Música do site
+
+A música de fundo do site usa a faixa fornecida pelo usuário, com controles simples e preferência local de pausa/volume. A origem, a preparação, o player e os limites de início automático e navegação estão em [Música do site](../website/MUSIC.md). Essa integração é independente do seletor de trilhas do jogo.
+
 ## Publicar um registro
 
 Crie `docs/devlog/YYYY-MM-DD-slug.md`. Use UTF-8 e metadados YAML:
