@@ -385,12 +385,12 @@ inline bool RunTownCameraChecks(std::ostream &out, size_t &checks)
 	rig.Pan(1, 1);
 	check(samePose(rig.pose(), saved[2]), "third person keeps the eye anchored to the followed actor");
 	TownCameraRig floorRig;
-	for (const TownCameraMode mode : { TownCameraMode::FreeOrbit, TownCameraMode::ThirdPerson }) {
+	for (const TownCameraMode mode : { TownCameraMode::FreeOrbit }) {
 		floorRig.SetMode(mode);
 		floorRig.SetPose({ 0, -1, 5, {} });
 		const TownCameraFrame frame = BuildTownCameraFrame(floorRig, { 0, 2, 0 }, 640, 480, 320, 240);
 		check(floorRig.pose().pitch > 0 && frame.valid && frame.eye.height > 2,
-		    "orbit and third person do not place the eye below the followed ground height");
+		    "free orbit retains its positive-pitch floor");
 	}
 	floorRig.SetMode(TownCameraMode::FirstPerson);
 	floorRig.SetPose({ 0, -1, 0, {} });
@@ -439,6 +439,309 @@ inline bool RunTownCameraChecks(std::ostream &out, size_t &checks)
 	const TownCameraFrame sanitized = BuildTownCameraFrame(invalidRig, {}, 640, 480, 320, 240);
 	check(sanitized.valid && std::isfinite(sanitized.eye.height) && sanitized.nearClip > 0
 	        && sanitized.farClip > sanitized.nearClip && sanitized.focalPixels > 0, "invalid preferences and pose recover a finite usable camera");
+
+
+	// Follow-wheel transitions and explicit visual-frame advancement.
+	{
+		const TownCameraPoint wheelAnchor { 12, 3, 25 };
+		const auto makeWheelRig = [](TownCameraMode mode, float distance) {
+			TownCameraRig result;
+			result.SetMode(mode);
+			result.SetPose({ 0.7F, -0.3F, distance, {} });
+			return result;
+		};
+		const auto wheelFrame = [&](const TownCameraRig &candidate) {
+			return BuildTownCameraFrame(candidate, wheelAnchor, 640, 480, 320, 240);
+		};
+		const auto sameWheelFrame = [&](const TownCameraFrame &a, const TownCameraFrame &b) {
+			return a.valid == b.valid && a.perspective == b.perspective
+			    && samePoint(a.eye, b.eye) && samePoint(a.forward, b.forward)
+			    && samePoint(a.up, b.up) && samePoint(a.right, b.right)
+			    && close(a.heightScale, b.heightScale) && close(a.focalPixels, b.focalPixels)
+			    && close(a.centerX, b.centerX) && close(a.centerY, b.centerY)
+			    && close(a.nearClip, b.nearClip) && close(a.farClip, b.farClip)
+			    && close(a.fogDepthOffset, b.fogDepthOffset);
+		};
+		const auto sameWheelPreferences = [&](const TownCameraPreferences &a, const TownCameraPreferences &b) {
+			return close(a.verticalFovDegrees, b.verticalFovDegrees)
+			    && close(a.nearClip, b.nearClip) && close(a.farClip, b.farClip)
+			    && close(a.eyeHeight, b.eyeHeight) && close(a.firstPersonEyeHeight, b.firstPersonEyeHeight)
+			    && close(a.orbitRadiansPerPixel, b.orbitRadiansPerPixel)
+			    && close(a.zoomExponentPerStep, b.zoomExponentPerStep);
+		};
+		const auto settleWheel = [](TownCameraRig &candidate) {
+			for (int step = 0; step < 32 && candidate.IsVisualTransitionActive(); ++step)
+				candidate.AdvanceVisual(0.1F);
+			return !candidate.IsVisualTransitionActive();
+		};
+
+		TownCameraRig wheelThreshold = makeWheelRig(TownCameraMode::ThirdPerson, 0.61F);
+		const TownCameraFrame wheelBeforeEntry = wheelFrame(wheelThreshold);
+		wheelThreshold.Zoom(0.05F);
+		check(wheelThreshold.mode() == TownCameraMode::ThirdPerson && wheelThreshold.pose().distance > 0.6F,
+		    "fractional wheel stays in third person above its entry threshold");
+		wheelThreshold.Zoom(0.1F);
+		check(wheelThreshold.mode() == TownCameraMode::FirstPerson && close(wheelThreshold.pose().distance, 0)
+		        && wheelThreshold.IsVisualTransitionActive(), "fractional positive wheel crosses the 0.6 threshold into first person");
+		check(close(wheelThreshold.VisualDistance(), 0.61F) && close(wheelThreshold.VisualEyeHeight(), 1.1F)
+		        && sameWheelFrame(wheelFrame(wheelThreshold), wheelBeforeEntry),
+		    "wheel entry preserves the displayed eye and orientation before any visual time advances");
+		check(close(wheelThreshold.pose().yaw, 0.7F) && close(wheelThreshold.pose().pitch, -0.3F),
+		    "wheel entry transfers the active orientation including negative pitch");
+
+		const uint64_t wheelReadRevision = wheelThreshold.revision();
+		const TownCameraFrame wheelReadFrame = wheelFrame(wheelThreshold);
+		const TownCameraRay wheelReadRay = TownCameraScreenRay(wheelReadFrame, 320, 240);
+		check(wheelReadRay.valid && sameWheelFrame(wheelReadFrame, wheelFrame(wheelThreshold))
+		        && samePoint(wheelReadRay.origin, wheelReadFrame.eye)
+		        && wheelThreshold.revision() == wheelReadRevision && close(wheelThreshold.VisualDistance(), 0.61F),
+		    "building frames and selection rays never advance the visual transition");
+		for (const float badSeconds : { 0.0F, -0.01F, nan, infinity, -infinity }) {
+			const uint64_t revision = wheelThreshold.revision();
+			const float distance = wheelThreshold.VisualDistance(), height = wheelThreshold.VisualEyeHeight();
+			check(!wheelThreshold.AdvanceVisual(badSeconds) && wheelThreshold.revision() == revision
+			        && close(wheelThreshold.VisualDistance(), distance) && close(wheelThreshold.VisualEyeHeight(), height),
+			    "zero, negative and nonfinite visual time cannot advance or invalidate the camera");
+		}
+		check(wheelThreshold.AdvanceVisual(0.05F) && wheelThreshold.revision() > wheelReadRevision,
+		    "an eligible visual step changes the camera revision for fresh picking");
+		const float wheelResidual = std::exp(-0.5F);
+		check(close(wheelThreshold.VisualDistance(), 0.61F * wheelResidual)
+		        && close(wheelThreshold.VisualEyeHeight(), 1.7F - 0.6F * wheelResidual),
+		    "distance and eye height share the time-based easing instead of jumping at a mode edge");
+		const TownCameraFrame wheelMidFrame = wheelFrame(wheelThreshold);
+		const TownCameraPoint wheelExpectedEye = wheelAnchor + TownCameraPoint { 0, wheelThreshold.VisualEyeHeight(), 0 }
+		    - wheelBeforeEntry.forward * wheelThreshold.VisualDistance();
+		check(samePoint(wheelMidFrame.eye, wheelExpectedEye)
+		        && samePoint(wheelMidFrame.forward, wheelBeforeEntry.forward)
+		        && samePoint(wheelMidFrame.up, wheelBeforeEntry.up),
+		    "the moving eye follows the same hero anchor and forward basis while both heights blend");
+		bool wheelMonotonic = true;
+		for (int step = 0; step < 32 && wheelThreshold.IsVisualTransitionActive(); ++step) {
+			const float oldDistance = wheelThreshold.VisualDistance(), oldHeight = wheelThreshold.VisualEyeHeight();
+			const uint64_t oldRevision = wheelThreshold.revision();
+			const bool advanced = wheelThreshold.AdvanceVisual(0.1F);
+			wheelMonotonic &= wheelThreshold.VisualDistance() >= 0 && wheelThreshold.VisualDistance() <= oldDistance
+			    && wheelThreshold.VisualEyeHeight() >= oldHeight && wheelThreshold.VisualEyeHeight() <= 1.7F
+			    && wheelFrame(wheelThreshold).valid && (!advanced || wheelThreshold.revision() > oldRevision);
+		}
+		check(wheelMonotonic && !wheelThreshold.IsVisualTransitionActive()
+		        && close(wheelThreshold.VisualDistance(), 0) && close(wheelThreshold.VisualEyeHeight(), 1.7F)
+		        && samePoint(wheelFrame(wheelThreshold).eye, { 12, 4.7F, 25 }),
+		    "first-person convergence stays finite, monotonic and bounded, then reaches its physical eye endpoint");
+		const uint64_t wheelSettledRevision = wheelThreshold.revision();
+		check(!wheelThreshold.AdvanceVisual(0.1F) && wheelThreshold.revision() == wheelSettledRevision,
+		    "a settled transition does not keep invalidating picking");
+
+		TownCameraRig wheelFarReversal = makeWheelRig(TownCameraMode::ThirdPerson, 5);
+		wheelFarReversal.Zoom(50);
+		const TownCameraFrame wheelFarBeforeReverse = wheelFrame(wheelFarReversal);
+		wheelFarReversal.Zoom(-1);
+		check(wheelFarReversal.mode() == TownCameraMode::ThirdPerson && wheelFarReversal.pose().distance > 5
+		        && close(wheelFarReversal.VisualDistance(), 5)
+		        && sameWheelFrame(wheelFrame(wheelFarReversal), wheelFarBeforeReverse),
+		    "scroll-out during a distant unfinished FPP entry requests farther than the displayed eye without a jump");
+		check(wheelFarReversal.AdvanceVisual(0.02F) && wheelFarReversal.VisualDistance() > 5,
+		    "the first visual step after a distant scroll-out reversal actually moves outward");
+
+		TownCameraRig wheelExit = makeWheelRig(TownCameraMode::FirstPerson, 0);
+		const TownCameraFrame wheelExitBefore = wheelFrame(wheelExit);
+		wheelExit.Zoom(-0.125F);
+		check(wheelExit.mode() == TownCameraMode::ThirdPerson && wheelExit.pose().distance >= 1
+		        && sameWheelFrame(wheelFrame(wheelExit), wheelExitBefore)
+		        && close(wheelExit.pose().pitch, -0.3F),
+		    "fractional negative wheel leaves FPP with the exit margin while retaining its exact current view");
+		const float wheelExitDistance = wheelExit.VisualDistance(), wheelExitHeight = wheelExit.VisualEyeHeight();
+		wheelExit.Orbit(0.2F, -0.1F);
+		check(wheelExit.IsVisualTransitionActive() && close(wheelExit.VisualDistance(), wheelExitDistance)
+		        && close(wheelExit.VisualEyeHeight(), wheelExitHeight)
+		        && close(wheelExit.pose().yaw, 0.9F) && close(wheelExit.pose().pitch, -0.4F),
+		    "looking during a wheel transition changes direction without cancelling its distance or height blend");
+		check(settleWheel(wheelExit) && close(wheelExit.VisualDistance(), wheelExit.pose().distance)
+		        && close(wheelExit.VisualEyeHeight(), 1.1F), "scroll-out converges to the independent third-person endpoint");
+		TownCameraRig wheelHysteresis = makeWheelRig(TownCameraMode::FirstPerson, 0);
+		wheelHysteresis.Zoom(-0.001F);
+		wheelHysteresis.Zoom(0.001F);
+		check(wheelHysteresis.mode() == TownCameraMode::ThirdPerson && wheelHysteresis.pose().distance > 0.6F,
+		    "tiny opposing wheel fractions around FPP exit do not immediately reenter first person");
+		TownCameraRig wheelInsideBand = makeWheelRig(TownCameraMode::ThirdPerson, 0.55F);
+		wheelInsideBand.Zoom(-0.1F);
+		check(wheelInsideBand.mode() == TownCameraMode::ThirdPerson && wheelInsideBand.pose().distance > 0.55F,
+		    "scroll-out inside the entry band never triggers an inward mode switch");
+
+		TownCameraRig wheelWhole = makeWheelRig(TownCameraMode::ThirdPerson, 5), wheelFractions = wheelWhole;
+		wheelWhole.Zoom(1);
+		for (int part = 0; part < 4; ++part)
+			wheelFractions.Zoom(0.25F);
+		check(samePose(wheelWhole.pose(), wheelFractions.pose())
+		        && close(wheelWhole.VisualDistance(), wheelFractions.VisualDistance()),
+		    "four precise quarter steps equal one whole wheel step away from thresholds");
+		TownCameraRig wheelHuge = makeWheelRig(TownCameraMode::FirstPerson, 0), wheelBounded = wheelHuge;
+		wheelHuge.Zoom(-1000);
+		wheelBounded.Zoom(-50);
+		check(samePose(wheelHuge.pose(), wheelBounded.pose()) && close(wheelHuge.pose().distance, 80),
+		    "a huge outward wheel batch is bounded to fifty steps and an eighty-unit boom");
+		wheelHuge.Zoom(1000);
+		check(wheelHuge.mode() == TownCameraMode::FirstPerson && close(wheelHuge.pose().distance, 0)
+		        && std::isfinite(wheelHuge.VisualDistance()), "a huge inward batch reaches FPP without nonfinite distance");
+		TownCameraRig wheelNoOp = makeWheelRig(TownCameraMode::FirstPerson, 0);
+		const uint64_t wheelNoOpRevision = wheelNoOp.revision();
+		const TownCameraPose wheelNoOpPose = wheelNoOp.pose();
+		for (const float noOpSteps : { 0.0F, 1.0F, nan, infinity, -infinity })
+			wheelNoOp.Zoom(noOpSteps);
+		wheelNoOp.Pan(1, 1);
+		check(samePose(wheelNoOp.pose(), wheelNoOpPose) && wheelNoOp.revision() == wheelNoOpRevision
+		        && !wheelNoOp.IsVisualTransitionActive(), "positive FPP zoom, pan and invalid wheel values remain inert");
+
+		TownCameraRig wheelOneStep = makeWheelRig(TownCameraMode::ThirdPerson, 2);
+		wheelOneStep.Zoom(50);
+		TownCameraRig wheelSubsteps = wheelOneStep, wheelHiccup = wheelOneStep;
+		wheelOneStep.AdvanceVisual(0.1F);
+		for (int part = 0; part < 10; ++part)
+			wheelSubsteps.AdvanceVisual(0.01F);
+		wheelHiccup.AdvanceVisual(10);
+		check(close(wheelOneStep.VisualDistance(), wheelSubsteps.VisualDistance(), 0.0002F)
+		        && close(wheelOneStep.VisualEyeHeight(), wheelSubsteps.VisualEyeHeight(), 0.0002F),
+		    "equal eligible elapsed time produces equal visual distance and height across frame subdivisions");
+		check(close(wheelHiccup.VisualDistance(), wheelOneStep.VisualDistance())
+		        && close(wheelHiccup.VisualEyeHeight(), wheelOneStep.VisualEyeHeight()),
+		    "a large frame delay advances at most one tenth of a second rather than jumping to an endpoint");
+
+		TownCameraRig wheelExplicit = makeWheelRig(TownCameraMode::ThirdPerson, 2);
+		wheelExplicit.Zoom(50);
+		const TownCameraPose wheelExplicitPose = wheelExplicit.pose();
+		wheelExplicit.SetMode(TownCameraMode::FirstPerson);
+		check(!wheelExplicit.IsVisualTransitionActive() && samePose(wheelExplicit.pose(), wheelExplicitPose)
+		        && close(wheelExplicit.VisualDistance(), 0) && close(wheelExplicit.VisualEyeHeight(), 1.7F),
+		    "explicitly selecting even the current mode cancels delayed wheel motion without changing its saved pose");
+		wheelExplicit.Zoom(-1);
+		wheelExplicit.SetPose({ 0.4F, -0.6F, 4, {} });
+		check(!wheelExplicit.IsVisualTransitionActive() && close(wheelExplicit.VisualDistance(), 4)
+		        && close(wheelExplicit.pose().pitch, -0.6F), "an explicit diagnostic pose cancels the blend and retains follow pitch freedom");
+		wheelExplicit.Zoom(50);
+		wheelExplicit.SetMode(TownCameraMode::FreeOrbit);
+		check(!wheelExplicit.IsVisualTransitionActive() && samePose(wheelExplicit.pose(), TownCameraPose {})
+		        && close(wheelExplicit.VisualEyeHeight(), 0), "K-style explicit mode selection restores the free-orbit saved pose");
+
+		TownCameraRig wheelSuspend = makeWheelRig(TownCameraMode::ThirdPerson, 2);
+		wheelSuspend.Zoom(50);
+		wheelSuspend.AdvanceVisual(0.01F);
+		const TownCameraPose wheelSuspendPose = wheelSuspend.pose();
+		wheelSuspend.Suspend(true);
+		const uint64_t wheelSuspendedRevision = wheelSuspend.revision();
+		wheelSuspend.Zoom(-1);
+		check(wheelSuspend.suspended() && wheelSuspend.mode() == TownCameraMode::FirstPerson
+		        && samePose(wheelSuspend.pose(), wheelSuspendPose) && !wheelSuspend.IsVisualTransitionActive()
+		        && !wheelSuspend.AdvanceVisual(0.1F) && wheelSuspend.revision() == wheelSuspendedRevision
+		        && !wheelSuspend.HideLocalPlayer() && !wheelFrame(wheelSuspend).valid,
+		    "F4 cancellation preserves mode and intended pose while suspended input and visual motion stay inert");
+		wheelSuspend.Suspend(false);
+		check(!wheelSuspend.IsVisualTransitionActive() && samePose(wheelSuspend.pose(), wheelSuspendPose)
+		        && close(wheelSuspend.VisualDistance(), 0) && close(wheelSuspend.VisualEyeHeight(), 1.7F),
+		    "F4 resume uses the preserved endpoint and never resumes cancelled delayed motion");
+		TownCameraRig wheelHome = makeWheelRig(TownCameraMode::ThirdPerson, 2);
+		const TownCameraPose wheelHomeThird = wheelHome.pose();
+		wheelHome.Zoom(50);
+		const TownCameraPose wheelHomeFirst = wheelHome.pose();
+		wheelHome.RestoreIsometric();
+		check(wheelHome.mode() == TownCameraMode::Isometric && !wheelHome.IsVisualTransitionActive()
+		        && samePose(wheelHome.pose(), TownCameraPose {}) && close(wheelHome.VisualEyeHeight(), 0)
+		        && !wheelFrame(wheelHome).perspective, "Home cancels wheel motion and restores the exact native camera contract");
+		wheelHome.SetMode(TownCameraMode::ThirdPerson);
+		const bool wheelHomeThirdPreserved = samePose(wheelHome.pose(), wheelHomeThird);
+		wheelHome.SetMode(TownCameraMode::FirstPerson);
+		check(wheelHomeThirdPreserved && samePose(wheelHome.pose(), wheelHomeFirst),
+		    "Home retains both follow modes' saved poses after a wheel transition");
+
+		TownCameraRig wheelPreferences = makeWheelRig(TownCameraMode::ThirdPerson, 2);
+		TownCameraPreferences wheelSavedPreferences = wheelPreferences.preferences();
+		wheelSavedPreferences.verticalFovDegrees = 58;
+		wheelSavedPreferences.orbitRadiansPerPixel = 0.008F;
+		wheelSavedPreferences.eyeHeight = 0.9F;
+		wheelSavedPreferences.firstPersonEyeHeight = 1.8F;
+		wheelSavedPreferences.zoomExponentPerStep = 0.25F;
+		wheelPreferences.SetPreferences(wheelSavedPreferences);
+		wheelPreferences.Zoom(50);
+		check(settleWheel(wheelPreferences) && sameWheelPreferences(wheelPreferences.preferences(), wheelSavedPreferences)
+		        && close(wheelPreferences.VisualEyeHeight(), 1.8F), "wheel motion preserves preferences and converges to a configured eye height");
+		wheelSavedPreferences.firstPersonEyeHeight = 1.6F;
+		wheelPreferences.SetPreferences(wheelSavedPreferences);
+		const uint64_t wheelPreferenceRevision = wheelPreferences.revision();
+		check(!wheelPreferences.IsVisualTransitionActive() && close(wheelPreferences.VisualEyeHeight(), 1.6F)
+		        && !wheelPreferences.AdvanceVisual(0.1F) && wheelPreferences.revision() == wheelPreferenceRevision,
+		    "changing preferences after settling never reactivates stale wheel interpolation");
+		TownCameraRig wheelLimitNoOp = makeWheelRig(TownCameraMode::ThirdPerson, 80);
+		wheelLimitNoOp.Zoom(-1);
+		TownCameraPreferences wheelLimitPreferences = wheelLimitNoOp.preferences();
+		wheelLimitPreferences.eyeHeight = 1.3F;
+		wheelLimitNoOp.SetPreferences(wheelLimitPreferences);
+		check(!wheelLimitNoOp.IsVisualTransitionActive() && close(wheelLimitNoOp.VisualEyeHeight(), 1.3F),
+		    "a no-op wheel event at the maximum distance cannot leave latent visual state behind");
+		TownCameraRig wheelHeightOnly = makeWheelRig(TownCameraMode::ThirdPerson, 0.5F);
+		TownCameraPreferences wheelHeightOnlyPreferences = wheelHeightOnly.preferences();
+		wheelHeightOnlyPreferences.eyeHeight = 0.4F;
+		wheelHeightOnlyPreferences.firstPersonEyeHeight = 2;
+		wheelHeightOnly.SetPreferences(wheelHeightOnlyPreferences);
+		wheelHeightOnly.Zoom(50);
+		for (int step = 0; step < 9; ++step)
+			wheelHeightOnly.AdvanceVisual(0.1F);
+		check(wheelHeightOnly.VisualDistance() == 0 && wheelHeightOnly.IsVisualTransitionActive(),
+		    "distance may settle while a larger eye-height change is still converging");
+		wheelHeightOnlyPreferences.firstPersonEyeHeight = wheelHeightOnly.VisualEyeHeight();
+		wheelHeightOnly.SetPreferences(wheelHeightOnlyPreferences);
+		check(!wheelHeightOnly.IsVisualTransitionActive(),
+		    "a preference matching the displayed height completes the remaining height-only transition");
+		wheelHeightOnlyPreferences.firstPersonEyeHeight = 1.8F;
+		wheelHeightOnly.SetPreferences(wheelHeightOnlyPreferences);
+		check(!wheelHeightOnly.IsVisualTransitionActive() && close(wheelHeightOnly.VisualEyeHeight(), 1.8F),
+		    "completing a blend through preferences clears its storage before a later preference change");
+
+		for (const TownCameraMode legacyMode : { TownCameraMode::Isometric, TownCameraMode::FreeOrbit }) {
+			TownCameraRig wheelLegacy;
+			wheelLegacy.SetMode(legacyMode);
+			wheelLegacy.SetPose({ 0.9F, 0.5F, 20, { 2, 0, -3 } });
+			TownCameraPose wheelLegacyExpectedPose = wheelLegacy.pose();
+			wheelLegacyExpectedPose.distance *= std::exp(-wheelLegacy.preferences().zoomExponentPerStep * 0.75F);
+			TownCameraRig wheelLegacyExpected = wheelLegacy;
+			wheelLegacyExpected.SetPose(wheelLegacyExpectedPose);
+			wheelLegacy.Zoom(0.75F);
+			check(wheelLegacy.mode() == legacyMode && samePose(wheelLegacy.pose(), wheelLegacyExpected.pose())
+			        && sameWheelFrame(wheelFrame(wheelLegacy), wheelFrame(wheelLegacyExpected))
+			        && !wheelLegacy.IsVisualTransitionActive() && !wheelLegacy.AdvanceVisual(0.1F)
+			        && close(wheelLegacy.VisualEyeHeight(), 0), "isometric and free-orbit zoom retain their existing projection and pose behavior");
+		}
+		TownCameraRig wheelFloor = makeWheelRig(TownCameraMode::ThirdPerson, 5);
+		wheelFloor.SetPose({ 0, -1, 5, {} });
+		check(close(wheelFloor.pose().pitch, -1) && wheelFrame(wheelFloor).valid
+		        && wheelFrame(wheelFloor).forward.height > 0 && wheelFrame(wheelFloor).eye.height < wheelAnchor.height,
+		    "third person publishes the continuous upward view for the external collision solver instead of snapping pitch");
+		wheelFloor.SetMode(TownCameraMode::FreeOrbit);
+		wheelFloor.SetPose({ 0, -1, 5, {} });
+		check(wheelFloor.pose().pitch > 0 && wheelFrame(wheelFloor).eye.height > wheelAnchor.height,
+		    "free orbit alone retains its legacy positive pitch floor");
+
+		TownCameraRig wheelHide = makeWheelRig(TownCameraMode::ThirdPerson, 5);
+		const uint64_t wheelHideRevision = wheelHide.revision();
+		check(!wheelHide.HideLocalPlayer() && wheelHide.HideLocalPlayer(0.2F)
+		        && wheelHide.HideLocalPlayer(0.65F) && !wheelHide.HideLocalPlayer(0.6501F)
+		        && !wheelHide.HideLocalPlayer(nan) && !wheelHide.HideLocalPlayer(infinity)
+		        && wheelHide.mode() == TownCameraMode::ThirdPerson && wheelHide.revision() == wheelHideRevision,
+		    "collision distance controls near-body hiding without changing mode, intent or revision");
+		wheelHide.Zoom(50);
+		check(!wheelHide.HideLocalPlayer() && wheelHide.HideLocalPlayer(0.2F),
+		    "a logical FPP entry still visually far away keeps the body until the resolved eye approaches it");
+		check(settleWheel(wheelHide) && wheelHide.HideLocalPlayer(100), "settled FPP always hides only the local player");
+		wheelHide.Zoom(-1);
+		check(wheelHide.mode() == TownCameraMode::ThirdPerson && wheelHide.HideLocalPlayer(),
+		    "scroll-out does not expose the local body while the displayed eye is still at the FPP endpoint");
+		wheelHide.SetMode(TownCameraMode::ThirdPerson);
+		wheelHide.SetPose({ 0, 0, 0.5F, {} });
+		check(wheelHide.HideLocalPlayer(), "a settled near third-person boom also hides the local body");
+		for (const TownCameraMode visibleMode : { TownCameraMode::Isometric, TownCameraMode::FreeOrbit }) {
+			wheelHide.SetMode(visibleMode);
+			check(!wheelHide.HideLocalPlayer(0), "non-follow modes never use follow-body hiding");
+		}
+	}
 
 	out << "Camera contract: " << checks - firstCheck << " checks, " << failures << " failures\n";
 	return failures == 0;

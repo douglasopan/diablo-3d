@@ -54,17 +54,31 @@ public:
 	void SetPose(TownCameraPose pose);
 	void SetPreferences(TownCameraPreferences preferences);
 	void Orbit(float yawDelta, float pitchDelta);
+	/** Positive wheel approaches. Only the two follow modes cross by wheel;
+	 * this changes session state, not persisted preferences. */
 	void Zoom(float steps);
+	/** Advance once per eligible rendered frame, never in getters or picking.
+	 * The adapter freezes advancement behind a pending click barrier. */
+	bool AdvanceVisual(float seconds);
+	float VisualDistance() const;
+	float VisualEyeHeight() const;
+	bool IsVisualTransitionActive() const;
 	void Pan(float x, float z);
 	void Suspend(bool suspended);
 	void RestoreIsometric();
-	bool HideLocalPlayer() const;
+	/** A finite nonnegative argument is the final collision-resolved boom
+	 * distance. The adapter may add visibility hysteresis around this result. */
+	bool HideLocalPlayer(float resolvedFollowDistance = -1) const;
 
 private:
+	void BeginFollowVisual();
 	std::array<TownCameraPose, 4> poses_;
 	TownCameraPreferences preferences_;
 	TownCameraMode mode_ = TownCameraMode::Isometric;
 	bool suspended_ = false;
+	bool followVisualActive_ = false;
+	float followVisualDistance_ = 0;
+	float followVisualEyeHeight_ = 1.1F;
 	uint64_t revision_ = 0;
 };
 
@@ -91,7 +105,8 @@ struct TownCameraFrame {
 /** Native centers and zoom are supplied by the existing viewport adapter;
  * perspective uses the same logical viewport/center, without UI rescaling.
  * FOV is nominal for a centered view; an off-center viewport is an asymmetric
- * frustum with the same focal length. No camera/scene collision is performed. */
+ * frustum with the same focal length. This publishes the desired visual eye;
+ * the runtime resolves scene collision before publishing color/depth/picking. */
 TownCameraFrame BuildTownCameraFrame(const TownCameraRig &rig, TownCameraPoint anchor,
 	int width, int height, float centerX, float centerY, float nativeZoom = 1);
 TownCameraPoint TownCameraToView(const TownCameraFrame &frame, TownCameraPoint world);

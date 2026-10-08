@@ -23,6 +23,15 @@ float Bounded(float value, float fallback, float minimum, float maximum)
 	return std::isfinite(value) ? std::clamp(value, minimum, maximum) : fallback;
 }
 
+uint8_t CanonicalMovementKeys(uint8_t physicalKeys)
+{
+	return static_cast<uint8_t>(
+	    ((physicalKeys & (TownFirstPersonArrowUp | TownFirstPersonKeyW)) != 0 ? TownFirstPersonArrowUp : 0)
+	    | ((physicalKeys & (TownFirstPersonArrowDown | TownFirstPersonKeyS)) != 0 ? TownFirstPersonArrowDown : 0)
+	    | ((physicalKeys & (TownFirstPersonArrowLeft | TownFirstPersonKeyA)) != 0 ? TownFirstPersonArrowLeft : 0)
+	    | ((physicalKeys & (TownFirstPersonArrowRight | TownFirstPersonKeyD)) != 0 ? TownFirstPersonArrowRight : 0));
+}
+
 void ClearHeld(TownFirstPersonInputResult &result)
 {
 	result.stopOwnWalk = result.stopOwnWalk || IsDirection(result.nextState.lastDirection);
@@ -82,12 +91,12 @@ TownFirstPersonInputResult StepTownFirstPersonInput(const TownFirstPersonInputSt
 {
 	TownFirstPersonInputResult result;
 	result.nextState = state;
-	result.nextState.heldKeys &= TownFirstPersonArrowMask;
-	result.nextState.blockedKeys &= TownFirstPersonArrowMask;
+	result.nextState.heldKeys &= TownFirstPersonMovementMask;
+	result.nextState.blockedKeys &= TownFirstPersonMovementMask;
 	result.nextState.lastDirectionKeys &= TownFirstPersonArrowMask;
-	const uint8_t physical = input.physicalHeld & TownFirstPersonArrowMask;
-	const uint8_t pressed = input.pressed & TownFirstPersonArrowMask;
-	const uint8_t released = input.released & TownFirstPersonArrowMask;
+	const uint8_t physical = input.physicalHeld & TownFirstPersonMovementMask;
+	const uint8_t pressed = input.pressed & TownFirstPersonMovementMask;
+	const uint8_t released = input.released & TownFirstPersonMovementMask;
 	const bool validPose = std::isfinite(input.currentYaw) && std::isfinite(input.currentPitch)
 	    && input.currentPitch >= -PitchLimit && input.currentPitch <= PitchLimit;
 	const bool eligible = input.firstPersonActive && input.inputAllowed && validPose;
@@ -189,7 +198,7 @@ TownFirstPersonInputResult StepTownFirstPersonInput(const TownFirstPersonInputSt
 		const double pitch = std::clamp(input.currentPitch + mousePitch, -static_cast<double>(PitchLimit), static_cast<double>(PitchLimit));
 		result.pitchDelta = static_cast<float>(pitch - input.currentPitch);
 	}
-	const uint8_t held = result.nextState.heldKeys;
+	const uint8_t held = CanonicalMovementKeys(result.nextState.heldKeys);
 	const int forward = ((held & TownFirstPersonArrowUp) != 0 ? 1 : 0)
 	    - ((held & TownFirstPersonArrowDown) != 0 ? 1 : 0);
 	const int right = ((held & TownFirstPersonArrowRight) != 0 ? 1 : 0)

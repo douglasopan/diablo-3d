@@ -26,6 +26,8 @@ void RotateTownView(float radians);
 void AdjustTownViewDistance(float delta);
 void OrbitTownView(float yawDelta, float pitchDelta);
 void ZoomTownView(float wheelSteps);
+/** Once per eligible world frame; zero pauses visual interpolation. */
+bool AdvanceTownViewCamera(float seconds);
 void ResetTownViewCamera();
 TownCameraMode GetTownViewCameraMode();
 /** Session mode only; Home does not overwrite the saved startup preference. */
@@ -46,6 +48,17 @@ struct TownViewCameraState {
 	float eyeHeight = 1.1F;
 };
 TownViewCameraState GetTownViewCameraState();
+/** Visual-only collision evidence, separate from the requested camera pose. */
+struct TownViewFollowCameraState {
+	bool active = false, transition = false, blocked = false, initialOverlap = false;
+	bool valid = true, localPlayerHidden = false;
+	float desiredDistance = 0, visualDistance = 0, resolvedDistance = 0;
+	float eyeHeight = 0, radius = 0;
+	TownCameraPoint desiredEye {}, resolvedEye {};
+	uint64_t sceneRevision = 0;
+	size_t triangles = 0, bytes = 0, nodesVisited = 0, trianglesTested = 0, cacheBuilds = 0;
+};
+TownViewFollowCameraState GetTownViewFollowCameraState();
 /** Effective world sampling; camera, pointer coordinates and UI remain logical. */
 struct TownViewSamplingState {
 	bool requested = false;

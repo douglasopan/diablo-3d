@@ -45,6 +45,7 @@
 #include "engine/render/town_vegetation.hpp"
 #include "engine/render/town_actor.hpp"
 #include "engine/render/town_body.hpp"
+#include "engine/render/town_camera_collision.hpp"
 #include "engine/render/town_actor_mask.hpp"
 #include "engine/render/town_view_resolve.hpp"
 #include "engine/render/town_presentation.hpp"
@@ -258,6 +259,14 @@ uint64_t PickSceneRevision = 0;
 uint64_t PickCameraRevision = 0;
 bool PickHorizonEnabled = false;
 TownCameraRig CameraRig;
+TownCameraCollisionIndex CameraCollisionIndex;
+uint64_t CameraCollisionSceneRevision = std::numeric_limits<uint64_t>::max();
+uint64_t FollowProjectionRevision = 0, PickFollowProjectionRevision = 0;
+TownViewFollowCameraState FollowCameraState;
+TownCameraPoint LastSafeCameraEye {}, LastCameraAnchor {};
+bool HasSafeCameraEye = false;
+float CameraFollowFrameSeconds = 0;
+size_t CameraCollisionBuilds = 0;
 float CameraYaw = Pi * 0.25F;
 float CameraDistance = 22.0F;
 float CameraPitch = Pi / 6;
@@ -494,6 +503,164 @@ void SyncCameraPose()
 	CameraPanOffset = { pose.pan.x, 0, pose.pan.z };
 }
 
+float CameraPointLength(TownCameraPoint point)
+{
+	return std::sqrt(point.x * point.x + point.height * point.height + point.z * point.z);
+}
+
+void ResetFollowCameraHistory(bool clearIndex = false)
+{
+	HasSafeCameraEye = false;
+	FollowCameraState = {};
+	CameraFollowFrameSeconds = 0;
+	++FollowProjectionRevision;
+	PickingValid = false;
+	if (clearIndex) {
+		CameraCollisionIndex.Clear();
+		CameraCollisionSceneRevision = std::numeric_limits<uint64_t>::max();
+	}
+}
+
+void PrepareCameraCollisionIndex()
+{
+	const auto &scene = GetTownScene();
+	const uint64_t revision = GetTownSceneRevision();
+	if (revision == CameraCollisionSceneRevision)
+		return;
+	std::vector<TownCameraCollisionTriangle> triangles;
+	const auto append = [&](const auto &surfaces) {
+		for (const auto &surface : surfaces) {
+			if (surface.surfaceDetail == TownSceneSurfaceDetail::FireCore || surface.surfaceDetail == TownSceneSurfaceDetail::FireTip)
+				continue;
+			TownCameraCollisionTriangle triangle;
+			for (size_t i = 0; i < 3; ++i) {
+				const auto &v = surface.vertices[i];
+				triangle.vertices[i] = { v.x, v.height, v.z };
+			}
+			triangles.push_back(triangle);
+		}
+	};
+	for (const auto &model : scene) {
+		append(TownSceneExteriorTriangles(model));
+		if (model.cabinInterior != nullptr)
+			append(model.cabinInterior->interiorTriangles);
+	}
+	CameraCollisionIndex.Build(std::move(triangles));
+	CameraCollisionSceneRevision = revision;
+	++CameraCollisionBuilds;
+	HasSafeCameraEye = false;
+}
+
+void ResolveFollowCamera(TownCameraFrame &frame, TownCameraPoint anchor)
+{
+	const float frameSeconds = CameraFollowFrameSeconds;
+	CameraFollowFrameSeconds = 0; // A capture/redraw cannot reuse a frame's recovery time.
+	if (!frame.valid || (CameraRig.mode() != TownCameraMode::ThirdPerson && CameraRig.mode() != TownCameraMode::FirstPerson)) {
+		if (FollowCameraState.active)
+			ResetFollowCameraHistory();
+		return;
+	}
+	PrepareCameraCollisionIndex();
+	const TownViewFollowCameraState previous = FollowCameraState;
+	TownViewFollowCameraState state;
+	state.active = true;
+	state.transition = CameraRig.IsVisualTransitionActive();
+	state.desiredDistance = CameraRig.pose().distance;
+	state.visualDistance = CameraRig.VisualDistance();
+	state.eyeHeight = CameraRig.VisualEyeHeight();
+	state.radius = TownCameraCollisionRadius(frame);
+	state.desiredEye = frame.eye;
+	state.sceneRevision = CameraCollisionSceneRevision;
+	state.triangles = CameraCollisionIndex.triangleCount();
+	state.bytes = CameraCollisionIndex.bytes();
+	state.cacheBuilds = CameraCollisionBuilds;
+	if (HasSafeCameraEye && CameraPointLength(anchor - LastCameraAnchor) > 4)
+		HasSafeCameraEye = false; // Native load/teleport, never interpolate across the map.
+	const auto sweep = [&](TownCameraPoint from, TownCameraPoint to) {
+		const auto hit = CameraCollisionIndex.Sweep(from, to, state.radius);
+		state.nodesVisited += hit.nodesVisited;
+		state.trianglesTested += hit.trianglesTested;
+		state.initialOverlap |= hit.initialOverlap;
+		return hit;
+	};
+	const TownCameraPoint originalFocus = anchor + TownCameraPoint { 0, state.eyeHeight, 0 };
+	const auto separated = CameraCollisionIndex.Separate(originalFocus,
+		HasSafeCameraEye ? LastSafeCameraEye : originalFocus - frame.forward, state.radius);
+	state.trianglesTested += separated.trianglesTested;
+	TownCameraPoint focus = separated.point;
+	state.valid = separated.resolved && state.radius > 0;
+	state.blocked = CameraPointLength(focus - originalFocus) > 0.0001F;
+	const TownCameraPoint outward = state.desiredEye - originalFocus;
+	const float desiredLength = CameraPointLength(outward);
+	TownCameraPoint candidate = focus;
+	if (state.valid) {
+		const auto hit = sweep(focus, focus + outward);
+		state.valid = hit.valid;
+		float allowed = desiredLength * hit.fraction;
+		state.blocked |= hit.fraction < 1;
+		if (hit.fraction < 1)
+			allowed = std::max(0.0F, allowed - 0.002F);
+		// Looking up may put the requested boom below ground; shorten it without
+		// changing direction, desired zoom or the native player's collision.
+		const float floor = state.radius + 0.002F;
+		if (outward.height < 0 && desiredLength > 0) {
+			const float floorLength = std::max(0.0F, (focus.height - floor) * desiredLength / -outward.height);
+			state.blocked |= floorLength < allowed;
+			allowed = std::min(allowed, floorLength);
+		}
+		if (HasSafeCameraEye && previous.active && allowed > previous.resolvedDistance) {
+			const float factor = 1 - std::exp(-frameSeconds / 0.1F);
+			allowed = previous.resolvedDistance + (allowed - previous.resolvedDistance) * factor;
+		}
+		if (desiredLength > 0)
+			candidate = focus + outward * (allowed / desiredLength);
+		candidate.height = std::max(candidate.height, floor);
+		if (HasSafeCameraEye) {
+			// A boom test alone can jump to the opposite side of a thin wall when
+			// the camera rotates. Sweep from the last published safe eye as well.
+			const auto old = CameraCollisionIndex.Separate(LastSafeCameraEye, LastSafeCameraEye, state.radius);
+			state.trianglesTested += old.trianglesTested;
+			state.valid &= old.resolved;
+			if (old.resolved) {
+				const auto temporal = sweep(old.point, candidate);
+				state.valid &= temporal.valid;
+				if (temporal.fraction < 1) {
+					state.blocked = true;
+					const TownCameraPoint movement = candidate - old.point;
+					const float length = CameraPointLength(movement);
+					candidate = old.point + movement * std::max(0.0F, temporal.fraction - (length > 0 ? 0.002F / length : 0));
+				}
+			}
+		}
+		const auto final = sweep(candidate, candidate);
+		state.valid &= final.valid && !final.initialOverlap && candidate.height >= floor - 0.0001F;
+	}
+	if (!state.valid && HasSafeCameraEye) {
+		const auto old = sweep(LastSafeCameraEye, LastSafeCameraEye);
+		if (old.valid && !old.initialOverlap && LastSafeCameraEye.height >= state.radius) {
+			candidate = LastSafeCameraEye;
+			state.valid = true;
+			state.blocked = true;
+		}
+	}
+	state.resolvedEye = candidate;
+	state.resolvedDistance = CameraPointLength(candidate - focus);
+	state.transition |= !state.blocked && std::abs(state.resolvedDistance - desiredLength) > 0.001F;
+	state.localPlayerHidden = CameraRig.HideLocalPlayer(state.resolvedDistance)
+	    || (previous.localPlayerHidden && state.resolvedDistance < 0.85F);
+	if (!previous.active || CameraPointLength(candidate - previous.resolvedEye) > 0.000001F
+	    || previous.localPlayerHidden != state.localPlayerHidden || previous.valid != state.valid)
+		++FollowProjectionRevision;
+	FollowCameraState = state;
+	frame.valid &= state.valid;
+	frame.eye = candidate;
+	if (state.valid) {
+		LastSafeCameraEye = candidate;
+		LastCameraAnchor = anchor;
+		HasSafeCameraEye = true;
+	}
+}
+
 void ConfigureCamera(int width, int height)
 {
 	Vec3 target { static_cast<float>(ViewPosition.x), 0, static_cast<float>(ViewPosition.y) };
@@ -520,6 +687,7 @@ void ConfigureCamera(int width, int height)
 	}
 	ViewCamera.projection = BuildTownCameraFrame(CameraRig, { target.x, target.y, target.z }, width, height,
 		centerX, centerY, static_cast<float>(zoomFactor));
+	ResolveFollowCamera(ViewCamera.projection, { target.x, target.y, target.z });
 	const TownCameraFrame &frame = ViewCamera.projection;
 	const auto vector = [](TownCameraPoint point) { return Vec3 { point.x, point.height, point.z }; };
 	ViewCamera.target = target + CameraPanOffset;
@@ -2327,6 +2495,7 @@ bool CurrentPickingValid()
 {
 	return PickingValid && SamplingState.requested == *GetOptions().Graphics.townViewAntialiasing
 	    && PickCameraRevision == CameraRig.revision()
+	    && PickFollowProjectionRevision == FollowProjectionRevision
 	    && PickHorizonEnabled == *GetOptions().Graphics.townViewHorizon
 	    && PickGpuRequested == *GetOptions().Graphics.townViewGpuRendering
 	    && PickFrustumCullingRequested == *GetOptions().Graphics.townViewFrustumCulling
@@ -2454,6 +2623,7 @@ void ToggleTownView()
 {
 	Enabled = !Enabled;
 	CameraRig.Suspend(!Enabled);
+	ResetFollowCameraHistory();
 	EndTownViewCameraDrag();
 	PickingValid = false;
 }
@@ -2494,6 +2664,7 @@ void ZoomTownView(float wheelSteps)
 
 void ResetTownViewCamera()
 {
+	ResetFollowCameraHistory();
 	CameraRig.RestoreIsometric();
 	SyncCameraPose();
 	EndTownViewCameraDrag();
@@ -2516,6 +2687,7 @@ void SetTownViewCameraMode(TownCameraMode mode)
 {
 	if (!CameraRig.SetMode(mode))
 		return;
+	ResetFollowCameraHistory();
 	SyncCameraPose();
 	EndTownViewCameraDrag();
 	PickingValid = false;
@@ -2540,10 +2712,26 @@ void ApplyTownViewCameraPreferences()
 
 void SetTownViewCameraPoseForDiagnostics(TownCameraPose pose)
 {
+	ResetFollowCameraHistory();
 	CameraRig.SetPose(pose);
 	SyncCameraPose();
 	EndTownViewCameraDrag();
 	PickingValid = false;
+}
+
+bool AdvanceTownViewCamera(float seconds)
+{
+	CameraFollowFrameSeconds = std::isfinite(seconds) ? std::clamp(seconds, 0.0F, 0.1F) : 0;
+	const bool changed = CameraRig.AdvanceVisual(CameraFollowFrameSeconds)
+	    || (FollowCameraState.active && (FollowCameraState.transition || FollowCameraState.blocked) && CameraFollowFrameSeconds > 0);
+	if (changed)
+		PickingValid = false;
+	return changed;
+}
+
+TownViewFollowCameraState GetTownViewFollowCameraState()
+{
+	return FollowCameraState;
 }
 
 TownViewSamplingState GetTownViewSamplingState()
@@ -2649,6 +2837,7 @@ void SetTownViewRasterJitterForDiagnostics(float x, float y)
 
 void ResetTownViewResources()
 {
+	ResetFollowCameraHistory(true);
 	ClearGpuSceneResources();
 	HorizonMesh = {};
 	std::vector<uint8_t>().swap(HorizonColors);
@@ -2712,6 +2901,7 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 		return false;
 	}
 	if (CachedDungeonData != pDungeonCels.get()) {
+		ResetFollowCameraHistory(true);
 		ClearGpuSceneResources();
 		HorizonPaletteValid = false;
 		RendererState.requestedGpu = *GetOptions().Graphics.townViewGpuRendering;
@@ -2761,6 +2951,13 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 	}
 	if (!ViewCamera.projection.valid) {
 		RendererState.failure = "Invalid town camera frame";
+		if (FollowCameraState.active) {
+			// No safe near-plane sphere: fail closed instead of presenting the
+			// native 2D world with first-person input. Picking remains invalid.
+			SamplingState = { *GetOptions().Graphics.townViewAntialiasing, 1, logical.w(), logical.h(), false };
+			ClearSurface(logical);
+			return true;
+		}
 		return false;
 	}
 	const Surface out = PrepareSamplingBuffers(logical);
@@ -2889,7 +3086,7 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 			const Player &player = Players[i];
 			if (!player.plractive || !player.isOnActiveLevel() || !player.AnimInfo.sprites)
 				continue;
-			if (CameraRig.HideLocalPlayer() && &player == MyPlayer)
+			if (FollowCameraState.localPlayerHidden && &player == MyPlayer)
 				continue;
 			Vec3 position = PlayerPosition(player);
 			position.y = 0;
@@ -2957,6 +3154,7 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 	PickFrustumCullingRequested = ArchitectureCullingState.requested;
 	PickSceneRevision = GetTownSceneRevision();
 	PickCameraRevision = CameraRig.revision();
+	PickFollowProjectionRevision = FollowProjectionRevision;
 	PickHorizonEnabled = *GetOptions().Graphics.townViewHorizon;
 	PickingValid = true;
 	RendererState.worldMilliseconds = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - worldStart).count();

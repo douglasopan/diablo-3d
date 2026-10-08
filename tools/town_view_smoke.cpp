@@ -4682,11 +4682,13 @@ void ExportTownEditorGround(const std::filesystem::path &output)
 
 // Reuses native scene helpers without a window, GPU or gameplay ticks.
 #include "town_camera_eye_height_checks.hpp"
+#include "town_camera_follow_checks.hpp"
 
 int main(int argc, char **argv)
 {
 	std::cout << std::unitbuf;
 	std::cerr << std::unitbuf;
+	const bool followCamera = argc == 5 && std::string(argv[4]) == "--follow-camera";
 	const bool eyeHeight = (argc == 6 || argc == 7) && std::string(argv[4]) == "--eye-height";
 	const bool presentation = argc == 5 && std::string(argv[4]) == "--presentation";
 	const bool quality = argc == 5 && std::string(argv[4]) == "--quality";
@@ -4707,9 +4709,9 @@ int main(int argc, char **argv)
 	const bool layers = argc == 3 && std::string(argv[1]) == "--presentation-layers";
 	const bool gpuFixtures = argc == 3 && std::string(argv[1]) == "--gpu-fixtures";
 	const bool synthetic = layers || gpuFixtures;
-	if (argc != 4 && !presentation && !quality && !gpu && !gpuRecovery && !camera && !cameraExtra && !architectureCulling && !firstPersonPerformance && !residentMeshes && !residentZoomStress && !ingameMenuVisual && !cabinOpenings && !cabinReview && !editorSnapshot && !editorChecks && !synthetic && !eyeHeight) {
+	if (argc != 4 && !presentation && !quality && !gpu && !gpuRecovery && !camera && !cameraExtra && !architectureCulling && !firstPersonPerformance && !residentMeshes && !residentZoomStress && !ingameMenuVisual && !cabinOpenings && !cabinReview && !editorSnapshot && !editorChecks && !synthetic && !eyeHeight && !followCamera) {
 		std::cerr << "Usage: town_view_smoke <game-data-directory> <built-assets-directory> <capture-directory> --eye-height 1.1|1.7 [baseline-directory]\n"
-		          << "       town_view_smoke <game-data-directory> <built-assets-directory> <capture-directory> [--presentation|--quality|--gpu|--gpu-recovery|--camera|--camera-extra|--architecture-culling|--first-person-performance|--resident-meshes|--resident-fullhd|--resident-zoom-stress|--ingame-menu-visual|--cabin-openings|--cabin-review|--editor-snapshot|--editor-map-checks]\n"
+		          << "       town_view_smoke <game-data-directory> <built-assets-directory> <capture-directory> [--follow-camera|--presentation|--quality|--gpu|--gpu-recovery|--camera|--camera-extra|--architecture-culling|--first-person-performance|--resident-meshes|--resident-fullhd|--resident-zoom-stress|--ingame-menu-visual|--cabin-openings|--cabin-review|--editor-snapshot|--editor-map-checks]\n"
 		          << "       town_view_smoke --presentation-layers <synthetic-capture-directory>\n"
 		          << "       town_view_smoke --gpu-fixtures <synthetic-capture-directory>\n";
 		return 2;
@@ -4729,7 +4731,7 @@ int main(int argc, char **argv)
 	devilution::paths::SetPrefPath(output.string());
 	devilution::paths::SetConfigPath(output.string());
 	SDL_SetMainReady();
-	SDL_setenv("SDL_VIDEODRIVER", "dummy", eyeHeight ? 1 : 0);
+	SDL_setenv("SDL_VIDEODRIVER", "dummy", (eyeHeight || followCamera) ? 1 : 0);
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
 		std::cerr << SDL_GetError() << '\n';
 		return 2;
@@ -4745,6 +4747,10 @@ int main(int argc, char **argv)
 #endif
 		} else if (gpuFixtures)
 			RunGpuFixtures(output);
+		else if (followCamera) {
+			RunFollowCameraCpu(output);
+			FreeTownerGFX();
+		}
 		else if (eyeHeight) {
 			size_t cameraChecks = 0;
 			Check(RunTownCameraChecks(std::cout, cameraChecks), "pure camera contract passes before native eye-height capture");

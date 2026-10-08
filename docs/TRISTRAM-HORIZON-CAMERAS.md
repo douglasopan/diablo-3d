@@ -2,6 +2,12 @@
 
 Atualização: **8 de outubro de 2026**. Documento responsável pelo pedido novo de horizonte frontal/ocular e liberdade de câmera. Segue a etapa e os contratos de [PROJECT-EXECUTION.md](PROJECT-EXECUTION.md); não substitui sua fila. O pedido explícito antecipa este incremento isolado de atmosfera, sem declarar G1/G2 concluídos. Cabana e revisões selecionadas permanecem congeladas; produção Meshy e Godot pertence à frente de Tristram completa.
 
+## Roda, WASD e colisão visual — incremento de 8 de outubro
+
+Instalado pelo principal às **19:31 (Brasília)** no mesmo `Iniciar-Tristram.cmd`, SHA-256 `550257d4f4eab6ccc8ee1115151947cab5a33278ac8f631fd4865664e7e55410`. A roda aproxima terceira → primeira e afasta de volta com yaw/pitch preservados e interpolação de distância/altura. WASD coexiste com as setas sem modificar velocidade/cadência nativas. A câmera passa a limitar o olho e a near-plane contra os triângulos montados da arquitetura, com cache BVH e varredura temporal; não muda SOL/mapa e não inclui atores/árvores/rochas. Distância desejada e resolvida ficam separadas.
+
+Passaram 253 verificações de câmera, 1.239 de input puro, 29 de colisão, 2.777 produtivas, 946 do HUD e 59.452 das configurações. A fixture CPU real percorreu 34 quadros (14 limitados, zero fechados), um BVH de 82.086 triângulos e seis capturas; entrada com tempo zero manteve imagem/paleta idênticas. Aliases idênticos, backup, nenhum processo encerrado e 44 arquivos do perfil preservados; preparação mudou somente o recibo de runtime. Recibo privado: `diagnostics/camera-wheel-20261008/installed-20261008T223057Z/receipt.json`. Sem execução GPU, captura física/Alt+Tab ou benchmark novo. Revisão interativa/artística e todos os alvos continuam pendentes. Contrato completo em [TRISTRAM-FIRST-PERSON-INPUT.md](TRISTRAM-FIRST-PERSON-INPUT.md). As instalações seguintes são históricas.
+
 ## Calibração da altura ocular — 8 de outubro
 
 O relato de câmera baixa diante dos NPCs reabriu somente a calibração ocular. A preferência anterior `eyeHeight=1.1` servia tanto à primeira pessoa quanto ao alvo da terceira. `firstPersonEyeHeight=1.7` agora eleva somente o olho da primeira pessoa; o alvo da terceira permanece em 1,1. O getter publica a altura efetiva do modo. Não altera FOV, pitch, escala dos NPCs, posição do herói, colisão, iluminação ou modelos. Sanitização usa fallback 1,7 para valores não finitos e limites 0,4–2.
@@ -43,7 +49,7 @@ Histórico preservado: `diagnostics/horizon-camera/runtime-wip-pause-20261008` c
 | Parte | Estado | Limite |
 | --- | --- | --- |
 | Auditoria de projeção, input e bordas | Leitura e fixtures nativos CPU/GPU concluídos | Interação completa de uma partida continua para revisão. |
-| `town_camera.hpp/.cpp` | Compilado na engine; primeira pessoa calibrada inicialmente em 1,7, terceira preservada em 1,1 | Revisão artística da altura por classe/pose pendente; sem colisão de câmera. |
+| `town_camera.hpp/.cpp` e `town_camera_collision.hpp/.cpp` | Alturas 1,7/1,1, roda terceira/primeira e colisão visual com arquitetura instaladas | Revisão interativa/artística pendente; nova sequência testada na CPU, sem colisão de atores/árvores/rochas. |
 | `town_horizon.hpp/.cpp` | Geometria/fog integrados CPU/GPU e revisados por amostra | Horizonte visual 360°; cores, relevo e alturas provisórios. Não completa lacunas do piso nativo. |
 | Diagnóstico CPU sintético | Compilado e executado em diretório privado | Sem MPQ, assets, perfil, saves, janela ou cache do jogo. |
 | Perspectiva CPU/GPU, controles e opções na partida | Link, fixtures reais e instalação habitual comprovados | Avaliação artística/interativa e orçamento de desempenho pendentes. |
@@ -67,8 +73,8 @@ O chat principal **DIABLOI 1 3D** é o responsável pela entrega. Na janela excl
 | --- | --- |
 | Isométrico | Mesmas deltas nativas `(32,-32;16,16)` e altura `−32`, compressão vertical √(2/3), zoom legado, pan limitado ao raio 20. Home restaura yaw π/4, pitch π/6, distância 22, pan zero e usa o backend original. O início da sessão conserva yaw +0,15. |
 | Órbita livre | Perspectiva, rotação e distância físicas em torno do alvo, pan visual limitado. Inclinação mínima 0,005 rad mantém o olho acima do piso do alvo. |
-| Terceira pessoa | Perspectiva a partir de alvo + altura ocular; órbita acompanha a posição interpolada, sem pan. Distância inicial 5. Ainda não faz colisão entre câmera e arquitetura. |
-| Primeira pessoa | Olho exatamente em alvo + altura ocular, distância/pan zero, orientação visual independente, pitch para cima/baixo e indicação para ocultar somente o jogador local. Roda não a transforma numa órbita. |
+| Terceira pessoa | Perspectiva em torno do alvo + altura ocular; acompanha o herói, sem pan. Distância inicial 5, limitada visualmente contra arquitetura; roda pode aproximar até primeira pessoa. |
+| Primeira pessoa | Olho desejado em alvo + altura ocular, distância/pan zero, orientação independente e pitch para cima/baixo. Colisão resolve o olho seguro e oculta somente o jogador local. Roda para afastar retorna à terceira pessoa. |
 
 Cada modo restaura sua própria pose. F4 suspende/retoma sem perdê-la; Home preserva as outras três poses. O adaptador conserva o início isométrico atual em yaw +0,15. `revision()` invalida picking; mudança de modo/preferências encerra arrasto. Shift+botão central desloca somente isométrico/órbita; botão central usa a sensibilidade salva nos quatro modos. O módulo não consome input nem escreve no jogador. Altura ocular de primeira pessoa 1,7 é uma **calibração inicial**; o alvo de terceira pessoa conserva 1,1. A revisão por classe/pose e escala dos modelos continua pendente.
 

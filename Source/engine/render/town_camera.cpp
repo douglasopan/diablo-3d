@@ -9,6 +9,12 @@ namespace {
 
 constexpr float Pi = 3.14159265358979323846F;
 constexpr float NativeHeightScale = 0.816496580927726F;
+constexpr float FollowEnterDistance = 0.6F;
+constexpr float FollowExitDistance = 1.0F;
+constexpr float FollowMaximumDistance = 80;
+constexpr float FollowVisualTimeConstant = 0.1F;
+constexpr float FollowVisualTolerance = 0.0001F;
+constexpr float FollowHideDistance = 0.65F;
 
 bool Finite(TownCameraPoint point)
 {
@@ -30,7 +36,10 @@ TownCameraPose Sanitize(TownCameraPose pose, TownCameraMode mode)
 	pose.yaw = std::isfinite(pose.yaw) ? std::remainder(pose.yaw, 2 * Pi) : Pi / 4;
 	const bool isometric = mode == TownCameraMode::Isometric;
 	const bool first = mode == TownCameraMode::FirstPerson;
-	pose.pitch = Bounded(pose.pitch, first ? 0 : Pi / 6, isometric ? 0.35F : first ? -1.40F : 0.005F, 1.40F);
+	const bool followsHero = first || mode == TownCameraMode::ThirdPerson;
+	// Wheel exit must retain an upward first-person view. The runtime collision
+	// solver now protects the third-person boom from the ground and architecture.
+	pose.pitch = Bounded(pose.pitch, first ? 0 : Pi / 6, isometric ? 0.35F : followsHero ? -1.40F : 0.005F, 1.40F);
 	pose.distance = first ? 0 : Bounded(pose.distance, 22, isometric ? 10.0F : 0.5F, isometric ? 52.0F : 80.0F);
 	pose.pan = { Bounded(pose.pan.x, 0, -80, 80), 0, Bounded(pose.pan.z, 0, -80, 80) };
 	const float panLength = std::sqrt(Dot(pose.pan, pose.pan));
@@ -141,8 +150,9 @@ bool TownCameraRig::SetMode(TownCameraMode mode)
 {
 	if (static_cast<size_t>(mode) >= poses_.size())
 		return false;
-	if (mode_ != mode) {
+	if (mode_ != mode || followVisualActive_) {
 		mode_ = mode;
+		followVisualActive_ = false;
 		++revision_;
 	}
 	return true;
@@ -150,6 +160,7 @@ bool TownCameraRig::SetMode(TownCameraMode mode)
 
 void TownCameraRig::SetPose(TownCameraPose pose)
 {
+	followVisualActive_ = false;
 	poses_[static_cast<size_t>(mode_)] = Sanitize(pose, mode_);
 	++revision_;
 }
@@ -157,6 +168,8 @@ void TownCameraRig::SetPose(TownCameraPose pose)
 void TownCameraRig::SetPreferences(TownCameraPreferences preferences)
 {
 	preferences_ = Sanitize(preferences);
+	if (followVisualActive_ && !IsVisualTransitionActive())
+		followVisualActive_ = false;
 	++revision_;
 }
 
@@ -167,16 +180,103 @@ void TownCameraRig::Orbit(float yawDelta, float pitchDelta)
 	TownCameraPose next = pose();
 	next.yaw += std::remainder(yawDelta, 2 * Pi);
 	next.pitch += std::clamp(pitchDelta, -Pi, Pi);
-	SetPose(next);
+	// Looking during a wheel blend must not reset its displayed distance/height.
+	poses_[static_cast<size_t>(mode_)] = Sanitize(next, mode_);
+	++revision_;
 }
 
 void TownCameraRig::Zoom(float steps)
 {
-	if (!std::isfinite(steps) || mode_ == TownCameraMode::FirstPerson)
+	if (!std::isfinite(steps) || steps == 0)
 		return;
+	const float boundedSteps = std::clamp(steps, -50.0F, 50.0F);
+	if (mode_ == TownCameraMode::FirstPerson || mode_ == TownCameraMode::ThirdPerson) {
+		if (suspended_ || (mode_ == TownCameraMode::FirstPerson && steps > 0))
+			return;
+		// Capture the currently displayed state BEFORE changing the intended mode;
+		// a reversal continues from that state, rather than jumping to an endpoint.
+		BeginFollowVisual();
+		TownCameraPose next = pose();
+		if (mode_ == TownCameraMode::FirstPerson) {
+			// A fast reversal can arrive while the displayed eye is still far
+			// behind the hero. Start from there so scroll-out actually moves out.
+			const float exitBase = std::max(FollowExitDistance, followVisualDistance_);
+			next.distance = std::clamp(exitBase * std::exp(-preferences_.zoomExponentPerStep * boundedSteps),
+			    FollowExitDistance, FollowMaximumDistance);
+			mode_ = TownCameraMode::ThirdPerson;
+		} else {
+			next.distance = std::clamp(next.distance * std::exp(-preferences_.zoomExponentPerStep * boundedSteps),
+			    0.5F, FollowMaximumDistance);
+			if (steps > 0 && next.distance <= FollowEnterDistance) {
+				mode_ = TownCameraMode::FirstPerson;
+				next.distance = 0;
+			}
+		}
+		poses_[static_cast<size_t>(mode_)] = Sanitize(next, mode_);
+		if (!IsVisualTransitionActive())
+			followVisualActive_ = false;
+		++revision_;
+		return;
+	}
 	TownCameraPose next = pose();
-	next.distance *= std::exp(-preferences_.zoomExponentPerStep * std::clamp(steps, -50.0F, 50.0F));
+	next.distance *= std::exp(-preferences_.zoomExponentPerStep * boundedSteps);
 	SetPose(next);
+}
+
+void TownCameraRig::BeginFollowVisual()
+{
+	if (followVisualActive_)
+		return;
+	followVisualDistance_ = pose().distance;
+	followVisualEyeHeight_ = mode_ == TownCameraMode::FirstPerson
+	    ? preferences_.firstPersonEyeHeight : preferences_.eyeHeight;
+	followVisualActive_ = true;
+}
+
+float TownCameraRig::VisualDistance() const
+{
+	return followVisualActive_ ? followVisualDistance_ : pose().distance;
+}
+
+float TownCameraRig::VisualEyeHeight() const
+{
+	if (followVisualActive_)
+		return followVisualEyeHeight_;
+	if (mode_ == TownCameraMode::FirstPerson)
+		return preferences_.firstPersonEyeHeight;
+	return mode_ == TownCameraMode::ThirdPerson ? preferences_.eyeHeight : 0;
+}
+
+bool TownCameraRig::IsVisualTransitionActive() const
+{
+	if (!followVisualActive_)
+		return false;
+	const float targetHeight = mode_ == TownCameraMode::FirstPerson
+	    ? preferences_.firstPersonEyeHeight : preferences_.eyeHeight;
+	return followVisualDistance_ != pose().distance || followVisualEyeHeight_ != targetHeight;
+}
+
+bool TownCameraRig::AdvanceVisual(float seconds)
+{
+	if (suspended_ || !IsVisualTransitionActive() || !std::isfinite(seconds) || seconds <= 0)
+		return false;
+	const float alpha = -std::expm1(-std::min(seconds, 0.1F) / FollowVisualTimeConstant);
+	const auto advance = [alpha](float current, float target) {
+		const float next = current + (target - current) * alpha;
+		return std::abs(next - target) <= FollowVisualTolerance ? target : next;
+	};
+	const float targetHeight = mode_ == TownCameraMode::FirstPerson
+	    ? preferences_.firstPersonEyeHeight : preferences_.eyeHeight;
+	const float distance = advance(followVisualDistance_, pose().distance);
+	const float height = advance(followVisualEyeHeight_, targetHeight);
+	if (distance == followVisualDistance_ && height == followVisualEyeHeight_)
+		return false;
+	followVisualDistance_ = distance;
+	followVisualEyeHeight_ = height;
+	if (distance == pose().distance && height == targetHeight)
+		followVisualActive_ = false;
+	++revision_;
+	return true;
 }
 
 void TownCameraRig::Pan(float x, float z)
@@ -193,6 +293,9 @@ void TownCameraRig::Suspend(bool suspended)
 {
 	if (suspended_ != suspended) {
 		suspended_ = suspended;
+		// F4 cancels delayed motion while preserving logical mode and saved pose.
+		if (suspended)
+			followVisualActive_ = false;
 		++revision_;
 	}
 }
@@ -201,12 +304,21 @@ void TownCameraRig::RestoreIsometric()
 {
 	mode_ = TownCameraMode::Isometric;
 	poses_[0] = {};
+	followVisualActive_ = false;
 	++revision_;
 }
 
-bool TownCameraRig::HideLocalPlayer() const
+bool TownCameraRig::HideLocalPlayer(float resolvedFollowDistance) const
 {
-	return !suspended_ && mode_ == TownCameraMode::FirstPerson;
+	if (suspended_)
+		return false;
+	if (mode_ == TownCameraMode::FirstPerson && !followVisualActive_)
+		return true;
+	if (mode_ != TownCameraMode::ThirdPerson && mode_ != TownCameraMode::FirstPerson)
+		return false;
+	if (std::isfinite(resolvedFollowDistance) && resolvedFollowDistance >= 0)
+		return resolvedFollowDistance <= FollowHideDistance;
+	return VisualDistance() <= FollowHideDistance;
 }
 
 TownCameraFrame BuildTownCameraFrame(const TownCameraRig &rig, TownCameraPoint anchor,
@@ -232,11 +344,8 @@ TownCameraFrame BuildTownCameraFrame(const TownCameraRig &rig, TownCameraPoint a
 	frame.right = { sy, 0, -cy };
 	frame.up = { -cy * sp, cp, -sy * sp };
 	TownCameraPoint target = anchor + pose.pan;
-	if (rig.mode() == TownCameraMode::ThirdPerson)
-		target.height += preferences.eyeHeight;
-	else if (rig.mode() == TownCameraMode::FirstPerson)
-		target.height += preferences.firstPersonEyeHeight;
-	const float distance = !frame.perspective ? 256 : pose.distance;
+	target.height += rig.VisualEyeHeight();
+	const float distance = !frame.perspective ? 256 : rig.VisualDistance();
 	frame.eye = target + TownCameraPoint { outward.x, outward.height / frame.heightScale, outward.z } * distance;
 	frame.focalPixels = frame.perspective
 	    ? height / (2 * std::tan(preferences.verticalFovDegrees * Pi / 360))

@@ -107,6 +107,10 @@ struct PhysicalServices {
         case SDLK_DOWN: return TownFirstPersonArrowDown;
         case SDLK_LEFT: return TownFirstPersonArrowLeft;
         case SDLK_RIGHT: return TownFirstPersonArrowRight;
+        case SDLK_W: return TownFirstPersonKeyW;
+        case SDLK_A: return TownFirstPersonKeyA;
+        case SDLK_S: return TownFirstPersonKeyS;
+        case SDLK_D: return TownFirstPersonKeyD;
         default: return 0;
         }
     }
@@ -356,7 +360,7 @@ StepSample Sample()
 }
 
 std::vector<StepSample> ExecuteOneNativeStep(const ProductionAccess &api, Point origin, float yaw,
-    Point target, bool firstPerson)
+    Point target, bool firstPerson, SDL_Keycode movementKey = SDLK_UP)
 {
     api.release();
     DrainEmittedWalks(Check);
@@ -367,7 +371,7 @@ std::vector<StepSample> ExecuteOneNativeStep(const ProductionAccess &api, Point 
     ClearLastSentPlayerCmd();
     const uint32_t rngBefore = GetLCGEngineState();
     if (firstPerson) {
-        Arrow(api, SDLK_UP, true);
+        Arrow(api, movementKey, true);
         plrctrls_after_game_logic();
     } else {
         NetSendCmdLoc(MyPlayerId, true, CMD_WALKXY, target); // Native reference, same parser/cadence.
@@ -381,7 +385,7 @@ std::vector<StepSample> ExecuteOneNativeStep(const ProductionAccess &api, Point 
     Check(MyPlayer->isWalking() && MyPlayer->position.future == target, "native ProcessPlayers begins the queued step");
     ClearLastSentPlayerCmd();
     if (firstPerson) {
-        Arrow(api, SDLK_UP, false);
+        Arrow(api, movementKey, false);
         api.sync();
         plrctrls_after_game_logic();
     } else {
@@ -420,6 +424,8 @@ void NativeCadenceChecks(const ProductionAccess &api)
             const float yaw = static_cast<float>(sector) * Pi / 4;
             const auto native = ExecuteOneNativeStep(api, origin, yaw, target, false);
             const auto candidate = ExecuteOneNativeStep(api, origin, yaw, target, true);
+            const auto wasd = ExecuteOneNativeStep(api, origin, yaw, target, true, SDLK_W);
+            Check(native == wasd, "WASD W preserves complete native movement/animation/collision cadence");
             Check(native == candidate, "complete tile/future/mode/frame/path cadence equals native CMD_WALKXY, run="
                 + std::to_string(run) + ", sector=" + std::to_string(sector)
                 + ", ticks=" + std::to_string(native.size()));
@@ -513,6 +519,9 @@ void Cleanup() noexcept
 }
 } // namespace
 
+// Added production dispatcher regression cases, sharing this isolated runner.
+#include "town_follow_input_checks.hpp"
+
 int main(int argc, char **argv)
 {
     if (argc != 4) {
@@ -535,6 +544,8 @@ int main(int argc, char **argv)
         RelativeMouseAndFocusChecks(api);
         first_person_root_supplement::RunCpuDeferredClickChecks(api, Check);
         first_person_root_supplement::RunPendingNativeWalkGateChecks(api, Check, [](bool focused) { PhysicalServices::Focus = focused; });
+        FollowInputChecks(api);
+        FollowClickChecks(api);
         Check(renderer == nullptr, "no GPU renderer was created during the entire fixture");
         Check((SDL_GetWindowFlags(ghMainWnd) & SDL_WINDOW_HIDDEN) != 0, "dummy window remains hidden at completion");
         Cleanup();

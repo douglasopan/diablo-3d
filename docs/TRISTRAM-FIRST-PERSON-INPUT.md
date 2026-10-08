@@ -1,8 +1,36 @@
 # Controles de primeira pessoa em Tristram
 
-Atualização: **8 de outubro de 2026**. O pedido de mouse para olhar e setas relativas à câmera foi implementado, compilado, validado tecnicamente e instalado no iniciador habitual. Continua a frente de [câmeras e horizonte](TRISTRAM-HORIZON-CAMERAS.md) na fila de [PROJECT-EXECUTION.md](PROJECT-EXECUTION.md). A validação interativa do mouse físico continua pendente.
+Atualização: **8 de outubro de 2026**. Mouse para olhar, WASD/setas relativos à câmera, roda entre terceira/primeira pessoa e colisão visual com arquitetura estão implementados, compilados, validados tecnicamente e instalados no iniciador habitual. Continua a frente de [câmeras e horizonte](TRISTRAM-HORIZON-CAMERAS.md) na fila de [PROJECT-EXECUTION.md](PROJECT-EXECUTION.md). A validação interativa do mouse físico continua pendente.
 
 ## Estado verificável
+
+Instalado pelo principal às **19:31 de 8 de outubro (Brasília)**, no mesmo `Iniciar-Tristram.cmd`. SHA-256 `550257d4f4eab6ccc8ee1115151947cab5a33278ac8f631fd4865664e7e55410`; aliases v4/quality/godot idênticos, backup e nenhum processo encerrado. Os **44 arquivos do perfil** preservaram hash/tamanho/data; `PrepareOnly` alterou somente `runtime-baseline-receipt.json`. Modelos, texturas, iluminação, áudio, preferências, saves e backend GPU foram preservados.
+
+| Validação atual | Resultado |
+| --- | --- |
+| Compilação | Release/NONET, MSVC x64; jogo e diagnósticos. |
+| Câmera / input puro / colisão | 253 / 1.239 / 29 verificações, zero falhas. |
+| Input produtivo | 2.777 verificações, com handler, comandos, movimento e picking CPU nativos. |
+| Regressões HUD / configurações | 946 / 59.452 verificações. Não cobrem o novo relato de páginas Gameplay. |
+| Pacote selecionado na CPU | 34 quadros, seis capturas; 14 quadros limitados por arquitetura, zero sem olho seguro. BVH de 82.086 triângulos construído uma vez. |
+
+Recibo privado: `diagnostics/camera-wheel-20261008/installed-20261008T223057Z/receipt.json`; logs finais em `diagnostics/camera-wheel-20261008/`. Os serviços físicos SDL são simulados. **Sem execução GPU, mouse físico, Alt+Tab ou medição de FPS nesta rodada.** O caminho de quadro fechado por ausência de olho seguro foi revisado estaticamente; não ocorreu nas 34 poses reais. Não se comprova cobertura de todos os NPCs/itens/combate ou todas as estruturas/câmeras.
+
+## Incremento de roda, WASD e colisão
+
+Aproximar a terceira pessoa pela roda até distância desejada ≤0,6 entra em primeira pessoa. Afastar na primeira retorna à terceira, com ponto de saída de pelo menos 1,0 e continuação do zoom; os limiares separados evitam oscilação. A roda fracionária e a direção invertida SDL são tratadas uma vez. Yaw/pitch são transferidos, com pitch limitado a ±1,4 rad. Órbita livre conserva seu limite próprio. As distâncias continuam limitadas pelo rig.
+
+Distância e altura visuais interpolam com constante de tempo de 0,1 s, passo limitado a 0,1 s e um avanço por quadro elegível; pausa/interface/foco não acumulam tempo. As alturas independentes de 1,1 na terceira e 1,7 na primeira permanecem. O corpo local oculta perto do olho (≤0,65) e reaparece depois de 0,85; primeira pessoa estável sempre o oculta. Troca explícita de modo, Home e suspensão encerram a interpolação. A roda muda a sessão, sem gravar uma nova preferência de modo no INI.
+
+`town_camera_collision.hpp/.cpp` constrói um BVH dos triângulos montados da arquitetura, incluindo os interiores existentes e suas aberturas, por revisão da cena. Varredura de esfera de duas faces cobre paredes finas, arestas, vértices e movimento temporal; a esfera inclui olho e cantos da near-plane conforme FOV/aspecto. A câmera encurta imediatamente diante da parede e recupera distância gradualmente. Posição solicitada e resolvida ficam separadas. Picking e desenho usam o mesmo olho resolvido. Sem olho seguro, o quadro do mundo fecha e invalida seleção, sem cair no desenho 2D com controles FPP ativos. A colisão visual não inclui atores, árvores, rochas ou horizonte e **não modifica a colisão SOL do herói**.
+
+Os oito botões físicos (W/A/S/D e quatro setas) possuem estados independentes. W+↑, por exemplo, continua avançando ao soltar apenas um deles. Ctrl/Alt/GUI reservam atalhos nativos; Shift permite o movimento normal. Uma tecla antiga ou repetição sem pressão inicial elegível não adquire posse. Solturas possuídas são drenadas mesmo através de interfaces/modificadores. Os nomes internos antigos `heldArrows`/`consumeArrowKeys` abrangem os oito bits; aliases só são combinados depois do filtro.
+
+Roda e movimento relativo preservam a ordem com cliques. Um clique absoluto de terceira pessoa posterior à roda aguarda desenho/picking fresco; não usa o antigo retículo. Os testes cobrem roda→clique, down→up→roda, down→roda→up, cancelamento por UI e a liberação correspondente quando uma roda se torna inelegível por botão nativo segurado. O clique deliberado de retomada FPP conserva seu consumo imediato. UI mantém a roda nativa. O runtime compara W+↑ à mesma caminhada/corrida nativa em oito yaw e nos dois modos de velocidade, sem gravar INI.
+
+`tools/town_follow_input_checks.hpp` estende o diagnóstico produtivo; `tools/town_camera_follow_checks.hpp` usa `town_view_smoke --follow-camera` com o pacote selecionado em cópia privada, SDL dummy e GPU desligada. Conferem imagem/paleta exatas na entrada com tempo zero, ausência de avanço por segundo desenho, esfera segura, cache e preservação da geometria/RGB, frames/estado nativo e RNG. Seis capturas foram produzidas; amostras de entrada/meio/primeira pessoa foram inspecionadas visualmente. Isso não substitui a revisão artística/interativa.
+
+## Histórico da primeira instalação de controles
 
 | Etapa | Resultado |
 | --- | --- |
@@ -22,7 +50,7 @@ Em Tristram, **F4** alterna original/3D. **K** percorre isométrica → órbita 
 
 Em Tristram com 3D e primeira pessoa ativos, teclado/mouse e sessão elegível, o adaptador solicita captura relativa uma vez. Somente a confirmação da plataforma ativa o controle. Mouse horizontal gira yaw; vertical altera pitch, limitado pelo rig a ±1,4 rad. A sensibilidade usa a opção já salva, com base de 0,006 rad por pixel a 100%, sem multiplicação por tempo ou por suavização de bordas. Não é necessário segurar o botão central.
 
-↑/↓ avançam/recuam; ←/→ deslocam lateralmente. Combinações opostas se anulam. As demais combinações são normalizadas e quantizadas nas oito direções nativas, com margem angular de 3° enquanto a mesma combinação permanece pressionada. Pitch não inclina o deslocamento. A intenção é consumida uma vez na cadência nativa de movimento, pelo mesmo `WalkInDir`/`CMD_WALKXY` existente. Não há escrita direta de posição, caminho, animação, velocidade, colisão ou RNG.
+W/↑ e S/↓ avançam/recuam; A/← e D/→ deslocam lateralmente. Combinações opostas se anulam. As demais combinações são normalizadas e quantizadas nas oito direções nativas, com margem angular de 3° enquanto a mesma combinação permanece pressionada. Pitch não inclina o deslocamento. A intenção é consumida uma vez na cadência nativa de movimento, pelo mesmo `WalkInDir`/`CMD_WALKXY` existente. Não há escrita direta de posição, caminho, animação, velocidade, colisão ou RNG.
 
 Escape libera o mouse e segue para a ação nativa. Menus, textos, painéis, inventário, atributos, livro de magias, stash, comércio, automapa, item na mão, cursor especial, timeout, morte, transição de nível, troca de handler, saída e perda de foco suspendem a captura e limpam as setas possuídas. Captura perdida ou falha não é repetida a cada quadro. Retornar foco ou fechar a interface não recaptura automaticamente: um novo clique esquerdo ou direito dentro do mundo retoma o controle, e esse clique, incluindo sua soltura, é consumido. Deltas antigos são descartados ao adquirir ou liberar; teclas já seguradas só voltam a mover após soltura e nova pressão.
 
@@ -70,7 +98,7 @@ Matriz de revisão do comportamento: checklist de revisão, sem cobertura autom�
 - Retículo e seleção no mesmo centro lógico, céu sem alvo falso, interação/clique/combat/HUD nativos, cursor de hardware e software, suavização 1×/2× e restauração exata do fundo. Motion→click antes do próximo desenho foi corrigido e exercitado com picking CPU de chão.
 - Perfil, saves, pacotes selecionados e arquivos alheios preservados; candidato separado e nenhum processo humano encerrado.
 
-Captura física, confinamento/ocultação, Alt+Tab e janela/fullscreen reais continuam pendentes. Os testes do HUD/configurações são regressões gerais, não validação visual do novo retículo. Não foram medidos FPS, sincronização entre peers nem todos os alvos/interações de gameplay. Demos legadas não armazenam deltas relativos; gravação/reprodução ficam fora da captura deste incremento. SDL1 conserva o input existente sem captura FPP. Colisão da câmera com arquitetura e revisão artística continuam fora desta entrega.
+Captura física, confinamento/ocultação, Alt+Tab e janela/fullscreen reais continuam pendentes. Os testes do HUD/configurações são regressões gerais, não validação visual do novo retículo. Não foram medidos FPS, sincronização entre peers nem todos os alvos/interações de gameplay. Demos legadas não armazenam deltas relativos; gravação/reprodução ficam fora da captura deste incremento. SDL1 conserva o input existente sem captura FPP. A colisão com arquitetura foi acrescentada no incremento atual acima; a revisão artística continua pendente.
 
 **Próxima ação:** teste interativo pelo iniciador habitual, com foco/cursor, interfaces, cliques em NPC/itens, diferentes escalas e retículo; registrar qualquer defeito antes de ampliar a entrega.
 

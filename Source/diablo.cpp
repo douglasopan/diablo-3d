@@ -190,6 +190,10 @@ uint8_t FirstPersonConsumedArrows = 0;
 uint32_t FirstPersonConsumedButtons = 0;
 Point FirstPersonSavedPointer;
 bool FirstPersonHasSavedPointer = false;
+uint16_t FirstPersonMovementModifiers = 0;
+uint32_t TownCameraLastFrameTicks = 0;
+bool TownCameraHasFrameClock = false;
+bool TownFollowWheelNeedsDraw = false;
 
 struct FirstPersonDeferredClick {
 	Uint8 button;
@@ -197,6 +201,9 @@ struct FirstPersonDeferredClick {
 	bool down;
 	float lookX = 0;
 	float lookY = 0;
+	float wheelSteps = 0;
+	bool absoluteClick = false;
+	Point pointer {};
 };
 std::array<FirstPersonDeferredClick, 256> FirstPersonDeferredClicks;
 size_t FirstPersonDeferredClickCount = 0;
@@ -805,21 +812,49 @@ void FlushFirstPersonMouse()
 #endif
 }
 
+bool HasReservedFirstPersonModifiers(uint16_t modifiers)
+{
+#ifdef USE_SDL1
+	return (modifiers & (SDL_KMOD_CTRL | SDL_KMOD_ALT)) != 0; // FPP capture is disabled on SDL1.
+#else
+	return (modifiers & (SDL_KMOD_CTRL | SDL_KMOD_ALT | SDL_KMOD_GUI)) != 0;
+#endif
+}
+
 uint8_t FirstPersonHeldArrows()
 {
-	if (HasFirstPersonServices())
-		return FirstPersonServices.heldArrows() & TownFirstPersonArrowMask;
+	uint8_t held = 0;
+	if (HasFirstPersonServices()) {
+		held = FirstPersonServices.heldArrows();
+	} else {
 #ifdef USE_SDL1
-	return 0;
-#else
-	if (HeadlessMode)
 		return 0;
-	const auto *keys = SDL_GetKeyboardState(nullptr);
-	return (keys[SDL_SCANCODE_UP] ? TownFirstPersonArrowUp : 0)
-	    | (keys[SDL_SCANCODE_DOWN] ? TownFirstPersonArrowDown : 0)
-	    | (keys[SDL_SCANCODE_LEFT] ? TownFirstPersonArrowLeft : 0)
-	    | (keys[SDL_SCANCODE_RIGHT] ? TownFirstPersonArrowRight : 0);
+#else
+		if (HeadlessMode)
+			return 0;
+		const auto *keys = SDL_GetKeyboardState(nullptr);
+		const auto down = [&](SDL_Keycode key) {
+#ifdef USE_SDL3
+			const auto scan = SDL_GetScancodeFromKey(key, nullptr);
+#else
+			const auto scan = SDL_GetScancodeFromKey(key);
 #endif
+			return scan != SDL_SCANCODE_UNKNOWN && keys[scan];
+		};
+		held = (down(SDLK_UP) ? TownFirstPersonArrowUp : 0)
+		    | (down(SDLK_DOWN) ? TownFirstPersonArrowDown : 0)
+		    | (down(SDLK_LEFT) ? TownFirstPersonArrowLeft : 0)
+		    | (down(SDLK_RIGHT) ? TownFirstPersonArrowRight : 0)
+		    | (down(SDLK_W) ? TownFirstPersonKeyW : 0)
+		    | (down(SDLK_A) ? TownFirstPersonKeyA : 0)
+		    | (down(SDLK_S) ? TownFirstPersonKeyS : 0)
+		    | (down(SDLK_D) ? TownFirstPersonKeyD : 0);
+#endif
+	}
+	const uint16_t modifiers = HasFirstPersonServices() ? FirstPersonMovementModifiers : SDL_GetModState();
+	if (HasReservedFirstPersonModifiers(modifiers))
+		held &= TownFirstPersonArrowMask;
+	return held;
 }
 
 uint8_t FirstPersonArrow(SDL_Keycode code)
@@ -831,6 +866,10 @@ uint8_t FirstPersonArrow(SDL_Keycode code)
 	case SDLK_DOWN: return TownFirstPersonArrowDown;
 	case SDLK_LEFT: return TownFirstPersonArrowLeft;
 	case SDLK_RIGHT: return TownFirstPersonArrowRight;
+	case SDLK_W: return TownFirstPersonKeyW;
+	case SDLK_A: return TownFirstPersonKeyA;
+	case SDLK_S: return TownFirstPersonKeyS;
+	case SDLK_D: return TownFirstPersonKeyD;
 	default: return 0;
 	}
 }
@@ -841,7 +880,7 @@ bool IsFirstPersonModeActive()
 	    && GetTownViewCameraMode() == TownCameraMode::FirstPerson;
 }
 
-bool CanCaptureFirstPersonInput()
+bool CanUseFollowCameraInput()
 {
 #ifdef USE_SDL1
 	return false;
@@ -850,7 +889,7 @@ bool CanCaptureFirstPersonInput()
 		return false;
 	const bool focused = HasFirstPersonServices() ? FirstPersonServices.hasFocus()
 	                                            : ghMainWnd != nullptr && diablo_is_focused();
-	if (!focused || !gbActive || CurrentEventHandler != GameEventHandler || !IsFirstPersonModeActive()
+	if (!focused || !gbActive || CurrentEventHandler != GameEventHandler || !gbRunGame || !IsTownViewActive()
 	    || !CanUseTownCamera() || MyPlayer->hasNoLife() || MyPlayer->_pLvlChanging || !MyPlayer->isOnActiveLevel()
 	    || ControlMode != ControlTypes::KeyboardAndMouse || ControlDevice != ControlTypes::KeyboardAndMouse
 	    || pcurs != CURSOR_HAND || !MyPlayer->HoldItem.isEmpty() || sgnTimeoutCurs != CURSOR_NONE
@@ -865,6 +904,23 @@ bool CanCaptureFirstPersonInput()
 	// A mode change must not capture the middle of a native held mouse action.
 	return FirstPersonInput.phase == TownFirstPersonCapturePhase::Captured || sgbMouseDown == CLICK_NONE;
 #endif
+}
+
+bool CanCaptureFirstPersonInput()
+{
+	return IsFirstPersonModeActive() && CanUseFollowCameraInput() && GetTownViewFollowCameraState().valid;
+}
+
+void AdvanceTownCameraForDraw()
+{
+	const uint32_t now = SDL_GetTicks();
+	const bool eligible = CanUseFollowCameraInput();
+	const float seconds = eligible && TownCameraHasFrameClock && FirstPersonDeferredClickCount == 0
+	    ? static_cast<float>(now - TownCameraLastFrameTicks) / 1000.0F : 0;
+	TownCameraLastFrameTicks = now;
+	TownCameraHasFrameClock = eligible;
+	if (AdvanceTownViewCamera(seconds))
+		RedrawViewport();
 }
 
 Point FirstPersonPointerCenter()
@@ -1080,7 +1136,7 @@ bool HasDeferredFirstPersonDown(Uint8 button)
 	return false;
 }
 
-void QueueTownFirstPersonClick(Uint8 button, uint16_t modifiers, bool down)
+void QueueTownFirstPersonClick(Uint8 button, uint16_t modifiers, bool down, bool absolute = false)
 {
 	const uint32_t mask = 1U << (button - 1);
 	if (down) {
@@ -1091,13 +1147,14 @@ void QueueTownFirstPersonClick(Uint8 button, uint16_t modifiers, bool down)
 		SuspendTownFirstPersonInput();
 		return;
 	}
-	FirstPersonDeferredClicks[FirstPersonDeferredClickCount++] = { button, modifiers, down };
+	FirstPersonDeferredClicks[FirstPersonDeferredClickCount++] = { button, modifiers, down, 0, 0, 0, absolute, MousePosition };
 	RedrawViewport();
 }
 
 void QueueTownFirstPersonLook(float x, float y)
 {
 	if (FirstPersonDeferredClickCount != 0 && FirstPersonDeferredClicks[FirstPersonDeferredClickCount - 1].button == 0
+	    && FirstPersonDeferredClicks[FirstPersonDeferredClickCount - 1].wheelSteps == 0
 	    && ((FirstPersonDeferredClicks[FirstPersonDeferredClickCount - 1].lookY >= 0 && y >= 0)
 	        || (FirstPersonDeferredClicks[FirstPersonDeferredClickCount - 1].lookY <= 0 && y <= 0))) {
 		auto &look = FirstPersonDeferredClicks[FirstPersonDeferredClickCount - 1];
@@ -1114,6 +1171,7 @@ void QueueTownFirstPersonLook(float x, float y)
 
 void FlushTownFirstPersonClicks()
 {
+	TownFollowWheelNeedsDraw = false; // Caller has drawn the current camera/picking epoch.
 	if (FirstPersonDeferredClickCount == 0)
 		return;
 	const auto pending = FirstPersonDeferredClicks;
@@ -1122,12 +1180,44 @@ void FlushTownFirstPersonClicks()
 	SyncTownFirstPersonInput();
 	// DrawAndBlit has refreshed picking. Sky/failed draws never become a walk
 	// to the hero's fallback tile; there is no synchronous render per click.
-	if (!IsTownFirstPersonInputCaptured())
-		return;
-	MousePosition = FirstPersonPointerCenter();
+	if (IsTownFirstPersonInputCaptured())
+		MousePosition = FirstPersonPointerCenter();
 	bool lookedSinceDraw = false;
 	for (size_t i = 0; i < count; ++i) {
 		const auto &click = pending[i];
+		if (click.wheelSteps != 0) {
+			if (!CanUseFollowCameraInput())
+				continue; // Drop only this ineligible wheel; matching mouse ups must still run.
+			ZoomTownView(click.wheelSteps);
+			TownFollowWheelNeedsDraw = true;
+			SyncTownFirstPersonInput();
+			lookedSinceDraw = true;
+			RedrawViewport();
+			continue;
+		}
+		if (click.absoluteClick && click.down) {
+			if (lookedSinceDraw) {
+				for (size_t rest = i; rest < count; ++rest)
+					FirstPersonDeferredClicks[FirstPersonDeferredClickCount++] = pending[rest];
+				RedrawViewport();
+				return;
+			}
+			if (!IsTownFirstPersonInputCaptured() && CanUseFollowCameraInput()) {
+				MousePosition = click.pointer;
+				Point tile;
+				int towner, item, player;
+				if (PickTownView(MousePosition, tile, towner, item, player)) {
+					CheckCursMove();
+					HandleMouseButtonDown(click.button, click.modifiers);
+				}
+			}
+			continue;
+		}
+		if (!IsTownFirstPersonInputCaptured()) {
+			if (click.button != 0 && !click.down)
+				HandleMouseButtonUp(click.button, click.modifiers);
+			continue;
+		}
 		if (click.button == 0) {
 			SyncTownFirstPersonInput(0, 0, click.lookX, click.lookY);
 			lookedSinceDraw = true;
@@ -1148,8 +1238,8 @@ void FlushTownFirstPersonClicks()
 		else
 			HandleMouseButtonUp(click.button, click.modifiers);
 		SyncTownFirstPersonInput();
-		if (!IsTownFirstPersonInputCaptured())
-			break; // A native action may open a store or another interface.
+		// Subsequent wheel events may cross back into FPP. Other events still
+		// consult capture/UI eligibility; matching ups only clear owned latches.
 	}
 }
 
@@ -1173,6 +1263,7 @@ void PrepareForFadeIn()
 
 void GameEventHandler(const SDL_Event &event, uint16_t modState)
 {
+	FirstPersonMovementModifiers = modState;
 	// Every early UI/controller return still observes any changed input gate.
 	struct SyncAfterEvent {
 		~SyncAfterEvent() { SyncTownFirstPersonInput(); }
@@ -1225,19 +1316,27 @@ void GameEventHandler(const SDL_Event &event, uint16_t modState)
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 		repeat = event.key.repeat;
 #endif
+		if (repeat && (FirstPersonConsumedArrows & FirstPersonArrow(SDLC_EventKey(event))) != 0)
+			return; // Owned repeats remain consumed even through UI/modifier changes.
 		if (!repeat)
 			FirstPersonConsumedArrows &= ~FirstPersonArrow(SDLC_EventKey(event));
 	}
 	if (event.type == SDL_EVENT_KEY_DOWN && IsTownFirstPersonInputCaptured()) {
 		const uint8_t arrow = FirstPersonArrow(SDLC_EventKey(event));
-		if (arrow != 0) {
+		const bool modifiedWasd = (arrow & TownFirstPersonWasdMask) != 0
+		    && HasReservedFirstPersonModifiers(modState);
+		if (arrow != 0 && !modifiedWasd) {
 			bool repeat = false;
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 			repeat = event.key.repeat;
 #endif
-			FirstPersonConsumedArrows |= arrow;
-			SyncTownFirstPersonInput(repeat ? 0 : arrow);
-			return;
+			if (!repeat) {
+				FirstPersonConsumedArrows |= arrow;
+				SyncTownFirstPersonInput(arrow);
+				return;
+			}
+			// An unowned repeat belongs to its native keydown, including one
+			// received under modifiers. Keep its matching native KEYUP available.
 		}
 	}
 	if (event.type == SDL_EVENT_MOUSE_MOTION && IsTownFirstPersonInputCaptured()) {
@@ -1323,6 +1422,22 @@ void GameEventHandler(const SDL_Event &event, uint16_t modState)
 		return;
 	case SDL_EVENT_MOUSE_BUTTON_DOWN:
 		MousePosition = GetTownFirstPersonPointer({ SDLC_EventButtonIntX(event), SDLC_EventButtonIntY(event) });
+		if (GetTownViewFollowCameraState().active && !GetTownViewFollowCameraState().valid
+		    && CanControlTownCamera() && (event.button.button == SDL_BUTTON_LEFT || event.button.button == SDL_BUTTON_RIGHT)) {
+			FirstPersonConsumedButtons |= 1U << (event.button.button - 1);
+			return; // Closed follow frame has no valid native world target; UI stays native.
+		}
+		if (!IsTownFirstPersonInputCaptured() && CanControlTownCamera() && CanUseFollowCameraInput()
+		    && GetTownViewCameraMode() == TownCameraMode::ThirdPerson
+		    && (event.button.button == SDL_BUTTON_LEFT || event.button.button == SDL_BUTTON_RIGHT)) {
+			Point tile;
+			int towner, item, player;
+			if (TownFollowWheelNeedsDraw || FirstPersonDeferredClickCount != 0 || !PickTownView(MousePosition, tile, towner, item, player)) {
+				QueueTownFirstPersonClick(event.button.button, modState, true, true);
+				return;
+			}
+			CheckCursMove(); // An absolute follow click never reuses a stale hover target.
+		}
 		if (IsTownFirstPersonInputCaptured()
 		    && (event.button.button == SDL_BUTTON_LEFT || event.button.button == SDL_BUTTON_RIGHT)
 		    && (FirstPersonDeferredClickCount != 0 || (sgbMouseDown == CLICK_NONE && !HasFirstPersonPointerPick()))) {
@@ -1337,7 +1452,9 @@ void GameEventHandler(const SDL_Event &event, uint16_t modState)
 		return;
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 	case SDL_EVENT_MOUSE_WHEEL:
-		if (CanControlTownCamera() && (modState & SDL_KMOD_CTRL) == 0) {
+		if (CanControlTownCamera() && (modState & SDL_KMOD_CTRL) == 0
+		    && ((GetTownViewCameraMode() != TownCameraMode::ThirdPerson && GetTownViewCameraMode() != TownCameraMode::FirstPerson)
+		        || CanUseFollowCameraInput())) {
 			float steps = static_cast<float>(SDLC_EventWheelIntY(event));
 #if SDL_VERSION_ATLEAST(3, 0, 0)
 			steps = event.wheel.y;
@@ -1347,8 +1464,19 @@ void GameEventHandler(const SDL_Event &event, uint16_t modState)
 #endif
 			if (event.wheel.direction == SDL_MOUSEWHEEL_FLIPPED)
 				steps = -steps;
-			if (steps != 0) {
-				ZoomTownView(steps);
+			if (std::isfinite(steps) && steps != 0) {
+				TownFollowWheelNeedsDraw = GetTownViewCameraMode() == TownCameraMode::ThirdPerson
+				    || GetTownViewCameraMode() == TownCameraMode::FirstPerson;
+				if (FirstPersonDeferredClickCount != 0) {
+					if (FirstPersonDeferredClickCount == FirstPersonDeferredClicks.size()) {
+						SuspendTownFirstPersonInput();
+						return;
+					}
+					FirstPersonDeferredClicks[FirstPersonDeferredClickCount++] = { 0, 0, false, 0, 0, steps };
+				} else {
+					ZoomTownView(steps);
+					SyncTownFirstPersonInput();
+				}
 				RedrawViewport();
 				return;
 			}
@@ -1494,6 +1622,7 @@ void RunGameLoop(interface_mode uMsg)
 			if (!drawGame)
 				continue;
 			RedrawViewport();
+			AdvanceTownCameraForDraw();
 			DrawAndBlit();
 			FlushTownFirstPersonClicks();
 			continue;
@@ -1505,6 +1634,7 @@ void RunGameLoop(interface_mode uMsg)
 			diablo_color_cyc_logic();
 		gbGameLoopStartup = false;
 		if (drawGame) {
+			AdvanceTownCameraForDraw();
 			DrawAndBlit();
 			FlushTownFirstPersonClicks();
 		}
@@ -2425,6 +2555,9 @@ Direction GetTownFirstPersonMoveDirection()
 
 void SuspendTownFirstPersonInput()
 {
+	TownFollowWheelNeedsDraw = false;
+	TownCameraHasFrameClock = false;
+	AdvanceTownViewCamera(0);
 	FirstPersonDeferredClickCount = 0;
 	// Stop before pause/UI/device changes can disable GameLogic or ownership
 	// guards. This also cancels a queued walk whose path does not exist yet.
@@ -2441,6 +2574,7 @@ void SetTownFirstPersonInputServicesForDiagnostics(const TownFirstPersonInputSer
 	FirstPersonConsumedArrows = 0;
 	FirstPersonConsumedButtons = 0;
 	FirstPersonHasSavedPointer = false;
+	FirstPersonMovementModifiers = 0;
 }
 
 void DispatchGameEventForDiagnostics(const SDL_Event &event, uint16_t modState)
