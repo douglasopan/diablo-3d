@@ -7,6 +7,9 @@ audit. URLs, filenames, commits and evidence hashes are language independent.
 from __future__ import annotations
 
 TRANSLATIONS: dict[str, str] = {
+    'Tristram de perto': 'Tristram up close',
+    'Quatro câmeras, revisão dos modelos, desempenho e uma comunidade bilíngue. Conheça os grandes avanços desta rodada, as comparações reais e o que ainda está em teste.': 'Four camera modes, model review, performance and a bilingual community. Explore the major advances in this round, real comparisons and the work still being tested.',
+    'Ler a nova rodada': 'Read the latest round',
     'Música de fundo': 'Background music',
     'Toque para ouvir': 'Press play to listen',
     'Reproduzir música de fundo': 'Play background music',
@@ -398,6 +401,61 @@ TRANSLATIONS: dict[str, str] = {
 }
 
 
+TRANSLATIONS.update({
+    'câmeras, cache GPU, descarte espacial e menus revisados': 'cameras, GPU cache, spatial culling and revised menus',
+    'O horizonte atual é provisório. Dia/noite e fog são planos posteriores. Expansão lateral de mapas continua aberta.': 'The current horizon is provisional. Day/night and fog are later plans. Lateral map expansion remains an open question.',
+    'Refinar o horizonte provisório e investigar dia/noite e fog. A expansão lateral dos mapas permanece uma questão aberta.': 'Refine the provisional horizon and investigate day/night and fog. Lateral map expansion remains an open question.',
+    'Música': 'Music',
+    'Música ↗': 'Music ↗',
+    'Novidades ↗': 'Project news ↗',
+    'NOVIDADES POR E-MAIL': 'NEWS BY EMAIL',
+    'Acompanhe a próxima etapa.': 'Follow the next stage.',
+    'Deixe seu e-mail se quiser receber notícias do Diablo 3D. A inscrição é voluntária e pode ser cancelada.': 'Leave your email if you would like to receive Diablo 3D news. Signup is optional, and you can unsubscribe.',
+    'Quero receber novidades': 'Keep me updated',
+    'ACOMPANHE O PROJETO': 'FOLLOW THE PROJECT',
+    'O próximo capítulo.': 'The next chapter.',
+    'No seu e-mail.': 'In your inbox.',
+    'Inscreva-se voluntariamente para receber novidades do desenvolvimento do Diablo 3D, em português ou inglês.': 'Sign up if you would like to receive Diablo 3D development news in Portuguese or English.',
+    'Receba novidades do Diablo 3D': 'Receive Diablo 3D news',
+    'Inscreva-se voluntariamente para receber novidades do Diablo 3D em português ou inglês. Respostas privadas e cancelamento disponível.': 'Sign up for Diablo 3D news in Portuguese or English. Responses are private, and you can unsubscribe.',
+    'O formulário pede seu e-mail, o idioma de preferência e seu consentimento para receber notícias do projeto. As respostas ficam privadas com o responsável pelo Diablo 3D.': 'The form asks for your email, preferred language and consent to receive project news. Responses are kept private with the Diablo 3D maintainer.',
+    'Seu contato será usado para novidades do projeto. Não é necessário se inscrever para ler o site, ouvir músicas ou baixar os arquivos gratuitos.': 'Your contact will be used for project news. You do not need to sign up to read the site, listen to music or download the free files.',
+    'Deixar meu e-mail': 'Leave my email',
+    'O formulário abre no Google Forms. A confirmação aparece após o envio concluído.': 'The form opens in Google Forms. Confirmation appears once your response has been submitted.',
+    'Quer cancelar?': 'Want to unsubscribe?',
+    'Use o formulário de cancelamento com o mesmo e-mail da inscrição. O pedido é recebido de forma privada e processado manualmente antes de qualquer novo envio.': 'Use the unsubscribe form with the same email you signed up with. Your request is received privately and processed manually before any further mailing.',
+    'Pedir cancelamento': 'Request unsubscribe',
+    'Para dúvidas sobre sua inscrição, fale com douglasopan no Discord oficial.': 'For questions about your signup, contact douglasopan on the official Discord.',
+    'Trilha personalizada · Douglas Pan': 'Custom soundtrack · Douglas Pan',
+    'Ouça e baixe gratuitamente as versões personalizadas de menu e Tristram do Diablo 3D, com crédito Douglas Pan nos arquivos MP3.': 'Listen to and download the custom menu and Tristram versions from Diablo 3D for free, with Douglas Pan credited inside the MP3 files.',
+    'TRILHA PERSONALIZADA': 'CUSTOM SOUNDTRACK',
+    'A música do projeto.': 'The music of the project.',
+    'Por Douglas Pan.': 'By Douglas Pan.',
+    'Ouça e baixe gratuitamente as versões personalizadas que já estão no catálogo do jogo. Começamos pelo menu principal e por Tristram; os demais ambientes receberão suas faixas ao longo do desenvolvimento.': 'Listen to and download the custom versions already in the game catalog for free. We begin with the main menu and Tristram; tracks for other environments will follow as development progresses.',
+    'Menu principal · versão Rock2': 'Main menu · Rock2 version',
+    'Menu principal · versão anterior': 'Main menu · earlier version',
+    'Tristram · opção 1': 'Tristram · option 1',
+    'Tristram · opção 2': 'Tristram · option 2',
+    'Tristram · opção 3': 'Tristram · option 3',
+    'Player da trilha': 'Soundtrack player',
+    'ESCUTE A TRILHA': 'LISTEN TO THE SOUNDTRACK',
+    'Seu navegador pode baixar as faixas pelos links abaixo.': 'Use the links below to download the tracks.',
+    'Escolha uma faixa para ouvir.': 'Choose a track to listen to.',
+    'Faixas para ouvir e baixar': 'Tracks to listen to and download',
+    'Tocar': 'Play',
+    'Baixar MP3': 'Download MP3',
+    'Ouvir': 'Listen to',
+    'Ouvir MP3 ↗': 'Listen to MP3 ↗',
+    'Versões do projeto': 'Project versions',
+    'Esta biblioteca reúne {count} arquivos personalizados.': 'This library contains {count} custom files.',
+    'Tristram 3 aparenta ser outra exportação da primeira opção; a lista reúne versões disponíveis, sem contar cada arquivo como uma composição distinta.': 'Tristram 3 appears to be another export of the first option; the list presents the available versions without counting every file as a separate composition.',
+    'O crédito Douglas Pan está também nos metadados internos dos MP3s. A biblioteca contém apenas a trilha personalizada; as músicas originais do jogo não são distribuídas aqui.': 'Douglas Pan is also credited in the MP3s’ internal metadata. This library contains the custom soundtrack only; the original game music is not distributed here.',
+    'Não é necessário cadastrar e-mail para ouvir ou baixar.': 'No email signup is required to listen or download.',
+    'Acompanhe os próximos capítulos.': 'Follow the next chapters.',
+    'O objetivo é reconstruir todo Diablo 1 em 3D. Novas faixas e avanços aparecem no devlog.': 'The goal is to rebuild all of Diablo 1 in 3D. New tracks and progress are shared in the devlog.',
+})
+
+
 def translate_text(value: str) -> str:
     """Translate one complete string, preserving its surrounding whitespace."""
     if value in TRANSLATIONS:
@@ -413,6 +471,21 @@ def translate_text(value: str) -> str:
 # Public asset paths are the stable evidence identifiers; the inventory has no
 # separate ID field. These overlays never change image bytes or provenance.
 EVIDENCE_EN: dict[str, dict[str, str]] = {
+    '/assets/captures/tristram-camera-modes.webp': {
+        'title': 'Four cameras in Tristram',
+        'alt': 'Technical comparison of isometric, free-orbit, third-person and first-person modes, with CPU above and GPU below.',
+        'caption': 'Actual captures from the camera validation on October 8. The rows compare CPU and GPU; they do not show before and after the new optimizations or measure smoothness.',
+    },
+    '/assets/captures/adria-master-textured-comparison.webp': {
+        'title': 'Adria: preserved geometry and textured result',
+        'alt': 'Adria geometry master on the left and reduced textured result on the right, compared in the Godot tool.',
+        'caption': 'Authoring comparison: 3,491,844 preserved triangles on the left, without UVs or material; 5,134 triangles in the textured result on the right. The Godot preview is not an in-game screenshot.',
+    },
+    '/assets/captures/adria-material-transfer-review.webp': {
+        'title': 'Adria: material transfer under review',
+        'alt': 'Dense geometry with transferred material on the left and reduced textured model on the right.',
+        'caption': 'Experimental transfer onto the dense geometry, without removing faces. Volumes return, but UVs and materials still show patches and compression. An authoring candidate that is neither approved nor installed.',
+    },
     '/assets/captures/v1-center.webp': {
         'title': 'First Tristram prototype',
         'alt': 'Tristram prototype with segmented terrain and buildings reconstructed in vertical strips.',

@@ -8,6 +8,7 @@ from urllib.parse import unquote, urlsplit
 import xml.etree.ElementTree as ET
 
 import build
+from soundtrack import load_soundtrack, safe_file, sha256, validate_mp3
 
 
 class Document(HTMLParser):
@@ -103,6 +104,21 @@ def verify():
     assert (root / 'robots.txt').read_text().endswith(build.absolute('/sitemap.xml') + '\n')
     assert not any(p.name in ('PROMPTS.md', 'requirements.txt', 'build.py') or 'design-references' in p.parts for p in files), 'Build-only materials leaked to artifact'
     assert not any(p.suffix.lower() in ('.mpq', '.sv', '.cel', '.cl2', '.min', '.til', '.sol', '.obj', '.glb', '.gltf') for p in files), 'Proprietary/derived game assets must never be uploaded'
+    soundtrack = load_soundtrack()
+    for language in ('', 'en/'):
+        assert json.loads((root / (language + 'soundtrack.json')).read_text(encoding='utf-8')) == soundtrack, 'Published soundtrack manifest differs from validated source'
+        library = documents[root / (language + 'musica/index.html')]
+        assert sum(t == 'audio' for t, a in library.tags) == 1, 'Library must have one player'
+        assert any(t == 'audio' and a.get('id') == 'soundtrack-player' and 'autoplay' not in a for t, a in library.tags)
+        downloads = [a for t, a in library.tags if t == 'a' and 'download' in a]
+        assert len(downloads) == len(soundtrack['tracks']), 'Every custom track needs a free direct download'
+    expected_audio = {track['public_path'] for track in soundtrack['tracks']} | {soundtrack['background']['public_path']}
+    assert {'/' + p.relative_to(root).as_posix() for p in files if p.is_file() and p.suffix.lower() == '.mp3'} == expected_audio, 'Unexpected MP3 in publication artifact'
+    for track in soundtrack['tracks']:
+        output = safe_file(root, track['public_path'].lstrip('/'))
+        assert sha256(output) == track['sha256'], 'Published soundtrack bytes changed'
+        validate_mp3(output, track['tags'])
+    assert sha256(root / soundtrack['background']['public_path'].lstrip('/')) == soundtrack['background']['sha256'], 'Published background alias differs'
     evidence = json.loads((root / 'evidence.json').read_text(encoding='utf-8'))
     entries = evidence['entries'] if isinstance(evidence, dict) else evidence
     assert len({e['sha256'] for e in entries}) == len(entries), 'Selected images must not be exact duplicates'

@@ -523,5 +523,44 @@
     "width": 800,
     "height": 1380,
     "release_commit": "cdeaaab0d208bf0da4239b98c287619508e308a5"
+  },
+  {
+    "file": "/assets/captures/tristram-camera-modes.webp",
+    "title": "Quatro câmeras em Tristram",
+    "alt": "Comparação técnica dos modos isométrico, órbita livre, terceira e primeira pessoa, com CPU acima e GPU abaixo.",
+    "caption": "Capturas reais da rodada de câmeras de 8 de outubro. As linhas comparam CPU e GPU; não representam antes e depois das novas otimizações nem uma medição de fluidez.",
+    "category": "Protótipo",
+    "stage": "2026-10-08",
+    "source": "diagnostics/camera-apply-20261008/runtime-r1/review-1920x1080.png",
+    "sha256": "adf10b6c1a47b28a9eacf3bb80f83116b8e0a08b9637ec84c6d9646f07427c95",
+    "duplicate_sources": [],
+    "width": 1920,
+    "height": 588
+  },
+  {
+    "file": "/assets/captures/adria-master-textured-comparison.webp",
+    "title": "Adria: geometria preservada e resultado texturizado",
+    "alt": "Master geométrico de Adria à esquerda e resultado texturizado reduzido à direita, comparados na ferramenta Godot.",
+    "caption": "Comparação de autoria: 3.491.844 triângulos preservados à esquerda, sem UV/material; 5.134 triângulos no resultado texturizado à direita. A prévia Godot não é uma captura da partida.",
+    "category": "Geometria",
+    "stage": "2026-10-08",
+    "source": "diagnostics/asset-lod-20261008/godot-review/adria-baseline-5.png",
+    "sha256": "957b98d0534d51119f3f53eb0c6846170293b1bf3bb64ead77f899ff597fc8cd",
+    "duplicate_sources": [],
+    "width": 1600,
+    "height": 1000
+  },
+  {
+    "file": "/assets/captures/adria-material-transfer-review.webp",
+    "title": "Adria: transferência de material em revisão",
+    "alt": "Geometria densa com material transferido à esquerda e modelo texturizado reduzido à direita.",
+    "caption": "Transferência experimental sobre a geometria densa, sem remover faces. Volumes reaparecem, mas UVs e materiais ainda apresentam remendos e compressões. Candidato de autoria não aprovado nem instalado.",
+    "category": "Geometria",
+    "stage": "2026-10-08",
+    "source": "diagnostics/asset-lod-20261008/godot-review/adria-v2-handoff-5.png",
+    "sha256": "309182c5b4d88ef475e900ebd0529638074507880d1ff735ded0fce872aff78c",
+    "duplicate_sources": [],
+    "width": 1600,
+    "height": 1000
   }
 ]

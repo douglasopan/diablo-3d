@@ -18,6 +18,7 @@ from PIL import Image
 import yaml
 
 from translations import EVIDENCE_EN, translate_text
+from soundtrack import load_soundtrack
 
 ROOT = Path(__file__).resolve().parent
 REPO = ROOT.parent
@@ -29,9 +30,9 @@ if parsed_base.scheme not in ('http', 'https') or not parsed_base.netloc or pars
     raise ValueError('SITE_URL must be an absolute HTTP(S) URL without a query or fragment')
 PREFIX = parsed_base.path.rstrip('/')
 GITHUB = 'https://github.com/douglasopan/diablo-3d'
-SNAPSHOT = 'e17b77f0370df87732e227b7fa479d9b56c44280'
+SNAPSHOT = 'ae43f0470134af6bb470c68d20fa37647c8a0ec4'
 DISCORD = 'https://discord.gg/4YxQ7s69S'
-NAV = [('Início', '/'), ('Devlog', '/devlog/'), ('Projeto', '/projeto/'), ('Tecnologia', '/tecnologia/'), ('Participar', '/participar/'), ('Apoiar', '/apoiar/'), ('Roadmap', '/roadmap/'), ('Galeria', '/galeria/')]
+NAV = [('Início', '/'), ('Devlog', '/devlog/'), ('Música', '/musica/'), ('Projeto', '/projeto/'), ('Tecnologia', '/tecnologia/'), ('Participar', '/participar/'), ('Apoiar', '/apoiar/'), ('Roadmap', '/roadmap/'), ('Galeria', '/galeria/')]
 CATEGORIES = ('Protótipo', 'Geometria', 'Personagens', 'Comunidade', 'Ferramentas', 'Luz')
 MONTHS = ('janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro')
 EN_MONTHS = ('January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December')
@@ -40,9 +41,9 @@ LANG = 'pt-BR'
 
 def localized_path(path, language=None):
     language = language or LANG
-    routes = ('/devlog/', '/projeto/', '/tecnologia/', '/participar/', '/apoiar/', '/roadmap/', '/galeria/')
+    routes = ('/devlog/', '/musica/', '/novidades/', '/projeto/', '/tecnologia/', '/participar/', '/apoiar/', '/roadmap/', '/galeria/')
     route = urlsplit(path).path
-    if language == 'en' and (route in ('/', '/rss.xml', '/404.html', '/evidence.json') or route.startswith(routes)):
+    if language == 'en' and (route in ('/', '/rss.xml', '/404.html', '/evidence.json', '/soundtrack.json') or route.startswith(routes)):
         return '/en' + path
     return path
 
@@ -308,7 +309,7 @@ def no_results():
 
 
 def devlog_highlight():
-    return f'''<section class="panel prose"><h2>Godot para revisar a arquitetura</h2><p>O editor externo já permite inspecionar a cena, salvar o trabalho e exportar arquitetura estática para um perfil de revisão. A partida continua no DevilutionX, com suas regras e colisões.</p><div class="actions">{button('Conhecer o editor', '/devlog/editor-godot-arquitetura/')}{button('GPU testada na partida', '/devlog/renderizacao-gpu-tristram/', True)}</div></section>'''
+    return f'''<section class="panel prose"><h2>Tristram de perto</h2><p>Quatro câmeras, revisão dos modelos, desempenho e uma comunidade bilíngue. Conheça os grandes avanços desta rodada, as comparações reais e o que ainda está em teste.</p><div class="actions">{button('Ler a nova rodada', '/devlog/tristram-de-perto/')}{button('Conhecer o editor', '/devlog/editor-godot-arquitetura/', True)}</div></section>'''
 
 
 def lightbox():
@@ -342,7 +343,7 @@ def analytics_tag():
 </script>'''
 
 
-def frame(title, description, path, content, image='/assets/banner.webp', article=None, noindex=False):
+def frame(title, description, path, content, image='/assets/banner.webp', article=None, noindex=False, music=None):
     title, description = translated(title), translated(description)
     canonical = absolute(path)
     breadcrumb = [{'@type': 'ListItem', 'position': 1, 'name': translated('Início'), 'item': absolute('/')}]
@@ -355,7 +356,11 @@ def frame(title, description, path, content, image='/assets/banner.webp', articl
         {'@context': 'https://schema.org', '@type': 'BreadcrumbList', 'itemListElement': breadcrumb},
         {'@context': 'https://schema.org', '@type': 'BlogPosting' if article else 'WebPage', 'headline' if article else 'name': title, 'description': description, 'url': canonical, 'inLanguage': LANG, 'isPartOf': {'@id': absolute('/#website')}, **({'datePublished': article['date'], 'dateModified': article.get('updated', article['date']), 'image': absolute(image), 'author': {'@type': 'Organization', 'name': translated('Projeto D3D'), 'url': absolute('/projeto/')}, 'mainEntityOfPage': canonical} if article else {})}
     ]
+    if music:
+        artist = {'@type': 'Person', 'name': music['artist']}
+        structured.append({'@context': 'https://schema.org', '@type': 'MusicAlbum', 'name': music['album'], 'url': canonical, 'byArtist': artist, 'numTracks': len(music['tracks']), 'isAccessibleForFree': True, 'track': [{'@type': 'MusicRecording', 'name': track['title'], 'byArtist': artist, 'duration': f"PT{round(track['duration_seconds'])}S", 'audio': {'@type': 'AudioObject', 'contentUrl': absolute(track['public_path']), 'encodingFormat': 'audio/mpeg', 'creator': artist}, 'isAccessibleForFree': True} for track in music['tracks']]})
     nav = ''.join(f'<a href="{url(p)}"{" aria-current=" + chr(34) + "page" + chr(34) if (p == path or (p == "/devlog/" and article)) else ""}>{name}</a>' for name, p in NAV)
+    soundtrack_script = f'<script src="{versioned_asset("/soundtrack.js")}" defer></script>' if music else ''
     article_meta = f'<meta property="article:published_time" content="{article["date"]}"><meta property="article:modified_time" content="{article.get("updated", article["date"])}">' if article else ''
     languages = '<nav class="language-switch" aria-label="Idioma">' + ''.join(f'<a href="{urlsplit(alternate_url(path, lang)).path}" hreflang="{lang}" lang="{lang}" data-language-link="{lang}" aria-label="{label}"' + (' aria-current="true"' if LANG == lang else '') + f'>{short}</a>' for lang, label, short in [('pt-BR', 'Ler em português', 'PT'), ('en', 'Read in English', 'EN')]) + '</nav>'
     alternates = ''.join(f'<link rel="alternate" hreflang="{lang}" href="{alternate_url(path, lang)}">' for lang in ('pt-BR', 'en', 'x-default'))
@@ -365,9 +370,9 @@ def frame(title, description, path, content, image='/assets/banner.webp', articl
 <meta name="theme-color" content="#111211"><meta property="og:locale" content="{'en_US' if LANG == 'en' else 'pt_BR'}"><meta property="og:type" content="{'article' if article else 'website'}"><meta property="og:site_name" content="Diablo 3D · D3D"><meta property="og:title" content="{esc(title)}"><meta property="og:description" content="{esc(description)}"><meta property="og:url" content="{canonical}"><meta property="og:image" content="{absolute(image)}"><meta property="og:image:alt" content="{esc(article['image_alt'] if article else 'Banner oficial do projeto Diablo 3D')}">{article_meta}
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{esc(title)}"><meta name="twitter:description" content="{esc(description)}"><meta name="twitter:image" content="{absolute(image)}">
 <link rel="icon" type="image/png" href="{url('/assets/d3d-icon.png')}"><link rel="apple-touch-icon" href="{url('/assets/d3d-touch.png')}"><link rel="alternate" type="application/rss+xml" title="Diablo 3D — Devlog" href="{url('/rss.xml')}"><link rel="stylesheet" href="{versioned_asset('/vendor/plyr/plyr.css')}"><link rel="stylesheet" href="{versioned_asset('/site.css')}">
-{alternates}<script src="{versioned_asset('/language.js')}"></script><script type="application/ld+json">{json.dumps(structured, ensure_ascii=False).replace('<', chr(92) + 'u003c')}</script><script src="{versioned_asset('/site.js')}" defer></script><script src="{versioned_asset('/vendor/plyr/plyr.js')}" defer></script><script src="{versioned_asset('/music.js')}" defer></script></head>
+{alternates}<script src="{versioned_asset('/language.js')}"></script><script type="application/ld+json">{json.dumps(structured, ensure_ascii=False).replace('<', chr(92) + 'u003c')}</script><script src="{versioned_asset('/site.js')}" defer></script><script src="{versioned_asset('/vendor/plyr/plyr.js')}" defer></script><script src="{versioned_asset('/music.js')}" defer></script>{soundtrack_script}</head>
 <body><a class="skip-link" href="#main">Pular para o conteúdo</a><header class="site-header"><div class="wrap"><a class="brand" href="{url('/')}" aria-label="D3D — Início">{logo(True, True)}</a><button class="menu-toggle" type="button" aria-controls="navigation" aria-expanded="false" hidden data-enhancement>Menu <span aria-hidden="true">☰</span></button><nav id="navigation" class="main-nav" aria-label="Navegação principal">{nav}</nav>{languages}</div></header>
-<main id="main" class="wrap">{content}</main><footer class="site-footer"><div class="wrap"><div class="footer-top"><a class="brand" href="{url('/')}">{logo()}</a><nav aria-label="Links do projeto"><a href="{GITHUB}">GitHub ↗</a><a href="{DISCORD}">Discord ↗</a><a href="{url('/apoiar/')}">Apoiar ↗</a><a href="{url('/rss.xml')}">RSS ↗</a><a href="{source('LICENSE.md', False)}">Licença ↗</a></nav></div><p>Projeto de fã independente, sem afiliação com a Blizzard Entertainment. Diablo e suas marcas pertencem aos respectivos titulares.</p><p>Código público sob <a href="{source('LICENSE.md', False)}">Sustainable Use License</a>: distribuição gratuita e não comercial. Dados originais do jogo não são distribuídos.</p></div></footer>{background_music()}{lightbox()}</body></html>'''
+<main id="main" class="wrap">{content}</main><footer class="site-footer"><div class="wrap"><div class="footer-top"><a class="brand" href="{url('/')}">{logo()}</a><nav aria-label="Links do projeto"><a href="{GITHUB}">GitHub ↗</a><a href="{DISCORD}">Discord ↗</a><a href="{url('/musica/')}">Música ↗</a><a href="{url('/apoiar/')}">Apoiar ↗</a><a href="{url('/novidades/')}">Novidades ↗</a><a href="{url('/rss.xml')}">RSS ↗</a><a href="{source('LICENSE.md', False)}">Licença ↗</a></nav></div><p>Projeto de fã independente, sem afiliação com a Blizzard Entertainment. Diablo e suas marcas pertencem aos respectivos titulares.</p><p>Código público sob <a href="{source('LICENSE.md', False)}">Sustainable Use License</a>: distribuição gratuita e não comercial. Dados originais do jogo não são distribuídos.</p></div></footer>{'' if music else background_music()}{lightbox()}</body></html>'''
     return localize_html(document)
 
 
@@ -395,7 +400,7 @@ def technology():
 <section class="split"><div class="panel prose"><h2>Godot como editor externo</h2><p>A cena preparada mostra a arquitetura que o jogo realmente monta, incluindo recortes e interior. Ela pode ser comparada ao GLB fonte em modos distintos. Câmera livre, corte para interior e salvar e reabrir ajudam a revisar os objetos.</p>{button('Conhecer o editor', '/devlog/editor-godot-arquitetura/', True)}</div><div class="panel prose"><h2>Exportar para revisão</h2><p>A substituição de uma instância é explícita. O pacote de arquitetura estática e materiais básicos passa pelo loader C++ antes de ser aplicado a um perfil de revisão, com backup, recibo e hashes.</p><p>Chão e colisão ficam bloqueados. A cabana com luz e fogo permanece protegida no formato inicial, que ainda não exporta luzes autoradas. O jogo continua no DevilutionX.</p>{button('Guia do editor', source('docs/GODOT-EDITOR.md'), True)}</div></section>
 <section>{section_head('Ferramentas e decisões.')}<div class="tech-grid">{''.join(f'<div class="tech-card"><span class="eyebrow">0{i+1}</span><h3>{t}</h3><p>{d}</p><a href="{source(s)}">Ler a documentação ↗</a></div>' for i,(t,d,s) in enumerate(cards))}</div></section>
 <section class="split"><div class="panel prose"><h2>Comparar a rota correta</h2><p><kbd>F4</kbd> alterna original e 3D. <kbd>Home</kbd> restaura o enquadramento nativo e usa o backend original. Esse retorno pode produzir pixels idênticos sem provar uma malha fiel.</p><p>Para revisar um objeto, use malha forçada na perspectiva original, giros próximos de ±5° e os quatro ângulos principais. A oclusão e as faces não vistas também contam.</p></div><div class="panel prose"><h2>Luz externa e interior</h2><p>A calibração publicada ilumina a cor-base dos materiais importados em RGB linear antes de convertê-la para a paleta. A arte nativa ainda conserva iluminação pintada e tratamento de compatibilidade. Sombras geométricas atuais cobrem arquitetura estática.</p><p>Árvores, pedras e personagens ainda não participam desse mesmo mapa de sombras. A cabana de revisão possui duas fontes pontuais de velas, com oscilação discreta e paredes que bloqueiam seu vazamento. Travessões e adereços ainda não projetam sombras pontuais individuais. Materiais PBR do modelo importado não estão integralmente aplicados.</p></div></section>
-<details class="panel"><summary>O que vem depois e o que está em pesquisa</summary><div class="prose"><p>Depois de Tristram: primeiro nível procedural da Catedral, seguido de todos os demais níveis e conteúdos do jogo. As masmorras ainda usam o renderer original.</p><p>Dia/noite, horizonte e fog são planos posteriores. Expansão lateral de mapas continua aberta. Rede e voz por proximidade precisam de investigação e validação próprias.</p><p>O build atual é offline (<code>NONET=ON</code>). Alterar um limite de jogadores não cria, por si só, uma rede escalável.</p><a href="{source('docs/NETWORKING-RESEARCH.md')}">Pesquisa de rede ↗</a></div></details>'''
+<details class="panel"><summary>O que vem depois e o que está em pesquisa</summary><div class="prose"><p>Depois de Tristram: primeiro nível procedural da Catedral, seguido de todos os demais níveis e conteúdos do jogo. As masmorras ainda usam o renderer original.</p><p>O horizonte atual é provisório. Dia/noite e fog são planos posteriores. Expansão lateral de mapas continua aberta. Rede e voz por proximidade precisam de investigação e validação próprias.</p><p>O build atual é offline (<code>NONET=ON</code>). Alterar um limite de jogadores não cria, por si só, uma rede escalável.</p><a href="{source('docs/NETWORKING-RESEARCH.md')}">Pesquisa de rede ↗</a></div></details>'''
 
 
 def participate():
@@ -410,9 +415,9 @@ def participate():
 
 
 def roadmap():
-    milestones = [('EM DESENVOLVIMENTO', 'Tristram', 'Calibrar objetos completos e coerentes em 360°, personagens, materiais, contato com o terreno e comparação com a perspectiva original. A cabana leste opcional de revisão já possui duas janelas abertas, piso físico e velas com oscilação sutil; a pequena janela da porta agora atravessa a parede interna. O editor externo Godot já auxilia a inspeção e a exportação estática para revisão. O piloto GPU opcional no Windows foi validado tecnicamente; a cidade e os demais objetos continuam em revisão.'), ('PRÓXIMO MARCO', 'Primeiro nível procedural da Catedral', 'Construir geometria 3D a partir do mapa vivo e da semente da partida. Esse trabalho sucede a calibração da cidade; hoje as masmorras usam o renderer original.'), ('OBJETIVO COMPLETO · PLANEJADO', 'Todos os níveis de Diablo 1', 'Reconstruir os demais níveis da Catedral, as Catacumbas, as Cavernas e o Inferno, com os inimigos, objetos e conteúdo do jogo. Cada ambiente precisará de implementação e comparação próprias; nenhum desses níveis é apresentado como concluído.'), ('PLANEJAMENTO', 'Ambiente e alcance do mapa', 'Ciclo dia/noite, horizonte e fog vêm depois de Tristram. A expansão lateral dos mapas permanece uma questão aberta.'), ('PESQUISA', 'Rede e voz por proximidade', 'Restaurar e validar a rede existente em um experimento separado, antes de investigar mais jogadores e voz. O build atual permanece offline.')]
+    milestones = [('EM DESENVOLVIMENTO', 'Tristram', 'Calibrar objetos completos e coerentes em 360°, personagens, materiais, contato com o terreno e comparação com a perspectiva original. A cabana leste opcional de revisão já possui duas janelas abertas, piso físico e velas com oscilação sutil; a pequena janela da porta agora atravessa a parede interna. O editor externo Godot já auxilia a inspeção e a exportação estática para revisão. O piloto GPU opcional no Windows foi validado tecnicamente; a cidade e os demais objetos continuam em revisão.'), ('PRÓXIMO MARCO', 'Primeiro nível procedural da Catedral', 'Construir geometria 3D a partir do mapa vivo e da semente da partida. Esse trabalho sucede a calibração da cidade; hoje as masmorras usam o renderer original.'), ('OBJETIVO COMPLETO · PLANEJADO', 'Todos os níveis de Diablo 1', 'Reconstruir os demais níveis da Catedral, as Catacumbas, as Cavernas e o Inferno, com os inimigos, objetos e conteúdo do jogo. Cada ambiente precisará de implementação e comparação próprias; nenhum desses níveis é apresentado como concluído.'), ('PLANEJAMENTO', 'Ambiente e alcance do mapa', 'Refinar o horizonte provisório e investigar dia/noite e fog. A expansão lateral dos mapas permanece uma questão aberta.'), ('PESQUISA', 'Rede e voz por proximidade', 'Restaurar e validar a rede existente em um experimento separado, antes de investigar mais jogadores e voz. O build atual permanece offline.')]
     return intro('ROADMAP', 'Diablo inteiro.<br>Um marco de cada vez.', 'Todos os níveis do jogo fazem parte do objetivo. Tristram é a etapa atual; o roadmap organiza os próximos marcos sem fixar prazos de conclusão.') + f'''
-<aside class="notice"><p class="eyebrow">ESTADO DOCUMENTADO · 08 OUTUBRO 2026</p><p><kbd>F4</kbd> alterna a visão · <kbd>Home</kbd> usa o backend original · build offline.</p><p>A entrega técnica mais recente é o <a href="{GITHUB}/commit/{SNAPSHOT}">editor externo Godot com ponte de arquitetura estática</a>. Os testes, as capturas históricas e os limites ficam registrados no <a href="{url('/devlog/')}">devlog</a>.</p></aside>
+<aside class="notice"><p class="eyebrow">ESTADO DOCUMENTADO · 08 OUTUBRO 2026</p><p><kbd>F4</kbd> alterna a visão · <kbd>Home</kbd> usa o backend original · build offline.</p><p>A entrega técnica mais recente é o <a href="{GITHUB}/commit/{SNAPSHOT}">câmeras, cache GPU, descarte espacial e menus revisados</a>. Os testes, as capturas históricas e os limites ficam registrados no <a href="{url('/devlog/')}">devlog</a>.</p></aside>
 <section class="timeline">{''.join(f'<article class="milestone panel"><span class="tag">{badge}</span><h2>{title}</h2><p>{body}</p></article>' for badge,title,body in milestones)}</section>
 <section class="panel prose"><h2>O que precisa melhorar agora</h2><p>Silhuetas e faces ocultas da arquitetura, materiais, personagens e oclusão. Geração automática auxilia o processo, mas cada objeto precisa de revisão humana e comparação real.</p><p>As diferenças observadas ficam registradas junto das capturas. A igualdade de pixels na rota Home não substitui a revisão da malha.</p><a href="{source('docs/ROADMAP.md', False)}">Consultar o roadmap versionado no GitHub ↗</a></section>'''
 
@@ -435,6 +440,50 @@ def support():
 <section class="support-faq">{section_head('Apoio com clareza.')}<details class="panel"><summary>O apoio é voluntário?</summary><div class="prose"><p>Sim. Ele ajuda a sustentar o desenvolvimento e não compra acesso exclusivo ao jogo. O código permanece público sob a <a href="{source('LICENSE.md', False)}">Sustainable Use License</a>, com distribuição gratuita e não comercial.</p></div></details><details class="panel"><summary>Onde acompanho o progresso?</summary><div class="prose"><p>As mudanças publicadas, capturas e verificações aparecem no <a href="{url('/devlog/')}">devlog</a>. O <a href="{url('/roadmap/')}">roadmap</a> mostra o estado atual e os marcos planejados. Não há data prometida de conclusão.</p></div></details><details class="panel"><summary>Posso ajudar sem dinheiro ou créditos?</summary><div class="prose"><p>Sim. Modelagem, programação, capturas de teste e documentação também fazem o projeto avançar. Veja <a href="{url('/participar/')}">como participar</a>.</p></div></details></section>'''
 
 
+def soundtrack_page(music):
+    first = music['tracks'][0]
+    contexts = {
+        'menu-rock2': 'Menu principal · versão Rock2',
+        'menu-alternative': 'Menu principal · versão anterior',
+        'town-rock': 'Tristram · opção 1',
+        'town-alternative': 'Tristram · opção 2',
+        'town-third': 'Tristram · opção 3',
+    }
+    tracks = []
+    for number, track in enumerate(music['tracks'], 1):
+        asset = versioned_asset(track['public_path'])
+        title = esc(track['title'])
+        size = f"{track['size_bytes'] / 1_000_000:.1f} MB"
+        tracks.append(f'''<li class="soundtrack-track panel"><span class="track-number" aria-hidden="true">{number:02}</span><div class="track-copy"><p class="eyebrow">{esc(contexts.get(track['id'], track['environment']))}</p><h2>{title}</h2><p class="meta">Douglas Pan <span aria-hidden="true">·</span> {esc(track['duration_label'])} <span aria-hidden="true">·</span> MP3 · {size}</p></div><div class="actions"><button class="button secondary" type="button" data-soundtrack-src="{esc(asset)}" data-soundtrack-title="{title}" aria-label="{esc(translated('Tocar') + ' ' + track['title'])}" aria-pressed="false" hidden data-enhancement><span data-soundtrack-label>Tocar</span></button><a class="button" href="{esc(asset)}" download="Douglas-Pan--{esc(track['id'])}.mp3" aria-label="{esc(translated('Baixar MP3') + ' · ' + track['title'])}">Baixar MP3 <span aria-hidden="true">↓</span></a><noscript><a href="{esc(asset)}">Ouvir MP3 ↗</a></noscript></div></li>''')
+    return intro('TRILHA PERSONALIZADA', 'A música do projeto.<br>Por Douglas Pan.', 'Ouça e baixe gratuitamente as versões personalizadas que já estão no catálogo do jogo. Começamos pelo menu principal e por Tristram; os demais ambientes receberão suas faixas ao longo do desenvolvimento.') + f'''
+<section class="soundtrack-player panel" aria-label="Player da trilha"><p class="eyebrow">ESCUTE A TRILHA</p><h2 id="soundtrack-title">{esc(first['title'])}</h2><p>Douglas Pan</p><audio id="soundtrack-player" controls preload="none" src="{esc(versioned_asset(first['public_path']))}" aria-label="{esc(translated('Ouvir') + ' ' + first['title'])}">Seu navegador pode baixar as faixas pelos links abaixo.</audio><p id="soundtrack-status" class="meta" role="status" aria-live="polite">Escolha uma faixa para ouvir.</p></section>
+<ol class="soundtrack-list" aria-label="Faixas para ouvir e baixar">{''.join(tracks)}</ol>
+<aside class="notice prose"><h2>Versões do projeto</h2><p>{esc(translated('Esta biblioteca reúne {count} arquivos personalizados.').format(count=len(music['tracks'])))}</p><p>Tristram 3 aparenta ser outra exportação da primeira opção; a lista reúne versões disponíveis, sem contar cada arquivo como uma composição distinta.</p><p>O crédito Douglas Pan está também nos metadados internos dos MP3s. A biblioteca contém apenas a trilha personalizada; as músicas originais do jogo não são distribuídas aqui.</p><p>Não é necessário cadastrar e-mail para ouvir ou baixar.</p></aside>
+<section class="panel prose"><h2>Acompanhe os próximos capítulos.</h2><p>O objetivo é reconstruir todo Diablo 1 em 3D. Novas faixas e avanços aparecem no devlog.</p><div class="actions">{button('Acompanhar o devlog', '/devlog/')}{button('Apoiar o projeto', '/apoiar/', True)}</div></section>'''
+
+
+def load_newsletter():
+    config = json.loads((ROOT / 'newsletter.json').read_text(encoding='utf-8'))
+    if set(config) != {'signup_url', 'cancel_url'}:
+        raise ValueError('Newsletter config must contain only public signup and cancellation URLs')
+    for value in config.values():
+        if not isinstance(value, str) or not re.fullmatch(r'https://docs\.google\.com/forms/d/e/[A-Za-z0-9_-]+/viewform', value):
+            raise ValueError('Newsletter URLs must be public Google Forms respondent links')
+    if config['signup_url'] == config['cancel_url']:
+        raise ValueError('Newsletter signup and cancellation forms must be distinct')
+    return config
+
+
+def newsletter_banner():
+    return f'''<section class="newsletter-banner panel"><div><p class="eyebrow">NOVIDADES POR E-MAIL</p><h2>Acompanhe a próxima etapa.</h2><p>Deixe seu e-mail se quiser receber notícias do Diablo 3D. A inscrição é voluntária e pode ser cancelada.</p></div>{button('Quero receber novidades', '/novidades/')}</section>'''
+
+
+def newsletter_page(config):
+    return intro('ACOMPANHE O PROJETO', 'O próximo capítulo.<br>No seu e-mail.', 'Inscreva-se voluntariamente para receber novidades do desenvolvimento do Diablo 3D, em português ou inglês.') + f'''
+<section class="panel prose newsletter-details"><h2>Receba novidades do Diablo 3D</h2><p>O formulário pede seu e-mail, o idioma de preferência e seu consentimento para receber notícias do projeto. As respostas ficam privadas com o responsável pelo Diablo 3D.</p><p>Seu contato será usado para novidades do projeto. Não é necessário se inscrever para ler o site, ouvir músicas ou baixar os arquivos gratuitos.</p><div class="actions">{button('Deixar meu e-mail', config['signup_url'])}</div><p class="meta">O formulário abre no Google Forms. A confirmação aparece após o envio concluído.</p></section>
+<section class="panel prose newsletter-details"><h2>Quer cancelar?</h2><p>Use o formulário de cancelamento com o mesmo e-mail da inscrição. O pedido é recebido de forma privada e processado manualmente antes de qualquer novo envio.</p><div class="actions">{button('Pedir cancelamento', config['cancel_url'], True)}</div><p>Para dúvidas sobre sua inscrição, fale com douglasopan no Discord oficial.</p>{button('Conversar no Discord', DISCORD, True)}</section>'''
+
+
 def write(path, text):
     target = OUT / localized_path(path).lstrip('/')
     if path.endswith('/'):
@@ -443,10 +492,12 @@ def write(path, text):
     target.write_text(text, encoding='utf-8', newline='\n')
 
 
-def build_locale(posts, evidence):
+def build_locale(posts, evidence, soundtrack, newsletter):
     pages = [
         ('/', 'Diablo 1 sob uma nova dimensão.', 'Diablo 3D: um projeto para reconstruir todo Diablo 1 em 3D, com todos os níveis. Etapa atual: Tristram. Devlog, capturas reais e formas de apoiar.', home(posts)),
         ('/devlog/', 'Diário de construção', 'Acompanhe o desenvolvimento do jogo completo em Diablo 3D. Registros atuais de Tristram, capturas reais, decisões e verificações.', intro('DEVLOG', 'Diário de construção.', 'Do primeiro protótipo ao objetivo de reconstruir todo Diablo 1 em 3D. O que mudou, como foi testado e o que ainda precisa de revisão, com capturas reais e fontes versionadas.') + devlog_highlight() + '<p class="notice">Os registros de 07/10/2026 formam a retrospectiva inicial. v1–v4 representam etapas locais anteriores; novos registros acompanham as entregas seguintes.</p>' + filters(CATEGORIES, True) + '<h2 class="sr-only">Registros publicados</h2><section class="card-grid devlog-feed">' + ''.join(card(p) for p in posts) + '</section>' + no_results()),
+        ('/musica/', 'Trilha personalizada · Douglas Pan', 'Ouça e baixe gratuitamente as versões personalizadas de menu e Tristram do Diablo 3D, com crédito Douglas Pan nos arquivos MP3.', soundtrack_page(soundtrack)),
+        ('/novidades/', 'Receba novidades do Diablo 3D', 'Inscreva-se voluntariamente para receber novidades do Diablo 3D em português ou inglês. Respostas privadas e cancelamento disponível.', newsletter_page(newsletter)),
         ('/projeto/', 'Sobre o projeto', 'Conheça o D3D: projeto independente para reconstruir todo Diablo 1 em 3D, com todos os níveis, preservando a partida. Tristram é a etapa atual.', project()),
         ('/tecnologia/', 'Tecnologia do protótipo', 'DevilutionX, GPU opcional no Windows e editor externo Godot para arquitetura estática, com exportação validada e perfil de revisão.', technology()),
         ('/participar/', 'Participe do Diablo 3D', 'Contribua com modelos, código, testes e documentação. Reserve um objeto, compare com o original e envie para revisão.', participate()),
@@ -455,7 +506,9 @@ def build_locale(posts, evidence):
         ('/galeria/', 'Galeria do desenvolvimento', 'Capturas reais de cada etapa do protótipo Diablo 3D, incluindo comparações da cabana e ângulos de revisão.', gallery(evidence)),
     ]
     for path, title, description, content in pages:
-        write(path, frame(title, description, path, content))
+        if path in ('/', '/devlog/', '/musica/'):
+            content += newsletter_banner()
+        write(path, frame(title, description, path, content, music=soundtrack if path == '/musica/' else None))
     for post in posts:
         content = f'''<header class="page-intro article-intro atmospheric bleed">{scene('/assets/art/journal-atmosphere.webp', True)}<div class="intro-copy"><p class="eyebrow">{esc(translated(post['category']))} · DEVLOG</p><h1>{esc(post['title'])}</h1><p class="lede">{esc(post['description'])}</p><div class="meta"><time datetime="{post['date']}">{date_label(post['date'])}</time><span>Projeto D3D</span><span>{post['minutes']} {translated('min de leitura')}</span></div></div>{art_credit()}</header><nav class="breadcrumb" aria-label="Você está aqui"><a href="{url('/devlog/')}">Devlog</a><span aria-hidden="true"> / </span><span>{esc(post['category'])}</span></nav><div class="article-layout"><article class="prose"><figure>{img(post['image'], post['image_alt'], True)}<figcaption>{esc(post['image_alt'])}</figcaption></figure>{post['body']}<aside class="notice"><p>Este registro é versionado no GitHub. <a href="{source(post['source_file'], False)}">Ver fonte e histórico ↗</a></p></aside></article><aside class="toc"><details open><summary>Neste registro</summary>{post['toc']}</details><div class="notice"><p>Home usa o backend original. Essa rota não valida a malha.</p></div></aside></div><section>{section_head('Continue acompanhando.')}<div class="card-grid">{''.join(card(p) for p in [p for p in posts if p is not post][:3])}</div></section>'''
         write(post['path'], frame(post['title'], post['description'], post['path'], content, post['image'], post))
@@ -476,6 +529,7 @@ def build_locale(posts, evidence):
         ET.SubElement(item, f'{{{dc}}}date').text = post['date']
         ET.SubElement(item, 'guid', isPermaLink='true').text = absolute(post['path'])
     write('/rss.xml', ET.tostring(rss, encoding='unicode', xml_declaration=True))
+    write('/soundtrack.json', json.dumps(soundtrack, ensure_ascii=False, indent=2) + '\n')
     return [localized_path(p[0]) for p in pages] + [localized_path(p['path']) for p in posts]
 
 
@@ -483,6 +537,8 @@ def build():
     global LANG
     LANG = 'pt-BR'
     load_analytics()  # Invalid tracking configuration must fail before replacing the artifact.
+    soundtrack = load_soundtrack()  # Validate actual final MP3 tags and hashes before touching output.
+    newsletter = load_newsletter()
     posts = load_posts()
     raw_evidence = json.loads((ROOT / 'evidence.json').read_text(encoding='utf-8'))
     evidence = raw_evidence['entries'] if isinstance(raw_evidence, dict) else raw_evidence
@@ -491,7 +547,8 @@ def build():
         if not all(entry.get(k) for k in ('title', 'alt', 'caption', 'category', 'stage', 'source', 'sha256')):
             raise ValueError('Incomplete evidence metadata')
     allowed = {'.css', '.js', '.png', '.webp', '.svg', '.woff', '.woff2'}
-    public_extras = {PUBLIC / 'assets/audio/background-music.mp3', PUBLIC / 'vendor/plyr/LICENSE.txt'}
+    public_extras = {PUBLIC / soundtrack['background']['public_path'].lstrip('/'), PUBLIC / 'vendor/plyr/LICENSE.txt'}
+    public_extras.update(PUBLIC / track['public_path'].lstrip('/') for track in soundtrack['tracks'])
     for path in PUBLIC.rglob('*'):
         if path.is_symlink() or (path.is_file() and path.suffix.lower() not in allowed and path not in public_extras and not (path.parent == PUBLIC / 'assets/fonts' and path.suffix == '.txt')):
             raise ValueError(f'Unexpected public file: {path.relative_to(PUBLIC)}')
@@ -515,7 +572,7 @@ def build():
             public_entries = [dict(entry, category=translated(entry['category']), stage=translated(entry['stage'])) for entry in localized_evidence]
             public_inventory = dict(raw_evidence, entries=public_entries) if isinstance(raw_evidence, dict) else public_entries
             write('/evidence.json', json.dumps(public_inventory, ensure_ascii=False, indent=2) + '\n')
-        paths.extend(build_locale(posts, localized_evidence))
+        paths.extend(build_locale(posts, localized_evidence, soundtrack, newsletter))
     LANG = 'pt-BR'
     namespace = 'http://www.sitemaps.org/schemas/sitemap/0.9'
     xhtml = 'http://www.w3.org/1999/xhtml'

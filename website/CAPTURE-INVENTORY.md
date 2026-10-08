@@ -1,6 +1,6 @@
 # Inventário de capturas do devlog
 
-Auditoria local realizada em 07/10/2026, acrescida das cinco comparações contextuais finais de `63e5e749d73c213aecf4b77b400aa04acc5a0598` e das quatro comparações de fogo e janelas de `cdeaaab0d208bf0da4239b98c287619508e308a5`. Os números representam o inventário inicial mais essas nove imagens revisadas; estas extensões não são uma nova varredura de todos os diagnósticos posteriores.
+Auditoria local realizada em 07/10/2026, acrescida das cinco comparações contextuais finais de `63e5e749d73c213aecf4b77b400aa04acc5a0598` e das quatro comparações de fogo e janelas de `cdeaaab0d208bf0da4239b98c287619508e308a5`. Em 08/10 foram selecionadas mais três comparações: quatro câmeras CPU/GPU e duas revisões de Adria no Godot. As contagens do inventário local completo continuam descrevendo a auditoria inicial; estas extensões não são uma nova varredura de todos os diagnósticos posteriores.
 
 | Item | Quantidade |
 | --- | ---: |
@@ -12,14 +12,14 @@ Auditoria local realizada em 07/10/2026, acrescida das cinco comparações conte
 | Imagens classificadas como fontes, texturas ou material isolado e excluídas | 8,641 |
 | Candidatas contextuais de diagnóstico antes da seleção visual | 3,961 |
 | Hashes distintos dessas candidatas contextuais | 1,093 |
-| Imagens selecionadas e visualmente revisadas para o site | 37 |
+| Imagens selecionadas e visualmente revisadas para o site | 40 |
 | Prints do autor incluídos nessa seleção | 4 |
 
 O inventário completo, as folhas de contato e o mapeamento privado das capturas do autor ficam somente na área local de auditoria, fora do repositório. Este documento não expõe nomes de arquivos de outros projetos, dados de conta, conversas privadas ou caminhos pessoais.
 
 ## Critérios de publicação
 
-- Somente screenshots contextuais do jogo e comparações de cenas de desenvolvimento foram selecionados.
+- Somente screenshots contextuais do jogo e comparações de cenas de desenvolvimento foram selecionados. As comparações de Adria mostram a ferramenta de autoria e suas limitações, sem representar gameplay ou aceitação artística.
 - Fontes extraídas, sprites isolados, atlas, texturas, arquivos de albedo, ensaios sintéticos e imagens isoladas de candidatos de modelo foram excluídos. MPQ, saves e modelos não fazem parte destes assets.
 - Os demais prints de clipboard tratam de outros projetos ou de telas privadas e não são publicados.
 - Todas as imagens selecionadas foram conferidas visualmente; não há dados pessoais, credenciais ou chaves visíveis nelas.
@@ -30,10 +30,15 @@ O inventário completo, as folhas de contato e o mapeamento privado das capturas
 
 O arquivo `evidence.json` registra, para cada imagem pública, título, texto alternativo, legenda, etapa, categoria, fonte contextual, hash SHA-256 da imagem original e fontes de cópias exatas encontradas. Os prints do autor usam uma origem pública genérica; seu mapeamento exato permanece local.
 
+As três capturas de 08/10 preservam a resolução e os pixels originais após conversão lossless. A comparação de câmeras antecede as novas otimizações e não mede fluidez. As duas comparações de Adria distinguem master sem material, resultado reduzido e transferência experimental, ainda sem aprovação ou instalação. Nenhum GLB, textura isolada, perfil, caminho pessoal ou credencial acompanha as imagens.
+
 ## Seleção pública
 
 | Asset | Etapa | Categoria |
 | --- | --- | --- |
+| `tristram-camera-modes.webp` | 08/10 · comparação técnica de câmeras | Protótipo |
+| `adria-master-textured-comparison.webp` | 08/10 · revisão de autoria | Geometria |
+| `adria-material-transfer-review.webp` | 08/10 · transferência experimental não instalada | Geometria |
 | `v1-center.webp` | V1 | Protótipo |
 | `v1-rotated.webp` | V1 | Protótipo |
 | `v2-center.webp` | V2 | Geometria |

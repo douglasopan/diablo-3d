@@ -148,5 +148,24 @@ class AnalyticsPublication(unittest.TestCase):
                 self.assertNotIn('analytics-notice', page)
 
 
+class NewsletterContract(unittest.TestCase):
+    def test_only_public_respondent_urls_are_accepted(self):
+        with tempfile.TemporaryDirectory() as directory, patch.object(build, 'ROOT', Path(directory)):
+            path = Path(directory) / 'newsletter.json'
+            signup = 'https://docs.google.com/forms/d/e/public-signup/viewform'
+            cancel = 'https://docs.google.com/forms/d/e/public-cancel/viewform'
+            valid = dict(signup_url=signup, cancel_url=cancel)
+            path.write_text(json.dumps(valid), encoding='utf-8')
+            self.assertEqual(build.load_newsletter(), valid)
+            invalid = [dict(valid, signup_url='https://docs.google.com/forms/d/private-id/edit'),
+                       dict(valid, signup_url=cancel), dict(valid, responses='private'),
+                       dict(valid, signup_url=signup + '?email=private@example.com')]
+            for value in invalid:
+                with self.subTest(value=value):
+                    path.write_text(json.dumps(value), encoding='utf-8')
+                    with self.assertRaises(ValueError):
+                        build.load_newsletter()
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -1,0 +1,124 @@
+{
+  "schema_version": 1,
+  "artist": "Douglas Pan",
+  "album": "Diablo 3D — Custom Soundtrack",
+  "catalog_sha256": "fe043a204519120560fcb37b6ad7444992d3cb302cb1b00a46355a501c1911a8",
+  "tracks": [
+    {
+      "id": "menu-rock2",
+      "music_id": 7,
+      "environment": "Menu",
+      "variant_id": 1,
+      "variant": "rock",
+      "game_asset": "music/d3d/menu-rock2.mp3",
+      "public_path": "/assets/audio/soundtrack/menu-rock2.mp3",
+      "title": "Main Menu — Rock2",
+      "duration_seconds": 83.496,
+      "duration_label": "1:23",
+      "size_bytes": 1856051,
+      "sha256": "30e5cdf93e5684a6fd9f2ef8937a144246ef0eb2290557e2fb3faa0a391f1d9d",
+      "source_sha256": "f100f775332cd3d39357ece3b38549029075fe36d6f73476f14657c173edf2e4",
+      "tags": {
+        "artist": "Douglas Pan",
+        "album_artist": "Douglas Pan",
+        "author": "Douglas Pan",
+        "title": "Main Menu — Rock2",
+        "album": "Diablo 3D — Custom Soundtrack"
+      }
+    },
+    {
+      "id": "menu-alternative",
+      "music_id": 7,
+      "environment": "Menu",
+      "variant_id": 2,
+      "variant": "alternative",
+      "game_asset": "music/d3d/menu-alternative.mp3",
+      "public_path": "/assets/audio/soundtrack/menu-alternative.mp3",
+      "title": "Main Menu",
+      "duration_seconds": 85.032,
+      "duration_label": "1:25",
+      "size_bytes": 1964563,
+      "sha256": "5aeb066d898405c8d36b8c2f1af721f1b152c9c4ea603e44b528ceca7e2d8be4",
+      "source_sha256": "4cacef45cfb55ce58fb3cee1761ffc848001ddfa71dafe3dcb084ef8d59793d7",
+      "tags": {
+        "artist": "Douglas Pan",
+        "album_artist": "Douglas Pan",
+        "author": "Douglas Pan",
+        "title": "Main Menu",
+        "album": "Diablo 3D — Custom Soundtrack"
+      }
+    },
+    {
+      "id": "town-rock",
+      "music_id": 0,
+      "environment": "Town",
+      "variant_id": 1,
+      "variant": "rock",
+      "game_asset": "music/d3d/town-rock.mp3",
+      "public_path": "/assets/audio/soundtrack/town-rock.mp3",
+      "title": "Tristram 1",
+      "duration_seconds": 233.352,
+      "duration_label": "3:53",
+      "size_bytes": 7422069,
+      "sha256": "824f155a26c2299cd10e0790cf3065a8a9a645a3b76cbf35a2b12cb47baf477a",
+      "source_sha256": "4d71870e20408ab64a7f5b734e2b81a2879061d83e1a7cd022e6b1c3ad0390d6",
+      "tags": {
+        "artist": "Douglas Pan",
+        "album_artist": "Douglas Pan",
+        "author": "Douglas Pan",
+        "title": "Tristram 1",
+        "album": "Diablo 3D — Custom Soundtrack"
+      }
+    },
+    {
+      "id": "town-alternative",
+      "music_id": 0,
+      "environment": "Town",
+      "variant_id": 2,
+      "variant": "alternative",
+      "game_asset": "music/d3d/town-alternative.mp3",
+      "public_path": "/assets/audio/soundtrack/town-alternative.mp3",
+      "title": "Tristram 2",
+      "duration_seconds": 234.672,
+      "duration_label": "3:55",
+      "size_bytes": 7428117,
+      "sha256": "c72954571b88db2bd29a7dc610b748a69b307b9f16163d212254c58f9ebdd3c5",
+      "source_sha256": "1f8cfeeea408b72c16dac344b497555912fddb23d38969c617258114dc2c051a",
+      "tags": {
+        "artist": "Douglas Pan",
+        "album_artist": "Douglas Pan",
+        "author": "Douglas Pan",
+        "title": "Tristram 2",
+        "album": "Diablo 3D — Custom Soundtrack"
+      }
+    },
+    {
+      "id": "town-third",
+      "music_id": 0,
+      "environment": "Town",
+      "variant_id": 4,
+      "variant": "third",
+      "game_asset": "music/d3d/town-third.mp3",
+      "public_path": "/assets/audio/soundtrack/town-third.mp3",
+      "title": "Tristram 3",
+      "duration_seconds": 233.352,
+      "duration_label": "3:53",
+      "size_bytes": 5485365,
+      "sha256": "b9e6797b0e4e3c73ec08f53be6de9d23df424f48297e5bfc22ed353e65d16d9b",
+      "source_sha256": "015e013d60431f6b089e1568279302104bc811caaabaebd0390f94b476c568ba",
+      "tags": {
+        "artist": "Douglas Pan",
+        "album_artist": "Douglas Pan",
+        "author": "Douglas Pan",
+        "title": "Tristram 3",
+        "album": "Diablo 3D — Custom Soundtrack"
+      }
+    }
+  ],
+  "background": {
+    "public_path": "/assets/audio/background-music.mp3",
+    "track_id": "town-third",
+    "sha256": "b9e6797b0e4e3c73ec08f53be6de9d23df424f48297e5bfc22ed353e65d16d9b",
+    "size_bytes": 5485365
+  }
+}
