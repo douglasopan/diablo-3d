@@ -47,6 +47,7 @@
 #include "engine/backbuffer_state.hpp"
 #include "engine/dx.h"
 #include "engine/render/town_presentation.hpp"
+#include "engine/render/d3d_menu_presentation.hpp"
 #include "engine/render/ui_overlay_regions.hpp"
 #include "headless_mode.hpp"
 #include "options.h"
@@ -700,6 +701,7 @@ bool SpawnWindow(const char *lpWindowName)
 void ReinitializeTexture()
 {
 	ResetTownPresentationResources();
+	ResetD3dMainMenuResources();
 	ClearUiOverlayRegions();
 	if (texture)
 		texture.reset();

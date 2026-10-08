@@ -21,6 +21,7 @@
 
 #include "DiabloUI/ui_flags.hpp"
 #include "automap.h"
+#include "control/d3d_hud.hpp"
 #include "controls/control_mode.hpp"
 #include "controls/plrctrls.h"
 #include "cursor.h"
@@ -1331,7 +1332,8 @@ void DrawView(const Surface &out, Point startPosition)
 	if (GetTownViewHighResolutionFrame() != nullptr) {
 		BeginUiOverlayRegions(out);
 		const Rectangle &panel = GetMainPanel();
-		MarkUiOverlayRect(out, panel.position.x, panel.position.y, panel.size.width, panel.size.height);
+		if (!IsD3dHudEnabled())
+			MarkUiOverlayRect(out, panel.position.x, panel.position.y, panel.size.width, panel.size.height);
 	}
 #endif
 	if (IsTownViewActive()) {
@@ -1645,7 +1647,9 @@ void ShiftGrid(Point *offset, int horizontal, int vertical)
 int RowsCoveredByPanel()
 {
 	const auto &mainPanelSize = GetMainPanel().size;
-	if (GetScreenWidth() <= mainPanelSize.width) {
+	// The inverse cursor transform must match the actual viewport, including
+	// the floating HUD at 640 pixels. Touch still reserves the opaque panel.
+	if (GetViewportHeight() <= GetScreenHeight() - mainPanelSize.height) {
 		return 0;
 	}
 
@@ -1892,6 +1896,12 @@ void DrawAndBlit()
 	if (!gbRunGame || HeadlessMode) {
 		return;
 	}
+	static bool previousHud = IsD3dHudEnabled();
+	const bool currentHud = IsD3dHudEnabled();
+	if (previousHud != currentHud) {
+		RedrawEverything();
+		previousHud = currentHud;
+	}
 
 	int hgt = 0;
 	bool drawHealth = IsRedrawComponent(PanelDrawComponent::Health);
@@ -1904,7 +1914,7 @@ void DrawAndBlit()
 
 	const Rectangle &mainPanel = GetMainPanel();
 
-	if (gnScreenWidth > mainPanel.size.width || IsRedrawEverything()) {
+	if (IsD3dHudEnabled() || gnScreenWidth > mainPanel.size.width || IsRedrawEverything()) {
 		drawHealth = true;
 		drawMana = true;
 		drawControlButtons = true;
@@ -1946,9 +1956,11 @@ void DrawAndBlit()
 		DrawChatBox(out);
 	}
 	DrawXPBar(out);
-	if (*GetOptions().Gameplay.showHealthValues)
+	if (IsD3dHudEnabled())
+		DrawD3dHudValues(out);
+	if (!IsD3dHudEnabled() && *GetOptions().Gameplay.showHealthValues)
 		DrawFlaskValues(out, { mainPanel.position.x + 134, mainPanel.position.y + 28 }, MyPlayer->_pHitPoints >> 6, MyPlayer->_pMaxHP >> 6);
-	if (*GetOptions().Gameplay.showManaValues)
+	if (!IsD3dHudEnabled() && *GetOptions().Gameplay.showManaValues)
 		DrawFlaskValues(out, { mainPanel.position.x + mainPanel.size.width - 138, mainPanel.position.y + 28 },
 		    (HasAnyOf(InspectPlayer->_pIFlags, ItemSpecialEffect::NoMana) || MyPlayer->hasNoMana()) ? 0 : MyPlayer->_pMana >> 6,
 		    HasAnyOf(InspectPlayer->_pIFlags, ItemSpecialEffect::NoMana) ? 0 : MyPlayer->_pMaxMana >> 6);

@@ -92,6 +92,8 @@ struct Constants {
 	std::array<Float4, TownMaxPointLights> lightRedIntensity;
 	std::array<Float4, TownMaxLightApertures> apertureBounds;
 	std::array<Float4, TownMaxLightApertures> aperturePlanes;
+	std::array<Float4, TownMaxLightOccluders - 1> blockerMinimum;
+	std::array<Float4, TownMaxLightOccluders - 1> blockerMaximum;
 };
 static_assert(sizeof(Constants) % 16 == 0);
 
@@ -192,6 +194,8 @@ cbuffer Frame : register(b0) {
  float4 lightRedIntensity[8];
  float4 apertureBounds[8];
  float4 aperturePlanes[8];
+ float4 blockerMinimum[31];
+ float4 blockerMaximum[31];
 };
 Texture2D<uint> codes : register(t0);
 Texture2D<uint> opacity : register(t1);
@@ -286,7 +290,7 @@ bool crossingOpen(float3 origin, float3 delta, float t) {
  }
  return true;
 }
-bool visibleThrough(float3 origin, float3 receiver) {
+bool visibleThroughRoom(float3 origin, float3 receiver) {
  if (roomMinimum.w == 0) return true;
  float3 delta = receiver - origin;
  float entry = 0;
@@ -303,6 +307,40 @@ bool visibleThrough(float3 origin, float3 receiver) {
   }
  }
  return crossingOpen(origin, delta, entry) && crossingOpen(origin, delta, exitPoint);
+}
+bool opaqueCrossingOpen(float3 origin, float3 delta, float t, float3 minimum, float3 maximum) {
+ if (t <= 0.00001 || t >= 0.99999) return true;
+ float3 hit = origin + delta * t;
+ [unroll] for (int axis = 0; axis < 3; ++axis) {
+  if (abs(delta[axis]) <= 0.000001) continue;
+  if (abs(hit[axis] - minimum[axis]) <= 0.0001 || abs(hit[axis] - maximum[axis]) <= 0.0001) return false;
+ }
+ return true;
+}
+bool visibleThroughOpaqueBlocker(float3 origin, float3 receiver, float3 minimum, float3 maximum) {
+ float3 delta = receiver - origin;
+ float entry = 0;
+ float exitPoint = 1;
+ [unroll] for (int axis = 0; axis < 3; ++axis) {
+  if (abs(delta[axis]) <= 0.000001) {
+   if (origin[axis] < minimum[axis] || origin[axis] > maximum[axis]) return true;
+  } else {
+   float first = (minimum[axis] - origin[axis]) / delta[axis];
+   float second = (maximum[axis] - origin[axis]) / delta[axis];
+   entry = max(entry, min(first, second));
+   exitPoint = min(exitPoint, max(first, second));
+   if (entry > exitPoint) return true;
+  }
+ }
+ return opaqueCrossingOpen(origin, delta, entry, minimum, maximum)
+  && opaqueCrossingOpen(origin, delta, exitPoint, minimum, maximum);
+}
+bool visibleThrough(float3 origin, float3 receiver) {
+ if (!visibleThroughRoom(origin, receiver)) return false;
+ [loop] for (int i = 0; i < (int)shadowScale.w; ++i) {
+  if (!visibleThroughOpaqueBlocker(origin, receiver, blockerMinimum[i].xyz, blockerMaximum[i].xyz)) return false;
+ }
+ return true;
 }
 float pointAmount(float3 world, float3 authoredNormal) {
  float red = 0;
@@ -612,6 +650,16 @@ CachedTexture *GetTexture(const TownGpuTexture &input, TownGpuLighting lighting)
 bool Finite(float value) { return std::isfinite(value); }
 bool Finite(TownLightVector value) { return Finite(value.x) && Finite(value.height) && Finite(value.z); }
 
+bool ValidOpaqueBlocker(const TownLightOccluder &blocker)
+{
+	const auto bounded = [](TownLightVector value) {
+		return Finite(value) && std::abs(value.x) <= 1000000 && std::abs(value.height) <= 1000000 && std::abs(value.z) <= 1000000;
+	};
+	return bounded(blocker.minimum) && bounded(blocker.maximum)
+	    && blocker.minimum.x < blocker.maximum.x && blocker.minimum.height < blocker.maximum.height
+	    && blocker.minimum.z < blocker.maximum.z && blocker.apertures.empty();
+}
+
 bool MakeConstants(const TownGpuMaterial &material, const CachedTexture &texture, Constants &output)
 {
 	if (static_cast<uint32_t>(material.lighting) > static_cast<uint32_t>(TownGpuLighting::Interior)
@@ -625,6 +673,9 @@ bool MakeConstants(const TownGpuMaterial &material, const CachedTexture &texture
 	        && (!Finite(material.interiorRedNormalization) || material.interiorRedNormalization <= 0
 	            || !Finite(material.interiorPointRange) || material.interiorPointRange <= 0)))
 		return Fail("Invalid GPU material parameters");
+	if (material.blockers.size() > TownMaxLightOccluders - 1
+	    || !std::all_of(material.blockers.begin(), material.blockers.end(), ValidOpaqueBlocker))
+		return Fail("Invalid GPU interior opaque blockers");
 	output = {};
 	output.target = { static_cast<float>(Width), static_cast<float>(Height), 0, 0 };
 	output.flags = { static_cast<uint32_t>(material.lighting), texture.lightLevels, texture.codeCount,
@@ -645,6 +696,11 @@ bool MakeConstants(const TownGpuMaterial &material, const CachedTexture &texture
 		output.lightPositionRadius[index] = { light.position.x, light.position.height, light.position.z, light.radius };
 		output.lightRedIntensity[index] = { Finite(light.color.red) ? std::clamp(light.color.red, 0.0F, 16.0F) : 0,
 			Finite(light.intensity) ? std::clamp(light.intensity, 0.0F, 16.0F) : 0, 0, 0 };
+	}
+	for (const TownLightOccluder &blocker : material.blockers) {
+		const size_t index = static_cast<size_t>(output.shadowScale.w++);
+		output.blockerMinimum[index] = { blocker.minimum.x, blocker.minimum.height, blocker.minimum.z, 0 };
+		output.blockerMaximum[index] = { blocker.maximum.x, blocker.maximum.height, blocker.maximum.z, 0 };
 	}
 	if (material.room == nullptr)
 		return true;

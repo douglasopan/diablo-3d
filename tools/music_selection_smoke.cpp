@@ -14,12 +14,14 @@
 #include <fstream>
 #include <iostream>
 #include <iterator>
+#include <limits>
 #include <stdexcept>
 #include <string>
 #include <string_view>
 
 #include "engine/assets.hpp"
 #include "engine/music_catalog.hpp"
+#include "engine/random.hpp"
 #include "engine/render/town_view.hpp"
 #include "engine/sound_defs.hpp"
 #include "game_mode.hpp"
@@ -46,11 +48,13 @@ void Check(bool condition, const std::string &message)
 }
 
 // All configuration reads/writes are confined to this newly created fixture.
-// It deliberately has no MPQ, models, music or save files.
+// It deliberately has no MPQ, models, player music or save files.
 struct ConfigFixture {
 	std::filesystem::path directory;
 	std::filesystem::path iniPath;
 	std::filesystem::path corruptAudioPath;
+	std::filesystem::path replacementDirectory;
+	std::array<std::filesystem::path, 3> replacements;
 
 	ConfigFixture()
 	{
@@ -60,6 +64,9 @@ struct ConfigFixture {
 			throw std::runtime_error("Cannot create a fresh isolated configuration directory");
 		iniPath = directory / "diablo.ini";
 		corruptAudioPath = directory / "invalid.mp3";
+		replacementDirectory = directory / "music" / "d3d";
+		std::filesystem::create_directories(replacementDirectory);
+		replacements = { replacementDirectory / "town-rock.mp3", replacementDirectory / "town-alternative.mp3", replacementDirectory / "town-third.mp3" };
 		paths::SetBasePath(directory.string());
 		paths::SetPrefPath(directory.string());
 		paths::SetConfigPath(directory.string());
@@ -71,6 +78,10 @@ struct ConfigFixture {
 		std::error_code ignored;
 		std::filesystem::remove(iniPath, ignored);
 		std::filesystem::remove(corruptAudioPath, ignored);
+		for (const auto &path : replacements)
+			std::filesystem::remove(path, ignored);
+		std::filesystem::remove(replacementDirectory, ignored);
+		std::filesystem::remove(directory / "music", ignored);
 		std::filesystem::remove(directory, ignored);
 	}
 };
@@ -82,9 +93,11 @@ void CheckDefaults()
 	Check(*options.Graphics.townViewStartIn3D, "new profiles prefer starting in 3D");
 	for (unsigned i = 0; i < NUM_MUSIC; ++i) {
 		const auto track = static_cast<_music_id>(i);
-		Check(*options.Music.ForTrack(track) == MusicVariant::Rock, "Rock default for " + std::string(MusicTrackCatalog[i].key));
-		Check(options.Music.ForTrack(track).GetListSize() == (track == TMUSIC_INTRO ? 3U : 2U),
-		    "only the main menu offers the previous alternative: " + std::string(MusicTrackCatalog[i].key));
+		Check(*options.Music.ForTrack(track) == (track == TMUSIC_TOWN ? MusicVariant::Random : MusicVariant::Rock),
+		    "default soundtrack choice for " + std::string(MusicTrackCatalog[i].key));
+		const size_t choices = track == TMUSIC_TOWN ? 5 : track == TMUSIC_INTRO ? 3 : 2;
+		Check(options.Music.ForTrack(track).GetListSize() == choices,
+		    "supported soundtrack choices for " + std::string(MusicTrackCatalog[i].key));
 	}
 }
 
@@ -153,6 +166,89 @@ void CheckSelections()
 	Check(std::string_view(gameOriginal.path) == "music\\dlvld.wav", "game location original choice ignores the menu's alternative choice");
 }
 
+void CheckTownRandomSelection()
+{
+	constexpr std::array<const char *, 3> Paths {
+		"music\\d3d\\town-rock.mp3", "music\\d3d\\town-alternative.mp3", "music\\d3d\\town-third.mp3"
+	};
+	constexpr std::array<MusicVariant, 3> Variants { MusicVariant::Rock, MusicVariant::Alternative, MusicVariant::Third };
+	const auto installed = [](const char *) { return true; };
+	const uint32_t simulationRng = GetLCGEngineState();
+	Check(static_cast<unsigned>(MusicVariant::Random) == 3 && static_cast<unsigned>(MusicVariant::Third) == 4,
+	    "adding Tristram3 preserves the persisted Random ID3 and uses the new ID4");
+	constexpr std::array<unsigned, 7> Draws { 0, 1, 2, 3, 4, 5, std::numeric_limits<unsigned>::max() };
+	// Exhaust every availability subset, including only the third replacement.
+	// Expected order is specified here independently of the production catalog.
+	for (unsigned mask = 0; mask < 8; ++mask) {
+		std::array<unsigned, 3> available {};
+		unsigned count = 0;
+		for (unsigned candidate = 0; candidate < Paths.size(); ++candidate) {
+			if ((mask & (1U << candidate)) != 0)
+				available[count++] = candidate;
+		}
+		const auto exists = [&](const char *path) {
+			for (unsigned candidate = 0; candidate < Paths.size(); ++candidate) {
+				if (std::string_view(path) == Paths[candidate])
+					return (mask & (1U << candidate)) != 0;
+			}
+			return false;
+		};
+		const std::string subset = " (availability " + std::to_string(mask) + ")";
+		for (const unsigned draw : Draws) {
+			const char *expectedPath = count == 0 ? "music\\dtowne.wav" : Paths[available[draw % count]];
+			const MusicVariant expectedVariant = count == 0 ? MusicVariant::Original : Variants[available[draw % count]];
+			for (const MusicTheme theme : { MusicTheme::Custom, MusicTheme::Rock }) {
+				const auto selection = ResolveMusicSelection(TMUSIC_TOWN, theme, MusicVariant::Random, true, exists,
+				    false, MusicVariant::Rock, draw);
+				Check(std::string_view(selection.path) == expectedPath && selection.requested == MusicVariant::Random
+				        && selection.actual == expectedVariant && selection.fallback == (count == 0),
+				    "random Town selects the expected available candidate for draw " + std::to_string(draw)
+				        + (theme == MusicTheme::Rock ? " in global Rock" : " in Custom") + subset);
+			}
+		}
+		for (unsigned candidate = 0; candidate < Paths.size(); ++candidate) {
+			const bool present = (mask & (1U << candidate)) != 0;
+			for (const bool fullMusic : { true, false }) {
+				const char *original = fullMusic ? "music\\dtowne.wav" : "music\\stowne.wav";
+				const auto fixed = ResolveMusicSelection(TMUSIC_TOWN, MusicTheme::Custom, Variants[candidate], fullMusic, exists,
+				    false, MusicVariant::Rock, std::numeric_limits<unsigned>::max());
+				Check(std::string_view(fixed.path) == (present ? Paths[candidate] : original)
+				        && fixed.actual == (present ? Variants[candidate] : MusicVariant::Original)
+				        && fixed.requested == Variants[candidate] && fixed.fallback == !present,
+				    "fixed Tristram" + std::to_string(candidate + 1) + " ignores random draws and other candidates"
+				        + (fullMusic ? " in retail" : " in shareware") + subset);
+			}
+		}
+		const auto shareware = ResolveMusicSelection(TMUSIC_TOWN, MusicTheme::Custom, MusicVariant::Random, false, exists,
+		    false, MusicVariant::Rock, 2);
+		Check(std::string_view(shareware.path) == (count == 0 ? "music\\stowne.wav" : Paths[available[2 % count]])
+		        && shareware.fallback == (count == 0), "random shareware preserves native fallback" + subset);
+		const auto vanilla = ResolveMusicSelection(TMUSIC_TOWN, MusicTheme::Vanilla, MusicVariant::Third, true, exists);
+		Check(std::string_view(vanilla.path) == "music\\dtowne.wav" && vanilla.requested == MusicVariant::Original && !vanilla.fallback,
+		    "Vanilla ignores the selected third version and all replacements" + subset);
+	}
+	for (unsigned i = 0; i < NUM_MUSIC; ++i) {
+		if (i == TMUSIC_TOWN)
+			continue;
+		for (const MusicVariant unsupported : { MusicVariant::Random, MusicVariant::Third }) {
+			const auto choice = ResolveMusicSelection(static_cast<_music_id>(i), MusicTheme::Custom, unsupported, true, installed);
+			Check(std::string_view(choice.path) == MusicTrackCatalog[i].originalPath && choice.actual == MusicVariant::Original,
+			    "unsupported Town variant " + std::to_string(static_cast<unsigned>(unsupported)) + " is safe for " + std::string(MusicTrackCatalog[i].key));
+		}
+	}
+	for (const MusicVariant unsupported : { MusicVariant::Random, MusicVariant::Third }) {
+		const auto invalidMenu = ResolveMusicSelection(TMUSIC_CATACOMBS, MusicTheme::Custom, MusicVariant::Rock, true, installed,
+		    true, unsupported, 1);
+		Check(std::string_view(invalidMenu.path) == "music\\dlvlb.wav" && invalidMenu.actual == MusicVariant::Original,
+		    "invalid Town menu variant preserves the inherited menu track mapping");
+	}
+	const auto menuRock = ResolveMusicSelection(TMUSIC_TOWN, MusicTheme::Rock, MusicVariant::Random, true, installed,
+	    true, MusicVariant::Random, 1);
+	Check(std::string_view(menuRock.path) == "music\\d3d\\menu-rock2.mp3" && menuRock.requested == MusicVariant::Rock,
+	    "Rock menu rotation cannot activate the Town random policy");
+	Check(GetLCGEngineState() == simulationRng, "music selection and random draw indexing preserve the simulation RNG");
+}
+
 void CheckStartup()
 {
 	Options &options = GetOptions();
@@ -190,11 +286,44 @@ void CheckStartup()
 	Check(IsTownViewActive(), "resource reset also preserves a manually enabled 3D view");
 }
 
+void CheckTownOptionAvailability(const ConfigFixture &fixture)
+{
+	const auto &town = GetOptions().Music.town;
+	constexpr std::array<MusicVariant, 3> Variants { MusicVariant::Rock, MusicVariant::Alternative, MusicVariant::Third };
+	constexpr std::array<size_t, 3> ListIndices { 1, 2, 4 };
+	for (unsigned mask = 0; mask < 8; ++mask) {
+		for (unsigned candidate = 0; candidate < fixture.replacements.size(); ++candidate) {
+			const auto &path = fixture.replacements[candidate];
+			std::filesystem::remove(path);
+			if ((mask & (1U << candidate)) != 0) {
+				// Only the existence probe is under test; these bytes must not be decoded.
+				std::ofstream asset(path, std::ios::binary);
+				asset << "synthetic optional soundtrack availability fixture";
+				if (!asset)
+					throw std::runtime_error("Cannot write an isolated soundtrack availability fixture");
+			}
+		}
+		for (unsigned candidate = 0; candidate < Variants.size(); ++candidate) {
+			const bool present = (mask & (1U << candidate)) != 0;
+			const std::string description(town.GetListDescription(ListIndices[candidate]));
+			const std::string expected = "Tristram " + std::to_string(candidate + 1) + (present ? "" : " (pending)");
+			Check(town.HasReplacement(Variants[candidate]) == present && description == expected,
+			    "Town option describes the actual availability of Tristram" + std::to_string(candidate + 1)
+			        + " for subset " + std::to_string(mask));
+		}
+		Check(town.HasReplacement(MusicVariant::Random) == (mask != 0)
+		        && town.GetListDescription(3) == (mask != 0 ? "Random" : "Random (pending)"),
+		    "Random option is available exactly when any of the three Town replacements exists: " + std::to_string(mask));
+	}
+	for (const auto &path : fixture.replacements)
+		std::filesystem::remove(path);
+}
+
 void CheckPersistence(const ConfigFixture &fixture)
 {
 	{
 		std::ofstream out(fixture.iniPath, std::ios::binary);
-		out << "[Music]\nTheme=2\nMenu=2\nTown=0\nCathedral=1\nCatacombs=0\nCaves=1\nHell=0\nNest=1\nCrypt=0\n"
+		out << "[Music]\nTheme=2\nMenu=2\nTown=3\nCathedral=1\nCatacombs=0\nCaves=1\nHell=0\nNest=1\nCrypt=0\n"
 		       "[Graphics]\nStart in 3D=0\n";
 		if (!out)
 			throw std::runtime_error("Cannot write the isolated configuration fixture");
@@ -203,7 +332,7 @@ void CheckPersistence(const ConfigFixture &fixture)
 	Options &options = GetOptions();
 	Check(*options.Music.theme == MusicTheme::Custom && *options.Music.menu == MusicVariant::Alternative,
 	    "INI loads Custom mode and the earlier menu alternative");
-	constexpr std::array<int, NUM_MUSIC> Expected { 0, 1, 0, 1, 0, 1, 0, 2 };
+	constexpr std::array<int, NUM_MUSIC> Expected { 3, 1, 0, 1, 0, 1, 0, 2 };
 	for (unsigned i = 0; i < NUM_MUSIC; ++i)
 		Check(static_cast<int>(*options.Music.ForTrack(static_cast<_music_id>(i))) == Expected[i],
 		    "INI independently loads the stable key " + std::string(MusicTrackCatalog[i].key));
@@ -227,8 +356,28 @@ void CheckPersistence(const ConfigFixture &fixture)
 	options.Graphics.townViewStartIn3D.SetValue(false);
 	LoadOptions();
 	Check(*options.Music.theme == MusicTheme::Vanilla && *options.Music.menu == MusicVariant::Rock
-	        && *options.Graphics.townViewStartIn3D,
-	    "reloading restores both soundtrack choices and startup preference");
+	        && *options.Music.town == MusicVariant::Random && *options.Graphics.townViewStartIn3D,
+	    "reloading restores soundtrack choices, random Town selection and startup preference");
+	options.Music.town.SetValue(MusicVariant::Third);
+	SaveOptions();
+	{
+		std::ifstream thirdInput(fixture.iniPath, std::ios::binary);
+		const std::string thirdSaved { std::istreambuf_iterator<char>(thirdInput), std::istreambuf_iterator<char>() };
+		const auto thirdIni = Ini::parse(thirdSaved);
+		Check(thirdIni.has_value() && thirdIni->getInt("Music", "Town", -1) == 4
+		        && thirdIni->getInt("Music", "Theme", -1) == 2,
+		    "Tristram3 persists as ID4 and an individual choice activates Custom");
+	}
+	options.Music.town.SetValue(MusicVariant::Original);
+	LoadOptions();
+	Check(*options.Music.town == MusicVariant::Third && options.Music.town.GetActiveListIndex() == 4,
+	    "reloading ID4 restores the independent third Town version");
+	options.Music.town.SetValue(MusicVariant::Random);
+	SaveOptions();
+	options.Music.town.SetValue(MusicVariant::Third);
+	LoadOptions();
+	Check(*options.Music.town == MusicVariant::Random && options.Music.town.GetActiveListIndex() == 3,
+	    "older persisted ID3 continues to restore Random after adding Tristram3");
 }
 
 size_t CurrentMenuCount()
@@ -316,8 +465,22 @@ void CheckInGameMenus()
 			const std::string key(MusicTrackCatalog[track].key);
 			Check(std::string_view(sgpCurrentMenu[row].pszStr) == MusicTrackCatalog[track].name, "location page maps the real row to " + key);
 			ActivateMenuRow(row);
+			const bool isTown = track == TMUSIC_TOWN;
 			const size_t variants = track == TMUSIC_INTRO ? 3 : 2;
-			Check(CurrentMenuCount() == variants + 1, "variant menu exposes exactly the supported choices for " + key);
+			const size_t previousRow = isTown ? 4 : variants;
+			Check(CurrentMenuCount() == (isTown ? 5 : variants + 1) && CurrentMenuCount() <= 5,
+			    "variant menu exposes supported choices or pagination within five rows for " + key);
+			if (track == TMUSIC_TOWN) {
+				options.Music.theme.SetValue(MusicTheme::Rock);
+				ActivateMenuRow(previousRow);
+				ActivateMenuRow(row);
+				ActivateMenuRow(3);
+				Check(CurrentMenuCount() == 4 && std::string_view(sgpCurrentMenu[1].pszStr).starts_with("* "),
+				    "global Rock mode marks Random on the second Town variant page");
+				ActivateMenuRow(2);
+				Check(CurrentMenuCount() == 5 && std::string_view(sgpCurrentMenu[0].pszStr) == "Original",
+				    "Previous Page returns to the first Town choices without changing the selected location");
+			}
 			std::array<MusicVariant, NUM_MUSIC> before;
 			for (unsigned i = 0; i < NUM_MUSIC; ++i)
 				before[i] = *options.Music.ForTrack(static_cast<_music_id>(i));
@@ -335,8 +498,25 @@ void CheckInGameMenus()
 			if (track == TMUSIC_INTRO) {
 				ActivateMenuRow(2);
 				Check(*options.Music.menu == MusicVariant::Alternative, "Main Menu alternative is reachable through the real variant handler");
+			} else if (track == TMUSIC_TOWN) {
+				ActivateMenuRow(2);
+				Check(*options.Music.town == MusicVariant::Alternative && std::string_view(sgpCurrentMenu[2].pszStr).starts_with("* "),
+				    "Tristram2 is independently selectable through the Town handler");
+				ActivateMenuRow(3);
+				Check(CurrentMenuCount() == 4 && std::string_view(sgpCurrentMenu[0].pszStr).starts_with("Tristram 3"),
+				    "More Versions exposes Tristram3 and Random within four rows");
+				ActivateMenuRow(0);
+				Check(*options.Music.town == MusicVariant::Third && CurrentMenuCount() == 4
+				        && std::string_view(sgpCurrentMenu[0].pszStr).starts_with("* Tristram 3"),
+				    "Tristram3 is independently selectable and preserves the second variant page");
+				ActivateMenuRow(1);
+				Check(*options.Music.town == MusicVariant::Random && CurrentMenuCount() == 4
+				        && std::string_view(sgpCurrentMenu[1].pszStr).starts_with("* "),
+				    "Random remains ID3 and is independently selectable on the second variant page");
+				ActivateMenuRow(2);
+				Check(CurrentMenuCount() == 5, "Previous Page preserves all three first-page Town choices");
 			}
-			ActivateMenuRow(variants);
+			ActivateMenuRow(previousRow);
 			Check(CurrentMenuCount() == count + 2 && std::string_view(sgpCurrentMenu[0].pszStr) == MusicTrackCatalog[Order[first]].name,
 			    "Previous preserves location page after editing " + key);
 		}
@@ -420,6 +600,8 @@ int main()
 		const ConfigFixture fixture;
 		CheckDefaults();
 		CheckSelections();
+		CheckTownRandomSelection();
+		CheckTownOptionAvailability(fixture);
 		CheckStartup();
 		CheckPersistence(fixture);
 		CheckInGameMenus();

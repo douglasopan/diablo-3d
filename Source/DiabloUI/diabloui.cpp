@@ -42,6 +42,7 @@
 #include "engine/palette.h"
 #include "engine/render/clx_render.hpp"
 #include "engine/render/d3d_logo.hpp"
+#include "engine/render/d3d_menu_presentation.hpp"
 #include "engine/render/text_render.hpp"
 #include "engine/sound.h"
 #include "engine/surface.hpp"
@@ -811,6 +812,7 @@ void UiFadeIn()
 {
 	if (HeadlessMode) return;
 	UiUpdateFadePalette();
+	SetD3dMainMenuFade(fadeValue);
 	if (DiabloUiSurface() == PalSurface) {
 		BltFast(nullptr, nullptr);
 	}

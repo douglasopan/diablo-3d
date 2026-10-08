@@ -65,6 +65,7 @@
 #include "utils/ui_fwd.h"
 #include "town_editor_snapshot.hpp"
 #include "town_editor_map_checks.hpp"
+#include "town_cabin_light_gpu_checks.hpp"
 
 namespace {
 using namespace devilution;
@@ -319,6 +320,20 @@ void ExportNativeGroundPieces(const std::filesystem::path &output)
 			}
 			Check(changedOutsideShadow == 0, "ground cleanup preserves every unselected pixel " + prefix);
 		}
+		// Read the effective texture's own opacity, separately from palette
+		// zero. Earlier indexed exports could not detect accidental alpha holes.
+		auto effective = GetTownGroundReferenceTexture(piece, false);
+		Check(effective.width == 64 && effective.height == 32 && effective.rgba.size() == 2048 * 4,
+		    "effective ground RGBA readback has native dimensions " + prefix);
+		std::unique_ptr<SDL_Surface, decltype(&SDL_FreeSurface)> effectiveSurface(
+		    SDL_CreateRGBSurfaceWithFormatFrom(effective.rgba.data(), 64, 32, 32, 64 * 4, SDL_PIXELFORMAT_RGBA32), SDL_FreeSurface);
+		Check(effectiveSurface != nullptr, "wrap effective ground RGBA readback " + prefix);
+		SavePng(Surface { effectiveSurface.get() }, directory / (prefix + "-cached-floor-rgba.png"));
+		bool opacityMatches = true;
+		for (int y = 0; y < 32; ++y)
+			for (int x = 0; x < 64; ++x)
+				opacityMatches = opacityMatches && effective.rgba[(static_cast<size_t>(y) * 64 + x) * 4 + 3] == mask[{ x, y }];
+		Check(opacityMatches, "effective ground texture preserves original opacity including opaque black " + prefix);
 		metadata << (firstPiece ? "" : ",\n") << "{\"piece\":" << piece << ",\"sol\":" << static_cast<unsigned>(SOLData[piece])
 			<< ",\"blockedFloor\":" << (solid ? "true" : "false") << ",\"opaquePixels\":" << opaquePixels
 			<< ",\"opaqueBlackPixels\":" << opaqueBlackPixels << ",\"cachedChangedOriginalOpaquePixels\":" << cachedChangedPixels
@@ -4588,6 +4603,8 @@ void RunCabinOpenings(const std::filesystem::path &output)
 	FreeTownerGFX();
 }
 
+#include "town_cabin_review.hpp"
+
 } // namespace
 
 namespace {
@@ -4645,13 +4662,14 @@ int main(int argc, char **argv)
 	const bool quality = argc == 5 && std::string(argv[4]) == "--quality";
 	const bool gpu = argc == 5 && std::string(argv[4]) == "--gpu";
 	const bool cabinOpenings = argc == 5 && std::string(argv[4]) == "--cabin-openings";
+	const bool cabinReview = argc == 5 && std::string(argv[4]) == "--cabin-review";
 	const bool editorSnapshot = argc == 5 && std::string(argv[4]) == "--editor-snapshot";
 	const bool editorChecks = argc == 5 && std::string(argv[4]) == "--editor-map-checks";
 	const bool layers = argc == 3 && std::string(argv[1]) == "--presentation-layers";
 	const bool gpuFixtures = argc == 3 && std::string(argv[1]) == "--gpu-fixtures";
 	const bool synthetic = layers || gpuFixtures;
-	if (argc != 4 && !presentation && !quality && !gpu && !cabinOpenings && !editorSnapshot && !editorChecks && !synthetic) {
-		std::cerr << "Usage: town_view_smoke <game-data-directory> <built-assets-directory> <capture-directory> [--presentation|--quality|--gpu|--cabin-openings|--editor-snapshot|--editor-map-checks]\n"
+	if (argc != 4 && !presentation && !quality && !gpu && !cabinOpenings && !cabinReview && !editorSnapshot && !editorChecks && !synthetic) {
+		std::cerr << "Usage: town_view_smoke <game-data-directory> <built-assets-directory> <capture-directory> [--presentation|--quality|--gpu|--cabin-openings|--cabin-review|--editor-snapshot|--editor-map-checks]\n"
 		          << "       town_view_smoke --presentation-layers <synthetic-capture-directory>\n"
 		          << "       town_view_smoke --gpu-fixtures <synthetic-capture-directory>\n";
 		return 2;
@@ -4695,6 +4713,8 @@ int main(int argc, char **argv)
 			RunGpuWorld(output);
 		else if (cabinOpenings)
 			RunCabinOpenings(output);
+		else if (cabinReview)
+			RunCabinReview(output);
 		else if (editorSnapshot) {
 			InitializeTownDiagnostic();
 			const std::string native = NativeSceneState();

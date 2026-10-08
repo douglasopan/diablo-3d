@@ -1,0 +1,1691 @@
+{
+  "screens": [
+    {
+      "id": "V01",
+      "title": "Griswold — comprar básicos — lista com miniaturas",
+      "group": "Comércio",
+      "layout": "store-thumbnails",
+      "availability": "atual",
+      "condition": "Apresentação de loja configurada como lista com miniaturas.",
+      "summary": "Lista comercial nativa com preço, detalhes e seleção legíveis.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Ouro disponível",
+          "value": "2.450"
+        },
+        {
+          "label": "Espada curta",
+          "value": "120 ouro · Dano 4–8 · Dur. 24/24 · Força 18"
+        },
+        {
+          "label": "Escudo de madeira",
+          "value": "85 ouro · Defesa 6 · Dur. 16/16"
+        },
+        {
+          "label": "Armadura leve",
+          "value": "240 ouro · Defesa 12 · Dur. 30/30 · Força 20"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Comprar",
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/stores.cpp",
+          "line": 465
+        },
+        {
+          "file": "Source/stores.cpp",
+          "line": 355
+        },
+        {
+          "file": "Source/stores.cpp",
+          "line": 2218
+        },
+        {
+          "file": "Source/options.cpp",
+          "line": 975
+        }
+      ],
+      "notes": [
+        "Exemplo visual proposto; nomes genéricos, itens e preços demonstrativos. Identificação de Cain custa 100 ouro; Wirt cobra 50 ouro antes de mostrar a oferta.",
+        "Preservar nome, preço, qualidade/requisitos, propriedades identificadas, cargas, dano/defesa e durabilidade quando aplicáveis.",
+        "Lista com miniaturas mantém o mesmo fluxo; não confundir com grade visual.",
+        "Listas elegíveis possuem rolagem; Wirt oferece apenas um item.",
+        "Variante visual da lista: miniatura reduzida por item, mantendo seleção, detalhes, preço, rolagem e confirmação nativos.",
+        "Não usar a grade visual 10×9 neste exemplo.",
+        "Rótulos administrativos, dimensões da grade e resumo técnico permanecem fora da UI do jogador."
+      ],
+      "variants": []
+    },
+    {
+      "id": "V02",
+      "title": "Griswold — comprar premium — lista com miniaturas",
+      "group": "Comércio",
+      "layout": "store-thumbnails",
+      "availability": "atual",
+      "condition": "Apresentação de loja configurada como lista com miniaturas.",
+      "summary": "Lista comercial nativa com preço, detalhes e seleção legíveis.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Ouro disponível",
+          "value": "2.450"
+        },
+        {
+          "label": "Espada de combate",
+          "value": "1.450 ouro · Dano 8–14 · Dur. 32/32 · Força 35"
+        },
+        {
+          "label": "Escudo reforçado",
+          "value": "980 ouro · Defesa 16 · Dur. 24/24"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Comprar",
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/stores.cpp",
+          "line": 497
+        },
+        {
+          "file": "Source/stores.cpp",
+          "line": 355
+        },
+        {
+          "file": "Source/stores.cpp",
+          "line": 2218
+        },
+        {
+          "file": "Source/options.cpp",
+          "line": 975
+        }
+      ],
+      "notes": [
+        "Exemplo visual proposto; nomes genéricos, itens e preços demonstrativos. Identificação de Cain custa 100 ouro; Wirt cobra 50 ouro antes de mostrar a oferta.",
+        "Preservar nome, preço, qualidade/requisitos, propriedades identificadas, cargas, dano/defesa e durabilidade quando aplicáveis.",
+        "Lista com miniaturas mantém o mesmo fluxo; não confundir com grade visual.",
+        "Listas elegíveis possuem rolagem; Wirt oferece apenas um item.",
+        "Variante visual da lista: miniatura reduzida por item, mantendo seleção, detalhes, preço, rolagem e confirmação nativos.",
+        "Não usar a grade visual 10×9 neste exemplo.",
+        "Rótulos administrativos, dimensões da grade e resumo técnico permanecem fora da UI do jogador."
+      ],
+      "variants": []
+    },
+    {
+      "id": "V03",
+      "title": "Griswold — vender — lista com miniaturas",
+      "group": "Comércio",
+      "layout": "store-thumbnails",
+      "availability": "atual",
+      "condition": "Apresentação de loja configurada como lista com miniaturas.",
+      "summary": "Lista comercial nativa com preço, detalhes e seleção legíveis.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Ouro disponível",
+          "value": "2.450"
+        },
+        {
+          "label": "Machado usado",
+          "value": "65 ouro · Dano 5–10 · Dur. 10/24"
+        },
+        {
+          "label": "Capacete simples",
+          "value": "40 ouro · Defesa 5 · Dur. 12/18"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Vender",
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/stores.cpp",
+          "line": 544
+        },
+        {
+          "file": "Source/stores.cpp",
+          "line": 355
+        },
+        {
+          "file": "Source/stores.cpp",
+          "line": 2218
+        },
+        {
+          "file": "Source/options.cpp",
+          "line": 975
+        }
+      ],
+      "notes": [
+        "Exemplo visual proposto; nomes genéricos, itens e preços demonstrativos. Identificação de Cain custa 100 ouro; Wirt cobra 50 ouro antes de mostrar a oferta.",
+        "Preservar nome, preço, qualidade/requisitos, propriedades identificadas, cargas, dano/defesa e durabilidade quando aplicáveis.",
+        "Lista com miniaturas mantém o mesmo fluxo; não confundir com grade visual.",
+        "Listas elegíveis possuem rolagem; Wirt oferece apenas um item.",
+        "Variante visual da lista: miniatura reduzida por item, mantendo seleção, detalhes, preço, rolagem e confirmação nativos.",
+        "Não usar a grade visual 10×9 neste exemplo.",
+        "Rótulos administrativos, dimensões da grade e resumo técnico permanecem fora da UI do jogador."
+      ],
+      "variants": []
+    },
+    {
+      "id": "V04",
+      "title": "Griswold — reparar — lista com miniaturas",
+      "group": "Comércio",
+      "layout": "store-thumbnails",
+      "availability": "atual",
+      "condition": "Apresentação de loja configurada como lista com miniaturas.",
+      "summary": "Lista comercial nativa com preço, detalhes e seleção legíveis.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Ouro disponível",
+          "value": "2.450"
+        },
+        {
+          "label": "Espada curta",
+          "value": "Reparo: 18 ouro · Dur. 9/24"
+        },
+        {
+          "label": "Escudo de madeira",
+          "value": "Reparo: 12 ouro · Dur. 6/16"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Reparar",
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/stores.cpp",
+          "line": 630
+        },
+        {
+          "file": "Source/stores.cpp",
+          "line": 355
+        },
+        {
+          "file": "Source/stores.cpp",
+          "line": 2218
+        },
+        {
+          "file": "Source/options.cpp",
+          "line": 975
+        }
+      ],
+      "notes": [
+        "Exemplo visual proposto; nomes genéricos, itens e preços demonstrativos. Identificação de Cain custa 100 ouro; Wirt cobra 50 ouro antes de mostrar a oferta.",
+        "Preservar nome, preço, qualidade/requisitos, propriedades identificadas, cargas, dano/defesa e durabilidade quando aplicáveis.",
+        "Lista com miniaturas mantém o mesmo fluxo; não confundir com grade visual.",
+        "Listas elegíveis possuem rolagem; Wirt oferece apenas um item.",
+        "Variante visual da lista: miniatura reduzida por item, mantendo seleção, detalhes, preço, rolagem e confirmação nativos.",
+        "Não usar a grade visual 10×9 neste exemplo.",
+        "Rótulos administrativos, dimensões da grade e resumo técnico permanecem fora da UI do jogador."
+      ],
+      "variants": []
+    },
+    {
+      "id": "V05",
+      "title": "Adria — comprar — lista com miniaturas",
+      "group": "Comércio",
+      "layout": "store-thumbnails",
+      "availability": "atual",
+      "condition": "Apresentação de loja configurada como lista com miniaturas.",
+      "summary": "Lista comercial nativa com preço, detalhes e seleção legíveis.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Ouro disponível",
+          "value": "2.450"
+        },
+        {
+          "label": "Poção de mana",
+          "value": "50 ouro · Uso: restaurar mana"
+        },
+        {
+          "label": "Pergaminho de portal",
+          "value": "200 ouro · Uso: ler"
+        },
+        {
+          "label": "Cajado de dardo de fogo",
+          "value": "780 ouro · Cargas 18/18 · Requer Magia 20"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Comprar",
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/stores.cpp",
+          "line": 735
+        },
+        {
+          "file": "Source/stores.cpp",
+          "line": 355
+        },
+        {
+          "file": "Source/stores.cpp",
+          "line": 2218
+        },
+        {
+          "file": "Source/options.cpp",
+          "line": 975
+        }
+      ],
+      "notes": [
+        "Exemplo visual proposto; nomes genéricos, itens e preços demonstrativos. Identificação de Cain custa 100 ouro; Wirt cobra 50 ouro antes de mostrar a oferta.",
+        "Preservar nome, preço, qualidade/requisitos, propriedades identificadas, cargas, dano/defesa e durabilidade quando aplicáveis.",
+        "Lista com miniaturas mantém o mesmo fluxo; não confundir com grade visual.",
+        "Listas elegíveis possuem rolagem; Wirt oferece apenas um item.",
+        "Variante visual da lista: miniatura reduzida por item, mantendo seleção, detalhes, preço, rolagem e confirmação nativos.",
+        "Não usar a grade visual 10×9 neste exemplo.",
+        "Rótulos administrativos, dimensões da grade e resumo técnico permanecem fora da UI do jogador."
+      ],
+      "variants": []
+    },
+    {
+      "id": "V06",
+      "title": "Adria — vender — lista com miniaturas",
+      "group": "Comércio",
+      "layout": "store-thumbnails",
+      "availability": "atual",
+      "condition": "Apresentação de loja configurada como lista com miniaturas.",
+      "summary": "Lista comercial nativa com preço, detalhes e seleção legíveis.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Ouro disponível",
+          "value": "2.450"
+        },
+        {
+          "label": "Cajado usado",
+          "value": "130 ouro · Cargas 3/18"
+        },
+        {
+          "label": "Pergaminho de cura",
+          "value": "35 ouro · Uso: ler"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Vender",
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/stores.cpp",
+          "line": 769
+        },
+        {
+          "file": "Source/stores.cpp",
+          "line": 355
+        },
+        {
+          "file": "Source/stores.cpp",
+          "line": 2218
+        },
+        {
+          "file": "Source/options.cpp",
+          "line": 975
+        }
+      ],
+      "notes": [
+        "Exemplo visual proposto; nomes genéricos, itens e preços demonstrativos. Identificação de Cain custa 100 ouro; Wirt cobra 50 ouro antes de mostrar a oferta.",
+        "Preservar nome, preço, qualidade/requisitos, propriedades identificadas, cargas, dano/defesa e durabilidade quando aplicáveis.",
+        "Lista com miniaturas mantém o mesmo fluxo; não confundir com grade visual.",
+        "Listas elegíveis possuem rolagem; Wirt oferece apenas um item.",
+        "Variante visual da lista: miniatura reduzida por item, mantendo seleção, detalhes, preço, rolagem e confirmação nativos.",
+        "Não usar a grade visual 10×9 neste exemplo.",
+        "Rótulos administrativos, dimensões da grade e resumo técnico permanecem fora da UI do jogador."
+      ],
+      "variants": []
+    },
+    {
+      "id": "V07",
+      "title": "Adria — recarregar cajados — lista com miniaturas",
+      "group": "Comércio",
+      "layout": "store-thumbnails",
+      "availability": "atual",
+      "condition": "Apresentação de loja configurada como lista com miniaturas.",
+      "summary": "Lista comercial nativa com preço, detalhes e seleção legíveis.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Ouro disponível",
+          "value": "2.450"
+        },
+        {
+          "label": "Cajado de dardo de fogo",
+          "value": "Recarga: 90 ouro · Cargas 3/18"
+        },
+        {
+          "label": "Cajado de raio",
+          "value": "Recarga: 140 ouro · Cargas 1/12"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Recarregar",
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/stores.cpp",
+          "line": 862
+        },
+        {
+          "file": "Source/stores.cpp",
+          "line": 355
+        },
+        {
+          "file": "Source/stores.cpp",
+          "line": 2218
+        },
+        {
+          "file": "Source/options.cpp",
+          "line": 975
+        }
+      ],
+      "notes": [
+        "Exemplo visual proposto; nomes genéricos, itens e preços demonstrativos. Identificação de Cain custa 100 ouro; Wirt cobra 50 ouro antes de mostrar a oferta.",
+        "Preservar nome, preço, qualidade/requisitos, propriedades identificadas, cargas, dano/defesa e durabilidade quando aplicáveis.",
+        "Lista com miniaturas mantém o mesmo fluxo; não confundir com grade visual.",
+        "Listas elegíveis possuem rolagem; Wirt oferece apenas um item.",
+        "Variante visual da lista: miniatura reduzida por item, mantendo seleção, detalhes, preço, rolagem e confirmação nativos.",
+        "Não usar a grade visual 10×9 neste exemplo.",
+        "Rótulos administrativos, dimensões da grade e resumo técnico permanecem fora da UI do jogador."
+      ],
+      "variants": []
+    },
+    {
+      "id": "V08",
+      "title": "Pepin — comprar — lista com miniaturas",
+      "group": "Comércio",
+      "layout": "store-thumbnails",
+      "availability": "atual",
+      "condition": "Apresentação de loja configurada como lista com miniaturas.",
+      "summary": "Lista comercial nativa com preço, detalhes e seleção legíveis.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Ouro disponível",
+          "value": "2.450"
+        },
+        {
+          "label": "Poção de cura",
+          "value": "50 ouro · Uso: restaurar vida"
+        },
+        {
+          "label": "Poção de cura completa",
+          "value": "150 ouro · Uso: restaurar toda a vida"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Comprar",
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/stores.cpp",
+          "line": 1051
+        },
+        {
+          "file": "Source/stores.cpp",
+          "line": 355
+        },
+        {
+          "file": "Source/stores.cpp",
+          "line": 2218
+        },
+        {
+          "file": "Source/options.cpp",
+          "line": 975
+        }
+      ],
+      "notes": [
+        "Exemplo visual proposto; nomes genéricos, itens e preços demonstrativos. Identificação de Cain custa 100 ouro; Wirt cobra 50 ouro antes de mostrar a oferta.",
+        "Preservar nome, preço, qualidade/requisitos, propriedades identificadas, cargas, dano/defesa e durabilidade quando aplicáveis.",
+        "Lista com miniaturas mantém o mesmo fluxo; não confundir com grade visual.",
+        "Listas elegíveis possuem rolagem; Wirt oferece apenas um item.",
+        "Variante visual da lista: miniatura reduzida por item, mantendo seleção, detalhes, preço, rolagem e confirmação nativos.",
+        "Não usar a grade visual 10×9 neste exemplo.",
+        "Rótulos administrativos, dimensões da grade e resumo técnico permanecem fora da UI do jogador."
+      ],
+      "variants": []
+    },
+    {
+      "id": "V09",
+      "title": "Cain — identificar — lista com miniaturas",
+      "group": "Comércio",
+      "layout": "store-thumbnails",
+      "availability": "atual",
+      "condition": "Apresentação de loja configurada como lista com miniaturas.",
+      "summary": "Lista comercial nativa com preço, detalhes e seleção legíveis.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Ouro disponível",
+          "value": "2.450"
+        },
+        {
+          "label": "Espada não identificada",
+          "value": "100 ouro · Propriedades ocultas"
+        },
+        {
+          "label": "Anel não identificado",
+          "value": "100 ouro · Propriedades ocultas"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Identificar",
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/stores.cpp",
+          "line": 1105
+        },
+        {
+          "file": "Source/stores.cpp",
+          "line": 355
+        },
+        {
+          "file": "Source/stores.cpp",
+          "line": 2218
+        },
+        {
+          "file": "Source/options.cpp",
+          "line": 975
+        }
+      ],
+      "notes": [
+        "Exemplo visual proposto; nomes genéricos, itens e preços demonstrativos. Identificação de Cain custa 100 ouro; Wirt cobra 50 ouro antes de mostrar a oferta.",
+        "Preservar nome, preço, qualidade/requisitos, propriedades identificadas, cargas, dano/defesa e durabilidade quando aplicáveis.",
+        "Lista com miniaturas mantém o mesmo fluxo; não confundir com grade visual.",
+        "Listas elegíveis possuem rolagem; Wirt oferece apenas um item.",
+        "Variante visual da lista: miniatura reduzida por item, mantendo seleção, detalhes, preço, rolagem e confirmação nativos.",
+        "Não usar a grade visual 10×9 neste exemplo.",
+        "Rótulos administrativos, dimensões da grade e resumo técnico permanecem fora da UI do jogador."
+      ],
+      "variants": []
+    },
+    {
+      "id": "V10",
+      "title": "Wirt — oferta de um item — lista com miniaturas",
+      "group": "Comércio",
+      "layout": "store-thumbnails",
+      "availability": "atual",
+      "condition": "Apresentação de loja configurada como lista com miniaturas.",
+      "summary": "Lista comercial nativa com preço, detalhes e seleção legíveis.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Ouro disponível",
+          "value": "2.450"
+        },
+        {
+          "label": "Arco reforçado",
+          "value": "1.800 ouro · Dano 7–12 · Dur. 30/30 · Destreza 35"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Comprar",
+        "Sair"
+      ],
+      "source": [
+        {
+          "file": "Source/stores.cpp",
+          "line": 991
+        },
+        {
+          "file": "Source/stores.cpp",
+          "line": 355
+        },
+        {
+          "file": "Source/stores.cpp",
+          "line": 2218
+        },
+        {
+          "file": "Source/options.cpp",
+          "line": 975
+        }
+      ],
+      "notes": [
+        "Exemplo visual proposto; nomes genéricos, itens e preços demonstrativos. Identificação de Cain custa 100 ouro; Wirt cobra 50 ouro antes de mostrar a oferta.",
+        "Preservar nome, preço, qualidade/requisitos, propriedades identificadas, cargas, dano/defesa e durabilidade quando aplicáveis.",
+        "Lista com miniaturas mantém o mesmo fluxo; não confundir com grade visual.",
+        "Listas elegíveis possuem rolagem; Wirt oferece apenas um item.",
+        "Variante visual da lista: miniatura reduzida por item, mantendo seleção, detalhes, preço, rolagem e confirmação nativos.",
+        "Não usar a grade visual 10×9 neste exemplo.",
+        "Rótulos administrativos, dimensões da grade e resumo técnico permanecem fora da UI do jogador."
+      ],
+      "variants": []
+    },
+    {
+      "id": "V11",
+      "title": "Automapa opaco",
+      "group": "Painéis",
+      "layout": "map-opaque",
+      "availability": "atual",
+      "condition": "Automapa ligado no modo Opaco.",
+      "summary": "Leitura do mapa explorado, local e dificuldade com zoom e deslocamento.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Local",
+          "value": "Tristram"
+        },
+        {
+          "label": "Dificuldade",
+          "value": "Normal"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Aproximar",
+        "Afastar",
+        "Centralizar",
+        "Fechar"
+      ],
+      "source": [
+        {
+          "file": "Source/automap.h",
+          "line": 86
+        },
+        {
+          "file": "Source/automap.cpp",
+          "line": 1752
+        },
+        {
+          "file": "Source/automap.cpp",
+          "line": 1427
+        }
+      ],
+      "notes": [
+        "Conceito visual proposto; não é captura do executável.",
+        "Traçado demonstrativo autoral; não usa mapa de save.",
+        "Opaco e transparente são modos próprios; minimapa deve ocupar um canto, preservando o centro do mundo.",
+        "Preservar exploração, paredes, portas, escadas e direção/cor dos jogadores.",
+        "Botões visíveis são apresentação proposta de ações nativas; não são promessa de navegação automática."
+      ],
+      "variants": []
+    },
+    {
+      "id": "V12",
+      "title": "Automapa transparente",
+      "group": "Painéis",
+      "layout": "map-transparent",
+      "availability": "atual",
+      "condition": "Automapa ligado no modo Transparente.",
+      "summary": "Leitura do mapa explorado, local e dificuldade com zoom e deslocamento.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Local",
+          "value": "Tristram"
+        },
+        {
+          "label": "Dificuldade",
+          "value": "Normal"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Aproximar",
+        "Afastar",
+        "Centralizar",
+        "Fechar"
+      ],
+      "source": [
+        {
+          "file": "Source/automap.h",
+          "line": 86
+        },
+        {
+          "file": "Source/automap.cpp",
+          "line": 1752
+        },
+        {
+          "file": "Source/automap.cpp",
+          "line": 1427
+        }
+      ],
+      "notes": [
+        "Conceito visual proposto; não é captura do executável.",
+        "Traçado demonstrativo autoral; não usa mapa de save.",
+        "Opaco e transparente são modos próprios; minimapa deve ocupar um canto, preservando o centro do mundo.",
+        "Preservar exploração, paredes, portas, escadas e direção/cor dos jogadores.",
+        "Botões visíveis são apresentação proposta de ações nativas; não são promessa de navegação automática."
+      ],
+      "variants": []
+    },
+    {
+      "id": "V13",
+      "title": "Minimapa",
+      "group": "Painéis",
+      "layout": "minimap",
+      "availability": "atual",
+      "condition": "Automapa ligado no modo Minimapa.",
+      "summary": "Leitura do mapa explorado, local e dificuldade com zoom e deslocamento.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Local",
+          "value": "Tristram"
+        },
+        {
+          "label": "Dificuldade",
+          "value": "Normal"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Alternar mapa"
+      ],
+      "source": [
+        {
+          "file": "Source/automap.h",
+          "line": 86
+        },
+        {
+          "file": "Source/automap.cpp",
+          "line": 1752
+        },
+        {
+          "file": "Source/automap.cpp",
+          "line": 1427
+        }
+      ],
+      "notes": [
+        "Conceito visual proposto; não é captura do executável.",
+        "Traçado demonstrativo autoral; não usa mapa de save.",
+        "Opaco e transparente são modos próprios; minimapa deve ocupar um canto, preservando o centro do mundo.",
+        "Preservar exploração, paredes, portas, escadas e direção/cor dos jogadores.",
+        "Botões visíveis são apresentação proposta de ações nativas; não são promessa de navegação automática."
+      ],
+      "variants": []
+    },
+    {
+      "id": "V14",
+      "title": "Inspecionar Mira",
+      "group": "Painéis",
+      "layout": "inspect",
+      "availability": "condicional",
+      "condition": "Multiplayer, aliado amigável ativo; botão direito no retrato abre personagem e inventário em leitura. Build local NONET=ON.",
+      "summary": "Retratos de aliados com vida, mana e acesso à inspeção em leitura.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Nome",
+          "value": "Mira"
+        },
+        {
+          "label": "Classe",
+          "value": "Arqueira"
+        },
+        {
+          "label": "Nível",
+          "value": "11"
+        },
+        {
+          "label": "Experiência",
+          "value": "145.200"
+        },
+        {
+          "label": "Próximo nível",
+          "value": "188.000"
+        },
+        {
+          "label": "Força — Base / Agora",
+          "value": "28 / 32"
+        },
+        {
+          "label": "Magia — Base / Agora",
+          "value": "24 / 24"
+        },
+        {
+          "label": "Destreza — Base / Agora",
+          "value": "48 / 55"
+        },
+        {
+          "label": "Vitalidade — Base / Agora",
+          "value": "32 / 32"
+        },
+        {
+          "label": "Pontos a distribuir",
+          "value": "0"
+        },
+        {
+          "label": "Ouro",
+          "value": "1.820"
+        },
+        {
+          "label": "Classe de armadura",
+          "value": "36"
+        },
+        {
+          "label": "Chance de acerto",
+          "value": "82%"
+        },
+        {
+          "label": "Dano",
+          "value": "9–16"
+        },
+        {
+          "label": "Vida — Máxima / Atual",
+          "value": "96 / 82"
+        },
+        {
+          "label": "Mana — Máxima / Atual",
+          "value": "34 / 28"
+        },
+        {
+          "label": "Resistência mágica",
+          "value": "0%"
+        },
+        {
+          "label": "Resistência a fogo",
+          "value": "15%"
+        },
+        {
+          "label": "Resistência a raios",
+          "value": "10%"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Fechar inspeção"
+      ],
+      "source": [
+        {
+          "file": "Source/panels/partypanel.cpp",
+          "line": 105
+        },
+        {
+          "file": "Source/panels/charpanel.cpp",
+          "line": 132
+        },
+        {
+          "file": "Source/inv.cpp",
+          "line": 1210
+        }
+      ],
+      "notes": [
+        "Conceito visual proposto; identidade, equipamentos e números fictícios.",
+        "Mostrar personagem e inventário do aliado em leitura, sem botões +, equipar, usar, vender ou mover itens.",
+        "Preservar os sete locais equipados e mochila 10×4; essas dimensões são contrato externo, não texto administrativo na interface.",
+        "A inspeção depende de multiplayer; não foi validada no build local NONET=ON."
+      ],
+      "variants": []
+    },
+    {
+      "id": "V15",
+      "title": "Você morreu — solo com save",
+      "group": "Painéis",
+      "layout": "death",
+      "availability": "atual",
+      "condition": "Partida solo, herói morto e save válido.",
+      "summary": "Você morreu.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Mensagem",
+          "value": "Você morreu"
+        },
+        {
+          "label": "Próxima ação",
+          "value": "Esc — carregar último save"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Carregar último save"
+      ],
+      "source": [
+        {
+          "file": "Source/control/control_panel.cpp",
+          "line": 789
+        },
+        {
+          "file": "Source/control/control_panel.cpp",
+          "line": 823
+        }
+      ],
+      "notes": [
+        "Conceito visual proposto; não é captura do executável.",
+        "Mostrar somente a ação válida para este estado, sobre a partida avermelhada.",
+        "Não acrescentar rodapé genérico Esc · Fechar.",
+        "Símbolo do botão depende de teclado, gamepad ou toque; este exemplo usa teclado.",
+        "Condição da partida fica na evidência externa, sem aparecer como resumo técnico dentro da UI."
+      ],
+      "variants": []
+    },
+    {
+      "id": "V16",
+      "title": "Você morreu — solo sem save",
+      "group": "Painéis",
+      "layout": "death",
+      "availability": "atual",
+      "condition": "Partida solo, herói morto e nenhum save válido.",
+      "summary": "Você morreu.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Mensagem",
+          "value": "Você morreu"
+        },
+        {
+          "label": "Próxima ação",
+          "value": "Esc — retornar ao menu principal"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Retornar ao menu principal"
+      ],
+      "source": [
+        {
+          "file": "Source/control/control_panel.cpp",
+          "line": 789
+        },
+        {
+          "file": "Source/control/control_panel.cpp",
+          "line": 823
+        }
+      ],
+      "notes": [
+        "Conceito visual proposto; não é captura do executável.",
+        "Mostrar somente a ação válida para este estado, sobre a partida avermelhada.",
+        "Não acrescentar rodapé genérico Esc · Fechar.",
+        "Símbolo do botão depende de teclado, gamepad ou toque; este exemplo usa teclado.",
+        "Condição da partida fica na evidência externa, sem aparecer como resumo técnico dentro da UI."
+      ],
+      "variants": []
+    },
+    {
+      "id": "V17",
+      "title": "Você morreu — multiplayer",
+      "group": "Painéis",
+      "layout": "death",
+      "availability": "condicional",
+      "condition": "Multiplayer e herói morto; build local NONET=ON.",
+      "summary": "Você morreu.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Mensagem",
+          "value": "Você morreu"
+        },
+        {
+          "label": "Próxima ação",
+          "value": "Esc — reiniciar na cidade"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Reiniciar na cidade"
+      ],
+      "source": [
+        {
+          "file": "Source/control/control_panel.cpp",
+          "line": 789
+        },
+        {
+          "file": "Source/control/control_panel.cpp",
+          "line": 823
+        }
+      ],
+      "notes": [
+        "Conceito visual proposto; não é captura do executável.",
+        "Mostrar somente a ação válida para este estado, sobre a partida avermelhada.",
+        "Não acrescentar rodapé genérico Esc · Fechar.",
+        "Símbolo do botão depende de teclado, gamepad ou toque; este exemplo usa teclado.",
+        "Condição da partida fica na evidência externa, sem aparecer como resumo técnico dentro da UI."
+      ],
+      "variants": []
+    },
+    {
+      "id": "V18",
+      "title": "Grimório — página 2",
+      "group": "Painéis",
+      "layout": "spellbook",
+      "availability": "atual",
+      "condition": "Grimório aberto na página 2; somente magias presentes no herói fictício são exibidas.",
+      "summary": "Magias da página 2 do grimório.",
+      "choices": [
+        "Página 1",
+        "Página 2",
+        "Página 3",
+        "Página 4"
+      ],
+      "rows": [
+        {
+          "label": "Ressurreição",
+          "value": "Cajado · 8 cargas"
+        },
+        {
+          "label": "Parede de Fogo",
+          "value": "Nível 1 · Mana 28"
+        },
+        {
+          "label": "Telecinese",
+          "value": "Nível 1 · Mana 15"
+        },
+        {
+          "label": "Relâmpago",
+          "value": "Nível 1 · Mana 10"
+        },
+        {
+          "label": "Portal da cidade",
+          "value": "Nível 1 · Mana 18"
+        },
+        {
+          "label": "Lampejo",
+          "value": "Nível 1 · Mana 30"
+        },
+        {
+          "label": "Petrificar",
+          "value": "Nível 1 · Mana 60"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Selecionar magia",
+        "Fechar"
+      ],
+      "source": [
+        {
+          "file": "Source/panels/spell_book.cpp",
+          "line": 45
+        },
+        {
+          "file": "Source/panels/spell_book.cpp",
+          "line": 148
+        },
+        {
+          "file": "assets/txtdata/spells/spelldat.tsv",
+          "line": 2
+        }
+      ],
+      "notes": [
+        "Conceito visual proposto; não é captura do executável.",
+        "Sete posições fixas por página. Rows vazias preservam posições não possuídas e não devem produzir texto.",
+        "Usar faixa de abas horizontal; destacar a página indicada no título sem reordenar as abas.",
+        "Valores de mana e cargas são demonstrativos; custo efetivo depende do herói e do nível. Não representam avaliação de balanceamento.",
+        "Magias presentes são exemplo de progressão/posse, não um save real; estados proibidos em Tristram continuam indicados.",
+        "Ordem fixa: Ressurreição, Parede de Fogo, Telecinese, Relâmpago, Portal da cidade, Lampejo e Petrificar.",
+        "Neste herói fictício, Ressurreição vem do cajado equipado; não apresentar como magia aprendida por livro."
+      ],
+      "variants": []
+    },
+    {
+      "id": "V19",
+      "title": "Grimório — página 3",
+      "group": "Painéis",
+      "layout": "spellbook",
+      "availability": "atual",
+      "condition": "Grimório aberto na página 3; somente magias presentes no herói fictício são exibidas.",
+      "summary": "Magias da página 3 do grimório.",
+      "choices": [
+        "Página 1",
+        "Página 2",
+        "Página 3",
+        "Página 4"
+      ],
+      "rows": [
+        {
+          "label": "Fasear",
+          "value": "Nível 1 · Mana 12"
+        },
+        {
+          "label": "Escudo de Mana",
+          "value": "Nível 1 · Mana 33"
+        },
+        {
+          "label": "Elemental",
+          "value": "Nível 1 · Mana 35"
+        },
+        {
+          "label": "Bola de Fogo",
+          "value": "Nível 1 · Mana 16"
+        },
+        {
+          "label": "Onda de Chamas",
+          "value": "Nível 1 · Mana 35"
+        },
+        {
+          "label": "Relâmpago encadeado",
+          "value": "Nível 1 · Mana 30"
+        },
+        {
+          "label": "Guardiã",
+          "value": "Nível 1 · Mana 50"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Selecionar magia",
+        "Fechar"
+      ],
+      "source": [
+        {
+          "file": "Source/panels/spell_book.cpp",
+          "line": 45
+        },
+        {
+          "file": "Source/panels/spell_book.cpp",
+          "line": 148
+        },
+        {
+          "file": "assets/txtdata/spells/spelldat.tsv",
+          "line": 2
+        }
+      ],
+      "notes": [
+        "Conceito visual proposto; não é captura do executável.",
+        "Sete posições fixas por página. Rows vazias preservam posições não possuídas e não devem produzir texto.",
+        "Usar faixa de abas horizontal; destacar a página indicada no título sem reordenar as abas.",
+        "Valores de mana e cargas são demonstrativos; custo efetivo depende do herói e do nível. Não representam avaliação de balanceamento.",
+        "Magias presentes são exemplo de progressão/posse, não um save real; estados proibidos em Tristram continuam indicados.",
+        "Ordem fixa: Fasear, Escudo de Mana, Elemental, Bola de Fogo, Onda de Chamas, Relâmpago encadeado e Guardiã."
+      ],
+      "variants": []
+    },
+    {
+      "id": "V20",
+      "title": "Grimório — página 4",
+      "group": "Painéis",
+      "layout": "spellbook",
+      "availability": "atual",
+      "condition": "Grimório aberto na página 4; somente magias presentes no herói fictício são exibidas.",
+      "summary": "Magias da página 4 do grimório.",
+      "choices": [
+        "Página 1",
+        "Página 2",
+        "Página 3",
+        "Página 4"
+      ],
+      "rows": [
+        {
+          "label": "",
+          "value": ""
+        },
+        {
+          "label": "Golem",
+          "value": "Nível 1 · Mana 100"
+        },
+        {
+          "label": "Teletransporte",
+          "value": "Nível 1 · Mana 35"
+        },
+        {
+          "label": "Apocalipse",
+          "value": "Cajado · 8 cargas"
+        },
+        {
+          "label": "Espírito de Ossos",
+          "value": "Nível 1 · Mana 24"
+        },
+        {
+          "label": "Estrela de Sangue",
+          "value": "Nível 1 · Mana 25"
+        },
+        {
+          "label": "",
+          "value": ""
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Selecionar magia",
+        "Fechar"
+      ],
+      "source": [
+        {
+          "file": "Source/panels/spell_book.cpp",
+          "line": 45
+        },
+        {
+          "file": "Source/panels/spell_book.cpp",
+          "line": 148
+        },
+        {
+          "file": "assets/txtdata/spells/spelldat.tsv",
+          "line": 2
+        }
+      ],
+      "notes": [
+        "Conceito visual proposto; não é captura do executável.",
+        "Sete posições fixas por página. Rows vazias preservam posições não possuídas e não devem produzir texto.",
+        "Usar faixa de abas horizontal; destacar a página indicada no título sem reordenar as abas.",
+        "Valores de mana e cargas são demonstrativos; custo efetivo depende do herói e do nível. Não representam avaliação de balanceamento.",
+        "Magias presentes são exemplo de progressão/posse, não um save real; estados proibidos em Tristram continuam indicados.",
+        "Ordem fixa das sete posições: Nova, Golem, Teletransporte, Apocalipse, Espírito de Ossos, Estrela de Sangue e Eterealizar.",
+        "Primeira e sétima posições ficam vazias no exemplo; manter o espaço, sem imprimir rótulo de posição ou nome de magia ausente.",
+        "Na tabela Diablo, Nova e Apocalipse não têm livro; o exemplo usa somente Apocalipse por cajado equipado.",
+        "Eterealizar não possui livro nem cajado na tabela Diablo; sua posição reservada não comprova obtenção normal da magia."
+      ],
+      "variants": []
+    },
+    {
+      "id": "V21",
+      "title": "Grimório — página 5 · Hellfire",
+      "group": "Painéis",
+      "layout": "spellbook",
+      "availability": "condicional",
+      "condition": "Hellfire ligado; Grimório aberto na página 5; somente magias presentes no herói fictício são exibidas.",
+      "summary": "Magias da página 5 do grimório.",
+      "choices": [
+        "Página 1",
+        "Página 2",
+        "Página 3",
+        "Página 4",
+        "Página 5"
+      ],
+      "rows": [
+        {
+          "label": "Parede Relampejante",
+          "value": "Nível 1 · Mana 28"
+        },
+        {
+          "label": "Imolação",
+          "value": "Nível 1 · Mana 60"
+        },
+        {
+          "label": "Deformação",
+          "value": "Nível 1 · Mana 35"
+        },
+        {
+          "label": "Refletir",
+          "value": "Nível 1 · Mana 35"
+        },
+        {
+          "label": "Fúria",
+          "value": "Nível 1 · Mana 35"
+        },
+        {
+          "label": "Anel de Fogo",
+          "value": "Nível 1 · Mana 28"
+        },
+        {
+          "label": "Procurar",
+          "value": "Nível 1 · Mana 15"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Selecionar magia",
+        "Fechar"
+      ],
+      "source": [
+        {
+          "file": "Source/panels/spell_book.cpp",
+          "line": 45
+        },
+        {
+          "file": "Source/panels/spell_book.cpp",
+          "line": 148
+        },
+        {
+          "file": "mods/hf/txtdata/spells/spelldat.tsv",
+          "line": 41
+        }
+      ],
+      "notes": [
+        "Conceito visual proposto; não é captura do executável.",
+        "Sete posições fixas por página. Rows vazias preservam posições não possuídas e não devem produzir texto.",
+        "Usar faixa de abas horizontal; destacar a página indicada no título sem reordenar as abas.",
+        "Valores de mana e cargas são demonstrativos; custo efetivo depende do herói e do nível. Não representam avaliação de balanceamento.",
+        "Magias presentes são exemplo de progressão/posse, não um save real; estados proibidos em Tristram continuam indicados.",
+        "Ordem fixa: Parede Relampejante, Imolação, Deformação, Refletir, Fúria, Anel de Fogo e Procurar.",
+        "Página adicional disponível somente em Hellfire; os nomes seguem a tradução local."
+      ],
+      "variants": []
+    },
+    {
+      "id": "V22",
+      "title": "Griswold — grade visual selecionada",
+      "group": "NPCs",
+      "layout": "menu",
+      "availability": "atual",
+      "condition": "Opção Store UI configurada como Visual grid.",
+      "summary": "Menu inicial do NPC com opções nativas e proposta de leitura ampliada.",
+      "choices": [
+        "Conversar com Griswold",
+        "Negociar / Reparar",
+        "Sair da ferraria"
+      ],
+      "rows": [],
+      "fields": [],
+      "buttons": [
+        "Fechar"
+      ],
+      "source": [
+        {
+          "file": "Source/stores.cpp",
+          "line": 433
+        },
+        {
+          "file": "Source/stores.cpp",
+          "line": 1286
+        }
+      ],
+      "notes": [
+        "Conceito visual proposto; estado atual do menu inicial quando grade visual está selecionada.",
+        "Negociar / Reparar abre a grade; não manter simultaneamente as quatro opções das listas.",
+        "O estado da opção fica na evidência externa; a interface mostra somente as ações do NPC."
+      ],
+      "variants": []
+    },
+    {
+      "id": "V23",
+      "title": "Adria — grade visual selecionada",
+      "group": "NPCs",
+      "layout": "menu",
+      "availability": "atual",
+      "condition": "Opção Store UI configurada como Visual grid.",
+      "summary": "Menu inicial do NPC com opções nativas e proposta de leitura ampliada.",
+      "choices": [
+        "Conversar com Adria",
+        "Comprar / Vender",
+        "Recarregar cajados",
+        "Sair da cabana"
+      ],
+      "rows": [],
+      "fields": [],
+      "buttons": [
+        "Fechar"
+      ],
+      "source": [
+        {
+          "file": "Source/stores.cpp",
+          "line": 691
+        },
+        {
+          "file": "Source/stores.cpp",
+          "line": 1532
+        }
+      ],
+      "notes": [
+        "Conceito visual proposto; estado atual do menu inicial quando grade visual está selecionada.",
+        "Comprar / Vender abre grade; recarregar cajados preserva fluxo textual próprio.",
+        "A opção técnica fica somente na evidência externa."
+      ],
+      "variants": []
+    },
+    {
+      "id": "V24",
+      "title": "Wirt — sem oferta",
+      "group": "NPCs",
+      "layout": "menu",
+      "availability": "atual",
+      "condition": "BoyItem vazio: Wirt não tem item disponível.",
+      "summary": "Menu inicial do NPC com opções nativas e proposta de leitura ampliada.",
+      "choices": [
+        "Conversar com Wirt",
+        "Despedir-se"
+      ],
+      "rows": [],
+      "fields": [],
+      "buttons": [
+        "Fechar"
+      ],
+      "source": [
+        {
+          "file": "Source/stores.cpp",
+          "line": 972
+        }
+      ],
+      "notes": [
+        "Conceito visual proposto; estado nativo sem oferta.",
+        "Não mostrar cobrança de 50 ouro nem botão de olhar quando não há oferta."
+      ],
+      "variants": []
+    },
+    {
+      "id": "V25",
+      "title": "Conversar com Griswold — shareware",
+      "group": "NPCs",
+      "layout": "dialog",
+      "availability": "condicional",
+      "condition": "Versão shareware/demo, gbIsSpawn ligado.",
+      "summary": "Conversa indisponível nesta versão.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Mensagem",
+          "value": "Conversar com Griswold não está disponível na versão demo."
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/stores.cpp",
+          "line": 1205
+        },
+        {
+          "file": "Source/stores.cpp",
+          "line": 1212
+        }
+      ],
+      "notes": [
+        "Conceito visual proposto; aviso nativo de indisponibilidade da conversa em shareware.",
+        "Não oferecer rumores ou tópicos de missão nesse estado.",
+        "Nome da variante e flags de compilação ficam fora da interface do jogador."
+      ],
+      "variants": []
+    },
+    {
+      "id": "V26",
+      "title": "Conversar com Adria — shareware",
+      "group": "NPCs",
+      "layout": "dialog",
+      "availability": "condicional",
+      "condition": "Versão shareware/demo, gbIsSpawn ligado.",
+      "summary": "Conversa indisponível nesta versão.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Mensagem",
+          "value": "Conversar com Adria não está disponível na versão demo."
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/stores.cpp",
+          "line": 1205
+        },
+        {
+          "file": "Source/stores.cpp",
+          "line": 1212
+        }
+      ],
+      "notes": [
+        "Conceito visual proposto; aviso nativo de indisponibilidade da conversa em shareware.",
+        "Não oferecer rumores ou tópicos de missão nesse estado.",
+        "Nome da variante e flags de compilação ficam fora da interface do jogador."
+      ],
+      "variants": []
+    },
+    {
+      "id": "V27",
+      "title": "Conversar com Pepin — shareware",
+      "group": "NPCs",
+      "layout": "dialog",
+      "availability": "condicional",
+      "condition": "Versão shareware/demo, gbIsSpawn ligado.",
+      "summary": "Conversa indisponível nesta versão.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Mensagem",
+          "value": "Conversar com Pepin não está disponível na versão demo."
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/stores.cpp",
+          "line": 1205
+        },
+        {
+          "file": "Source/stores.cpp",
+          "line": 1212
+        }
+      ],
+      "notes": [
+        "Conceito visual proposto; aviso nativo de indisponibilidade da conversa em shareware.",
+        "Não oferecer rumores ou tópicos de missão nesse estado.",
+        "Nome da variante e flags de compilação ficam fora da interface do jogador."
+      ],
+      "variants": []
+    },
+    {
+      "id": "V28",
+      "title": "Conversar com Cain — shareware",
+      "group": "NPCs",
+      "layout": "dialog",
+      "availability": "condicional",
+      "condition": "Versão shareware/demo, gbIsSpawn ligado.",
+      "summary": "Conversa indisponível nesta versão.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Mensagem",
+          "value": "Conversar com Cain não está disponível na versão demo."
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/stores.cpp",
+          "line": 1205
+        },
+        {
+          "file": "Source/stores.cpp",
+          "line": 1212
+        }
+      ],
+      "notes": [
+        "Conceito visual proposto; aviso nativo de indisponibilidade da conversa em shareware.",
+        "Não oferecer rumores ou tópicos de missão nesse estado.",
+        "Nome da variante e flags de compilação ficam fora da interface do jogador."
+      ],
+      "variants": []
+    },
+    {
+      "id": "V29",
+      "title": "Conversar com Wirt — shareware",
+      "group": "NPCs",
+      "layout": "dialog",
+      "availability": "condicional",
+      "condition": "Versão shareware/demo, gbIsSpawn ligado.",
+      "summary": "Conversa indisponível nesta versão.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Mensagem",
+          "value": "Conversar com Wirt não está disponível na versão demo."
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/stores.cpp",
+          "line": 1205
+        },
+        {
+          "file": "Source/stores.cpp",
+          "line": 1212
+        }
+      ],
+      "notes": [
+        "Conceito visual proposto; aviso nativo de indisponibilidade da conversa em shareware.",
+        "Não oferecer rumores ou tópicos de missão nesse estado.",
+        "Nome da variante e flags de compilação ficam fora da interface do jogador."
+      ],
+      "variants": []
+    },
+    {
+      "id": "V30",
+      "title": "Conversar com Ogden — shareware",
+      "group": "NPCs",
+      "layout": "dialog",
+      "availability": "condicional",
+      "condition": "Versão shareware/demo, gbIsSpawn ligado.",
+      "summary": "Conversa indisponível nesta versão.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Mensagem",
+          "value": "Conversar com Ogden não está disponível na versão demo."
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/stores.cpp",
+          "line": 1205
+        },
+        {
+          "file": "Source/stores.cpp",
+          "line": 1212
+        }
+      ],
+      "notes": [
+        "Conceito visual proposto; aviso nativo de indisponibilidade da conversa em shareware.",
+        "Não oferecer rumores ou tópicos de missão nesse estado.",
+        "Nome da variante e flags de compilação ficam fora da interface do jogador."
+      ],
+      "variants": []
+    },
+    {
+      "id": "V31",
+      "title": "Conversar com Gillian — shareware",
+      "group": "NPCs",
+      "layout": "dialog",
+      "availability": "condicional",
+      "condition": "Versão shareware/demo, gbIsSpawn ligado.",
+      "summary": "Conversa indisponível nesta versão.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Mensagem",
+          "value": "Conversar com Gillian não está disponível na versão demo."
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/stores.cpp",
+          "line": 1205
+        },
+        {
+          "file": "Source/stores.cpp",
+          "line": 1212
+        }
+      ],
+      "notes": [
+        "Conceito visual proposto; aviso nativo de indisponibilidade da conversa em shareware.",
+        "Não oferecer rumores ou tópicos de missão nesse estado.",
+        "Nome da variante e flags de compilação ficam fora da interface do jogador."
+      ],
+      "variants": []
+    },
+    {
+      "id": "V32",
+      "title": "Conversar com Farnham — shareware",
+      "group": "NPCs",
+      "layout": "dialog",
+      "availability": "condicional",
+      "condition": "Versão shareware/demo, gbIsSpawn ligado.",
+      "summary": "Conversa indisponível nesta versão.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Mensagem",
+          "value": "Conversar com Farnham não está disponível na versão demo."
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/stores.cpp",
+          "line": 1205
+        },
+        {
+          "file": "Source/stores.cpp",
+          "line": 1212
+        }
+      ],
+      "notes": [
+        "Conceito visual proposto; aviso nativo de indisponibilidade da conversa em shareware.",
+        "Não oferecer rumores ou tópicos de missão nesse estado.",
+        "Nome da variante e flags de compilação ficam fora da interface do jogador."
+      ],
+      "variants": []
+    },
+    {
+      "id": "V33",
+      "title": "Adria — nenhum item para vender",
+      "group": "Comércio",
+      "layout": "store",
+      "availability": "atual",
+      "condition": "Nenhum item do inventário atende aos critérios de compra de Adria.",
+      "summary": "O vendedor não encontra itens elegíveis no inventário.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Vendedora",
+          "value": "Adria"
+        },
+        {
+          "label": "Estado",
+          "value": "Nada para vender"
+        },
+        {
+          "label": "Ouro disponível",
+          "value": "2.450"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/stores.cpp",
+          "line": 769
+        },
+        {
+          "file": "Source/stores.cpp",
+          "line": 819
+        }
+      ],
+      "notes": [
+        "Conceito visual proposto; saldo fictício.",
+        "Estado vazio da venda a Adria; não reutilizar nome ou critérios do ferreiro.",
+        "O resumo técnico fica somente na evidência externa."
+      ],
+      "variants": []
+    }
+  ]
+}

@@ -1,0 +1,93 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://ui/main_menu.gd" id="1"]
+[ext_resource type="Texture2D" path="res://ui/art/menu-background.png" id="2"]
+[ext_resource type="Texture2D" path="res://ui/art/menu-logo.webp" id="3"]
+
+[sub_resource type="StyleBoxFlat" id="Button"]
+bg_color = Color(0.018, 0.023, 0.023, 0.55)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.43, 0.36, 0.23, 0.65)
+
+[sub_resource type="Theme" id="Theme"]
+default_font_size = 25
+Button/colors/font_color = Color(0.83, 0.72, 0.47, 1)
+Button/styles/normal = SubResource("Button")
+
+[node name="MainMenu" type="Control"]
+layout_mode = 0
+offset_right = 640.0
+offset_bottom = 480.0
+script = ExtResource("1")
+
+[node name="Background" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="MenuLogo" type="TextureRect" parent="."]
+layout_mode = 1
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -290.0
+offset_top = -240.0
+offset_right = 290.0
+offset_bottom = -86.0
+texture = ExtResource("3")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="MenuList" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -255.0
+offset_top = -48.0
+offset_right = 255.0
+offset_bottom = 210.0
+theme = SubResource("Theme")
+theme_override_constants/separation = 0
+
+[node name="SinglePlayer" type="Button" parent="MenuList"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "Um jogador"
+
+[node name="MultiPlayer" type="Button" parent="MenuList"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "Multijogador"
+
+[node name="Settings" type="Button" parent="MenuList"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "Configurações"
+
+[node name="Support" type="Button" parent="MenuList"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "Suporte"
+
+[node name="Credits" type="Button" parent="MenuList"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "Créditos"
+
+[node name="Exit" type="Button" parent="MenuList"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "Sair"

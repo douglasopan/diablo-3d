@@ -1,5 +1,6 @@
 #include "control_flasks.hpp"
 #include "control.hpp"
+#include "control/d3d_hud.hpp"
 
 #include "engine/surface.hpp"
 #include "utils/str_cat.hpp"
@@ -101,24 +102,34 @@ void DrawFlaskLower(const Surface &out, const Surface &sourceBuffer, int offset,
 
 void DrawLifeFlaskUpper(const Surface &out)
 {
+	if (IsD3dHudEnabled()) return;
 	constexpr int LifeFlaskUpperOffset = 107;
 	DrawFlaskUpper(out, *pLifeBuff, LifeFlaskUpperOffset, MyPlayer->_pHPPer);
 }
 
 void DrawManaFlaskUpper(const Surface &out)
 {
+	if (IsD3dHudEnabled()) return;
 	constexpr int ManaFlaskUpperOffset = 475;
 	DrawFlaskUpper(out, *pManaBuff, ManaFlaskUpperOffset, MyPlayer->_pManaPer);
 }
 
 void DrawLifeFlaskLower(const Surface &out, bool drawFilledPortion)
 {
+	if (IsD3dHudEnabled()) {
+		DrawD3dHudFlask(out, false);
+		return;
+	}
 	constexpr int LifeFlaskLowerOffset = 96;
 	DrawFlaskLower(out, *pLifeBuff, LifeFlaskLowerOffset, MyPlayer->_pHPPer, drawFilledPortion);
 }
 
 void DrawManaFlaskLower(const Surface &out, bool drawFilledPortion)
 {
+	if (IsD3dHudEnabled()) {
+		DrawD3dHudFlask(out, true);
+		return;
+	}
 	constexpr int ManaFlaskLowerOffset = 464;
 	DrawFlaskLower(out, *pManaBuff, ManaFlaskLowerOffset, MyPlayer->_pManaPer, drawFilledPortion);
 }

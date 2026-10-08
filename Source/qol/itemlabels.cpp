@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "control/control.hpp"
+#include "control/d3d_hud.hpp"
 #include "cursor.h"
 #include "engine/point.hpp"
 #include "engine/render/clx_render.hpp"
@@ -138,7 +139,7 @@ bool IsMouseOverGameArea()
 		return false;
 	if ((IsLeftPanelOpen()) && GetLeftPanel().contains(MousePosition))
 		return false;
-	if (GetMainPanel().contains(MousePosition))
+	if (IsPointOnD3dHud(MousePosition))
 		return false;
 
 	return true;

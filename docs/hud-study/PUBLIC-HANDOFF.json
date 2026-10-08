@@ -1,0 +1,2768 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "status": "Todos os arquivos enumerados estão finalizados para handoff documental e revisão da integração.",
+  "repositoryRelativeScope": "docs/hud-study/",
+  "exactPathsFile": "docs/hud-study/PUBLIC-FILES.txt",
+  "fileCount": 282,
+  "artifactFileCount": 279,
+  "artifactBytes": 81186452,
+  "artifactGroups": {
+    "rootFiles": 16,
+    "dataFiles": 5,
+    "exampleJpegs": 223,
+    "responsiveJpegs": 24,
+    "supportImages": 11
+  },
+  "imageOrigins": {
+    "imageGenPng": 8,
+    "galleryJpeg": 249,
+    "existingAuthorLogoWebp": 1
+  },
+  "imageDimensions": {
+    "1280x720": 18,
+    "1448x1086": 1,
+    "1672x941": 5,
+    "1905x1072": 1,
+    "1920x1080": 224,
+    "1931x814": 1,
+    "1932x814": 1,
+    "2496x1080": 6,
+    "640x160": 1
+  },
+  "notReadyFiles": [],
+  "excludedInputs": [
+    "Bitmap original de HUD fornecido pelo usuário, mantido fora da entrega.",
+    "Capturas históricas externas ao estudo; somente metadados de origem publicados.",
+    "MPQs, sprites extraídos, áudio, modelos, saves, executáveis e perfis privados."
+  ],
+  "functionalRequirement": "Mesmos botões e funções nativos; tamanho, proporções, disposição, espaçamento e agrupamento podem mudar.",
+  "approval": "Referências são conceitos; handoff não promove novas imagens nem aprova a implementação. 01 e 05 preservadas por hash.",
+  "publicPreparation": [
+    "Caminhos absolutos da máquina retirados.",
+    "Links de servidor temporário retirados da documentação pública.",
+    "Nenhuma imagem foi alterada pela sanitização.",
+    "Nenhum staging, commit, build ou edição de produção executado pelo estudo."
+  ],
+  "verification": {
+    "uniqueExamples": 223,
+    "responsiveFiles": 24,
+    "localLinkAudit": {
+      "valid": 866,
+      "broken": 0,
+      "scope": "Auditoria antes dos três documentos de handoff; referências adicionadas resolvem para arquivos enumerados."
+    },
+    "embeddedDataMatchesJson": true,
+    "externalRuntimeDependencies": 0,
+    "secretPatternFindings": 0,
+    "absoluteMachinePathFindings": 0,
+    "sourceHudBitmapIncluded": false,
+    "javascriptSyntaxChecks": "study.js e catalog-data.js passaram",
+    "limits": "Verificação documental e de arte; sem execução ou aprovação visual da implementação do jogo."
+  },
+  "files": [
+    {
+      "path": "docs/hud-study/COVERAGE.md",
+      "bytes": 58356,
+      "sha256": "e90405d2df35184be72cac2c1b4c7ad6b5984b23a48ceb8b2638a012f2828fa2"
+    },
+    {
+      "path": "docs/hud-study/FRONTEND-AUDIT.md",
+      "bytes": 9693,
+      "sha256": "e119e108208c2cfd1017354c9120cdec4e553b0c64640144b0d3e07e380cf28f"
+    },
+    {
+      "path": "docs/hud-study/INGAME-AUDIT.md",
+      "bytes": 11648,
+      "sha256": "8f3421b15230f417f0d3b210e78b8f54950a405e06a4426e340a194704527352"
+    },
+    {
+      "path": "docs/hud-study/OPTIONS-AUDIT.md",
+      "bytes": 10579,
+      "sha256": "f1ad35d02be772440728c6368bbb048962940a0b634b740250701af7ef639848"
+    },
+    {
+      "path": "docs/hud-study/QUALITY.md",
+      "bytes": 3073,
+      "sha256": "60f0be7be87e169e5d8873e1c09091e3840da46983644b382f1d84553b2c03c4"
+    },
+    {
+      "path": "docs/hud-study/README.md",
+      "bytes": 9168,
+      "sha256": "ccfea7e01f9ff1a6776f8519c0968aa22d332fa7a46e9a138e9606e0438c908f"
+    },
+    {
+      "path": "docs/hud-study/catalog-data.js",
+      "bytes": 178452,
+      "sha256": "0dfb4a144f138d81b3d28c811df389a2e0644f9d014fe1142f5c444735f30077"
+    },
+    {
+      "path": "docs/hud-study/character-refinement.css",
+      "bytes": 771,
+      "sha256": "34dfba02516ee58f4758ec861e4ac48769766100a431ceb4d78cd8471167104f"
+    },
+    {
+      "path": "docs/hud-study/compact-refinement.css",
+      "bytes": 1296,
+      "sha256": "e61f9cff0bad81e564a8ad2e1fe98a11e1f04ac0a81b21a9bbb9c05db3473cba"
+    },
+    {
+      "path": "docs/hud-study/data/frontend.json",
+      "bytes": 54491,
+      "sha256": "5e4f6d71d8a4ac3540f0a46a82c0df56e363dce158ab985cc70cd9f21f8a9a61"
+    },
+    {
+      "path": "docs/hud-study/data/ingame-variants.json",
+      "bytes": 53167,
+      "sha256": "be82a14a78b34f0cf576c9d5c7d3a2101f8c84c4cee950cb6bc68325ff1c30d1"
+    },
+    {
+      "path": "docs/hud-study/data/ingame.json",
+      "bytes": 88783,
+      "sha256": "4afea1bdbb781bd1a9a7e9de0d33c6fb40ec2c8772a4c1eb6cbeafed83f44da8"
+    },
+    {
+      "path": "docs/hud-study/data/layout-checks.json",
+      "bytes": 2329,
+      "sha256": "01a3ee84311732548b7d134995c8d0661a859b896948d7b9a9c03b3fb1a2ff4c"
+    },
+    {
+      "path": "docs/hud-study/data/options.json",
+      "bytes": 72561,
+      "sha256": "2ef7778655530e8b0ae09474e9046228f1e3b340e82041e6d049c0a65bd0674f"
+    },
+    {
+      "path": "docs/hud-study/examples/D01-V1.jpg",
+      "bytes": 252055,
+      "sha256": "c21ed334008480a1b15e64092917d20e3ac370b4b449943b651e6875ac1e1076",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/D01.jpg",
+      "bytes": 248858,
+      "sha256": "8dd35c9b4f803bad99c725a06dc012ab7f0c6241ee6f37c6d3fed8f973d7fa30",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/D02-V1.jpg",
+      "bytes": 250597,
+      "sha256": "d96375fdf64c1c57ab85c0461f241c0cb739e3c6fb91b6192dbc710beee36020",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/D02-V2.jpg",
+      "bytes": 247712,
+      "sha256": "e6f335cd8327f53d940a6774b1bc4f19006e5e36b2b9c334ba4c0e08391ea048",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/D02-V3.jpg",
+      "bytes": 250369,
+      "sha256": "0ee420cbd85e10bf329a30c8f42b23aeda9262f51d8cf72244fbde13b7b913dd",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/D02-V4.jpg",
+      "bytes": 247768,
+      "sha256": "31f9b9c1b875bd6a9a99de365a99a164384197209e6186489782fe1dbc843cba",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/D02-V5.jpg",
+      "bytes": 244543,
+      "sha256": "b9308278690a6e371665429039afa3a2079b82d4196ea4debcf0b9dede4ab8b8",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/D02-V6.jpg",
+      "bytes": 250014,
+      "sha256": "300585c61b914515fdade1c47bb5f8b7c84234bd27dd5d7e9403e0ea5dfbe721",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/D02.jpg",
+      "bytes": 251582,
+      "sha256": "e097c63d71c71f2b0c5e47001f982093a4ba73d577e8d313ec315f1f4d7e0816",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/D03-V1.jpg",
+      "bytes": 245059,
+      "sha256": "d6023a668c6883d10e70148c4b45bfeed0e008f2899ae082ae1932cb86747a11",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/D03-V2.jpg",
+      "bytes": 245341,
+      "sha256": "70b4e3c29b02a356ad0dc68ef5c6274bfdc13c135dff497ebe9dccda11966e2f",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/D03-V3.jpg",
+      "bytes": 238825,
+      "sha256": "42186c2c0f3ea4fd1d365406a92a6b29c63a4686d9d3ee5e286df6c997cd9b8e",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/D03.jpg",
+      "bytes": 245139,
+      "sha256": "b025a443319a41f9b6507a0dc7fa349b462770e03bdbbf27140fd2da51aa9965",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/D04.jpg",
+      "bytes": 247570,
+      "sha256": "6b0c16823619a8008dc1f25f3e6b3158814ffec440a8e71063524d7428be28ea",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F01-V1.jpg",
+      "bytes": 245326,
+      "sha256": "a52ba38f3c51d7caf89eaa44a8d4fcd9a7c8b5490bb90ef61e41563dd7a8d276",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F01.jpg",
+      "bytes": 245059,
+      "sha256": "3363ea3e795d0c4cb9d2c5d548027d176ed6e4b413fa57a4b1f9edeecf5a08c2",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F02.jpg",
+      "bytes": 249036,
+      "sha256": "b5a8c7df244d1dd407ef39923e0216d2b2dcd92a796c5f8a9ca7d0f08b2172a3",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F03-V1.jpg",
+      "bytes": 251976,
+      "sha256": "c168d35fb02c053982993ad73494070ad6e71f705296d952e939838cc582c20c",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F03-V2.jpg",
+      "bytes": 252204,
+      "sha256": "fc844ca431fe86b0d43790907c55df0442d98f9fd3df72a401c9942f50276de0",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F03-V3.jpg",
+      "bytes": 253344,
+      "sha256": "1b91a7f3a2d175dc1d2c17e12a32a05901ffa37fb9feb5142af92b6c2c475573",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F03.jpg",
+      "bytes": 251395,
+      "sha256": "9d9b5544d62193f1f7d32c5759b35ef766823ada6ba78ced3235f6bc8ce3f924",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F04-V1.jpg",
+      "bytes": 217107,
+      "sha256": "381de4aa599cb58168e74cc783242307adb9e551519882eb76cb016571a6393c",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F04-V2.jpg",
+      "bytes": 214419,
+      "sha256": "aeaa8317f47c64f548e884e7caa8a2ddae94a6cefc2cf9bb11919505fef80fb3",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F04-V4.jpg",
+      "bytes": 217672,
+      "sha256": "0327f4a178ef85d9b80dee16fb973d7e449b0ebb82e0fcac411bb7adaa6bf9d8",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F04.jpg",
+      "bytes": 216860,
+      "sha256": "49e50ce9acf424cb05569335ddaf5f85394cbe3433b9054a263e1ec24710ff52",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F05-V1.jpg",
+      "bytes": 215326,
+      "sha256": "569cd6c07613a4c84b9d67354b39ed5613e6255b670de050204744db9f967edc",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F05-V2.jpg",
+      "bytes": 216996,
+      "sha256": "3f11db3a02dfb447e6d4aebb756743af5d6249be7afdf4c456449b3a13dc3378",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F05-V3.jpg",
+      "bytes": 219696,
+      "sha256": "b46a71f90933c05398c5fca68220f48a3025335d2f9ed5b283bd8a653a6d81cc",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F05.jpg",
+      "bytes": 216200,
+      "sha256": "1f55dba72630720d9d9cd655b39a2713386110a792b9e3d5db8a5d779ade946e",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F06-V1.jpg",
+      "bytes": 230922,
+      "sha256": "c9a2125c38ddeef8d6704426c6027e2f4aa93c62693ba1225eb78d341280ffd0",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F06-V2.jpg",
+      "bytes": 230126,
+      "sha256": "eeec7cd8684e6e31c0fee7098a39d2f6914907c8d4bbeaf411b3dc4e2c0d970e",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F06.jpg",
+      "bytes": 228018,
+      "sha256": "ea8dae55859053c87d3451dad8576b80bc764d7855c78aa8b5b4717b65ce7fd4",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F07.jpg",
+      "bytes": 249176,
+      "sha256": "e6a091a331d0ca72e08e51fade062ff3995288e07b61f5b22cf127d092c5c8da",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F08-V1.jpg",
+      "bytes": 244676,
+      "sha256": "e3b9f95d3440ff6bae4d53bd003d2086cdcc2c7d227db25c7eea5939d3692b82",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F08-V2.jpg",
+      "bytes": 244011,
+      "sha256": "f275c804b13899615f3724233e8f56fa6810bd9c86e5f625bdb6bfb46f354202",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F08-V3.jpg",
+      "bytes": 246562,
+      "sha256": "a2db95c4efb047eb615ef52f6ed07dea3f8c6942c1f8adab16eb5c533d0f2406",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F08.jpg",
+      "bytes": 245444,
+      "sha256": "889e54bbdb2276a4356a18f35fb4efa04ec0e3a39085c56a9691622dabf2f9d7",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F09-V1.jpg",
+      "bytes": 244511,
+      "sha256": "f32b81fba4813d5341fff0fe52853b046543906328ff31016a6219a6466e4f31",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F09-V2.jpg",
+      "bytes": 246754,
+      "sha256": "627d4d2d057eb0a487a748688d27792785e0eb29f33de7e9b4304d3de5d0d595",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F09.jpg",
+      "bytes": 255284,
+      "sha256": "45eee17f793536d5c3441547ba96f25f789363dd83a8b3115976a6644516e38a",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F10-V1.jpg",
+      "bytes": 250055,
+      "sha256": "bc6f8b054c52016453d4e0d6c62527fa5baba2cf9a75e60b4d9f1dfff8ebac74",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F10-V2.jpg",
+      "bytes": 246029,
+      "sha256": "882fea24d06c0a050dae590ab2a0a9bc0318a6b777d526f1679fbadfab23abcd",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F10-V3.jpg",
+      "bytes": 248318,
+      "sha256": "0575a8ec743d8a095d850b5a7df91faf923c7b96f8c57d93374c74af95a57cac",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F10-V4.jpg",
+      "bytes": 256549,
+      "sha256": "6c624c8a6fc522842cfd5477285d0abce02df392457108d5e1c7e3349aefd141",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F10-V5.jpg",
+      "bytes": 245000,
+      "sha256": "9dbc659fe8f5854954ac92ed9adcb098b53975952acb7bf363fa87427d9c14ad",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F10.jpg",
+      "bytes": 242932,
+      "sha256": "b61c993ca1ae7c5b9600be954a045760d96f9a96c0d1d7efee08b789e0b56aa3",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F11-V1.jpg",
+      "bytes": 251212,
+      "sha256": "d26d9be070bd2540842ec83c55afbb6fa2b5ba1f372fe73245df417aa750cb25",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F11.jpg",
+      "bytes": 250176,
+      "sha256": "e24379246135c11580e5249f3b868bf9cb53e8e4583370adc7f47b3c0c5e3692",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F12-V1.jpg",
+      "bytes": 239221,
+      "sha256": "805c774f6a282c822b576b72e7c72a4d594fa5921b98ab41b002d0b086b811f7",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F12-V2.jpg",
+      "bytes": 241749,
+      "sha256": "a733df8e22006e333634f285c0a9178f065e8b5798018d4f2098da570fcbc9bb",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F12-V3.jpg",
+      "bytes": 238613,
+      "sha256": "109815174f4dd872bad70fc3247a50da780d6a9fd7276927a11b4c5786397337",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F12.jpg",
+      "bytes": 241659,
+      "sha256": "7873d4909a551fd40204474cd2ccc369eca5211dfa0c5552f5639a676416326e",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F13-V1.jpg",
+      "bytes": 248168,
+      "sha256": "74ddca3e0983a260c15c28aa774b91c53f664562ad3e090927d69cf0ffedb9cf",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F13.jpg",
+      "bytes": 248483,
+      "sha256": "4b67cd82f1204f156dd8c714ddcc9c3bbe7e9c1d6046f5b89106f162a4a8ca41",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F14.jpg",
+      "bytes": 248196,
+      "sha256": "b7e3695a2676ce8b8abab19df8c9ec5226241bdfee2029e799d811b900cad51a",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/F15.jpg",
+      "bytes": 237159,
+      "sha256": "f25f4c0477070532780ead9c29ffeb77f9c5c2f8d6a0424bf40fb2a32fbe8dc6",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/G01.jpg",
+      "bytes": 257417,
+      "sha256": "9d1ad61d7a69906017bde25fe79eb9d4e4807c49cd1b172e1c8b0209da3aa577",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/G02.jpg",
+      "bytes": 267296,
+      "sha256": "74b24bc94d6413105cbe363b9d553eb019a2a955989757215e8ea648733abe58",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/G03.jpg",
+      "bytes": 255731,
+      "sha256": "69d7f9865733c58cc0b780ea3415967a645f0ec359e10cbde866e7fe52297764",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/G04.jpg",
+      "bytes": 257935,
+      "sha256": "06ed35a854f7061edd385dae95d684bfdbf2759ccc8052f3c19a664f44d31579",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/G05.jpg",
+      "bytes": 253530,
+      "sha256": "ea48360e97f93d98824140fd1ef254bbbf3c80c0cf878308feb7e58eadc9fe6a",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/G06.jpg",
+      "bytes": 256260,
+      "sha256": "34d2cc379bc1c145fe321bee30d42316bd71cf021bada7000327f093d3874c72",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/G07.jpg",
+      "bytes": 267503,
+      "sha256": "477d6048ddfd6824ee3c47565ad755c2fd5a5c224f3789441504334d672c4809",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/G08.jpg",
+      "bytes": 257341,
+      "sha256": "777f20716f907774371cfe83a5ea5210b530a74cc6a8386fefd709bb6a6aeffb",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/G09.jpg",
+      "bytes": 256738,
+      "sha256": "95b61c5241f2cd4291ace793707609c16aa053647fde5df6ef2af949ac7d6cbf",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/G10.jpg",
+      "bytes": 263442,
+      "sha256": "d609f693dd306b55d3c82079a9c7f7880e5fae9ab683c6043cc52b90937316c4",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/G11.jpg",
+      "bytes": 269177,
+      "sha256": "12795c0d86e08960dc9ccdafec61323dd9c16837051f6dd106b010cd8028faed",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/G12.jpg",
+      "bytes": 269320,
+      "sha256": "bb91c701c75010680786ee29fb98983418f24c44504500142633aa3fcb8a1729",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/G13.jpg",
+      "bytes": 269392,
+      "sha256": "67cf6bc08ae355dc2d98d9c79a06763eeb40111fa4db021aac3e433f0f88ab9c",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/G14.jpg",
+      "bytes": 270224,
+      "sha256": "f7fe17da4f4038e5a22f6ac0c56061b025223f5b448bc711760a1b629576fc20",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/G15.jpg",
+      "bytes": 269549,
+      "sha256": "d5eff42f3c19d8ba49dc14e75df09d0de5e640e274c880cd8217f438af7fd7d6",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/G16.jpg",
+      "bytes": 269047,
+      "sha256": "5076ba7fce7af0ae30836bab69cca7c5c81f6e715d78092a6772f561b62a6044",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/G17.jpg",
+      "bytes": 270725,
+      "sha256": "b17e36eb5682bafdc6580326e16d4ab82765fe27a4b04c6f02082bb728acc8aa",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/G18.jpg",
+      "bytes": 270602,
+      "sha256": "61b4e6db8ad73990ee698dc44325c57aaadad00a2fc0538fcd2fd948fce5225e",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/G19.jpg",
+      "bytes": 282074,
+      "sha256": "19351a0c947a7147969862ce927527f62e8add6bd0de1f1fc205a377fc74cb6c",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/G20.jpg",
+      "bytes": 279945,
+      "sha256": "33db02e729a7f7de543ed625890c9bce2c9123ca75a67b8d4f6c1d42a83a6435",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/G21.jpg",
+      "bytes": 280041,
+      "sha256": "1285e40f6c0ca8e15a136e9d613ebb1e7382c1a1562849ccdc8531bb2523db48",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/G22.jpg",
+      "bytes": 279756,
+      "sha256": "adc296812bdcf0457ddb3c910cebdc1a1e3dd9f31cab16d7664b5e19d5c144ee",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/L01-V1.jpg",
+      "bytes": 217302,
+      "sha256": "ab4ab122e4c1bab3acf18ddceb44d818584df81d59cd417026dace600e5e0dc2",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/L01-V10.jpg",
+      "bytes": 218543,
+      "sha256": "a9e2b33a6c4be32f9da0e645233303fefd783cde0714ab7036bb17c4d259f787",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/L01-V11.jpg",
+      "bytes": 217502,
+      "sha256": "2369402089e369ac3a2c2c91c0cb28c51fbb69950d296e983bd22ff4567c2a26",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/L01-V2.jpg",
+      "bytes": 217484,
+      "sha256": "bac805c697a623e257c18bc86931978f9b89c647f92a5826547ccb309d799d29",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/L01-V3.jpg",
+      "bytes": 217665,
+      "sha256": "c52095b3b818baf7a20887268caeadec1c05ac9d17ebbb7b4a1d6ef1ef98c00e",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/L01-V4.jpg",
+      "bytes": 218133,
+      "sha256": "0d352c49c18d547d7f265b49d75615200d734f3bd4f0eb9fc934139c5e76db75",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/L01-V5.jpg",
+      "bytes": 217815,
+      "sha256": "81858030560a411c9127f9f0c14e956b3c1e989deeb166e5a0aa7a460304bb53",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/L01-V6.jpg",
+      "bytes": 217497,
+      "sha256": "2484bd6f9a43ba79c4b0484aa068dc15a5bc5d8f789a01f358cb1b3b375d0826",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/L01-V7.jpg",
+      "bytes": 217377,
+      "sha256": "fbb3c719fe3283db4aac2a584cb9048f030ac2c70aca4eb48f7cbc7cd966bb8f",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/L01-V8.jpg",
+      "bytes": 217385,
+      "sha256": "1500e38ba1f01e4819b45cf6e53ab16550879843725f49b76ee27ddfca0e893e",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/L01-V9.jpg",
+      "bytes": 217890,
+      "sha256": "5ea03df7920dbadb03015853b338bb933057640dae2e60548d03da0198f7c453",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/L01.jpg",
+      "bytes": 218656,
+      "sha256": "320e47944d4864981fe3595f18ad22edb80495215d728ed1e4d18444f6290a8c",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/N01.jpg",
+      "bytes": 251550,
+      "sha256": "0005c48e619e490cb06e801b77f7d235bccd7f40565133bf01de56050ee3d29e",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/N02.jpg",
+      "bytes": 249685,
+      "sha256": "4b1efc178e73bc2f84a9ed0d37a2aded36ae62c7b93178465e881a8bd32aeeff",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/N03.jpg",
+      "bytes": 252391,
+      "sha256": "74c25b70ac46ba55a83bc3f255183a95bc8a51e51707ffa78bca7bca02e7a965",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/N04.jpg",
+      "bytes": 253217,
+      "sha256": "757b7ebdeede96047ce02b446280d157f0b32b045755b953116111048fd9734d",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/N05.jpg",
+      "bytes": 255205,
+      "sha256": "c873ea1811369394673a406e2dddd992dc26738293bcff19a83cf1356d11aa46",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/N06.jpg",
+      "bytes": 255467,
+      "sha256": "b04ab8f965ab57210e9f4ac543ad5e3e2572316bc1fce1811863d91ca2f43940",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/N07.jpg",
+      "bytes": 254062,
+      "sha256": "4506a210c50578d2652abaa917031760b78c2c9454d4fd5874a12ca599b7232f",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/N08.jpg",
+      "bytes": 258168,
+      "sha256": "c22fa0147872d7d9afa532c80c2648390b1d857ffe4f7299f89b5da5ae335959",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/N09.jpg",
+      "bytes": 258651,
+      "sha256": "779ef9fca108be68df7fd369451cbd71041d3b8256b20fc752578add8edcfafa",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/N10.jpg",
+      "bytes": 257712,
+      "sha256": "5cc704ebf7100aa9ec37825c9d3a0b16212e683972362f5219c5be7672a2a157",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/N11.jpg",
+      "bytes": 257619,
+      "sha256": "d2fc9cf66023de317c35b439b0f42717b706add396589230822445d3b42f4dea",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/N12.jpg",
+      "bytes": 257899,
+      "sha256": "f9f334f420ef97fb656b9ea988f86738d53e99fb3ce2fc7162781c630f0e4a13",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/N13.jpg",
+      "bytes": 257412,
+      "sha256": "d13831ab8d66a86d691d993f17f80cf7365631bc169196a3ba1c9db2194efd77",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/N14.jpg",
+      "bytes": 258348,
+      "sha256": "ab022a1927ef511e293f90a000f57c20ce378708d152b2114c16db16a10ab8ea",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/N15.jpg",
+      "bytes": 257981,
+      "sha256": "7c0be3b57a3b146b0a6e12f7d208abab8759d1eaae7c62d2fd49af9579789523",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/N16.jpg",
+      "bytes": 258437,
+      "sha256": "c6fcdac64f1615566707231e945e219874cf0b6c8423c7e57640915de0cbfa54",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/O01.jpg",
+      "bytes": 235076,
+      "sha256": "d2cfba293a31d78d96ce82624b9f3b916b8145c28aee769d8e558ddb6a9fb166",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/O02.jpg",
+      "bytes": 243867,
+      "sha256": "ec9fa544a67292c2336234e9dbe9123b299a99f69d64115b54f60c71af38f8a1",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/O03.jpg",
+      "bytes": 228474,
+      "sha256": "433150d1f5cf3c495449557dd2e27d5513f470f3ebce85abad0bd66ec46f9631",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/O04.jpg",
+      "bytes": 249890,
+      "sha256": "8b54b667d414a774d3ddb3077671cebee63c4fd77ffb161cfb17a5271b301bb8",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/O05.jpg",
+      "bytes": 246159,
+      "sha256": "74a2619d3ac490f6cb8bd7e7f319f86bf4d73a1d61052dbd3056b48c6e7167b7",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/O06.jpg",
+      "bytes": 247010,
+      "sha256": "265e2d65724edd05c671d7fd45bbb14c3eb1a7cb6776ec2085a2894b28b44b09",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/O07.jpg",
+      "bytes": 248374,
+      "sha256": "9a41ec09bd19154f60f4b2663c0b0fe5c0f7a24783c29da0d4db07069af8af08",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/O08.jpg",
+      "bytes": 242410,
+      "sha256": "d3f346554e647a7f17565bd38e3a8a8a9cce8029dad07d03fb4f4cfa1e7f8272",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/O09.jpg",
+      "bytes": 252127,
+      "sha256": "444fb14244656cbfc529e4ffb5511c25046e3178315a761c42b3e1ca1c485d48",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/O10.jpg",
+      "bytes": 249876,
+      "sha256": "a9bd4ca2f9c30f6ce7dd44927fde4a2878c0e3bd54ff577796945a1701d108a4",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/O11.jpg",
+      "bytes": 250457,
+      "sha256": "98cfbabfabc01f953f04ebf3c4f34a99520f0c31248e53f165e0491b56ed9879",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/O12.jpg",
+      "bytes": 236875,
+      "sha256": "40f885ea655b92494ce28edeb718a689da55a27e5d6b39ec49fa4388012af20f",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/O13.jpg",
+      "bytes": 241432,
+      "sha256": "12586387e8f5d25b493f57c2f6262a3fbf5c4e6a4ccb43d8bdcc048aeb7d288f",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/O14.jpg",
+      "bytes": 247610,
+      "sha256": "f00360ccd51762ea253108ef17fb9bd0b47dfd8cc776fe64a47abda80a1f24ac",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/O15.jpg",
+      "bytes": 251092,
+      "sha256": "dea300a28bc621e919f925c6fc38660ccd879c4e59adda1d05715604f3571059",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/O16.jpg",
+      "bytes": 234443,
+      "sha256": "c5558e3c1db07c6bc31bdd8614df8211f4fe6d2377c791794db21f9088c6ccb2",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/O17.jpg",
+      "bytes": 255446,
+      "sha256": "a48f7c5d101b0e505da780f63500ea5dfe6b335541212651ba39e65f472b0f65",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/O18.jpg",
+      "bytes": 235361,
+      "sha256": "fffead6f6767785a8149eff978cb3c12753b66761f532879e9c034912541d815",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/O19.jpg",
+      "bytes": 251717,
+      "sha256": "2c6ae4ca3ac335068eae759d86e876ce6bec41e22f6acb40d0833705ce73f812",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/O20.jpg",
+      "bytes": 257599,
+      "sha256": "bcdc32a95e98760889d9d2f7041c0c327b93a8c56cbda8dbc04947f784964b8b",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/O21.jpg",
+      "bytes": 248627,
+      "sha256": "85c3bfb5f4e45b2aea705829f51d0c707085170db4a4693818b489bc45dbb7f2",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/O22.jpg",
+      "bytes": 247478,
+      "sha256": "dd36cdc1b93e6c64855c032533ed9c89cb11c006a8931ca165d98d932590bc0d",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/O23.jpg",
+      "bytes": 250897,
+      "sha256": "3bf290d6e52d30094bf1125d8f239e28c497310d70fabc15bceed20b015f872b",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/O24.jpg",
+      "bytes": 231975,
+      "sha256": "9082275b0eac7d5b32dd9117088cd7c031d1198abbf8a1860103fe74c5fa3045",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/O25.jpg",
+      "bytes": 228890,
+      "sha256": "07784b129291a649cb5634cb9e168ec22c2598b1a6e888d0c87acd5d9af018f4",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/O26.jpg",
+      "bytes": 232155,
+      "sha256": "3155b347a0aed37372e3cfe07eb80b90d12ccb50ba6d7323887539034f2edc7e",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/O27.jpg",
+      "bytes": 229064,
+      "sha256": "8a734e3fe9e999ab48186b20e163217cee1d3c489d050854ea820d6196052278",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/O28.jpg",
+      "bytes": 230912,
+      "sha256": "324bf4c61ebdca250e53705c599b77c2180e3767ec7f97039a8f4f2ae7c33e9d",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/O29.jpg",
+      "bytes": 232130,
+      "sha256": "dde9dd8b07f385bbcb8227d9b2d757e85209b0e007819cf0f892597457b51fb5",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/O30.jpg",
+      "bytes": 231553,
+      "sha256": "f735a792bf2ab0cd99f61eceb0426ed85c4ef3b0eb9ad5128b22c048aab5240b",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/O31.jpg",
+      "bytes": 241796,
+      "sha256": "ba591b9bfccb15294b688b79a392879c9edc347eca797188ec901b1239b75aa8",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/O32.jpg",
+      "bytes": 253747,
+      "sha256": "90da126f7e09fc8102dcbf0f5a85f224c0d73494c1ff546d3e15757068898eee",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/O33.jpg",
+      "bytes": 254824,
+      "sha256": "21c19048457b009fa35696e2a18deffc7857d633a2727274e0c6d76654189ac6",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/O34.jpg",
+      "bytes": 254611,
+      "sha256": "f57a44ae8de0f21c4458a71688fcce12d3494c4cf8d9c647f9137bee7f53da62",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/P01.jpg",
+      "bytes": 286679,
+      "sha256": "a43ca6de01908762920daa00e346e5246f88b2fbf0cd34ec8d8c5de1fc96fd49",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/P02.jpg",
+      "bytes": 262377,
+      "sha256": "8e1e7b4272f569ae73bc437b36a80ed527c9e29ac9ad64d27c6e9ea676339989",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/P03.jpg",
+      "bytes": 267369,
+      "sha256": "43d54986a9f261bab7316a89edba18ebff6d51c338a82bb65fbe9c96dc6fd1b0",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/P04.jpg",
+      "bytes": 270956,
+      "sha256": "006e99e2ab2c06f1c5db1955dc31851da99cc602865bb1e8b7596bddf119ceea",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/P05.jpg",
+      "bytes": 241400,
+      "sha256": "4bbc05f59b25c680975829e437530343d1fc0b835744a2a85b9e013a9d7f19f0",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/P06.jpg",
+      "bytes": 263939,
+      "sha256": "f683e25fc0d3d1c0ac1e47d70d127b53223ee55b6261889d298a32a8fe5fbad8",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/P07.jpg",
+      "bytes": 238378,
+      "sha256": "9f9f9c5fcd564a2ac035fef2acbcaed81ee003c62367582dddb610effe4afc32",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/P08.jpg",
+      "bytes": 242319,
+      "sha256": "b7af2328237a98d114024338f6160f31fb308ed344b12ad07f9a2a1ebfca418f",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/P09.jpg",
+      "bytes": 240005,
+      "sha256": "8d7178a7d7458d0d42b539d150640306cea78f69afd9b5c4b9d857b22b7cba47",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/P10.jpg",
+      "bytes": 240172,
+      "sha256": "6cef6be44fed326f944d6ce4d8c1a8c8ca938c7525a9db6d776108a448ba0dac",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/P11.jpg",
+      "bytes": 215210,
+      "sha256": "f90e6334ab959fb791f9bdc83ee9442f895152380829e791f8c3ea4a426670bb",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/P12.jpg",
+      "bytes": 277892,
+      "sha256": "f163d05cd766d512e7d5d2dcc34c3eb18c33382ceafb8cd39da7a2492e506084",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/P13.jpg",
+      "bytes": 237982,
+      "sha256": "8229d39910265fb7cb63507fa0bf6ae668d05488aa5c18034818fcc8556cd7a9",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/P14.jpg",
+      "bytes": 216899,
+      "sha256": "a9a50bea88a133994c668994c7efc47aead88a20ec25e1b24dffd86ba5ad60a7",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/P15.jpg",
+      "bytes": 235544,
+      "sha256": "2b306dfbc68b3619668e1affb25349da69436603c30db1de826be6d28d1a299b",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/P16.jpg",
+      "bytes": 281233,
+      "sha256": "2cd6736b829f8533cc358adb354f5ba1402e52117bbdc09784556e1d038a5d95",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/P17.jpg",
+      "bytes": 168579,
+      "sha256": "afff13a10df5311eb7472c1d722d5984aba60b1c95d37459747dcfc516b7b042",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/P18.jpg",
+      "bytes": 279694,
+      "sha256": "d70339b5d68aa2344fbf08b66a59f787fe74670caeabf4e81586c608142cd885",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/P19.jpg",
+      "bytes": 221678,
+      "sha256": "1daabaaabae435fa956a56ab32f2d952182918b0a6f83bc23357c0977bebac2a",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/P20.jpg",
+      "bytes": 280455,
+      "sha256": "337006e6d8e99f7221c49f4746fccd458915406f3bb00abce146dd9d008fa0d1",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/P21.jpg",
+      "bytes": 281266,
+      "sha256": "6f150f5fdf5b9d317299a0469a84017e7c42fda2d8cab034dbe7a29f3212dfdf",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/P22.jpg",
+      "bytes": 289155,
+      "sha256": "e0c3b79e620659c33702035df6f3b7ef7baa3ced80987ca0f10a17754427c851",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/P23.jpg",
+      "bytes": 217732,
+      "sha256": "d494523c66c6c693e5757240b2644458b479a202b3c2c5b0e2d307744e385cd9",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/T01.jpg",
+      "bytes": 223058,
+      "sha256": "f0d666a58d76d3b9a1b0a14088c57571970d7a90870f2a87038a960f31a8f612",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/T02.jpg",
+      "bytes": 226357,
+      "sha256": "a5333867750848184669d51657ee62a0f27debb261330a885436a920f1fbdf8f",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/T03.jpg",
+      "bytes": 222106,
+      "sha256": "7b8a7bff90b259fa9e9c7f62e8087dd9323899b3eed6aff2deef8e3bcf6537ab",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/T04.jpg",
+      "bytes": 221113,
+      "sha256": "3521ced52e6e3cafd4813977d2933b99b46b5ad8b59ad4dc891607b292f2c065",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/T05.jpg",
+      "bytes": 220932,
+      "sha256": "6389dcd35272163f846238b7cfc04aa0d8e52bc2eb56f6ee7a9b9d60999249bd",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/T06.jpg",
+      "bytes": 219415,
+      "sha256": "bff127acdf3a19dfb10fe1eacd3cb3e479fef344bbea20e2c825e1f1598115f2",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/T07.jpg",
+      "bytes": 225764,
+      "sha256": "8abdb545052144cf58ca008bdab4c372b3f4e6812fab877e896e75619a80aad5",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/T08.jpg",
+      "bytes": 222826,
+      "sha256": "186a56c3248196f3290f7a045522c5ba54cd9c93ae978a5ffe38b91c40e27e16",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/T09.jpg",
+      "bytes": 224570,
+      "sha256": "0ff2565d6b11d8f7d8525424b4b2e803b6f04fd9d51a01f6a22186f3fb591de0",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/T10.jpg",
+      "bytes": 232168,
+      "sha256": "5ab5c522a8c7ab3ff77fabcdf15027c0b4e6041b8af696b3d3ae08d6976365b5",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/T11.jpg",
+      "bytes": 243355,
+      "sha256": "db989a16be13a52c03e7b1a6d9418bfd01667a8a8ca3da8eeea89d76b3b9028d",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/T12.jpg",
+      "bytes": 237709,
+      "sha256": "3f3235563405ccd785aa77e2e5ec4fbd3fdce5ba6a2d7c9fe5131be81a219210",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/T13.jpg",
+      "bytes": 235944,
+      "sha256": "095bcc5d1a9dae991ff8d4a2a7f65bd4ae4cc1922d82ed5a00465a3facb616f9",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/T14.jpg",
+      "bytes": 235735,
+      "sha256": "3379ecef5fe04bf2b05b713b023c19fff6b109bacf6ec7d4e7e89aba22f78412",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/T15.jpg",
+      "bytes": 257548,
+      "sha256": "1f37e8e0399edc65e8f15ee2d273046bc59cc19cc8541d921658bcd8acbeef14",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/T16.jpg",
+      "bytes": 257502,
+      "sha256": "f1003705997d5e50c4eefc215fed253fc77f1fce5c048fe9f30db4ed08805eb4",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/T17.jpg",
+      "bytes": 257322,
+      "sha256": "4e6e0bdb130a574866214b8234a1a7a37651320b4474480952407f49207698d9",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/T18.jpg",
+      "bytes": 258517,
+      "sha256": "92cbe0a502a49cfaf01098d3b9a6d79bb2633273ee3633b28c76b706ea5b348a",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/T19.jpg",
+      "bytes": 258821,
+      "sha256": "7abd419c1a1877aacdcf596ab5f7ea4d346d41b3393b5c27eef04bc27d5fb061",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/T20.jpg",
+      "bytes": 258573,
+      "sha256": "3c8f909aa79e42b5a4ed89d8b55b8442ad8e702c371fdb503b2efe500f48bad9",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/T21.jpg",
+      "bytes": 247386,
+      "sha256": "8be9ff5467c91a22292892f33cfcfa7377ad0f67a7a3f489d488640e95ca2179",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/T22.jpg",
+      "bytes": 249291,
+      "sha256": "e65116f8e1d963496c0366e7ecc01112e27ca1d3df17e67f08eb2b888ced8d3f",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/T23.jpg",
+      "bytes": 219017,
+      "sha256": "934a6406e65c629e3c42b07a4d2e196492c30cbe4ab70ed9af71e9de116752bd",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/T24.jpg",
+      "bytes": 216131,
+      "sha256": "d0ea0c677ac167b7cc55b2bda67b820c06aec290bc175b0d215980a1debe1122",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/T25.jpg",
+      "bytes": 217525,
+      "sha256": "678e2d0a38798e7d37d9e4a3ff21f6a383b9e91d47bfd767d2dff9d7e74d983a",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/T26.jpg",
+      "bytes": 217522,
+      "sha256": "9fc5d631272c8a716850d3a9983be5dca363e79c856923d6661a30830bf58ed0",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/T27.jpg",
+      "bytes": 242799,
+      "sha256": "00fbf99f23bbe47acb581b1b94b4ea1dc444dab2511887d6a0c08d2ab0210aad",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/V01.jpg",
+      "bytes": 231123,
+      "sha256": "d9ba3152378179f8a56ad759cce735f0ea4738b33265af0343e78a61ec859944",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/V02.jpg",
+      "bytes": 233250,
+      "sha256": "0e9442503eadf5626b74214f811d243f69e33a79001762c77edffb25739c8803",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/V03.jpg",
+      "bytes": 228774,
+      "sha256": "11cdc4dc9ea8ea9571825d42f1a55c882a12e5ee56369abfa7da9dcb8e0d2d1a",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/V04.jpg",
+      "bytes": 227922,
+      "sha256": "bdc2d6c0c913cd20e8afd688da99e43fb72bbb94ab3e3d39d8ea94d8698e5f59",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/V05.jpg",
+      "bytes": 228822,
+      "sha256": "533ee8dd95acefeb101012776b102dd0e7f45c778554b65a1a01491fd8b49c7c",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/V06.jpg",
+      "bytes": 225989,
+      "sha256": "079d87156c37f2daa5f133644d3bfbcb9d83cc08f7f135d770519c72d8ee0e82",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/V07.jpg",
+      "bytes": 232182,
+      "sha256": "3c11392cf28481f79e01b6180e07a71398bb7f26091fcc4510e159a10d77ba20",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/V08.jpg",
+      "bytes": 229324,
+      "sha256": "bac46dad0b8c9e85d854ef6f95af9458d5fb3238b175e6638a5d25f76fe0d288",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/V09.jpg",
+      "bytes": 231395,
+      "sha256": "b26cc6cb363e11db6f99e75ce8452602b3c9749889309fc75ac48849c2b93947",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/V10.jpg",
+      "bytes": 238043,
+      "sha256": "29ca8a5a259338eca77bbb47422bf272996a40ceb895c3995a56e8db09dff3ff",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/V11.jpg",
+      "bytes": 214488,
+      "sha256": "ccc23765aa5abed0137878baf04d69a6cdcf43f9cf9e24b1acb4ed051d25ef57",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/V12.jpg",
+      "bytes": 290945,
+      "sha256": "4eed2ae17768314c9cb8ec4fc0a6ada2e0f23319cac25ee2d19fbd209ac1c7a2",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/V13.jpg",
+      "bytes": 281125,
+      "sha256": "a588e72bd4686d070fcd0cfeda4d6cfdb3ada871e6cfa710a85e3c3a3fc028c9",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/V14.jpg",
+      "bytes": 262642,
+      "sha256": "de51ef67c277f071996b59cdb3e44e626c5fef2f7b23905ac1830fcfefb61050",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/V15.jpg",
+      "bytes": 169152,
+      "sha256": "41d976794ead09f933f5a85395764c3adc7227b106b0de242af5e2a0da5fdb52",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/V16.jpg",
+      "bytes": 170426,
+      "sha256": "d66f2f5d47b4f5f34e633cce82107dc0a2edb3a00a1e29f2470b42216c36e667",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/V17.jpg",
+      "bytes": 168534,
+      "sha256": "1120a7d21471ba038d11bf7779f3b8b57cf2cae9d0cd10226a951ba0dbfb18cd",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/V18.jpg",
+      "bytes": 268663,
+      "sha256": "941572d57c2f85566f350c45e0477b1b2f993edad43612015bdcd060209fc24d",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/V19.jpg",
+      "bytes": 267786,
+      "sha256": "a1ae462467b95bed1f1bbb7eb78d524eb37c7c69bc20efbea7b7e94d4e5062a5",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/V20.jpg",
+      "bytes": 264661,
+      "sha256": "559c38e843427bd7e59b13f3e4d58cb384816bf8708913950b1582bccb1050c8",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/V21.jpg",
+      "bytes": 267870,
+      "sha256": "569e0937ee34772dae77e86c4a3470289b527d6c3a066eb31dc77e8dd1a26c37",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/V22.jpg",
+      "bytes": 261584,
+      "sha256": "0c4ea4b8a66578cc0be88d46cc9814cbe873dbf528612eab6acfe44e6a4952f3",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/V23.jpg",
+      "bytes": 256408,
+      "sha256": "7908d40747daae2354990f901efb74ab060d52763aa0355bf2ac21c159ec5794",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/V24.jpg",
+      "bytes": 259168,
+      "sha256": "74a6e2855b8cd58e80c48a8d4819815d79415bc5c7d398b621b7478eac7800ce",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/V25.jpg",
+      "bytes": 260255,
+      "sha256": "59c8f7e35918038967a7a140b4e2112a356286907c21700497568969368d83e3",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/V26.jpg",
+      "bytes": 259160,
+      "sha256": "55edb8b79f5d98d13ed3a577ae9413ad65d22167d79881a31c8f62d7249951bb",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/V27.jpg",
+      "bytes": 258981,
+      "sha256": "7c335af3c8a7489b954e025bff460d63a6347b39ad3d2d6a290a21bf423d190a",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/V28.jpg",
+      "bytes": 258849,
+      "sha256": "2594c7e932530438a27dac3ae95177173187cbb318c0efe3c8a727593b0035d0",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/V29.jpg",
+      "bytes": 258974,
+      "sha256": "9e736f0d51c74b44f558c371c2200efc4f973744174ba79bbf2430dba4119682",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/V30.jpg",
+      "bytes": 259662,
+      "sha256": "370ceac8beaca3ac2e8cc09703b76439efa2d7f6efd1107b600ef5b70e460658",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/V31.jpg",
+      "bytes": 259317,
+      "sha256": "23643fd7f559a2d4111b2f7db0947a141dbd87e06f93dbde422a31e7fefe6332",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/V32.jpg",
+      "bytes": 260054,
+      "sha256": "39b83d69a66325c5a7aecc5db672da7a3e4c8b8516b953614579695b8e1878a9",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/examples/V33.jpg",
+      "bytes": 217287,
+      "sha256": "80afeb3e60f019ac63a3d8cdf3e890667f3b197b2cc3bbd818b0d47af1c2edf4",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/families.css",
+      "bytes": 9098,
+      "sha256": "bdcbddc009a4d109eabccd534afff80456f497c912101dbdbd53e65ee5cbd342"
+    },
+    {
+      "path": "docs/hud-study/images/01-hud-16x9-v2.png",
+      "bytes": 2475003,
+      "sha256": "97d42f8046ff645160c62213459cfbcb4ec8049fe4819ffe53030d7ef2f41385",
+      "pixels": [
+        1672,
+        941
+      ],
+      "format": "PNG"
+    },
+    {
+      "path": "docs/hud-study/images/02-hud-ultrawide-v1.png",
+      "bytes": 2897999,
+      "sha256": "4785f764f12de0964b492cf98a20b651d6a79fd8820dc6421e18bccc3372ac63",
+      "pixels": [
+        1931,
+        814
+      ],
+      "format": "PNG"
+    },
+    {
+      "path": "docs/hud-study/images/02-hud-ultrawide-v2.png",
+      "bytes": 2757180,
+      "sha256": "976f05c03da00dcaf38d07ae1d26882330bc39ac24c7cb6e4009824dceec879d",
+      "pixels": [
+        1932,
+        814
+      ],
+      "format": "PNG"
+    },
+    {
+      "path": "docs/hud-study/images/03-hud-compacto.png",
+      "bytes": 2474983,
+      "sha256": "5e0645386612f4d54d89f255823661587d00506c778d45eec9d4f2270bf79d55",
+      "pixels": [
+        1672,
+        941
+      ],
+      "format": "PNG"
+    },
+    {
+      "path": "docs/hud-study/images/04-personagem-inventario.png",
+      "bytes": 2593984,
+      "sha256": "a0407a4ee7d04d7ca5055f7b370a3a5ca56c349909ade306707dd8abe1f2965d",
+      "pixels": [
+        1672,
+        941
+      ],
+      "format": "PNG"
+    },
+    {
+      "path": "docs/hud-study/images/05-fundo-menus.png",
+      "bytes": 2168989,
+      "sha256": "6883e5223ec8b185a7e52248d7540e3f8cb53aecc8f8ebee5b0b5c130db9d1b5",
+      "pixels": [
+        1672,
+        941
+      ],
+      "format": "PNG"
+    },
+    {
+      "path": "docs/hud-study/images/06-menu-principal-preview.jpg",
+      "bytes": 251395,
+      "sha256": "9d9b5544d62193f1f7d32c5759b35ef766823ada6ba78ced3235f6bc8ce3f924",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/images/07-hud-native-16x9-v1.png",
+      "bytes": 2721679,
+      "sha256": "c5bc5e6d324e6b479f2dab673729b6d941921b80c2204ce2055075b1b3fa608a",
+      "pixels": [
+        1672,
+        941
+      ],
+      "format": "PNG"
+    },
+    {
+      "path": "docs/hud-study/images/08-hud-native-4x3-v1.png",
+      "bytes": 2811240,
+      "sha256": "434823702cfda7167ee2e16b444c5a92c515540af32b5419d5f26da0c802225c",
+      "pixels": [
+        1448,
+        1086
+      ],
+      "format": "PNG"
+    },
+    {
+      "path": "docs/hud-study/images/catalogo-preview.jpg",
+      "bytes": 220105,
+      "sha256": "b1475b7742407e5c97372575b8a47e32ca12758d979ea3857ab0495fffe5a22d",
+      "pixels": [
+        1905,
+        1072
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/images/logo-d3d-reference.webp",
+      "bytes": 95610,
+      "sha256": "6e57a6d1478fe37800a13f4bbeef1c76c76d9f5cdd41b1d3b425bce99564b124",
+      "pixels": [
+        640,
+        160
+      ],
+      "format": "WEBP"
+    },
+    {
+      "path": "docs/hud-study/index.html",
+      "bytes": 4363,
+      "sha256": "867935934cce952d0f9b156fc5ce0199915f0a39478f0dc0355e01355ac3a946"
+    },
+    {
+      "path": "docs/hud-study/native-hud-r1.json",
+      "bytes": 13388,
+      "sha256": "f13860a22be2683e9f7de37749b7222bb5f485142b0885b6e9ee477e6a0be8d5"
+    },
+    {
+      "path": "docs/hud-study/prompts.json",
+      "bytes": 15593,
+      "sha256": "4b8b04428e7f2bc2cfd84ac18e5d9763b078eb574bf06a5ec1571840a2b30b95"
+    },
+    {
+      "path": "docs/hud-study/provenance.json",
+      "bytes": 5488,
+      "sha256": "f9b423e7c64a4cd7b2fd6027bf3dc944309e7020fe9a3678d22609d99ca1b752"
+    },
+    {
+      "path": "docs/hud-study/responsive/F03-compacto.jpg",
+      "bytes": 130559,
+      "sha256": "d50b6d99f36a4e4df07c0d65bbe0f1bc048652dd86ae7616ab37b37b305c384a",
+      "pixels": [
+        1280,
+        720
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/responsive/F03-ultrawide.jpg",
+      "bytes": 279001,
+      "sha256": "b4fada97d1bd0bad026b50b0e849232b33a58a2b7e47dcbfa4fd10d93f952699",
+      "pixels": [
+        2496,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/responsive/F04-compacto.jpg",
+      "bytes": 109400,
+      "sha256": "5e5a751781cfc0e9748d32c7adb033015d677a84c7ca0e98d8c8f05fde41fc29",
+      "pixels": [
+        1280,
+        720
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/responsive/G01-compacto.jpg",
+      "bytes": 141279,
+      "sha256": "2c2b4063a04fb7b1f89328fb8e8a1c4cf60544221e72d9b121dc9edf58fda5d0",
+      "pixels": [
+        1280,
+        720
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/responsive/G01-ultrawide.jpg",
+      "bytes": 383905,
+      "sha256": "1108a276ada7fa06bd929cf577b5ab44ce49bf20c2ec8acea45a499e6ede2882",
+      "pixels": [
+        2496,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/responsive/G05-compacto.jpg",
+      "bytes": 137001,
+      "sha256": "3e14923d8bd20b5da7920c1af705cb717a27ca319428b2bbba3590a586e6f3de",
+      "pixels": [
+        1280,
+        720
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/responsive/G06-compacto.jpg",
+      "bytes": 140655,
+      "sha256": "2069f4db37819b5d1962d205fc9fc10e7881b5d01a584730b8687ceb8f7afbe6",
+      "pixels": [
+        1280,
+        720
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/responsive/O08-compacto.jpg",
+      "bytes": 128247,
+      "sha256": "fa147d8d5702d21653f1db16ebadf9f8c59f772e29379c68471070f62ec9c9c1",
+      "pixels": [
+        1280,
+        720
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/responsive/O21-compacto.jpg",
+      "bytes": 129222,
+      "sha256": "c1f2892223392c160060e8ea28f22d9ae3ce587fb3125a05ba5b6b01e9384d03",
+      "pixels": [
+        1280,
+        720
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/responsive/O30-compacto.jpg",
+      "bytes": 121191,
+      "sha256": "f32828714ede8f11b09254cbad8e351d486ea8b1f586fbc77e1a87e2aea4cf60",
+      "pixels": [
+        1280,
+        720
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/responsive/P03-compacto-inventario.jpg",
+      "bytes": 145867,
+      "sha256": "c18eec462e52317c932b0094a89d98b8497f9aae5209b332a58fee0959fdc693",
+      "pixels": [
+        1280,
+        720
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/responsive/P03-compacto-personagem.jpg",
+      "bytes": 152912,
+      "sha256": "84bb848c5d0a3927ae7fd82ce8f651982779456b641667cbb27f02d5be8f5f2c",
+      "pixels": [
+        1280,
+        720
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/responsive/P03-ultrawide.jpg",
+      "bytes": 376643,
+      "sha256": "9069031b7c20602646f95559933eeb809a825293b7ce158ef4ccad088616e271",
+      "pixels": [
+        2496,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/responsive/P04-compacto.jpg",
+      "bytes": 149932,
+      "sha256": "3ff63dda3366bf9434de527b0dcc1c72553823fe7eeb7c010e987dc0d4b9f6f2",
+      "pixels": [
+        1280,
+        720
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/responsive/P08-compacto.jpg",
+      "bytes": 136573,
+      "sha256": "979d4d69f46a2824f37d10661892b8e548e9b4dac96fa52db43a00fd1ac907d0",
+      "pixels": [
+        1280,
+        720
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/responsive/P11-compacto.jpg",
+      "bytes": 114510,
+      "sha256": "dd9f0e05b88126bffc1c8acb3258da195e2652a324f9a98db76be5b4441913dd",
+      "pixels": [
+        1280,
+        720
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/responsive/P11-ultrawide.jpg",
+      "bytes": 329977,
+      "sha256": "978e939880c83b7eaea84b23fa8a8c8dcc219d93e79714b7951b59a17677a682",
+      "pixels": [
+        2496,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/responsive/P16-ultrawide.jpg",
+      "bytes": 412761,
+      "sha256": "e495e794ba2c3344ce8f533f0a39418db199fc66d8f198cfca7fd3f778fde676",
+      "pixels": [
+        2496,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/responsive/P17-compacto.jpg",
+      "bytes": 99686,
+      "sha256": "c3c570f527deb1da158ee52468c1cd8f9107860cfa826b37e6b24df17ea3cb71",
+      "pixels": [
+        1280,
+        720
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/responsive/P20-compacto.jpg",
+      "bytes": 165583,
+      "sha256": "d1fdb24a80c7e3058af6fc2c1426ad97e187ce43966a342d949754d127f8cf24",
+      "pixels": [
+        1280,
+        720
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/responsive/P22-compacto.jpg",
+      "bytes": 170575,
+      "sha256": "200e76adb7375d1d830da3c5ea0887c3bbcaa5686b51fc8742c69ca4d1b007c6",
+      "pixels": [
+        1280,
+        720
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/responsive/T11-compacto.jpg",
+      "bytes": 138724,
+      "sha256": "8761af558af84cb5f10cd981960cf75ca797bc8ec516f4a987a558bc828311ae",
+      "pixels": [
+        1280,
+        720
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/responsive/T11-ultrawide.jpg",
+      "bytes": 352801,
+      "sha256": "a7cdc7254ad2cc530ea6c78a00bb535a863ec04616a6224883ca183e810fbb28",
+      "pixels": [
+        2496,
+        1080
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/responsive/V02-compacto.jpg",
+      "bytes": 127546,
+      "sha256": "1a7d9ec3286442bf10e883ea7cc370dc746f4f982c4b877c69a0e2dae151b1cd",
+      "pixels": [
+        1280,
+        720
+      ],
+      "format": "JPEG"
+    },
+    {
+      "path": "docs/hud-study/study.css",
+      "bytes": 13739,
+      "sha256": "0077c199dc1ec9a7f4fdf32994e59fad8f6263319bbb0db2d0396df9be2fd329"
+    },
+    {
+      "path": "docs/hud-study/study.js",
+      "bytes": 17862,
+      "sha256": "027727889b1f986b8702d4b0db12d31dec5fb43f35ddfd4212c6124fb1bff87d"
+    }
+  ],
+  "handoffFiles": [
+    {
+      "path": "docs/hud-study/PUBLIC-FILES.txt",
+      "bytes": 9885,
+      "sha256": "b0a56be1801276187be25c476334fef5d7efe6f33861a3d2f9fad04cb26cdefd"
+    },
+    {
+      "path": "docs/hud-study/PUBLIC-HANDOFF.json",
+      "bytes": null,
+      "sha256": null,
+      "note": "Auto-referência; hash e tamanho próprios são omitidos para evitar circularidade."
+    },
+    {
+      "path": "docs/hud-study/PUBLIC-HANDOFF.md",
+      "bytes": 2932,
+      "sha256": "7e413e8dbeb7bd4a94c9698a7352c07308e104f51b62635146c7fd47c61cd195"
+    }
+  ]
+}

@@ -26,6 +26,7 @@
 #include "automap.h"
 #include "capture.h"
 #include "control/control.hpp"
+#include "control/d3d_hud.hpp"
 #include "cursor.h"
 #include "dead.h"
 #ifdef _DEBUG
@@ -249,7 +250,7 @@ void LeftMouseCmd(bool bShift)
 {
 	bool bNear;
 
-	assert(!GetMainPanel().contains(MousePosition));
+	assert(!IsPointOnD3dHud(MousePosition));
 
 	if (leveltype == DTYPE_TOWN) {
 		CloseGoldWithdraw();
@@ -371,7 +372,7 @@ void LeftMouseDown(uint16_t modState)
 	const bool isShiftHeld = (modState & SDL_KMOD_SHIFT) != 0;
 	const bool isCtrlHeld = (modState & SDL_KMOD_CTRL) != 0;
 
-	if (!GetMainPanel().contains(MousePosition)) {
+	if (!IsPointOnD3dHud(MousePosition)) {
 		if (!gmenu_is_active() && !TryIconCurs()) {
 			if (QuestLogIsOpen && GetLeftPanel().contains(MousePosition)) {
 				QuestlogESC();
@@ -474,6 +475,8 @@ void RightMouseDown(bool isShiftHeld)
 	if (DidRightClickPartyPortrait())
 		return;
 	if (pcurs == CURSOR_HAND) {
+		if (IsPointOnD3dHud(MousePosition))
+			return;
 		CheckPlrSpell(isShiftHeld);
 	} else if (pcurs > CURSOR_HAND && pcurs < CURSOR_FIRSTITEM) {
 		NewCursor(CURSOR_HAND);
@@ -689,7 +692,7 @@ bool CanControlTownCamera(bool requireWorldPointer = true)
 	if (!requireWorldPointer)
 		return true;
 	if (MousePosition.x < 0 || MousePosition.x >= gnScreenWidth || MousePosition.y < 0 || MousePosition.y >= gnViewportHeight
-	    || GetMainPanel().contains(MousePosition)
+	    || IsPointOnD3dHud(MousePosition)
 	    || (IsLeftPanelOpen() && GetLeftPanel().contains(MousePosition))
 	    || (IsRightPanelOpen() && GetRightPanel().contains(MousePosition)))
 		return false;
@@ -1007,6 +1010,7 @@ void RunGameLoop(interface_mode uMsg)
 		}
 		if (!gbRunGame)
 			break;
+		music_update();
 
 		bool drawGame = true;
 		bool processInput = true;

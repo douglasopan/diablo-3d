@@ -2,6 +2,7 @@
 #include "control.hpp"
 #include "control_chat.hpp"
 #include "control_flasks.hpp"
+#include "control/d3d_hud.hpp"
 
 #include "automap.h"
 #include "controls/control_mode.hpp"
@@ -10,6 +11,7 @@
 #include "engine/backbuffer_state.hpp"
 #include "engine/load_cel.hpp"
 #include "engine/render/clx_render.hpp"
+#include "engine/render/primitive_render.hpp"
 #include "engine/render/ui_overlay_regions.hpp"
 #include "engine/trn.hpp"
 #include "gamemenu.h"
@@ -164,7 +166,7 @@ int CapStatPointsToAdd(int remainingStatPoints, const Player &player, CharacterA
 	return std::min(remainingStatPoints, pointsToReachCap);
 }
 
-int DrawDurIcon4Item(const Surface &out, Item &pItem, int x, int c)
+int DrawDurIcon4Item(const Surface &out, Item &pItem, int x, int c, int y)
 {
 	const int durabilityThresholdGold = 5;
 	const int durabilityThresholdRed = 2;
@@ -206,7 +208,6 @@ int DrawDurIcon4Item(const Surface &out, Item &pItem, int x, int c)
 	}
 
 	// Draw icon
-	const int y = -17 + GetMainPanel().position.y;
 	if (partition > 0) {
 		const Surface stenciledBuffer = out.subregionY(y - partition, partition);
 		ClxDraw(stenciledBuffer, { x, partition }, (*pDurIcons)[c + 8]); // Gold icon
@@ -273,7 +274,7 @@ void CalculatePanelAreas()
 	RightPanel.position.y = LeftPanel.position.y;
 
 	gnViewportHeight = gnScreenHeight;
-	if (gnScreenWidth <= MainPanel.size.width) {
+	if (gnScreenWidth <= MainPanel.size.width && ControlMode == ControlTypes::VirtualGamepad) {
 		// Part of the screen is fully obscured by the UI
 		gnViewportHeight -= MainPanel.size.height;
 	}
@@ -433,12 +434,20 @@ std::expected<void, std::string> InitMainPanel()
 
 void DrawMainPanel(const Surface &out)
 {
+	if (IsD3dHudEnabled())
+		return;
 	DrawPanelBox(out, MakeSdlRect(0, sgbPlrTalkTbl + PanelPaddingHeight, GetMainPanel().size.width, GetMainPanel().size.height), GetMainPanel().position);
 	DrawInfoBox(out);
 }
 
 void DrawMainPanelButtons(const Surface &out)
 {
+	if (IsD3dHudEnabled()) {
+		const int count = IsChatAvailable() ? TotalMpMainPanelButtons : TotalSpMainPanelButtons;
+		for (int i = 0; i < count; ++i)
+			DrawD3dHudPanelButton(out, i, MainPanelButtons[i]);
+		return;
+	}
 	const Point mainPanelPosition = GetMainPanel().position;
 
 	for (int i = 0; i < TotalSpMainPanelButtons; i++) {
@@ -475,18 +484,14 @@ void CheckMainPanelButton()
 	const int totalButtons = IsChatAvailable() ? TotalMpMainPanelButtons : TotalSpMainPanelButtons;
 
 	for (int i = 0; i < totalButtons; i++) {
-		Rectangle button = MainPanelButtonRect[i];
-
-		SetPanelObjectPosition(UiPanels::Main, button);
+		const Rectangle button = GetD3dHudPanelButtonRect(i);
 
 		if (button.contains(MousePosition)) {
 			SetMainPanelButtonDown(i);
 		}
 	}
 
-	Rectangle spellSelectButton = SpellButtonRect;
-
-	SetPanelObjectPosition(UiPanels::Main, spellSelectButton);
+	const Rectangle spellSelectButton = GetD3dHudSpellRect();
 
 	if (!SpellSelectFlag && spellSelectButton.contains(MousePosition)) {
 		if ((SDL_GetModState() & SDL_KMOD_SHIFT) != 0) {
@@ -503,18 +508,14 @@ void CheckMainPanelButton()
 
 void CheckMainPanelButtonDead()
 {
-	Rectangle menuButton = MainPanelButtonRect[PanelButtonMainmenu];
-
-	SetPanelObjectPosition(UiPanels::Main, menuButton);
+	const Rectangle menuButton = GetD3dHudPanelButtonRect(PanelButtonMainmenu);
 
 	if (menuButton.contains(MousePosition)) {
 		SetMainPanelButtonDown(PanelButtonMainmenu);
 		return;
 	}
 
-	Rectangle chatButton = MainPanelButtonRect[PanelButtonSendmsg];
-
-	SetPanelObjectPosition(UiPanels::Main, chatButton);
+	const Rectangle chatButton = GetD3dHudPanelButtonRect(PanelButtonSendmsg);
 
 	if (chatButton.contains(MousePosition)) {
 		SetMainPanelButtonDown(PanelButtonSendmsg);
@@ -555,9 +556,7 @@ void CheckMainPanelButtonUp()
 
 		MainPanelButtons[i] = false;
 
-		Rectangle button = MainPanelButtonRect[i];
-
-		SetPanelObjectPosition(UiPanels::Main, button);
+		const Rectangle button = GetD3dHudPanelButtonRect(i);
 
 		if (!button.contains(MousePosition))
 			continue;
@@ -653,9 +652,7 @@ void CheckLevelButton()
 		return;
 	}
 
-	Rectangle button = LevelButtonRect;
-
-	SetPanelObjectPosition(UiPanels::Main, button);
+	const Rectangle button = GetD3dHudLevelButtonRect();
 
 	if (!LevelButtonDown && button.contains(MousePosition))
 		LevelButtonDown = true;
@@ -663,9 +660,7 @@ void CheckLevelButton()
 
 void CheckLevelButtonUp()
 {
-	Rectangle button = LevelButtonRect;
-
-	SetPanelObjectPosition(UiPanels::Main, button);
+	const Rectangle button = GetD3dHudLevelButtonRect();
 
 	if (button.contains(MousePosition)) {
 		OpenCharPanel();
@@ -677,6 +672,18 @@ void DrawLevelButton(const Surface &out)
 {
 	if (IsLevelUpButtonVisible()) {
 		const int nCel = LevelButtonDown ? 2 : 1;
+		if (IsD3dHudEnabled()) {
+			OwnedSurface button(41, 22);
+			FillRect(button, 0, 0, 41, 22, 0);
+			RenderClxSprite(button, (*pChrButtons)[nCel], { 0, 0 });
+			DrawD3dHudSurface(out, button, GetD3dHudLevelButtonRect(), true);
+			OwnedSurface label(120, 23);
+			FillRect(label, 0, 0, 120, 23, 0);
+			DrawString(label, _("Level Up"), { { 0, 0 }, { 120, 23 } },
+			    { .flags = UiFlags::ColorWhite | UiFlags::AlignCenter | UiFlags::KerningFitSpacing });
+			DrawD3dHudSurface(out, label, GetD3dHudLevelLabelRect(), true);
+			return;
+		}
 		DrawString(out, _("Level Up"), { GetMainPanel().position + Displacement { 0, LevelButtonRect.position.y - 23 }, { 120, 0 } },
 		    { .flags = UiFlags::ColorWhite | UiFlags::AlignCenter | UiFlags::KerningFitSpacing });
 		RenderClxSprite(out, (*pChrButtons)[nCel], GetMainPanel().position + Displacement { LevelButtonRect.position.x, LevelButtonRect.position.y });
@@ -751,6 +758,18 @@ void ReleaseChrBtns(bool addAllStatPoints)
 
 void DrawDurIcon(const Surface &out)
 {
+	Player &myPlayer = *MyPlayer;
+	if (IsD3dHudEnabled()) {
+		OwnedSurface icons(152, 32);
+		FillRect(icons, 0, 0, 152, 32, 0);
+		int x = 120;
+		x = DrawDurIcon4Item(icons, myPlayer.InvBody[INVLOC_HEAD], x, 3, 32);
+		x = DrawDurIcon4Item(icons, myPlayer.InvBody[INVLOC_CHEST], x, 2, 32);
+		x = DrawDurIcon4Item(icons, myPlayer.InvBody[INVLOC_HAND_LEFT], x, 0, 32);
+		DrawDurIcon4Item(icons, myPlayer.InvBody[INVLOC_HAND_RIGHT], x, 0, 32);
+		DrawD3dHudSurface(out, icons, GetD3dHudDurabilityRect(), true);
+		return;
+	}
 	const bool hasRoomBetweenPanels = RightPanel.position.x - (LeftPanel.position.x + LeftPanel.size.width) >= 16 + (32 + 8 + 32 + 8 + 32 + 8 + 32) + 16;
 	const bool hasRoomUnderPanels = MainPanel.position.y - (RightPanel.position.y + RightPanel.size.height) >= 16 + 32 + 16;
 
@@ -765,11 +784,11 @@ void DrawDurIcon(const Surface &out)
 			x -= MainPanel.position.x + MainPanel.size.width - RightPanel.position.x;
 	}
 
-	Player &myPlayer = *MyPlayer;
-	x = DrawDurIcon4Item(out, myPlayer.InvBody[INVLOC_HEAD], x, 3);
-	x = DrawDurIcon4Item(out, myPlayer.InvBody[INVLOC_CHEST], x, 2);
-	x = DrawDurIcon4Item(out, myPlayer.InvBody[INVLOC_HAND_LEFT], x, 0);
-	DrawDurIcon4Item(out, myPlayer.InvBody[INVLOC_HAND_RIGHT], x, 0);
+	const int y = -17 + GetMainPanel().position.y;
+	x = DrawDurIcon4Item(out, myPlayer.InvBody[INVLOC_HEAD], x, 3, y);
+	x = DrawDurIcon4Item(out, myPlayer.InvBody[INVLOC_CHEST], x, 2, y);
+	x = DrawDurIcon4Item(out, myPlayer.InvBody[INVLOC_HAND_LEFT], x, 0, y);
+	DrawDurIcon4Item(out, myPlayer.InvBody[INVLOC_HAND_RIGHT], x, 0, y);
 }
 
 void RedBack(const Surface &out)

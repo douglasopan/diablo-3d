@@ -8,6 +8,7 @@
 #endif
 
 #include "control/control.hpp"
+#include "control/d3d_hud.hpp"
 #include "controls/plrctrls.h"
 #include "cursor.h"
 #include "diablo.h"
@@ -72,7 +73,7 @@ void SimulateMouseMovement(const SDL_Event &event)
 {
 	const Point position = ScaleToScreenCoordinates(event.tfinger.x, event.tfinger.y);
 
-	const bool isInMainPanel = GetMainPanel().contains(position);
+	const bool isInMainPanel = IsPointOnD3dHud(position);
 	const bool isInLeftPanel = GetLeftPanel().contains(position);
 	const bool isInRightPanel = GetRightPanel().contains(position);
 	if (IsStashOpen) {

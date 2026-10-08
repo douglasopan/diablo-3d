@@ -78,6 +78,8 @@ void music_start(_music_id nTrack);
 void music_set_game_context(bool inGame);
 /** Apply soundtrack preferences without restarting an unchanged active track. */
 void music_refresh();
+/** Start a new random Town choice when its finite playthrough has completed. */
+void music_update();
 void sound_disable_music(bool disable);
 int sound_get_or_set_music_volume(int volume);
 int sound_get_or_set_sound_volume(int volume);

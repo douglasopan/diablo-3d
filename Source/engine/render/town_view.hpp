@@ -70,11 +70,16 @@ struct TownViewLightingState {
 	size_t lightLevels = 0;
 	size_t cabinInteriors = 0;
 	bool cabinFireEnabled = true;
+	bool directionalShadowsEnabled = true;
 };
 TownViewLightingState GetTownViewLightingState();
 
 /** Headless evidence for real interior illumination; production defaults on. */
 void SetTownViewCabinFireEnabledForDiagnostics(bool enabled);
+/** Same-camera shadow A/B; only directional geometry shadows are disabled.
+ * Terrain colors, diffuse illumination, depth and selection remain unchanged.
+ * Production and resource reloads default to enabled. */
+void SetTownViewDirectionalShadowsEnabledForDiagnostics(bool enabled);
 /** A nonnegative time freezes visual flames for reproducible captures; negative
  * restores the runtime timer. Simulation time and random state are untouched. */
 void SetTownViewFireTimeForDiagnostics(double seconds);

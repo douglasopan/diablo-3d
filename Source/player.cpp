@@ -15,6 +15,7 @@
 #endif
 
 #include "control/control.hpp"
+#include "control/d3d_hud.hpp"
 #include "controls/control_mode.hpp"
 #include "controls/plrctrls.h"
 #include "cursor.h"
@@ -3142,7 +3143,7 @@ void CheckPlrSpell(bool isShiftHeld, SpellID spellID, SpellType spellType)
 		if (pcurs != CURSOR_HAND)
 			return;
 
-		if (GetMainPanel().contains(MousePosition)) // inside main panel
+		if (IsPointOnD3dHud(MousePosition))
 			return;
 
 		if (

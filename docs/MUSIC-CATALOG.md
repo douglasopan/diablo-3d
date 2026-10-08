@@ -6,20 +6,22 @@ O jogo tem **oito IDs de música ambiente**: seis usados pelo Diablo, incluindo 
 
 ## Lista de composições
 
-Os IDs numéricos abaixo seguem a enumeração nativa. São vínculos técnicos, não números de ordem de um álbum. Os caminhos WAV identificam as músicas originais; o loader procura primeiro um MP3 de mesmo nome quando disponível.
+Esta é a **ordem de produção de 1 a 8**, usada para organizar os arquivos que serão refeitos. O número de produção é separado do ID nativo preservado pelo jogo. Por isso, os arquivos `06.wav`, `06 (2).wav` e `06 (1).mp3` pertencem a Tristram, a sexta entrada da lista, cujo ID técnico é 0. Os caminhos WAV identificam as músicas originais; o loader procura primeiro um MP3 de mesmo nome quando disponível.
 
-| ID | Constante | Local / forma de reprodução | Recurso original completo | Versões autorais fornecidas | Estado de produção |
+| Ordem | ID nativo / constante | Local / forma de reprodução | Recurso original completo | Versões autorais fornecidas | Estado de produção |
 | --- | --- | --- | --- | --- | --- |
-| 0 | `TMUSIC_TOWN` | Tristram, nível 0, inclusive com Hellfire ativo | `music/dtowne.wav` | Nenhuma | Refazer: tema da cidade. |
-| 1 | `TMUSIC_CATHEDRAL` | Catedral, andares 1–4; mapas especiais com tipo Catedral | `music/dlvla.wav` | Nenhuma | Refazer: tema da Catedral. |
-| 2 | `TMUSIC_CATACOMBS` | Catacumbas, andares 5–8; Câmara dos Ossos | `music/dlvlb.wav` | Nenhuma | Refazer: tema das Catacumbas. |
-| 3 | `TMUSIC_CAVES` | Cavernas, andares 9–12; Abastecimento de Água Envenenado | `music/dlvlc.wav` | Nenhuma | Refazer: tema das Cavernas. |
-| 4 | `TMUSIC_HELL` | Inferno, andares 13–16, incluindo o andar de Diablo | `music/dlvld.wav` | Nenhuma | Refazer: tema do Inferno. |
-| 5 | `TMUSIC_NEST` | Ninho / Hive, andares 17–20, conteúdo condicional Hellfire | `music/dlvlf.wav` | Nenhuma | Refazer se incluído o escopo Hellfire. |
-| 6 | `TMUSIC_CRYPT` | Cripta, andares 21–24, conteúdo condicional Hellfire | `music/dlvle.wav` | Nenhuma | Refazer se incluído o escopo Hellfire. |
-| 7 | `TMUSIC_INTRO` | Menu principal e telas que mantêm sua música, incluindo créditos, suporte, configurações e seleção de herói | `music/dintro.wav` | `Main_Menu_Rock2.mp3` e `Main_Menu.mp3` | Rock 2 é a nova escolha solicitada pelo autor; conservar a primeira composição como alternativa selecionável. |
+| **1** | 7 — `TMUSIC_INTRO` | Menu principal, créditos, suporte, configurações e seleção de herói | `music/dintro.wav` | `Main_Menu_Rock2.mp3` e `Main_Menu.mp3` | Rock2 é o padrão local; primeira composição preservada como alternativa. |
+| **2** | 1 — `TMUSIC_CATHEDRAL` | Catedral, andares 1–4; mapas especiais com tipo Catedral | `music/dlvla.wav` | Nenhuma | Refazer: tema da Catedral. |
+| **3** | 2 — `TMUSIC_CATACOMBS` | Catacumbas, andares 5–8; Câmara dos Ossos | `music/dlvlb.wav` | Nenhuma | Refazer: tema das Catacumbas. |
+| **4** | 3 — `TMUSIC_CAVES` | Cavernas, andares 9–12; Abastecimento de Água Envenenado | `music/dlvlc.wav` | Nenhuma | Refazer: tema das Cavernas. |
+| **5** | 4 — `TMUSIC_HELL` | Inferno, andares 13–16, incluindo o andar de Diablo | `music/dlvld.wav` | Nenhuma | Refazer: tema do Inferno. |
+| **6** | 0 — `TMUSIC_TOWN` | Tristram, nível 0, inclusive com Hellfire ativo | `music/dtowne.wav` | `06.wav` → Tristram 1; `06 (2).wav` → Tristram 2; `06 (1).mp3` → Tristram 3 | Três opções locais validadas no decoder; fontes preservadas. Seleção fixa ou aleatória ao fim de cada música. A terceira aparenta ser outra exportação da primeira gravação. |
+| **7** | 5 — `TMUSIC_NEST` | Ninho / Hive, andares 17–20, conteúdo condicional Hellfire | `music/dlvlf.wav` | Nenhuma | Refazer se incluído o escopo Hellfire. |
+| **8** | 6 — `TMUSIC_CRYPT` | Cripta, andares 21–24, conteúdo condicional Hellfire | `music/dlvle.wav` | Nenhuma | Refazer se incluído o escopo Hellfire. |
 
-Portanto, depois das duas alternativas já fornecidas para o menu, faltam **cinco composições dos ambientes do Diablo** e, separadamente, **duas do Hellfire**. Não foram fornecidas novas composições para esses sete ambientes. O estado da instalação e dos testes pertence ao contrato [MUSIC.md](MUSIC.md), evitando confundir arquivo recebido com versão validada.
+Foram fornecidos cinco arquivos: duas opções para o menu e três para Tristram. Isso não implica cinco gravações distintas: a comparação local sugere que Tristram 3 é uma exportação MP3 da primeira gravação, mantida como opção separada conforme solicitado. Faltam **quatro temas dos ambientes do Diablo** — Catedral, Catacumbas, Cavernas e Inferno — e, separadamente, **dois do Hellfire** — Ninho e Cripta. O estado da instalação, hashes e testes pertence ao contrato [MUSIC.md](MUSIC.md), evitando confundir arquivo recebido, decoder validado e revisão artística.
+
+No modo global Rock, Tristram usa um sorteio uniforme entre os arquivos disponíveis. Um novo sorteio independente acontece ao fim de cada faixa e pode repetir a mesma opção. O modo Custom permite fixar Tristram 1, 2 ou 3, escolher Random ou manter a original; Vanilla conserva a trilha original. A seleção aleatória não consome o RNG da simulação. Os WAVs originais recebidos continuam preservados e os MP3s convertidos ficam nos caminhos `music/d3d/town-rock.mp3` e `music/d3d/town-alternative.mp3`; `music/d3d/town-third.mp3` é uma cópia exata do MP3 recebido, sem recompressão.
 
 Fontes: enumeração em [`sound.h`](../Source/engine/sound.h), caminhos originais e substituições em [`music_catalog.hpp`](../Source/engine/music_catalog.hpp), relação entre tipo de ambiente e faixa em `GetLevelMusic` de [`sound.cpp`](../Source/engine/sound.cpp) e andares em `GetLevelType` de [`gendung.cpp`](../Source/levels/gendung.cpp). A carga do nível decide a faixa pelo seu tipo em [`diablo.cpp`](../Source/diablo.cpp).
 

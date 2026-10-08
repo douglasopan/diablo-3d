@@ -1,7 +1,9 @@
 #include "control.hpp"
 #include "control_panel.hpp"
+#include "control/d3d_hud.hpp"
 #include "controls/control_mode.hpp"
 #include "engine/render/primitive_render.hpp"
+#include "gmenu.h"
 #include "inv.h"
 #include "levels/trigs.h"
 #include "options.h"
@@ -31,9 +33,7 @@ void PrintInfo(const Surface &out)
 		return;
 
 	const int space[] = { 18, 12, 6, 3, 0 };
-	Rectangle infoBox = InfoBoxRect;
-
-	SetPanelObjectPosition(UiPanels::Main, infoBox);
+	Rectangle infoBox = GetD3dHudInfoRect();
 
 	const auto newLineCount = static_cast<int>(c_count(InfoString.str(), '\n'));
 	const int spaceIndex = std::min(4, newLineCount);
@@ -47,12 +47,20 @@ void PrintInfo(const Surface &out)
 
 	SpeakText(InfoString);
 
-	DrawString(out, InfoString, infoBox,
+	std::optional<OwnedSurface> hudInfo;
+	if (IsD3dHudEnabled()) {
+		hudInfo.emplace(400, 64);
+		DrawD3dHudPlate(*hudInfo, { { 0, 0 }, { 400, 64 } });
+	}
+	const Surface &textOut = hudInfo ? *hudInfo : out;
+	DrawString(textOut, InfoString, hudInfo ? Rectangle { { 0, spacing / 2 }, { 400, 64 } } : infoBox,
 	    {
 	        .flags = InfoColor | UiFlags::AlignCenter | UiFlags::VerticalCenter | UiFlags::KerningFitSpacing,
 	        .spacing = 2,
 	        .lineHeight = lineHeight,
 	    });
+	if (hudInfo)
+		DrawD3dHudSurface(out, *hudInfo, GetD3dHudInfoRect());
 }
 
 Rectangle GetFloatingInfoRect(const int lineHeight, const int textSpacing)
@@ -145,12 +153,13 @@ Rectangle GetFloatingInfoRect(const int lineHeight, const int textSpacing)
 				continue;
 
 			const Item &item = player.SpdList[i];
-			Point itemPosition = InvRect[i + SLOTXY_BELT_FIRST].position;
+			const Rectangle slot = GetD3dHudBeltSlotRect(i);
+			Point itemPosition = slot.position;
 
-			itemPosition.x += GetInventorySize(item).width * InventorySlotSizeInPixels.width / 2; // Align position to center of the item graphic
+			itemPosition.x += slot.size.width / 2; // Align with the edited and scaled belt slot.
 			itemPosition.x -= maxW / 2;                                                           // Align position to the center of the floating item info box
 
-			const Point screen = GetMainPanel().position + Displacement { itemPosition.x, itemPosition.y };
+			const Point screen = itemPosition;
 
 			return { { screen.x, screen.y }, { maxW, totalH } };
 		}
@@ -314,9 +323,7 @@ void CheckPanelInfo()
 	const int totalButtons = IsChatAvailable() ? TotalMpMainPanelButtons : TotalSpMainPanelButtons;
 
 	for (int i = 0; i < totalButtons; i++) {
-		Rectangle button = MainPanelButtonRect[i];
-
-		SetPanelObjectPosition(UiPanels::Main, button);
+		const Rectangle button = GetD3dHudPanelButtonRect(i);
 
 		if (button.contains(MousePosition)) {
 			if (i != 7) {
@@ -335,9 +342,7 @@ void CheckPanelInfo()
 		}
 	}
 
-	Rectangle spellSelectButton = SpellButtonRect;
-
-	SetPanelObjectPosition(UiPanels::Main, spellSelectButton);
+	const Rectangle spellSelectButton = GetD3dHudSpellRect();
 
 	if (!SpellSelectFlag && spellSelectButton.contains(MousePosition)) {
 		InfoString = _("Select current spell button");
@@ -378,9 +383,7 @@ void CheckPanelInfo()
 		}
 	}
 
-	Rectangle belt = BeltRect;
-
-	SetPanelObjectPosition(UiPanels::Main, belt);
+	const Rectangle belt = GetD3dHudBeltRect();
 
 	if (belt.contains(MousePosition))
 		pcursinvitem = CheckInvHLight();
@@ -391,7 +394,10 @@ void CheckPanelInfo()
 
 void DrawInfoBox(const Surface &out)
 {
-	DrawPanelBox(out, MakeSdlRect(InfoBoxRect.position.x, InfoBoxRect.position.y + PanelPaddingHeight, InfoBoxRect.size.width, InfoBoxRect.size.height), GetMainPanel().position + Displacement { InfoBoxRect.position.x, InfoBoxRect.position.y });
+	if (IsD3dHudEnabled() && gmenu_is_active())
+		return;
+	if (!IsD3dHudEnabled())
+		DrawPanelBox(out, MakeSdlRect(InfoBoxRect.position.x, InfoBoxRect.position.y + PanelPaddingHeight, InfoBoxRect.size.width, InfoBoxRect.size.height), GetMainPanel().position + Displacement { InfoBoxRect.position.x, InfoBoxRect.position.y });
 	if (!MainPanelFlag && !trigflag && pcursinvitem == -1 && pcursstashitem == StashStruct::EmptyCell && pcursstoreitem == -1 && pcursstorebtn == -1 && !SpellSelectFlag && pcurs != CURSOR_HOURGLASS) {
 		InfoString = StringOrView {};
 		InfoColor = UiFlags::ColorWhite;

@@ -150,6 +150,9 @@ struct TownCabinInterior {
 	TownLightVector roomMaximum;
 	std::vector<TownCabinOpening> openings;
 	std::vector<TownLightAperture> apertures;
+	/** The room shell followed by opaque authored window bars. The first
+	 * aperture span borrows this same adjunct's stable apertures vector. */
+	std::vector<TownLightOccluder> lightOccluders;
 	std::vector<TownCabinFireSource> fireSources;
 	TownLightColor fireColor { 1.0F, 0.665F, 0.094F };
 	TownLightColor fireEmissionLinear;

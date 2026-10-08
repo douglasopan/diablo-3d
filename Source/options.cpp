@@ -372,21 +372,36 @@ void OptionEntryEnumBase::SetActiveListIndex(size_t index)
 
 OptionEntryMusicVariant::OptionEntryMusicVariant(_music_id track)
     : OptionEntryEnum<MusicVariant>(MusicTrackCatalog[track].key, OptionEntryFlags::None,
-          MusicTrackCatalog[track].name, MusicTrackCatalog[track].description, MusicVariant::Rock,
+          MusicTrackCatalog[track].name, MusicTrackCatalog[track].description,
+          track == TMUSIC_TOWN ? MusicVariant::Random : MusicVariant::Rock,
           {
               { MusicVariant::Original, N_("Original") },
               { MusicVariant::Rock, N_("Rock") },
           })
     , track_(track)
 {
-	if (track == TMUSIC_INTRO)
+	if (track == TMUSIC_TOWN) {
+		AddEntry(static_cast<int>(MusicVariant::Alternative), N_("Tristram 2"));
+		AddEntry(static_cast<int>(MusicVariant::Random), N_("Random"));
+		AddEntry(static_cast<int>(MusicVariant::Third), N_("Tristram 3"));
+	} else if (track == TMUSIC_INTRO) {
 		AddEntry(static_cast<int>(MusicVariant::Alternative), N_("Main Menu"));
+	}
 }
 
 std::string_view OptionEntryMusicVariant::GetListDescription(size_t index) const
 {
 	if (index == 0)
 		return _("Original");
+	if (track_ == TMUSIC_TOWN) {
+		if (index == 1)
+			return HasReplacement(MusicVariant::Rock) ? _("Tristram 1") : _("Tristram 1 (pending)");
+		if (index == 2)
+			return HasReplacement(MusicVariant::Alternative) ? _("Tristram 2") : _("Tristram 2 (pending)");
+		if (index == 4)
+			return HasReplacement(MusicVariant::Third) ? _("Tristram 3") : _("Tristram 3 (pending)");
+		return HasReplacement(MusicVariant::Random) ? _("Random") : _("Random (pending)");
+	}
 	if (index == 1) {
 		if (track_ == TMUSIC_INTRO)
 			return HasReplacement(MusicVariant::Rock) ? _("Rock2") : _("Rock2 (pending)");
@@ -402,9 +417,12 @@ std::string_view OptionEntryMusicVariant::GetValueDescription() const
 
 bool OptionEntryMusicVariant::HasReplacement(MusicVariant variant) const
 {
+	if (variant == MusicVariant::Random)
+		return track_ == TMUSIC_TOWN && (HasReplacement(MusicVariant::Rock) || HasReplacement(MusicVariant::Alternative) || HasReplacement(MusicVariant::Third));
 	const MusicTrackDefinition &definition = MusicTrackCatalog[track_];
 	const char *path = variant == MusicVariant::Rock ? definition.rockPath
-	    : variant == MusicVariant::Alternative ? definition.alternativePath : "";
+	    : variant == MusicVariant::Alternative ? definition.alternativePath
+	    : variant == MusicVariant::Third && track_ == TMUSIC_TOWN ? definition.thirdPath : "";
 	return path[0] != '\0' && FindAsset(path).ok();
 }
 

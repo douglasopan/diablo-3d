@@ -1,0 +1,248 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://ui/hud.gd" id="1_hud"]
+
+[sub_resource type="StyleBoxFlat" id="ToolsStyle"]
+bg_color = Color(0.025, 0.035, 0.04, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.37, 0.32, 0.23, 1)
+content_margin_left = 10.0
+content_margin_top = 8.0
+content_margin_right = 10.0
+content_margin_bottom = 8.0
+
+[node name="HUD" type="Control"]
+layout_mode = 0
+offset_right = 854.0
+offset_bottom = 480.0
+mouse_filter = 2
+script = ExtResource("1_hud")
+
+[node name="SafeFrame" type="Control" parent="."]
+layout_mode = 0
+offset_right = 853.0
+offset_bottom = 480.0
+mouse_filter = 2
+
+[node name="HudHealthOrb" type="Control" parent="SafeFrame"]
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -224.0
+offset_top = -104.0
+offset_right = -136.0
+offset_bottom = -16.0
+tooltip_text = "Vida nativa. Nesta cena: valor demonstrativo ajustável."
+
+[node name="HudManaOrb" type="Control" parent="SafeFrame"]
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = 136.0
+offset_top = -104.0
+offset_right = 224.0
+offset_bottom = -16.0
+tooltip_text = "Mana nativa. Nesta cena: valor demonstrativo ajustável."
+
+[node name="HudBelt" type="Control" parent="SafeFrame"]
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -116.0
+offset_top = -43.0
+offset_right = 116.0
+offset_bottom = -14.0
+tooltip_text = "Cinto nativo: oito espaços iguais, atalhos 1–8. Itens desenhados aqui são demonstrativos."
+
+[node name="HudSpell" type="Control" parent="SafeFrame"]
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = 60.0
+offset_top = -103.0
+offset_right = 116.0
+offset_bottom = -47.0
+tooltip_text = "Magia selecionada / seletor de magias nativo."
+
+[node name="HudInfo" type="Control" parent="SafeFrame"]
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = -210.0
+offset_right = 200.0
+offset_bottom = -146.0
+tooltip_text = "Informações nativas de item, magia e interação."
+
+[node name="Utilities" type="Control" parent="SafeFrame"]
+layout_mode = 0
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+metadata/_editor_description = "Apresentação compacta: o script sobe este grupo 100 px quando SafeFrame < 844. A exportação remove esse deslocamento. Edite os Control filhos."
+
+[node name="HudCharacter" type="Control" parent="SafeFrame/Utilities"]
+layout_mode = 0
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -198.0
+offset_top = -44.0
+offset_right = -168.0
+offset_bottom = -12.0
+tooltip_text = "Personagem · C"
+
+[node name="HudInventory" type="Control" parent="SafeFrame/Utilities"]
+layout_mode = 0
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -166.0
+offset_top = -44.0
+offset_right = -136.0
+offset_bottom = -12.0
+tooltip_text = "Inventário · I"
+
+[node name="HudSpellbook" type="Control" parent="SafeFrame/Utilities"]
+layout_mode = 0
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -134.0
+offset_top = -44.0
+offset_right = -104.0
+offset_bottom = -12.0
+tooltip_text = "Livro de magias · B"
+
+[node name="HudQuests" type="Control" parent="SafeFrame/Utilities"]
+layout_mode = 0
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -102.0
+offset_top = -44.0
+offset_right = -72.0
+offset_bottom = -12.0
+tooltip_text = "Missões · Q"
+
+[node name="HudMap" type="Control" parent="SafeFrame/Utilities"]
+layout_mode = 0
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -70.0
+offset_top = -44.0
+offset_right = -40.0
+offset_bottom = -12.0
+tooltip_text = "Alternar automapa nativo · Tab. Esta cena não implementa um minimapa."
+
+[node name="HudMenu" type="Control" parent="SafeFrame/Utilities"]
+layout_mode = 0
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -38.0
+offset_top = -44.0
+offset_right = -8.0
+offset_bottom = -12.0
+tooltip_text = "Menu nativo da partida · Esc"
+
+[node name="HudChat" type="Control" parent="SafeFrame/Utilities"]
+visible = false
+layout_mode = 0
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -70.0
+offset_top = -80.0
+offset_right = -40.0
+offset_bottom = -48.0
+tooltip_text = "Chat nativo, quando disponível na partida."
+
+[node name="HudFriendly" type="Control" parent="SafeFrame/Utilities"]
+visible = false
+layout_mode = 0
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -38.0
+offset_top = -80.0
+offset_right = -8.0
+offset_bottom = -48.0
+tooltip_text = "Modo amistoso nativo, quando disponível na partida."
+
+[node name="PreviewTools" type="PanelContainer" parent="."]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 30.0
+offset_right = 284.0
+offset_bottom = 178.0
+theme_override_styles/panel = SubResource("ToolsStyle")
+
+[node name="Content" type="VBoxContainer" parent="PreviewTools"]
+layout_mode = 2
+theme_override_constants/separation = 3
+
+[node name="Title" type="Label" parent="PreviewTools/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.73, 0.56, 1)
+theme_override_font_sizes/font_size = 12
+text = "HUD • VALORES DEMONSTRATIVOS"
+
+[node name="LifeLabel" type="Label" parent="PreviewTools/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "Vida demonstrativa: 70.0%"
+
+[node name="Life" type="HSlider" parent="PreviewTools/Content"]
+layout_mode = 2
+value = 70.0
+step = 0.1
+
+[node name="ManaLabel" type="Label" parent="PreviewTools/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "Mana demonstrativa: 55.4%"
+
+[node name="Mana" type="HSlider" parent="PreviewTools/Content"]
+layout_mode = 2
+value = 55.4
+step = 0.1
+
+[node name="Export" type="Button" parent="PreviewTools/Content"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "Exportar layout HUD"
+
+[node name="PreviewStatus" type="Label" parent="."]
+layout_mode = 0
+offset_left = 16.0
+offset_top = 182.0
+offset_right = 838.0
+offset_bottom = 202.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.55, 0.61, 0.63, 1)
+theme_override_font_sizes/font_size = 9
+text = "Edite os Control em SafeFrame. Salve a cena e exporte."
+autowrap_mode = 2

@@ -24,6 +24,7 @@
 #include "controls/control_mode.hpp"
 #include "controls/plrctrls.h"
 #include "engine/render/primitive_render.hpp"
+#include "engine/render/d3d_menu_presentation.hpp"
 #include "engine/render/town_presentation.hpp"
 #include "engine/render/town_view.hpp"
 #include "engine/render/ui_overlay_regions.hpp"
@@ -138,6 +139,7 @@ void dx_cleanup()
 	ClearUiOverlayRegions();
 #ifndef USE_SDL1
 	ResetTownPresentationResources();
+	ResetD3dMainMenuResources();
 	if (ghMainWnd != nullptr)
 		SDL_HideWindow(ghMainWnd);
 #endif
@@ -321,6 +323,15 @@ void RenderPresent([[maybe_unused]] bool allowTownLayers)
 		if (SDL_RenderCopy(renderer, texture.get(), nullptr, nullptr) <= -1) ErrSdl();
 #endif
 
+		if (IsD3dMainMenuActive() && !RenderD3dMainMenu(renderer, PalSurface)) {
+			// Keep all native controls visible if an optional layer fails midway.
+			SetD3dMainMenuActive(false);
+#ifdef USE_SDL3
+			if (!SDL_RenderTexture(renderer, texture.get(), nullptr, nullptr)) ErrSdl();
+#else
+			if (SDL_RenderCopy(renderer, texture.get(), nullptr, nullptr) < 0) ErrSdl();
+#endif
+		}
 		if (allowTownLayers && gbRunGame) {
 			const Surface *world = GetTownViewHighResolutionFrame();
 			const UiOverlayFrame ui = GetUiOverlayFrame();

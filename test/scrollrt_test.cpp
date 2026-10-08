@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include "control/control.hpp"
+#include "controls/control_mode.hpp"
 #include "diablo.h"
 #include "engine/render/scrollrt.h"
 #include "options.h"
@@ -146,10 +147,30 @@ TEST(Scroll_rt, calc_tile_offset_768_480_zoom)
 
 TEST(Scroll_rt, calc_tiles_covered_by_panel_original)
 {
+	const ControlTypes previousMode = ControlMode;
+	ControlMode = ControlTypes::VirtualGamepad;
 	gnScreenWidth = 640;
+	gnScreenHeight = 480;
 	GetOptions().Graphics.zoom.SetValue(false);
 	CalculatePanelAreas();
+	EXPECT_EQ(gnViewportHeight, 352);
 	EXPECT_EQ(RowsCoveredByPanel(), 0);
+	ControlMode = previousMode;
+}
+
+TEST(Scroll_rt, calc_tiles_covered_by_floating_hud_640)
+{
+	const ControlTypes previousMode = ControlMode;
+	ControlMode = ControlTypes::KeyboardAndMouse;
+	gnScreenWidth = 640;
+	gnScreenHeight = 480;
+	GetOptions().Graphics.zoom.SetValue(false);
+	CalculatePanelAreas();
+	EXPECT_EQ(gnViewportHeight, 480);
+	EXPECT_EQ(RowsCoveredByPanel(), 4);
+	GetOptions().Graphics.zoom.SetValue(true);
+	EXPECT_EQ(RowsCoveredByPanel(), 2);
+	ControlMode = previousMode;
 }
 
 TEST(Scroll_rt, calc_tiles_covered_by_panel_960)

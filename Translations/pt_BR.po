@@ -12349,8 +12349,8 @@ msgid "Crypt (Hellfire)"
 msgstr "Cripta (Hellfire)"
 
 #: Source/engine/music_catalog.hpp
-msgid "Town and outdoor services. Rock uses the original until a replacement is installed."
-msgstr "Cidade e seus serviços. Rock usa a original até uma nova música ser instalada."
+msgid "Town and outdoor services. Choose Tristram 1, Tristram 2, Tristram 3 or a new random choice after each track ends. Missing replacements use the original music."
+msgstr "Cidade e seus serviços. Escolha Tristram 1, Tristram 2, Tristram 3 ou um novo sorteio ao fim de cada música. Substituições ausentes usam a música original."
 
 #: Source/engine/music_catalog.hpp
 msgid "Cathedral floors 1-4 and maps using that environment. Rock uses the original until a replacement is installed."
@@ -12423,3 +12423,43 @@ msgstr "Iniciar em 3D: Não"
 #: Source/gamemenu.cpp
 msgid "Start in 3D: On"
 msgstr "Iniciar em 3D: Sim"
+
+#: Source/options.cpp
+msgid "Tristram 1"
+msgstr "Tristram 1"
+
+#: Source/options.cpp
+msgid "Tristram 1 (pending)"
+msgstr "Tristram 1 (pendente)"
+
+#: Source/options.cpp
+msgid "Tristram 2"
+msgstr "Tristram 2"
+
+#: Source/options.cpp
+msgid "Tristram 2 (pending)"
+msgstr "Tristram 2 (pendente)"
+
+#: Source/options.cpp
+msgid "Random"
+msgstr "Aleatório"
+
+#: Source/options.cpp
+msgid "Random (pending)"
+msgstr "Aleatório (pendente)"
+
+#: Source/options.cpp
+msgid "Tristram 3"
+msgstr "Tristram 3"
+
+#: Source/options.cpp
+msgid "Tristram 3 (pending)"
+msgstr "Tristram 3 (pendente)"
+
+#: Source/gamemenu.cpp
+msgid "More Versions"
+msgstr "Mais versões"
+
+#: Source/gamemenu.cpp
+msgid "Previous Page"
+msgstr "Página anterior"

@@ -66,7 +66,10 @@ def main() -> None:
     parser.add_argument("--report", type=Path)
     parser.add_argument("--compare-source", type=Path, help="Second smoke archive export; require identical native palette, colors and coverage")
     parser.add_argument("--source-only", action="store_true", help="Check frozen masks against independent native coverage without claiming a runtime readback")
+    parser.add_argument("--require-effective-opacity", action="store_true", help="Require actual effective RGBA textures and verify independent native coverage")
     args = parser.parse_args()
+    if args.source_only and args.require_effective_opacity:
+        parser.error("--require-effective-opacity requires runtime readback")
     directory = args.captures / "ground-shadow-sources"
     source, pieces = load_sources(directory)
     masks = read_masks(args.header)
@@ -82,19 +85,32 @@ def main() -> None:
         if image is not None and image.size != (64, 32):
             raise ValueError(f"Piece {piece}: diagnostic dimensions must be 64x32")
         indexed = image is None or image.mode == "P"
-        actual = None if image is None else list(image.tobytes()) if indexed else list(image.convert("RGB").get_flattened_data())
+        actual = None if image is None else list(image.tobytes()) if indexed else list(image.convert("RGB").getdata())
         donor_id, rows = masks.get(piece, (piece, [0] * 32))
         donor = pieces[donor_id]
         outside_mismatches = inside_mismatches = outside_covered = inside_covered = selected_outside_coverage = 0
         preserved_transparent = transparent_mismatches = 0
         preserved_opaque_black = opaque_black_mismatches = 0
         selected_opaque_black = 0
+        rgba_path = directory / f"piece-{piece}-cached-floor-rgba.png"
+        rgba = None
+        if not args.source_only and rgba_path.is_file():
+            effective = Image.open(rgba_path)
+            if effective.mode != "RGBA" or effective.size != (64, 32):
+                raise ValueError(f"Piece {piece}: effective runtime readback must be native 64x32 RGBA")
+            rgba = list(effective.getdata())
+        elif args.require_effective_opacity:
+            raise ValueError(f"Piece {piece}: missing effective runtime RGBA opacity readback")
+        runtime_opacity_mismatches = runtime_rgba_color_mismatches = 0
         for offset, index in enumerate(original["indices"]):
             y, x = divmod(offset, 64)
             selected = bool(rows[y] & (1 << x))
             selected_outside_coverage += selected and not original["opacity"][offset]
             expected_index = donor["indices"][offset] if selected else index
             expected = expected_index if indexed else tuple(palette[expected_index])
+            if rgba is not None:
+                runtime_opacity_mismatches += rgba[offset][3] != (255 if original["opacity"][offset] else 0)
+                runtime_rgba_color_mismatches += rgba[offset][:3] != tuple(palette[expected_index])
             if selected:
                 inside_covered += 1
                 selected_opaque_black += bool(original["opacity"][offset]) and index == 0
@@ -108,6 +124,7 @@ def main() -> None:
                 preserved_opaque_black += opaque_black
                 opaque_black_mismatches += actual is not None and opaque_black and actual[offset] != expected
         valid = (outside_mismatches == 0 and inside_mismatches == 0 and selected_outside_coverage == 0
+                 and runtime_opacity_mismatches == 0 and runtime_rgba_color_mismatches == 0
                  and original["opacity"] == donor["opacity"] and (piece not in masks or original["sol"] == 0))
         results.append({"piece": piece, "donor": donor_id, "readbackMode": None if image is None else image.mode,
                         "maskedOpaquePixels": inside_covered, "preservedOriginalOpaquePixels": outside_covered,
@@ -115,6 +132,9 @@ def main() -> None:
                         "outsideMaskMismatches": outside_mismatches, "insideMaskDonorMismatches": inside_mismatches,
                         "preservedOriginalOpaqueBlackPixels": preserved_opaque_black, "opaqueBlackMismatches": opaque_black_mismatches,
                         "selectedShadowOpaqueBlackPixels": selected_opaque_black, "nativeSol": original["sol"],
+                        "runtimeOpacityReadbackAvailable": rgba is not None,
+                        "runtimeOpacityMismatches": runtime_opacity_mismatches,
+                        "runtimeRgbaColorMismatches": runtime_rgba_color_mismatches,
                         "selectedOutsideOriginalCoverage": selected_outside_coverage, "pass": valid})
     source_comparison = None
     if args.compare_source:
@@ -130,8 +150,10 @@ def main() -> None:
     report = {"source": str(args.captures.resolve()), "archiveMode": source["archiveMode"],
               "method": "frozen masks versus independent native primitive coverage" if args.source_only else "actual effective ground PNG versus independent native primitive export and frozen header mattes",
               "runtimeReadbackChecked": not args.source_only, "maskCount": len(masks), "controlCount": len(controls),
-              "runtimeOpacityReadbackAvailable": False,
-              "opacityEvidence": "source/donor coverage identical; runtime copy preserves opacity by contract, not inferred from black PNG pixels",
+              "runtimeOpacityReadbackAvailable": all(result["runtimeOpacityReadbackAvailable"] for result in results),
+              "opacityEvidence": "actual effective RGBA alpha versus independently rendered original primitive coverage"
+                  if all(result["runtimeOpacityReadbackAvailable"] for result in results)
+                  else "source/donor coverage identical; complete runtime opacity readback unavailable; not inferred from black PNG pixels",
               "sourceComparison": source_comparison,
               "results": results, "pass": all(result["pass"] for result in results) and (source_comparison is None or source_comparison["pass"])}
     text = json.dumps(report, indent=2) + "\n"

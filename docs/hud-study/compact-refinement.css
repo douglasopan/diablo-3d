@@ -1,0 +1,6 @@
+
+.scene.compact .combined .sidepanel.right,.scene.compact .solo-side{width:520px;bottom:155px;max-height:none}.scene.compact .solo-side{height:490px}.scene.compact .equipment{height:144px;width:280px;grid-template-rows:repeat(3,44px);gap:6px;margin-bottom:4px}.scene.compact .combined .inventory-grid,.scene.compact .solo-side .inventory-grid{margin:4px 0}.scene.compact .combined .sidepanel.right>.rows,.scene.compact .solo-side>.rows{margin:3px 0}.scene.compact .combined .sidepanel.right>.rows .data-row,.scene.compact .solo-side>.rows .data-row{font-size:16px;padding:5px 0}.scene.compact .combined .sidepanel.right h3{margin-bottom:9px;padding-bottom:10px}.scene.compact .combined .sidepanel.right .panel-body{padding:0}.book-tabs button{min-width:45px}.sidepanel.right>.rows{margin:8px 0}.sidepanel.right>.rows .data-row{padding:6px 0;font-size:18px}
+
+
+.scene.compact .combined .sidepanel.right{bottom:175px}.scene.compact .combined .sidepanel.right h3{margin-bottom:6px}.scene.compact .combined .sidepanel.right .inventory-grid{margin:2px 0}.scene.compact .combined .sidepanel.right .equipment{margin-bottom:2px}
+.pager a {display:inline-flex;align-items:center;font:11px Segoe UI,sans-serif;padding:10px 13px;border:1px solid #3d4241;text-decoration:none;background:#181e21;color:#d8bd85}

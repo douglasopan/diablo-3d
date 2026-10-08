@@ -1,0 +1,154 @@
+{
+  "studyDate": "2026-10-08",
+  "scope": "docs/hud-study somente; conceitos para revisão, sem integração no jogo",
+  "sourceHeadAtDocumentation": "fb9ba34b2f46b7de44bcb6e1c34378b67d73a979",
+  "generationTool": "image_gen integrado",
+  "model": "Não exposto pela ferramenta",
+  "assets": [
+    {
+      "file": "docs/hud-study/images/01-hud-16x9-v2.png",
+      "bytes": 2475003,
+      "sha256": "97d42f8046ff645160c62213459cfbcb4ec8049fe4819ffe53030d7ef2f41385",
+      "pixels": [
+        1672,
+        941
+      ],
+      "origin": "image_gen integrado; modelo não informado pela ferramenta",
+      "exactCopyOfGeneration": true,
+      "preservedForIntegration": true,
+      "generationId": "exec-42331a78-430f-4051-b1a8-b4347d373980"
+    },
+    {
+      "file": "docs/hud-study/images/02-hud-ultrawide-v1.png",
+      "bytes": 2897999,
+      "sha256": "4785f764f12de0964b492cf98a20b651d6a79fd8820dc6421e18bccc3372ac63",
+      "pixels": [
+        1931,
+        814
+      ],
+      "origin": "image_gen integrado; modelo não informado pela ferramenta",
+      "exactCopyOfGeneration": true,
+      "preservedForIntegration": false,
+      "generationId": "exec-b521d1ff-e7bb-42b2-b277-bfd5a6204fd0"
+    },
+    {
+      "file": "docs/hud-study/images/02-hud-ultrawide-v2.png",
+      "bytes": 2757180,
+      "sha256": "976f05c03da00dcaf38d07ae1d26882330bc39ac24c7cb6e4009824dceec879d",
+      "pixels": [
+        1932,
+        814
+      ],
+      "origin": "image_gen integrado; modelo não informado pela ferramenta",
+      "exactCopyOfGeneration": true,
+      "preservedForIntegration": false,
+      "generationId": "exec-4f247874-a618-4015-a955-155f293e2e63"
+    },
+    {
+      "file": "docs/hud-study/images/03-hud-compacto.png",
+      "bytes": 2474983,
+      "sha256": "5e0645386612f4d54d89f255823661587d00506c778d45eec9d4f2270bf79d55",
+      "pixels": [
+        1672,
+        941
+      ],
+      "origin": "image_gen integrado; modelo não informado pela ferramenta",
+      "exactCopyOfGeneration": true,
+      "preservedForIntegration": false,
+      "generationId": "exec-5050223f-a528-4ff3-8568-9802ef1c5aa1"
+    },
+    {
+      "file": "docs/hud-study/images/04-personagem-inventario.png",
+      "bytes": 2593984,
+      "sha256": "a0407a4ee7d04d7ca5055f7b370a3a5ca56c349909ade306707dd8abe1f2965d",
+      "pixels": [
+        1672,
+        941
+      ],
+      "origin": "image_gen integrado; modelo não informado pela ferramenta",
+      "exactCopyOfGeneration": true,
+      "preservedForIntegration": false,
+      "generationId": "exec-6f32c0e7-ae98-4378-8f90-d55409394e28"
+    },
+    {
+      "file": "docs/hud-study/images/05-fundo-menus.png",
+      "bytes": 2168989,
+      "sha256": "6883e5223ec8b185a7e52248d7540e3f8cb53aecc8f8ebee5b0b5c130db9d1b5",
+      "pixels": [
+        1672,
+        941
+      ],
+      "origin": "image_gen integrado; modelo não informado pela ferramenta",
+      "exactCopyOfGeneration": true,
+      "preservedForIntegration": true,
+      "generationId": "exec-0e20bc06-30ea-425b-959e-decff892bddc"
+    },
+    {
+      "file": "docs/hud-study/images/logo-d3d-reference.webp",
+      "bytes": 95610,
+      "sha256": "6e57a6d1478fe37800a13f4bbeef1c76c76d9f5cdd41b1d3b425bce99564b124",
+      "pixels": [
+        640,
+        160
+      ],
+      "origin": "Logo autoral existente no repositório",
+      "source": "website/public/assets/branding/d3d-logo-static.webp",
+      "exactCopyOfSource": true
+    },
+    {
+      "file": "docs/hud-study/images/06-menu-principal-preview.jpg",
+      "bytes": 251395,
+      "sha256": "9d9b5544d62193f1f7d32c5759b35ef766823ada6ba78ced3235f6bc8ce3f924",
+      "pixels": [
+        1920,
+        1080
+      ],
+      "origin": "Renderização da galeria, cópia de examples/F03.jpg",
+      "exactCopyOfExample": true
+    }
+  ],
+  "catalogPreviews": {
+    "count": 223,
+    "format": "JPEG",
+    "dimensions": {
+      "1920x1080": 223
+    },
+    "origin": "Capturas do estudo HTML pelo navegador; não são capturas do jogo nem gerações individuais de IA",
+    "responsiveFiles": 24
+  },
+  "historicalReferencesInspected": [
+    {
+      "file": "website/public/assets/captures/author-cabin-target.webp",
+      "bytes": 403966,
+      "sha256": "bd43952974a3c128b21fb086c11094848fac0403807de6a8cc14f9412de128bf",
+      "pixels": [
+        741,
+        428
+      ]
+    },
+    {
+      "file": "website/public/assets/captures/v4-town.webp",
+      "bytes": 197568,
+      "sha256": "cf6ecb269fc15b638ab59bb2e1d7adc6ebb588aa54b1b595d12200dc35727493",
+      "pixels": [
+        640,
+        640
+      ]
+    },
+    {
+      "file": "website/public/assets/captures/author-menu-startup.webp",
+      "bytes": 26294,
+      "sha256": "0d1e876a00bd714bf724eac57bb637a1b7af221c424d8705730dc36285abacca",
+      "pixels": [
+        949,
+        545
+      ]
+    }
+  ],
+  "notes": [
+    "Prompts e revisões completos em prompts.json.",
+    "A primeira revisão ultrawide foi preservada; a segunda é exibida no catálogo.",
+    "As dimensões registradas são as dos arquivos efetivos, que podem diferir do canvas pedido no prompt. A galeria enquadra a arte para cada formato."
+  ],
+  "publicMetadataNote": "Caminhos absolutos da máquina foram retirados; IDs de geração, hashes e relações de origem preservados. As referências históricas são metadados, sem copiar as capturas para a entrega."
+}

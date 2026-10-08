@@ -285,6 +285,7 @@ std::unordered_map<size_t, SceneMaterials> SceneMaterialCache;
 std::unordered_map<size_t, Texture> ImportedTextureCache;
 std::unordered_map<size_t, std::array<Texture, InteriorMaterialCount + FlameBandCount * FlameLightLevels>> CabinInteriorTextureCache;
 bool CabinFireEnabledForDiagnostics = true;
+bool DirectionalShadowsEnabledForDiagnostics = true;
 double CabinFireDiagnosticTime = -1;
 double FrameFireTime = 0;
 std::unordered_map<uint32_t, uint32_t> ImportedAlbedoColors;
@@ -613,6 +614,8 @@ void Rasterize(const Surface &out, const std::array<Vertex, 3> &triangle, const 
 	// the source. Shadowing their absent direct light again crushed the masonry.
 	const bool receivesDirectLight = normal.x * light.x + normal.y * light.height + normal.z * light.z > 0.02F;
 	const float diffuse = std::clamp(normal.x * light.x + normal.y * light.height + normal.z * light.z, 0.0F, 1.0F);
+	const bool receivesShadow = DirectionalShadowsEnabledForDiagnostics && interior == nullptr && !texture.emissive
+	    && (hasAlbedo ? diffuse > 0 : receivesDirectLight);
 	if (CaptureGpu) {
 		if (CaptureGpuFailed)
 			return;
@@ -623,7 +626,7 @@ void Rasterize(const Surface &out, const std::array<Vertex, 3> &triangle, const 
 		material.repeat = texture.repeat;
 		material.transparentZero = transparent && !hasAlbedo && texture.opacity.empty();
 		material.preservePicking = pick.preservePicking;
-		material.receivesShadow = interior == nullptr && !texture.emissive && (hasAlbedo ? diffuse > 0 : receivesDirectLight);
+		material.receivesShadow = receivesShadow;
 		material.shade = shade;
 		material.fallbackPaletteIndex = fallback.palette;
 		material.fallbackShade = fallback.shade;
@@ -632,13 +635,13 @@ void Rasterize(const Surface &out, const std::array<Vertex, 3> &triangle, const 
 		material.shadowSlopeU = shadowReceiver.depthSlopeU;
 		material.shadowSlopeV = shadowReceiver.depthSlopeV;
 		material.normal = { normal.x, normal.y, normal.z };
-		TownLightOccluder room;
 		if (interior != nullptr) {
 			material.lights = { interior->lights.data(), interior->lightCount };
 			material.interiorRedNormalization = interior->room->fireColor.red;
 			material.interiorPointRange = InteriorPointLightRange;
-			room = { interior->room->roomMinimum, interior->room->roomMaximum, interior->room->apertures };
-			material.room = &room;
+			const std::span<const TownLightOccluder> occluders(interior->room->lightOccluders);
+			material.room = &occluders.front();
+			material.blockers = occluders.subspan(1);
 		}
 		const bool constantPalette = !hasAlbedo && !texture.emissive && texture.opacity.empty()
 		    && texture.width == 1 && texture.height == 1 && texture.pixels.size() == 1;
@@ -679,7 +682,7 @@ void Rasterize(const Surface &out, const std::array<Vertex, 3> &triangle, const 
 			if (!texture.sample(u, v, color, &albedoColor) || (transparent && !hasAlbedo && texture.opacity.empty() && color == 0))
 				continue;
 			const Vec3 world = worldA * wa + worldB * wb + worldC * wc;
-			const float shadow = interior == nullptr && !texture.emissive && (hasAlbedo ? diffuse > 0 : receivesDirectLight)
+			const float shadow = receivesShadow
 			    ? SampleTownShadow(world.x, world.y, world.z, shadowReceiver) : 0;
 			const int shadowLevel = std::clamp(static_cast<int>(shadow * 3.0F + 0.5F), 0, 3);
 			if (texture.emissive) {
@@ -688,10 +691,9 @@ void Rasterize(const Surface &out, const std::array<Vertex, 3> &triangle, const 
 				TownLightingConfig roomLight;
 				roomLight.ambient = { 0.015F, 0.013F, 0.010F };
 				roomLight.directionalIntensity = 0;
-				const TownLightOccluder room { interior->room->roomMinimum, interior->room->roomMaximum, interior->room->apertures };
 				const std::span<const TownPointLight> lights(interior->lights.data(), interior->lightCount);
 				const TownLightingSample lighting = SampleTownLighting({ normal.x, normal.y, normal.z },
-					{ world.x, world.y, world.z }, 0, roomLight, lights, std::span<const TownLightOccluder>(&room, 1));
+					{ world.x, world.y, world.z }, 0, roomLight, lights, interior->room->lightOccluders);
 				const float amount = interior->room->fireColor.red > 0 ? lighting.point.red / interior->room->fireColor.red : 0;
 				const size_t level = static_cast<size_t>(std::clamp(static_cast<int>(amount / InteriorPointLightRange * (ImportedLightLevels - 1) + 0.5F), 0, static_cast<int>(ImportedLightLevels - 1)));
 				destination[x] = texture.interiorLightTables[albedoColor][level];
@@ -2134,12 +2136,17 @@ TownViewLightingState GetTownViewLightingState()
 {
 	return { SceneLightingConfig, SceneLightingProfileLoaded, ImportedTextureCache.size(),
 		ImportedAlbedoLightTables.size(), ImportedAlbedoLightTables.size() * ImportedLightLevels, ImportedLightLevels,
-		CabinInteriorTextureCache.size(), CabinFireEnabledForDiagnostics };
+		CabinInteriorTextureCache.size(), CabinFireEnabledForDiagnostics, DirectionalShadowsEnabledForDiagnostics };
 }
 
 void SetTownViewCabinFireEnabledForDiagnostics(bool enabled)
 {
 	CabinFireEnabledForDiagnostics = enabled;
+}
+
+void SetTownViewDirectionalShadowsEnabledForDiagnostics(bool enabled)
+{
+	DirectionalShadowsEnabledForDiagnostics = enabled;
 }
 
 void SetTownViewFireTimeForDiagnostics(double seconds)
@@ -2168,6 +2175,7 @@ void ResetTownViewResources()
 	ImportedTextureCache.clear();
 	CabinInteriorTextureCache.clear();
 	CabinFireEnabledForDiagnostics = true;
+	DirectionalShadowsEnabledForDiagnostics = true;
 	ImportedAlbedoColors.clear();
 	ImportedAlbedoLightTables.clear();
 	ActorVolumeCache.clear();
@@ -2212,6 +2220,7 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 		ImportedTextureCache.clear();
 		CabinInteriorTextureCache.clear();
 		CabinFireEnabledForDiagnostics = true;
+		DirectionalShadowsEnabledForDiagnostics = true;
 		ImportedAlbedoColors.clear();
 		ImportedAlbedoLightTables.clear();
 		ActorVolumeCache.clear();

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="dark"><title>Diablo 3D · Estudo de HUD e menus</title><link rel="stylesheet" href="study.css"><link rel="stylesheet" href="families.css"><link rel="stylesheet" href="character-refinement.css"><link rel="stylesheet" href="compact-refinement.css"></head>
+<body>
+<header class="masthead"><div><span class="eyebrow">DIREÇÃO VISUAL · 08 OUT 2026</span><h1>Diablo 3D <em>HUD & menus</em></h1></div><span class="status">Estudo para revisão</span></header>
+<div class="workspace">
+<aside class="catalog"><div class="catalog-top"><h2>Telas do jogo</h2><p id="count">Carregando catálogo…</p><label class="sr-only" for="search">Buscar tela</label><input id="search" type="search" placeholder="Buscar tela, NPC ou opção…"><select id="group" aria-label="Filtrar família"><option value="">Todas as famílias</option></select><label class="toggle"><input id="conditional" type="checkbox" checked> Incluir telas condicionais</label></div><nav id="screen-list" aria-label="Catálogo de exemplos"></nav><div class="catalog-foot">Exemplos de apresentação.<br>O jogo permanece inalterado.</div></aside>
+<main>
+<div class="toolbar"><div class="mode-tabs"><button id="show-concepts" class="active">Imagens geradas</button><button id="show-screens">Exemplos por tela</button></div><div class="format-buttons" id="format-buttons"><button data-format="wide" class="active">16:9</button><button data-format="ultra">Ultrawide</button><button data-format="compact">1280 × 720</button></div></div>
+<section id="concepts"><div class="intro"><h2>Ferro, pedra e espaço para o mundo.</h2><p>Orbes clássicos, cinto de oito posições e controles próximos do centro. Os cenários abaixo são ilustrações geradas; não são capturas nem assets aprovados do jogo.</p></div><div class="concept-grid">
+<a href="images/01-hud-16x9-v2.png" target="_blank"><img src="images/01-hud-16x9-v2.png" alt="HUD proposto em 16:9"><strong>01 · Jogo em 16:9</strong><span>Núcleo compacto; Cura ativa em Tristram.</span></a>
+<a href="images/02-hud-ultrawide-v2.png" target="_blank"><img src="images/02-hud-ultrawide-v2.png" alt="HUD proposto ultrawide"><strong>02 · Ultrawide</strong><span>Controles centrais; mais mundo nas laterais.</span></a>
+<a href="images/03-hud-compacto.png" target="_blank"><img src="images/03-hud-compacto.png" alt="HUD compacto"><strong>03 · Viewport menor</strong><span>Oito posições visíveis; favoritos recolhidos.</span></a>
+<a href="images/04-personagem-inventario.png" target="_blank"><img src="images/04-personagem-inventario.png" alt="Personagem e inventário abertos"><strong>04 · Personagem + inventário</strong><span>Sete locais de equipamento; mochila 10 × 4.</span></a>
+</div><div class="intro"><p>O catálogo oferece composições individuais com texto e grades determinísticos, apoiadas pela arte gerada. A disponibilidade se refere ao código auditado; a apresentação é proposta. <button class="text-button" id="start-catalog">Abrir os exemplos →</button></p></div></section>
+<section id="screens" hidden>
+<div class="screen-heading"><div><span id="screen-id" class="eyebrow"></span><h2 id="screen-title"></h2></div><div class="pager"><a id="open-image" target="_blank">Imagem</a><button id="open-focus">Ampliar</button><button id="previous" aria-label="Tela anterior">←</button><button id="next" aria-label="Próxima tela">→</button></div></div>
+<div id="stage" class="stage"><div id="scene" class="scene"></div></div>
+<div class="preview-note">CONCEITO DE APRESENTAÇÃO · Conteúdo fictício · Botões ilustrativos; seleção e rolagem podem ser exploradas.</div>
+<article class="evidence"><div><span class="eyebrow">ESTADO NO JOGO</span><p id="availability"></p><p id="summary"></p></div><div><span class="eyebrow">CRITÉRIOS E LIMITES</span><ul id="notes"></ul><details><summary>Fontes e variantes</summary><ul id="sources"></ul><ul id="variants"></ul></details></div></article>
+</section>
+<footer>Escopo: estudo visual, sem implementação no jogo. <a href="README.md">Especificação e evidências</a> · <a href="COVERAGE.md">Cobertura das telas</a></footer>
+</main></div><script src="catalog-data.js"></script><script src="study.js"></script></body></html>

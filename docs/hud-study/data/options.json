@@ -1,0 +1,2754 @@
+{
+  "screens": [
+    {
+      "id": "O01",
+      "title": "Configurações",
+      "group": "Configurações",
+      "layout": "menu",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Categorias atualmente expostas pela interface, incluindo as condicionais identificadas.",
+      "choices": [
+        "Idioma",
+        "Mods — se disponíveis",
+        "Modo de jogo — com dados completos",
+        "Inicialização",
+        "Gráficos",
+        "Áudio",
+        "Trilha sonora",
+        "Gameplay",
+        "Mapeamento de teclas",
+        "Mapeamento do controle"
+      ],
+      "rows": [],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/DiabloUI/settingsmenu.cpp",
+          "line": 407
+        }
+      ],
+      "notes": [
+        "Categorias sem entradas visíveis são omitidas no jogo.",
+        "Mods e Modo de jogo aparecem apenas quando seus requisitos são atendidos.",
+        "A ordem preserva a lista nativa, sem categorias internas invisíveis."
+      ],
+      "variants": []
+    },
+    {
+      "id": "O02",
+      "title": "Idioma",
+      "group": "Configurações",
+      "layout": "settings",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Exemplo de apresentação proposto; os valores ilustram uma configuração fictícia.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Idioma",
+          "value": "Português do Brasil"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/options.cpp",
+          "line": 1185
+        }
+      ],
+      "notes": [
+        "Alterar idioma recria a interface. A seleção abre O03."
+      ],
+      "variants": []
+    },
+    {
+      "id": "O03",
+      "title": "Escolher idioma",
+      "group": "Configurações",
+      "layout": "choice",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Escolha um valor para esta opção. Exemplo visual de um submenu existente.",
+      "choices": [
+        "Dansk",
+        "Deutsch",
+        "Eesti",
+        "English",
+        "Español",
+        "Français",
+        "Hrvatski",
+        "Italiano",
+        "Magyar",
+        "Polski",
+        "Português do Brasil",
+        "Română",
+        "Suomi",
+        "Svenska",
+        "Türkçe",
+        "Čeština",
+        "Ελληνικά",
+        "беларуская",
+        "Български",
+        "Русский",
+        "Українська",
+        "עברית",
+        "日本語 — fontes extras",
+        "한국어 — fontes extras",
+        "汉语 — fontes extras",
+        "漢語 — fontes extras"
+      ],
+      "rows": [],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/options.cpp",
+          "line": 1119
+        }
+      ],
+      "notes": [
+        "Idiomas asiáticos dependem das fontes extras.",
+        "Um idioma personalizado no perfil também pode ser listado. Lista final depende dos recursos disponíveis."
+      ],
+      "variants": []
+    },
+    {
+      "id": "O04",
+      "title": "Mods",
+      "group": "Configurações",
+      "layout": "settings",
+      "availability": "condicional",
+      "condition": "Existe ao menos um mod registrado e visível.",
+      "summary": "Exemplo de apresentação proposto; os valores ilustram uma configuração fictícia.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Expansão Hellfire — exemplo",
+          "value": "Desligada"
+        },
+        {
+          "label": "Mod de demonstração fictício",
+          "value": "Desligado"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/options.cpp",
+          "line": 1686
+        }
+      ],
+      "notes": [
+        "Os nomes e estados nesta tela são fictícios; não representam mods instalados.",
+        "O jogo constrói a lista a partir dos manifestos disponíveis.",
+        "Ativação recria a interface; descrição, autoria e versão podem vir do manifesto."
+      ],
+      "variants": []
+    },
+    {
+      "id": "O05",
+      "title": "Modo de jogo",
+      "group": "Configurações",
+      "layout": "settings",
+      "availability": "condicional",
+      "condition": "Dados completos de Diablo necessários estão disponíveis.",
+      "summary": "Exemplo de apresentação proposto; os valores ilustram uma configuração fictícia.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Restringir para Shareware",
+          "value": "Desligado"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/options.cpp",
+          "line": 471
+        }
+      ],
+      "notes": [
+        "Diablo/Hellfire não é seletor visível nesta categoria; a opção interna Game está Invisible.",
+        "A mudança para Shareware recria a interface."
+      ],
+      "variants": []
+    },
+    {
+      "id": "O06",
+      "title": "Inicialização",
+      "group": "Configurações",
+      "layout": "settings",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Exemplo de apresentação proposto; os valores ilustram uma configuração fictícia.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Introdução",
+          "value": "Ligada"
+        },
+        {
+          "label": "Splash",
+          "value": "Logo e tela de título"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/options.cpp",
+          "line": 491
+        }
+      ],
+      "notes": [
+        "A entrada Introdução corresponde ao modo Diablo ou Hellfire ativo.",
+        "Introdução alterna ON/OFF sem abrir submenu; Splash abre O07."
+      ],
+      "variants": []
+    },
+    {
+      "id": "O07",
+      "title": "Tela de abertura",
+      "group": "Configurações",
+      "layout": "choice",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Escolha um valor para esta opção. Exemplo visual de um submenu existente.",
+      "choices": [
+        "Logo e tela de título",
+        "Tela de título",
+        "Nenhuma"
+      ],
+      "rows": [],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/options.cpp",
+          "line": 505
+        }
+      ],
+      "notes": [],
+      "variants": []
+    },
+    {
+      "id": "O08",
+      "title": "Gráficos",
+      "group": "Configurações",
+      "layout": "settings",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Exemplo de apresentação proposto; os valores ilustram uma configuração fictícia.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Resolução interna",
+          "value": "1920 × 1080 — exemplo"
+        },
+        {
+          "label": "Tela cheia",
+          "value": "Ligada"
+        },
+        {
+          "label": "Ajustar à tela",
+          "value": "Ligado"
+        },
+        {
+          "label": "Qualidade de ampliação",
+          "value": "Anisotrópica"
+        },
+        {
+          "label": "Escala inteira",
+          "value": "Desligada"
+        },
+        {
+          "label": "Controle da taxa de quadros",
+          "value": "Sincronização vertical"
+        },
+        {
+          "label": "Zoom",
+          "value": "Desligado"
+        },
+        {
+          "label": "Iniciar em 3D",
+          "value": "Ligado"
+        },
+        {
+          "label": "Renderização 3D por GPU",
+          "value": "Ligada"
+        },
+        {
+          "label": "Suavização de bordas 3D",
+          "value": "Desligada"
+        },
+        {
+          "label": "Exibir FPS",
+          "value": "Desligado"
+        },
+        {
+          "label": "Iluminação por pixel",
+          "value": "Ligada"
+        },
+        {
+          "label": "Ciclo de cores",
+          "value": "Ligado"
+        },
+        {
+          "label": "Arte alternativa do Ninho — Hellfire",
+          "value": "Desligada"
+        },
+        {
+          "label": "Cursor de hardware",
+          "value": "Ligado"
+        },
+        {
+          "label": "Cursor de hardware para itens",
+          "value": "Desligado"
+        },
+        {
+          "label": "Tamanho máximo do cursor",
+          "value": "128"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/options.cpp",
+          "line": 830
+        }
+      ],
+      "notes": [
+        "Resolução ilustrativa; a lista real é fornecida pelo runtime.",
+        "Resolução, tela cheia, ajuste à tela, escala inteira e cursores possuem restrições de alteração na partida; algumas mudanças recriam a interface.",
+        "Iniciar em 3D vale ao iniciar ou carregar; outros níveis continuam no renderizador original.",
+        "GPU e suavização aplicam no próximo desenho; GPU possui fallback CPU.",
+        "Arte alternativa do Ninho aparece somente em Hellfire.",
+        "Upscale e correção de brilho são opções internas Invisible e foram omitidas."
+      ],
+      "variants": [
+        "SDL1 pode omitir filtros, escala inteira e cursores de hardware.",
+        "Tela cheia é omitida em plataformas móveis sem suporte a janela e no menu Vita.",
+        "Controle de frames fica invisível em NXDK/Android; cursor depende de suporte."
+      ]
+    },
+    {
+      "id": "O09",
+      "title": "Resolução interna — exemplo",
+      "group": "Configurações",
+      "layout": "choice",
+      "availability": "condicional",
+      "condition": "O runtime oferece mais de duas resoluções.",
+      "summary": "Escolha um valor para esta opção. Exemplo visual de um submenu existente.",
+      "choices": [
+        "640 × 480 — exemplo",
+        "1280 × 720 — exemplo",
+        "1920 × 1080 — exemplo",
+        "2560 × 1080 — exemplo"
+      ],
+      "rows": [],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/options.cpp",
+          "line": 638
+        }
+      ],
+      "notes": [
+        "Exemplos fictícios de valores plausíveis; não são uma lista fixa de resoluções suportadas.",
+        "A resolução interna determina a área visível e pode diferir da saída física."
+      ],
+      "variants": []
+    },
+    {
+      "id": "O10",
+      "title": "Qualidade de ampliação",
+      "group": "Configurações",
+      "layout": "choice",
+      "availability": "condicional",
+      "condition": "Compilação com SDL2/SDL3.",
+      "summary": "Escolha um valor para esta opção. Exemplo visual de um submenu existente.",
+      "choices": [
+        "Pixel mais próximo",
+        "Bilinear",
+        "Anisotrópica"
+      ],
+      "rows": [],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/options.cpp",
+          "line": 856
+        }
+      ],
+      "notes": [
+        "É filtro da saída; não substitui suavização de bordas da cena 3D."
+      ],
+      "variants": []
+    },
+    {
+      "id": "O11",
+      "title": "Controle da taxa de quadros",
+      "group": "Configurações",
+      "layout": "choice",
+      "availability": "condicional",
+      "condition": "Plataforma e backend expõem mais de duas opções.",
+      "summary": "Escolha um valor para esta opção. Exemplo visual de um submenu existente.",
+      "choices": [
+        "Nenhum",
+        "Sincronização vertical",
+        "Limitar FPS"
+      ],
+      "rows": [],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/options.cpp",
+          "line": 863
+        }
+      ],
+      "notes": [
+        "SDL1 não oferece sincronização vertical nessa lista; então a escolha alterna diretamente.",
+        "NXDK e Android omitem este controle no menu."
+      ],
+      "variants": []
+    },
+    {
+      "id": "O12",
+      "title": "Tamanho máximo do cursor de hardware",
+      "group": "Configurações",
+      "layout": "choice",
+      "availability": "condicional",
+      "condition": "Backend oferece cursor de hardware.",
+      "summary": "Escolha um valor para esta opção. Exemplo visual de um submenu existente.",
+      "choices": [
+        "0",
+        "64",
+        "128",
+        "256",
+        "512"
+      ],
+      "rows": [],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/options.cpp",
+          "line": 896
+        }
+      ],
+      "notes": [
+        "Valor nativo em pixels de largura/altura; valores maiores que o limite voltam ao cursor de software.",
+        "0 é uma escolha nativa; não se infere significado adicional nesta proposta."
+      ],
+      "variants": []
+    },
+    {
+      "id": "O13",
+      "title": "Áudio",
+      "group": "Configurações",
+      "layout": "settings",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Exemplo de apresentação proposto; os valores ilustram uma configuração fictícia.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Som ao caminhar",
+          "value": "Ligado"
+        },
+        {
+          "label": "Som ao equipar automaticamente",
+          "value": "Desligado"
+        },
+        {
+          "label": "Som ao coletar itens",
+          "value": "Ligado"
+        },
+        {
+          "label": "Taxa de amostragem",
+          "value": "48000 Hz"
+        },
+        {
+          "label": "Canais",
+          "value": "2"
+        },
+        {
+          "label": "Buffer",
+          "value": "2048 frames por canal"
+        },
+        {
+          "label": "Resampler",
+          "value": "Speex — exemplo de compilação"
+        },
+        {
+          "label": "Qualidade do resampler",
+          "value": "3"
+        },
+        {
+          "label": "Dispositivo",
+          "value": "Padrão do sistema — exemplo"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/options.cpp",
+          "line": 550
+        }
+      ],
+      "notes": [
+        "Valores fictícios; disponibilidade dos resamplers e dispositivos depende do runtime.",
+        "Resampler tem no máximo Speex/SDL nas flags atuais e alterna diretamente; não há subtela >2 para ele.",
+        "Qualidade aparece quando Speex está selecionado.",
+        "Volumes de música, efeitos e dicas de navegação são Invisible aqui; os sliders Música/Som existem no menu da partida.",
+        "Formato e dispositivo de áudio possuem flag de não alteração durante a partida."
+      ],
+      "variants": []
+    },
+    {
+      "id": "O14",
+      "title": "Taxa de amostragem",
+      "group": "Configurações",
+      "layout": "choice",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Escolha um valor para esta opção. Exemplo visual de um submenu existente.",
+      "choices": [
+        "22050 Hz",
+        "44100 Hz",
+        "48000 Hz"
+      ],
+      "rows": [],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/options.cpp",
+          "line": 558
+        }
+      ],
+      "notes": [],
+      "variants": []
+    },
+    {
+      "id": "O15",
+      "title": "Buffer de áudio",
+      "group": "Configurações",
+      "layout": "choice",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Escolha um valor para esta opção. Exemplo visual de um submenu existente.",
+      "choices": [
+        "1024 frames por canal",
+        "2048 frames por canal",
+        "5120 frames por canal"
+      ],
+      "rows": [],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/options.cpp",
+          "line": 560
+        }
+      ],
+      "notes": [
+        "Os valores representam número de frames por canal, não milissegundos."
+      ],
+      "variants": []
+    },
+    {
+      "id": "O16",
+      "title": "Qualidade do resampler",
+      "group": "Configurações",
+      "layout": "choice",
+      "availability": "condicional",
+      "condition": "Speex compilado e selecionado.",
+      "summary": "Escolha um valor para esta opção. Exemplo visual de um submenu existente.",
+      "choices": [
+        "0 — menor qualidade",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5 — maior qualidade"
+      ],
+      "rows": [],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/options.cpp",
+          "line": 561
+        }
+      ],
+      "notes": [
+        "Faixa exposta pelo código: 0 a 5."
+      ],
+      "variants": []
+    },
+    {
+      "id": "O17",
+      "title": "Dispositivo de áudio — exemplo",
+      "group": "Configurações",
+      "layout": "choice",
+      "availability": "condicional",
+      "condition": "SDL2/SDL3 e mais de duas entradas enumeradas.",
+      "summary": "Escolha um valor para esta opção. Exemplo visual de um submenu existente.",
+      "choices": [
+        "Padrão do sistema — exemplo",
+        "Saída do monitor — exemplo",
+        "Fones de ouvido — exemplo"
+      ],
+      "rows": [],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/options.cpp",
+          "line": 733
+        }
+      ],
+      "notes": [
+        "Nomes fictícios de dispositivos plausíveis; o jogo enumera o hardware real.",
+        "Com uma ou duas entradas, a seleção alterna diretamente na categoria."
+      ],
+      "variants": []
+    },
+    {
+      "id": "O18",
+      "title": "Trilha sonora",
+      "group": "Configurações",
+      "layout": "settings",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Exemplo de apresentação proposto; os valores ilustram uma configuração fictícia.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Modo da trilha",
+          "value": "Personalizado"
+        },
+        {
+          "label": "Menu principal",
+          "value": "Original"
+        },
+        {
+          "label": "Tristram",
+          "value": "Original"
+        },
+        {
+          "label": "Catedral",
+          "value": "Original"
+        },
+        {
+          "label": "Catacumbas",
+          "value": "Original"
+        },
+        {
+          "label": "Cavernas",
+          "value": "Original"
+        },
+        {
+          "label": "Inferno",
+          "value": "Original"
+        },
+        {
+          "label": "Ninho — Hellfire",
+          "value": "Original"
+        },
+        {
+          "label": "Cripta — Hellfire",
+          "value": "Original"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/options.cpp",
+          "line": 586
+        }
+      ],
+      "notes": [
+        "Os oito locais constam na lista atual, incluindo Ninho e Cripta.",
+        "Modo possui três escolhas; Menu possui três variantes; demais locais possuem duas e alternam diretamente.",
+        "Ausência de substituição conserva a música original. Nenhuma mídia privada é incluída no estudo."
+      ],
+      "variants": []
+    },
+    {
+      "id": "O19",
+      "title": "Modo da trilha sonora",
+      "group": "Configurações",
+      "layout": "choice",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Escolha um valor para esta opção. Exemplo visual de um submenu existente.",
+      "choices": [
+        "Vanilla — original",
+        "Rock — substituições instaladas",
+        "Personalizado"
+      ],
+      "rows": [],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/options.cpp",
+          "line": 588
+        }
+      ],
+      "notes": [
+        "Alterações musicais aplicam ao local atual imediatamente."
+      ],
+      "variants": []
+    },
+    {
+      "id": "O20",
+      "title": "Música do menu principal",
+      "group": "Configurações",
+      "layout": "choice",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Escolha um valor para esta opção. Exemplo visual de um submenu existente.",
+      "choices": [
+        "Original",
+        "Rock2 — exemplo de substituição indisponível",
+        "Main Menu — exemplo de alternativa indisponível"
+      ],
+      "rows": [],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/options.cpp",
+          "line": 373
+        }
+      ],
+      "notes": [
+        "Rock2 e Main Menu são nomes genéricos de variantes exibidos no código, sem título de obra nem referência a arquivo.",
+        "O jogo indica pending/missing quando a substituição não existe; o exemplo não afirma quais mídias estão instaladas."
+      ],
+      "variants": []
+    },
+    {
+      "id": "O21",
+      "title": "Gameplay — Diablo",
+      "group": "Configurações",
+      "layout": "settings",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Exemplo de apresentação proposto; os valores ilustram uma configuração fictícia.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Fogo amigo",
+          "value": "Ligado"
+        },
+        {
+          "label": "Quests completas no multiplayer",
+          "value": "Desligado"
+        },
+        {
+          "label": "Quests aleatórias",
+          "value": "Ligadas"
+        },
+        {
+          "label": "Correr em Tristram",
+          "value": "Desligado"
+        },
+        {
+          "label": "Lançamento rápido de magia",
+          "value": "Desligado"
+        },
+        {
+          "label": "Barra de experiência",
+          "value": "Ligada"
+        },
+        {
+          "label": "Informações flutuantes de item",
+          "value": "Ligadas"
+        },
+        {
+          "label": "Interface de lojas",
+          "value": "Lista com imagens de itens"
+        },
+        {
+          "label": "Exibir valores de vida",
+          "value": "Ligado"
+        },
+        {
+          "label": "Exibir valores de mana",
+          "value": "Ligado"
+        },
+        {
+          "label": "Informações do grupo",
+          "value": "Ligadas"
+        },
+        {
+          "label": "Barra de vida de inimigo",
+          "value": "Ligada"
+        },
+        {
+          "label": "Exibir tipo do monstro",
+          "value": "Ligado"
+        },
+        {
+          "label": "Rótulos dos itens",
+          "value": "Ligados"
+        },
+        {
+          "label": "Reabastecer cinto automaticamente",
+          "value": "Desligado"
+        },
+        {
+          "label": "Equipar armas automaticamente",
+          "value": "Ligado"
+        },
+        {
+          "label": "Equipar armaduras automaticamente",
+          "value": "Desligado"
+        },
+        {
+          "label": "Equipar elmos automaticamente",
+          "value": "Desligado"
+        },
+        {
+          "label": "Equipar escudos automaticamente",
+          "value": "Desligado"
+        },
+        {
+          "label": "Equipar joias automaticamente",
+          "value": "Desligado"
+        },
+        {
+          "label": "Coletar ouro automaticamente",
+          "value": "Ligado"
+        },
+        {
+          "label": "Coletar elixires automaticamente",
+          "value": "Desligado"
+        },
+        {
+          "label": "Coleta de poções de vida",
+          "value": "2"
+        },
+        {
+          "label": "Coleta de poções de vida cheia",
+          "value": "0"
+        },
+        {
+          "label": "Coleta de poções de mana",
+          "value": "2"
+        },
+        {
+          "label": "Coleta de poções de mana cheia",
+          "value": "0"
+        },
+        {
+          "label": "Coleta de poções de rejuvenescimento",
+          "value": "0"
+        },
+        {
+          "label": "Coleta de poções de rejuvenescimento cheio",
+          "value": "0"
+        },
+        {
+          "label": "Coleta automática em Tristram",
+          "value": "Desligada"
+        },
+        {
+          "label": "Desabilitar santuários prejudiciais",
+          "value": "Desligado"
+        },
+        {
+          "label": "Prender mouse à janela",
+          "value": "Desligado"
+        },
+        {
+          "label": "Pausar ao perder foco",
+          "value": "Ligado"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/options.cpp",
+          "line": 985
+        }
+      ],
+      "notes": [
+        "Valores fictícios para revisão visual; a galeria permite rolar todos os campos.",
+        "Velocidade e limiar para omitir carregamento são Invisible nessa categoria.",
+        "Fogo amigo, quests completas, correr em Tristram e informações do grupo têm restrições durante multiplayer; quests aleatórias requerem fora da partida.",
+        "Formato das lojas e seis quantidades possuem subtelas próprias O23–O29."
+      ],
+      "variants": []
+    },
+    {
+      "id": "O22",
+      "title": "Gameplay — Hellfire",
+      "group": "Configurações",
+      "layout": "settings",
+      "availability": "condicional",
+      "condition": "Modo Hellfire ativo.",
+      "summary": "Exemplo de apresentação proposto; os valores ilustram uma configuração fictícia.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Fogo amigo",
+          "value": "Ligado"
+        },
+        {
+          "label": "Quests completas no multiplayer",
+          "value": "Desligado"
+        },
+        {
+          "label": "Quests aleatórias",
+          "value": "Ligadas"
+        },
+        {
+          "label": "Quest da menina Theo",
+          "value": "Desligada"
+        },
+        {
+          "label": "Quest de Jersey",
+          "value": "Desligada"
+        },
+        {
+          "label": "Correr em Tristram",
+          "value": "Desligado"
+        },
+        {
+          "label": "Lançamento rápido de magia",
+          "value": "Desligado"
+        },
+        {
+          "label": "Disponibilizar Bardo de teste",
+          "value": "Desligado"
+        },
+        {
+          "label": "Disponibilizar Bárbaro de teste",
+          "value": "Desligado"
+        },
+        {
+          "label": "Barra de experiência",
+          "value": "Ligada"
+        },
+        {
+          "label": "Informações flutuantes de item",
+          "value": "Ligadas"
+        },
+        {
+          "label": "Interface de lojas",
+          "value": "Lista com imagens de itens"
+        },
+        {
+          "label": "Exibir valores de vida",
+          "value": "Ligado"
+        },
+        {
+          "label": "Exibir valores de mana",
+          "value": "Ligado"
+        },
+        {
+          "label": "Informações do grupo",
+          "value": "Ligadas"
+        },
+        {
+          "label": "Barra de vida de inimigo",
+          "value": "Ligada"
+        },
+        {
+          "label": "Exibir tipo do monstro",
+          "value": "Ligado"
+        },
+        {
+          "label": "Rótulos dos itens",
+          "value": "Ligados"
+        },
+        {
+          "label": "Reabastecer cinto automaticamente",
+          "value": "Desligado"
+        },
+        {
+          "label": "Equipar armas automaticamente",
+          "value": "Ligado"
+        },
+        {
+          "label": "Equipar armaduras automaticamente",
+          "value": "Desligado"
+        },
+        {
+          "label": "Equipar elmos automaticamente",
+          "value": "Desligado"
+        },
+        {
+          "label": "Equipar escudos automaticamente",
+          "value": "Desligado"
+        },
+        {
+          "label": "Equipar joias automaticamente",
+          "value": "Desligado"
+        },
+        {
+          "label": "Coletar ouro automaticamente",
+          "value": "Ligado"
+        },
+        {
+          "label": "Coletar elixires automaticamente",
+          "value": "Desligado"
+        },
+        {
+          "label": "Coletar óleos automaticamente",
+          "value": "Desligado"
+        },
+        {
+          "label": "Coleta de poções de vida",
+          "value": "2"
+        },
+        {
+          "label": "Coleta de poções de vida cheia",
+          "value": "0"
+        },
+        {
+          "label": "Coleta de poções de mana",
+          "value": "2"
+        },
+        {
+          "label": "Coleta de poções de mana cheia",
+          "value": "0"
+        },
+        {
+          "label": "Coleta de poções de rejuvenescimento",
+          "value": "0"
+        },
+        {
+          "label": "Coleta de poções de rejuvenescimento cheio",
+          "value": "0"
+        },
+        {
+          "label": "Coleta automática em Tristram",
+          "value": "Desligada"
+        },
+        {
+          "label": "Desabilitar santuários prejudiciais",
+          "value": "Desligado"
+        },
+        {
+          "label": "Prender mouse à janela",
+          "value": "Desligado"
+        },
+        {
+          "label": "Pausar ao perder foco",
+          "value": "Ligado"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/options.cpp",
+          "line": 942
+        },
+        {
+          "file": "Source/options.cpp",
+          "line": 985
+        }
+      ],
+      "notes": [
+        "Inclui todos os campos comuns de O21 e cinco entradas exclusivas de Hellfire.",
+        "Theo, Jersey, Bardo e Bárbaro não podem mudar durante a partida.",
+        "Exemplo de cobertura de conteúdo condicional; não indica que Hellfire foi integrado ao 3D."
+      ],
+      "variants": []
+    },
+    {
+      "id": "O23",
+      "title": "Interface de lojas",
+      "group": "Configurações",
+      "layout": "choice",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Escolha um valor para esta opção. Exemplo visual de um submenu existente.",
+      "choices": [
+        "Lista apenas com texto",
+        "Lista com imagens de itens",
+        "Grade visual"
+      ],
+      "rows": [],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/options.cpp",
+          "line": 975
+        }
+      ],
+      "notes": [],
+      "variants": []
+    },
+    {
+      "id": "O24",
+      "title": "Coleta automática — poções de vida",
+      "group": "Configurações",
+      "layout": "choice",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Escolha um valor para esta opção. Exemplo visual de um submenu existente.",
+      "choices": [
+        "0",
+        "1",
+        "2",
+        "4",
+        "8",
+        "16"
+      ],
+      "rows": [],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/options.cpp",
+          "line": 969
+        }
+      ],
+      "notes": [
+        "Quantidade de poções a coletar automaticamente; os seis tipos mantêm telas individuais."
+      ],
+      "variants": []
+    },
+    {
+      "id": "O25",
+      "title": "Coleta automática — poções de vida cheia",
+      "group": "Configurações",
+      "layout": "choice",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Escolha um valor para esta opção. Exemplo visual de um submenu existente.",
+      "choices": [
+        "0",
+        "1",
+        "2",
+        "4",
+        "8",
+        "16"
+      ],
+      "rows": [],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/options.cpp",
+          "line": 970
+        }
+      ],
+      "notes": [
+        "Quantidade de poções a coletar automaticamente; os seis tipos mantêm telas individuais."
+      ],
+      "variants": []
+    },
+    {
+      "id": "O26",
+      "title": "Coleta automática — poções de mana",
+      "group": "Configurações",
+      "layout": "choice",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Escolha um valor para esta opção. Exemplo visual de um submenu existente.",
+      "choices": [
+        "0",
+        "1",
+        "2",
+        "4",
+        "8",
+        "16"
+      ],
+      "rows": [],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/options.cpp",
+          "line": 971
+        }
+      ],
+      "notes": [
+        "Quantidade de poções a coletar automaticamente; os seis tipos mantêm telas individuais."
+      ],
+      "variants": []
+    },
+    {
+      "id": "O27",
+      "title": "Coleta automática — poções de mana cheia",
+      "group": "Configurações",
+      "layout": "choice",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Escolha um valor para esta opção. Exemplo visual de um submenu existente.",
+      "choices": [
+        "0",
+        "1",
+        "2",
+        "4",
+        "8",
+        "16"
+      ],
+      "rows": [],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/options.cpp",
+          "line": 972
+        }
+      ],
+      "notes": [
+        "Quantidade de poções a coletar automaticamente; os seis tipos mantêm telas individuais."
+      ],
+      "variants": []
+    },
+    {
+      "id": "O28",
+      "title": "Coleta automática — poções de rejuvenescimento",
+      "group": "Configurações",
+      "layout": "choice",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Escolha um valor para esta opção. Exemplo visual de um submenu existente.",
+      "choices": [
+        "0",
+        "1",
+        "2",
+        "4",
+        "8",
+        "16"
+      ],
+      "rows": [],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/options.cpp",
+          "line": 973
+        }
+      ],
+      "notes": [
+        "Quantidade de poções a coletar automaticamente; os seis tipos mantêm telas individuais."
+      ],
+      "variants": []
+    },
+    {
+      "id": "O29",
+      "title": "Coleta automática — poções de rejuvenescimento cheio",
+      "group": "Configurações",
+      "layout": "choice",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Escolha um valor para esta opção. Exemplo visual de um submenu existente.",
+      "choices": [
+        "0",
+        "1",
+        "2",
+        "4",
+        "8",
+        "16"
+      ],
+      "rows": [],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/options.cpp",
+          "line": 974
+        }
+      ],
+      "notes": [
+        "Quantidade de poções a coletar automaticamente; os seis tipos mantêm telas individuais."
+      ],
+      "variants": []
+    },
+    {
+      "id": "O30",
+      "title": "Mapeamento de teclas",
+      "group": "Configurações",
+      "layout": "settings",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Exemplo de apresentação proposto; os valores ilustram uma configuração fictícia.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Item do cinto 1",
+          "value": "1"
+        },
+        {
+          "label": "Item do cinto 2",
+          "value": "2"
+        },
+        {
+          "label": "Item do cinto 3",
+          "value": "3"
+        },
+        {
+          "label": "Item do cinto 4",
+          "value": "4"
+        },
+        {
+          "label": "Item do cinto 5",
+          "value": "5"
+        },
+        {
+          "label": "Item do cinto 6",
+          "value": "6"
+        },
+        {
+          "label": "Item do cinto 7",
+          "value": "7"
+        },
+        {
+          "label": "Item do cinto 8",
+          "value": "8"
+        },
+        {
+          "label": "Atalho de magia 1",
+          "value": "F5"
+        },
+        {
+          "label": "Atalho de magia 2",
+          "value": "F6"
+        },
+        {
+          "label": "Atalho de magia 3",
+          "value": "F7"
+        },
+        {
+          "label": "Atalho de magia 4",
+          "value": "F8"
+        },
+        {
+          "label": "Atalho de magia 5",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Atalho de magia 6",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Atalho de magia 7",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Atalho de magia 8",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Atalho de magia 9",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Atalho de magia 10",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Atalho de magia 11",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Atalho de magia 12",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Magia anterior",
+          "value": "Roda para cima"
+        },
+        {
+          "label": "Próxima magia",
+          "value": "Roda para baixo"
+        },
+        {
+          "label": "Usar poção de vida",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Usar poção de mana",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Seleção rápida de magias",
+          "value": "S"
+        },
+        {
+          "label": "Salvar rápido",
+          "value": "F2"
+        },
+        {
+          "label": "Tristram 3D",
+          "value": "F4"
+        },
+        {
+          "label": "Girar câmera para a esquerda",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Girar câmera para a direita",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Aproximar câmera",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Restaurar câmera",
+          "value": "Home"
+        },
+        {
+          "label": "Afastar câmera",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Carregar rápido",
+          "value": "F3"
+        },
+        {
+          "label": "Sair do jogo",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Parar herói",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Destacar itens enquanto segura",
+          "value": "Alt"
+        },
+        {
+          "label": "Alternar destaque de itens",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Alternar automapa",
+          "value": "Tab"
+        },
+        {
+          "label": "Alternar tipo de mapa",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Inventário",
+          "value": "I"
+        },
+        {
+          "label": "Personagem",
+          "value": "C"
+        },
+        {
+          "label": "Grupo",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Registro de quests",
+          "value": "Q"
+        },
+        {
+          "label": "Grimório",
+          "value": "B"
+        },
+        {
+          "label": "Mensagem rápida 1",
+          "value": "F9"
+        },
+        {
+          "label": "Mensagem rápida 2",
+          "value": "F10"
+        },
+        {
+          "label": "Mensagem rápida 3",
+          "value": "F11"
+        },
+        {
+          "label": "Mensagem rápida 4",
+          "value": "F12"
+        },
+        {
+          "label": "Mensagem rápida 5",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Mensagem rápida 6",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Mensagem rápida 7",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Mensagem rápida 8",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Mensagem rápida 9",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Mensagem rápida 10",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Esconder painéis",
+          "value": "Espaço"
+        },
+        {
+          "label": "Zoom",
+          "value": "Z"
+        },
+        {
+          "label": "Pausar",
+          "value": "Pause"
+        },
+        {
+          "label": "Pausar — alternativo",
+          "value": "P"
+        },
+        {
+          "label": "Diminuir brilho",
+          "value": "F"
+        },
+        {
+          "label": "Aumentar brilho",
+          "value": "G"
+        },
+        {
+          "label": "Ajuda",
+          "value": "F1"
+        },
+        {
+          "label": "Captura de tela",
+          "value": "Print Screen"
+        },
+        {
+          "label": "Informações da partida",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Histórico do chat",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Organizar inventário",
+          "value": "Sem vínculo"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/options.cpp",
+          "line": 1196
+        },
+        {
+          "file": "Source/diablo.cpp",
+          "line": 1928
+        },
+        {
+          "file": "Source/player.h",
+          "line": 44
+        },
+        {
+          "file": "Source/quick_messages.hpp",
+          "line": 14
+        }
+      ],
+      "notes": [
+        "Vínculos nesta proposta são exemplos fictícios, não leitura do perfil habitual nem promessa de defaults.",
+        "O código registra 8 itens do cinto, 12 magias e 10 mensagens rápidas.",
+        "Ajuda herdada ainda menciona quatro magias; divergência documentada, sem correção de código.",
+        "Selecionar qualquer ação abre o mesmo layout de captura de tecla/mouse O32."
+      ],
+      "variants": [
+        "Em build _DEBUG também aparecem Console e Alternar debug; omitidos da experiência normal."
+      ]
+    },
+    {
+      "id": "O31",
+      "title": "Mapeamento do controle",
+      "group": "Configurações",
+      "layout": "settings",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Exemplo de apresentação proposto; os valores ilustram uma configuração fictícia.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Item do cinto 1",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Item do cinto 2",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Item do cinto 3",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Item do cinto 4",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Item do cinto 5",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Item do cinto 6",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Item do cinto 7",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Item do cinto 8",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Atalho de magia 1",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Atalho de magia 2",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Atalho de magia 3",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Atalho de magia 4",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Atalho de magia 5",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Atalho de magia 6",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Atalho de magia 7",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Atalho de magia 8",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Atalho de magia 9",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Atalho de magia 10",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Atalho de magia 11",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Atalho de magia 12",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Ação primária",
+          "value": "B"
+        },
+        {
+          "label": "Ação secundária",
+          "value": "Y"
+        },
+        {
+          "label": "Lançar magia",
+          "value": "X"
+        },
+        {
+          "label": "Cancelar",
+          "value": "A"
+        },
+        {
+          "label": "Mover para cima",
+          "value": "Direcional ↑"
+        },
+        {
+          "label": "Mover para baixo",
+          "value": "Direcional ↓"
+        },
+        {
+          "label": "Mover para a esquerda",
+          "value": "Direcional ←"
+        },
+        {
+          "label": "Mover para a direita",
+          "value": "Direcional →"
+        },
+        {
+          "label": "Permanecer parado enquanto segura",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Alternar permanecer parado",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Usar poção de vida",
+          "value": "LB"
+        },
+        {
+          "label": "Usar poção de mana",
+          "value": "RB"
+        },
+        {
+          "label": "Personagem",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Inventário",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Registro de quests",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Grimório",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Seleção rápida de magias",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Alternar automapa",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Mover automapa para cima",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Mover automapa para baixo",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Mover automapa para a esquerda",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Mover automapa para a direita",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Mover mouse para cima",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Mover mouse para baixo",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Mover mouse para a esquerda",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Mover mouse para a direita",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Clique esquerdo — vínculo 1",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Clique esquerdo — vínculo 2",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Clique direito — vínculo 1",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Clique direito — vínculo 2",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Menu de magias do controle",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Navegador do controle",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Menu da partida — vínculo 1",
+          "value": "Start"
+        },
+        {
+          "label": "Menu da partida — vínculo 2",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Salvar rápido",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Carregar rápido",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Destacar itens enquanto segura",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Alternar destaque de itens",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Esconder painéis",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Zoom",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Pausar",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Diminuir brilho",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Aumentar brilho",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Ajuda",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Captura de tela",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Informações da partida",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Organizar inventário",
+          "value": "Sem vínculo"
+        },
+        {
+          "label": "Histórico do chat",
+          "value": "Sem vínculo"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/options.cpp",
+          "line": 1416
+        },
+        {
+          "file": "Source/diablo.cpp",
+          "line": 2301
+        }
+      ],
+      "notes": [
+        "Vínculos fictícios para revisão visual. Letras ABXY exemplificam um controle; glifos devem acompanhar o dispositivo real.",
+        "Inclui todos os registros atuais, inclusive vínculos duplicados para cliques e menu.",
+        "Selecionar uma ação abre O33; o controle admite modificador e botão."
+      ],
+      "variants": []
+    },
+    {
+      "id": "O32",
+      "title": "Alterar tecla — inventário",
+      "group": "Configurações",
+      "layout": "form",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Escolha a associação atual e pressione uma tecla, botão central/lateral ou roda do mouse.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Ação",
+          "value": "Inventário"
+        },
+        {
+          "label": "Tecla vinculada",
+          "value": "I"
+        },
+        {
+          "label": "Estado",
+          "value": "Pressione uma tecla para alterar"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Desvincular tecla",
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/DiabloUI/settingsmenu.cpp",
+          "line": 446
+        }
+      ],
+      "notes": [
+        "Aceita teclado, botão central, laterais e roda nos quatro sentidos; não aceita clique primário/secundário como vínculo nesta tela.",
+        "Um exemplo individual representa a captura compartilhada por todas as ações."
+      ],
+      "variants": []
+    },
+    {
+      "id": "O33",
+      "title": "Alterar controle — inventário",
+      "group": "Configurações",
+      "layout": "form",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Selecione a combinação atual para iniciar a captura dos botões.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Ação",
+          "value": "Inventário"
+        },
+        {
+          "label": "Combinação vinculada",
+          "value": "LB + Y — exemplo"
+        },
+        {
+          "label": "Estado",
+          "value": "Selecione a combinação para alterar"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Iniciar captura",
+        "Desvincular combinação",
+        "Voltar"
+      ],
+      "source": [
+        {
+          "file": "Source/DiabloUI/settingsmenu.cpp",
+          "line": 501
+        }
+      ],
+      "notes": [
+        "O tempo nativo de captura é 10 segundos; o estado em andamento está representado em O34.",
+        "A captura admite modificador e botão; Esc cancela; liberar os botões termina a associação."
+      ],
+      "variants": [
+        "Repouso: combinação clicável, Desvincular e Voltar visíveis.",
+        "Captura ativa: mensagem regressiva, ações de navegação ocultas temporariamente."
+      ]
+    },
+    {
+      "id": "O34",
+      "title": "Captura do controle em andamento",
+      "group": "Configurações",
+      "layout": "form",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Estado de captura da combinação: pressione os botões antes de o tempo terminar.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Ação",
+          "value": "Inventário"
+        },
+        {
+          "label": "Combinação",
+          "value": "LB + Y — exemplo"
+        },
+        {
+          "label": "Tempo restante",
+          "value": "8 segundos — exemplo"
+        }
+      ],
+      "fields": [],
+      "buttons": [],
+      "source": [
+        {
+          "file": "Source/DiabloUI/settingsmenu.cpp",
+          "line": 501
+        }
+      ],
+      "notes": [
+        "Janela nativa de 10 segundos; exemplo mostra o segundo estado de O33.",
+        "Durante captura, outras ações ficam ocultas. Esc cancela; soltar os botões conclui."
+      ],
+      "variants": []
+    },
+    {
+      "id": "G01",
+      "title": "Menu da partida — solo",
+      "group": "Partida",
+      "layout": "menu",
+      "availability": "atual",
+      "condition": "Partida solo.",
+      "summary": "Exemplo visual sobre a partida; ações preservam o comportamento nativo.",
+      "choices": [
+        "Opções",
+        "Salvar jogo",
+        "Carregar jogo",
+        "Sair para o menu principal",
+        "Sair do jogo"
+      ],
+      "rows": [],
+      "fields": [],
+      "buttons": [],
+      "source": [
+        {
+          "file": "Source/gamemenu.cpp",
+          "line": 73
+        }
+      ],
+      "notes": [
+        "Esc retorna à partida; o menu atual não possui botão Retomar.",
+        "Carregar desabilita sem save válido. Opções desabilita quando o herói está morto."
+      ],
+      "variants": []
+    },
+    {
+      "id": "G02",
+      "title": "Menu da partida — multiplayer",
+      "group": "Partida",
+      "layout": "menu",
+      "availability": "condicional",
+      "condition": "Build com rede e partida multiplayer.",
+      "summary": "Exemplo visual sobre a partida; ações preservam o comportamento nativo.",
+      "choices": [
+        "Opções",
+        "Sair para o menu principal",
+        "Sair do jogo"
+      ],
+      "rows": [],
+      "fields": [],
+      "buttons": [],
+      "source": [
+        {
+          "file": "Source/gamemenu.cpp",
+          "line": 85
+        }
+      ],
+      "notes": [
+        "Sem Salvar/Carregar; o build local NONET não valida esse fluxo.",
+        "Esc fecha o menu; não presumir que o mundo multiplayer pausa."
+      ],
+      "variants": []
+    },
+    {
+      "id": "G03",
+      "title": "Opções da partida — solo",
+      "group": "Partida",
+      "layout": "settings",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Controles rápidos preservados durante uma partida solo.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Áudio",
+          "value": "Abrir"
+        },
+        {
+          "label": "Vídeo",
+          "value": "Abrir"
+        },
+        {
+          "label": "Velocidade",
+          "value": "Normal — exemplo"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Menu anterior"
+      ],
+      "source": [
+        {
+          "file": "Source/gamemenu.cpp",
+          "line": 94
+        }
+      ],
+      "notes": [
+        "Velocidade possui slider nativo de 20 a 50 ticks por segundo, com 46 posições.",
+        "O valor Normal deste exemplo corresponde a 20 ticks por segundo."
+      ],
+      "variants": []
+    },
+    {
+      "id": "G04",
+      "title": "Opções da partida — multiplayer",
+      "group": "Partida",
+      "layout": "settings",
+      "availability": "condicional",
+      "condition": "Build com rede e partida multiplayer.",
+      "summary": "Velocidade informativa definida pela partida multiplayer.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Áudio",
+          "value": "Abrir"
+        },
+        {
+          "label": "Vídeo",
+          "value": "Abrir"
+        },
+        {
+          "label": "Velocidade",
+          "value": "Normal — leitura apenas"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Menu anterior"
+      ],
+      "source": [
+        {
+          "file": "Source/gamemenu.cpp",
+          "line": 239
+        }
+      ],
+      "notes": [
+        "Sem slider de velocidade habilitado; rótulos possíveis Normal, Rápida, Mais rápida e Máxima.",
+        "As faixas do código são 20, ≥30, ≥40 e ≥50 ticks por segundo."
+      ],
+      "variants": []
+    },
+    {
+      "id": "G05",
+      "title": "Áudio da partida",
+      "group": "Partida",
+      "layout": "settings",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Música, efeitos e acesso à escolha de trilha.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Música",
+          "value": "60% — exemplo"
+        },
+        {
+          "label": "Som",
+          "value": "80% — exemplo"
+        },
+        {
+          "label": "Trilha sonora",
+          "value": "Abrir"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Menu anterior"
+      ],
+      "source": [
+        {
+          "file": "Source/gamemenu.cpp",
+          "line": 105
+        }
+      ],
+      "notes": [
+        "Percentuais fictícios para legibilidade; o runtime usa a escala nativa de volume, com slider e mute.",
+        "Acionar Música/Som alterna habilitado/desabilitado.",
+        "Não há controle de volume de dicas de navegação neste submenu."
+      ],
+      "variants": []
+    },
+    {
+      "id": "G06",
+      "title": "Vídeo da partida",
+      "group": "Partida",
+      "layout": "settings",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Controles atuais da visualização de Tristram e brilho.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Renderização 3D por GPU",
+          "value": "Ligada"
+        },
+        {
+          "label": "Suavização de bordas 3D",
+          "value": "Desligada"
+        },
+        {
+          "label": "Iniciar em 3D",
+          "value": "Ligado"
+        },
+        {
+          "label": "Gamma",
+          "value": "50% — exemplo"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Menu anterior"
+      ],
+      "source": [
+        {
+          "file": "Source/gamemenu.cpp",
+          "line": 139
+        }
+      ],
+      "notes": [
+        "Gamma nativo: 0 a 100, em 21 posições.",
+        "GPU/suavização aplicam no próximo desenho; Iniciar em 3D vale na próxima abertura/carregamento.",
+        "GPU usa CPU quando indisponível; demais níveis ainda usam renderizador original."
+      ],
+      "variants": []
+    },
+    {
+      "id": "G07",
+      "title": "Trilha sonora na partida",
+      "group": "Partida",
+      "layout": "menu",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Exemplo visual sobre a partida; ações preservam o comportamento nativo.",
+      "choices": [
+        "Tema: Personalizado — exemplo",
+        "Música por local",
+        "Menu anterior"
+      ],
+      "rows": [],
+      "fields": [],
+      "buttons": [],
+      "source": [
+        {
+          "file": "Source/gamemenu.cpp",
+          "line": 114
+        }
+      ],
+      "notes": [
+        "Tema alterna Vanilla/Rock/Custom na mesma linha; não abre tela de escolha.",
+        "Mudança aplica imediatamente ao local atual."
+      ],
+      "variants": []
+    },
+    {
+      "id": "G08",
+      "title": "Música por local — página 1 de 3",
+      "group": "Partida",
+      "layout": "menu",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Exemplo visual sobre a partida; ações preservam o comportamento nativo.",
+      "choices": [
+        "Menu principal",
+        "Tristram",
+        "Catedral",
+        "Mais faixas",
+        "Menu anterior"
+      ],
+      "rows": [],
+      "fields": [],
+      "buttons": [],
+      "source": [
+        {
+          "file": "Source/gamemenu.cpp",
+          "line": 316
+        }
+      ],
+      "notes": [
+        "A ordem nativa contém três locais por página."
+      ],
+      "variants": []
+    },
+    {
+      "id": "G09",
+      "title": "Música por local — página 2 de 3",
+      "group": "Partida",
+      "layout": "menu",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Exemplo visual sobre a partida; ações preservam o comportamento nativo.",
+      "choices": [
+        "Catacumbas",
+        "Cavernas",
+        "Inferno",
+        "Mais faixas",
+        "Menu anterior"
+      ],
+      "rows": [],
+      "fields": [],
+      "buttons": [],
+      "source": [
+        {
+          "file": "Source/gamemenu.cpp",
+          "line": 316
+        }
+      ],
+      "notes": [],
+      "variants": []
+    },
+    {
+      "id": "G10",
+      "title": "Música por local — página 3 de 3",
+      "group": "Partida",
+      "layout": "menu",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Exemplo visual sobre a partida; ações preservam o comportamento nativo.",
+      "choices": [
+        "Ninho — Hellfire",
+        "Cripta — Hellfire",
+        "Primeira página",
+        "Menu anterior"
+      ],
+      "rows": [],
+      "fields": [],
+      "buttons": [],
+      "source": [
+        {
+          "file": "Source/gamemenu.cpp",
+          "line": 316
+        }
+      ],
+      "notes": [
+        "Ninho/Cripta fazem parte da lista atual mesmo quando os ambientes não estão ativos no modo Diablo.",
+        "Isto representa disponibilidade do menu; não prova conteúdo 3D desses níveis."
+      ],
+      "variants": []
+    },
+    {
+      "id": "G11",
+      "title": "Variante musical — Menu principal",
+      "group": "Partida",
+      "layout": "menu",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Exemplo visual sobre a partida; ações preservam o comportamento nativo.",
+      "choices": [
+        "★ Original — exemplo ativo",
+        "Rock2 — pendente neste exemplo",
+        "Main Menu — ausente neste exemplo",
+        "Menu anterior"
+      ],
+      "rows": [],
+      "fields": [],
+      "buttons": [],
+      "source": [
+        {
+          "file": "Source/gamemenu.cpp",
+          "line": 348
+        }
+      ],
+      "notes": [
+        "Estado musical fictício; não deriva da instalação nem do perfil do usuário.",
+        "No código atual a seleção ativa recebe prefixo *; a estrela deste estudo é proposta visual.",
+        "Substituição ausente conserva a faixa original. Nenhuma mídia ou nome de arquivo privado está incluído."
+      ],
+      "variants": []
+    },
+    {
+      "id": "G12",
+      "title": "Variante musical — Tristram",
+      "group": "Partida",
+      "layout": "menu",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Exemplo visual sobre a partida; ações preservam o comportamento nativo.",
+      "choices": [
+        "★ Original — exemplo ativo",
+        "Rock — pendente neste exemplo",
+        "Menu anterior"
+      ],
+      "rows": [],
+      "fields": [],
+      "buttons": [],
+      "source": [
+        {
+          "file": "Source/gamemenu.cpp",
+          "line": 348
+        }
+      ],
+      "notes": [
+        "Estado musical fictício; não deriva da instalação nem do perfil do usuário.",
+        "No código atual a seleção ativa recebe prefixo *; a estrela deste estudo é proposta visual.",
+        "Substituição ausente conserva a faixa original. Nenhuma mídia ou nome de arquivo privado está incluído."
+      ],
+      "variants": []
+    },
+    {
+      "id": "G13",
+      "title": "Variante musical — Catedral",
+      "group": "Partida",
+      "layout": "menu",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Exemplo visual sobre a partida; ações preservam o comportamento nativo.",
+      "choices": [
+        "★ Original — exemplo ativo",
+        "Rock — pendente neste exemplo",
+        "Menu anterior"
+      ],
+      "rows": [],
+      "fields": [],
+      "buttons": [],
+      "source": [
+        {
+          "file": "Source/gamemenu.cpp",
+          "line": 348
+        }
+      ],
+      "notes": [
+        "Estado musical fictício; não deriva da instalação nem do perfil do usuário.",
+        "No código atual a seleção ativa recebe prefixo *; a estrela deste estudo é proposta visual.",
+        "Substituição ausente conserva a faixa original. Nenhuma mídia ou nome de arquivo privado está incluído."
+      ],
+      "variants": []
+    },
+    {
+      "id": "G14",
+      "title": "Variante musical — Catacumbas",
+      "group": "Partida",
+      "layout": "menu",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Exemplo visual sobre a partida; ações preservam o comportamento nativo.",
+      "choices": [
+        "★ Original — exemplo ativo",
+        "Rock — pendente neste exemplo",
+        "Menu anterior"
+      ],
+      "rows": [],
+      "fields": [],
+      "buttons": [],
+      "source": [
+        {
+          "file": "Source/gamemenu.cpp",
+          "line": 348
+        }
+      ],
+      "notes": [
+        "Estado musical fictício; não deriva da instalação nem do perfil do usuário.",
+        "No código atual a seleção ativa recebe prefixo *; a estrela deste estudo é proposta visual.",
+        "Substituição ausente conserva a faixa original. Nenhuma mídia ou nome de arquivo privado está incluído."
+      ],
+      "variants": []
+    },
+    {
+      "id": "G15",
+      "title": "Variante musical — Cavernas",
+      "group": "Partida",
+      "layout": "menu",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Exemplo visual sobre a partida; ações preservam o comportamento nativo.",
+      "choices": [
+        "★ Original — exemplo ativo",
+        "Rock — pendente neste exemplo",
+        "Menu anterior"
+      ],
+      "rows": [],
+      "fields": [],
+      "buttons": [],
+      "source": [
+        {
+          "file": "Source/gamemenu.cpp",
+          "line": 348
+        }
+      ],
+      "notes": [
+        "Estado musical fictício; não deriva da instalação nem do perfil do usuário.",
+        "No código atual a seleção ativa recebe prefixo *; a estrela deste estudo é proposta visual.",
+        "Substituição ausente conserva a faixa original. Nenhuma mídia ou nome de arquivo privado está incluído."
+      ],
+      "variants": []
+    },
+    {
+      "id": "G16",
+      "title": "Variante musical — Inferno",
+      "group": "Partida",
+      "layout": "menu",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Exemplo visual sobre a partida; ações preservam o comportamento nativo.",
+      "choices": [
+        "★ Original — exemplo ativo",
+        "Rock — pendente neste exemplo",
+        "Menu anterior"
+      ],
+      "rows": [],
+      "fields": [],
+      "buttons": [],
+      "source": [
+        {
+          "file": "Source/gamemenu.cpp",
+          "line": 348
+        }
+      ],
+      "notes": [
+        "Estado musical fictício; não deriva da instalação nem do perfil do usuário.",
+        "No código atual a seleção ativa recebe prefixo *; a estrela deste estudo é proposta visual.",
+        "Substituição ausente conserva a faixa original. Nenhuma mídia ou nome de arquivo privado está incluído."
+      ],
+      "variants": []
+    },
+    {
+      "id": "G17",
+      "title": "Variante musical — Ninho — Hellfire",
+      "group": "Partida",
+      "layout": "menu",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Exemplo visual sobre a partida; ações preservam o comportamento nativo.",
+      "choices": [
+        "★ Original — exemplo ativo",
+        "Rock — pendente neste exemplo",
+        "Menu anterior"
+      ],
+      "rows": [],
+      "fields": [],
+      "buttons": [],
+      "source": [
+        {
+          "file": "Source/gamemenu.cpp",
+          "line": 348
+        }
+      ],
+      "notes": [
+        "Estado musical fictício; não deriva da instalação nem do perfil do usuário.",
+        "No código atual a seleção ativa recebe prefixo *; a estrela deste estudo é proposta visual.",
+        "Substituição ausente conserva a faixa original. Nenhuma mídia ou nome de arquivo privado está incluído."
+      ],
+      "variants": [
+        "Ambiente de Hellfire; o submenu consta na lista atual."
+      ]
+    },
+    {
+      "id": "G18",
+      "title": "Variante musical — Cripta — Hellfire",
+      "group": "Partida",
+      "layout": "menu",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Exemplo visual sobre a partida; ações preservam o comportamento nativo.",
+      "choices": [
+        "★ Original — exemplo ativo",
+        "Rock — pendente neste exemplo",
+        "Menu anterior"
+      ],
+      "rows": [],
+      "fields": [],
+      "buttons": [],
+      "source": [
+        {
+          "file": "Source/gamemenu.cpp",
+          "line": 348
+        }
+      ],
+      "notes": [
+        "Estado musical fictício; não deriva da instalação nem do perfil do usuário.",
+        "No código atual a seleção ativa recebe prefixo *; a estrela deste estudo é proposta visual.",
+        "Substituição ausente conserva a faixa original. Nenhuma mídia ou nome de arquivo privado está incluído."
+      ],
+      "variants": [
+        "Ambiente de Hellfire; o submenu consta na lista atual."
+      ]
+    },
+    {
+      "id": "G19",
+      "title": "Pausa",
+      "group": "Partida",
+      "layout": "dialog",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Pausa simples sobre o mundo.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Estado",
+          "value": "Pausado"
+        }
+      ],
+      "fields": [],
+      "buttons": [],
+      "source": [
+        {
+          "file": "Source/gmenu.cpp",
+          "line": 191
+        }
+      ],
+      "notes": [
+        "Estado separado do menu da partida; não acrescenta opções inexistentes.",
+        "A disponibilidade de pausa depende do contexto da partida."
+      ],
+      "variants": []
+    },
+    {
+      "id": "G20",
+      "title": "Salvando",
+      "group": "Partida",
+      "layout": "loading",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Mensagem de salvamento em andamento sobre a partida.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Estado",
+          "value": "Salvando jogo…"
+        }
+      ],
+      "fields": [],
+      "buttons": [],
+      "source": [
+        {
+          "file": "Source/gamemenu.cpp",
+          "line": 609
+        }
+      ],
+      "notes": [
+        "Não existe navegador de slots nem confirmação neste comando.",
+        "Operação não ocorre se o cursor estiver carregando um item; herói morto impede salvar."
+      ],
+      "variants": []
+    },
+    {
+      "id": "G21",
+      "title": "Carregando",
+      "group": "Partida",
+      "layout": "loading",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Mensagem de carregamento do save atual.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Estado",
+          "value": "Carregando jogo…"
+        }
+      ],
+      "fields": [],
+      "buttons": [],
+      "source": [
+        {
+          "file": "Source/gamemenu.cpp",
+          "line": 571
+        }
+      ],
+      "notes": [
+        "Comando imediato, sem seleção de slots nesta tela."
+      ],
+      "variants": []
+    },
+    {
+      "id": "G22",
+      "title": "Jogo salvo",
+      "group": "Partida",
+      "layout": "dialog",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Confirmação transitória do salvamento.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Estado",
+          "value": "Jogo salvo"
+        }
+      ],
+      "fields": [],
+      "buttons": [],
+      "source": [
+        {
+          "file": "Source/gamemenu.cpp",
+          "line": 629
+        }
+      ],
+      "notes": [
+        "Mensagem temporária, sem botão de confirmação; tempo restante calculado até aproximadamente 1 segundo do início da operação."
+      ],
+      "variants": []
+    }
+  ]
+}

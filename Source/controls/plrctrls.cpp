@@ -19,6 +19,7 @@
 
 #include "automap.h"
 #include "control/control.hpp"
+#include "control/d3d_hud.hpp"
 #include "controls/controller_motion.h"
 #ifndef USE_SDL1
 #include "controls/devices/game_controller.h"
@@ -668,7 +669,7 @@ Point InvGetEquipSlotCoordFromInvSlot(const inv_xy_slot slot)
 Point GetSlotCoord(int slot)
 {
 	if (slot >= SLOTXY_BELT_FIRST && slot <= SLOTXY_BELT_LAST) {
-		return GetPanelPosition(UiPanels::Main, InvRect[slot].Center());
+		return GetD3dHudBeltSlotRect(slot - SLOTXY_BELT_FIRST).Center();
 	}
 
 	return GetPanelPosition(UiPanels::Inventory, InvRect[slot].Center());
@@ -2325,7 +2326,7 @@ void PerformPrimaryAction()
 				return;
 			TryIconCurs();
 			NewCursor(CURSOR_HAND);
-		} else if (GetRightPanel().contains(MousePosition) || GetMainPanel().contains(MousePosition)) {
+		} else if (GetRightPanel().contains(MousePosition) || IsPointOnD3dHud(MousePosition)) {
 			LiftInventoryItem();
 		} else if (IsStashOpen && GetLeftPanel().contains(MousePosition)) {
 			LiftStashItem();

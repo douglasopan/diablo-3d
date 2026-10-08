@@ -9,6 +9,7 @@
 #include <cstdint>
 
 #include "control/control.hpp"
+#include "control/d3d_hud.hpp"
 #include "controls/control_mode.hpp"
 #include "controls/plrctrls.h"
 #include "cursor.h"
@@ -809,7 +810,7 @@ void CheckTrigForce()
 {
 	trigflag = false;
 
-	if (ControlMode == ControlTypes::KeyboardAndMouse && GetMainPanel().contains(MousePosition)) {
+	if (ControlMode == ControlTypes::KeyboardAndMouse && IsPointOnD3dHud(MousePosition)) {
 		return;
 	}
 

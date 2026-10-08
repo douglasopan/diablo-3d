@@ -1,0 +1,137 @@
+{
+  "desktop": {
+    "viewport": [
+      1920,
+      1080
+    ],
+    "examples": 223,
+    "overflowIssues": [],
+    "transientMeasurement": {
+      "id": "V02",
+      "reason": "Medição anterior ao ajuste do primeiro quadro",
+      "resolved": true,
+      "finalBounds": {
+        "x": 435,
+        "y": 100,
+        "right": 1485,
+        "bottom": 739.671875
+      }
+    }
+  },
+  "responsive": [
+    {
+      "id": "F03",
+      "format": "compact",
+      "overflow": []
+    },
+    {
+      "id": "F04",
+      "format": "compact",
+      "overflow": []
+    },
+    {
+      "id": "O08",
+      "format": "compact",
+      "overflow": []
+    },
+    {
+      "id": "O21",
+      "format": "compact",
+      "overflow": []
+    },
+    {
+      "id": "O30",
+      "format": "compact",
+      "overflow": []
+    },
+    {
+      "id": "G01",
+      "format": "compact",
+      "overflow": []
+    },
+    {
+      "id": "G05",
+      "format": "compact",
+      "overflow": []
+    },
+    {
+      "id": "G06",
+      "format": "compact",
+      "overflow": []
+    },
+    {
+      "id": "P04",
+      "format": "compact",
+      "overflow": []
+    },
+    {
+      "id": "P08",
+      "format": "compact",
+      "overflow": []
+    },
+    {
+      "id": "P11",
+      "format": "compact",
+      "overflow": []
+    },
+    {
+      "id": "P17",
+      "format": "compact",
+      "overflow": []
+    },
+    {
+      "id": "P20",
+      "format": "compact",
+      "overflow": []
+    },
+    {
+      "id": "P22",
+      "format": "compact",
+      "overflow": []
+    },
+    {
+      "id": "T11",
+      "format": "compact",
+      "overflow": []
+    },
+    {
+      "id": "V02",
+      "format": "compact",
+      "overflow": []
+    },
+    {
+      "id": "F03",
+      "format": "ultra",
+      "overflow": []
+    },
+    {
+      "id": "G01",
+      "format": "ultra",
+      "overflow": []
+    },
+    {
+      "id": "P03",
+      "format": "ultra",
+      "overflow": []
+    },
+    {
+      "id": "P11",
+      "format": "ultra",
+      "overflow": []
+    },
+    {
+      "id": "P16",
+      "format": "ultra",
+      "overflow": []
+    },
+    {
+      "id": "T11",
+      "format": "ultra",
+      "overflow": []
+    }
+  ],
+  "limitations": [
+    "Geometria dos painéis conferida; corpos de listas têm rolagem.",
+    "Conferência visual por famílias; não é teste de fluxos no executável."
+  ]
+}

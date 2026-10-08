@@ -13,6 +13,7 @@
 #include <memory>
 #include <mutex>
 #include <optional>
+#include <random>
 #include <string>
 #include <utility>
 
@@ -59,12 +60,30 @@ SoundSample music;
 std::string ActiveMusicSelectionPath;
 bool MusicMuted = false;
 bool MusicInGame = false;
+unsigned ActiveRandomIndex = 0;
+bool ActiveMusicRandomPolicy = false;
+bool ActiveMusicFinite = false;
 
-MusicSelection SelectedMusic(_music_id track)
+MusicSelection SelectedMusic(_music_id track, unsigned randomIndex = 0)
 {
 	const auto &options = GetOptions().Music;
 	return ResolveMusicSelection(track, *options.theme, *options.ForTrack(track), HaveFullMusic(),
-	    [](const char *path) { return FindAsset(path).ok(); }, !MusicInGame, *options.menu);
+	    [](const char *path) { return FindAsset(path).ok(); }, !MusicInGame, *options.menu, randomIndex);
+}
+
+unsigned DrawMusicRandomIndex()
+{
+	// Audio choices must never consume the simulation's deterministic RNG.
+	static std::mt19937 generator(std::random_device {}());
+	const auto &town = MusicTrackCatalog[TMUSIC_TOWN];
+	unsigned count = 0;
+	for (const char *path : { town.rockPath, town.alternativePath, town.thirdPath }) {
+		if (path[0] != '\0' && FindAsset(path).ok())
+			++count;
+	}
+	// Draw over the filtered pool itself: modulo of a three-way draw would bias
+	// selection when only two replacements are installed.
+	return count == 0 ? 0 : std::uniform_int_distribution<unsigned>(0, count - 1)(generator);
 }
 
 std::string GetMp3Path(const char *path)
@@ -336,16 +355,24 @@ void music_stop()
 	music.Release();
 	sgnMusicTrack = NUM_MUSIC;
 	ActiveMusicSelectionPath.clear();
+	ActiveRandomIndex = 0;
+	ActiveMusicRandomPolicy = false;
+	ActiveMusicFinite = false;
 }
 
 void music_start(_music_id nTrack)
 {
 	assert(nTrack < NUM_MUSIC);
 	music_stop();
-	if (!gbMusicOn)
+	if (!gbMusicOn || !gbSndInited || nTrack >= NUM_MUSIC)
 		return;
-	const MusicSelection selection = SelectedMusic(nTrack);
+	MusicSelection selection = SelectedMusic(nTrack);
+	const bool randomPolicy = selection.requested == MusicVariant::Random && nTrack == TMUSIC_TOWN && MusicInGame;
+	const unsigned randomIndex = randomPolicy ? DrawMusicRandomIndex() : 0;
+	if (randomPolicy)
+		selection = SelectedMusic(nTrack, randomIndex);
 	const char *trackPath = selection.path;
+	bool replacementLoaded = selection.actual != MusicVariant::Original;
 
 #ifdef DISABLE_STREAMING_MUSIC
 	const bool stream = false;
@@ -359,6 +386,7 @@ void music_start(_music_id nTrack)
 		const auto &definition = MusicTrackCatalog[nTrack];
 		trackPath = HaveFullMusic() ? definition.originalPath : definition.sharewarePath;
 		loaded = LoadAudioFile(trackPath, stream, music);
+		replacementLoaded = false;
 	}
 	if (!loaded.has_value()) {
 		LogError(LogCategory::Audio, "Music could not be loaded: {}", loaded.error());
@@ -369,7 +397,10 @@ void music_start(_music_id nTrack)
 	music.SetVolume(*GetOptions().Audio.musicVolume, VOLUME_MIN, VOLUME_MAX);
 	if (MusicMuted)
 		music.Mute();
-	if (!music.Play(/*numIterations=*/0)) {
+	// Only a successfully loaded random replacement gets a finite playthrough.
+	// A missing or rejected replacement loops the original without retry churn.
+	const bool finite = randomPolicy && replacementLoaded;
+	if (!music.Play(/*numIterations=*/finite ? 1 : 0)) {
 		LogError(LogCategory::Audio, "Aulib::Stream::play (from music_start): {}", SDL_GetError());
 		music_stop();
 		return;
@@ -377,8 +408,11 @@ void music_start(_music_id nTrack)
 
 	sgnMusicTrack = nTrack;
 	ActiveMusicSelectionPath = selection.path;
-	LogInfo(LogCategory::Audio, "Diablo 3D music playing: {} (context={}, track={}, fallback={})", trackPath,
-	    MusicInGame ? "game" : "menu", static_cast<int>(nTrack), selection.fallback || std::string_view(trackPath) != selection.path);
+	ActiveRandomIndex = randomIndex;
+	ActiveMusicRandomPolicy = randomPolicy;
+	ActiveMusicFinite = finite;
+	LogInfo(LogCategory::Audio, "Diablo 3D music playing: {} (context={}, track={}, fallback={}, random={})", trackPath,
+	    MusicInGame ? "game" : "menu", static_cast<int>(nTrack), selection.fallback || std::string_view(trackPath) != selection.path, finite);
 }
 
 void music_set_game_context(bool inGame)
@@ -391,8 +425,21 @@ void music_refresh()
 	if (!gbSndInited || !gbMusicOn || sgnMusicTrack == NUM_MUSIC)
 		return;
 	const _music_id track = sgnMusicTrack;
-	if (SelectedMusic(track).path != ActiveMusicSelectionPath)
+	const MusicSelection selection = SelectedMusic(track, ActiveRandomIndex);
+	const bool randomPolicy = selection.requested == MusicVariant::Random && track == TMUSIC_TOWN && MusicInGame;
+	if (selection.path != ActiveMusicSelectionPath || randomPolicy != ActiveMusicRandomPolicy)
 		music_start(track);
+}
+
+void music_update()
+{
+	// Poll completion from the game thread. Decoder callbacks must not load assets
+	// or recreate a stream while the audio mixer is processing it.
+	if (!gbSndInited || !gbMusicOn || !MusicInGame || !ActiveMusicFinite
+	    || sgnMusicTrack == NUM_MUSIC || !music.IsLoaded() || music.IsPlaying())
+		return;
+	const _music_id track = sgnMusicTrack;
+	music_start(track);
 }
 
 void sound_disable_music(bool disable)

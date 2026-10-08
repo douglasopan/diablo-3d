@@ -1,0 +1,144 @@
+{
+  "revision": "native-functions-r1",
+  "date": "2026-10-08",
+  "reason": "Requisito explícito do usuário transmitido pelo chat de implementação: manter exatamente as funções originais do HUD, sem funções novas nesta etapa.",
+  "status": "Candidatos visuais para revisão; sem aprovação artística da implementação e sem promoção automática",
+  "tool": "image_gen integrado",
+  "model": "Não informado pela ferramenta",
+  "scope": "Somente docs/hud-study; não altera C++/Godot, assets de produção, build ou staging",
+  "functionalReference": {
+    "role": "Referência funcional fornecida pelo usuário; não copiada para a entrega",
+    "sha256": "f5915deeedb081934cd80d0dc1ffe966e8426aeb8297d0df7cf6e2fdf83b7b5f",
+    "origin": "Imagem do HUD original fornecida pelo usuário, mantida fora desta entrega pública.",
+    "publicAssetIncluded": false
+  },
+  "artReference": {
+    "path": "images/01-hud-16x9-v2.png",
+    "role": "Direção artística preservada; conjunto de controles anterior não determina esta revisão"
+  },
+  "preservedPreviousReferences": [
+    "images/01-hud-16x9-v2.png",
+    "images/05-fundo-menus.png"
+  ],
+  "nativeContract": {
+    "buttons": [
+      "CHAR",
+      "QUESTS",
+      "MAP",
+      "MENU",
+      "INV",
+      "SPELLS"
+    ],
+    "globes": [
+      "Vida",
+      "Mana"
+    ],
+    "belt": {
+      "cells": 8,
+      "rows": 1,
+      "example": "Duas poções de cura e seis espaços vazios"
+    },
+    "infoBox": "Área contextual nativa de várias linhas, com o exemplo Poção de cura. Pode ficar vazia; não é log, recurso ou novo painel.",
+    "currentSpell": "Um ícone de magia preparada à direita; Cura no exemplo em Tristram. Pode representar habilidade, magia, pergaminho ou cajado. Abre a lista rápida nativa.",
+    "sceneState": "Solo, mapa fechado, sem indicação pendente de subir nível. Estados condicionais nativos continuam responsabilidade da integração; estas duas imagens não os representam.",
+    "absentNewControls": [
+      "Barra de quatro QuickSpell",
+      "Ícone/botão de ação esquerda",
+      "Minimapa permanente",
+      "Rastreador de missões",
+      "Retratos",
+      "Habilidades/cooldowns",
+      "Outros botões novos"
+    ],
+    "nativeOptionalInformation": "Números de vida/mana são opção nativa do DevilutionX, embora não exibidos nestas referências.",
+    "nativeConditionalControls": "Chat e amistoso/PvP quando disponíveis, aviso/botão de subir nível e demais estados existentes devem ser preservados na implementação."
+  },
+  "sourceAudit": [
+    {
+      "file": "Source/control/control_panel.cpp",
+      "line": 86
+    },
+    {
+      "file": "Source/panels/mainpanel.cpp",
+      "line": 90
+    },
+    {
+      "file": "Source/control/control.hpp",
+      "line": 40
+    },
+    {
+      "file": "Source/control/control_infobox.cpp",
+      "line": 317
+    }
+  ],
+  "outputs": [
+    {
+      "file": "images/07-hud-native-16x9-v1.png",
+      "requestedCanvas": [
+        1920,
+        1080
+      ],
+      "prompt": "Use case: ui-mockup.\nAsset type: one finished game HUD design reference, full-screen 16:9 landscape, requested canvas 1920x1080. New candidate only; not a screenshot or an approved implementation.\nInput images:\nImage 1 is the ORIGINAL HUD strip and is the strict FUNCTIONAL reference. Reproduce exactly its functional inventory.\nImage 2 is the previously approved ART DIRECTION only: aged iron, blackened pewter, restrained gothic relief, dark stone, antique brass trim, warm ivory readable lettering, crimson health globe and blue mana globe, illustrative isometric Tristram world. Do NOT copy Image 2's additional controls or overlays.\n\nPrimary request: create a new high-fidelity Diablo 3D HUD concept which has ONLY the controls and information areas present in Image 1. Modernize the material quality, legibility and responsive spacing, while retaining the original compact bottom-panel grouping.\nScene/backdrop: same illustrative overcast Tristram village mood and elevated isometric view as Image 2, with a small armored warrior on a muddy path near the well and timber/stone cabins. The world fills the frame; the central play area is unobstructed. This is newly generated illustrative scenery.\nComposition: a single compact connected HUD panel centered along the bottom, approximately 1060px wide and 190px high in a 1920x1080 frame, with 24px bottom clearance. Keep the entire panel, all six buttons, both globes, every belt cell, the information box and the selected-spell square fully visible. No controls elsewhere on the screen.\nEXACT native inventory, read carefully:\n1. Six rectangular utility buttons and only six: left outer column \"CHAR\", \"QUESTS\", small gap, \"MAP\", \"MENU\"; right outer column \"INV\", \"SPELLS\". These labels must be verbatim, legible, without renamed or duplicate buttons. Their layout is inspired by Image 1.\n2. Exactly two sculpted globes: crimson health on the left between its button column and center, deep blue mana on the right between center and right button column. Use restrained gargoyle supports. Globes show fill, with no additional resource bars or numeric panels.\n3. Exactly EIGHT square belt cells in ONE continuous horizontal row at upper center, labeled sequentially \"1\" \"2\" \"3\" \"4\" \"5\" \"6\" \"7\" \"8\". First two cells contain one red potion each; remaining six are empty. No item stack counts, no hidden cells, no ninth slot.\n4. One wide, dark bordered INFORMATION BOX directly beneath the belt row, as in the original. This is the existing contextual information area, not a new resource or log panel. Show a single centered line \"Poção de cura\" in warm ivory, as an example of native hover/item information. No additional pop-up tooltip or notification elsewhere.\n5. One CURRENT SPELL square at bottom right, directly beneath the \"INV\" / \"SPELLS\" buttons, containing the familiar pale healing hand glyph from Image 1. This is the only spell icon outside the belt. Do not add a left-click action square.\nAll elements belong to that one bottom HUD, proportioned so text and click targets are readable and the center world remains open. The original single information box must be wide enough for native multi-line contextual text even though this example shows one line.\nText (verbatim): discreet editorial text at top center \"CONCEITO · FUNÇÕES NATIVAS · NÃO É CAPTURA DO JOGO\", and at top right \"16:9\". The only other texts are the six exact button labels, belt digits 1 to 8, and \"Poção de cura\".\nHard exclusions: no F5/F6/F7/F8 quick-spell bar, no extra spell shortcuts, no minimap, no map overlay, no location label, no quest overlay, no portraits, no party panels, no experience line, no stamina, no cooldowns, no damage numbers, no combat action button, no extra indicators, no notification outside the info box, no extra buttons. The MAP button is present; the map itself is closed. No logo, no new feature or gameplay mechanic.\nStyle: polished realistic dark-fantasy UI materials, crisp front-facing readable controls, narrow antique brass outlines, subdued decoration, high contrast for essential labels; keep the red and blue native identities. Deliver ONE coherent 16:9 frame, no collage or presentation board.",
+      "sha256": "c5bc5e6d324e6b479f2dab673729b6d941921b80c2204ce2055075b1b3fa608a",
+      "bytes": 2721679,
+      "actualPixels": [
+        1672,
+        941
+      ],
+      "exactCopyOfGeneration": true,
+      "generationId": "exec-d98bf0ce-2f74-4438-93b5-407d1bca813f"
+    },
+    {
+      "file": "images/08-hud-native-4x3-v1.png",
+      "requestedCanvas": [
+        1280,
+        960
+      ],
+      "prompt": "Use case: ui-mockup.\nAsset type: ONE full-screen compact game HUD design reference, landscape 4:3 aspect ratio, requested canvas 1280x960. New visual candidate; not an approved implementation.\nInput images: Image 1 is the original native HUD strip and the strict functional inventory. Image 2 is the newly generated 16:9 native-functions-only HUD, the exact visual/style/layout reference to adapt. Preserve its bottom grouping and materials; change only the responsive framing and proportions required by 4:3.\nPrimary request: adapt this HUD to a COMPACT 4:3 screen without hiding, duplicating or adding any controls. Preserve exactly the original functionality and all eight belt slots. This must be genuinely 4:3, not a 16:9 frame or side-by-side board.\nScene/backdrop: the same illustrative dark isometric Tristram village, warrior, cabins and well from Image 2. Reframe into 4:3 with more vertical scene and less peripheral width; retain the centered warrior and open gameplay area. Do not stretch or squash the image.\nHUD composition: the one connected bottom HUD spans about 94 percent of the compact frame width, with 16px external side and bottom clearances. Keep it around the bottom 20-23 percent of the screen, maintaining readable button labels and a spacious contextual information box. The HUD is centered and every element is entirely visible. No external corner controls.\nSTRICT ELEMENT LIST:\n- Left outer column: EXACTLY four rectangular buttons with the verbatim labels \"CHAR\", \"QUESTS\", a small gap, \"MAP\", \"MENU\".\n- Crimson health globe immediately inward from the left buttons, sculpted dark gargoyle support.\n- Center upper row: EXACTLY eight square belt cells, ONE horizontal continuous row, digits \"1\" \"2\" \"3\" \"4\" \"5\" \"6\" \"7\" \"8\". First two cells contain a single red potion each; six empty cells follow. No stacks, no ninth cell.\n- Center lower area: one wide black contextual INFORMATION BOX with thin antique brass border, directly under the belt. Display the single native hover-information example \"Poção de cura\". This box must have room for native multi-line text, but show only that line in this specimen.\n- Deep blue mana globe immediately inward from the right controls, matching sculpted support.\n- Right outer column: EXACTLY two buttons labeled \"INV\" and \"SPELLS\", with ONE current-spell square directly below, showing the pale healing hand glyph. This is the ONLY magic icon outside the belt.\nDo not omit any button on the compact frame. Keep the design integrated and functional, not separated into tabs. Crisp readable native labels, dark iron/pewter, stone in low contrast, restrained gothic detail and thin warm brass outlines. Globes have their original red/blue fill identities. No permanent numeric resource panels.\nText (verbatim): top center small editorial label \"CONCEITO · FUNÇÕES NATIVAS · NÃO É CAPTURA DO JOGO\"; top right \"4:3 COMPACTO\". All remaining text consists ONLY of the six button labels, belt digits 1 to 8, and \"Poção de cura\".\nHard exclusions: no extra quick-spell bar or F5/F6/F7/F8 buttons, no left-click action square, no minimap or visible map, no location label, no quest overlay, no portraits or party frames, no XP line, no stamina, no cooldowns, no notification or tooltip outside the information box, no additional skill/control/badge, no logo. MAP button exists with the map closed.\nOutput: one polished, front-facing game UI composition occupying a genuine 4:3 landscape frame. Retain all native controls and the original semantics. This is a raster concept with illustrative world scenery, not a playable game capture.",
+      "sha256": "434823702cfda7167ee2e16b444c5a92c515540af32b5419d5f26da0c802225c",
+      "bytes": 2811240,
+      "actualPixels": [
+        1448,
+        1086
+      ],
+      "exactCopyOfGeneration": true,
+      "generationId": "exec-f300a80b-4121-4a51-b2b0-613edd6b14e0"
+    }
+  ],
+  "verification": {
+    "method": "Inspeção visual das duas saídas geradas e conferência do contrato no código herdado",
+    "bothImages": {
+      "sixNativeButtons": true,
+      "eightBeltCells": true,
+      "twoGlobes": true,
+      "oneContextualInfoBox": true,
+      "oneCurrentSpellIcon": true,
+      "noQuickSpellBar": true,
+      "noLeftActionSquare": true,
+      "noMinimapOrQuestOverlay": true
+    },
+    "limitations": [
+      "Mockups raster ilustrativos, não sprites nem composição interativa.",
+      "Medidas finais da implementação devem vir do layout compartilhado de desenho e input; não extrair coordenadas dos bitmaps.",
+      "A arte gerada pode usar dimensões ligeiramente diferentes do canvas solicitado.",
+      "Apenas o estado solo representado foi inspecionado; não houve execução do jogo."
+    ]
+  },
+  "preservationCheck": [
+    {
+      "file": "images/01-hud-16x9-v2.png",
+      "sha256": "97d42f8046ff645160c62213459cfbcb4ec8049fe4819ffe53030d7ef2f41385",
+      "unchangedFromPreviousManifest": true
+    },
+    {
+      "file": "images/05-fundo-menus.png",
+      "sha256": "6883e5223ec8b185a7e52248d7540e3f8cb53aecc8f8ebee5b0b5c130db9d1b5",
+      "unchangedFromPreviousManifest": true
+    }
+  ],
+  "layoutFlexibility": {
+    "requirement": "Preservar os mesmos botões e funções; tamanho, proporções, posições, espaçamento e agrupamento podem mudar.",
+    "clarifiedByUser": "2026-10-08",
+    "effect": "As posições e medidas dos prompts registram a geração desta rodada; não são restrições obrigatórias para a implementação ou próximas propostas."
+  }
+}

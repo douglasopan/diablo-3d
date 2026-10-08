@@ -1,8 +1,10 @@
 #include "panels/spell_list.hpp"
 
+#include <algorithm>
 #include <cstdint>
 
 #include "control/control.hpp"
+#include "control/d3d_hud.hpp"
 #include "controls/control_mode.hpp"
 #include "controls/plrctrls.h"
 #include "engine/backbuffer_state.hpp"
@@ -79,14 +81,9 @@ std::optional<std::string_view> GetHotkeyName(SpellID spellId, SpellType spellTy
 	return {};
 }
 
-} // namespace
-
-void DrawSpell(const Surface &out)
+SpellType GetSpellIconType(SpellID &spl, SpellType st)
 {
 	const Player &myPlayer = *MyPlayer;
-	SpellID spl = myPlayer._pRSpell;
-	SpellType st = myPlayer._pRSplType;
-
 	if (!IsValidSpell(spl)) {
 		st = SpellType::Invalid;
 		spl = SpellID::Null;
@@ -102,6 +99,32 @@ void DrawSpell(const Surface &out)
 
 	if (leveltype == DTYPE_TOWN && st != SpellType::Invalid && !GetSpellData(spl).isAllowedInTown())
 		st = SpellType::Invalid;
+
+	return st;
+}
+
+void DrawHudSpellHotkey(const Surface &out, Rectangle icon, std::string_view text)
+{
+	DrawD3dHudKeyLabel(out, icon, text);
+}
+
+} // namespace
+
+void DrawSpell(const Surface &out)
+{
+	const Player &myPlayer = *MyPlayer;
+	SpellID spl = myPlayer._pRSpell;
+	const SpellType st = GetSpellIconType(spl, myPlayer._pRSplType);
+
+	if (IsD3dHudEnabled()) {
+		const Rectangle spellRect = GetD3dHudSpellRect();
+		DrawD3dHudSpellIcon(out, spellRect, spl, st);
+		const std::optional<std::string_view> hotkeyName = GetHotkeyName(spl, myPlayer._pRSplType, true);
+		if (hotkeyName)
+			DrawHudSpellHotkey(out, spellRect, *hotkeyName);
+
+		return;
+	}
 
 	SetSpellTrans(st);
 	const Point position = GetMainPanel().position + Displacement { 565, 119 };
@@ -203,7 +226,7 @@ std::vector<SpellListItem> GetSpellListItems()
 	const Point mainPanelPosition = GetMainPanel().position;
 
 	int x = mainPanelPosition.x + 12 + (SPLICONLENGTH * SPLROWICONLS);
-	int y = mainPanelPosition.y - 17;
+	int y = (IsD3dHudEnabled() ? GetD3dHudOrbRect(false).position.y : mainPanelPosition.y) - 17;
 
 	for (auto i : enum_values<SpellType>()) {
 		const Player &myPlayer = *MyPlayer;
@@ -335,7 +358,7 @@ void DoSpeedBook()
 	SpellSelectFlag = true;
 	const Point mainPanelPosition = GetMainPanel().position;
 	int xo = mainPanelPosition.x + 12 + (SPLICONLENGTH * 10);
-	int yo = mainPanelPosition.y - 17;
+	int yo = (IsD3dHudEnabled() ? GetD3dHudOrbRect(false).position.y : mainPanelPosition.y) - 17;
 	int x = xo + (SPLICONLENGTH / 2);
 	int y = yo - (SPLICONLENGTH / 2);
 

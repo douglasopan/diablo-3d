@@ -20,6 +20,7 @@
 
 #include "DiabloUI/diabloui.h"
 #include "control/control.hpp"
+#include "control/d3d_hud.hpp"
 #include "controls/control_mode.hpp"
 #include "controls/plrctrls.h"
 #include "doom.h"
@@ -678,7 +679,7 @@ void AlterMousePositionViaPanels(Point &screenPosition)
  */
 void AlterMousePositionViaScrolling(Point &screenPosition, Rectangle mainPanel)
 {
-	if (mainPanel.contains(MousePosition) && track_isscrolling()) {
+	if (IsPointOnD3dHud(MousePosition) && track_isscrolling()) {
 		screenPosition.y = mainPanel.position.y - 1;
 	}
 }
@@ -826,9 +827,9 @@ bool CheckPlayerState(const Point currentTile, const Player &myPlayer)
 	return false;
 }
 
-bool CheckPanelsAndFlags(Rectangle mainPanel)
+bool CheckPanelsAndFlags(Rectangle /*mainPanel*/)
 {
-	if (mainPanel.contains(MousePosition)) {
+	if (IsPointOnD3dHud(MousePosition)) {
 		CheckPanelInfo();
 		return true;
 	}

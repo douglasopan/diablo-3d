@@ -22,6 +22,7 @@ A community project to bring **the whole Diablo 1 game into 3D**, including its 
 - Windows build, headless scene diagnostics and native-view comparison tools are included as source.
 - A [Godot editor](docs/GODOT-EDITOR.md) inspects the actual architecture, model identities and locked native collision, and exports explicitly selected static replacements to a separate game review profile. It is an authoring tool; the game still runs in DevilutionX.
 - [Soundtrack settings](docs/MUSIC.md) select Vanilla, Rock or a mix for eight environments, in the main settings and during play. Rock2 is the local menu default; the earlier composition stays selectable, and missing replacements use the original music. Owner-supplied audio remains local.
+- The [responsive HUD](docs/HUD-IMPLEMENTATION.md) rearranges the original controls without adding gameplay actions. Its layout and the main menu layout can be edited in Godot; the game retains the native handlers. The approved menu background is included.
 - New games prefer the 3D town view. **Start in 3D** is a saved video preference; **F4** switches views during play, and **Home** keeps the native comparison. Other levels still use the original renderer.
 - The owner-provided [animated logo](docs/ANIMATED-LOGO.md) contains 240 frames over eight seconds and covers the main, title and Escape menus.
 
@@ -35,10 +36,12 @@ See [BUILDING-D3D.md](docs/BUILDING-D3D.md) for Windows compiler prerequisites a
 
 ```powershell
 .\build.ps1
-.\Iniciar-Tristram.ps1 -DataDirectory 'C:\path\to\your\Diablo'
+.\Iniciar-Tristram.cmd
 ```
 
-Supply your own `DIABDAT.MPQ`, or separately obtain supported shareware data. The launcher reads your data directory and keeps this prototype's saves and settings in an ignored `perfil-tristram/` folder. Nothing needs to be installed over your original game.
+Use **Iniciar-Tristram.cmd** as the single regular play shortcut. It selects `build/devilutionx-tristram-v4.exe` and the habitual `perfil-tristram/` profile; video and soundtrack preferences belong in the game settings. Comparison profiles and candidate executables are development tools, not alternative editions to choose for normal play.
+
+Supply your own `DIABDAT.MPQ`, or separately obtain supported shareware data. For a data directory outside the launcher's detected locations, use `Iniciar-Tristram.ps1 -DataDirectory 'C:\path\to\your\Diablo'` during setup. Saves and settings remain in the ignored `perfil-tristram/` folder. Nothing needs to be installed over your original game.
 
 | Control | Action |
 | --- | --- |

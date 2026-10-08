@@ -59,6 +59,9 @@ void GamemenuMusicLocationPrevious(bool bActivate);
 void GamemenuMusicOriginal(bool bActivate);
 void GamemenuMusicRock(bool bActivate);
 void GamemenuMusicAlternative(bool bActivate);
+void GamemenuMusicRandom(bool bActivate);
+void GamemenuMusicThird(bool bActivate);
+void GamemenuMusicVariantsNext(bool bActivate);
 void GamemenuVideoOptions(bool bActivate);
 void GamemenuVideoPrevious(bool bActivate);
 void GamemenuGpuRendering(bool bActivate);
@@ -120,16 +123,17 @@ TMenuItem sgSoundtrackMenu[] = {
 	// clang-format on
 };
 TMenuItem sgMusicLocationsMenu[6];
-TMenuItem sgMusicVariantsMenu[5];
+TMenuItem sgMusicVariantsMenu[6];
 constexpr std::array<_music_id, NUM_MUSIC> MusicLocationOrder = {
 	TMUSIC_INTRO, TMUSIC_TOWN, TMUSIC_CATHEDRAL, TMUSIC_CATACOMBS,
 	TMUSIC_CAVES, TMUSIC_HELL, TMUSIC_NEST, TMUSIC_CRYPT
 };
 constexpr size_t MusicLocationsPerPage = 3;
 size_t MusicLocationPage = 0;
+size_t MusicVariantPage = 0;
 _music_id SelectedMusicLocation = TMUSIC_INTRO;
 // Own the dynamic labels: a temporary option description must never back pszStr.
-std::array<std::string, 3> MusicVariantLabels;
+std::array<std::string, 4> MusicVariantLabels;
 const char *const MusicThemeNames[] = {
 	N_("Theme: Vanilla"),
 	N_("Theme: Rock"),
@@ -347,28 +351,46 @@ void GamemenuMusicLocationsNext(bool /*bActivate*/)
 
 void GamemenuShowMusicVariants()
 {
-	constexpr std::array<void (*)(bool), 3> Handlers = {
-		&GamemenuMusicOriginal, &GamemenuMusicRock, &GamemenuMusicAlternative
+	constexpr std::array<void (*)(bool), 5> Handlers = {
+		&GamemenuMusicOriginal, &GamemenuMusicRock, &GamemenuMusicAlternative, &GamemenuMusicRandom, &GamemenuMusicThird
+	};
+	constexpr std::array<MusicVariant, 5> DisplayOrder = {
+		MusicVariant::Original, MusicVariant::Rock, MusicVariant::Alternative, MusicVariant::Third, MusicVariant::Random
 	};
 	const MusicOptions &music = GetOptions().Music;
 	const OptionEntryMusicVariant &option = music.ForTrack(SelectedMusicLocation);
 	const MusicVariant selected = *music.theme == MusicTheme::Vanilla ? MusicVariant::Original
-	    : *music.theme == MusicTheme::Rock ? MusicVariant::Rock : *option;
-	const size_t count = option.GetListSize();
+	    : *music.theme == MusicTheme::Rock ? (SelectedMusicLocation == TMUSIC_TOWN ? MusicVariant::Random : MusicVariant::Rock)
+	                                     : *option;
+	const bool paginated = option.GetListSize() > 4;
+	const size_t offset = paginated ? MusicVariantPage * 3 : 0;
+	const size_t count = paginated ? std::min(size_t { 3 }, option.GetListSize() - offset) : option.GetListSize();
 	for (size_t i = 0; i < count; ++i) {
-		MusicVariantLabels[i] = option.GetListDescription(i);
-		if (i == static_cast<size_t>(selected))
+		const MusicVariant variant = DisplayOrder[offset + i];
+		const size_t optionIndex = static_cast<size_t>(variant);
+		MusicVariantLabels[i] = option.GetListDescription(optionIndex);
+		if (variant == selected)
 			MusicVariantLabels[i].insert(0, "* ");
-		sgMusicVariantsMenu[i] = { GMENU_ENABLED, MusicVariantLabels[i].c_str(), Handlers[i] };
+		sgMusicVariantsMenu[i] = { GMENU_ENABLED, MusicVariantLabels[i].c_str(), Handlers[optionIndex] };
 	}
-	sgMusicVariantsMenu[count] = { GMENU_ENABLED, N_("Previous Menu"), &GamemenuMusicLocationPrevious };
-	sgMusicVariantsMenu[count + 1] = { GMENU_ENABLED, nullptr, nullptr };
+	size_t row = count;
+	if (paginated)
+		sgMusicVariantsMenu[row++] = { GMENU_ENABLED, MusicVariantPage == 0 ? N_("More Versions") : N_("Previous Page"), &GamemenuMusicVariantsNext };
+	sgMusicVariantsMenu[row++] = { GMENU_ENABLED, N_("Previous Menu"), &GamemenuMusicLocationPrevious };
+	sgMusicVariantsMenu[row] = { GMENU_ENABLED, nullptr, nullptr };
 	gmenu_set_items(sgMusicVariantsMenu, nullptr);
+}
+
+void GamemenuMusicVariantsNext(bool /*bActivate*/)
+{
+	MusicVariantPage = (MusicVariantPage + 1) % 2;
+	GamemenuShowMusicVariants();
 }
 
 void GamemenuSelectMusicLocation(size_t index)
 {
 	SelectedMusicLocation = MusicLocationOrder[MusicLocationPage * MusicLocationsPerPage + index];
+	MusicVariantPage = 0;
 	GamemenuShowMusicVariants();
 }
 
@@ -415,6 +437,18 @@ void GamemenuMusicAlternative(bool bActivate)
 {
 	if (bActivate)
 		GamemenuSetMusicVariant(MusicVariant::Alternative);
+}
+
+void GamemenuMusicRandom(bool bActivate)
+{
+	if (bActivate)
+		GamemenuSetMusicVariant(MusicVariant::Random);
+}
+
+void GamemenuMusicThird(bool bActivate)
+{
+	if (bActivate)
+		GamemenuSetMusicVariant(MusicVariant::Third);
 }
 
 void GamemenuGetVideoOptions()

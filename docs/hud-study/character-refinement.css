@@ -1,0 +1,3 @@
+
+.sidepanel.left{bottom:220px}.sidepanel.left .panel-body{padding:0}.character-rows{margin:0}.character-rows .data-row{font-size:18px;line-height:1.15;padding:5px 0;min-height:29px;align-items:center;gap:12px}.character-rows .attribute-row{min-height:44px;padding:0}.character-rows .attribute-row .value{display:flex;align-items:center;gap:12px}.attribute-plus{width:44px;height:44px;border:1px solid #87714a;background:#20281d;color:#e3ce9f;font-size:22px}.sidepanel.left .gothic-actions{display:none}.scene.compact .character-rows .data-row{font-size:16px;min-height:25px}.scene.compact .character-rows .attribute-row{min-height:44px}.scene.compact .combined .sidepanel.left{width:510px;bottom:170px}.scene.compact .combined .sidepanel.left .panel-body{overflow:auto}
+

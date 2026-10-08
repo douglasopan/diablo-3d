@@ -1,5 +1,24 @@
 # Editor Godot de Tristram
 
+## Editar o menu de entrada visualmente
+
+O menu tem uma cena de autoria própria: `editor/godot/ui/main_menu.tscn`. Na raiz do workspace, **Abrir-Menu-Godot.cmd** abre essa cena na área **2D** do Godot. O jogo continua no DevilutionX; o Godot exporta as posições usadas pelo desenho e pelas áreas de clique do menu real.
+
+1. Selecione **MenuLogo** para mover o título, ou **MenuList** para mover/redimensionar a lista. Use os controles de posição e tamanho no editor 2D; conserve as âncoras centrais, escala 1 e rotação 0.
+2. Selecione a raiz **MainMenu**. Em **Preview Size**, confira 640×480, 1280×720, 1920×1080 e 2560×1080. O fundo cobre a tela com recorte proporcional, sem deformar a imagem.
+3. Salve a cena e clique em **Exportar layout do menu**, no Inspector da raiz. A saída é `editor/godot/local/ui/layout.ini`; exportar preserva as seções do HUD já existentes e não altera o perfil do jogo.
+4. Com o jogo fechado, execute **Aplicar-Menu-Godot.cmd**. O aplicador valida o formato e grava somente `perfil-tristram/d3d-ui/layout.ini`, guardando uma cópia anterior. Reabra pelo atalho habitual. Saves, músicas, modelos e iluminação não são modificados.
+
+No v1, o título animado conserva tamanho 580×154 e sua animação atual; sua posição pode mudar. A lista permite largura 300–640 e altura 258–384, distribuída entre as seis ações existentes. O jogo usa no mínimo 43 pixels por linha. A fonte e os textos da prévia Godot são auxiliares: a partida usa as fontes, traduções, seleção por teclado/controle e ações nativas. Alterar os rótulos dos botões na cena não renomeia funções do jogo.
+
+O fundo aplicado é a imagem gerada e aprovada no estudo, sem os controles ilustrativos. Sua camada é RGB, independente da paleta do mundo. A composição mantém a transparência de índice zero da UI e conserva o preto opaco dos demais índices, o fade e o cursor. A ausência do fundo, um renderizador sem suporte ou a falha de carregamento conservam o menu herdado. Arquivos de layout inválidos usam posições padrão; as edições entram ao reabrir o menu.
+
+O HUD principal tem sua própria cena, aberta por **Abrir-HUD-Godot.cmd**, e compartilha o contrato `d3d.ui-layout` versão 1 e a mesma exportação local. O fluxo de edição, aplicação e seus limites estão em [HUD-IMPLEMENTATION.md](HUD-IMPLEMENTATION.md). A primeira integração conserva controles e arte nativos; os painéis e submenus ainda precisam da próxima etapa visual.
+
+Validação executada em 8 de outubro de 2026: cena/exportação Godot **16 verificações**, aplicador PowerShell **48**, composição/retângulos/cliques C++ **112**. Evidências privadas em `diagnostics/menu-godot/` e `diagnostics/town-music/godot-menu-smoke.log`. A validação usa renderer de software sem janela e arquivos temporários; não representa inspeção artística da janela completa. O botão no Inspector usa o recurso [export_tool_button do Godot](https://docs.godotengine.org/en/stable/tutorials/scripting/gdscript/gdscript_exports.html#export-tool-button).
+
+## Arquitetura estática
+
 Primeira versão para inspecionar e editar **arquitetura estática**. Godot é a ferramenta de autoria; o jogo continua no DevilutionX. O contrato de arquivos está em [GODOT-BRIDGE.md](GODOT-BRIDGE.md), e IDs, variantes e aprovação continuam em [assets/registry.json](../assets/registry.json). Esta entrega auxilia a revisão G1 da cabana; não encerra Tristram nem inicia o cenário procedural.
 
 ## Abrir e preservar o trabalho

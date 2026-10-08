@@ -56,6 +56,10 @@ struct TownGpuMaterial {
 	float interiorPointRange = 1;
 	std::span<const TownPointLight> lights;
 	const TownLightOccluder *room = nullptr;
+	/** Additional opaque room shells for interior point-light visibility. They
+	 * have no apertures and are copied during Submit. At most
+	 * TownMaxLightOccluders - 1 are allowed, reserving one for room. */
+	std::span<const TownLightOccluder> blockers;
 };
 
 /** Same light-space depth convention as town_shadow: larger is nearer the light. */

@@ -81,6 +81,8 @@ set(libdevilutionx_SRCS
 
   engine/render/automap_render.cpp
   engine/render/d3d_logo.cpp
+  engine/render/d3d_menu_presentation.cpp
+  engine/render/d3d_ui_layout.cpp
   engine/render/scrollrt.cpp
   engine/render/town_view.cpp
   engine/render/town_presentation.cpp
@@ -273,6 +275,7 @@ add_devilutionx_object_library(libdevilutionx_control
   control/control_gold.cpp
   control/control_infobox.cpp
   control/control_panel.cpp
+  control/d3d_hud.cpp
 )
 target_link_dependencies(libdevilutionx_control
   PUBLIC

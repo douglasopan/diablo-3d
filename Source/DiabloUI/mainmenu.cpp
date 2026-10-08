@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <memory>
@@ -17,6 +18,8 @@
 #include "engine/assets.hpp"
 #include "engine/load_clx.hpp"
 #include "engine/point.hpp"
+#include "engine/render/d3d_menu_presentation.hpp"
+#include "engine/render/d3d_ui_layout.hpp"
 #include "game_mode.hpp"
 #include "utils/language.h"
 #include "utils/ui_fwd.h"
@@ -50,6 +53,7 @@ void MainmenuEsc()
 
 void MainmenuLoad(const char *name)
 {
+	ReloadD3dUiLayout();
 	vecMenuItems.push_back(std::make_unique<UiListItem>(_("Single Player"), MAINMENU_SINGLE_PLAYER));
 	vecMenuItems.push_back(std::make_unique<UiListItem>(_("Multi Player"), MAINMENU_MULTIPLAYER));
 	vecMenuItems.push_back(std::make_unique<UiListItem>(_("Settings"), MAINMENU_SETTINGS));
@@ -59,7 +63,10 @@ void MainmenuLoad(const char *name)
 	vecMenuItems.push_back(std::make_unique<UiListItem>(gbIsHellfire ? _("Exit Hellfire") : _("Exit Diablo"), MAINMENU_EXIT_DIABLO));
 #endif
 
-	if (!gbIsSpawn || gbIsHellfire) {
+	if (SetD3dMainMenuActive(true)) {
+		ArtBackgroundWidescreen = std::nullopt;
+		UiLoadBlackBackground();
+	} else if (!gbIsSpawn || gbIsHellfire) {
 		ArtBackgroundWidescreen = LoadOptionalClx("ui_art\\mainmenuw.clx");
 		LoadBackgroundArt("ui_art\\mainmenu");
 	} else {
@@ -68,6 +75,9 @@ void MainmenuLoad(const char *name)
 
 	UiAddBackground(&vecMainMenuDialog);
 	UiAddLogo(&vecMainMenuDialog);
+	const Rectangle logo = GetD3dUiRect("MenuLogo", gnScreenWidth, gnScreenHeight,
+	    { { (gnScreenWidth - 580) / 2, GetUIRectangle().position.y }, { 580, 154 } });
+	vecMainMenuDialog.back()->m_rect = { static_cast<Sint16>(logo.position.x), static_cast<Sint16>(logo.position.y), static_cast<Uint16>(logo.size.width), static_cast<Uint16>(logo.size.height) };
 
 	const Point uiPosition = GetUIRectangle().position;
 
@@ -76,7 +86,11 @@ void MainmenuLoad(const char *name)
 		vecMainMenuDialog.push_back(std::make_unique<UiArtText>(_("Shareware").data(), rect1, UiFlags::FontSize30 | UiFlags::ColorUiSilver | UiFlags::AlignCenter, 8));
 	}
 
-	vecMainMenuDialog.push_back(std::make_unique<UiList>(vecMenuItems, vecMenuItems.size(), uiPosition.x + 64, (uiPosition.y + 192), 510, 43, UiFlags::FontSize42 | UiFlags::ColorUiGold | UiFlags::AlignCenter, 5));
+	Rectangle menu = GetD3dUiRect("MenuList", gnScreenWidth, gnScreenHeight,
+	    { { uiPosition.x + 64, uiPosition.y + 192 }, { 510, static_cast<int>(vecMenuItems.size()) * 43 } });
+	const int rowHeight = std::clamp(menu.size.height / static_cast<int>(vecMenuItems.size()), 43, 64);
+	menu.position.y = std::clamp(menu.position.y, 0, std::max(0, gnScreenHeight - rowHeight * static_cast<int>(vecMenuItems.size())));
+	vecMainMenuDialog.push_back(std::make_unique<UiList>(vecMenuItems, vecMenuItems.size(), menu.position.x, menu.position.y, menu.size.width, rowHeight, UiFlags::FontSize42 | UiFlags::ColorUiGold | UiFlags::AlignCenter, 5));
 
 	const SDL_Rect rect2 = { 17, (Sint16)(gnScreenHeight - 36), 605, 21 };
 	vecMainMenuDialog.push_back(std::make_unique<UiArtText>(name, rect2, UiFlags::FontSize12 | UiFlags::ColorUiSilverDark));
@@ -90,6 +104,7 @@ void MainmenuLoad(const char *name)
 
 void MainmenuFree()
 {
+	SetD3dMainMenuActive(false);
 	ArtBackgroundWidescreen = std::nullopt;
 	ArtBackground = std::nullopt;
 

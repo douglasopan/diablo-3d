@@ -17,6 +17,7 @@
 #endif
 
 #include "DiabloUI/ui_flags.hpp"
+#include "control/d3d_hud.hpp"
 #include "controls/control_mode.hpp"
 #include "controls/plrctrls.h"
 #include "cursor.h"
@@ -26,6 +27,7 @@
 #include "engine/load_cel.hpp"
 #include "engine/palette.h"
 #include "engine/render/clx_render.hpp"
+#include "engine/render/primitive_render.hpp"
 #include "engine/render/text_render.hpp"
 #include "engine/render/ui_overlay_regions.hpp"
 #include "engine/size.hpp"
@@ -302,6 +304,12 @@ bool AutoEquip(Player &player, const Item &item, inv_body_loc bodyLocation, bool
 
 int FindTargetSlotUnderItemCursor(Point cursorPosition, Size itemSize)
 {
+	// The edited belt is drawn above the side panels, including their hidden
+	// native rectangles. Resolve it first for the same priority as HUD input.
+	for (int r = SLOTXY_BELT_FIRST; r <= SLOTXY_BELT_LAST; r++) {
+		if (GetD3dHudBeltSlotRect(r - SLOTXY_BELT_FIRST).contains(cursorPosition))
+			return r;
+	}
 	Displacement panelOffset = Point { 0, 0 } - GetRightPanel().position;
 	for (int r = SLOTXY_EQUIPPED_FIRST; r <= SLOTXY_EQUIPPED_LAST; r++) {
 		if (InvRect[r].contains(cursorPosition + panelOffset))
@@ -333,11 +341,6 @@ int FindTargetSlotUnderItemCursor(Point cursorPosition, Size itemSize)
 		}
 	}
 
-	panelOffset = Point { 0, 0 } - GetMainPanel().position;
-	for (int r = SLOTXY_BELT_FIRST; r <= SLOTXY_BELT_LAST; r++) {
-		if (InvRect[r].contains(cursorPosition + panelOffset))
-			return r;
-	}
 	return NUM_XY_SLOTS;
 }
 
@@ -630,18 +633,15 @@ inv_body_loc MapSlotToInvBodyLoc(inv_xy_slot slot)
 
 std::optional<inv_xy_slot> FindSlotUnderCursor(Point cursorPosition)
 {
-
-	auto testPosition = static_cast<Point>(cursorPosition - GetRightPanel().position);
-	for (std::underlying_type_t<inv_xy_slot> r = SLOTXY_EQUIPPED_FIRST; r != SLOTXY_BELT_FIRST; r++) {
-		// check which body/inventory rectangle the mouse is in, if any
-		if (InvRect[r].contains(testPosition)) {
+	for (std::underlying_type_t<inv_xy_slot> r = SLOTXY_BELT_FIRST; r != NUM_XY_SLOTS; r++) {
+		if (GetD3dHudBeltSlotRect(r - SLOTXY_BELT_FIRST).contains(cursorPosition)) {
 			return static_cast<inv_xy_slot>(r);
 		}
 	}
 
-	testPosition = static_cast<Point>(cursorPosition - GetMainPanel().position);
-	for (std::underlying_type_t<inv_xy_slot> r = SLOTXY_BELT_FIRST; r != NUM_XY_SLOTS; r++) {
-		// check which belt rectangle the mouse is in, if any
+	auto testPosition = static_cast<Point>(cursorPosition - GetRightPanel().position);
+	for (std::underlying_type_t<inv_xy_slot> r = SLOTXY_EQUIPPED_FIRST; r != SLOTXY_BELT_FIRST; r++) {
+		// check which body/inventory rectangle the mouse is in, if any
 		if (InvRect[r].contains(testPosition)) {
 			return static_cast<inv_xy_slot>(r);
 		}
@@ -1278,43 +1278,66 @@ void DrawInvBelt(const Surface &out)
 		return;
 	}
 
-	const Point mainPanelPosition = GetMainPanel().position;
-
-	DrawPanelBox(out, { 205, 21, 232, 28 }, mainPanelPosition + Displacement { 205, 5 });
+	const bool customHud = IsD3dHudEnabled();
+	if (customHud) {
+		DrawD3dHudBeltBackground(out);
+	} else {
+		DrawPanelBox(out, { 205, 21, 232, 28 }, GetMainPanel().position + Displacement { 205, 5 });
+	}
 
 	const Player &myPlayer = *InspectPlayer;
+	// Keep the native item renderer and its outline, including one pixel of margin.
+	std::optional<OwnedSurface> itemBuffer;
+	if (customHud)
+		itemBuffer.emplace(InventorySlotSizeInPixels.width + 2, InventorySlotSizeInPixels.height + 2);
+	const auto drawHotkey = [&](int i, Rectangle slot) {
+		const auto beltKey = StrCat("BeltItem", i + 1);
+		std::string_view keyName = ControlMode == ControlTypes::Gamepad
+		    ? GetOptions().Padmapper.InputNameForAction(beltKey, true)
+		    : GetOptions().Keymapper.KeyNameForAction(beltKey);
+		if (customHud) {
+			DrawD3dHudKeyLabel(out, slot, keyName);
+			return;
+		}
+		if (!customHud && keyName.length() > 2)
+			keyName = {};
+		const Rectangle keyRect { slot.position + Displacement { 0, InventorySlotSizeInPixels.height - 12 }, InventorySlotSizeInPixels };
+		DrawString(out, keyName, keyRect,
+		    { .flags = UiFlags::ColorWhite | UiFlags::AlignRight });
+	};
 
 	for (int i = 0; i < MaxBeltItems; i++) {
+		const Rectangle slot = GetD3dHudBeltSlotRect(i);
 		if (myPlayer.SpdList[i].isEmpty()) {
+			if (customHud)
+				drawHotkey(i, slot);
 			continue;
 		}
 
-		const Point position { InvRect[i + SLOTXY_BELT_FIRST].position.x + mainPanelPosition.x, InvRect[i + SLOTXY_BELT_FIRST].position.y + mainPanelPosition.y + InventorySlotSizeInPixels.height };
-		InvDrawSlotBack(out, position, InventorySlotSizeInPixels, myPlayer.SpdList[i]._iMagical);
+		const Surface &itemOut = customHud ? *itemBuffer : out;
+		const Point position = customHud
+		    ? Point { 1, InventorySlotSizeInPixels.height }
+		    : slot.position + Displacement { 0, InventorySlotSizeInPixels.height };
+		if (customHud)
+			FillRect(itemOut, 0, 0, itemOut.w(), itemOut.h(), PAL16_GRAY + 5);
+		InvDrawSlotBack(itemOut, position, InventorySlotSizeInPixels, myPlayer.SpdList[i]._iMagical);
 		const int cursId = myPlayer.SpdList[i]._iCurs + CURSOR_FIRSTITEM;
 
 		const ClxSprite sprite = GetInvItemSprite(cursId);
 
 		if (pcursinvitem == i + INVITEM_BELT_FIRST) {
 			if (ControlMode == ControlTypes::KeyboardAndMouse || invflag) {
-				ClxDrawOutline(out, GetOutlineColor(myPlayer.SpdList[i], true), position, sprite);
+				ClxDrawOutline(itemOut, GetOutlineColor(myPlayer.SpdList[i], true), position, sprite);
 			}
 		}
 
-		DrawItem(myPlayer.SpdList[i], out, position, sprite);
+		DrawItem(myPlayer.SpdList[i], itemOut, position, sprite);
+		if (customHud)
+			DrawD3dHudBeltItem(out, itemOut, slot);
 
-		if (myPlayer.SpdList[i].isUsable()
-		    && myPlayer.SpdList[i]._itype != ItemType::Gold) {
-			auto beltKey = StrCat("BeltItem", i + 1);
-			std::string_view keyName = ControlMode == ControlTypes::Gamepad
-			    ? GetOptions().Padmapper.InputNameForAction(beltKey, true)
-			    : GetOptions().Keymapper.KeyNameForAction(beltKey);
-
-			if (keyName.length() > 2)
-				keyName = {};
-
-			DrawString(out, keyName, { position - Displacement { 0, 12 }, InventorySlotSizeInPixels },
-			    { .flags = UiFlags::ColorWhite | UiFlags::AlignRight });
+		if (customHud || (myPlayer.SpdList[i].isUsable()
+		                    && myPlayer.SpdList[i]._itype != ItemType::Gold)) {
+			drawHotkey(i, slot);
 		}
 	}
 }
@@ -1662,10 +1685,11 @@ void CheckInvItem(bool isShiftHeld, bool isCtrlHeld)
 
 void CheckInvScrn(bool isShiftHeld, bool isCtrlHeld)
 {
-	const Point mainPanelPosition = GetMainPanel().position;
-	if (MousePosition.x > 190 + mainPanelPosition.x && MousePosition.x < 437 + mainPanelPosition.x
-	    && MousePosition.y > mainPanelPosition.y && MousePosition.y < 33 + mainPanelPosition.y) {
-		CheckInvItem(isShiftHeld, isCtrlHeld);
+	for (int i = 0; i < MaxBeltItems; i++) {
+		if (GetD3dHudBeltSlotRect(i).contains(MousePosition)) {
+			CheckInvItem(isShiftHeld, isCtrlHeld);
+			return;
+		}
 	}
 }
 
@@ -1922,22 +1946,10 @@ int SyncDropEar(Point position, uint16_t icreateinfo, uint32_t iseed, uint8_t cu
 
 int8_t CheckInvHLight()
 {
-	int8_t r = 0;
-	for (; r < NUM_XY_SLOTS; r++) {
-		int xo = GetRightPanel().position.x;
-		int yo = GetRightPanel().position.y;
-		if (r >= SLOTXY_BELT_FIRST) {
-			xo = GetMainPanel().position.x;
-			yo = GetMainPanel().position.y;
-		}
-
-		if (InvRect[r].contains(MousePosition - Displacement(xo, yo))) {
-			break;
-		}
-	}
-
-	if (r >= NUM_XY_SLOTS)
+	const auto slot = FindSlotUnderCursor(MousePosition);
+	if (!slot)
 		return -1;
+	auto r = static_cast<int8_t>(*slot);
 
 	int8_t rv = -1;
 	InfoColor = UiFlags::ColorWhite;

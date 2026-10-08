@@ -662,7 +662,8 @@ void PrepareCabinInteriorTriangles(std::vector<TownSceneTriangle> &triangles, To
 	}
 }
 
-void AddCabinOpeningInserts(Builder &builder, const TownCabinOpening &opening)
+void AddCabinOpeningInserts(Builder &builder, const TownCabinOpening &opening,
+	std::vector<TownLightOccluder> &lightOccluders)
 {
 	const TownLightAperture &aperture = opening.aperture;
 	const float centerU = (aperture.minU + aperture.maxU) / 2;
@@ -705,8 +706,12 @@ void AddCabinOpeningInserts(Builder &builder, const TownCabinOpening &opening)
 	const auto addBar = [&](float minU, float minV, float maxU, float maxV) {
 		const Position a = CabinOpeningPosition(opening, minU, minV, frameCoordinate - 0.02F);
 		const Position b = CabinOpeningPosition(opening, maxU, maxV, frameCoordinate + 0.02F);
-		builder.Box(std::min(a.x, b.x), std::min(a.z, b.z), std::max(a.x, b.x), std::max(a.z, b.z),
-			std::min(a.height, b.height), std::max(a.height, b.height), TownSceneMaterial::Timber);
+		const TownLightVector minimum { std::min(a.x, b.x), std::min(a.height, b.height), std::min(a.z, b.z) };
+		const TownLightVector maximum { std::max(a.x, b.x), std::max(a.height, b.height), std::max(a.z, b.z) };
+		builder.Box(minimum.x, minimum.z, maximum.x, maximum.z, minimum.height, maximum.height, TownSceneMaterial::Timber);
+		// Reuse the actual opaque bar bounds, rather than inventing a larger
+		// rectangle that would also block the window's clear panes.
+		lightOccluders.push_back({ minimum, maximum, {} });
 	};
 	addBar(centerU - 0.016F, centerV - radiusV + 0.05F, centerU + 0.016F, centerV + radiusV - 0.05F);
 	addBar(centerU - radiusU + 0.05F, centerV - 0.016F, centerU + radiusU - 0.05F, centerV + 0.016F);
@@ -787,6 +792,7 @@ std::shared_ptr<const TownCabinInterior> MakeCabinInterior(const TownSceneModel 
 	};
 	for (const TownCabinOpening &opening : interior->openings)
 		interior->apertures.push_back(opening.aperture);
+	interior->lightOccluders.push_back({ interior->roomMinimum, interior->roomMaximum, interior->apertures });
 	interior->fireEmissionLinear = TownSrgbToLinear({ 181.0F / 255, 93.0F / 255, 27.0F / 255 });
 	interior->fireCoreEmissionLinear = TownSrgbToLinear({ 221.0F / 255, 196.0F / 255, 126.0F / 255 });
 	interior->fireTipEmissionLinear = TownSrgbToLinear({ 107.0F / 255, 74.0F / 255, 24.0F / 255 });
@@ -829,7 +835,7 @@ std::shared_ptr<const TownCabinInterior> MakeCabinInterior(const TownSceneModel 
 	// Separate tunnels connect each existing outer aperture to the room shell.
 	Builder inserts = MakeBuilder(model.kind, model.minTile, model.maxTile, source, pick);
 	for (const TownCabinOpening &opening : interior->openings)
-		AddCabinOpeningInserts(inserts, opening);
+		AddCabinOpeningInserts(inserts, opening, interior->lightOccluders);
 	for (TownCabinFireSource &fire : interior->fireSources)
 		AddCabinCandle(inserts, fire, interior->roomMinimum);
 	PrepareCabinInteriorTriangles(inserts.model.triangles, interior->roomMinimum);

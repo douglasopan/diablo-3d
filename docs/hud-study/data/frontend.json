@@ -1,0 +1,1831 @@
+{
+  "screens": [
+    {
+      "id": "F01",
+      "title": "Abertura — título",
+      "group": "Entrada",
+      "layout": "menu",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Logo animado aprovado do Diablo 3D sobre o fundo de título. O conteúdo deve preservar o crédito herdado.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Crédito",
+          "value": "Copyright © 1996–2001 Blizzard Entertainment"
+        }
+      ],
+      "fields": [],
+      "buttons": [],
+      "source": [
+        {
+          "file": "Source/DiabloUI/title.cpp",
+          "line": 40
+        },
+        {
+          "file": "Source/DiabloUI/title.cpp",
+          "line": 67
+        },
+        {
+          "file": "Source/diablo.cpp",
+          "line": 1423
+        }
+      ],
+      "notes": [
+        "Referenciar textualmente o logo D3D aprovado. Não recriar, copiar ou extrair o asset nesta auditoria.",
+        "Avança por tecla, clique ou ação de controle, ou termina após o ciclo do logo próprio; o fallback termina após 7 segundos.",
+        "Não há botão nativo Continuar nem formulário nesta tela.",
+        "Sua exibição depende da preferência de abertura."
+      ],
+      "variants": [
+        {
+          "title": "Abertura herdada de Hellfire",
+          "condition": "Recursos Hellfire de título disponíveis.",
+          "summary": "Mesma abertura, com a composição herdada de Hellfire e os créditos aplicáveis.",
+          "source": [
+            {
+              "file": "Source/DiabloUI/title.cpp",
+              "line": 46
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "F02",
+      "title": "Escolher Diablo ou Hellfire",
+      "group": "Entrada",
+      "layout": "choice",
+      "availability": "condicional",
+      "condition": "Hellfire descoberto e modo de inicialização configurado para perguntar.",
+      "summary": "Seleção de modo na inicialização.",
+      "choices": [
+        "Entrar em Hellfire",
+        "Mudar para Diablo"
+      ],
+      "rows": [],
+      "fields": [],
+      "buttons": [],
+      "source": [
+        {
+          "file": "Source/DiabloUI/selstart.cpp",
+          "line": 41
+        },
+        {
+          "file": "Source/DiabloUI/selstart.cpp",
+          "line": 49
+        },
+        {
+          "file": "Source/diablo.cpp",
+          "line": 1350
+        },
+        {
+          "file": "Source/diablo.cpp",
+          "line": 1378
+        }
+      ],
+      "notes": [
+        "Esc encerra o seletor.",
+        "A escolha persiste a preferência e a ativação de Hellfire.",
+        "Não é um seletor de campanha universal exposto em toda abertura."
+      ],
+      "variants": []
+    },
+    {
+      "id": "F03",
+      "title": "Menu principal — Diablo",
+      "group": "Entrada",
+      "layout": "menu",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Entradas existentes do menu principal.",
+      "choices": [
+        "Um jogador",
+        "Multijogador",
+        "Configurações",
+        "Suporte",
+        "Créditos",
+        "Sair do Diablo"
+      ],
+      "rows": [
+        {
+          "label": "Produto",
+          "value": "Diablo 3D — estudo visual"
+        }
+      ],
+      "fields": [],
+      "buttons": [],
+      "source": [
+        {
+          "file": "Source/DiabloUI/mainmenu.cpp",
+          "line": 51
+        },
+        {
+          "file": "Source/DiabloUI/diabloui.cpp",
+          "line": 657
+        },
+        {
+          "file": "Source/menu.cpp",
+          "line": 175
+        }
+      ],
+      "notes": [
+        "Preservar o logo animado aprovado via referência textual.",
+        "O texto de produto é exemplo da galeria; não representa a versão real do executável.",
+        "Em inatividade, pode repetir o filme de introdução. O filme é mídia, não outra tela de menu.",
+        "Multijogador continua no menu mesmo quando somente Offline foi compilado."
+      ],
+      "variants": [
+        {
+          "title": "Menu principal — Hellfire",
+          "condition": "Modo Hellfire ativo.",
+          "choices": [
+            "Um jogador",
+            "Multijogador",
+            "Configurações",
+            "Suporte",
+            "Créditos",
+            "Sair do Hellfire"
+          ]
+        },
+        {
+          "title": "Menu principal — shareware",
+          "condition": "Edição shareware ativa.",
+          "notes": [
+            "A edição Diablo shareware usa outro fundo; Hellfire shareware exibe a identificação Shareware.",
+            "As entradas do menu não ganham novos recursos."
+          ]
+        },
+        {
+          "title": "Menu principal — plataforma sem saída",
+          "condition": "Compilação NOEXIT.",
+          "choices": [
+            "Um jogador",
+            "Multijogador",
+            "Configurações",
+            "Suporte",
+            "Créditos"
+          ],
+          "availability": "condicional",
+          "notes": [
+            "A ação de saída é omitida pela plataforma; não substituí-la por outro recurso."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "F04",
+      "title": "Personagens de um jogador",
+      "group": "Heróis",
+      "layout": "list",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Selecionar um herói salvo ou criar outro. Retrato e atributos acompanham a seleção.",
+      "choices": [
+        "Aldren",
+        "Mira",
+        "Novo herói"
+      ],
+      "rows": [
+        {
+          "label": "Herói selecionado",
+          "value": "Aldren"
+        },
+        {
+          "label": "Nível",
+          "value": "1"
+        },
+        {
+          "label": "Força",
+          "value": "30"
+        },
+        {
+          "label": "Magia",
+          "value": "10"
+        },
+        {
+          "label": "Destreza",
+          "value": "20"
+        },
+        {
+          "label": "Vitalidade",
+          "value": "25"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "OK",
+        "Excluir",
+        "Cancelar"
+      ],
+      "source": [
+        {
+          "file": "Source/DiabloUI/hero/selhero.cpp",
+          "line": 139
+        },
+        {
+          "file": "Source/DiabloUI/hero/selhero.cpp",
+          "line": 484
+        },
+        {
+          "file": "Source/DiabloUI/hero/selhero.cpp",
+          "line": 530
+        }
+      ],
+      "notes": [
+        "Aldren e Mira são nomes fictícios; nenhum save foi lido para produzir o exemplo.",
+        "Valores do herói selecionado ilustram um Guerreiro recém-criado e vêm dos atributos iniciais auditados.",
+        "Lista rolável, até seis linhas visíveis no layout herdado.",
+        "Indicadores de progressão nas dificuldades aparecem para heróis salvos, de acordo com o rank.",
+        "Excluir fica desabilitado quando Novo herói está selecionado."
+      ],
+      "variants": [
+        {
+          "title": "Personagens multijogador",
+          "condition": "Provider escolhido; conjunto de heróis multijogador.",
+          "summary": "Mesmo layout, título e conjunto de personagens multijogador.",
+          "source": [
+            {
+              "file": "Source/DiabloUI/hero/selhero.cpp",
+              "line": 565
+            }
+          ]
+        },
+        {
+          "title": "Novo herói selecionado",
+          "condition": "Foco no último item da lista.",
+          "rows": [
+            {
+              "label": "Nível",
+              "value": "--"
+            },
+            {
+              "label": "Força",
+              "value": "--"
+            },
+            {
+              "label": "Magia",
+              "value": "--"
+            },
+            {
+              "label": "Destreza",
+              "value": "--"
+            },
+            {
+              "label": "Vitalidade",
+              "value": "--"
+            }
+          ],
+          "notes": [
+            "Excluir desabilitado; não apresentar os traços como atributos reais."
+          ]
+        },
+        {
+          "title": "Nenhum herói salvo",
+          "condition": "Conjunto de saves vazio.",
+          "choices": [],
+          "rows": [],
+          "buttons": [],
+          "summary": "O código abre diretamente a escolha de classe F05; não existe uma tela vazia adicional.",
+          "source": [
+            {
+              "file": "Source/DiabloUI/hero/selhero.cpp",
+              "line": 590
+            }
+          ]
+        },
+        {
+          "title": "Personagens — diagnóstico",
+          "condition": "Compilação _DEBUG.",
+          "availability": "debug",
+          "rows": [
+            {
+              "label": "Herói selecionado",
+              "value": "Aldren"
+            },
+            {
+              "label": "Nível",
+              "value": "1"
+            },
+            {
+              "label": "Força",
+              "value": "30"
+            },
+            {
+              "label": "Magia",
+              "value": "10"
+            },
+            {
+              "label": "Destreza",
+              "value": "20"
+            },
+            {
+              "label": "Vitalidade",
+              "value": "25"
+            },
+            {
+              "label": "Savegame",
+              "value": "0"
+            }
+          ],
+          "notes": [
+            "Savegame é um campo de diagnóstico presente somente no build de depuração."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "F05",
+      "title": "Novo herói — escolher classe",
+      "group": "Heróis",
+      "layout": "choice",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Lista de classes disponíveis, retrato e atributos iniciais da seleção.",
+      "choices": [
+        "Guerreiro",
+        "Arqueira",
+        "Feiticeiro"
+      ],
+      "rows": [
+        {
+          "label": "Classe selecionada",
+          "value": "Guerreiro"
+        },
+        {
+          "label": "Nível",
+          "value": "1"
+        },
+        {
+          "label": "Força",
+          "value": "30"
+        },
+        {
+          "label": "Magia",
+          "value": "10"
+        },
+        {
+          "label": "Destreza",
+          "value": "20"
+        },
+        {
+          "label": "Vitalidade",
+          "value": "25"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "OK",
+        "Cancelar"
+      ],
+      "source": [
+        {
+          "file": "Source/DiabloUI/hero/selhero.cpp",
+          "line": 164
+        },
+        {
+          "file": "Source/DiabloUI/hero/selhero.cpp",
+          "line": 179
+        },
+        {
+          "file": "Source/DiabloUI/hero/selhero.cpp",
+          "line": 250
+        },
+        {
+          "file": "assets/txtdata/classes/warrior/attributes.tsv",
+          "line": 3
+        }
+      ],
+      "notes": [
+        "Exemplo do Diablo completo com as três classes básicas.",
+        "A lista é derivada dos dados de classes carregados; não é um limite novo de três classes.",
+        "Sem personalização de aparência, gênero, raça ou árvore de habilidades no fluxo auditado."
+      ],
+      "variants": [
+        {
+          "title": "Novo herói — Hellfire",
+          "condition": "Hellfire habilitado; classes opcionais ausentes.",
+          "choices": [
+            "Guerreiro",
+            "Arqueira",
+            "Feiticeiro",
+            "Monge"
+          ],
+          "availability": "condicional",
+          "source": [
+            {
+              "file": "Source/DiabloUI/hero/selhero.cpp",
+              "line": 179
+            }
+          ]
+        },
+        {
+          "title": "Novo herói — classes opcionais",
+          "condition": "Hellfire habilitado; assets correspondentes ou opções de teste habilitam Bardo/Bárbaro.",
+          "choices": [
+            "Guerreiro",
+            "Arqueira",
+            "Feiticeiro",
+            "Monge",
+            "Bardo",
+            "Bárbaro"
+          ],
+          "availability": "condicional",
+          "notes": [
+            "Monge ainda exige Hellfire.",
+            "Bardo/Bárbaro dependem dos assets ou de suas opções de teste; não tratar seis classes como disponibilidade universal.",
+            "Mais de quatro itens reduz o passo da lista herdada; a lista tem rolagem."
+          ],
+          "source": [
+            {
+              "file": "Source/DiabloUI/hero/selhero.cpp",
+              "line": 183
+            },
+            {
+              "file": "Source/DiabloUI/hero/selhero.cpp",
+              "line": 194
+            }
+          ]
+        },
+        {
+          "title": "Novo herói — classe indisponível no shareware",
+          "condition": "Rogue ou Sorcerer selecionado em shareware.",
+          "summary": "A seleção abre o aviso D02 e retorna à escolha de classe.",
+          "availability": "condicional",
+          "source": [
+            {
+              "file": "Source/DiabloUI/hero/selhero.cpp",
+              "line": 289
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "F06",
+      "title": "Novo herói — nome",
+      "group": "Heróis",
+      "layout": "form",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Informar o nome do personagem após escolher sua classe.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Classe",
+          "value": "Guerreiro"
+        },
+        {
+          "label": "Nível",
+          "value": "1"
+        },
+        {
+          "label": "Força",
+          "value": "30"
+        },
+        {
+          "label": "Magia",
+          "value": "10"
+        },
+        {
+          "label": "Destreza",
+          "value": "20"
+        },
+        {
+          "label": "Vitalidade",
+          "value": "25"
+        }
+      ],
+      "fields": [
+        {
+          "label": "Nome",
+          "value": "Aldren",
+          "type": "text",
+          "maxLength": 15
+        }
+      ],
+      "buttons": [
+        "OK",
+        "Cancelar"
+      ],
+      "source": [
+        {
+          "file": "Source/DiabloUI/hero/selhero.cpp",
+          "line": 289
+        },
+        {
+          "file": "Source/DiabloUI/hero/selhero.cpp",
+          "line": 311
+        }
+      ],
+      "notes": [
+        "Nome fictício. O campo é obrigatório e usa maxLength 15.",
+        "Não há campo de conta, senha ou confirmação de nome.",
+        "Cancelar volta à escolha de classe."
+      ],
+      "variants": [
+        {
+          "title": "Novo herói multijogador — nome",
+          "condition": "Criação no conjunto multijogador.",
+          "summary": "Mesmo formulário; o nome passa pela validação multijogador.",
+          "notes": [
+            "Espaços, caracteres reservados e palavras reservadas podem causar D02.",
+            "A mesma validação não é aplicada ao nome em um jogador."
+          ],
+          "source": [
+            {
+              "file": "Source/DiabloUI/hero/selhero.cpp",
+              "line": 335
+            }
+          ]
+        },
+        {
+          "title": "Novo herói — nome sugerido",
+          "condition": "Controle/gamepad ativo, ou compilação PREFILL_PLAYER_NAME.",
+          "fields": [
+            {
+              "label": "Nome",
+              "value": "Aldren",
+              "type": "text",
+              "maxLength": 15
+            }
+          ],
+          "notes": [
+            "A galeria usa nome fictício para representar o preenchimento inicial; não afirma que esse nome foi sorteado pelo jogo.",
+            "O nome pode ser editado."
+          ],
+          "source": [
+            {
+              "file": "Source/DiabloUI/hero/selhero.cpp",
+              "line": 267
+            },
+            {
+              "file": "Source/DiabloUI/hero/selhero.cpp",
+              "line": 304
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "F07",
+      "title": "Partida salva existente",
+      "group": "Heróis",
+      "layout": "choice",
+      "availability": "condicional",
+      "condition": "Herói selecionado informa que há partida salva.",
+      "summary": "Escolher entre retomar a partida salva ou iniciar uma nova para o herói.",
+      "choices": [
+        "Carregar partida",
+        "Nova partida"
+      ],
+      "rows": [
+        {
+          "label": "Herói",
+          "value": "Aldren"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "OK",
+        "Cancelar"
+      ],
+      "source": [
+        {
+          "file": "Source/DiabloUI/hero/selhero.cpp",
+          "line": 217
+        },
+        {
+          "file": "Source/DiabloUI/hero/selhero.cpp",
+          "line": 363
+        }
+      ],
+      "notes": [
+        "Herói fictício; não exibir nome ou conteúdo de saves reais.",
+        "Não é uma lista de vários checkpoints ou slots de gravação.",
+        "Nova partida de um jogador segue à dificuldade F08."
+      ],
+      "variants": []
+    },
+    {
+      "id": "F08",
+      "title": "Criar partida — dificuldade",
+      "group": "Partidas",
+      "layout": "choice",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Escolher dificuldade para uma nova partida.",
+      "choices": [
+        "Normal",
+        "Pesadelo",
+        "Inferno"
+      ],
+      "rows": [
+        {
+          "label": "Seleção",
+          "value": "Normal"
+        },
+        {
+          "label": "Descrição",
+          "value": "Ponto de partida recomendado para um novo personagem enfrentar Diablo."
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "OK",
+        "Cancelar"
+      ],
+      "source": [
+        {
+          "file": "Source/DiabloUI/multi/selgame.cpp",
+          "line": 331
+        },
+        {
+          "file": "Source/DiabloUI/multi/selgame.cpp",
+          "line": 396
+        },
+        {
+          "file": "Source/DiabloUI/multi/selgame.cpp",
+          "line": 433
+        }
+      ],
+      "notes": [
+        "No modo de um jogador, confirmar encerra a preparação da partida; não abre velocidade.",
+        "Os nomes são traduções de Normal, Nightmare e Hell.",
+        "Não há modo extremo/hardcore adicional nesta tela."
+      ],
+      "variants": [
+        {
+          "title": "Dificuldade — multijogador",
+          "condition": "Criação de partida multijogador ou Offline.",
+          "summary": "A mesma escolha leva depois à velocidade F12.",
+          "rows": [
+            {
+              "label": "Seleção",
+              "value": "Pesadelo"
+            },
+            {
+              "label": "Descrição",
+              "value": "Inimigos fortalecidos; recomendado para personagens experientes."
+            }
+          ],
+          "notes": [
+            "Pesadelo exige nível 20; Inferno exige nível 30.",
+            "O requisito é validado no multijogador. Falha abre D02."
+          ],
+          "source": [
+            {
+              "file": "Source/DiabloUI/multi/selgame.cpp",
+              "line": 415
+            }
+          ]
+        },
+        {
+          "title": "Dificuldade — Inferno",
+          "condition": "Foco em Inferno.",
+          "rows": [
+            {
+              "label": "Seleção",
+              "value": "Inferno"
+            },
+            {
+              "label": "Descrição",
+              "value": "A dificuldade mais exigente, destinada aos personagens mais experientes."
+            }
+          ]
+        },
+        {
+          "title": "Dificuldade — pública ou privada",
+          "condition": "Criação pública e privada compartilham este layout.",
+          "notes": [
+            "O código usa o título Criar partida nas duas variantes; não acrescentar um campo de nome de sala."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "F09",
+      "title": "Multijogador — conexão Offline",
+      "group": "Rede",
+      "layout": "list",
+      "availability": "atual",
+      "condition": "Build local NONET=ON.",
+      "summary": "A variante executável local oferece somente Offline.",
+      "choices": [
+        "Offline"
+      ],
+      "rows": [
+        {
+          "label": "Jogadores suportados",
+          "value": "1"
+        },
+        {
+          "label": "Requisitos",
+          "value": "Jogar sozinho, sem exposição à rede."
+        },
+        {
+          "label": "Gateway",
+          "value": "Nenhum gateway necessário"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "OK",
+        "Cancelar"
+      ],
+      "source": [
+        {
+          "file": "Source/DiabloUI/multi/selconn.cpp",
+          "line": 51
+        },
+        {
+          "file": "Source/DiabloUI/multi/selconn.cpp",
+          "line": 64
+        },
+        {
+          "file": "Source/DiabloUI/multi/selconn.cpp",
+          "line": 126
+        },
+        {
+          "file": "CMakeLists.txt",
+          "line": 35
+        }
+      ],
+      "notes": [
+        "Condição do build local confirmada por leitura de cache local de build (CMakeCache.txt:647); esse arquivo não é copiado ao estudo.",
+        "Escolher o provider abre a seleção de herói e depois o fluxo de partida.",
+        "Mudar gateway existe como elemento oculto e sem ação; não deve aparecer como botão utilizável."
+      ],
+      "variants": [
+        {
+          "title": "Multijogador — ZeroTier",
+          "condition": "Build de rede com ZeroTier e TCP habilitados; foco em ZeroTier.",
+          "availability": "condicional",
+          "choices": [
+            "ZeroTier",
+            "Cliente-servidor (TCP)",
+            "Offline"
+          ],
+          "rows": [
+            {
+              "label": "Seleção",
+              "value": "ZeroTier"
+            },
+            {
+              "label": "Jogadores suportados",
+              "value": "4"
+            },
+            {
+              "label": "Requisitos",
+              "value": "Todos os computadores precisam estar conectados à internet."
+            },
+            {
+              "label": "Gateway",
+              "value": "Nenhum gateway necessário"
+            }
+          ],
+          "source": [
+            {
+              "file": "Source/DiabloUI/multi/selconn.cpp",
+              "line": 55
+            },
+            {
+              "file": "Source/DiabloUI/multi/selconn.cpp",
+              "line": 129
+            },
+            {
+              "file": "Source/multi.h",
+              "line": 26
+            }
+          ],
+          "notes": [
+            "Tela herdada condicional; rede nova não foi validada neste build.",
+            "As entradas TCP/ZeroTier podem ser omitidas individualmente pelas flags de compilação."
+          ]
+        },
+        {
+          "title": "Multijogador — TCP",
+          "condition": "Build de rede com ZeroTier e TCP habilitados; foco em TCP.",
+          "availability": "condicional",
+          "choices": [
+            "ZeroTier",
+            "Cliente-servidor (TCP)",
+            "Offline"
+          ],
+          "rows": [
+            {
+              "label": "Seleção",
+              "value": "Cliente-servidor (TCP)"
+            },
+            {
+              "label": "Jogadores suportados",
+              "value": "4"
+            },
+            {
+              "label": "Requisitos",
+              "value": "Todos os computadores precisam estar em uma rede compatível com TCP."
+            },
+            {
+              "label": "Gateway",
+              "value": "Nenhum gateway necessário"
+            }
+          ],
+          "source": [
+            {
+              "file": "Source/DiabloUI/multi/selconn.cpp",
+              "line": 59
+            },
+            {
+              "file": "Source/DiabloUI/multi/selconn.cpp",
+              "line": 126
+            },
+            {
+              "file": "Source/multi.h",
+              "line": 26
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "F10",
+      "title": "ZeroTier — ações e partidas públicas",
+      "group": "Rede",
+      "layout": "list",
+      "availability": "condicional",
+      "condition": "Provider ZeroTier escolhido, PACKET_ENCRYPTION habilitado e partida pública fictícia disponível.",
+      "summary": "Selecionar uma ação ou uma partida pública descoberta.",
+      "choices": [
+        "Criar partida",
+        "Criar partida pública",
+        "Entrar em partida",
+        "Partidas públicas",
+        "RefúgioDemo"
+      ],
+      "rows": [
+        {
+          "label": "Partida selecionada",
+          "value": "RefúgioDemo"
+        },
+        {
+          "label": "Dificuldade",
+          "value": "Normal"
+        },
+        {
+          "label": "Velocidade",
+          "value": "Normal"
+        },
+        {
+          "label": "Jogadores",
+          "value": "Aldren Mira"
+        },
+        {
+          "label": "Ping",
+          "value": "42 ms"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "OK",
+        "Cancelar"
+      ],
+      "source": [
+        {
+          "file": "Source/DiabloUI/multi/selgame.cpp",
+          "line": 111
+        },
+        {
+          "file": "Source/DiabloUI/multi/selgame.cpp",
+          "line": 152
+        },
+        {
+          "file": "Source/DiabloUI/multi/selgame.cpp",
+          "line": 214
+        },
+        {
+          "file": "Source/DiabloUI/multi/selgame.cpp",
+          "line": 270
+        }
+      ],
+      "notes": [
+        "RefúgioDemo, nomes e ping são dados fictícios.",
+        "Partidas públicas é um cabeçalho desabilitado, não uma ação.",
+        "Criar partida privada só aparece quando PACKET_ENCRYPTION foi compilado.",
+        "Não há login, lobby/chat, campo de nome de sala nem botão nativo Atualizar.",
+        "Offline pula esta tela e abre diretamente dificuldade/velocidade."
+      ],
+      "variants": [
+        {
+          "title": "TCP — selecionar ação",
+          "condition": "Provider TCP escolhido.",
+          "choices": [
+            "Criar partida",
+            "Criar partida pública",
+            "Entrar em partida"
+          ],
+          "rows": [
+            {
+              "label": "Descrição",
+              "value": "Criar uma partida com a dificuldade escolhida ou entrar por endereço."
+            }
+          ],
+          "notes": [
+            "TCP não exibe a lista de partidas públicas do ZeroTier.",
+            "A ação Criar partida permanece condicionada à criptografia de pacotes."
+          ]
+        },
+        {
+          "title": "ZeroTier — descobrindo partidas",
+          "condition": "Busca pública inicial ainda em curso.",
+          "choices": [
+            "Criar partida",
+            "Criar partida pública",
+            "Entrar em partida",
+            "Partidas públicas",
+            "Carregando..."
+          ],
+          "rows": [],
+          "notes": [
+            "Carregando... é linha desabilitada da mesma lista."
+          ]
+        },
+        {
+          "title": "ZeroTier — nenhuma partida pública",
+          "condition": "Busca pública não retornou partidas.",
+          "choices": [
+            "Criar partida",
+            "Criar partida pública",
+            "Entrar em partida",
+            "Partidas públicas",
+            "Nenhuma"
+          ],
+          "rows": [],
+          "notes": [
+            "Nenhuma é linha desabilitada; não é erro nem nova tela."
+          ]
+        },
+        {
+          "title": "Ações — sem criptografia de pacotes",
+          "condition": "PACKET_ENCRYPTION ausente.",
+          "choices": [
+            "Criar partida pública",
+            "Entrar em partida"
+          ],
+          "rows": [
+            {
+              "label": "Descrição",
+              "value": "Criar partida pública ou entrar por endereço."
+            }
+          ],
+          "notes": [
+            "Criar partida privada é omitido.",
+            "Não inventar uma opção de ativar criptografia nessa tela."
+          ]
+        },
+        {
+          "title": "Partida — conexão por retransmissão",
+          "condition": "Metadado peerIsRelayed ativo.",
+          "rows": [
+            {
+              "label": "Partida selecionada",
+              "value": "RefúgioDemo"
+            },
+            {
+              "label": "Dificuldade",
+              "value": "Normal"
+            },
+            {
+              "label": "Velocidade",
+              "value": "Normal"
+            },
+            {
+              "label": "Jogadores",
+              "value": "Aldren Mira"
+            },
+            {
+              "label": "Ping",
+              "value": "42 ms — retransmitido"
+            }
+          ],
+          "notes": [
+            "Métrica fictícia; corresponde à indicação RELAYED existente."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "F11",
+      "title": "Entrar em partida — ID ZeroTier",
+      "group": "Rede",
+      "layout": "form",
+      "availability": "condicional",
+      "condition": "ZeroTier disponível; ação Entrar em partida.",
+      "summary": "Informar um ID de partida, sem criar conta.",
+      "choices": [],
+      "rows": [],
+      "fields": [
+        {
+          "label": "ID da partida",
+          "value": "RefugioDemo",
+          "type": "text",
+          "maxLength": 128
+        }
+      ],
+      "buttons": [
+        "OK",
+        "Cancelar"
+      ],
+      "source": [
+        {
+          "file": "Source/DiabloUI/multi/selgame.cpp",
+          "line": 354
+        },
+        {
+          "file": "Source/DiabloUI/multi/selgame.cpp",
+          "line": 369
+        }
+      ],
+      "notes": [
+        "ID fictício, não utilizável como destino real.",
+        "Com criptografia compilada, o passo seguinte é a senha F13; sem ela, a entrada é tentada diretamente."
+      ],
+      "variants": [
+        {
+          "title": "Entrar em partida — endereço TCP",
+          "condition": "TCP disponível; ação Entrar em partida.",
+          "fields": [
+            {
+              "label": "Endereço IP ou hostname",
+              "value": "192.0.2.10",
+              "type": "text",
+              "maxLength": 128
+            }
+          ],
+          "notes": [
+            "Endereço de documentação, não destino real.",
+            "A interface aceita endereço IP ou hostname.",
+            "Não há campo de porta separado no formulário auditado."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "F12",
+      "title": "Criar partida — velocidade",
+      "group": "Partidas",
+      "layout": "choice",
+      "availability": "atual",
+      "condition": "Criação multijogador ou Offline; etapa posterior à dificuldade.",
+      "summary": "Selecionar a velocidade existente da simulação.",
+      "choices": [
+        "Normal",
+        "Rápida",
+        "Mais rápida",
+        "Máxima"
+      ],
+      "rows": [
+        {
+          "label": "Seleção",
+          "value": "Normal"
+        },
+        {
+          "label": "Descrição",
+          "value": "Velocidade recomendada para começar a enfrentar Diablo."
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "OK",
+        "Cancelar"
+      ],
+      "source": [
+        {
+          "file": "Source/DiabloUI/multi/selgame.cpp",
+          "line": 483
+        },
+        {
+          "file": "Source/DiabloUI/multi/selgame.cpp",
+          "line": 506
+        },
+        {
+          "file": "Source/DiabloUI/multi/selgame.cpp",
+          "line": 550
+        }
+      ],
+      "notes": [
+        "Os valores associados são 20, 30, 40 e 50 ticks por segundo.",
+        "As traduções representam Normal, Fast, Faster e Fastest.",
+        "A tela não é exibida após a escolha de dificuldade no fluxo solo.",
+        "Offline e criação pública iniciam após esta escolha; criação privada vai à senha."
+      ],
+      "variants": [
+        {
+          "title": "Velocidade — Rápida",
+          "condition": "Foco na segunda opção.",
+          "rows": [
+            {
+              "label": "Seleção",
+              "value": "Rápida"
+            },
+            {
+              "label": "Descrição",
+              "value": "Inimigos mais velozes; recomendado para personagens experientes."
+            }
+          ]
+        },
+        {
+          "title": "Velocidade — Mais rápida",
+          "condition": "Foco na terceira opção.",
+          "rows": [
+            {
+              "label": "Seleção",
+              "value": "Mais rápida"
+            },
+            {
+              "label": "Descrição",
+              "value": "Monstros procuram o herói mais depressa; destinada a campeões experientes."
+            }
+          ]
+        },
+        {
+          "title": "Velocidade — Máxima",
+          "condition": "Foco na quarta opção.",
+          "rows": [
+            {
+              "label": "Seleção",
+              "value": "Máxima"
+            },
+            {
+              "label": "Descrição",
+              "value": "Os inimigos avançam sem hesitar; a maior velocidade disponível."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "F13",
+      "title": "Criar partida privada — senha",
+      "group": "Rede",
+      "layout": "form",
+      "availability": "condicional",
+      "condition": "Criação privada disponível com PACKET_ENCRYPTION, depois da velocidade.",
+      "summary": "Informar a senha da partida privada.",
+      "choices": [],
+      "rows": [],
+      "fields": [
+        {
+          "label": "Senha",
+          "value": "demo123",
+          "type": "text",
+          "maxLength": 15
+        }
+      ],
+      "buttons": [
+        "OK",
+        "Cancelar"
+      ],
+      "source": [
+        {
+          "file": "Source/DiabloUI/multi/selgame.cpp",
+          "line": 550
+        },
+        {
+          "file": "Source/DiabloUI/multi/selgame.cpp",
+          "line": 562
+        },
+        {
+          "file": "Source/DiabloUI/ui_item.h",
+          "line": 272
+        }
+      ],
+      "notes": [
+        "demo123 é texto fictício e não é uma credencial.",
+        "A fonte usa UiEdit comum e não mascara o campo; por isso type é text.",
+        "Se a galeria preferir pontos/asteriscos, deve rotular essa máscara como melhoria proposta.",
+        "Na criação privada, a senha não pode ficar vazia.",
+        "Offline e criação pública pulam este formulário."
+      ],
+      "variants": [
+        {
+          "title": "Entrar em partida — senha opcional",
+          "condition": "Entrada manual com PACKET_ENCRYPTION.",
+          "fields": [
+            {
+              "label": "Senha",
+              "value": "",
+              "type": "text",
+              "maxLength": 15
+            }
+          ],
+          "summary": "A senha pode ficar vazia para tentar entrar sem senha.",
+          "notes": [
+            "Somente o fluxo de entrada permite campo vazio.",
+            "Não adicionar confirmação de senha, recuperação ou conta."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "F14",
+      "title": "Créditos",
+      "group": "Informações",
+      "layout": "credits",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Rolagem automática de autoria e créditos herdados.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Projeto original",
+          "value": "Diablo — Blizzard Entertainment"
+        },
+        {
+          "label": "Áreas de crédito",
+          "value": "Design, programação, arte, música, som, vozes e testes"
+        },
+        {
+          "label": "Expansão",
+          "value": "Hellfire — créditos preservados conforme a lista herdada"
+        }
+      ],
+      "fields": [],
+      "buttons": [],
+      "source": [
+        {
+          "file": "Source/DiabloUI/credits.cpp",
+          "line": 151
+        },
+        {
+          "file": "Source/DiabloUI/credits.cpp",
+          "line": 187
+        },
+        {
+          "file": "Source/DiabloUI/credits_lines.cpp",
+          "line": 9
+        },
+        {
+          "file": "Source/DiabloUI/credits_lines.cpp",
+          "line": 214
+        }
+      ],
+      "notes": [
+        "Este exemplo resume categorias para estudar a composição; não substitui a lista integral de pessoas.",
+        "A implementação futura deve preservar nomes, autoria, licenças e créditos completos.",
+        "A tela atual sai por tecla/clique, ação de voltar/selecionar ou término da rolagem; não possui botão de doação."
+      ],
+      "variants": []
+    },
+    {
+      "id": "F15",
+      "title": "Suporte",
+      "group": "Informações",
+      "layout": "credits",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Texto de suporte em rolagem automática, compartilhando a estrutura de créditos.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Comunidade",
+          "value": "Discord.gg/devilutionx"
+        },
+        {
+          "label": "Relatar problemas",
+          "value": "github.com/diasurgical/devilutionX"
+        },
+        {
+          "label": "Ao relatar",
+          "value": "Informar versão, sistema operacional e natureza do problema."
+        },
+        {
+          "label": "Responsável pelo port",
+          "value": "Diasurgical"
+        },
+        {
+          "label": "Licenças citadas",
+          "value": "Fontes SIL OFL; Twitmoji CC-BY 4.0; SDL zlib"
+        }
+      ],
+      "fields": [],
+      "buttons": [],
+      "source": [
+        {
+          "file": "Source/DiabloUI/credits.cpp",
+          "line": 195
+        },
+        {
+          "file": "Source/DiabloUI/support_lines.cpp",
+          "line": 10
+        },
+        {
+          "file": "Source/DiabloUI/support_lines.cpp",
+          "line": 16
+        },
+        {
+          "file": "Source/DiabloUI/support_lines.cpp",
+          "line": 19
+        }
+      ],
+      "notes": [
+        "São referências textuais já presentes no código, não destinos acessados durante o estudo.",
+        "A tela herdada não converte os endereços em botões clicáveis.",
+        "Preservar o aviso de que Blizzard e GOG não mantêm ou certificam o DevilutionX.",
+        "Qualquer botão novo de abrir site seria uma melhoria proposta."
+      ],
+      "variants": []
+    },
+    {
+      "id": "D01",
+      "title": "Confirmar exclusão de herói",
+      "group": "Diálogos",
+      "layout": "dialog",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Excluir herói de um jogador.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Confirmação",
+          "value": "Deseja excluir o personagem fictício Aldren?"
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "Sim",
+        "Não"
+      ],
+      "source": [
+        {
+          "file": "Source/DiabloUI/hero/selhero.cpp",
+          "line": 613
+        },
+        {
+          "file": "Source/DiabloUI/selyesno.cpp",
+          "line": 58
+        },
+        {
+          "file": "Source/DiabloUI/selyesno.cpp",
+          "line": 74
+        }
+      ],
+      "notes": [
+        "Exemplo estático; nenhuma exclusão foi executada.",
+        "Esc responde Não.",
+        "É diálogo bloqueante de confirmação, não outra seção de menu."
+      ],
+      "variants": [
+        {
+          "title": "Confirmar exclusão de herói multijogador",
+          "condition": "Exclusão no conjunto multijogador.",
+          "summary": "Mesmo diálogo, com título de exclusão de herói multijogador."
+        }
+      ]
+    },
+    {
+      "id": "D02",
+      "title": "Aviso — dificuldade indisponível",
+      "group": "Diálogos",
+      "layout": "dialog",
+      "availability": "condicional",
+      "condition": "Tentativa de Pesadelo com herói multijogador abaixo do nível 20.",
+      "summary": "Aviso grande com logo e confirmação OK.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Mensagem",
+          "value": "Seu personagem precisa atingir o nível 20 para entrar numa partida multijogador em Pesadelo."
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "OK"
+      ],
+      "source": [
+        {
+          "file": "Source/DiabloUI/selok.cpp",
+          "line": 58
+        },
+        {
+          "file": "Source/DiabloUI/multi/selgame.cpp",
+          "line": 424
+        }
+      ],
+      "notes": [
+        "O mesmo componente recebe várias mensagens; elas são variantes, não novas telas.",
+        "Preservar o logo aprovado via referência textual."
+      ],
+      "variants": [
+        {
+          "title": "Aviso — Inferno indisponível",
+          "condition": "Herói multijogador abaixo do nível 30.",
+          "rows": [
+            {
+              "label": "Mensagem",
+              "value": "Seu personagem precisa atingir o nível 30 para entrar numa partida multijogador em Inferno."
+            }
+          ],
+          "source": [
+            {
+              "file": "Source/DiabloUI/multi/selgame.cpp",
+              "line": 426
+            }
+          ]
+        },
+        {
+          "title": "Aviso — nome inválido",
+          "condition": "Nome multijogador falhou na validação.",
+          "rows": [
+            {
+              "label": "Mensagem",
+              "value": "Nome inválido. Não use espaços, caracteres reservados ou palavras reservadas."
+            }
+          ],
+          "source": [
+            {
+              "file": "Source/DiabloUI/hero/selhero.cpp",
+              "line": 340
+            }
+          ]
+        },
+        {
+          "title": "Aviso — edição completa necessária",
+          "condition": "Classe restrita selecionada no shareware.",
+          "rows": [
+            {
+              "label": "Mensagem",
+              "value": "Arqueira e Feiticeiro requerem a versão completa do Diablo."
+            }
+          ],
+          "source": [
+            {
+              "file": "Source/DiabloUI/hero/selhero.cpp",
+              "line": 294
+            }
+          ],
+          "notes": [
+            "A mensagem herdada também cita a página de compra na GOG; este resumo não cria um botão novo."
+          ]
+        },
+        {
+          "title": "Aviso — partida incompatível",
+          "condition": "Edição shareware/completa ou versão incompatível.",
+          "rows": [
+            {
+              "label": "Mensagem",
+              "value": "A versão do jogo não corresponde à do anfitrião."
+            }
+          ],
+          "source": [
+            {
+              "file": "Source/DiabloUI/multi/selgame.cpp",
+              "line": 100
+            },
+            {
+              "file": "Source/DiabloUI/multi/selgame.cpp",
+              "line": 607
+            }
+          ]
+        },
+        {
+          "title": "Aviso — falha de rede",
+          "condition": "Entrada ou criação da partida falhou.",
+          "rows": [
+            {
+              "label": "Mensagem",
+              "value": "Não foi possível entrar na partida."
+            }
+          ],
+          "source": [
+            {
+              "file": "Source/DiabloUI/multi/selgame.cpp",
+              "line": 658
+            },
+            {
+              "file": "Source/DiabloUI/multi/selgame.cpp",
+              "line": 684
+            }
+          ],
+          "notes": [
+            "Texto resumido fictício; em execução o detalhe vem do erro real do sistema de rede."
+          ]
+        },
+        {
+          "title": "Aviso — assets incompatíveis com multijogador",
+          "condition": "Build sem _DEBUG e assets de lógica substituídos.",
+          "rows": [
+            {
+              "label": "Mensagem",
+              "value": "Multijogador indisponível com substituições de assets de lógica Lua, TSV ou SOL."
+            }
+          ],
+          "source": [
+            {
+              "file": "Source/menu.cpp",
+              "line": 88
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D03",
+      "title": "Erro — criar personagem",
+      "group": "Diálogos",
+      "layout": "dialog",
+      "availability": "atual",
+      "condition": "Falha na criação do personagem.",
+      "summary": "Popup compacto de erro, podendo preservar a tela anterior ao fundo.",
+      "choices": [],
+      "rows": [
+        {
+          "label": "Mensagem",
+          "value": "Não foi possível criar o personagem."
+        }
+      ],
+      "fields": [],
+      "buttons": [
+        "OK"
+      ],
+      "source": [
+        {
+          "file": "Source/DiabloUI/dialogs.cpp",
+          "line": 77
+        },
+        {
+          "file": "Source/DiabloUI/dialogs.cpp",
+          "line": 164
+        },
+        {
+          "file": "Source/DiabloUI/hero/selhero.cpp",
+          "line": 347
+        }
+      ],
+      "notes": [
+        "Componente distinto do aviso grande D02.",
+        "Título é opcional; tamanho/arte variam conforme título e estado de erro.",
+        "Se a UI estiver inativa, já houver diálogo ou a arte falhar, o código pode recorrer à caixa nativa do sistema."
+      ],
+      "variants": [
+        {
+          "title": "Informação — partida encerrada",
+          "condition": "Sincronização informou término da partida.",
+          "summary": "Variante informativa do mesmo popup.",
+          "rows": [
+            {
+              "label": "Mensagem",
+              "value": "A partida terminou."
+            }
+          ],
+          "source": [
+            {
+              "file": "Source/msg.cpp",
+              "line": 2749
+            }
+          ]
+        },
+        {
+          "title": "Erro — dados do nível",
+          "condition": "Falha ao receber dados do nível.",
+          "rows": [
+            {
+              "label": "Mensagem",
+              "value": "Não foi possível obter os dados do nível."
+            }
+          ],
+          "source": [
+            {
+              "file": "Source/msg.cpp",
+              "line": 2755
+            }
+          ]
+        },
+        {
+          "title": "Popup com título",
+          "condition": "Chamada fornece título e corpo.",
+          "rows": [
+            {
+              "label": "Título",
+              "value": "Diablo 3D"
+            },
+            {
+              "label": "Mensagem",
+              "value": "Não foi possível concluir a operação."
+            }
+          ],
+          "notes": [
+            "Texto e título fictícios para composição; não são relato de uma falha ocorrida.",
+            "O exemplo apenas demonstra a variante estrutural de título opcional."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "D04",
+      "title": "Sincronização — progresso cancelável",
+      "group": "Diálogos",
+      "layout": "loading",
+      "availability": "condicional",
+      "condition": "Espera por dados da partida em sincronização multijogador.",
+      "summary": "Popup com barra de progresso e ação Cancelar.",
+      "choices": [],
+      "rows": [],
+      "fields": [],
+      "buttons": [
+        "Cancelar"
+      ],
+      "source": [
+        {
+          "file": "Source/DiabloUI/progress.cpp",
+          "line": 54
+        },
+        {
+          "file": "Source/DiabloUI/progress.cpp",
+          "line": 82
+        },
+        {
+          "file": "Source/DiabloUI/progress.cpp",
+          "line": 106
+        },
+        {
+          "file": "Source/msg.cpp",
+          "line": 2741
+        }
+      ],
+      "notes": [
+        "A galeria pode ilustrar a barra parcialmente preenchida, sem afirmar medição real.",
+        "A fonte não imprime número percentual nem estimativa de tempo.",
+        "Teclas Esc, Enter/Espaço e ações de controle também podem encerrar a espera.",
+        "Não confundir com o carregamento de nível L01, que possui fundos de transição."
+      ],
+      "variants": []
+    },
+    {
+      "id": "L01",
+      "title": "Carregamento de partida ou nível",
+      "group": "Transições",
+      "layout": "loading",
+      "availability": "atual",
+      "condition": "",
+      "summary": "Fundo de transição e barra de progresso. Exemplo de início de nova partida.",
+      "choices": [],
+      "rows": [],
+      "fields": [],
+      "buttons": [],
+      "source": [
+        {
+          "file": "Source/interfac.cpp",
+          "line": 59
+        },
+        {
+          "file": "Source/interfac.cpp",
+          "line": 99
+        },
+        {
+          "file": "Source/interfac.cpp",
+          "line": 137
+        },
+        {
+          "file": "Source/interfac.cpp",
+          "line": 241
+        }
+      ],
+      "notes": [
+        "Sem campo ou escolha de gameplay; não adicionar dicas que afirmem mecânicas novas.",
+        "A barra herdada possui extensão máxima de 534 pixels lógicos e altura de 22 pixels lógicos.",
+        "A fonte não mostra porcentagem numérica nem tempo restante.",
+        "As variantes abaixo trocam o fundo e a posição/cor herdada da barra; não são onze menus independentes.",
+        "Carregamentos muito rápidos podem ser omitidos segundo a preferência existente."
+      ],
+      "variants": [
+        {
+          "title": "Carregamento — início",
+          "condition": "Nova partida ou carregar partida.",
+          "summary": "Fundo CutStart; barra inferior.",
+          "source": [
+            {
+              "file": "Source/interfac.cpp",
+              "line": 102
+            },
+            {
+              "file": "Source/interfac.cpp",
+              "line": 143
+            }
+          ]
+        },
+        {
+          "title": "Carregamento — cidade",
+          "condition": "Retorno à cidade ou transições mapeadas para Town.",
+          "summary": "Fundo CutTown; barra inferior.",
+          "source": [
+            {
+              "file": "Source/interfac.cpp",
+              "line": 149
+            }
+          ]
+        },
+        {
+          "title": "Carregamento — Catedral",
+          "condition": "Transição de tipo Catedral ou fallback equivalente.",
+          "summary": "Fundo CutLevel1; barra superior.",
+          "source": [
+            {
+              "file": "Source/interfac.cpp",
+              "line": 155
+            }
+          ]
+        },
+        {
+          "title": "Carregamento — Catacumbas",
+          "condition": "Transição de tipo Catacumbas.",
+          "summary": "Fundo CutLevel2; barra superior.",
+          "source": [
+            {
+              "file": "Source/interfac.cpp",
+              "line": 161
+            }
+          ]
+        },
+        {
+          "title": "Carregamento — Cavernas",
+          "condition": "Transição de tipo Cavernas.",
+          "summary": "Fundo CutLevel3; barra inferior.",
+          "source": [
+            {
+              "file": "Source/interfac.cpp",
+              "line": 167
+            }
+          ]
+        },
+        {
+          "title": "Carregamento — Inferno",
+          "condition": "Transição de tipo Inferno.",
+          "summary": "Fundo CutLevel4; barra inferior.",
+          "source": [
+            {
+              "file": "Source/interfac.cpp",
+              "line": 173
+            }
+          ]
+        },
+        {
+          "title": "Carregamento — Cripta",
+          "condition": "Conteúdo Hellfire de Cripta.",
+          "availability": "condicional",
+          "summary": "Fundo CutLevel5; barra inferior.",
+          "source": [
+            {
+              "file": "Source/interfac.cpp",
+              "line": 179
+            }
+          ]
+        },
+        {
+          "title": "Carregamento — Ninho",
+          "condition": "Conteúdo Hellfire de Ninho.",
+          "availability": "condicional",
+          "summary": "Fundo CutLevel6; barra inferior.",
+          "source": [
+            {
+              "file": "Source/interfac.cpp",
+              "line": 185
+            }
+          ]
+        },
+        {
+          "title": "Carregamento — portal azul",
+          "condition": "Transição por portal.",
+          "summary": "Fundo CutPortal; barra inferior.",
+          "source": [
+            {
+              "file": "Source/interfac.cpp",
+              "line": 191
+            }
+          ]
+        },
+        {
+          "title": "Carregamento — portal vermelho",
+          "condition": "Transição especial do nível Vile Betrayer.",
+          "summary": "Fundo CutPortalRed; barra inferior.",
+          "source": [
+            {
+              "file": "Source/interfac.cpp",
+              "line": 197
+            }
+          ]
+        },
+        {
+          "title": "Carregamento — portão",
+          "condition": "Transição mapeada para Gate ao nível final.",
+          "summary": "Fundo CutGate; barra inferior.",
+          "source": [
+            {
+              "file": "Source/interfac.cpp",
+              "line": 203
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

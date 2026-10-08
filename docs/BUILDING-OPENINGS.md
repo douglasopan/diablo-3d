@@ -22,6 +22,8 @@ An absent rear reference does not establish that the original building had a rea
 
 Cut the opening through the relevant outer wall and inner shell. Preserve the surrounding masonry or timber. Add a real wall-depth lining, sill and frame; leave clear panes or spaces where a ray can actually reach the interior. Opaque wooden divisions must remain geometry rather than an all-purpose transparency mask.
 
+Geometry and light occlusion must agree on those divisions. The current cabin passes its four authored round-window bars as separate closed axis-aligned opaque shells, using the exact boxes that create the mesh. CPU and GPU test the same segments; the GPU copies at most 31 additional blocker bounds alongside the room, within the CPU limit of 32 occluders. Opaque blocker shells have no apertures. This does not add triangle-level shadows for imported door details or arbitrary interior props. See the reproduced defect and controls in [TRISTRAM-G1-REVIEW.md](TRISTRAM-G1-REVIEW.md).
+
 Use the same aperture shape and orientation for geometry and point-light visibility. The current pure lighting helper supports bounded opaque axis-aligned room shells with several openings. `TownLightAperture` declares an X, Height or Z plane, the plane coordinate and its in-plane bounds. The axes are:
 
 | Plane | u coordinate | v coordinate |
