@@ -22,14 +22,14 @@
   "lightingRuntimePath": "d3d-lighting.ini",
   "privateAssets": true,
   "pipeline": {
-    "id": "cabin-east-openings-fire-v2",
+    "id": "cabin-east-openings-fire-v3",
     "implementation": "runtime-code-adjunct",
     "sourcePaths": [
       "Source/engine/render/town_scene.cpp",
       "Source/engine/render/town_view.cpp",
       "Source/engine/render/town_lighting.cpp"
     ],
-    "description": "Declared code adjunct: a front opening measured on the imported mesh and an inferred, user-requested rear opening under review, plus room, timber floor and two candle sources. This declaration does not prove arbitrary executable support. The selected D3DMESH1 geometry and UV source remain unchanged."
+    "description": "Declared code adjunct: a measured front opening, an inferred user-requested rear opening under review and an inner-shell opening aligned to the existing door window, plus room, timber floor and two candle sources. The door cut stops before its imported panes and divisions. This declaration does not prove arbitrary executable support. The selected D3DMESH1 geometry and UV source remain unchanged."
   },
   "pendingReview": [
     "360-degree geometry and material fidelity",

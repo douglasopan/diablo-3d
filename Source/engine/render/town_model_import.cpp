@@ -8,11 +8,13 @@
 #include <limits>
 #include <memory>
 #include <new>
+#include <string>
 #include <utility>
 
-#include "mods/mod_identity.h"
 #include "engine/assets.hpp"
 #include "levels/dun_tile_data.hpp"
+#include "mods/mod_identity.h"
+#include "utils/log.hpp"
 
 namespace devilution {
 namespace {
@@ -23,6 +25,28 @@ constexpr uint32_t MaxTextureSide = 2048;
 constexpr std::size_t BytesPerTriangle = 15 * sizeof(uint32_t);
 constexpr std::size_t MaxAssetBytes = HeaderBytes + MaxTriangles * BytesPerTriangle + MaxTextureSide * MaxTextureSide * 3;
 constexpr std::array<char, 8> Magic { 'D', '3', 'D', 'M', 'E', 'S', 'H', '1' };
+
+bool IsBaselineCabin(const TownSceneModel &model)
+{
+	return model.kind == TownSceneKind::Cabin && model.minTile == Point { 70, 66 };
+}
+
+TownModelRuntimeAudit MakeImportAudit(const TownSceneModel &model, std::string_view assetPath,
+    std::string_view expectedSha256, std::string_view revision)
+{
+	TownModelRuntimeAudit audit;
+	audit.assetPath = assetPath;
+	audit.sourceKind = assetPath.empty() ? "memory" : "unresolved";
+	if (IsBaselineCabin(model) && (assetPath.empty() || assetPath == "d3d-models/cabin-east.d3d" || assetPath == "d3d-models\\cabin-east.d3d")) {
+		audit.expectedSha256 = TownCabinBaselineSha256;
+		audit.revision = "meshy-v2-multiview";
+	}
+	if (!expectedSha256.empty())
+		audit.expectedSha256 = expectedSha256;
+	if (!revision.empty())
+		audit.revision = revision;
+	return audit;
+}
 
 uint32_t ReadWord(std::span<const std::byte> data, std::size_t offset)
 {
@@ -110,10 +134,10 @@ bool ComputeNormal(TownSceneTriangle &triangle)
 	return true;
 }
 
-} // namespace
-
-bool ParseTownModelOverride(TownSceneModel &model, std::span<const std::byte> data)
+bool ParseModelWithAudit(TownSceneModel &model, std::span<const std::byte> data,
+    TownModelRuntimeAudit &audit, bool requireExpectedHash)
 {
+	audit.failure = "parse";
 	if (data.size() < HeaderBytes || data.size() > MaxAssetBytes
 	    || std::memcmp(data.data(), Magic.data(), Magic.size()) != 0
 	    || model.minTile.x < 0 || model.minTile.x >= MAXDUNX || model.minTile.y < 0 || model.minTile.y >= MAXDUNY)
@@ -128,6 +152,12 @@ bool ParseTownModelOverride(TownSceneModel &model, std::span<const std::byte> da
 	if (data.size() != HeaderBytes + triangleBytes + textureBytes)
 		return false;
 	try {
+		if (audit.sha256.empty())
+			audit.sha256 = ModHashToHex(ComputeBytesSha256(data));
+		if (requireExpectedHash && audit.sha256 != audit.expectedSha256) {
+			audit.failure = "hash-mismatch";
+			return false;
+		}
 		const std::vector<Point> blocked = BlockedSourceTiles(model);
 		const Point sourceTile = model.triangles.empty() ? model.minTile : model.triangles.front().sourceTile;
 		const Point fallbackPick = model.triangles.empty() ? model.minTile : model.triangles.front().pickTile;
@@ -154,37 +184,96 @@ bool ParseTownModelOverride(TownSceneModel &model, std::span<const std::byte> da
 		texture->height = height;
 		texture->rgb.resize(textureBytes);
 		std::memcpy(texture->rgb.data(), data.data() + offset, textureBytes);
+		audit.status = !audit.expectedSha256.empty() && audit.sha256 == audit.expectedSha256 ? "matched" : "unregistered";
+		audit.failure.clear();
+		TownModelRuntimeAudit committedAudit = audit;
 		// Commit only after all decoding succeeds. A corrupt optional override
 		// cannot erase the current procedural model or partially change its art.
 		model.triangles = std::move(triangles);
 		model.importedTexture = std::move(texture);
 		model.externalModel = true;
 		model.cabinInterior.reset();
+		model.runtimeAudit = std::move(committedAudit);
 		return true;
+	} catch (const std::bad_alloc &) {
+		audit.failure = "allocation";
+		return false;
+	}
+}
+
+} // namespace
+
+bool ParseTownModelOverride(TownSceneModel &model, std::span<const std::byte> data)
+{
+	try {
+		TownModelRuntimeAudit audit = MakeImportAudit(model, {}, {}, {});
+		return ParseModelWithAudit(model, data, audit, false);
 	} catch (const std::bad_alloc &) {
 		return false;
 	}
 }
 
-bool LoadTownModelOverride(TownSceneModel &model, std::string_view assetPath)
+bool LoadTownModelOverride(TownSceneModel &model, std::string_view assetPath,
+    std::string_view expectedSha256, std::string_view revision, TownModelRuntimeAudit *attemptAudit)
 {
-	if (assetPath.empty() || assetPath.find('\0') != std::string_view::npos)
-		return false;
-	AssetRef ref = FindAsset(assetPath);
-	if (!ref.ok())
-		return false;
-	const std::size_t size = ref.size();
-	if (size < HeaderBytes || size > MaxAssetBytes)
-		return false;
-	AssetHandle handle = OpenAsset(std::move(ref));
-	if (!handle.ok())
-		return false;
+	TownModelRuntimeAudit audit;
 	try {
+		audit = MakeImportAudit(model, assetPath, expectedSha256, revision);
+		const auto fail = [&](std::string_view reason) {
+			audit.status = "fallback";
+			audit.failure = reason;
+			if (attemptAudit != nullptr)
+				*attemptAudit = audit;
+			// A rejected attempt never relabels the bytes of an already loaded model.
+			if (model.externalModel) {
+				model.runtimeAudit.status = "fallback";
+				model.runtimeAudit.failure = reason;
+			} else {
+				model.runtimeAudit = audit;
+			}
+			LogWarn("Town model '{}' retained its existing geometry: {}", assetPath, reason);
+			return false;
+		};
+		if (assetPath.empty() || assetPath.size() > 2048 || assetPath.find('\0') != std::string_view::npos)
+			return fail("invalid-path");
+		if (!expectedSha256.empty()) {
+			std::array<uint8_t, 32> digest;
+			if (!HexToModHash(expectedSha256, digest))
+				return fail("invalid-hash");
+			audit.expectedSha256 = ModHashToHex(digest);
+		}
+		AssetRef ref = FindAsset(assetPath);
+		if (!ref.ok())
+			return fail("missing");
+#ifdef UNPACKED_MPQS
+		audit.sourceKind = "unpacked-file";
+#else
+		audit.sourceKind = ref.archive != nullptr ? "archive" : (ref.isOverridden ? "override" : "loose-file");
+#endif
+		const std::size_t size = ref.size();
+		if (size < HeaderBytes || size > MaxAssetBytes)
+			return fail("size");
+		AssetHandle handle = OpenAsset(std::move(ref));
+		if (!handle.ok())
+			return fail("open");
 		std::vector<std::byte> data(size);
 		if (!handle.read(data.data(), data.size()))
-			return false;
-		return ParseTownModelOverride(model, data);
+			return fail("read");
+		audit.sha256 = ModHashToHex(ComputeBytesSha256(data));
+		if (!ParseModelWithAudit(model, data, audit, !expectedSha256.empty()))
+			return fail(audit.failure);
+		if (attemptAudit != nullptr)
+			*attemptAudit = std::move(audit);
+		return true;
 	} catch (const std::bad_alloc &) {
+		// These short labels fit the existing audit strings on normal builds.
+		model.runtimeAudit.status = "fallback";
+		model.runtimeAudit.failure = "allocation";
+		if (attemptAudit != nullptr) {
+			audit.status = "fallback";
+			audit.failure = "allocation";
+			*attemptAudit = std::move(audit);
+		}
 		return false;
 	}
 }

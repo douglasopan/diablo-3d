@@ -2444,6 +2444,25 @@ Point TownViewScreenPosition(Point tile)
 	return { static_cast<int>(std::lround(projected.x)), static_cast<int>(std::lround(projected.y)) };
 }
 
+TownGroundReferenceTexture GetTownGroundReferenceTexture(uint16_t piece, bool fallback)
+{
+	TownGroundReferenceTexture result;
+	if (!pDungeonCels || piece >= MAXTILES)
+		return result;
+	const Texture &texture = fallback ? FallbackGround() : SceneGround(piece);
+	result.width = texture.width;
+	result.height = texture.height;
+	result.rgba.resize(static_cast<size_t>(texture.width) * texture.height * 4);
+	for (size_t i = 0; i < texture.pixels.size(); ++i) {
+		const SDL_Color color = logical_palette[texture.pixels[i]];
+		result.rgba[4 * i] = color.r;
+		result.rgba[4 * i + 1] = color.g;
+		result.rgba[4 * i + 2] = color.b;
+		result.rgba[4 * i + 3] = texture.opacity.empty() || texture.opacity[i] != 0 ? 255 : 0;
+	}
+	return result;
+}
+
 bool DrawTownViewTileDiagnostic(const Surface &out, Point tile)
 {
 	if (!pDungeonCels || !InDungeonBounds(tile))

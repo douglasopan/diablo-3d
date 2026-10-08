@@ -8,6 +8,7 @@
 #pragma once
 
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <span>
 #include <string>
@@ -84,6 +85,9 @@ extern DVL_API_FOR_TEST std::vector<ModIdentifier> ActiveModIdentifiers;
 
 /** @brief Empties `ActiveModIdentifiers`. Called at the start of every mod reload. */
 void ClearModIdentifiers();
+
+/** @brief Returns the SHA-256 of the exact byte span, including an empty span. */
+[[nodiscard]] std::array<uint8_t, 32> ComputeBytesSha256(std::span<const std::byte> bytes);
 
 /**
  * @brief Computes the SHA-256 of a file's raw bytes using a chunked read.

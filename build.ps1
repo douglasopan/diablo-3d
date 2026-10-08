@@ -5,6 +5,8 @@
     [switch]$WithBranding,
     [switch]$WithAnimatedLogoSmoke,
     [string[]]$Targets = @('devilutionx'),
+    [ValidatePattern('^[A-Za-z0-9_-]+$')]
+    [string]$ExecutableName = 'devilutionx-tristram-v4',
     [ValidateSet('Release', 'Debug', 'RelWithDebInfo')]
     [string]$Configuration = 'Release',
     [int]$Jobs = 8
@@ -84,7 +86,7 @@ $taskArguments = @(
     '-DCMAKE_POLICY_VERSION_MINIMUM=3.5',
     '-DNONET=ON', '-DDISABLE_LTO=ON', '-DBUILD_TESTING=OFF',
     '-DCPACK=OFF', '-DBUILD_ASSETS_MPQ=OFF', '-DNOSOUND=OFF',
-    '-DTRISTRAM_EXECUTABLE_NAME=devilutionx-tristram-v4',
+    "-DTRISTRAM_EXECUTABLE_NAME=$ExecutableName",
     '-DBUILD_SHARED_LIBS=OFF',
     '-DDEVILUTIONX_SYSTEM_SDL2=OFF', '-DDEVILUTIONX_STATIC_SDL2=ON',
     '-DDEVILUTIONX_SYSTEM_ZLIB=OFF', '-DDEVILUTIONX_STATIC_ZLIB=ON',

@@ -130,6 +130,7 @@ struct AssetRef {
 	    : archive(other.archive)
 	    , hashIndex(other.hashIndex)
 	    , filename(other.filename)
+	    , isOverridden(other.isOverridden)
 	    , directHandle(other.directHandle)
 	{
 		other.directHandle = nullptr;
@@ -141,6 +142,7 @@ struct AssetRef {
 		archive = other.archive;
 		hashIndex = other.hashIndex;
 		filename = other.filename;
+		isOverridden = other.isOverridden;
 		directHandle = other.directHandle;
 		other.directHandle = nullptr;
 		return *this;

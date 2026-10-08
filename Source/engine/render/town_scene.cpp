@@ -6,6 +6,7 @@
 #include <utility>
 
 #include "engine/render/town_model_import.hpp"
+#include "engine/render/town_editor_map.hpp"
 #include "levels/dun_tile_data.hpp"
 
 namespace devilution {
@@ -694,9 +695,9 @@ void AddCabinOpeningInserts(Builder &builder, const TownCabinOpening &opening)
 			center.height - (outerA.height + outerB.height + innerA.height + innerB.height) / 4,
 			center.z - (outerA.z + outerB.z + innerA.z + innerB.z) / 4 };
 		if (normal.x * toward.x + normal.height * toward.height + normal.z * toward.z > 0)
-			builder.Quad(outerA, outerB, innerB, innerA, TownSceneMaterial::Stone);
+			builder.Quad(outerA, outerB, innerB, innerA, opening.liningMaterial);
 		else
-			builder.Quad(outerA, innerA, innerB, outerB, TownSceneMaterial::Stone);
+			builder.Quad(outerA, innerA, innerB, outerB, opening.liningMaterial);
 	}
 	if (opening.kind != TownCabinOpeningKind::Window || !opening.woodenMuntins)
 		return;
@@ -773,13 +774,16 @@ std::shared_ptr<const TownCabinInterior> MakeCabinInterior(const TownSceneModel 
 	auto interior = std::make_shared<TownCabinInterior>();
 	interior->roomMinimum = { model.physicalBounds.minX + 0.23F, 0.10F, model.physicalBounds.minZ + 0.23F };
 	interior->roomMaximum = { model.physicalBounds.maxX - 0.23F, 4.62F, 71.38F };
-	// Both holes were measured in the existing Meshy geometry. The rear radius
-	// is smaller so its recessed lower stone lip and all source UVs stay intact.
+	// The gable cuts retain their measured source geometry and recessed lips.
+	// The door already has real panes and divisions: its shallow X cut opens
+	// only the inner shell, stopping before the imported door and its bars.
 	interior->openings = {
 		{ TownCabinOpeningKind::Window, { TownLightPlane::Z, interior->roomMaximum.z, 71.110F, 71.810F, 1.865F, 2.565F, 20 },
 			71.608F, 71.30F, 71.758F, true },
 		{ TownCabinOpeningKind::Window, { TownLightPlane::Z, interior->roomMinimum.z, 71.100F, 71.740F, 1.922F, 2.562F, 20 },
 			66.148F, 65.998F, 66.46F, true },
+		{ TownCabinOpeningKind::Window, { TownLightPlane::X, interior->roomMaximum.x, 67.315F, 67.625F, 1.035F, 1.395F, 0 },
+			73.04F, 72.94F, 73.05F, false, TownSceneMaterial::Timber },
 	};
 	for (const TownCabinOpening &opening : interior->openings)
 		interior->apertures.push_back(opening.aperture);
@@ -802,7 +806,7 @@ std::shared_ptr<const TownCabinInterior> MakeCabinInterior(const TownSceneModel 
 	const float middle = (left + right) / 2;
 	const float eave = 1.52F;
 	const float peak = interior->roomMaximum.height;
-	// Both gables use the same measured opening list; all other walls are closed.
+	// Cut both gables and the door's inner wall from the same opening list.
 	room.Quad({ left, floor, back }, { right, floor, back }, { right, eave, back }, { left, eave, back }, TownSceneMaterial::Stone);
 	room.Triangle({ left, eave, back }, { right, eave, back }, { middle, peak, back }, TownSceneMaterial::Stone);
 	room.Quad({ left, floor, front }, { left, eave, front }, { right, eave, front }, { right, floor, front }, TownSceneMaterial::Stone);
@@ -1321,6 +1325,7 @@ void BuildScene()
 	AddWell({ 60, 70 }, { 61, 71 });
 	AddCathedral({ 20, 16 }, { 29, 27 }, { 22, 18 }, { 25, 29 });
 	AddCrypt();
+	LoadTownEditorMap(Scene);
 }
 
 } // namespace
@@ -1330,7 +1335,8 @@ bool BuildTownCabinInterior(TownSceneModel &model)
 	// Only this calibrated, optional model has a measured aperture. Do not
 	// infer openings in other imports or change the procedural closed houses.
 	if (!model.externalModel || !model.importedTexture || model.kind != TownSceneKind::Cabin
-	    || model.minTile != Point { 70, 66 } || model.triangles.empty())
+	    || model.minTile != Point { 70, 66 } || model.triangles.empty()
+	    || model.runtimeAudit.sha256 != TownCabinBaselineSha256)
 		return false;
 	model.cabinInterior = MakeCabinInterior(model);
 	return true;
@@ -1381,6 +1387,7 @@ bool TownSceneReplacesTile(Point tile)
 void ResetTownScene()
 {
 	Scene.clear();
+	ResetTownEditorMapAudit();
 }
 
 } // namespace devilution

@@ -1,7 +1,9 @@
 #pragma once
 
 #include <cstddef>
+#include <cstdint>
 #include <string>
+#include <vector>
 
 #include "engine/point.hpp"
 #include "engine/render/town_lighting.hpp"
@@ -87,6 +89,14 @@ float TownViewDepthAt(Point screen);
 Point TownViewScreenPosition(Point tile);
 /** Diagnostic: cached textures beside native tile decoding, without projection. */
 bool DrawTownViewTileDiagnostic(const Surface &out, Point tile);
+/** Local authoring reference: the same cleaned/fallback floor pixels used by
+ * the 3D renderer, in top-row-first RGBA. No camera or simulation is changed. */
+struct TownGroundReferenceTexture {
+	int width = 0;
+	int height = 0;
+	std::vector<uint8_t> rgba;
+};
+TownGroundReferenceTexture GetTownGroundReferenceTexture(uint16_t piece, bool fallback);
 /** Whole-tree source at left and its explicit opacity mask at right. */
 bool DrawTownViewVegetationDiagnostic(const Surface &out, size_t groupIndex, Point *sourceSize = nullptr);
 /** Cached complete tree mesh for coverage diagnostics; invalidated on reset. */

@@ -20,6 +20,7 @@ A community project to bring **the whole Diablo 1 game into 3D**, including its 
 - Characters have depth. Warrior and cow reconstruction can use eight original views; unseen anatomy for single-view townspeople is inferred.
 - Walking, collisions, inventory and NPC interaction use the existing game simulation.
 - Windows build, headless scene diagnostics and native-view comparison tools are included as source.
+- A [Godot editor](docs/GODOT-EDITOR.md) inspects the actual architecture, model identities and locked native collision, and exports explicitly selected static replacements to a separate game review profile. It is an authoring tool; the game still runs in DevilutionX.
 - The owner-provided [animated logo](docs/ANIMATED-LOGO.md) contains 240 frames over eight seconds and covers the main, title and Escape menus.
 
 The **current build is an offline prototype in Tristram, with an optional Direct3D 11 GPU renderer on Windows and a CPU fallback**. Toggle GPU rendering and edge smoothing independently through the in-game Video Options; see [the GPU renderer](docs/GPU-RENDERER.md) for its scope and validation. Dungeon levels still use the original renderer and are part of the planned whole-game reconstruction. The reconstructed shapes and materials need substantial visual refinement, particularly unseen faces, characters and compound scenery. [Meshy multi-view generation and optional local model review](docs/MESHY-WORKFLOW.md) are available; generated candidates still require fidelity approval.
@@ -47,6 +48,8 @@ Supply your own `DIABDAT.MPQ`, or separately obtain supported shareware data. Th
 | Click ground / NPC | Native movement / interaction |
 
 The helper build defaults to **`NONET=ON`**. Voice, larger sessions and multiplayer compatibility have not been implemented or validated by this prototype.
+
+To help assemble and inspect the scene, use **`Abrir-Editor-Godot.cmd`** after building the game and `town_view_smoke`. Save in Godot, export the selected replacements, then use **`Aplicar-Mapa-Godot.cmd`** and **`Testar-Mapa-Godot.cmd`**. Local art/data are excluded from Git. The initial static format protects the east cabin's existing fire/interior adjunct; see the [editor guide](docs/GODOT-EDITOR.md) for setup, limits and the distinction between technical checks and visual approval.
 
 ## Help create complete 3D objects
 

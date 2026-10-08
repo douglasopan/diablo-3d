@@ -44,6 +44,14 @@ Useful script options include:
 
 `-SkipConfigure` reuses an existing configuration; use it only after configuring the required optional targets. `-WithSmoke` enables the diagnostic target and `-WithBranding` enables the logo tool. Pass the target names you want to compile through `-Targets`.
 
+For the [Godot authoring bridge](GODOT-EDITOR.md), build its separate candidate explicitly:
+
+```powershell
+.\build.ps1 -ExecutableName devilutionx-tristram-godot -WithSmoke -Targets devilutionx,town_view_smoke
+```
+
+`-ExecutableName` changes the output name when configuring; its default remains `devilutionx-tristram-v4`. The Godot launcher requires the dedicated candidate and does not fall back to an older normal executable that could ignore an exported map.
+
 Read `build/configure.log` and `build/build.log` if a build fails. Missing `vswhere` or MSVC means the Visual Studio C++ installation must be completed. Missing CMake or Ninja means those tools must be supplied through `PATH` or the Visual Studio CMake component. When moving a build between different clones, layouts or compilers, configure into a new build directory rather than reusing a cache that refers to the old source tree.
 
 ## Run with local game data

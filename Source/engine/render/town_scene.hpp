@@ -3,6 +3,7 @@
 #include <array>
 #include <cstdint>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "engine/point.hpp"
@@ -121,6 +122,7 @@ struct TownCabinOpening {
 	float clipMinimum = 0;
 	float clipMaximum = 0;
 	bool woodenMuntins = true;
+	TownSceneMaterial liningMaterial = TownSceneMaterial::Stone;
 };
 
 enum class TownCabinFireKind : uint8_t { Candle, Candelabrum, Hearth, Campfire };
@@ -156,6 +158,17 @@ struct TownCabinInterior {
 	uint32_t clippedSourceTriangles = 0;
 };
 
+/** Identity of the bytes actually decoded, distinct from the launcher's receipt. */
+struct TownModelRuntimeAudit {
+	std::string assetPath;
+	std::string sourceKind;
+	std::string sha256;
+	std::string expectedSha256;
+	std::string revision;
+	std::string status = "procedural";
+	std::string failure;
+};
+
 /** One coherent architectural object, replacing its painted scenery footprint. */
 struct TownSceneModel {
 	TownSceneKind kind;
@@ -168,6 +181,7 @@ struct TownSceneModel {
 	std::shared_ptr<const TownImportedTexture> importedTexture;
 	bool externalModel = false;
 	std::shared_ptr<const TownCabinInterior> cabinInterior;
+	TownModelRuntimeAudit runtimeAudit;
 };
 
 /** Original imported triangles are never rewritten by this bounded adjunct. */

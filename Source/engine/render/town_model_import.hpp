@@ -17,12 +17,17 @@ struct TownImportedTexture {
 	std::vector<uint8_t> rgb;
 };
 
+inline constexpr std::string_view TownCabinBaselineSha256 = "d12cc57e798151fb4abf3173149a4d7cf1da2cc8bdbc6ac39439aee3fe9069f9";
+
 /**
  * Optional local model override. Missing or malformed assets leave the existing
  * model untouched. Call after its procedural builder has assigned native metadata.
  * FindAsset/OpenAsset honor normal profile/asset overrides; no archive is changed.
+ * A nonempty expected hash is enforced before committing. The optional attempt
+ * audit reports rejected bytes separately from an already loaded model identity.
  */
-bool LoadTownModelOverride(TownSceneModel &model, std::string_view assetPath);
+bool LoadTownModelOverride(TownSceneModel &model, std::string_view assetPath,
+    std::string_view expectedSha256 = {}, std::string_view revision = {}, TownModelRuntimeAudit *attemptAudit = nullptr);
 
 /**
  * D3DMESH1 binary contract (all numbers little-endian, no struct padding):
@@ -34,6 +39,7 @@ bool LoadTownModelOverride(TownSceneModel &model, std::string_view assetPath);
  * Limits: 1..20000 triangles, 1..2048 pixels per side, local x/z -64..128,
  * height 0..64, finite nondegenerate triangles, exact byte count and UVs 0..1.
  * This replaces visual geometry only; native bounds/collision/map stay intact.
+ * Success records SHA-256 of this exact span; failure leaves all model fields intact.
  */
 bool ParseTownModelOverride(TownSceneModel &model, std::span<const std::byte> data);
 

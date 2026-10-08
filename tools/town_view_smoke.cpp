@@ -63,6 +63,8 @@
 #include "utils/paths.h"
 #include "utils/surface_to_png.hpp"
 #include "utils/ui_fwd.h"
+#include "town_editor_snapshot.hpp"
+#include "town_editor_map_checks.hpp"
 
 namespace {
 using namespace devilution;
@@ -2276,6 +2278,74 @@ void RecordPlayerArchitectureOcclusion(const Surface &out, const TownVolumeMesh 
 		Record("INFO cabin actor verified occluder model=" + std::to_string(model) + " kind=" + std::to_string(static_cast<int>(scene[model].kind)));
 }
 
+void CheckCabinDoorApertureGeometry(const TownSceneModel &model)
+{
+	const auto &interior = *model.cabinInterior;
+	const auto door = std::find_if(interior.openings.begin(), interior.openings.end(), [](const TownCabinOpening &opening) {
+		return opening.kind == TownCabinOpeningKind::Window && opening.aperture.plane == TownLightPlane::X;
+	});
+	Check(door != interior.openings.end() && door->aperture.polygonSides == 0 && !door->woodenMuntins
+	        && std::abs(door->aperture.coordinate - interior.roomMaximum.x) < 0.00001F,
+	    "door window declares a real rectangular inner-wall portal without replacing its imported divisions");
+	const auto blocked = [](const std::vector<TownSceneTriangle> &triangles, float z, float height) {
+		const RayVector origin { 74, height, z }, direction { -1.10, 0, 0 };
+		for (const auto &triangle : triangles) {
+			double distance, u, v;
+			if (RayTriangle(origin, direction, triangle, distance, u, v) && distance < 1)
+				return true;
+		}
+		return false;
+	};
+	// Actual imported holes are irregular; sample the measured clear regions,
+	// rather than assuming a symmetric four-pane window or testing the bars.
+	for (const auto [z, height] : std::array<std::pair<float, float>, 3> {
+		     std::pair { 67.35F, 1.32F }, { 67.55F, 1.27F }, { 67.42F, 1.15F } }) {
+		Check(!blocked(model.triangles, z, height) && !blocked(interior.exteriorTriangles, z, height)
+		        && !blocked(interior.interiorTriangles, z, height),
+		    "measured door-window ray traverses the original opening, tunnel and inner shell at z=" + std::to_string(z)
+		        + " height=" + std::to_string(height));
+	}
+	for (const auto [z, height] : std::array<std::pair<float, float>, 4> {
+		     std::pair { 67.48F, 1.28F }, { 67.605F, 1.29F }, { 67.30F, 1.22F }, { 67.45F, 0.70F } }) {
+		Check(blocked(model.triangles, z, height) && blocked(interior.exteriorTriangles, z, height),
+		    "original door divisions, frame and closed lower door retain real opaque geometry at z=" + std::to_string(z)
+		        + " height=" + std::to_string(height));
+	}
+	const auto sameTriangle = [](const TownSceneTriangle &a, const TownSceneTriangle &b) {
+		for (size_t i = 0; i < 3; ++i) {
+			const auto &v = a.vertices[i], &w = b.vertices[i];
+			if (v.x != w.x || v.height != w.height || v.z != w.z || v.u != w.u || v.v != w.v)
+				return false;
+		}
+		return a.normal.x == b.normal.x && a.normal.height == b.normal.height && a.normal.z == b.normal.z
+		    && a.material == b.material && a.surfaceDetail == b.surfaceDetail && a.surfaceRole == b.surfaceRole
+		    && a.sourceTile == b.sourceTile && a.pickTile == b.pickTile && a.nativeProjection == b.nativeProjection;
+	};
+	size_t unchangedDoorTriangles = 0;
+	for (const auto &triangle : model.triangles) {
+		bool intersects = true;
+		for (int axis = 0; axis < 3; ++axis) {
+			float low = std::numeric_limits<float>::infinity(), high = -low;
+			for (const auto &v : triangle.vertices) {
+				const float coordinate = axis == 0 ? v.x : (axis == 1 ? v.height : v.z);
+				low = std::min(low, coordinate);
+				high = std::max(high, coordinate);
+			}
+			const std::array<float, 3> minimum { 72.94F, 1.0F, 67.30F }, maximum { 73.20F, 1.45F, 67.65F };
+			intersects = intersects && high >= minimum[axis] && low <= maximum[axis];
+		}
+		if (!intersects)
+			continue;
+		Check(std::any_of(interior.exteriorTriangles.begin(), interior.exteriorTriangles.end(), [&](const TownSceneTriangle &copy) {
+			return sameTriangle(triangle, copy);
+		}), "each imported triangle around the door window retains its exact geometry, UVs and material metadata");
+		++unchangedDoorTriangles;
+	}
+	Check(model.triangles.size() == 5783 && unchangedDoorTriangles > 0,
+	    "the selected 5783-triangle source remains intact and the door-window exterior is copied exactly");
+	Record("INFO door window exact source triangles preserved=" + std::to_string(unchangedDoorTriangles));
+}
+
 void CheckCabinInteriorLight(const Surface &out, int modelIndex, const std::filesystem::path &output, int orbit)
 {
 	const auto &model = GetTownScene()[modelIndex];
@@ -2305,8 +2375,9 @@ void CheckCabinInteriorLight(const Surface &out, int modelIndex, const std::file
 	}
 	const auto &interior = *model.cabinInterior;
 	const TownLightOccluder room { interior.roomMinimum, interior.roomMaximum, interior.apertures };
-	Check(interior.openings.size() == 2 && interior.fireSources.size() == 2,
-		"review cabin declares front and rear windows plus two physical candle sources");
+	Check(interior.openings.size() == 3 && interior.fireSources.size() == 2,
+		"review cabin declares front, rear and door windows plus two physical candle sources");
+	CheckCabinDoorApertureGeometry(model);
 	const auto openingPoint = [](const TownLightAperture &aperture, float coordinate, float u, float v) -> TownLightVector {
 		if (aperture.plane == TownLightPlane::X)
 			return { coordinate, v, u };
@@ -2326,15 +2397,18 @@ void CheckCabinInteriorLight(const Surface &out, int modelIndex, const std::file
 		};
 		Check(TownPointLightVisibility(source, extendFromSource(center), std::span<const TownLightOccluder>(&room, 1)) == 1,
 			"fire visibility passes through each declared window, including the rear face");
-		const TownLightVector corner = openingPoint(aperture, aperture.coordinate,
-			centerU + (aperture.maxU - centerU) * 0.95F, centerV + (aperture.maxV - centerV) * 0.95F);
+		const TownLightVector corner = aperture.polygonSides != 0
+		    ? openingPoint(aperture, aperture.coordinate, centerU + (aperture.maxU - centerU) * 0.95F, centerV + (aperture.maxV - centerV) * 0.95F)
+		    : openingPoint(aperture, aperture.coordinate, aperture.maxU + (aperture.maxU - aperture.minU) * 0.1F, centerV);
 		Check(TownPointLightVisibility(source, extendFromSource(corner), std::span<const TownLightOccluder>(&room, 1)) == 0,
-			"stone beyond the circular panes blocks candle light on both faces");
+			"inner wall outside the declared polygon or rectangle blocks candle light");
+		if (aperture.plane == TownLightPlane::X)
+			continue; // Its imported divisions and irregular clear panes were ray-tested above.
 		// Independent triangle rays traverse four panes and the full wall depth.
 		const float directionSign = aperture.coordinate > opening.outerCoordinate ? 1.0F : -1.0F;
 		bool continuous = true;
-		for (float du : { -0.12F, 0.12F }) {
-			for (float dv : { -0.12F, 0.12F }) {
+		for (float du : { -(aperture.maxU - centerU) * 0.35F, (aperture.maxU - centerU) * 0.35F }) {
+			for (float dv : { -(aperture.maxV - centerV) * 0.35F, (aperture.maxV - centerV) * 0.35F }) {
 				const auto originPoint = openingPoint(aperture, opening.outerCoordinate - directionSign * 0.2F, centerU + du, centerV + dv);
 				const auto destinationPoint = openingPoint(aperture, aperture.coordinate + directionSign * 0.05F, centerU + du, centerV + dv);
 				const RayVector origin { originPoint.x, originPoint.height, originPoint.z };
@@ -4404,6 +4478,163 @@ void RunGpuWorld(const std::filesystem::path &output)
 	Check(allComparisonsPassed, "GPU selection and depth have no unexplained disagreement; classified ground ties and fixed-point edges retain explicit independent geometric evidence");
 }
 
+void RunCabinOpenings(const std::filesystem::path &output)
+{
+	InitializeTownDiagnostic();
+	ToggleTownView();
+	PlaceFixturePlayerNear({ 76, 69 });
+	ViewPosition = { 73, 68 };
+	CharFlag = false;
+	GetOptions().Graphics.zoom.SetValue(true);
+	GetOptions().Graphics.townViewAntialiasing.SetValue(false);
+	GetOptions().Graphics.townViewGpuRendering.SetValue(false);
+	gnScreenWidth = 960;
+	gnScreenHeight = 640 + GetMainPanel().size.height;
+	CalculatePanelAreas();
+	CalcViewportGeometry();
+	OwnedSurface allocation(gnScreenWidth, gnScreenHeight + 2);
+	SDL_SetPaletteColors(allocation.surface->format->palette, logical_palette.data(), 0, 256);
+	SDL_FillRect(allocation.surface, nullptr, 255);
+	const Surface out = allocation.subregionY(0, gnScreenHeight);
+	ResetTownViewCamera();
+	ZoomTownView(3);
+	Check(DrawTownView(out, true), "prepare an actual selected cabin in an isolated close-up fixture");
+	const auto &scene = GetTownScene();
+	const auto found = std::find_if(scene.begin(), scene.end(), [](const TownSceneModel &model) {
+		return model.kind == TownSceneKind::Cabin && model.minTile == Point { 70, 66 };
+	});
+	Check(found != scene.end() && found->externalModel && found->cabinInterior != nullptr,
+	    "targeted opening review requires the actual selected imported cabin and runtime adjunct");
+	const int modelIndex = static_cast<int>(found - scene.begin());
+	const std::string original = NativeSceneState();
+	const std::string geometry = SceneGeometryState(scene);
+	const auto randomState = GetLCGEngineState();
+	std::ofstream manifest(output / "cabin-openings.json");
+	manifest << "{\"gameWindowCapture\":false,\"sourceTriangles\":5783,\"fireTimeSeconds\":0,"
+	            "\"scope\":\"actual CPU/hardware-GPU door-window closeups; source divisions occlude visually, room light portal is rectangular\",\"frames\":[";
+	bool first = true;
+	for (bool gpu : { false, true }) {
+		GetOptions().Graphics.townViewGpuRendering.SetValue(gpu);
+		for (int degrees : { 0, -5, 5, -45 }) {
+			ResetTownViewCamera();
+			ZoomTownView(3);
+			OrbitTownView(degrees * 3.14159265358979323846F / 180, 0);
+			Check(DrawTownView(out, true), "draw selected door-window closeup with the requested backend");
+			const auto renderer = GetTownViewRendererState();
+			Check(renderer.requestedGpu == gpu && renderer.usedGpu == gpu
+			        && (gpu ? renderer.cpuRasterizedTriangles == 0 && renderer.gpuSubmittedTriangles > 0
+			                       && GetTownGpuStatus().frameSucceeded && !GetTownGpuStatus().warp
+			                : renderer.cpuRasterizedTriangles > 0),
+			    "targeted door opening uses CPU or hardware GPU explicitly, without a silent fallback: " + renderer.failure);
+			const auto directory = output / (gpu ? "gpu" : "cpu");
+			std::filesystem::create_directories(directory);
+			SavePng(out.subregionY(0, gnViewportHeight), directory / ("door-orbit-" + std::to_string(degrees) + ".png"));
+			const auto lit = ViewportPixels(out);
+			const GpuRayFrame camera;
+			int minX = out.w(), maxX = 0, minY = gnViewportHeight, maxY = 0;
+			for (float z : { 67.315F, 67.625F }) {
+				for (float height : { 1.035F, 1.395F }) {
+					const auto projected = camera.RasterVertex({ 73.04F, height, z, 0, 0 }, 1);
+					minX = std::min(minX, static_cast<int>(std::floor(projected[0])));
+					maxX = std::max(maxX, static_cast<int>(std::ceil(projected[0])));
+					minY = std::min(minY, static_cast<int>(std::floor(projected[1])));
+					maxY = std::max(maxY, static_cast<int>(std::ceil(projected[1])));
+				}
+			}
+			minX = std::clamp(minX, 0, out.w() - 1);
+			maxX = std::clamp<int>(maxX, minX + 1, out.w());
+			minY = std::clamp(minY, 0, gnViewportHeight - 1);
+			maxY = std::clamp<int>(maxY, minY + 1, gnViewportHeight);
+			SetTownViewCabinFireEnabledForDiagnostics(false);
+			Check(DrawTownView(out, true), "draw the same door-window closeup without candle lighting and emission");
+			SavePng(out.subregionY(0, gnViewportHeight), directory / ("door-fire-off-" + std::to_string(degrees) + ".png"));
+			int changed = 0, warm = 0, outsideOwner = 0;
+			for (int y = minY; y < maxY; ++y) {
+				for (int x = minX; x < maxX; ++x) {
+					const uint8_t colorIndex = lit[static_cast<size_t>(y) * out.w() + x];
+					if (colorIndex == out[{ x, y }])
+						continue;
+					++changed;
+					outsideOwner += TownViewArchitectureAt({ x, y }) != modelIndex ? 1 : 0;
+					const auto color = logical_palette[colorIndex];
+					warm += color.r > 30 && color.r >= color.g && color.g > color.b * 1.5 ? 1 : 0;
+				}
+			}
+			Record("INFO door opening " + std::string(gpu ? "GPU" : "CPU") + " orbit=" + std::to_string(degrees)
+			    + " candleChanged=" + std::to_string(changed) + " warmChanged=" + std::to_string(warm)
+			    + " changesOutsideCabinOwner=" + std::to_string(outsideOwner));
+			Check(changed > 0 && warm > 0 && outsideOwner == 0,
+			    "actual door-window pixels reveal warm candle-lit interior through the preserved imported divisions");
+			SetTownViewCabinFireEnabledForDiagnostics(true);
+			Check(DrawTownView(out, true) && ViewportPixels(out) == lit,
+			    "frozen candle time restores the exact same door-window frame");
+			CheckCabinInteriorLight(out, modelIndex, directory, degrees);
+			bool guards = true;
+			for (int y = gnViewportHeight; y < allocation.h(); ++y)
+				for (int x = 0; x < allocation.w(); ++x)
+					guards = guards && allocation[{ x, y }] == 255;
+			Check(guards && NativeSceneState() == original && GetLCGEngineState() == randomState && SceneGeometryState(GetTownScene()) == geometry,
+			    "door-window capture preserves imported source, native closed-door collision, simulation, RNG and UI guard rows");
+			manifest << (first ? "" : ",") << "{\"backend\":\"" << (gpu ? "hardware-gpu" : "cpu")
+			         << "\",\"orbitDegrees\":" << degrees << ",\"doorChangedPixels\":" << changed << ",\"doorWarmChangedPixels\":" << warm
+			         << ",\"changesOutsideCabinOwner\":" << outsideOwner << ",\"doorBoundsPixels\":[" << minX << ',' << minY << ',' << maxX << ',' << maxY << "]}";
+			first = false;
+		}
+	}
+	manifest << "]}\n";
+	Check(manifest.good(), "record actual CPU/GPU opening closeups and proportional candle evidence");
+	GetOptions().Graphics.townViewGpuRendering.SetValue(false);
+	ResetTownViewResources();
+	FreeTownerGFX();
+}
+
+} // namespace
+
+namespace {
+
+void ExportTownEditorGround(const std::filesystem::path &output)
+{
+	const auto directory = output / "ground";
+	std::filesystem::create_directories(directory);
+	std::map<std::string, std::pair<uint16_t, bool>> textures;
+	std::ostringstream tiles;
+	bool first = true;
+	for (int z = 0; z < MAXDUNY; ++z) {
+		for (int x = 0; x < MAXDUNX; ++x) {
+			const uint16_t piece = dPiece[x][z];
+			if (piece >= MAXTILES)
+				Check(false, "editor ground references a valid native MIN piece");
+			const bool fallback = TownSceneReplacesTile({ x, z }) || TownPropReplacesTile({ x, z })
+			    || HasAnyOf(SOLData[piece], TileProperties::Solid | TileProperties::BlockMissile);
+			const std::string key = fallback ? "fallback" : "p" + std::to_string(piece);
+			textures.try_emplace(key, piece, fallback);
+			tiles << (first ? "" : ",") << '[' << x << ',' << z << ",\"" << key << "\"]";
+			first = false;
+		}
+	}
+	std::ofstream manifest(output / "ground-reference.json");
+	manifest << "{\"source\":\"same cleaned/fallback floor pixels as town_view; grass reference beneath solid scenery; no terrain editing\","
+	            "\"exportLocked\":true,\"textures\":[";
+	first = true;
+	for (const auto &[key, source] : textures) {
+		const auto texture = GetTownGroundReferenceTexture(source.first, source.second);
+		Check(texture.width == 64 && texture.height == 32 && texture.rgba.size() == 64 * 32 * 4,
+		    "editor ground exports actual 64x32 palette pixels and opacity");
+		std::unique_ptr<SDL_Surface, decltype(&SDL_FreeSurface)> surface(
+		    SDL_CreateRGBSurfaceWithFormat(0, texture.width, texture.height, 32, SDL_PIXELFORMAT_RGBA32), SDL_FreeSurface);
+		Check(surface != nullptr, "allocate local editor ground texture");
+		for (int y = 0; y < texture.height; ++y)
+			std::memcpy(static_cast<uint8_t *>(surface->pixels) + y * surface->pitch,
+			    texture.rgba.data() + static_cast<size_t>(y) * texture.width * 4, texture.width * 4);
+		SavePng(Surface { surface.get() }, directory / (key + ".png"));
+		manifest << (first ? "" : ",") << "{\"key\":\"" << key << "\",\"path\":\"ground/" << key
+		         << ".png\",\"width\":64,\"height\":32}";
+		first = false;
+	}
+	manifest << "],\"tiles\":[" << tiles.str() << "]}\n";
+	Check(manifest.good(), "export native town floor layout and locked texture references for Godot");
+}
+
 } // namespace
 
 int main(int argc, char **argv)
@@ -4413,11 +4644,14 @@ int main(int argc, char **argv)
 	const bool presentation = argc == 5 && std::string(argv[4]) == "--presentation";
 	const bool quality = argc == 5 && std::string(argv[4]) == "--quality";
 	const bool gpu = argc == 5 && std::string(argv[4]) == "--gpu";
+	const bool cabinOpenings = argc == 5 && std::string(argv[4]) == "--cabin-openings";
+	const bool editorSnapshot = argc == 5 && std::string(argv[4]) == "--editor-snapshot";
+	const bool editorChecks = argc == 5 && std::string(argv[4]) == "--editor-map-checks";
 	const bool layers = argc == 3 && std::string(argv[1]) == "--presentation-layers";
 	const bool gpuFixtures = argc == 3 && std::string(argv[1]) == "--gpu-fixtures";
 	const bool synthetic = layers || gpuFixtures;
-	if (argc != 4 && !presentation && !quality && !gpu && !synthetic) {
-		std::cerr << "Usage: town_view_smoke <game-data-directory> <built-assets-directory> <capture-directory> [--presentation|--quality|--gpu]\n"
+	if (argc != 4 && !presentation && !quality && !gpu && !cabinOpenings && !editorSnapshot && !editorChecks && !synthetic) {
+		std::cerr << "Usage: town_view_smoke <game-data-directory> <built-assets-directory> <capture-directory> [--presentation|--quality|--gpu|--cabin-openings|--editor-snapshot|--editor-map-checks]\n"
 		          << "       town_view_smoke --presentation-layers <synthetic-capture-directory>\n"
 		          << "       town_view_smoke --gpu-fixtures <synthetic-capture-directory>\n";
 		return 2;
@@ -4459,6 +4693,23 @@ int main(int argc, char **argv)
 			RunQuality(output);
 		else if (gpu)
 			RunGpuWorld(output);
+		else if (cabinOpenings)
+			RunCabinOpenings(output);
+		else if (editorSnapshot) {
+			InitializeTownDiagnostic();
+			const std::string native = NativeSceneState();
+			const auto random = GetLCGEngineState();
+			Check(ExportTownEditorSnapshot(output), "export the actual native-bound architecture, decoded model identities, openings, fire geometry and collision for Godot");
+			ExportTownEditorGround(output);
+			Check(NativeSceneState() == native && GetLCGEngineState() == random,
+			    "Godot snapshot export preserves native simulation, map, actors and random state");
+			FreeTownerGFX();
+		}
+		else if (editorChecks) {
+			InitializeTownDiagnostic();
+			CheckTownEditorMapLoader(output, Check);
+			FreeTownerGFX();
+		}
 		else
 			Run(output);
 	} catch (const std::exception &error) {

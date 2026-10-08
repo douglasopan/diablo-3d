@@ -35,6 +35,21 @@ void ClearModIdentifiers()
 	ActiveModIdentifiers.clear();
 }
 
+std::array<uint8_t, 32> ComputeBytesSha256(std::span<const std::byte> bytes)
+{
+	picosha2::hash256_one_by_one hasher;
+	while (!bytes.empty()) {
+		const std::size_t count = std::min(bytes.size(), std::size_t { 32768 });
+		const auto *first = reinterpret_cast<const uint8_t *>(bytes.data());
+		hasher.process(first, first + count);
+		bytes = bytes.subspan(count);
+	}
+	hasher.finish();
+	std::array<uint8_t, 32> hash;
+	hasher.get_hash_bytes(hash.begin(), hash.end());
+	return hash;
+}
+
 bool ComputeFileSha256(const char *path, std::array<uint8_t, 32> &hashOut)
 {
 	FILE *file = OpenFile(path, "rb");
