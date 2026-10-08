@@ -1,0 +1,1691 @@
+{
+  "schemaVersion": 1,
+  "revision": "r2",
+  "kind": "npc-commerce-ui-candidate-art",
+  "tool": "builtin:image_gen.imagegen",
+  "status": "complete-candidates-with-one-layout-blocker",
+  "expectedAssets": 9,
+  "completedAssets": 9,
+  "installed": false,
+  "notes": [
+    "Artes novas candidatas, não capturas do jogo nem originais de comparação.",
+    "Capacidades, campos e funções nativos são autoritativos; exemplos numéricos vêm do estudo e são fictícios.",
+    "coveredIds mapeia o template artístico a variantes funcionais; não afirma uma captura/geração separada para cada estado.",
+    "Nenhum retrato/modelo novo foi gerado ou aprovado; arquitetura decorativa do fundo não é referência de prédio."
+  ],
+  "styleReferences": [
+    "../images/07-hud-native-16x9-v1.png",
+    "../images/04-personagem-inventario.png"
+  ],
+  "assets": [
+    {
+      "slug": "c-01-npc-menus",
+      "canonicalIds": [
+        "N01"
+      ],
+      "coveredIds": [
+        "N01",
+        "N02",
+        "N03",
+        "N04",
+        "N05",
+        "N06",
+        "N07",
+        "N08",
+        "V22",
+        "V23",
+        "V24"
+      ],
+      "title": "NPCs — oito menus iniciais",
+      "output": "images/c-01-npc-menus.png",
+      "path": "images/c-01-npc-menus.png",
+      "sha256": "8ca698dff6c75c38739e203d4ed05622f792da92aa1a489b0a9a424e07ac330e",
+      "bytes": 2409701,
+      "width": 1536,
+      "height": 1024,
+      "prompt": "Use case: ui-mockup. Create a brand-new original raster concept for Diablo 3D HUD r2, a finished comparison-ready UI art board. This is candidate art, never an original game screenshot. High resolution landscape 3072×2048 if possible; crisp legible Portuguese typography. Same design language as the inspected HUD study: charcoal stone and black leather surfaces, forged dark iron, fine pewter edge filigree, restrained aged-brass details, ivory serif text, amber focus. Solid opaque near-black content areas, quiet thin ornament, generous line spacing, no noisy stone behind text. Material depth only at edges. The world, if shown, is a tiny subdued Tristram setting, not the focus. No invented NPC portraits, no character artwork or models, no logos, no promotional copy. Small board header exactly: 'DIABLO 3D · ESTUDO R2 · ARTE CANDIDATA'. Keep every UI text inside its own bounds. Functional controls must be exactly those specified. No extra tabs, buttons, shortcuts, features, currencies or stat types. No side labeled original and no split before/after. Native data remains authoritative; numeric examples are illustrative. Modern placement/proportion allowed, existing actions/capacities remain unchanged.\n\nOne coherent 2-column by 4-row board showing all eight native town NPC menu variants, no portraits, each panel with name header and text actions. Keep enough whitespace for the longest six-row panel. Each panel is a complete menu, no footer controls beyond its existing exit action. Text verbatim by panel: GRISWOLD / Conversar / Comprar itens básicos / Comprar itens premium / Vender itens / Reparar itens / Sair da ferraria. ADRIA / Conversar / Comprar itens / Vender itens / Recarregar cajados / Sair da cabana. PEPIN / Conversar / Comprar itens / Sair. CAIN / Conversar / Identificar um item / Despedir-se. WIRT / Conversar / Pagar 50 de ouro para olhar / Despedir-se. OGDEN / Conversar / Sair da taverna. GILLIAN / Conversar / Acessar armazenamento / Despedir-se. FARNHAM / Conversar / Despedir-se. Do not add sell to Pepin or Wirt. Wirt's payment is before seeing the offer, never the purchase price. Do not invent a healing button: Pepin heals automatically. Add small neutral board notes outside player menus only: 'Loja visual: ações dependem da interface selecionada' and 'Wirt sem oferta: somente Conversar e Despedir-se'. These are evidence labels, not clickable actions. This board must make all eight menus visibly different only in their legitimate actions.",
+      "tool": "builtin:image_gen.imagegen",
+      "mode": "built-in",
+      "status": "candidate",
+      "installed": false,
+      "inspection": {
+        "reviewed": true,
+        "observations": "Oito menus legíveis, sem retratos novos; ações distintas e taxa pré-oferta de Wirt presentes. Arquitetura decorativa é conceito, não referência aprovada de prédio."
+      },
+      "id": "c-01-npc-menus",
+      "outputs": [
+        "images/c-01-npc-menus.png"
+      ],
+      "repoPath": "docs/hud-study/r2/images/c-01-npc-menus.png",
+      "dimensions": {
+        "width": 1536,
+        "height": 1024
+      },
+      "toolMode": "builtin",
+      "origin": "AI-generated candidate art",
+      "coverageMode": "shared-art-template-and-existing-native-text-map",
+      "directlyIllustratedIds": [
+        "N01",
+        "N02",
+        "N03",
+        "N04",
+        "N05",
+        "N06",
+        "N07",
+        "N08",
+        "V24"
+      ],
+      "nativeTextMapping": [
+        {
+          "id": "N01",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "N01"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "N02",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "N02"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "N03",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "N03"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "N04",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "N04"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "N05",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "N05"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "N06",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "N06"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "N07",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "N07"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "N08",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "N08"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "V22",
+          "catalog": "../data/ingame-variants.json",
+          "recordMatch": {
+            "id": "V22"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "V23",
+          "catalog": "../data/ingame-variants.json",
+          "recordMatch": {
+            "id": "V23"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "V24",
+          "catalog": "../data/ingame-variants.json",
+          "recordMatch": {
+            "id": "V24"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        }
+      ],
+      "usage": "Concept art/atlas only. Native text, item icons, capacities, input and layout remain authoritative; not production font artwork or installed UI."
+    },
+    {
+      "slug": "c-02-npc-subjects",
+      "canonicalIds": [
+        "N09"
+      ],
+      "coveredIds": [
+        "N09",
+        "N10",
+        "N11",
+        "N12",
+        "N13",
+        "N14",
+        "N15",
+        "N16",
+        "V25",
+        "V26",
+        "V27",
+        "V28",
+        "V29",
+        "V30",
+        "V31",
+        "V32"
+      ],
+      "title": "NPCs — assuntos e shareware",
+      "output": "images/c-02-npc-subjects.png",
+      "path": "images/c-02-npc-subjects.png",
+      "sha256": "681189b3dc5ecf79f78d49a952537c4fb45ed98b154bc93b490f13860bf55755",
+      "bytes": 2063047,
+      "width": 1536,
+      "height": 1024,
+      "prompt": "Use case: ui-mockup. Create a brand-new original raster concept for Diablo 3D HUD r2, a finished comparison-ready UI art board. This is candidate art, never an original game screenshot. High resolution landscape 3072×2048 if possible; crisp legible Portuguese typography. Same design language as the inspected HUD study: charcoal stone and black leather surfaces, forged dark iron, fine pewter edge filigree, restrained aged-brass details, ivory serif text, amber focus. Solid opaque near-black content areas, quiet thin ornament, generous line spacing, no noisy stone behind text. Material depth only at edges. The world, if shown, is a tiny subdued Tristram setting, not the focus. No invented NPC portraits, no character artwork or models, no logos, no promotional copy. Small board header exactly: 'DIABLO 3D · ESTUDO R2 · ARTE CANDIDATA'. Keep every UI text inside its own bounds. Functional controls must be exactly those specified. No extra tabs, buttons, shortcuts, features, currencies or stat types. No side labeled original and no split before/after. Native data remains authoritative; numeric examples are illustrative. Modern placement/proportion allowed, existing actions/capacities remain unchanged.\n\nA polished 2×2 board of reusable NPC conversation-subject layouts, not new portraits. Panel 1 full example: header 'CONVERSAR COM GRISWOLD', rows 'Rumores', 'O Açougueiro', 'Voltar'. Panel 2 full example: 'CONVERSAR COM CAIN', rows 'Rumores', 'Água envenenada', 'Voltar'. Panel 3: 'CONVERSAR COM OGDEN', rows 'Rumores', 'O sinal da taverna', 'Voltar'. Panel 4: 'CONVERSA INDISPONÍVEL', text 'Conversa indisponível nesta versão.', single action 'Voltar'. A subtle amber focus on one actual topic. No simulated dialogue prose, no chat bubbles, no accept quest button. Outside panels add a small noninteractive native-coverage footer: 'Griswold · Adria · Pepin · Cain · Wirt · Ogden · Gillian · Farnham' and 'Assuntos variam por NPC e estado da missão; shareware usa o aviso.' The example topics do not claim every NPC always has that quest. Long narrated report is a different UI, not part of this board.",
+      "tool": "builtin:image_gen.imagegen",
+      "mode": "built-in",
+      "status": "candidate",
+      "installed": false,
+      "inspection": {
+        "reviewed": true,
+        "observations": "Assuntos/aviso shareware legíveis, sem retratos. Exemplos de quests permanecem ilustrativos e condicionais."
+      },
+      "id": "c-02-npc-subjects",
+      "outputs": [
+        "images/c-02-npc-subjects.png"
+      ],
+      "repoPath": "docs/hud-study/r2/images/c-02-npc-subjects.png",
+      "dimensions": {
+        "width": 1536,
+        "height": 1024
+      },
+      "toolMode": "builtin",
+      "origin": "AI-generated candidate art",
+      "coverageMode": "shared-art-template-and-existing-native-text-map",
+      "directlyIllustratedIds": [
+        "N09",
+        "N12",
+        "N14",
+        "V25"
+      ],
+      "nativeTextMapping": [
+        {
+          "id": "N09",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "N09"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "N10",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "N10"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "N11",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "N11"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "N12",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "N12"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "N13",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "N13"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "N14",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "N14"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "N15",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "N15"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "N16",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "N16"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "V25",
+          "catalog": "../data/ingame-variants.json",
+          "recordMatch": {
+            "id": "V25"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "V26",
+          "catalog": "../data/ingame-variants.json",
+          "recordMatch": {
+            "id": "V26"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "V27",
+          "catalog": "../data/ingame-variants.json",
+          "recordMatch": {
+            "id": "V27"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "V28",
+          "catalog": "../data/ingame-variants.json",
+          "recordMatch": {
+            "id": "V28"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "V29",
+          "catalog": "../data/ingame-variants.json",
+          "recordMatch": {
+            "id": "V29"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "V30",
+          "catalog": "../data/ingame-variants.json",
+          "recordMatch": {
+            "id": "V30"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "V31",
+          "catalog": "../data/ingame-variants.json",
+          "recordMatch": {
+            "id": "V31"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "V32",
+          "catalog": "../data/ingame-variants.json",
+          "recordMatch": {
+            "id": "V32"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        }
+      ],
+      "usage": "Concept art/atlas only. Native text, item icons, capacities, input and layout remain authoritative; not production font artwork or installed UI."
+    },
+    {
+      "slug": "c-03-commerce-text",
+      "canonicalIds": [
+        "T01"
+      ],
+      "coveredIds": [
+        "T01",
+        "T02",
+        "T03",
+        "T04",
+        "T05",
+        "T06",
+        "T07",
+        "T08",
+        "T09",
+        "T10"
+      ],
+      "title": "Comércio — lista textual e dados",
+      "output": "images/c-03-commerce-text.png",
+      "path": "images/c-03-commerce-text.png",
+      "sha256": "c74799652b85e7120ffc8749b3da7704c1eef8cba63231111b5493868fbaa101",
+      "bytes": 2208702,
+      "width": 1536,
+      "height": 1024,
+      "prompt": "Use case: ui-mockup. Create a brand-new original raster concept for Diablo 3D HUD r2, a finished comparison-ready UI art board. This is candidate art, never an original game screenshot. High resolution landscape 3072×2048 if possible; crisp legible Portuguese typography. Same design language as the inspected HUD study: charcoal stone and black leather surfaces, forged dark iron, fine pewter edge filigree, restrained aged-brass details, ivory serif text, amber focus. Solid opaque near-black content areas, quiet thin ornament, generous line spacing, no noisy stone behind text. Material depth only at edges. The world, if shown, is a tiny subdued Tristram setting, not the focus. No invented NPC portraits, no character artwork or models, no logos, no promotional copy. Small board header exactly: 'DIABLO 3D · ESTUDO R2 · ARTE CANDIDATA'. Keep every UI text inside its own bounds. Functional controls must be exactly those specified. No extra tabs, buttons, shortcuts, features, currencies or stat types. No side labeled original and no split before/after. Native data remains authoritative; numeric examples are illustrative. Modern placement/proportion allowed, existing actions/capacities remain unchanged.\n\nCreate a detailed commerce list design sheet with two large panels side by side and a narrow bottom row of compact service examples. No item thumbnails in this archetype: it is text-list mode. Left large panel 'GRISWOLD · COMPRAR BÁSICOS'; 'Ouro disponível: 2.450'; three separated rows verbatim: 'Espada curta' / '120 ouro · Dano 4–8 · Dur. 24/24 · Força 18'; 'Escudo de madeira' / '85 ouro · Defesa 6 · Dur. 16/16'; 'Armadura leve' / '240 ouro · Defesa 12 · Dur. 30/30 · Força 20'; controls 'Comprar' and 'Voltar'. Right large panel 'ADRIA · COMPRAR'; 'Ouro disponível: 2.450'; rows 'Poção de mana' / '50 ouro · Restaurar mana'; 'Pergaminho de portal' / '200 ouro · Ler'; 'Cajado de dardo de fogo' / '780 ouro · Cargas 18/18 · Magia 20'; controls 'Comprar' and 'Voltar'. Bottom five compact state cards retain data and operation labels: 'GRISWOLD · PREMIUM' / 'Espada de combate' / '1.450 ouro · Dano 8–14 · Dur. 32/32 · Força 35'; 'GRISWOLD · REPARAR' / 'Espada curta' / '18 ouro · Dur. 9/24'; 'ADRIA · RECARREGAR' / 'Cajado de dardo de fogo' / '90 ouro · Cargas 3/18'; 'CAIN · IDENTIFICAR' / 'Anel não identificado' / '100 ouro · Propriedades ocultas'; 'WIRT · OFERTA' / 'Arco reforçado' / '1.800 ouro · Dano 7–12 · Dur. 30/30 · Destreza 35'. Compact cards are variants of the list template and no new controls. Outside player UI, small footer notes 'Variantes: compra básica/premium, venda, reparo, recarga, identificação e oferta de Wirt.' Retain scrollbars and room for quality, requirements, revealed powers, charges, damage/defense and durability whenever applicable. Do not flatten or omit these fields.",
+      "tool": "builtin:image_gen.imagegen",
+      "mode": "built-in",
+      "status": "candidate",
+      "installed": false,
+      "inspection": {
+        "reviewed": true,
+        "observations": "Preço/requisitos/dano/defesa/durabilidade/cargas presentes nas amostras. As demais operações usam o mesmo template e o texto mapeado; ícone X é proposta visual de fechamento existente."
+      },
+      "id": "c-03-commerce-text",
+      "outputs": [
+        "images/c-03-commerce-text.png"
+      ],
+      "repoPath": "docs/hud-study/r2/images/c-03-commerce-text.png",
+      "dimensions": {
+        "width": 1536,
+        "height": 1024
+      },
+      "toolMode": "builtin",
+      "origin": "AI-generated candidate art",
+      "coverageMode": "shared-art-template-and-existing-native-text-map",
+      "directlyIllustratedIds": [
+        "T01",
+        "T02",
+        "T04",
+        "T05",
+        "T07",
+        "T09",
+        "T10"
+      ],
+      "nativeTextMapping": [
+        {
+          "id": "T01",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "T01"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "T02",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "T02"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "T03",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "T03"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "T04",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "T04"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "T05",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "T05"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "T06",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "T06"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "T07",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "T07"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "T08",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "T08"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "T09",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "T09"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "T10",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "T10"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        }
+      ],
+      "usage": "Concept art/atlas only. Native text, item icons, capacities, input and layout remain authoritative; not production font artwork or installed UI."
+    },
+    {
+      "slug": "c-04-commerce-thumbnails",
+      "canonicalIds": [
+        "V01"
+      ],
+      "coveredIds": [
+        "V01",
+        "V02",
+        "V03",
+        "V04",
+        "V05",
+        "V06",
+        "V07",
+        "V08",
+        "V09",
+        "V10"
+      ],
+      "title": "Comércio — lista com miniaturas",
+      "output": "images/c-04-commerce-thumbnails.png",
+      "path": "images/c-04-commerce-thumbnails.png",
+      "sha256": "4200999a9f3e1c7a54a422a986e25983afec1219a3f715b25390f51aebeb7473",
+      "bytes": 2245413,
+      "width": 1536,
+      "height": 1024,
+      "prompt": "Use case: ui-mockup. Create a brand-new original raster concept for Diablo 3D HUD r2, a finished comparison-ready UI art board. This is candidate art, never an original game screenshot. High resolution landscape 3072×2048 if possible; crisp legible Portuguese typography. Same design language as the inspected HUD study: charcoal stone and black leather surfaces, forged dark iron, fine pewter edge filigree, restrained aged-brass details, ivory serif text, amber focus. Solid opaque near-black content areas, quiet thin ornament, generous line spacing, no noisy stone behind text. Material depth only at edges. The world, if shown, is a tiny subdued Tristram setting, not the focus. No invented NPC portraits, no character artwork or models, no logos, no promotional copy. Small board header exactly: 'DIABLO 3D · ESTUDO R2 · ARTE CANDIDATA'. Keep every UI text inside its own bounds. Functional controls must be exactly those specified. No extra tabs, buttons, shortcuts, features, currencies or stat types. No side labeled original and no split before/after. Native data remains authoritative; numeric examples are illustrative. Modern placement/proportion allowed, existing actions/capacities remain unchanged.\n\nA complete wide commerce screen for the existing list-with-thumbnails presentation. Single centered framed panel with two side-by-side variant columns 'GRISWOLD · COMPRAR' and 'ADRIA · COMPRAR'; each is a genuine item list, not inventory grid. Add small illustrative item miniatures in a fixed column without changing the item's native dimensions or claiming final approved item icons. Left: 'Ouro disponível: 2.450'; 'Espada curta' / '120 ouro' / 'Dano 4–8 · Dur. 24/24 · Força 18'; 'Escudo de madeira' / '85 ouro' / 'Defesa 6 · Dur. 16/16'; 'Armadura leve' / '240 ouro' / 'Defesa 12 · Dur. 30/30 · Força 20'. Right: 'Poção de mana' / '50 ouro · Restaurar mana'; 'Pergaminho de portal' / '200 ouro · Ler'; 'Cajado de dardo de fogo' / '780 ouro · Cargas 18/18 · Magia 20'. Each column has 'Comprar' and 'Voltar' only, an amber selected row and scroll affordance. Under the lists, a restrained noninteractive specimen details strip labels 'Qualidade · Requisitos · Poderes · Cargas · Dano/Defesa · Durabilidade'. Native operations supported by template are buy basic/premium, sell, repair, recharge, identify, Wirt offer. Do not draw ten duplicated screens; show consistent template with sufficient detail space. Do not add filtering, search, rarity sort, currencies, comparison stats or equipment slots.",
+      "tool": "builtin:image_gen.imagegen",
+      "mode": "built-in",
+      "status": "candidate",
+      "installed": false,
+      "inspection": {
+        "reviewed": true,
+        "observations": "Miniaturas ilustrativas e todos os campos de preço/dano/defesa/requisitos/durabilidade/cargas legíveis; demais operações mapeiam o mesmo template.",
+        "functionalLayoutConformant": true,
+        "issues": []
+      },
+      "id": "c-04-commerce-thumbnails",
+      "outputs": [
+        "images/c-04-commerce-thumbnails.png"
+      ],
+      "repoPath": "docs/hud-study/r2/images/c-04-commerce-thumbnails.png",
+      "dimensions": {
+        "width": 1536,
+        "height": 1024
+      },
+      "toolMode": "builtin",
+      "origin": "AI-generated candidate art",
+      "coverageMode": "shared-art-template-and-existing-native-text-map",
+      "directlyIllustratedIds": [
+        "V01",
+        "V05"
+      ],
+      "nativeTextMapping": [
+        {
+          "id": "V01",
+          "catalog": "../data/ingame-variants.json",
+          "recordMatch": {
+            "id": "V01"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "V02",
+          "catalog": "../data/ingame-variants.json",
+          "recordMatch": {
+            "id": "V02"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "V03",
+          "catalog": "../data/ingame-variants.json",
+          "recordMatch": {
+            "id": "V03"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "V04",
+          "catalog": "../data/ingame-variants.json",
+          "recordMatch": {
+            "id": "V04"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "V05",
+          "catalog": "../data/ingame-variants.json",
+          "recordMatch": {
+            "id": "V05"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "V06",
+          "catalog": "../data/ingame-variants.json",
+          "recordMatch": {
+            "id": "V06"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "V07",
+          "catalog": "../data/ingame-variants.json",
+          "recordMatch": {
+            "id": "V07"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "V08",
+          "catalog": "../data/ingame-variants.json",
+          "recordMatch": {
+            "id": "V08"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "V09",
+          "catalog": "../data/ingame-variants.json",
+          "recordMatch": {
+            "id": "V09"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "V10",
+          "catalog": "../data/ingame-variants.json",
+          "recordMatch": {
+            "id": "V10"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        }
+      ],
+      "usage": "Concept art/atlas only. Native text, item icons, capacities, input and layout remain authoritative; not production font artwork or installed UI."
+    },
+    {
+      "slug": "c-05-commerce-grid",
+      "canonicalIds": [
+        "T11"
+      ],
+      "coveredIds": [
+        "T11",
+        "T12",
+        "T13",
+        "T14"
+      ],
+      "title": "Comércio — grade 10×9 e inventário",
+      "output": "images/c-05-commerce-grid-r2.png",
+      "path": "images/c-05-commerce-grid-r2.png",
+      "sha256": "008ba3bf9fcde46c24bd0c83e81e5541da5be94ee8329ddbd0284e1079cd4ab0",
+      "bytes": 2106772,
+      "width": 1536,
+      "height": 1024,
+      "prompt": "Edit the inspected candidate UI art image. This is a surgical correction of the LEFT SHOP GRID ONLY. Preserve the entire composition, all text, headings, shop tabs, price/details, five shop buttons, background, frame style, and the RIGHT INVENTORY exactly as they are. In particular the right inventory retains exactly SEVEN equipped slots and TEN columns by FOUR rows of backpack cells. Rebuild only the rectangular shop grid beneath Griswold's tabs and above the item-detail panel. It MUST contain EXACTLY TEN columns and NINE rows: 90 equal rectangular cells. This means ELEVEN full vertical boundary lines including both borders, and TEN full horizontal boundary lines including both borders. Count 10 spaces across and 9 spaces down before finishing. Uniform cell spacing, no extra narrow column or partial cell. Keep the same outer grid rectangle, adjusting line spacing inside it. Keep the existing item illustrations roughly in their same grid locations, without obscuring enough grid lines to hide the count. All other image pixels should remain visually unchanged. No additional text, symbols, buttons, arrows, slots or artworks. The existing shop layout currently has the wrong grid count; correct it to 10×9.",
+      "tool": "builtin:image_gen.imagegen",
+      "mode": "built-in",
+      "status": "candidate",
+      "installed": false,
+      "inspection": {
+        "reviewed": true,
+        "functionalLayoutConformant": false,
+        "promotionBlocked": true,
+        "observations": "Edição direcionada preservou7slots e mochila10×4, mas a grade da loja continua11×8. Leitura das linhas nos pixels confirma12limites verticais e9horizontais. Este candidato não pode determinar a capacidade/layout final; contrato C++/Godot permanece10×9.",
+        "issues": [
+          {
+            "severity": "blocks-promotion",
+            "component": "shop-grid",
+            "expected": "10 columns × 9 rows = 90 cells",
+            "observed": "11 columns × 8 rows = 88 cells",
+            "evidence": "At y610/620:12vertical boundary clusters; at x700/720:9horizontal boundary clusters; image read without modification.",
+            "requiredAction": "Reestablish exact10×9 geometry from the native/Godot layout before promoting; preserve candidate art only."
+          }
+        ]
+      },
+      "revision": "r2",
+      "history": [
+        {
+          "revision": "r1",
+          "output": "images/c-05-commerce-grid-r1.png",
+          "sha256": "830efa82da4e86ed24ab4883f356e6c94306e4019f902da2fbabe8e9aa3e130c",
+          "bytes": 2454691,
+          "dimensions": {
+            "width": 1536,
+            "height": 1024
+          },
+          "prompt": "Use case: ui-mockup. Create a brand-new original raster concept for Diablo 3D HUD r2, a finished comparison-ready UI art board. This is candidate art, never an original game screenshot. High resolution landscape 3072×2048 if possible; crisp legible Portuguese typography. Same design language as the inspected HUD study: charcoal stone and black leather surfaces, forged dark iron, fine pewter edge filigree, restrained aged-brass details, ivory serif text, amber focus. Solid opaque near-black content areas, quiet thin ornament, generous line spacing, no noisy stone behind text. Material depth only at edges. The world, if shown, is a tiny subdued Tristram setting, not the focus. No invented NPC portraits, no character artwork or models, no logos, no promotional copy. Small board header exactly: 'DIABLO 3D · ESTUDO R2 · ARTE CANDIDATA'. Keep every UI text inside its own bounds. Functional controls must be exactly those specified. No extra tabs, buttons, shortcuts, features, currencies or stat types. No side labeled original and no split before/after. Native data remains authoritative; numeric examples are illustrative. Modern placement/proportion allowed, existing actions/capacities remain unchanged.\n\nA complete exceptionally precise commerce grid concept with a large left shop panel, right inventory panel, small native-variant notes at the bottom. Shop header 'GRISWOLD', tabs exactly 'Básicos' and 'Premium', 'Ouro: 2.450', 'Página 1 / 2'. Shop grid MUST be exactly TEN columns by NINE rows, 90 equal visible cells; draw every grid line clearly. Only a few illustrative swords/shields/armor occupy correctly sized multi-cell rectangles, most cells empty. Under the shop grid an item detail box for selection: 'Espada curta' / '120 ouro · Dano 4–8' / 'Durabilidade 24/24 · Força 18'. Shop actions exactly 'Comprar', 'Vender', 'Reparar um', 'Reparar todos', 'Fechar'. Right panel 'INVENTÁRIO' has EXACTLY SEVEN equipped-item positions: helmet, amulet, body armor, left-hand weapon, right-hand shield, ring one, ring two. Beneath it backpack grid MUST be TEN columns by FOUR rows, 40 cells, not five or nine columns. Do not add boots, gloves, belts as equipment slots. The screen must show inventory and shop together, usable at 16:9 with content separated, no extra quickspell bar. Small noninteractive coverage notes outside the player panels: 'Adria: Diversos · Comprar · Vender; recarga textual' / 'Pepin: Diversos · Comprar' / 'Wirt: Diversos · Comprar uma oferta'. Do not present those notes as a live menu. Native grid buys directly; do not draw confirmation popup. All text crisp, avoid perspective distortions of cells.",
+          "issues": [
+            {
+              "severity": "must-correct-before-layout-use",
+              "component": "shop-grid",
+              "expected": "10 columns × 9 rows",
+              "observed": "visual count approximately 11 columns × 8 rows",
+              "reason": "Generated grid is an art candidate only; native cell capacity must be re-established in final asset/layout."
+            }
+          ],
+          "status": "candidate-preserved",
+          "installed": false
+        }
+      ],
+      "id": "c-05-commerce-grid",
+      "outputs": [
+        "images/c-05-commerce-grid-r2.png"
+      ],
+      "repoPath": "docs/hud-study/r2/images/c-05-commerce-grid-r2.png",
+      "dimensions": {
+        "width": 1536,
+        "height": 1024
+      },
+      "toolMode": "builtin",
+      "origin": "AI-generated candidate art",
+      "coverageMode": "shared-art-template-and-existing-native-text-map",
+      "directlyIllustratedIds": [
+        "T11"
+      ],
+      "nativeTextMapping": [
+        {
+          "id": "T11",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "T11"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "T12",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "T12"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "T13",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "T13"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "T14",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "T14"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        }
+      ],
+      "usage": "Concept art/atlas only. Native text, item icons, capacities, input and layout remain authoritative; not production font artwork or installed UI."
+    },
+    {
+      "slug": "c-06-commerce-confirmation",
+      "canonicalIds": [
+        "T15"
+      ],
+      "coveredIds": [
+        "T15",
+        "T16",
+        "T17",
+        "T18",
+        "T19",
+        "T20"
+      ],
+      "title": "Comércio — seis confirmações",
+      "output": "images/c-06-commerce-confirmation.png",
+      "path": "images/c-06-commerce-confirmation.png",
+      "sha256": "f215085bce9d509ecccb270b24f0fcaf175255de7e5db6ba909b42a8b526f16a",
+      "bytes": 2295201,
+      "width": 1536,
+      "height": 1024,
+      "prompt": "Use case: ui-mockup. Create a brand-new original raster concept for Diablo 3D HUD r2, a finished comparison-ready UI art board. This is candidate art, never an original game screenshot. High resolution landscape 3072×2048 if possible; crisp legible Portuguese typography. Same design language as the inspected HUD study: charcoal stone and black leather surfaces, forged dark iron, fine pewter edge filigree, restrained aged-brass details, ivory serif text, amber focus. Solid opaque near-black content areas, quiet thin ornament, generous line spacing, no noisy stone behind text. Material depth only at edges. The world, if shown, is a tiny subdued Tristram setting, not the focus. No invented NPC portraits, no character artwork or models, no logos, no promotional copy. Small board header exactly: 'DIABLO 3D · ESTUDO R2 · ARTE CANDIDATA'. Keep every UI text inside its own bounds. Functional controls must be exactly those specified. No extra tabs, buttons, shortcuts, features, currencies or stat types. No side labeled original and no split before/after. Native data remains authoritative; numeric examples are illustrative. Modern placement/proportion allowed, existing actions/capacities remain unchanged.\n\nA 3-column by 2-row art board with six complete confirmation dialog variants, all the same dignified charcoal/iron/ivory frame. Every dialog has exactly two actions 'Sim' and 'Não', clear keyboard/controller focus amber on one, no duplicate footer actions. First 'COMPRAR ITEM?' / 'Espada curta' / 'Preço: 120 ouro' / 'Ouro disponível: 2.450'. Second 'VENDER ITEM?' / 'Machado usado' / 'Preço: 65 ouro' / 'Ouro disponível: 2.450'. Third 'REPARAR ITEM?' / 'Espada curta' / 'Preço: 18 ouro' / 'Durabilidade 9/24' / 'Ouro disponível: 2.450'. Fourth 'RECARREGAR CAJADO?' / 'Cajado simples' / 'Preço: 90 ouro' / 'Cargas 3/18' / 'Ouro disponível: 2.450'. Fifth 'IDENTIFICAR ITEM?' / 'Anel não identificado' / 'Preço: 100 ouro' / 'Propriedades ocultas' / 'Ouro disponível: 2.450'. Sixth 'NEGÓCIO DE WIRT?' / 'Arco reforçado' / 'Preço: 1.800 ouro' / 'Dano 7–12 · Dur. 30/30 · Destreza 35' / 'Ouro disponível: 2.450'. Do not confuse Wirt's 50-gold look fee with this item price. A small noninteractive board footnote says 'Confirmações das listas; a grade visual compra diretamente.' No original-game reference panel.",
+      "tool": "builtin:image_gen.imagegen",
+      "mode": "built-in",
+      "status": "candidate",
+      "installed": false,
+      "inspection": {
+        "reviewed": true,
+        "observations": "Seis confirmações Sim/Não com preços e campos próprios; Wirt 1.800 é preço da oferta, distinto da taxa 50 para olhar.",
+        "functionalLayoutConformant": true,
+        "issues": []
+      },
+      "id": "c-06-commerce-confirmation",
+      "outputs": [
+        "images/c-06-commerce-confirmation.png"
+      ],
+      "repoPath": "docs/hud-study/r2/images/c-06-commerce-confirmation.png",
+      "dimensions": {
+        "width": 1536,
+        "height": 1024
+      },
+      "toolMode": "builtin",
+      "origin": "AI-generated candidate art",
+      "coverageMode": "shared-art-template-and-existing-native-text-map",
+      "directlyIllustratedIds": [
+        "T15",
+        "T16",
+        "T17",
+        "T18",
+        "T19",
+        "T20"
+      ],
+      "nativeTextMapping": [
+        {
+          "id": "T15",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "T15"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "T16",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "T16"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "T17",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "T17"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "T18",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "T18"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "T19",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "T19"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "T20",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "T20"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        }
+      ],
+      "usage": "Concept art/atlas only. Native text, item icons, capacities, input and layout remain authoritative; not production font artwork or installed UI."
+    },
+    {
+      "slug": "c-07-commerce-blocked",
+      "canonicalIds": [
+        "T21"
+      ],
+      "coveredIds": [
+        "T21",
+        "T22"
+      ],
+      "title": "Comércio — dinheiro e espaço insuficientes",
+      "output": "images/c-07-commerce-blocked-r2.png",
+      "path": "images/c-07-commerce-blocked-r2.png",
+      "sha256": "a2f09eaa0794b35b147891149afca47fb1b14b043eee048db95e7c269c698f49",
+      "bytes": 1866694,
+      "width": 1536,
+      "height": 1024,
+      "prompt": "Edit this inspected candidate image by removing ONLY the two large background UI panels titled COMERCIANTE and INVENTÁRIO, including ALL their item names, icons, columns, item prices, weight column, fake gear rows, and their frames. Replace those background panels with the same softly blurred dark Tristram street scenery already present between them. Keep the TWO FOREGROUND WARNING DIALOGS exactly unchanged: OURO INSUFICIENTE with its complete Portuguese message, Ouro disponível 80, Preço120 and Voltar; INVENTÁRIO CHEIO with its complete Portuguese message, Armadura leve, Espaço exigido 2×3 células and Voltar. Preserve the foreground dialog borders, size, placement, material, text, values and buttons exactly. Preserve top candidate header, bottom evidence note, candles and mug. There must be absolutely NO other UI behind the warning dialogs after this edit: no inventory list, no merchant list, no stats, no weight, no gloves/boots/belt, no hidden fake features. This is a surgical background correction; do not redesign either foreground warning popup and do not add anything new.",
+      "tool": "builtin:image_gen.imagegen",
+      "mode": "built-in",
+      "status": "candidate",
+      "installed": false,
+      "inspection": {
+        "reviewed": true,
+        "functionalLayoutConformant": true,
+        "promotionBlocked": false,
+        "observations": "Edição removeu integralmente as duas listas falsas de fundo e seus stats/gear inventados; os avisos centrais, textos/valores e Voltar permanecem. R1 preservada como rejeitada para uso funcional.",
+        "issues": []
+      },
+      "revision": "r2",
+      "history": [
+        {
+          "revision": "r1",
+          "output": "images/c-07-commerce-blocked-r1.png",
+          "sha256": "967a8b0624c2a9c57ab4a462209ab061b4a7c5f3680218024e88e2081c08cabf",
+          "bytes": 1931872,
+          "dimensions": {
+            "width": 1536,
+            "height": 1024
+          },
+          "prompt": "Use case: ui-mockup. Create a brand-new original raster concept for Diablo 3D HUD r2, a finished comparison-ready UI art board. This is candidate art, never an original game screenshot. High resolution landscape 3072×2048 if possible; crisp legible Portuguese typography. Same design language as the inspected HUD study: charcoal stone and black leather surfaces, forged dark iron, fine pewter edge filigree, restrained aged-brass details, ivory serif text, amber focus. Solid opaque near-black content areas, quiet thin ornament, generous line spacing, no noisy stone behind text. Material depth only at edges. The world, if shown, is a tiny subdued Tristram setting, not the focus. No invented NPC portraits, no character artwork or models, no logos, no promotional copy. Small board header exactly: 'DIABLO 3D · ESTUDO R2 · ARTE CANDIDATA'. Keep every UI text inside its own bounds. Functional controls must be exactly those specified. No extra tabs, buttons, shortcuts, features, currencies or stat types. No side labeled original and no split before/after. Native data remains authoritative; numeric examples are illustrative. Modern placement/proportion allowed, existing actions/capacities remain unchanged.\n\nTwo large equally sized commerce error dialogs side by side, against very subdued dim shop-list context, readable and calm. Left header 'OURO INSUFICIENTE'; exact message 'Você não tem ouro suficiente para a transação.'; data 'Ouro disponível: 80' and 'Preço: 120'; sole action 'Voltar'. Right header 'INVENTÁRIO CHEIO'; exact message 'Não há espaço suficiente na mochila para este item.'; data 'Armadura leve' and 'Espaço exigido: 2 × 3 células'; sole action 'Voltar'. Restrained red-orange warning accent, not giant comic warning triangle. No Buy, Deposit, Expand Inventory, auto arrange or real-money action. Native feedback exists for text lists; do not claim added grid behavior. Small noninteractive board note at bottom 'Estados bloqueados da lista nativa · valores ilustrativos'. No rendered inventory grid is necessary in this board; preserve clear absence of actionable transactions.",
+          "issues": [
+            {
+              "severity": "must-correct-before-layout-use",
+              "component": "background-ui",
+              "expected": "No invented stat types or gear types",
+              "observed": "Background inventory lists weight/gloves/boots",
+              "reason": "Remove background UI; retain central warning dialogs."
+            }
+          ],
+          "status": "candidate-preserved",
+          "installed": false
+        }
+      ],
+      "id": "c-07-commerce-blocked",
+      "outputs": [
+        "images/c-07-commerce-blocked-r2.png"
+      ],
+      "repoPath": "docs/hud-study/r2/images/c-07-commerce-blocked-r2.png",
+      "dimensions": {
+        "width": 1536,
+        "height": 1024
+      },
+      "toolMode": "builtin",
+      "origin": "AI-generated candidate art",
+      "coverageMode": "shared-art-template-and-existing-native-text-map",
+      "directlyIllustratedIds": [
+        "T21",
+        "T22"
+      ],
+      "nativeTextMapping": [
+        {
+          "id": "T21",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "T21"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "T22",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "T22"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        }
+      ],
+      "usage": "Concept art/atlas only. Native text, item icons, capacities, input and layout remain authoritative; not production font artwork or installed UI."
+    },
+    {
+      "slug": "c-08-commerce-empty",
+      "canonicalIds": [
+        "T23"
+      ],
+      "coveredIds": [
+        "T23",
+        "T24",
+        "T25",
+        "T26",
+        "V33"
+      ],
+      "title": "Comércio — cinco estados sem itens",
+      "output": "images/c-08-commerce-empty.png",
+      "path": "images/c-08-commerce-empty.png",
+      "sha256": "ebd20df3547e497b8da96013c643aa7e079c3cd08a86309853dec49e2cf3af24",
+      "bytes": 2055299,
+      "width": 1536,
+      "height": 1024,
+      "prompt": "Use case: ui-mockup. Create a brand-new original raster concept for Diablo 3D HUD r2, a finished comparison-ready UI art board. This is candidate art, never an original game screenshot. High resolution landscape 3072×2048 if possible; crisp legible Portuguese typography. Same design language as the inspected HUD study: charcoal stone and black leather surfaces, forged dark iron, fine pewter edge filigree, restrained aged-brass details, ivory serif text, amber focus. Solid opaque near-black content areas, quiet thin ornament, generous line spacing, no noisy stone behind text. Material depth only at edges. The world, if shown, is a tiny subdued Tristram setting, not the focus. No invented NPC portraits, no character artwork or models, no logos, no promotional copy. Small board header exactly: 'DIABLO 3D · ESTUDO R2 · ARTE CANDIDATA'. Keep every UI text inside its own bounds. Functional controls must be exactly those specified. No extra tabs, buttons, shortcuts, features, currencies or stat types. No side labeled original and no split before/after. Native data remains authoritative; numeric examples are illustrative. Modern placement/proportion allowed, existing actions/capacities remain unchanged.\n\nA professional art board with five empty-store-state cards in a clear layout: top three cards, bottom two wider cards. Same iron/charcoal frame as all commerce concepts; no fake product rows or disabled purchase controls. Card 1 header 'GRISWOLD · VENDER', message 'Nenhum item aceito para venda', 'Ouro disponível: 2.450', only 'Voltar'. Card 2 'ADRIA · VENDER', message 'Nenhum item aceito para venda', 'Ouro disponível: 2.450', only 'Voltar'. Card 3 'GRISWOLD · REPARAR', message 'Nada para reparar', 'Ouro disponível: 2.450', only 'Voltar'. Card 4 'ADRIA · RECARREGAR', message 'Nada para recarregar', 'Ouro disponível: 2.450', only 'Voltar'. Card 5 'CAIN · IDENTIFICAR', message 'Nada para identificar', 'Ouro disponível: 2.450', only 'Voltar'. Use empty negative space attractively and keep content vertically centered; no portraits, icons can be tiny neutral ornamental line marks only. Do not use Griswold's acceptance criteria for Adria; messages are generic and correctly named. No loot suggestions, no new navigation.",
+      "tool": "builtin:image_gen.imagegen",
+      "mode": "built-in",
+      "status": "candidate",
+      "installed": false,
+      "inspection": {
+        "reviewed": true,
+        "observations": "Cinco estados vazios com vendedores/operações corretos, saldo ilustrativo e somente Voltar.",
+        "functionalLayoutConformant": true,
+        "issues": []
+      },
+      "id": "c-08-commerce-empty",
+      "outputs": [
+        "images/c-08-commerce-empty.png"
+      ],
+      "repoPath": "docs/hud-study/r2/images/c-08-commerce-empty.png",
+      "dimensions": {
+        "width": 1536,
+        "height": 1024
+      },
+      "toolMode": "builtin",
+      "origin": "AI-generated candidate art",
+      "coverageMode": "shared-art-template-and-existing-native-text-map",
+      "directlyIllustratedIds": [
+        "T23",
+        "T24",
+        "T25",
+        "T26",
+        "V33"
+      ],
+      "nativeTextMapping": [
+        {
+          "id": "T23",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "T23"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "T24",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "T24"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "T25",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "T25"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "T26",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "T26"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        },
+        {
+          "id": "V33",
+          "catalog": "../data/ingame-variants.json",
+          "recordMatch": {
+            "id": "V33"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        }
+      ],
+      "usage": "Concept art/atlas only. Native text, item icons, capacities, input and layout remain authoritative; not production font artwork or installed UI."
+    },
+    {
+      "slug": "c-09-commerce-identified",
+      "canonicalIds": [
+        "T27"
+      ],
+      "coveredIds": [
+        "T27"
+      ],
+      "title": "Comércio — identificação revelada",
+      "output": "images/c-09-commerce-identified.png",
+      "path": "images/c-09-commerce-identified.png",
+      "sha256": "82220d8dbc8a17fa951996d86f9db9315e4018fd1a2f52204d51101f11f49462",
+      "bytes": 2083778,
+      "width": 1536,
+      "height": 1024,
+      "prompt": "Use case: ui-mockup. Create a brand-new original raster concept for Diablo 3D HUD r2, a finished comparison-ready UI art board. This is candidate art, never an original game screenshot. High resolution landscape 3072×2048 if possible; crisp legible Portuguese typography. Same design language as the inspected HUD study: charcoal stone and black leather surfaces, forged dark iron, fine pewter edge filigree, restrained aged-brass details, ivory serif text, amber focus. Solid opaque near-black content areas, quiet thin ornament, generous line spacing, no noisy stone behind text. Material depth only at edges. The world, if shown, is a tiny subdued Tristram setting, not the focus. No invented NPC portraits, no character artwork or models, no logos, no promotional copy. Small board header exactly: 'DIABLO 3D · ESTUDO R2 · ARTE CANDIDATA'. Keep every UI text inside its own bounds. Functional controls must be exactly those specified. No extra tabs, buttons, shortcuts, features, currencies or stat types. No side labeled original and no split before/after. Native data remains authoritative; numeric examples are illustrative. Modern placement/proportion allowed, existing actions/capacities remain unchanged.\n\nA finished focused result screen after Cain identifies an item, the original shop interaction elegantly reframed, not a new reward or character-level-up screen. One centered large framed panel over subdued blurred Tristram neutral scene. Header 'IDENTIFICAÇÃO CONCLUÍDA'. Small illustrative ring icon as specimen, no final approved item asset claim. Exact main content 'Anel simples' in ivory; property '+3 de Magia' in restrained magical blue; line 'Custo pago: 100 ouro'. Native result and a sole return/completion action labeled 'Concluir'. Keep clear space reserved for additional revealed properties when a different item is identified, but do not invent or display other stats. Small noninteractive bottom label 'Exemplo ilustrativo · propriedades vêm do item nativo'. No equip, compare, sell, craft, salvage, reroll, rarity badge or popup original side. Match all charcoal stone/iron/pewter/ivory/amber materials with thin highlights and spacious readable type. Also show a small compact 4:3 variation inset at bottom-right of the board, same one result and one Concluir action; it is a responsive specimen of the same screen, not a second game window.",
+      "tool": "builtin:image_gen.imagegen",
+      "mode": "built-in",
+      "status": "candidate",
+      "installed": false,
+      "inspection": {
+        "reviewed": true,
+        "observations": "Resultado de identificação legível, custo100 e propriedade ilustrativa+3Magia; contém versão compacta do mesmo resultado.",
+        "functionalLayoutConformant": true,
+        "issues": []
+      },
+      "id": "c-09-commerce-identified",
+      "outputs": [
+        "images/c-09-commerce-identified.png"
+      ],
+      "repoPath": "docs/hud-study/r2/images/c-09-commerce-identified.png",
+      "dimensions": {
+        "width": 1536,
+        "height": 1024
+      },
+      "toolMode": "builtin",
+      "origin": "AI-generated candidate art",
+      "coverageMode": "shared-art-template-and-existing-native-text-map",
+      "directlyIllustratedIds": [
+        "T27"
+      ],
+      "nativeTextMapping": [
+        {
+          "id": "T27",
+          "catalog": "../data/ingame.json",
+          "recordMatch": {
+            "id": "T27"
+          },
+          "fields": [
+            "title",
+            "summary",
+            "choices",
+            "rows",
+            "fields",
+            "buttons",
+            "condition",
+            "notes"
+          ]
+        }
+      ],
+      "usage": "Concept art/atlas only. Native text, item icons, capacities, input and layout remain authoritative; not production font artwork or installed UI."
+    }
+  ],
+  "generationCalls": 9,
+  "targetedRepairCalls": 2,
+  "totalBuiltinCalls": 11,
+  "sourceContracts": [
+    "../data/ingame.json",
+    "../data/ingame-variants.json",
+    "../../../Source/stores.cpp",
+    "../../../Source/qol/visual_store.h",
+    "../../../Source/qol/visual_store.cpp"
+  ],
+  "issues": [
+    {
+      "asset": "c-05-commerce-grid",
+      "severity": "blocks-promotion",
+      "expected": "10×9 shop cells",
+      "observed": "11×8 generated shop cells after targeted edit",
+      "resolution": "Candidate may be reviewed visually; native/Godot grid geometry is authoritative and must be exact before promotion."
+    }
+  ],
+  "publicProvenance": "Private tool-output paths omitted; original masters and manifests retained locally."
+}

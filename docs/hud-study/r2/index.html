@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Diablo 3D · Todas as telas · Estudo R2</title><link rel="icon" href="data:,"><link rel="stylesheet" href="gallery.css"></head>
+<body><header><a href="../index.html">DIABLO 3D / HUD</a><h1>As outras telas, no mesmo mundo.</h1><p>Estudo visual R2 · artes candidatas, funções nativas preservadas</p><div id="metrics"></div></header>
+<div class="notice">Comparações reais onde há captura. Nas demais telas, o contrato do código fica visível até capturarmos o original. Nenhuma proposta abaixo está instalada no jogo.</div>
+<div class="shell"><aside><label for="search">Encontrar uma tela</label><input id="search" type="search" placeholder="Inventário, música, loja…"><label for="family">Família</label><select id="family"><option value="all">Todas</option></select><nav id="screens" aria-label="Telas"></nav></aside>
+<main><div class="screen-head"><div><p id="family-label" class="eyebrow"></p><h2 id="title"></h2></div><span id="status" class="badge"></span></div>
+<div class="toolbar"><label>Estado / variante <select id="variant"></select></label><label>Arte <select id="art"></select></label><button id="full">Ampliar proposta</button></div>
+<p id="variant-note"></p><div class="comparison"><section><h3>Interface nativa / referência</h3><div id="original" class="media"></div><p id="original-note"></p></section><section><h3>Proposta gerada</h3><div id="proposal" class="media"></div><p id="proposal-note"></p></section></div>
+<section class="details"><h3>Funções que precisam continuar funcionando</h3><ul id="functions"></ul><p id="constraints"></p><div id="variant-fields"></div><p id="issues" class="warning"></p><details><summary>Rastreabilidade e prompt da arte</summary><pre id="trace"></pre></details></section>
+<section class="next"><h3>Da imagem para o HUD</h3><p>O desenho orienta o acabamento. Molduras sem texto são peças separadas; rótulos, valores, grades, foco e botões permanecem editáveis. O projeto Godot desta pasta demonstra a montagem, sem alterar o jogo.</p><a href="project.godot">Projeto Godot</a> · <a href="README.md">Como conferir e editar</a> · <a href="catalog.json">Catálogo completo</a></section>
+</main></div><dialog id="lightbox"><button id="close">Fechar</button><img id="large" alt="Proposta ampliada"></dialog>
+<script src="catalog.js"></script><script src="gallery.js"></script></body></html>

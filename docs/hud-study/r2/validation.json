@@ -1,0 +1,19 @@
+{
+  "counts": {
+    "canonicalScreens": 65,
+    "studyFrames": 223,
+    "nativeReferences": 14,
+    "missingNativeReferences": 51,
+    "generatedImages": 63,
+    "screensWithArt": 63,
+    "missingArt": []
+  },
+  "missingArt": [],
+  "displayHashesVerified": 64,
+  "localMasterHashesVerified": 64,
+  "nativeMediaCopied": true,
+  "productionChanged": false,
+  "originalComparisonsComplete": false,
+  "godotStructuralChecks": 819,
+  "godotVisualReviewExecuted": false
+}

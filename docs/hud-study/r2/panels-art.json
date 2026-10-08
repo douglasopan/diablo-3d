@@ -1,0 +1,1700 @@
+{
+  "schemaVersion": 2,
+  "status": "complete_candidate_art_coverage",
+  "createdAt": "2026-10-08",
+  "generator": "image_gen.imagegen",
+  "toolMode": "built-in",
+  "builtInCalls": 26,
+  "paidApiOrCliUsed": false,
+  "candidate": true,
+  "installed": false,
+  "approved": false,
+  "productionReady": false,
+  "promotionBlocked": true,
+  "scope": "Painéis e controles P01–P23, variantes V11–V21 e G19 pausa simples",
+  "artifactCount": 21,
+  "coveredIds": [
+    "G19",
+    "P01",
+    "P02",
+    "P03",
+    "P04",
+    "P05",
+    "P06",
+    "P07",
+    "P08",
+    "P09",
+    "P10",
+    "P11",
+    "P12",
+    "P13",
+    "P14",
+    "P15",
+    "P16",
+    "P17",
+    "P18",
+    "P19",
+    "P20",
+    "P21",
+    "P22",
+    "P23",
+    "V11",
+    "V12",
+    "V13",
+    "V14",
+    "V15",
+    "V16",
+    "V17",
+    "V18",
+    "V19",
+    "V20",
+    "V21"
+  ],
+  "coverage": {
+    "P": 23,
+    "V": 11,
+    "G": 1,
+    "total": 35
+  },
+  "sources": [
+    "../data/ingame.json",
+    "../data/ingame-variants.json",
+    "../INGAME-AUDIT.md",
+    "../../../AGENTS.md",
+    "../../PROJECT-EXECUTION.md"
+  ],
+  "styleReferences": [
+    "../images/07-hud-native-16x9-v1.png",
+    "../images/04-personagem-inventario.png"
+  ],
+  "globalReviewNotes": [
+    "21 PNGs finais copiados diretamente das saídas do gerador integrado, com fontes preservadas no diretório de geração.",
+    "Nenhuma imagem é captura do executável nem comparação original. O fundo Tristram é ilustração conceitual.",
+    "Texto, números, ícones, grades e HUD ilustrado não são implementação funcional. Textos devem virar texto vivo; grades/receptáculos/cinto/hitboxes devem vir dos contratos reais.",
+    "Os alvos eram 1920×1080 para telas e 2048+ para pranchas. O recurso integrado retornou 1671–1983 pixels de largura; dimensões reais abaixo, sem upscale para fingir entrega HD maior.",
+    "Todos permanecem candidatos bloqueados para promoção automática. P08 contém erro de grade explícito após uma tentativa focada; P15 e pranchas auxiliares têm aproximações do HUD que exigem composição nativa.",
+    "Fontes, assets, runtime, Godot, C++, builds, perfil, launcher, Git e partida não foram alterados/executados por este escopo."
+  ],
+  "artifacts": [
+    {
+      "key": "p01-character",
+      "filename": "p-01-personagem.png",
+      "coveredIds": [
+        "P01"
+      ],
+      "prompt": "Use case: ui-mockup. Asset type: candidate high-definition concept painting for Diablo 1 3D UI, not a screenshot and never a fake original comparison. Art direction: match the approved references' dark original Diablo 1 gothic atmosphere: charcoal stone fields, finely worn aged iron frames, pewter engraving, restrained aged brass edging, ivory readable serif text. Tiny amber highlights only for selection and candlelight; red/blue life and mana. Avoid polished MMO UI, fantasy gold filigree overload, neon, flat web UI. Background is an ORIGINAL ILLUSTRATION of nighttime Tristram cobbles, timber cottages and a well; this is illustrative concept scenery, no claim of runtime. Keep the bottom native-style continuous HUD: left CHAR/QUESTS/MAP/MENU buttons, large red life globe held by gothic gargoyles, eight numbered belt cells ABOVE the broad black information box, blue mana globe, right INV/SPELLS buttons with one separate prepared-spell tile under them. No extra permanent quickbar, no minimap except when explicitly requested for a native map mode, no stamina, cooldowns, equipment boots/gloves or invented gameplay. Preserve the free world area. All strings are PT-BR sample copy to be implemented later as live text, never baked final runtime labels. Add a subtle outside-game editorial top caption \"ESTUDO R2 · CONCEITO IA · NÃO É CAPTURA\". Finish as an art-directed crisp HD bitmap, textured but typography remains clear.\nPrimary request: FULL SCREEN 1920x1080 landscape UI concept P01, character panel OPEN ON LEFT, taking 35% width and from y=55 to y=835; world visible on right. Only character panel; no inventory or minimap. Panel header \"PERSONAGEM · C\", close X. All twenty fields must be visible and legible, compact balanced grouping with a clear two-column attribute table. Exact content: \"Ardan\" \"Guerreiro · Nível 12\"; \"Experiência 188.420\" \"Próximo nível 230.000\"; table headers \"Atributo\" \"Base\" \"Agora\"; rows \"Força 45 51 +\" \"Magia 15 15 +\" \"Destreza 30 34 +\" \"Vitalidade 40 40 +\"; one plus button aligned beside each attribute (four total). \"Pontos a distribuir 5\". \"Ouro 2.450\". \"Classe de armadura 42\"; \"Chance de acerto 76%\"; \"Dano 12–21\"; resource headers \"Máxima\" \"Atual\"; \"Vida 146 118\" \"Mana 32 21\"; resistances \"Magia 10%\" \"Fogo 25%\" \"Raios 0%\". Preserve both columns rather than reducing attributes to one number. Show low key labeled XP meter after the numeric XP fields. No portrait replacing any statistic. Bottom HUD remains fully visible underneath.",
+      "normalizedRegions": [
+        {
+          "id": "P01",
+          "x": 0,
+          "y": 0,
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "intendedDimensions": [
+        1920,
+        1080
+      ],
+      "id": "p01-character",
+      "title": "Personagem",
+      "canonicalIds": [
+        "P01"
+      ],
+      "path": "images/p-01-personagem.png",
+      "tool": "image_gen.imagegen",
+      "toolMode": "built-in",
+      "toolOutput": "exec-0bcf90ae-a181-40ac-b9e7-2de0a4405766.png",
+      "copyMethod": "exact-file-copy; source retained in generated_images",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2605075,
+      "sha256": "fb6402480f99a9b3fbb212732362e4153862a839f9bb9c3dac9acd5ca70e4229",
+      "format": "PNG",
+      "candidate": true,
+      "installed": false,
+      "approved": false,
+      "productionReady": false,
+      "promotionBlocked": true,
+      "promotionBlockReasons": [
+        "Candidato de estudo sem aprovação visual/implementação.",
+        "Resolução real inferior ao alvo solicitado; sem ampliação artificial.",
+        "xp-sample-transcription-drift"
+      ],
+      "resolutionTargetMet": false,
+      "resampled": false,
+      "source": [
+        {
+          "file": "Source/panels/charpanel.cpp",
+          "line": 132
+        },
+        {
+          "file": "Source/control/control_panel.cpp",
+          "line": 692
+        }
+      ],
+      "normalizedRegionsApproximate": true,
+      "regionsAreRuntimeHitboxes": false,
+      "reviewNotes": [
+        "Todos os campos nativos aparecem, inclusive Base/Agora, pendentes, vida/mana, resistências, ouro e XP.",
+        "A IA escreveu Experiência 188.400 em vez do exemplo 188.420; a implementação deve usar o valor vivo."
+      ],
+      "issues": [
+        "xp-sample-transcription-drift"
+      ],
+      "revisions": []
+    },
+    {
+      "key": "p02-inventory",
+      "filename": "p-02-inventario.png",
+      "coveredIds": [
+        "P02"
+      ],
+      "prompt": "Use case: ui-mockup. Asset type: candidate high-definition concept painting for Diablo 1 3D UI, not a screenshot and never a fake original comparison. Art direction: match the approved references' dark original Diablo 1 gothic atmosphere: charcoal stone fields, finely worn aged iron frames, pewter engraving, restrained aged brass edging, ivory readable serif text. Tiny amber highlights only for selection and candlelight; red/blue life and mana. Avoid polished MMO UI, fantasy gold filigree overload, neon, flat web UI. Background is an ORIGINAL ILLUSTRATION of nighttime Tristram cobbles, timber cottages and a well; this is illustrative concept scenery, no claim of runtime. Keep the bottom native-style continuous HUD: left CHAR/QUESTS/MAP/MENU buttons, large red life globe held by gothic gargoyles, eight numbered belt cells ABOVE the broad black information box, blue mana globe, right INV/SPELLS buttons with one separate prepared-spell tile under them. No extra permanent quickbar, no minimap except when explicitly requested for a native map mode, no stamina, cooldowns, equipment boots/gloves or invented gameplay. Preserve the free world area. All strings are PT-BR sample copy to be implemented later as live text, never baked final runtime labels. Add a subtle outside-game editorial top caption \"ESTUDO R2 · CONCEITO IA · NÃO É CAPTURA\". Finish as an art-directed crisp HD bitmap, textured but typography remains clear.\nPrimary request: Generate a NEW FULL SCREEN bitmap at 1920×1080, aspect ratio16:9, not a redraw at the dimensions of an input image. P02 inventory OPEN ON RIGHT covering 34%width y55 to835. The world stays visible on left. Header \"INVENTÁRIO · I\", close X, \"Ardan\". The TOP equipment zone must contain EXACTLY SEVEN separate rectangular equipment receptacles: 1 head centered top, 1 small amulet at top right, 1 torso centered below head, 1 left hand to torso's left, 1 right hand to torso's right, 1 ring bottom left, 1 ring bottom right. Seven total, no boots, gloves, extra socket or decoration mistaken for a slot. Helmet in head, pendant in amulet, chainmail in torso, sword in left hand, shield in right hand, two rings. BELOW a precise backpack grid: TEN columns and FOUR rows, forty equal square cells, eleven vertical grid lines and five horizontal grid lines including borders. Sparse contents: sword spans one column by three rows; a potion one cell; scroll one cell. No eighth equipped slot. Bottom of inventory \"Ouro 2.450\". Small unobtrusive item information integrated into HUD information box: \"Espada curta · Dano 4–8 · Durabilidade 18/24 · Requer 18 de Força\". Native-style bottomHUD fully visible with eight belt cells only. Do not label dimensions in player-facing art.",
+      "normalizedRegions": [
+        {
+          "id": "P02",
+          "x": 0,
+          "y": 0,
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "intendedDimensions": [
+        1920,
+        1080
+      ],
+      "id": "p02-inventory",
+      "title": "Inventário",
+      "canonicalIds": [
+        "P02"
+      ],
+      "path": "images/p-02-inventario.png",
+      "tool": "image_gen.imagegen",
+      "toolMode": "built-in",
+      "toolOutput": "exec-77f17ce4-5d4e-4078-8a81-03e724495499.png",
+      "copyMethod": "exact-file-copy; source retained in generated_images",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2734393,
+      "sha256": "d169bd4a51a7e935a1cf5159f60bc8e84145497026fd6b895863eb75939c5c3b",
+      "format": "PNG",
+      "candidate": true,
+      "installed": false,
+      "approved": false,
+      "productionReady": false,
+      "promotionBlocked": true,
+      "promotionBlockReasons": [
+        "Candidato de estudo sem aprovação visual/implementação.",
+        "Resolução real inferior ao alvo solicitado; sem ampliação artificial."
+      ],
+      "resolutionTargetMet": false,
+      "resampled": false,
+      "source": [
+        {
+          "file": "Source/inv.cpp",
+          "line": 1187
+        },
+        {
+          "file": "Source/player.h",
+          "line": 38
+        }
+      ],
+      "normalizedRegionsApproximate": true,
+      "regionsAreRuntimeHitboxes": false,
+      "reviewNotes": [
+        "Inspeção visual: sete receptáculos e mochila com dez colunas por quatro linhas.",
+        "O item genérico ocupa múltiplas células; nenhum slot de bota/luva foi acrescentado."
+      ],
+      "issues": [],
+      "revisions": []
+    },
+    {
+      "key": "p03-combined",
+      "filename": "p-03-personagem-inventario.png",
+      "coveredIds": [
+        "P03"
+      ],
+      "intendedDimensions": [
+        1920,
+        1080
+      ],
+      "normalizedRegions": [
+        {
+          "id": "P03",
+          "x": 0,
+          "y": 0,
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "prompt": "Use case: precise-object-edit. Edit ONLY the provided concept image P03. Keep the complete composition, both side panels, current statistics, exact seven equipment receptacles, backpack10columns×4rows, illustrated Tristram and bottomHUD. Correct the missing gold field: add a single legible line \"Ouro 2.450\" within the LEFT character panel, directly beneath \"Pontos a distribuir 5\", slightly reducing or moving the character portrait if necessary to make room. Do not remove or merge any other statistics; retain Base/Agora for4attributes, Max/Atual Vida/Mana,3resistances,XP,level,armor,tohit,damage. Add no gameplay functions. Do not add gold to the center of world or across HUD. All text is sample concept copy; preserve external CONCEITO disclaimer. This change repairs one omitted native field.",
+      "repairAttempted": true,
+      "id": "p03-combined",
+      "title": "Personagem e inventário abertos",
+      "canonicalIds": [
+        "P03"
+      ],
+      "path": "images/p-03-personagem-inventario.png",
+      "tool": "image_gen.imagegen",
+      "toolMode": "built-in",
+      "toolOutput": "exec-b1a7ce27-5672-47bc-ad94-92469ad75cd4.png",
+      "copyMethod": "exact-file-copy; source retained in generated_images",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2687269,
+      "sha256": "8f576fcec456349c4012d69c84a770c7ebf51e7c12f716e687dad6f4befa2fd4",
+      "format": "PNG",
+      "candidate": true,
+      "installed": false,
+      "approved": false,
+      "productionReady": false,
+      "promotionBlocked": true,
+      "promotionBlockReasons": [
+        "Candidato de estudo sem aprovação visual/implementação.",
+        "Resolução real inferior ao alvo solicitado; sem ampliação artificial.",
+        "hud-labels-approximate"
+      ],
+      "resolutionTargetMet": false,
+      "resampled": false,
+      "source": [
+        {
+          "file": "Source/engine/render/scrollrt.cpp",
+          "line": 1436
+        },
+        {
+          "file": "Source/control/control_panel.cpp",
+          "line": 64
+        }
+      ],
+      "normalizedRegionsApproximate": true,
+      "regionsAreRuntimeHitboxes": false,
+      "reviewNotes": [
+        "Correção de conteúdo acrescentou Ouro 2.450 ao personagem.",
+        "Inspeção visual: campos completos, sete receptáculos e mochila 10×4.",
+        "O retrato de herói é ilustração proposta; não demonstra renderização por equipamento."
+      ],
+      "issues": [
+        "hud-labels-approximate"
+      ],
+      "revisions": [
+        {
+          "revision": 1,
+          "prompt": "Use case: ui-mockup. Asset type: candidate high-definition concept painting for Diablo 1 3D UI, not a screenshot and never a fake original comparison. Art direction: match the approved references' dark original Diablo 1 gothic atmosphere: charcoal stone fields, finely worn aged iron frames, pewter engraving, restrained aged brass edging, ivory readable serif text. Tiny amber highlights only for selection and candlelight; red/blue life and mana. Avoid polished MMO UI, fantasy gold filigree overload, neon, flat web UI. Background is an ORIGINAL ILLUSTRATION of nighttime Tristram cobbles, timber cottages and a well; this is illustrative concept scenery, no claim of runtime. Keep the bottom native-style continuous HUD: left CHAR/QUESTS/MAP/MENU buttons, large red life globe held by gothic gargoyles, eight numbered belt cells ABOVE the broad black information box, blue mana globe, right INV/SPELLS buttons with one separate prepared-spell tile under them. No extra permanent quickbar, no minimap except when explicitly requested for a native map mode, no stamina, cooldowns, equipment boots/gloves or invented gameplay. Preserve the free world area. All strings are PT-BR sample copy to be implemented later as live text, never baked final runtime labels. Add a subtle outside-game editorial top caption \"ESTUDO R2 · CONCEITO IA · NÃO É CAPTURA\". Finish as an art-directed crisp HD bitmap, textured but typography remains clear.\nPrimary request: FULL SCREEN 1920x1080. P03 combined view with character LEFT (x25–610,y55–840), inventory RIGHT (x1310–1895,y55–840), open Tristram world in center, bottom native HUD fully visible. Character header \"PERSONAGEM · C\". Must include all fields: Ardan, Guerreiro, Nível12; Experiência188.420, Próximo nível230.000; attribute columns Base/Agora and rows Força45/51+, Magia15/15+, Destreza30/34+, Vitalidade40/40+; Pontos a distribuir5; Ouro2.450; Classe de armadura42, Chance de acerto76%, Dano12–21; resource columns Máxima/Atual with Vida146/118 and Mana32/21; Resistências Magia10%, Fogo25%, Raios0%. Inventory header \"INVENTÁRIO · I\", EXACTLY7 equipment frames (one head, one amulet, one torso, two hands, two rings), helmet/pendant/mail/sword/shield/two rings; below equipment a precise TEN-column FOUR-row backpack, forty equal cells, sparse potion/sword/scroll. No extra equipment frame, no four extra magic buttons, no minimap. Composition demonstrates both panels at once preserving all functions; do not reuse earlier incomplete character layout.",
+          "toolOutput": "exec-4438634e-0c03-4974-8ca3-df954596de4c.png",
+          "candidate": true,
+          "installed": false,
+          "selected": false
+        }
+      ]
+    },
+    {
+      "key": "p04-spellbook-1-3",
+      "filename": "p-04-grimorio-paginas-1-3.png",
+      "coveredIds": [
+        "P04",
+        "V18",
+        "V19"
+      ],
+      "intendedDimensions": [
+        2880,
+        1620
+      ],
+      "normalizedRegions": [
+        {
+          "id": "P04",
+          "x": 0.015,
+          "y": 0.06,
+          "width": 0.31,
+          "height": 0.9
+        },
+        {
+          "id": "V18",
+          "x": 0.345,
+          "y": 0.06,
+          "width": 0.31,
+          "height": 0.9
+        },
+        {
+          "id": "V19",
+          "x": 0.675,
+          "y": 0.06,
+          "width": 0.31,
+          "height": 0.9
+        }
+      ],
+      "prompt": "Use case: ui-mockup. Asset type: candidate high-definition concept painting for Diablo 1 3D UI, not a screenshot and never a fake original comparison. Art direction: match the approved references' dark original Diablo 1 gothic atmosphere: charcoal stone fields, finely worn aged iron frames, pewter engraving, restrained aged brass edging, ivory readable serif text. Tiny amber highlights only for selection and candlelight; red/blue life and mana. Avoid polished MMO UI, fantasy gold filigree overload, neon, flat web UI. Background is an ORIGINAL ILLUSTRATION of nighttime Tristram cobbles, timber cottages and a well; this is illustrative concept scenery, no claim of runtime. Keep the bottom native-style continuous HUD: left CHAR/QUESTS/MAP/MENU buttons, large red life globe held by gothic gargoyles, eight numbered belt cells ABOVE the broad black information box, blue mana globe, right INV/SPELLS buttons with one separate prepared-spell tile under them. No extra permanent quickbar, no minimap except when explicitly requested for a native map mode, no stamina, cooldowns, equipment boots/gloves or invented gameplay. Preserve the free world area. All strings are PT-BR sample copy to be implemented later as live text, never baked final runtime labels. Add a subtle outside-game editorial top caption \"ESTUDO R2 · CONCEITO IA · NÃO É CAPTURA\". Finish as an art-directed crisp HD bitmap, textured but typography remains clear.\nPrimary request: A LARGE HD ART BOARD 2880x1620 with THREE clean equally-sized vertical concept frames side by side, outer editorial label at top. Each frame shows a tall dark stone right-side spellbook panel against a subtle Tristram illustration, a reduced native bottom HUD visible. Make the spellbook lists large and readable, seven FIXED rows each; illustrative spell icons, crisp ivory text, restrained category color. External labels above frames \"P04 · Página 1\", \"V18 · Página 2\", \"V19 · Página 3\". Inside each panel title \"GRIMÓRIO · B\"; bottom HORIZONTAL four tabs \"I II III IV\" in fixed order, select correct tab per frame. Page1 exact seven rows: Reparar / Habilidade (no mana); Dardo de fogo / Nível2 · Mana6; Raio carregado / Nível1 · Mana6; Dardo sagrado / Nível1 · Mana7; Cura / Nível2 · Mana5; Curar outro / Nível1 · Mana10; Inferno / Nível1 · Mana11. Page2 seven rows: Ressurreição / Cajado · 8 cargas; Parede de Fogo / Nível1 · Mana28; Telecinese / Nível1 · Mana15; Relâmpago / Nível1 · Mana10; Portal da cidade / Nível1 · Mana18; Lampejo / Nível1 · Mana30; Petrificar / Nível1 · Mana60. Page3 seven rows: Fasear / Nível1 · Mana12; Escudo de Mana / Nível1 · Mana33; Elemental / Nível1 · Mana35; Bola de Fogo / Nível1 · Mana16; Onda de Chamas / Nível1 · Mana35; Relâmpago encadeado / Nível1 · Mana30; Guardiã / Nível1 · Mana50. Small barred/invalid marker on offensive magic with explanatory sample \"Indisponível em Tristram\", keeping spell text readable. No mana cost on Reparar or staff; no sixth playable tab, no cooldown timers.",
+      "id": "p04-spellbook-1-3",
+      "title": "Grimório / Grimório — página 2 / Grimório — página 3",
+      "canonicalIds": [
+        "P04",
+        "V18",
+        "V19"
+      ],
+      "path": "images/p-04-grimorio-paginas-1-3.png",
+      "tool": "image_gen.imagegen",
+      "toolMode": "built-in",
+      "toolOutput": "exec-f7606d4a-b0d9-41aa-b16b-b0e75b1751a0.png",
+      "copyMethod": "exact-file-copy; source retained in generated_images",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2806917,
+      "sha256": "771ff612c1d4034e30372f13069041476648dee8c5c2d16ab6db30a06ea8c254",
+      "format": "PNG",
+      "candidate": true,
+      "installed": false,
+      "approved": false,
+      "productionReady": false,
+      "promotionBlocked": true,
+      "promotionBlockReasons": [
+        "Candidato de estudo sem aprovação visual/implementação.",
+        "Resolução real inferior ao alvo solicitado; sem ampliação artificial."
+      ],
+      "resolutionTargetMet": false,
+      "resampled": false,
+      "source": [
+        {
+          "file": "Source/panels/spell_book.cpp",
+          "line": 36
+        },
+        {
+          "file": "Source/panels/spell_book.cpp",
+          "line": 135
+        },
+        {
+          "file": "Source/panels/spell_book.cpp",
+          "line": 45
+        },
+        {
+          "file": "Source/panels/spell_book.cpp",
+          "line": 148
+        },
+        {
+          "file": "assets/txtdata/spells/spelldat.tsv",
+          "line": 2
+        }
+      ],
+      "normalizedRegionsApproximate": true,
+      "regionsAreRuntimeHitboxes": false,
+      "reviewNotes": [
+        "Três quadros com sete posições por página; categorias Habilidade, Magia e Cajado permanecem distintas.",
+        "Os custos e ícones são ilustrativos; os indicadores de indisponibilidade não foram validados como uma partida real.",
+        "Abas horizontais foram colocadas acima da lista pela IA, ainda em ordem I–IV."
+      ],
+      "issues": [],
+      "revisions": []
+    },
+    {
+      "key": "p04-spellbook-4-5",
+      "filename": "p-04-grimorio-paginas-4-5.png",
+      "coveredIds": [
+        "V20",
+        "V21"
+      ],
+      "intendedDimensions": [
+        2560,
+        1440
+      ],
+      "normalizedRegions": [
+        {
+          "id": "V20",
+          "x": 0.02,
+          "y": 0.06,
+          "width": 0.47,
+          "height": 0.9
+        },
+        {
+          "id": "V21",
+          "x": 0.51,
+          "y": 0.06,
+          "width": 0.47,
+          "height": 0.9
+        }
+      ],
+      "prompt": "Use case: ui-mockup. Asset type: candidate high-definition concept painting for Diablo 1 3D UI, not a screenshot and never a fake original comparison. Art direction: match the approved references' dark original Diablo 1 gothic atmosphere: charcoal stone fields, finely worn aged iron frames, pewter engraving, restrained aged brass edging, ivory readable serif text. Tiny amber highlights only for selection and candlelight; red/blue life and mana. Avoid polished MMO UI, fantasy gold filigree overload, neon, flat web UI. Background is an ORIGINAL ILLUSTRATION of nighttime Tristram cobbles, timber cottages and a well; this is illustrative concept scenery, no claim of runtime. Keep the bottom native-style continuous HUD: left CHAR/QUESTS/MAP/MENU buttons, large red life globe held by gothic gargoyles, eight numbered belt cells ABOVE the broad black information box, blue mana globe, right INV/SPELLS buttons with one separate prepared-spell tile under them. No extra permanent quickbar, no minimap except when explicitly requested for a native map mode, no stamina, cooldowns, equipment boots/gloves or invented gameplay. Preserve the free world area. All strings are PT-BR sample copy to be implemented later as live text, never baked final runtime labels. Add a subtle outside-game editorial top caption \"ESTUDO R2 · CONCEITO IA · NÃO É CAPTURA\". Finish as an art-directed crisp HD bitmap, textured but typography remains clear.\nPrimary request: LARGE HD art board2560x1440 with TWO clearly separated 16:9 screen mockup frames side by side; prioritize legible spellbook panels. External editorial labels above left \"V20 · Página 4 · Diablo\"; above right \"V21 · Página 5 · Hellfire condicional\". Tristram original illustration backgrounds, native bottom HUD. LEFT inside header \"GRIMÓRIO · B\", seven fixed slots with row1 BLANK (not even a label), row2 Golem / Nível1 · Mana100, row3 Teletransporte / Nível1 · Mana35, row4 Apocalipse / Cajado · 8 cargas, row5 Espírito de Ossos / Nível1 · Mana24, row6 Estrela de Sangue / Nível1 · Mana25, row7 BLANK. Retain blank first and seventh row spaces. Four horizontal bottom tabs I II III IV with IV selected. RIGHT header \"GRIMÓRIO · B\", five bottom tabs I II III IV V with V selected, seven rows in exact order: Parede Relampejante / Nível1 · Mana28; Imolação / Nível1 · Mana60; Deformação / Nível1 · Mana35; Refletir / Nível1 · Mana35; Fúria / Nível1 · Mana35; Anel de Fogo / Nível1 · Mana28; Procurar / Nível1 · Mana15. No sixth playable page. No mana cost added to staff powers. Offensive unavailable spells carry small barred marker, never full unreadable dimming. Four empty positions must not be filled with invented spells.",
+      "id": "p04-spellbook-4-5",
+      "title": "Grimório — página 4 / Grimório — página 5 · Hellfire",
+      "canonicalIds": [
+        "V20",
+        "V21"
+      ],
+      "path": "images/p-04-grimorio-paginas-4-5.png",
+      "tool": "image_gen.imagegen",
+      "toolMode": "built-in",
+      "toolOutput": "exec-333533ed-6897-4613-ae8d-466bbebee075.png",
+      "copyMethod": "exact-file-copy; source retained in generated_images",
+      "width": 1983,
+      "height": 793,
+      "bytes": 2664178,
+      "sha256": "808d6fa6085a8e3e65b6f6b6400602298277c068e4680d9f552d667e8bb312f9",
+      "format": "PNG",
+      "candidate": true,
+      "installed": false,
+      "approved": false,
+      "productionReady": false,
+      "promotionBlocked": true,
+      "promotionBlockReasons": [
+        "Candidato de estudo sem aprovação visual/implementação.",
+        "Resolução real inferior ao alvo solicitado; sem ampliação artificial.",
+        "hud-belt-approximate"
+      ],
+      "resolutionTargetMet": false,
+      "resampled": false,
+      "source": [
+        {
+          "file": "Source/panels/spell_book.cpp",
+          "line": 45
+        },
+        {
+          "file": "Source/panels/spell_book.cpp",
+          "line": 148
+        },
+        {
+          "file": "assets/txtdata/spells/spelldat.tsv",
+          "line": 2
+        },
+        {
+          "file": "mods/hf/txtdata/spells/spelldat.tsv",
+          "line": 41
+        }
+      ],
+      "normalizedRegionsApproximate": true,
+      "regionsAreRuntimeHitboxes": false,
+      "reviewNotes": [
+        "Página 4 mantém primeira e sétima posições vazias; Apocalipse aparece por cajado.",
+        "Página 5 é condicional Hellfire, com sete entradas e quinta aba.",
+        "O HUD reduzido contém numeração/células aproximadas; não extrair esse HUD como layout funcional."
+      ],
+      "issues": [
+        "hud-belt-approximate"
+      ],
+      "revisions": []
+    },
+    {
+      "key": "p05-speedbook",
+      "filename": "p-05-selecao-rapida-magias.png",
+      "coveredIds": [
+        "P05"
+      ],
+      "intendedDimensions": [
+        1920,
+        1080
+      ],
+      "normalizedRegions": [
+        {
+          "id": "P05",
+          "x": 0,
+          "y": 0,
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "prompt": "Use case: ui-mockup. Asset type: candidate high-definition concept painting for Diablo 1 3D UI, not a screenshot and never a fake original comparison. Art direction: match the approved references' dark original Diablo 1 gothic atmosphere: charcoal stone fields, finely worn aged iron frames, pewter engraving, restrained aged brass edging, ivory readable serif text. Tiny amber highlights only for selection and candlelight; red/blue life and mana. Avoid polished MMO UI, fantasy gold filigree overload, neon, flat web UI. Background is an ORIGINAL ILLUSTRATION of nighttime Tristram cobbles, timber cottages and a well; this is illustrative concept scenery, no claim of runtime. Keep the bottom native-style continuous HUD: left CHAR/QUESTS/MAP/MENU buttons, large red life globe held by gothic gargoyles, eight numbered belt cells ABOVE the broad black information box, blue mana globe, right INV/SPELLS buttons with one separate prepared-spell tile under them. No extra permanent quickbar, no minimap except when explicitly requested for a native map mode, no stamina, cooldowns, equipment boots/gloves or invented gameplay. Preserve the free world area. All strings are PT-BR sample copy to be implemented later as live text, never baked final runtime labels. Add a subtle outside-game editorial top caption \"ESTUDO R2 · CONCEITO IA · NÃO É CAPTURA\". Finish as an art-directed crisp HD bitmap, textured but typography remains clear.\nPrimary request: FULL SCREEN1920x1080 landscape. Native quick spell selection P05 open transiently as a compact four-row floating strip directly ABOVE the bottomHUD, world remains largely visible. Four clearly labeled origins as rows, no MMO hotbar: \"Habilidade\" with a hammer/anvil tile and \"Reparar · Habilidade\"; \"Magia\" with fire tile \"Dardo de fogo · Nível2 · F5\" and healing tile \"Cura · Nível2 · F6\"; \"Pergaminho\" with portal tile \"Portal da cidade · 2 unidades\"; \"Cajado\" with lightning tile \"Raio · 8 cargas\". Make scroll counts and staff charges distinct from learned level. Display a focused amber edge around Cura tile. One small instruction beneath \"Selecionar magia · Atribuir atalho\". No numerical cooldowns. The hero supports12 remappable shortcuts but do not draw12 permanent buttons or say four is maximum. No minimap.",
+      "id": "p05-speedbook",
+      "title": "Lista rápida de magias",
+      "canonicalIds": [
+        "P05"
+      ],
+      "path": "images/p-05-selecao-rapida-magias.png",
+      "tool": "image_gen.imagegen",
+      "toolMode": "built-in",
+      "toolOutput": "exec-af60847a-d101-4b44-9d8b-1ca86124a7ff.png",
+      "copyMethod": "exact-file-copy; source retained in generated_images",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2734867,
+      "sha256": "ac9165a9ede50d4c81cecb521c6cd04705bc41231d7afe032c92899130618682",
+      "format": "PNG",
+      "candidate": true,
+      "installed": false,
+      "approved": false,
+      "productionReady": false,
+      "promotionBlocked": true,
+      "promotionBlockReasons": [
+        "Candidato de estudo sem aprovação visual/implementação.",
+        "Resolução real inferior ao alvo solicitado; sem ampliação artificial."
+      ],
+      "resolutionTargetMet": false,
+      "resampled": false,
+      "source": [
+        {
+          "file": "Source/panels/spell_list.cpp",
+          "line": 115
+        },
+        {
+          "file": "Source/diablo.cpp",
+          "line": 1947
+        }
+      ],
+      "normalizedRegionsApproximate": true,
+      "regionsAreRuntimeHitboxes": false,
+      "reviewNotes": [
+        "Origens Habilidade, Magia, Pergaminho e Cajado aparecem distintas, sem barra permanente adicional.",
+        "F5/F6 são exemplos, e não limite de atalhos; o personagem mantém doze atalhos configuráveis."
+      ],
+      "issues": [],
+      "revisions": []
+    },
+    {
+      "key": "p06-quests",
+      "filename": "p-06-diario-missoes.png",
+      "coveredIds": [
+        "P06"
+      ],
+      "intendedDimensions": [
+        1920,
+        1080
+      ],
+      "normalizedRegions": [
+        {
+          "id": "P06",
+          "x": 0,
+          "y": 0,
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "prompt": "Use case: ui-mockup. Asset type: candidate high-definition concept painting for Diablo 1 3D UI, not a screenshot and never a fake original comparison. Art direction: match the approved references' dark original Diablo 1 gothic atmosphere: charcoal stone fields, finely worn aged iron frames, pewter engraving, restrained aged brass edging, ivory readable serif text. Tiny amber highlights only for selection and candlelight; red/blue life and mana. Avoid polished MMO UI, fantasy gold filigree overload, neon, flat web UI. Background is an ORIGINAL ILLUSTRATION of nighttime Tristram cobbles, timber cottages and a well; this is illustrative concept scenery, no claim of runtime. Keep the bottom native-style continuous HUD: left CHAR/QUESTS/MAP/MENU buttons, large red life globe held by gothic gargoyles, eight numbered belt cells ABOVE the broad black information box, blue mana globe, right INV/SPELLS buttons with one separate prepared-spell tile under them. No extra permanent quickbar, no minimap except when explicitly requested for a native map mode, no stamina, cooldowns, equipment boots/gloves or invented gameplay. Preserve the free world area. All strings are PT-BR sample copy to be implemented later as live text, never baked final runtime labels. Add a subtle outside-game editorial top caption \"ESTUDO R2 · CONCEITO IA · NÃO É CAPTURA\". Finish as an art-directed crisp HD bitmap, textured but typography remains clear.\nPrimary request: FULL SCREEN1920x1080. P06 quest log open LEFT in a tall charcoalstone agediron panel, header \"DIÁRIO DE MISSÕES · Q\" and closeX. Clear ivory headings \"Ativas\" and \"Concluídas\". Under Ativas two selectable text entries \"O Açougueiro\" selected with subtle amber edge, and \"Água envenenada\". Under Concluídas a muted but readable \"O sinal da taverna\", without selectable button. Only action at panel bottom \"Ouvir relato\"; simple closing X at header. No progress percentages, no checklist objectives, no quest tracking arrow, no invented reward icons, no minimap. Leave enough blank breathing room below list and world right, full native bottomHUD.",
+      "id": "p06-quests",
+      "title": "Diário de missões",
+      "canonicalIds": [
+        "P06"
+      ],
+      "path": "images/p-06-diario-missoes.png",
+      "tool": "image_gen.imagegen",
+      "toolMode": "built-in",
+      "toolOutput": "exec-31219da4-6b92-41ad-ab7c-638dd698e671.png",
+      "copyMethod": "exact-file-copy; source retained in generated_images",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2783815,
+      "sha256": "91080f642e4a757481102614eddbb4dd95c9907904875d62fb39cf2bb3de7d7b",
+      "format": "PNG",
+      "candidate": true,
+      "installed": false,
+      "approved": false,
+      "productionReady": false,
+      "promotionBlocked": true,
+      "promotionBlockReasons": [
+        "Candidato de estudo sem aprovação visual/implementação.",
+        "Resolução real inferior ao alvo solicitado; sem ampliação artificial."
+      ],
+      "resolutionTargetMet": false,
+      "resampled": false,
+      "source": [
+        {
+          "file": "Source/panels/quest_log.cpp",
+          "line": 84
+        },
+        {
+          "file": "Source/panels/quest_log.cpp",
+          "line": 167
+        }
+      ],
+      "normalizedRegionsApproximate": true,
+      "regionsAreRuntimeHitboxes": false,
+      "reviewNotes": [
+        "Ativas são selecionáveis; concluída foi desenhada com menor ênfase.",
+        "Nenhum checklist, porcentagem ou rastreador novo foi acrescentado."
+      ],
+      "issues": [],
+      "revisions": []
+    },
+    {
+      "key": "p07-narrative",
+      "filename": "p-07-relato-narrado.png",
+      "coveredIds": [
+        "P07"
+      ],
+      "intendedDimensions": [
+        1920,
+        1080
+      ],
+      "normalizedRegions": [
+        {
+          "id": "P07",
+          "x": 0,
+          "y": 0,
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "prompt": "Use case: ui-mockup. Asset type: candidate high-definition concept painting for Diablo 1 3D UI, not a screenshot and never a fake original comparison. Art direction: match the approved references' dark original Diablo 1 gothic atmosphere: charcoal stone fields, finely worn aged iron frames, pewter engraving, restrained aged brass edging, ivory readable serif text. Tiny amber highlights only for selection and candlelight; red/blue life and mana. Avoid polished MMO UI, fantasy gold filigree overload, neon, flat web UI. Background is an ORIGINAL ILLUSTRATION of nighttime Tristram cobbles, timber cottages and a well; this is illustrative concept scenery, no claim of runtime. Keep the bottom native-style continuous HUD: left CHAR/QUESTS/MAP/MENU buttons, large red life globe held by gothic gargoyles, eight numbered belt cells ABOVE the broad black information box, blue mana globe, right INV/SPELLS buttons with one separate prepared-spell tile under them. No extra permanent quickbar, no minimap except when explicitly requested for a native map mode, no stamina, cooldowns, equipment boots/gloves or invented gameplay. Preserve the free world area. All strings are PT-BR sample copy to be implemented later as live text, never baked final runtime labels. Add a subtle outside-game editorial top caption \"ESTUDO R2 · CONCEITO IA · NÃO É CAPTURA\". Finish as an art-directed crisp HD bitmap, textured but typography remains clear.\nPrimary request: FULL SCREEN1920x1080 P07 narrated quest/NPC text. A large but restrained horizontal darkstone reading window near top-center of illustrated Tristram, width65%, height46%, between y100 andy630. Ivory large serif reading text with comfortable line height, subtle scroll indicator on right, header \"RELATO\", closeX. Exact author-created sample copy, set in 5 short lines: \"A noite cobre a estrada. Antes de seguir, escute com atenção e prepare seus recursos. Há perigos além da luz das tochas. Leve o que puder carregar e volte quando precisar de abrigo.\" No NPC face portrait, no cinematic dialogue-choice tree, no play/pause media controls; the window represents native scrolling voice-synchronized text, closing retains context. World under it, bottom nativeHUD intact. No extra gameplay features.",
+      "id": "p07-narrative",
+      "title": "Diálogo e relato narrado",
+      "canonicalIds": [
+        "P07"
+      ],
+      "path": "images/p-07-relato-narrado.png",
+      "tool": "image_gen.imagegen",
+      "toolMode": "built-in",
+      "toolOutput": "exec-0080a445-ca90-417e-bdd3-d06ca15f4590.png",
+      "copyMethod": "exact-file-copy; source retained in generated_images",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2652443,
+      "sha256": "4e60db2cd81b4bea7d3c1ef61a94d88f4577d8d9162ae4431c8fc8bd9efbe111",
+      "format": "PNG",
+      "candidate": true,
+      "installed": false,
+      "approved": false,
+      "productionReady": false,
+      "promotionBlocked": true,
+      "promotionBlockReasons": [
+        "Candidato de estudo sem aprovação visual/implementação.",
+        "Resolução real inferior ao alvo solicitado; sem ampliação artificial."
+      ],
+      "resolutionTargetMet": false,
+      "resampled": false,
+      "source": [
+        {
+          "file": "Source/minitext.cpp",
+          "line": 94
+        },
+        {
+          "file": "Source/minitext.cpp",
+          "line": 159
+        }
+      ],
+      "normalizedRegionsApproximate": true,
+      "regionsAreRuntimeHitboxes": false,
+      "reviewNotes": [
+        "Texto narrativo autoral de amostra, com janela e rolagem; não representa lore canônica.",
+        "Não comprova sincronização ou reprodução de áudio."
+      ],
+      "issues": [],
+      "revisions": []
+    },
+    {
+      "key": "p08-stash",
+      "filename": "p-08-bau-inventario.png",
+      "coveredIds": [
+        "P08"
+      ],
+      "intendedDimensions": [
+        1920,
+        1080
+      ],
+      "normalizedRegions": [
+        {
+          "id": "P08",
+          "x": 0,
+          "y": 0,
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "prompt": "Use case: precise-object-edit. Edit ONLY the two cell grids in this supplied concept. Preserve all frames, equipment7slots, gold values, paging/withdraw controls, illustrated world and bottomnativeHUD. LEFT BAÚ cell grid is wrong: replace it with EXACTLY TEN columns by TEN rows (100equal cells). Count ELEVEN vertical full lines and ELEVEN horizontal full lines including borders; make its area square, eachcell equal. Remove current stash item illustrations if needed to reveal correct grid. RIGHT INVENTÁRIO backpack belowequipment is wrong: replace it with EXACTLY TEN columns by FOUR rows (40equalcells), ELEVEN vertical lines and FIVE horizontal lines including border. Equal squarecells, width:height ratio2.5:1. No grid-size labels inside playerUI. If space is tight, reduce empty padding; keep7equipmentframes unchanged. Do not add/removeslots anywhereelse. Primary objective is precise grid count, not new design.",
+      "repairAttempted": true,
+      "id": "p08-stash",
+      "title": "Baú e inventário",
+      "canonicalIds": [
+        "P08"
+      ],
+      "path": "images/p-08-bau-inventario.png",
+      "tool": "image_gen.imagegen",
+      "toolMode": "built-in",
+      "toolOutput": "exec-a2db29ef-b593-4fd1-893e-e5c0be44ae8b.png",
+      "copyMethod": "exact-file-copy; source retained in generated_images",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2531886,
+      "sha256": "09e556c5c725149341d995ff10db1532cacc35bcaa0dfda3ec8d7ace80f0c061",
+      "format": "PNG",
+      "candidate": true,
+      "installed": false,
+      "approved": false,
+      "productionReady": false,
+      "promotionBlocked": true,
+      "promotionBlockReasons": [
+        "Candidato de estudo sem aprovação visual/implementação.",
+        "Resolução real inferior ao alvo solicitado; sem ampliação artificial.",
+        "stash-grid-wrong-10x9",
+        "backpack-grid-wrong-10x3"
+      ],
+      "resolutionTargetMet": false,
+      "resampled": false,
+      "source": [
+        {
+          "file": "Source/qol/stash.cpp",
+          "line": 42
+        },
+        {
+          "file": "Source/qol/stash.cpp",
+          "line": 357
+        },
+        {
+          "file": "Source/stores.cpp",
+          "line": 2022
+        }
+      ],
+      "normalizedRegionsApproximate": true,
+      "regionsAreRuntimeHitboxes": false,
+      "reviewNotes": [
+        "A primeira saída e uma tentativa de correção focada não obedeceram à contagem de linhas.",
+        "A imagem final mostra aproximadamente baú 10×9 e mochila 10×3; o contrato real é baú 10×10 e mochila 10×4.",
+        "Sete receptáculos, página 7/100, cinco controles de navegação/saque e saldos estão presentes.",
+        "PROMOÇÃO BLOQUEADA: reconstruir grades pelos nós reais; não usar a grade rasterizada como especificação."
+      ],
+      "issues": [
+        "stash-grid-wrong-10x9",
+        "backpack-grid-wrong-10x3"
+      ],
+      "revisions": [
+        {
+          "revision": 1,
+          "prompt": "Use case: ui-mockup. Asset type: candidate high-definition concept painting for Diablo 1 3D UI, not a screenshot and never a fake original comparison. Art direction: match the approved references' dark original Diablo 1 gothic atmosphere: charcoal stone fields, finely worn aged iron frames, pewter engraving, restrained aged brass edging, ivory readable serif text. Tiny amber highlights only for selection and candlelight; red/blue life and mana. Avoid polished MMO UI, fantasy gold filigree overload, neon, flat web UI. Background is an ORIGINAL ILLUSTRATION of nighttime Tristram cobbles, timber cottages and a well; this is illustrative concept scenery, no claim of runtime. Keep the bottom native-style continuous HUD: left CHAR/QUESTS/MAP/MENU buttons, large red life globe held by gothic gargoyles, eight numbered belt cells ABOVE the broad black information box, blue mana globe, right INV/SPELLS buttons with one separate prepared-spell tile under them. No extra permanent quickbar, no minimap except when explicitly requested for a native map mode, no stamina, cooldowns, equipment boots/gloves or invented gameplay. Preserve the free world area. All strings are PT-BR sample copy to be implemented later as live text, never baked final runtime labels. Add a subtle outside-game editorial top caption \"ESTUDO R2 · CONCEITO IA · NÃO É CAPTURA\". Finish as an art-directed crisp HD bitmap, textured but typography remains clear.\nPrimary request: FULL SCREEN1920x1080. P08 stash open LEFT and inventory RIGHT with Tristram world corridor between them and nativeHUD bottom. LEFT panel title \"BAÚ\", top navigation row containing exactly five controls \"−10\", \"‹\", coin/withdraw icon, \"›\", \"+10\" surrounding page label \"7 / 100\"; small action text \"Sacar ouro\". BELOW the nav a precise SQUARE TEN COLUMN by TEN ROW stash grid:100equal square cells, 11vertical lines and11horizontal lines including border. Sparse big shield2×3, sword1×3, bow2×3, scroll1×1, potion1×1, no mergingcells. Footer \"Ouro guardado 18.600\". RIGHT inventory contains EXACTLY7equipment receptacles:head,amulet,torso,2hands,2rings, above a TEN-column FOUR-row backpack40cells; helmet/amulet/mail/sword/shield/tworings; footer \"Ouro 2.450\". Do not draw search, filters, named tabs or buy/sell controls. Do not print grid sizes or contract commentary in game UI. Full nativeHUD not covered.",
+          "toolOutput": "exec-22b38c62-4051-4373-ac3c-34cc65ebfc2c.png",
+          "candidate": true,
+          "installed": false,
+          "selected": false
+        }
+      ]
+    },
+    {
+      "key": "p09-gold",
+      "filename": "p-09-ouro-sacar-dividir.png",
+      "coveredIds": [
+        "P09",
+        "P10"
+      ],
+      "intendedDimensions": [
+        2560,
+        1440
+      ],
+      "normalizedRegions": [
+        {
+          "id": "P09",
+          "x": 0.01,
+          "y": 0.065,
+          "width": 0.48,
+          "height": 0.89
+        },
+        {
+          "id": "P10",
+          "x": 0.51,
+          "y": 0.065,
+          "width": 0.48,
+          "height": 0.89
+        }
+      ],
+      "prompt": "Use case: ui-mockup. Asset type: candidate high-definition concept painting for Diablo 1 3D UI, not a screenshot and never a fake original comparison. Art direction: match the approved references' dark original Diablo 1 gothic atmosphere: charcoal stone fields, finely worn aged iron frames, pewter engraving, restrained aged brass edging, ivory readable serif text. Tiny amber highlights only for selection and candlelight; red/blue life and mana. Avoid polished MMO UI, fantasy gold filigree overload, neon, flat web UI. Background is an ORIGINAL ILLUSTRATION of nighttime Tristram cobbles, timber cottages and a well; this is illustrative concept scenery, no claim of runtime. Keep the bottom native-style continuous HUD: left CHAR/QUESTS/MAP/MENU buttons, large red life globe held by gothic gargoyles, eight numbered belt cells ABOVE the broad black information box, blue mana globe, right INV/SPELLS buttons with one separate prepared-spell tile under them. No extra permanent quickbar, no minimap except when explicitly requested for a native map mode, no stamina, cooldowns, equipment boots/gloves or invented gameplay. Preserve the free world area. All strings are PT-BR sample copy to be implemented later as live text, never baked final runtime labels. Add a subtle outside-game editorial top caption \"ESTUDO R2 · CONCEITO IA · NÃO É CAPTURA\". Finish as an art-directed crisp HD bitmap, textured but typography remains clear.\nPrimary request: LARGE HD ART BOARD2560x1440 with TWO distinct screen concept frames side by side, editorial labels above them \"P09 · Sacar ouro\" and \"P10 · Dividir pilha\". Both show conceptual Tristram with nativeHUD, small centered darkstone numeric input modal, dim backdrop. LEFT modal title \"SACAR OURO\"; \"Ouro guardado 18.600\"; \"Limite disponível 1.200\"; framed number field label \"Quantidade\" value\"500\" with visible cursor; two actions \"Confirmar · Enter\" and \"Cancelar · Esc\". RIGHT modal title \"DIVIDIR OURO\"; \"Ouro nesta pilha 1.000\"; \"Remover até 1.000\"; \"Quantidade\" field\"250\"; identical Enter/Esc actions. Two distinct actions, not currency shop. Do not add bank deposit/taxes or payment icons. Numeric copy is illustrative. Draw a subtle warm coin emblem, restrained amber focus, ivory text. No minimap.",
+      "id": "p09-gold",
+      "title": "Sacar ouro do baú / Dividir pilha de ouro",
+      "canonicalIds": [
+        "P09",
+        "P10"
+      ],
+      "path": "images/p-09-ouro-sacar-dividir.png",
+      "tool": "image_gen.imagegen",
+      "toolMode": "built-in",
+      "toolOutput": "exec-a8e525c1-e94c-49a9-b70a-9167b54d9ec9.png",
+      "copyMethod": "exact-file-copy; source retained in generated_images",
+      "width": 1983,
+      "height": 793,
+      "bytes": 2565164,
+      "sha256": "a791d31254fc5f06fed28b709bc49bc1ebd72b99073a5a1e0317cd0e526b755b",
+      "format": "PNG",
+      "candidate": true,
+      "installed": false,
+      "approved": false,
+      "productionReady": false,
+      "promotionBlocked": true,
+      "promotionBlockReasons": [
+        "Candidato de estudo sem aprovação visual/implementação.",
+        "Resolução real inferior ao alvo solicitado; sem ampliação artificial.",
+        "hud-labels-approximate"
+      ],
+      "resolutionTargetMet": false,
+      "resampled": false,
+      "source": [
+        {
+          "file": "Source/qol/stash.cpp",
+          "line": 590
+        },
+        {
+          "file": "Source/qol/stash.cpp",
+          "line": 641
+        },
+        {
+          "file": "Source/control/control_gold.cpp",
+          "line": 48
+        }
+      ],
+      "normalizedRegionsApproximate": true,
+      "regionsAreRuntimeHitboxes": false,
+      "reviewNotes": [
+        "Os dois modais distinguem sacar do baú e dividir a pilha, com limites e Enter/Esc.",
+        "Steppers numéricos visuais são apresentação proposta; não comprovam botões implementados.",
+        "Numeração/células do HUD de fundo são aproximadas."
+      ],
+      "issues": [
+        "hud-labels-approximate"
+      ],
+      "revisions": []
+    },
+    {
+      "key": "p11-map-modes",
+      "filename": "p-11-automapa-tres-modos.png",
+      "coveredIds": [
+        "P11",
+        "V11",
+        "V12",
+        "V13"
+      ],
+      "intendedDimensions": [
+        2880,
+        1620
+      ],
+      "normalizedRegions": [
+        {
+          "id": "V11",
+          "x": 0.005,
+          "y": 0.065,
+          "width": 0.325,
+          "height": 0.89
+        },
+        {
+          "id": "V12",
+          "x": 0.3375,
+          "y": 0.065,
+          "width": 0.325,
+          "height": 0.89
+        },
+        {
+          "id": "V13",
+          "x": 0.67,
+          "y": 0.065,
+          "width": 0.325,
+          "height": 0.89
+        },
+        {
+          "id": "P11",
+          "x": 0,
+          "y": 0,
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "prompt": "Use case: ui-mockup. Asset type: candidate high-definition concept painting for Diablo 1 3D UI, not a screenshot and never a fake original comparison. Art direction: match the approved references' dark original Diablo 1 gothic atmosphere: charcoal stone fields, finely worn aged iron frames, pewter engraving, restrained aged brass edging, ivory readable serif text. Tiny amber highlights only for selection and candlelight; red/blue life and mana. Avoid polished MMO UI, fantasy gold filigree overload, neon, flat web UI. Background is an ORIGINAL ILLUSTRATION of nighttime Tristram cobbles, timber cottages and a well; this is illustrative concept scenery, no claim of runtime. Keep the bottom native-style continuous HUD: left CHAR/QUESTS/MAP/MENU buttons, large red life globe held by gothic gargoyles, eight numbered belt cells ABOVE the broad black information box, blue mana globe, right INV/SPELLS buttons with one separate prepared-spell tile under them. No extra permanent quickbar, no minimap except when explicitly requested for a native map mode, no stamina, cooldowns, equipment boots/gloves or invented gameplay. Preserve the free world area. All strings are PT-BR sample copy to be implemented later as live text, never baked final runtime labels. Add a subtle outside-game editorial top caption \"ESTUDO R2 · CONCEITO IA · NÃO É CAPTURA\". Finish as an art-directed crisp HD bitmap, textured but typography remains clear.\nPrimary request: LARGE HD ART BOARD2880x1620 with THREE equally sized clearly divided full-screen concept frames, outer labels \"V11 · Opaco\", \"V12 · Transparente\", \"V13 · Minimapa\". SAME original illustrative isometric town/exploration plan across modes, NOT a geographical worldmap. Each has native bottomHUD. LEFT mode: opaque charcoal map field covering most of world above HUD; fine ivory blueprint lines of explored rooms/lanes, doorway gaps, stairs, directional player arrow; no fake undiscovered details. Middle mode: SAME thin ivory explored map lines over the visible dark Tristram world with true transparent visual effect, no opaque panel or parchment. RIGHT mode: world unobstructed with only a small corner map top-right, same plan/arrow in small charcoal field, NOT a permanent minimap outside this explicit mode. Native map metadata \"Tristram\" \"Normal\" \"100%\". Map actions shown subtly \"Aproximar\" \"Afastar\" \"Centralizar\" \"Fechar\". No GPS routes, destination markers, quest tracking or automatic navigation. Distinction must be obvious from art, not merely labels. Keep readable map motifs and silhouette.",
+      "id": "p11-map-modes",
+      "title": "Automapa e minimapa / Automapa opaco / Automapa transparente / Minimapa",
+      "canonicalIds": [
+        "P11",
+        "V11",
+        "V12",
+        "V13"
+      ],
+      "path": "images/p-11-automapa-tres-modos.png",
+      "tool": "image_gen.imagegen",
+      "toolMode": "built-in",
+      "toolOutput": "exec-857f2abc-aaa0-4042-9bf6-456e6d5c387a.png",
+      "copyMethod": "exact-file-copy; source retained in generated_images",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2781197,
+      "sha256": "5a17abcb5f373e329be673ce31efa83fd75f9fec0719da622b2d0175a93f575b",
+      "format": "PNG",
+      "candidate": true,
+      "installed": false,
+      "approved": false,
+      "productionReady": false,
+      "promotionBlocked": true,
+      "promotionBlockReasons": [
+        "Candidato de estudo sem aprovação visual/implementação.",
+        "Resolução real inferior ao alvo solicitado; sem ampliação artificial."
+      ],
+      "resolutionTargetMet": false,
+      "resampled": false,
+      "source": [
+        {
+          "file": "Source/automap.h",
+          "line": 86
+        },
+        {
+          "file": "Source/automap.cpp",
+          "line": 1427
+        },
+        {
+          "file": "Source/automap.cpp",
+          "line": 1702
+        },
+        {
+          "file": "Source/automap.cpp",
+          "line": 1752
+        }
+      ],
+      "normalizedRegionsApproximate": true,
+      "regionsAreRuntimeHitboxes": false,
+      "reviewNotes": [
+        "Opaco, transparente e minimapa têm apresentações distintas; o minimapa aparece somente no quadro dedicado.",
+        "Os traçados são autorais e não representam save ou exploração real; sem identidade geométrica estrita entre quadros.",
+        "Ações visuais de zoom/centragem reformulam ações nativas; não comprovam navegação automática."
+      ],
+      "issues": [],
+      "revisions": []
+    },
+    {
+      "key": "p12-chat-history",
+      "filename": "p-12-chat-historico.png",
+      "coveredIds": [
+        "P12",
+        "P13"
+      ],
+      "intendedDimensions": [
+        2560,
+        1440
+      ],
+      "normalizedRegions": [
+        {
+          "id": "P12",
+          "x": 0.01,
+          "y": 0.065,
+          "width": 0.48,
+          "height": 0.89
+        },
+        {
+          "id": "P13",
+          "x": 0.51,
+          "y": 0.065,
+          "width": 0.48,
+          "height": 0.89
+        }
+      ],
+      "prompt": "Use case: ui-mockup. Asset type: candidate high-definition concept painting for Diablo 1 3D UI, not a screenshot and never a fake original comparison. Art direction: match the approved references' dark original Diablo 1 gothic atmosphere: charcoal stone fields, finely worn aged iron frames, pewter engraving, restrained aged brass edging, ivory readable serif text. Tiny amber highlights only for selection and candlelight; red/blue life and mana. Avoid polished MMO UI, fantasy gold filigree overload, neon, flat web UI. Background is an ORIGINAL ILLUSTRATION of nighttime Tristram cobbles, timber cottages and a well; this is illustrative concept scenery, no claim of runtime. Keep the bottom native-style continuous HUD: left CHAR/QUESTS/MAP/MENU buttons, large red life globe held by gothic gargoyles, eight numbered belt cells ABOVE the broad black information box, blue mana globe, right INV/SPELLS buttons with one separate prepared-spell tile under them. No extra permanent quickbar, no minimap except when explicitly requested for a native map mode, no stamina, cooldowns, equipment boots/gloves or invented gameplay. Preserve the free world area. All strings are PT-BR sample copy to be implemented later as live text, never baked final runtime labels. Add a subtle outside-game editorial top caption \"ESTUDO R2 · CONCEITO IA · NÃO É CAPTURA\". Finish as an art-directed crisp HD bitmap, textured but typography remains clear.\nPrimary request: LARGE HDARTBOARD2560x1440 TWO separate concept screens side by side, external labels \"P12 · Escrever mensagem\" and \"P13 · Histórico\". Tristram illustration+nativeHUD each. LEFT a modest lower-world text chat entry box directly aboveHUD. Title \"MENSAGEM\", three recipient toggle boxes \"Mira\" \"Toren\" \"Ilan\", Mira andToren checked andIlan unchecked. Field \"Vamos juntos.\" with visible caret. Actions \"Enviar · Enter\" \"Cancelar · Esc\". These are TEXT recipients; no microphone, voice, audio channels or voice/mute icons. RIGHT a distinct taller darkstone chat history panel on left, header \"HISTÓRICO · 8 mensagens\"; scroll bar; readable author/level/timestamp entries \"#8 · 21:14:02 · Mira · Nível11\" then \"Estou na praça.\"; \"#7 · 21:13:54 · Sistema\" then \"Jogo salvo.\"; \"#6 · 21:13:41 · Ardan · Nível12\" then \"Encontro junto ao poço.\"; bottom amber subtle \"2 mensagens novas\" plus \"Mais recentes\", closeX. Messages names/times fictional. No party invitation action or icons unrelatedtochat. World remains visible. No minimap.",
+      "id": "p12-chat-history",
+      "title": "Escrever mensagem / Histórico de mensagens",
+      "canonicalIds": [
+        "P12",
+        "P13"
+      ],
+      "path": "images/p-12-chat-historico.png",
+      "tool": "image_gen.imagegen",
+      "toolMode": "built-in",
+      "toolOutput": "exec-30a17320-1131-4e01-b9ee-c329ba544ee0.png",
+      "copyMethod": "exact-file-copy; source retained in generated_images",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2739269,
+      "sha256": "b75ea1f391d1a4d24b1695e94e0fcde6109016a0779a40a8181f55906a38643c",
+      "format": "PNG",
+      "candidate": true,
+      "installed": false,
+      "approved": false,
+      "productionReady": false,
+      "promotionBlocked": true,
+      "promotionBlockReasons": [
+        "Candidato de estudo sem aprovação visual/implementação.",
+        "Resolução real inferior ao alvo solicitado; sem ampliação artificial."
+      ],
+      "resolutionTargetMet": false,
+      "resampled": false,
+      "source": [
+        {
+          "file": "Source/control/control_chat.cpp",
+          "line": 91
+        },
+        {
+          "file": "Source/qol/chatlog.cpp",
+          "line": 155
+        }
+      ],
+      "normalizedRegionsApproximate": true,
+      "regionsAreRuntimeHitboxes": false,
+      "reviewNotes": [
+        "Destinatários são de texto; não há microfone nem promessa de voz.",
+        "Nomes, horários, mensagens, contagem e não lidas são fictícios.",
+        "Build local NONET=ON: fluxo multiplayer não foi validado em execução."
+      ],
+      "issues": [],
+      "revisions": []
+    },
+    {
+      "key": "p14-help",
+      "filename": "p-14-ajuda.png",
+      "coveredIds": [
+        "P14"
+      ],
+      "intendedDimensions": [
+        1920,
+        1080
+      ],
+      "normalizedRegions": [
+        {
+          "id": "P14",
+          "x": 0,
+          "y": 0,
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "prompt": "Use case: ui-mockup. Asset type: candidate high-definition concept painting for Diablo 1 3D UI, not a screenshot and never a fake original comparison. Art direction: match the approved references' dark original Diablo 1 gothic atmosphere: charcoal stone fields, finely worn aged iron frames, pewter engraving, restrained aged brass edging, ivory readable serif text. Tiny amber highlights only for selection and candlelight; red/blue life and mana. Avoid polished MMO UI, fantasy gold filigree overload, neon, flat web UI. Background is an ORIGINAL ILLUSTRATION of nighttime Tristram cobbles, timber cottages and a well; this is illustrative concept scenery, no claim of runtime. Keep the bottom native-style continuous HUD: left CHAR/QUESTS/MAP/MENU buttons, large red life globe held by gothic gargoyles, eight numbered belt cells ABOVE the broad black information box, blue mana globe, right INV/SPELLS buttons with one separate prepared-spell tile under them. No extra permanent quickbar, no minimap except when explicitly requested for a native map mode, no stamina, cooldowns, equipment boots/gloves or invented gameplay. Preserve the free world area. All strings are PT-BR sample copy to be implemented later as live text, never baked final runtime labels. Add a subtle outside-game editorial top caption \"ESTUDO R2 · CONCEITO IA · NÃO É CAPTURA\". Finish as an art-directed crisp HD bitmap, textured but typography remains clear.\nPrimary request: FULLSCREEN1920x1080. P14 help window centered above nativeHUD, width70%height70%, dark charcoalstone/pewter. Header \"AJUDA\", closeX. Wide readable scrollable text area with large ivory headings \"Atalhos\", \"Movimento\", \"Combate\", \"Automapa\", \"Itens e ouro\", \"Habilidades e magias\"; current section Atalhos lists exactly \"I — Inventário\", \"C — Personagem\", \"B — Grimório\", \"Q — Diário de missões\", \"Tab — Automapa\", \"1–8 — Usar item do cinto\". Below a short sample \"Clique no chão para mover. Clique em um item para recolher.\" Native-style simple narrow scrollbar on right and footer \"Rolar\" \"Esc · Fechar\". No online guides, searchbars, external websites or invented key limits. Tristram conceptual world behind, native bottomHUD. Text is sample and shortcuts later driven by real configuration.",
+      "id": "p14-help",
+      "title": "Ajuda",
+      "canonicalIds": [
+        "P14"
+      ],
+      "path": "images/p-14-ajuda.png",
+      "tool": "image_gen.imagegen",
+      "toolMode": "built-in",
+      "toolOutput": "exec-2aa0dfa9-1e61-4d54-8e0b-7aa7029091d8.png",
+      "copyMethod": "exact-file-copy; source retained in generated_images",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2745251,
+      "sha256": "f4a1f6336c9036154bc06bb9ba67c291f361de66695d32a3e2bf273b9f4de385",
+      "format": "PNG",
+      "candidate": true,
+      "installed": false,
+      "approved": false,
+      "productionReady": false,
+      "promotionBlocked": true,
+      "promotionBlockReasons": [
+        "Candidato de estudo sem aprovação visual/implementação.",
+        "Resolução real inferior ao alvo solicitado; sem ampliação artificial."
+      ],
+      "resolutionTargetMet": false,
+      "resampled": false,
+      "source": [
+        {
+          "file": "Source/help.cpp",
+          "line": 191
+        }
+      ],
+      "normalizedRegionsApproximate": true,
+      "regionsAreRuntimeHitboxes": false,
+      "reviewNotes": [
+        "Tópicos laterais são proposta de acesso à ajuda rolável.",
+        "Os atalhos são exemplos padrão e deverão consultar configuração real."
+      ],
+      "issues": [],
+      "revisions": []
+    },
+    {
+      "key": "p15-unique",
+      "filename": "p-15-detalhes-item-unico.png",
+      "coveredIds": [
+        "P15"
+      ],
+      "intendedDimensions": [
+        1920,
+        1080
+      ],
+      "normalizedRegions": [
+        {
+          "id": "P15",
+          "x": 0,
+          "y": 0,
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "prompt": "Use case: precise-object-edit. The supplied P15 concept inventory backpack incorrectly has FIVE horizontal rows. Make one focused edit: REMOVE THE BOTTOM FIFTH ROW of backpack cells and its item illustrations, bringing the lower backpack frame up exactly one row. Keep the remaining TEN columns and FOUR rows, forty cells, with eleven vertical lines and five horizontal lines including border. Move remaining backpack contents only as needed. Preserve all seven equipment receptacles above, shield detail card, all text, original illustration, native bottom HUD and layout. No other changes. Do not merely empty the fifth row: the fifth row must physically disappear. A compact empty strip below the four-row backpack is fine.",
+      "repairAttempted": true,
+      "id": "p15-unique",
+      "title": "Detalhes de item único",
+      "canonicalIds": [
+        "P15"
+      ],
+      "path": "images/p-15-detalhes-item-unico.png",
+      "tool": "image_gen.imagegen",
+      "toolMode": "built-in",
+      "toolOutput": "exec-9070edfd-f2f1-400d-bc4d-503dbc2180f8.png",
+      "copyMethod": "exact-file-copy; source retained in generated_images",
+      "width": 1671,
+      "height": 941,
+      "bytes": 2342840,
+      "sha256": "374f7e5c2f324a1ee10e41c326395dd81373822452a266bbacc5e398f104b2b3",
+      "format": "PNG",
+      "candidate": true,
+      "installed": false,
+      "approved": false,
+      "productionReady": false,
+      "promotionBlocked": true,
+      "promotionBlockReasons": [
+        "Candidato de estudo sem aprovação visual/implementação.",
+        "Resolução real inferior ao alvo solicitado; sem ampliação artificial.",
+        "hud-extra-belt-cell"
+      ],
+      "resolutionTargetMet": false,
+      "resampled": false,
+      "source": [
+        {
+          "file": "Source/items.cpp",
+          "line": 1734
+        },
+        {
+          "file": "Source/items.cpp",
+          "line": 4097
+        }
+      ],
+      "normalizedRegionsApproximate": true,
+      "regionsAreRuntimeHitboxes": false,
+      "reviewNotes": [
+        "Uma correção removeu a quinta linha: mochila final inspecionada com 10×4 e sete receptáculos.",
+        "Item único e propriedades são exemplos genéricos, sem inclusão no catálogo.",
+        "O HUD inferior gerado apresenta célula/numeração adicional aproximada; preservar o HUD nativo por composição em implementação."
+      ],
+      "issues": [
+        "hud-extra-belt-cell"
+      ],
+      "revisions": [
+        {
+          "revision": 1,
+          "prompt": "Use case: ui-mockup. Asset type: candidate high-definition concept painting for Diablo 1 3D UI, not a screenshot and never a fake original comparison. Art direction: match the approved references' dark original Diablo 1 gothic atmosphere: charcoal stone fields, finely worn aged iron frames, pewter engraving, restrained aged brass edging, ivory readable serif text. Tiny amber highlights only for selection and candlelight; red/blue life and mana. Avoid polished MMO UI, fantasy gold filigree overload, neon, flat web UI. Background is an ORIGINAL ILLUSTRATION of nighttime Tristram cobbles, timber cottages and a well; this is illustrative concept scenery, no claim of runtime. Keep the bottom native-style continuous HUD: left CHAR/QUESTS/MAP/MENU buttons, large red life globe held by gothic gargoyles, eight numbered belt cells ABOVE the broad black information box, blue mana globe, right INV/SPELLS buttons with one separate prepared-spell tile under them. No extra permanent quickbar, no minimap except when explicitly requested for a native map mode, no stamina, cooldowns, equipment boots/gloves or invented gameplay. Preserve the free world area. All strings are PT-BR sample copy to be implemented later as live text, never baked final runtime labels. Add a subtle outside-game editorial top caption \"ESTUDO R2 · CONCEITO IA · NÃO É CAPTURA\". Finish as an art-directed crisp HD bitmap, textured but typography remains clear.\nPrimary request: FULLSCREEN1920x1080. P15 inventory RIGHT with correct7equipment slots(head,amulet,torso,2hands,2rings) and TEN-column FOUR-row40-cell backpack. Focus selected antique shield in right hand. A separate modest darkstone information box immediately LEFT of inventory, not coveringtheHUD, with restrained paleamber unique item name \"Escudo antigo\"; smaller \"Único\"; properties \"Defesa 18\", \"+8 de resistência a fogo\", \"Durabilidade 22 / 30\"; closeX. Generic fictional visual item, no canonical Diablo artifact claim. A subtle white cursor arrow points to selected shield. Inventory contains sword/mail/helm/amulet/tworings in remaining sixreceptacles; sparse backpack. Do not add equip/use/sell comparison buttons, gear score, raritystars, DPS meter or item level. Full nativeHUD and worldleft, no minimap. The details window must remain visibly distinct from backpack contents and neednot fill screen.",
+          "toolOutput": "exec-bc61aebd-0845-4528-9e15-4412aa134f26.png",
+          "candidate": true,
+          "installed": false,
+          "selected": false
+        }
+      ]
+    },
+    {
+      "key": "p16-party-inspection",
+      "filename": "p-16-grupo-inspecao.png",
+      "coveredIds": [
+        "P16",
+        "V14"
+      ],
+      "intendedDimensions": [
+        2560,
+        1440
+      ],
+      "normalizedRegions": [
+        {
+          "id": "P16",
+          "x": 0.01,
+          "y": 0.065,
+          "width": 0.48,
+          "height": 0.89
+        },
+        {
+          "id": "V14",
+          "x": 0.51,
+          "y": 0.065,
+          "width": 0.48,
+          "height": 0.89
+        }
+      ],
+      "prompt": "Use case: precise-object-edit. In the RIGHT inspection frame only, replace the bow in Mira's left hand equipment receptacle with a short one-handed sword, and replace the single arrow in the right hand receptacle with a small wooden round shield. An individual arrow is not a valid native equipped item; this corrects that error. Keep EXACTLY seven equipment receptacles, all other inventory items and backpack grid unchanged. Preserve read-only state, all statistics, portraits, character illustration, party frame on left, dark materials and bottom HUD. No new buttons or items elsewhere.",
+      "repairAttempted": true,
+      "id": "p16-party-inspection",
+      "title": "Grupo e inspeção de aliado / Inspecionar Mira",
+      "canonicalIds": [
+        "P16",
+        "V14"
+      ],
+      "path": "images/p-16-grupo-inspecao.png",
+      "tool": "image_gen.imagegen",
+      "toolMode": "built-in",
+      "toolOutput": "exec-342305c0-9555-4bb6-892e-963b3f626ca9.png",
+      "copyMethod": "exact-file-copy; source retained in generated_images",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2547054,
+      "sha256": "b04708614a69010ef7e7d107e28667dba9f8579293d734407e2676416a700139",
+      "format": "PNG",
+      "candidate": true,
+      "installed": false,
+      "approved": false,
+      "productionReady": false,
+      "promotionBlocked": true,
+      "promotionBlockReasons": [
+        "Candidato de estudo sem aprovação visual/implementação.",
+        "Resolução real inferior ao alvo solicitado; sem ampliação artificial."
+      ],
+      "resolutionTargetMet": false,
+      "resampled": false,
+      "source": [
+        {
+          "file": "Source/panels/partypanel.cpp",
+          "line": 166
+        },
+        {
+          "file": "Source/panels/partypanel.cpp",
+          "line": 105
+        },
+        {
+          "file": "Source/panels/charpanel.cpp",
+          "line": 132
+        },
+        {
+          "file": "Source/inv.cpp",
+          "line": 1210
+        }
+      ],
+      "normalizedRegionsApproximate": true,
+      "regionsAreRuntimeHitboxes": false,
+      "reviewNotes": [
+        "Grupo e inspeção são quadros distintos; a inspeção não contém botões + ou ações de equipamento.",
+        "Uma correção substituiu arco/flecha equipados pela combinação genérica espada/escudo.",
+        "Inspeção visual: todos os campos, sete receptáculos e mochila 10×4.",
+        "Retrato/roupa são ilustração conceitual e não comprovam sincronização por equipamento; multiplayer condicional não foi executado."
+      ],
+      "issues": [],
+      "revisions": [
+        {
+          "revision": 1,
+          "prompt": "Use case: ui-mockup. Asset type: candidate high-definition concept painting for Diablo 1 3D UI, not a screenshot and never a fake original comparison. Art direction: match the approved references' dark original Diablo 1 gothic atmosphere: charcoal stone fields, finely worn aged iron frames, pewter engraving, restrained aged brass edging, ivory readable serif text. Tiny amber highlights only for selection and candlelight; red/blue life and mana. Avoid polished MMO UI, fantasy gold filigree overload, neon, flat web UI. Background is an ORIGINAL ILLUSTRATION of nighttime Tristram cobbles, timber cottages and a well; this is illustrative concept scenery, no claim of runtime. Keep the bottom native-style continuous HUD: left CHAR/QUESTS/MAP/MENU buttons, large red life globe held by gothic gargoyles, eight numbered belt cells ABOVE the broad black information box, blue mana globe, right INV/SPELLS buttons with one separate prepared-spell tile under them. No extra permanent quickbar, no minimap except when explicitly requested for a native map mode, no stamina, cooldowns, equipment boots/gloves or invented gameplay. Preserve the free world area. All strings are PT-BR sample copy to be implemented later as live text, never baked final runtime labels. Add a subtle outside-game editorial top caption \"ESTUDO R2 · CONCEITO IA · NÃO É CAPTURA\". Finish as an art-directed crisp HD bitmap, textured but typography remains clear.\nPrimary request: LARGEHDARTBOARD2560x1440 TWO separate concept frames side by side labeled outsidegame \"P16 · Grupo multiplayer\" and \"V14 · Inspecionar Mira\". LEFT shows native optional small party panel at upperleft of Tristram illustration: three compact portrait cards \"Mira · Arqueira\" with red life82/96 blue mana28/34; \"Toren · Feiticeiro\" life44/60 mana110/132 and a subtle mana-shield ring; \"Ilan · Guerreiro\" grayed portrait and \"Morto\". Tiny hint \"Botão direito · Inspecionar\". World andnativeHUD visible. RIGHT read-only inspection of Mira with character LEFT/inventoryRIGHT and narrow worldcenter plus nativeHUD. Character has \"Mira\", \"Arqueira · Nível11\"; Experiência145.200; Próximo nível188.000; columns Base/Agora: Força28/32, Magia24/24, Destreza48/55, Vitalidade32/32; Pontos0; Ouro1.820; Armadura36, Acerto82%, Dano9–16; Máxima/Atual Vida96/82 Mana34/28; resistances Magia0% Fogo15% Raios10%. NO plus buttons, NO equip/use/trade/move actions; only \"Fechar inspeção\". InventoryEXACT7equipmentreceptacles head/amulet/torso/twohands/tworings,40-cell10column4rowbackpack. Since inspectionopen, partycards doNOT remain over thisRIGHTframe. Use modest \"Somente leitura\" header. Fictitious players, no actual network session.",
+          "toolOutput": "exec-d7b1699f-9823-430f-8add-97c9408b45d2.png",
+          "candidate": true,
+          "installed": false,
+          "selected": false
+        }
+      ]
+    },
+    {
+      "key": "p17-death",
+      "filename": "p-17-morte-tres-contextos.png",
+      "coveredIds": [
+        "P17",
+        "V15",
+        "V16",
+        "V17"
+      ],
+      "intendedDimensions": [
+        2880,
+        1620
+      ],
+      "normalizedRegions": [
+        {
+          "id": "V15",
+          "x": 0.005,
+          "y": 0.065,
+          "width": 0.325,
+          "height": 0.89
+        },
+        {
+          "id": "V16",
+          "x": 0.3375,
+          "y": 0.065,
+          "width": 0.325,
+          "height": 0.89
+        },
+        {
+          "id": "V17",
+          "x": 0.67,
+          "y": 0.065,
+          "width": 0.325,
+          "height": 0.89
+        },
+        {
+          "id": "P17",
+          "x": 0,
+          "y": 0,
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "prompt": "Use case: ui-mockup. Asset type: candidate high-definition concept painting for Diablo 1 3D UI, not a screenshot and never a fake original comparison. Art direction: match the approved references' dark original Diablo 1 gothic atmosphere: charcoal stone fields, finely worn aged iron frames, pewter engraving, restrained aged brass edging, ivory readable serif text. Tiny amber highlights only for selection and candlelight; red/blue life and mana. Avoid polished MMO UI, fantasy gold filigree overload, neon, flat web UI. Background is an ORIGINAL ILLUSTRATION of nighttime Tristram cobbles, timber cottages and a well; this is illustrative concept scenery, no claim of runtime. Keep the bottom native-style continuous HUD: left CHAR/QUESTS/MAP/MENU buttons, large red life globe held by gothic gargoyles, eight numbered belt cells ABOVE the broad black information box, blue mana globe, right INV/SPELLS buttons with one separate prepared-spell tile under them. No extra permanent quickbar, no minimap except when explicitly requested for a native map mode, no stamina, cooldowns, equipment boots/gloves or invented gameplay. Preserve the free world area. All strings are PT-BR sample copy to be implemented later as live text, never baked final runtime labels. Add a subtle outside-game editorial top caption \"ESTUDO R2 · CONCEITO IA · NÃO É CAPTURA\". Finish as an art-directed crisp HD bitmap, textured but typography remains clear.\nPrimary request: LARGEHDARTBOARD2880x1620 THREE distinct concept screens side by side, external editorial labels \"V15 · Solo com save\", \"V16 · Solo sem save\", \"V17 · Multiplayer\". Each frame shows same originalILLUSTRATIONfallenarmoredhero onTristramcobbles, darkcrimson death tint over world, nativebottomHUD with EMPTY redlifeglobe. Centerivorytext \"Você morreu\" with ONLYONEvalidcontextualaction beneath it: LEFT \"Esc · Carregar último save\"; MIDDLE \"Esc · Retornar ao menu principal\"; RIGHT \"Esc · Reiniciar na cidade\". No otherchoices inanyframe, no genericFechar, no resurrectioncashshop, no countdown, no restartdungeon invention. Do not puttechnicalmodeconditioninsidegame UI; frame labelsoutsidegamearecomparisoneditorial. Restrainedgothictext, novastornamentalmenu. Fallenherodistantnon-graphic.",
+      "id": "p17-death",
+      "title": "Morte / Você morreu — solo com save / Você morreu — solo sem save / Você morreu — multiplayer",
+      "canonicalIds": [
+        "P17",
+        "V15",
+        "V16",
+        "V17"
+      ],
+      "path": "images/p-17-morte-tres-contextos.png",
+      "tool": "image_gen.imagegen",
+      "toolMode": "built-in",
+      "toolOutput": "exec-fe9b950f-61a2-46d7-b4bd-d3eb48ab5979.png",
+      "copyMethod": "exact-file-copy; source retained in generated_images",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2240584,
+      "sha256": "193923489d263a4b408027d14f4ac4f6fd3f0a32bcf2ec9fd6d02374bd24126b",
+      "format": "PNG",
+      "candidate": true,
+      "installed": false,
+      "approved": false,
+      "productionReady": false,
+      "promotionBlocked": true,
+      "promotionBlockReasons": [
+        "Candidato de estudo sem aprovação visual/implementação.",
+        "Resolução real inferior ao alvo solicitado; sem ampliação artificial."
+      ],
+      "resolutionTargetMet": false,
+      "resampled": false,
+      "source": [
+        {
+          "file": "Source/control/control_panel.cpp",
+          "line": 789
+        },
+        {
+          "file": "Source/control/control_panel.cpp",
+          "line": 823
+        }
+      ],
+      "normalizedRegionsApproximate": true,
+      "regionsAreRuntimeHitboxes": false,
+      "reviewNotes": [
+        "Cada quadro apresenta somente uma ação válida: carregar save, menu principal ou cidade.",
+        "Não há conjunto simultâneo de três escolhas, contador ou Fechar genérico.",
+        "Mundo ilustrado avermelhado; não é morte capturada do executável."
+      ],
+      "issues": [],
+      "revisions": []
+    },
+    {
+      "key": "p18-notification-pause",
+      "filename": "p-18-notificacao-pausa.png",
+      "coveredIds": [
+        "P18",
+        "G19"
+      ],
+      "intendedDimensions": [
+        2560,
+        1440
+      ],
+      "normalizedRegions": [
+        {
+          "id": "P18",
+          "x": 0.01,
+          "y": 0.065,
+          "width": 0.48,
+          "height": 0.89
+        },
+        {
+          "id": "G19",
+          "x": 0.51,
+          "y": 0.065,
+          "width": 0.48,
+          "height": 0.89
+        }
+      ],
+      "prompt": "Use case: ui-mockup. Asset type: candidate high-definition concept painting for Diablo 1 3D UI, not a screenshot and never a fake original comparison. Art direction: match the approved references' dark original Diablo 1 gothic atmosphere: charcoal stone fields, finely worn aged iron frames, pewter engraving, restrained aged brass edging, ivory readable serif text. Tiny amber highlights only for selection and candlelight; red/blue life and mana. Avoid polished MMO UI, fantasy gold filigree overload, neon, flat web UI. Background is an ORIGINAL ILLUSTRATION of nighttime Tristram cobbles, timber cottages and a well; this is illustrative concept scenery, no claim of runtime. Keep the bottom native-style continuous HUD: left CHAR/QUESTS/MAP/MENU buttons, large red life globe held by gothic gargoyles, eight numbered belt cells ABOVE the broad black information box, blue mana globe, right INV/SPELLS buttons with one separate prepared-spell tile under them. No extra permanent quickbar, no minimap except when explicitly requested for a native map mode, no stamina, cooldowns, equipment boots/gloves or invented gameplay. Preserve the free world area. All strings are PT-BR sample copy to be implemented later as live text, never baked final runtime labels. Add a subtle outside-game editorial top caption \"ESTUDO R2 · CONCEITO IA · NÃO É CAPTURA\". Finish as an art-directed crisp HD bitmap, textured but typography remains clear.\nPrimary request: LARGEHDARTBOARD2560x1440 TWOclearlyseparatedconceptscreenssidebyside. Externallabels \"P18 · Notificação\" and \"G19 · Pausa simples\". SameoriginalTristramillustrationandnativebottomHUD. LEFT: smalltemporarysystemmessage atuppercenter \"Jogo salvo.\" inivoryserif on averyrestrainedcharcoal/pewter horizontalplate; NOconfirmbutton, NOmandatorydialog, noothermessages. RIGHT: simplepausedworldwithONLYcenteredword \"Pausa\" inivory, absolutely NOmenuoptions, no panel frame, noresume/save/quitlist, no big logo, noinventedcontrols. Pauseisaseparateplainnativeoverlay. Bothworldsmostlyunobstructed, nomap. Avoidaddingtimersorprogressbars.",
+      "id": "p18-notification-pause",
+      "title": "Notificação da partida / Pausa simples",
+      "canonicalIds": [
+        "P18",
+        "G19"
+      ],
+      "path": "images/p-18-notificacao-pausa.png",
+      "tool": "image_gen.imagegen",
+      "toolMode": "built-in",
+      "toolOutput": "exec-644ab56c-1910-4211-82f6-5041f9f0da83.png",
+      "copyMethod": "exact-file-copy; source retained in generated_images",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2486777,
+      "sha256": "31847f6445668558466fb43fa6c2665657d87f0b8a79f6dd841412cb932e3c9d",
+      "format": "PNG",
+      "candidate": true,
+      "installed": false,
+      "approved": false,
+      "productionReady": false,
+      "promotionBlocked": true,
+      "promotionBlockReasons": [
+        "Candidato de estudo sem aprovação visual/implementação.",
+        "Resolução real inferior ao alvo solicitado; sem ampliação artificial."
+      ],
+      "resolutionTargetMet": false,
+      "resampled": false,
+      "source": [
+        {
+          "file": "Source/diablo_msg.cpp",
+          "line": 160
+        },
+        {
+          "file": "Source/gmenu.cpp",
+          "line": 191
+        }
+      ],
+      "normalizedRegionsApproximate": true,
+      "regionsAreRuntimeHitboxes": false,
+      "reviewNotes": [
+        "P18 tem mensagem temporária sem confirmação.",
+        "G19 tem somente a palavra Pausa centralizada, sem inventar menu de pausa."
+      ],
+      "issues": [],
+      "revisions": []
+    },
+    {
+      "key": "p19-cathedral-map",
+      "filename": "p-19-mapa-catedral.png",
+      "coveredIds": [
+        "P19"
+      ],
+      "intendedDimensions": [
+        1920,
+        1080
+      ],
+      "normalizedRegions": [
+        {
+          "id": "P19",
+          "x": 0,
+          "y": 0,
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "prompt": "Use case: ui-mockup. Asset type: candidate high-definition concept painting for Diablo 1 3D UI, not a screenshot and never a fake original comparison. Art direction: match the approved references' dark original Diablo 1 gothic atmosphere: charcoal stone fields, finely worn aged iron frames, pewter engraving, restrained aged brass edging, ivory readable serif text. Tiny amber highlights only for selection and candlelight; red/blue life and mana. Avoid polished MMO UI, fantasy gold filigree overload, neon, flat web UI. Background is an ORIGINAL ILLUSTRATION of nighttime Tristram cobbles, timber cottages and a well; this is illustrative concept scenery, no claim of runtime. Keep the bottom native-style continuous HUD: left CHAR/QUESTS/MAP/MENU buttons, large red life globe held by gothic gargoyles, eight numbered belt cells ABOVE the broad black information box, blue mana globe, right INV/SPELLS buttons with one separate prepared-spell tile under them. No extra permanent quickbar, no minimap except when explicitly requested for a native map mode, no stamina, cooldowns, equipment boots/gloves or invented gameplay. Preserve the free world area. All strings are PT-BR sample copy to be implemented later as live text, never baked final runtime labels. Add a subtle outside-game editorial top caption \"ESTUDO R2 · CONCEITO IA · NÃO É CAPTURA\". Finish as an art-directed crisp HD bitmap, textured but typography remains clear.\nPrimary request: FULL SCREEN 1920x1080. P19 special Cathedral Map document item. Center a large aged vellum parchment over illustrated Tristram and above native bottom HUD. Charcoalstone/agediron thin outer holder, close X. Parchment title \"MAPA DA CATEDRAL\". Original hand-drawn ink sketch: cathedral facade with tall tower, a crypt descent motif, small star-like arcane cartographic marks, marginal hatch lines; rough antique document, NOT same explored automap geometry. No GPS, no quest markers, no clickable route, no world atlas, no navigation buttons. Small editorial note OUTSIDE the game frame \"Documento autoral ilustrativo · Conteúdo condicional\"; not native lore copy. Inside parchment no invented prose or canonicity claim. Native HUD visible. Keep composition different from automap boards, warm worn ivory paper but overall dark Diablo1 mood.",
+      "id": "p19-cathedral-map",
+      "title": "Mapa da Catedral",
+      "canonicalIds": [
+        "P19"
+      ],
+      "path": "images/p-19-mapa-catedral.png",
+      "tool": "image_gen.imagegen",
+      "toolMode": "built-in",
+      "toolOutput": "exec-d0a32709-92c9-4b08-b3ae-bf4cd6591f69.png",
+      "copyMethod": "exact-file-copy; source retained in generated_images",
+      "width": 1672,
+      "height": 941,
+      "bytes": 3081893,
+      "sha256": "b532ead48395e0b13b750391850de5c3a8c77ae800a3a4c15750d6d8d67de334",
+      "format": "PNG",
+      "candidate": true,
+      "installed": false,
+      "approved": false,
+      "productionReady": false,
+      "promotionBlocked": true,
+      "promotionBlockReasons": [
+        "Candidato de estudo sem aprovação visual/implementação.",
+        "Resolução real inferior ao alvo solicitado; sem ampliação artificial."
+      ],
+      "resolutionTargetMet": false,
+      "resampled": false,
+      "source": [
+        {
+          "file": "Source/doom.cpp",
+          "line": 23
+        },
+        {
+          "file": "Source/items.cpp",
+          "line": 4313
+        }
+      ],
+      "normalizedRegionsApproximate": true,
+      "regionsAreRuntimeHitboxes": false,
+      "reviewNotes": [
+        "Documento autoral ilustrado, separado do automapa e sem extração de imagem proprietária.",
+        "Conteúdo de quest condicional; não comprova mapa canônico."
+      ],
+      "issues": [],
+      "revisions": []
+    },
+    {
+      "key": "p20-gamepad-hints",
+      "filename": "p-20-controle-menus-magias.png",
+      "coveredIds": [
+        "P20",
+        "P21"
+      ],
+      "intendedDimensions": [
+        2560,
+        1440
+      ],
+      "normalizedRegions": [
+        {
+          "id": "P20",
+          "x": 0.01,
+          "y": 0.065,
+          "width": 0.48,
+          "height": 0.89
+        },
+        {
+          "id": "P21",
+          "x": 0.51,
+          "y": 0.065,
+          "width": 0.48,
+          "height": 0.89
+        }
+      ],
+      "prompt": "Use case: ui-mockup. Asset type: candidate high-definition concept painting for Diablo 1 3D UI, not a screenshot and never a fake original comparison. Art direction: match the approved references' dark original Diablo 1 gothic atmosphere: charcoal stone fields, finely worn aged iron frames, pewter engraving, restrained aged brass edging, ivory readable serif text. Tiny amber highlights only for selection and candlelight; red/blue life and mana. Avoid polished MMO UI, fantasy gold filigree overload, neon, flat web UI. Background is an ORIGINAL ILLUSTRATION of nighttime Tristram cobbles, timber cottages and a well; this is illustrative concept scenery, no claim of runtime. Keep the bottom native-style continuous HUD: left CHAR/QUESTS/MAP/MENU buttons, large red life globe held by gothic gargoyles, eight numbered belt cells ABOVE the broad black information box, blue mana globe, right INV/SPELLS buttons with one separate prepared-spell tile under them. No extra permanent quickbar, no minimap except when explicitly requested for a native map mode, no stamina, cooldowns, equipment boots/gloves or invented gameplay. Preserve the free world area. All strings are PT-BR sample copy to be implemented later as live text, never baked final runtime labels. Add a subtle outside-game editorial top caption \"ESTUDO R2 · CONCEITO IA · NÃO É CAPTURA\". Finish as an art-directed crisp HD bitmap, textured but typography remains clear.\nPrimary request: LARGE HD ART BOARD 2560x1440, TWO separate concept screens side by side with outer labels \"P20 · Modificador de menus\" and \"P21 · Modificador de magias\". Same Tristram illustrated world and native bottom HUD; each has a small transient cross-shaped group of FOUR square icon hints over world near lower-right, not a circular radial gameplay menu. LEFT cross: above \"Menu\", right \"Inventário\", below \"Mapa\", left \"Personagem\"; two small adjacent face-button hints \"Missões\" and \"Magias\". Tiny native-controller hint \"Soltar modificador\". RIGHT cross: above fire icon \"Dardo de fogo\", right healing icon \"Cura\", below scroll/portal icon \"Portal da cidade\", left lightning icon \"Raio\"; small invalid marker on fire in Tristram, text remains readable. Exactly four spell hints in this transient cross, no permanent magic hotbar or claim four is total shortcut limit. Use neutral simple controller directional/button glyphs that stay coherent. No minimap, cooldowns, extra skills or new wheel actions.",
+      "id": "p20-gamepad-hints",
+      "title": "Auxiliar de menus no controle / Auxiliar de magias no controle",
+      "canonicalIds": [
+        "P20",
+        "P21"
+      ],
+      "path": "images/p-20-controle-menus-magias.png",
+      "tool": "image_gen.imagegen",
+      "toolMode": "built-in",
+      "toolOutput": "exec-b7c0d7f1-1a35-49d4-8261-b246cc92fe44.png",
+      "copyMethod": "exact-file-copy; source retained in generated_images",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2790232,
+      "sha256": "6fc42ecf832a85f1b3ddf7954da44476fad9e19202235a1de896e72eb3062a49",
+      "format": "PNG",
+      "candidate": true,
+      "installed": false,
+      "approved": false,
+      "productionReady": false,
+      "promotionBlocked": true,
+      "promotionBlockReasons": [
+        "Candidato de estudo sem aprovação visual/implementação.",
+        "Resolução real inferior ao alvo solicitado; sem ampliação artificial."
+      ],
+      "resolutionTargetMet": false,
+      "resampled": false,
+      "source": [
+        {
+          "file": "Source/controls/modifier_hints.cpp",
+          "line": 142
+        },
+        {
+          "file": "Source/controls/modifier_hints.cpp",
+          "line": 153
+        }
+      ],
+      "normalizedRegionsApproximate": true,
+      "regionsAreRuntimeHitboxes": false,
+      "reviewNotes": [
+        "Auxiliares transitórios em cruz, um para painéis e um com quatro magias.",
+        "Símbolos/botões de controle são ilustrativos; implementação deve consultar dispositivo e configuração reais.",
+        "Quatro dicas no auxiliar não limitam o armazenamento geral de doze atalhos."
+      ],
+      "issues": [],
+      "revisions": []
+    },
+    {
+      "key": "p22-touch",
+      "filename": "p-22-controles-toque.png",
+      "coveredIds": [
+        "P22"
+      ],
+      "intendedDimensions": [
+        1920,
+        1080
+      ],
+      "normalizedRegions": [
+        {
+          "id": "P22",
+          "x": 0,
+          "y": 0,
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "prompt": "Use case: ui-mockup. Asset type: candidate high-definition concept painting for Diablo 1 3D UI, not a screenshot and never a fake original comparison. Art direction: match the approved references' dark original Diablo 1 gothic atmosphere: charcoal stone fields, finely worn aged iron frames, pewter engraving, restrained aged brass edging, ivory readable serif text. Tiny amber highlights only for selection and candlelight; red/blue life and mana. Avoid polished MMO UI, fantasy gold filigree overload, neon, flat web UI. Background is an ORIGINAL ILLUSTRATION of nighttime Tristram cobbles, timber cottages and a well; this is illustrative concept scenery, no claim of runtime. Keep the bottom native-style continuous HUD: left CHAR/QUESTS/MAP/MENU buttons, large red life globe held by gothic gargoyles, eight numbered belt cells ABOVE the broad black information box, blue mana globe, right INV/SPELLS buttons with one separate prepared-spell tile under them. No extra permanent quickbar, no minimap except when explicitly requested for a native map mode, no stamina, cooldowns, equipment boots/gloves or invented gameplay. Preserve the free world area. All strings are PT-BR sample copy to be implemented later as live text, never baked final runtime labels. Add a subtle outside-game editorial top caption \"ESTUDO R2 · CONCEITO IA · NÃO É CAPTURA\". Finish as an art-directed crisp HD bitmap, textured but typography remains clear.\nPrimary request: FULL SCREEN 1920x1080 landscape conceptual touch controls for native Diablo1, original illustrated Tristram behind, native bottom HUD coherent. Overlay a large translucent stone/pewter virtual direction pad at lower-left WORLD area ABOVE HUD, subtly transparent four-way arrows and center thumb ring. Lower-right WORLD area ABOVE HUD has touch-sized distinct circular/rounded buttons: sword for \"Ação principal\", hand for \"Ação secundária\", magic glyph for \"Magia\", X for \"Cancelar\"; two small red/blue potion touch buttons \"Vida\" and \"Mana\"; compact \"Menu\" button top-right. Existing character/inventory/quests/grimório HUD controls remain accessible with sufficiently large targets. No minimap. NO \"Ficar parado\" in Tristram (that is dungeon conditional); do not add stamina, dodge, jump or cooldowns. Keep center world unobstructed for selection. Make these clearly translucent native touch affordances, not smartphone app nav bars. External editorial caption \"P22 · Toque · Conceito condicional\".",
+      "id": "p22-touch",
+      "title": "Controles de toque",
+      "canonicalIds": [
+        "P22"
+      ],
+      "path": "images/p-22-controles-toque.png",
+      "tool": "image_gen.imagegen",
+      "toolMode": "built-in",
+      "toolOutput": "exec-f656c609-ce6a-4977-aed1-61f935103e24.png",
+      "copyMethod": "exact-file-copy; source retained in generated_images",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2826096,
+      "sha256": "26ffa855eb175af3ab1b1f6b316b38ac63f727b7f7b9bbc469006b579a053520",
+      "format": "PNG",
+      "candidate": true,
+      "installed": false,
+      "approved": false,
+      "productionReady": false,
+      "promotionBlocked": true,
+      "promotionBlockReasons": [
+        "Candidato de estudo sem aprovação visual/implementação.",
+        "Resolução real inferior ao alvo solicitado; sem ampliação artificial.",
+        "unrequested-sample-environment-text"
+      ],
+      "resolutionTargetMet": false,
+      "resampled": false,
+      "source": [
+        {
+          "file": "Source/controls/touch/renderers.cpp",
+          "line": 273
+        },
+        {
+          "file": "Source/control/control_panel.cpp",
+          "line": 241
+        }
+      ],
+      "normalizedRegionsApproximate": true,
+      "regionsAreRuntimeHitboxes": false,
+      "reviewNotes": [
+        "Direção, ações, magia, cancelar, poções e menu desenhados com alvos maiores e centro livre.",
+        "Ficar parado foi omitido em Tristram, conforme condição nativa.",
+        "O gerador acrescentou texto de ambiente de amostra na informação do HUD; descartar esse texto na implementação."
+      ],
+      "issues": [
+        "unrequested-sample-environment-text"
+      ],
+      "revisions": []
+    },
+    {
+      "key": "p23-console",
+      "filename": "p-23-console-debug.png",
+      "coveredIds": [
+        "P23"
+      ],
+      "intendedDimensions": [
+        1920,
+        1080
+      ],
+      "normalizedRegions": [
+        {
+          "id": "P23",
+          "x": 0,
+          "y": 0,
+          "width": 1,
+          "height": 1
+        }
+      ],
+      "prompt": "Use case: precise-object-edit. Image1 is the edit target: the P23 debug console concept. Image2 is a supporting reference ONLY for the native continuous bottom HUD layout. Correct ONLY the lower20% HUD in Image1; the current little permanent magic hotbar is wrong. Replace it with the layout of Image2: LEFT four utility buttons CHAR/QUESTS/MAP/MENU; red life globe; exactly EIGHT numbered belt cells in one row ABOVE a wide black information field; blue mana globe; RIGHT INV/SPELLS buttons and ONE separate prepared-spell tile below them. No extra permanent magic slots. Preserve the console frame, its output/warning/error, autocomplete and entry, upper editorial disclaimer, illustrated Tristram world above HUD. Keep style charcoalstone, agediron, pewter and ivory text. Do not copy the reference's whole world or change console composition. Main purpose is to restore all native HUD controls.",
+      "repairAttempted": true,
+      "id": "p23-console",
+      "title": "Console de desenvolvimento",
+      "canonicalIds": [
+        "P23"
+      ],
+      "path": "images/p-23-console-debug.png",
+      "tool": "image_gen.imagegen",
+      "toolMode": "built-in",
+      "toolOutput": "exec-c5b76a2c-f3fa-4538-87b2-d22fdfc2124f.png",
+      "copyMethod": "exact-file-copy; source retained in generated_images",
+      "width": 1672,
+      "height": 941,
+      "bytes": 2029468,
+      "sha256": "8ce03ec0b37d1ec919aa1ccdea0f88a77d4da153c937c3428b8d021157a14303",
+      "format": "PNG",
+      "candidate": true,
+      "installed": false,
+      "approved": false,
+      "productionReady": false,
+      "promotionBlocked": true,
+      "promotionBlockReasons": [
+        "Candidato de estudo sem aprovação visual/implementação.",
+        "Resolução real inferior ao alvo solicitado; sem ampliação artificial."
+      ],
+      "resolutionTargetMet": false,
+      "resampled": false,
+      "source": [
+        {
+          "file": "Source/panels/console.cpp",
+          "line": 1
+        },
+        {
+          "file": "Source/panels/console.cpp",
+          "line": 560
+        }
+      ],
+      "normalizedRegionsApproximate": true,
+      "regionsAreRuntimeHitboxes": false,
+      "reviewNotes": [
+        "Debug condicional: entrada, histórico/saída, aviso/erro e sugestões ilustrativas.",
+        "Correção final retirou a hotbar inventada e restaurou os oito slots do cinto, utilitários e magia preparada conforme referência 07.",
+        "Sugestões help/history e textos são demonstrativos; não comprovam comandos Lua reais."
+      ],
+      "issues": [],
+      "revisions": [
+        {
+          "revision": 1,
+          "prompt": "Use case: ui-mockup. Create a FULL SCREEN1920x1080 debug-only Lua development console concept over a dark original illustrative Tristram scene, native continuous bottomHUD visible. Charcoalstone/pewter frame, restrained ivory text; functional monospaced content, no elaborate gold ornament. Header \"CONSOLE\", closeX. Console upper-left with broad output area and scrollbar; sample neutral safe lines \"Console pronto.\" then \"Aviso: exemplo de diagnóstico.\" then \"Erro: comando ilustrativo inválido.\" Distinct ivory/amber/muted-red severity with text labels. Lower multi-line input field \"> help\" and visible caret; a small autocomplete list \"help\" \"history\" under input, and quiet actions \"Executar · Enter\" \"Fechar\". Do not show real paths, secrets, passwords, save names or private dumps. External editorial top caption \"P23 · Somente debug · Conceito IA · Não é captura\". This is an optional debug tool, never a new player menu, no minimap or new gameplay.",
+          "toolOutput": "exec-aa3e5713-1613-45c1-933a-f82f32c1f082.png",
+          "candidate": true,
+          "installed": false,
+          "selected": false
+        }
+      ]
+    }
+  ],
+  "publicProvenance": "Private tool-output paths omitted; original masters and manifests retained locally."
+}

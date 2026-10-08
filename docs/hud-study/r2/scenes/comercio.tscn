@@ -1,0 +1,860 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/preview.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/frame.gd" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/components/inventory_panel.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/components/item_specimen.tscn" id="4"]
+
+[node name="Comercio" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.025, 0.03, 0.035, 1)
+mouse_filter = 2
+
+[node name="PrototypeTitle" type="Label" parent="."]
+layout_mode = 0
+offset_left = 90.0
+offset_top = 24.0
+offset_right = 1090.0
+offset_bottom = 68.0
+text = "COMÉRCIO · GRADE NATIVA 10 × 9"
+theme_override_colors/font_color = Color(0.9, 0.86, 0.78, 1)
+theme_override_font_sizes/font_size = 30
+vertical_alignment = 1
+
+[node name="Navigation" type="HBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 1020.0
+offset_top = 24.0
+offset_right = 1830.0
+offset_bottom = 72.0
+theme_override_constants/separation = 12
+
+[node name="Configuracoes" type="Button" parent="Navigation"]
+layout_mode = 2
+custom_minimum_size = Vector2(260, 48)
+text = "Configurações"
+
+[node name="Inventario" type="Button" parent="Navigation"]
+layout_mode = 2
+custom_minimum_size = Vector2(260, 48)
+text = "Inventário"
+
+[node name="Comercio" type="Button" parent="Navigation"]
+layout_mode = 2
+custom_minimum_size = Vector2(260, 48)
+text = "Comércio"
+
+[node name="PreviewStatus" type="Label" parent="."]
+layout_mode = 0
+offset_left = 90.0
+offset_top = 1010.0
+offset_right = 1830.0
+offset_bottom = 1050.0
+text = "Protótipo editável local · não aplica alterações no jogo"
+theme_override_colors/font_color = Color(0.9, 0.86, 0.78, 1)
+theme_override_font_sizes/font_size = 20
+vertical_alignment = 1
+
+[node name="ShopPanel" type="NinePatchRect" parent="."]
+layout_mode = 0
+offset_left = 90.0
+offset_top = 130.0
+offset_right = 990.0
+offset_bottom = 980.0
+mouse_filter = 2
+script = ExtResource("2")
+kit_texture = "res://assets/kit-panel.png"
+
+[node name="PanelFill" type="ColorRect" parent="ShopPanel"]
+layout_mode = 0
+offset_left = 32.0
+offset_top = 32.0
+offset_right = 868.0
+offset_bottom = 818.0
+color = Color(0.035, 0.04, 0.045, 1)
+mouse_filter = 2
+
+[node name="Title" type="Label" parent="ShopPanel"]
+layout_mode = 0
+offset_left = 42.0
+offset_top = 24.0
+offset_right = 858.0
+offset_bottom = 72.0
+text = "GRISWOLD · OURO 2.450"
+theme_override_colors/font_color = Color(0.9, 0.86, 0.78, 1)
+theme_override_font_sizes/font_size = 30
+vertical_alignment = 1
+
+[node name="Tabs" type="HBoxContainer" parent="ShopPanel"]
+layout_mode = 0
+offset_left = 42.0
+offset_top = 84.0
+offset_right = 858.0
+offset_bottom = 130.0
+theme_override_constants/separation = 16
+
+[node name="Basic" type="Button" parent="ShopPanel/Tabs"]
+layout_mode = 2
+custom_minimum_size = Vector2(200, 46)
+text = "Básicos"
+
+[node name="Premium" type="Button" parent="ShopPanel/Tabs"]
+layout_mode = 2
+custom_minimum_size = Vector2(200, 46)
+text = "Premium"
+
+[node name="Page" type="Label" parent="ShopPanel"]
+layout_mode = 0
+offset_left = 500.0
+offset_top = 87.0
+offset_right = 840.0
+offset_bottom = 127.0
+text = "Página 1 / 2"
+theme_override_colors/font_color = Color(0.9, 0.86, 0.78, 1)
+theme_override_font_sizes/font_size = 22
+vertical_alignment = 1
+
+[node name="ShopGrid" type="GridContainer" parent="ShopPanel" groups=["shop_grid"]]
+layout_mode = 0
+offset_left = 42.0
+offset_top = 150.0
+offset_right = 718.0
+offset_bottom = 614.0
+columns = 10
+theme_override_constants/h_separation = 4
+theme_override_constants/v_separation = 4
+
+[node name="Cell_R1_C1" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 1, coluna 1"
+
+[node name="Cell_R1_C2" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 1, coluna 2"
+
+[node name="Cell_R1_C3" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 1, coluna 3"
+
+[node name="Cell_R1_C4" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 1, coluna 4"
+
+[node name="Cell_R1_C5" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 1, coluna 5"
+
+[node name="Cell_R1_C6" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 1, coluna 6"
+
+[node name="Cell_R1_C7" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 1, coluna 7"
+
+[node name="Cell_R1_C8" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 1, coluna 8"
+
+[node name="Cell_R1_C9" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 1, coluna 9"
+
+[node name="Cell_R1_C10" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 1, coluna 10"
+
+[node name="Cell_R2_C1" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 2, coluna 1"
+
+[node name="Cell_R2_C2" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 2, coluna 2"
+
+[node name="Cell_R2_C3" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 2, coluna 3"
+
+[node name="Cell_R2_C4" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 2, coluna 4"
+
+[node name="Cell_R2_C5" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 2, coluna 5"
+
+[node name="Cell_R2_C6" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 2, coluna 6"
+
+[node name="Cell_R2_C7" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 2, coluna 7"
+
+[node name="Cell_R2_C8" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 2, coluna 8"
+
+[node name="Cell_R2_C9" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 2, coluna 9"
+
+[node name="Cell_R2_C10" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 2, coluna 10"
+
+[node name="Cell_R3_C1" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 3, coluna 1"
+
+[node name="Cell_R3_C2" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 3, coluna 2"
+
+[node name="Cell_R3_C3" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 3, coluna 3"
+
+[node name="Cell_R3_C4" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 3, coluna 4"
+
+[node name="Cell_R3_C5" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 3, coluna 5"
+
+[node name="Cell_R3_C6" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 3, coluna 6"
+
+[node name="Cell_R3_C7" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 3, coluna 7"
+
+[node name="Cell_R3_C8" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 3, coluna 8"
+
+[node name="Cell_R3_C9" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 3, coluna 9"
+
+[node name="Cell_R3_C10" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 3, coluna 10"
+
+[node name="Cell_R4_C1" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 4, coluna 1"
+
+[node name="Cell_R4_C2" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 4, coluna 2"
+
+[node name="Cell_R4_C3" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 4, coluna 3"
+
+[node name="Cell_R4_C4" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 4, coluna 4"
+
+[node name="Cell_R4_C5" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 4, coluna 5"
+
+[node name="Cell_R4_C6" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 4, coluna 6"
+
+[node name="Cell_R4_C7" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 4, coluna 7"
+
+[node name="Cell_R4_C8" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 4, coluna 8"
+
+[node name="Cell_R4_C9" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 4, coluna 9"
+
+[node name="Cell_R4_C10" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 4, coluna 10"
+
+[node name="Cell_R5_C1" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 5, coluna 1"
+
+[node name="Cell_R5_C2" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 5, coluna 2"
+
+[node name="Cell_R5_C3" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 5, coluna 3"
+
+[node name="Cell_R5_C4" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 5, coluna 4"
+
+[node name="Cell_R5_C5" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 5, coluna 5"
+
+[node name="Cell_R5_C6" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 5, coluna 6"
+
+[node name="Cell_R5_C7" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 5, coluna 7"
+
+[node name="Cell_R5_C8" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 5, coluna 8"
+
+[node name="Cell_R5_C9" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 5, coluna 9"
+
+[node name="Cell_R5_C10" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 5, coluna 10"
+
+[node name="Cell_R6_C1" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 6, coluna 1"
+
+[node name="Cell_R6_C2" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 6, coluna 2"
+
+[node name="Cell_R6_C3" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 6, coluna 3"
+
+[node name="Cell_R6_C4" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 6, coluna 4"
+
+[node name="Cell_R6_C5" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 6, coluna 5"
+
+[node name="Cell_R6_C6" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 6, coluna 6"
+
+[node name="Cell_R6_C7" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 6, coluna 7"
+
+[node name="Cell_R6_C8" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 6, coluna 8"
+
+[node name="Cell_R6_C9" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 6, coluna 9"
+
+[node name="Cell_R6_C10" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 6, coluna 10"
+
+[node name="Cell_R7_C1" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 7, coluna 1"
+
+[node name="Cell_R7_C2" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 7, coluna 2"
+
+[node name="Cell_R7_C3" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 7, coluna 3"
+
+[node name="Cell_R7_C4" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 7, coluna 4"
+
+[node name="Cell_R7_C5" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 7, coluna 5"
+
+[node name="Cell_R7_C6" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 7, coluna 6"
+
+[node name="Cell_R7_C7" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 7, coluna 7"
+
+[node name="Cell_R7_C8" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 7, coluna 8"
+
+[node name="Cell_R7_C9" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 7, coluna 9"
+
+[node name="Cell_R7_C10" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 7, coluna 10"
+
+[node name="Cell_R8_C1" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 8, coluna 1"
+
+[node name="Cell_R8_C2" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 8, coluna 2"
+
+[node name="Cell_R8_C3" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 8, coluna 3"
+
+[node name="Cell_R8_C4" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 8, coluna 4"
+
+[node name="Cell_R8_C5" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 8, coluna 5"
+
+[node name="Cell_R8_C6" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 8, coluna 6"
+
+[node name="Cell_R8_C7" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 8, coluna 7"
+
+[node name="Cell_R8_C8" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 8, coluna 8"
+
+[node name="Cell_R8_C9" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 8, coluna 9"
+
+[node name="Cell_R8_C10" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 8, coluna 10"
+
+[node name="Cell_R9_C1" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 9, coluna 1"
+
+[node name="Cell_R9_C2" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 9, coluna 2"
+
+[node name="Cell_R9_C3" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 9, coluna 3"
+
+[node name="Cell_R9_C4" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 9, coluna 4"
+
+[node name="Cell_R9_C5" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 9, coluna 5"
+
+[node name="Cell_R9_C6" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 9, coluna 6"
+
+[node name="Cell_R9_C7" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 9, coluna 7"
+
+[node name="Cell_R9_C8" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 9, coluna 8"
+
+[node name="Cell_R9_C9" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 9, coluna 9"
+
+[node name="Cell_R9_C10" type="Button" parent="ShopPanel/ShopGrid" groups=["native_cell", "shop_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(64, 48)
+toggle_mode = true
+tooltip_text = "Loja: linha 9, coluna 10"
+
+[node name="ShopItems" type="Control" parent="ShopPanel"]
+layout_mode = 0
+offset_left = 42.0
+offset_top = 150.0
+offset_right = 718.0
+offset_bottom = 614.0
+mouse_filter = 2
+
+[node name="Sword" parent="ShopPanel/ShopItems" instance=ExtResource("4")]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 64.0
+offset_bottom = 152.0
+item_label = "ESPADA\nexemplo"
+native_width_cells = 1
+native_height_cells = 3
+
+[node name="Shield" parent="ShopPanel/ShopItems" instance=ExtResource("4")]
+layout_mode = 0
+offset_left = 272.0
+offset_top = 0.0
+offset_right = 404.0
+offset_bottom = 152.0
+item_label = "ESCUDO\nexemplo"
+native_width_cells = 2
+native_height_cells = 3
+
+[node name="Armor" parent="ShopPanel/ShopItems" instance=ExtResource("4")]
+layout_mode = 0
+offset_left = 476.0
+offset_top = 208.0
+offset_right = 608.0
+offset_bottom = 360.0
+item_label = "ARMADURA\nexemplo"
+native_width_cells = 2
+native_height_cells = 3
+
+[node name="GridCapacity" type="Label" parent="ShopPanel"]
+layout_mode = 0
+offset_left = 42.0
+offset_top = 624.0
+offset_right = 858.0
+offset_bottom = 658.0
+text = "10 colunas × 9 linhas · 90 células"
+theme_override_colors/font_color = Color(0.9, 0.86, 0.78, 1)
+theme_override_font_sizes/font_size = 20
+vertical_alignment = 1
+
+[node name="ItemDetails" type="Label" parent="ShopPanel"]
+layout_mode = 0
+offset_left = 42.0
+offset_top = 670.0
+offset_right = 858.0
+offset_bottom = 740.0
+text = "Espada curta · 120 ouro · Dano 4–8\nDurabilidade 24/24 · Força 18"
+theme_override_colors/font_color = Color(0.9, 0.86, 0.78, 1)
+theme_override_font_sizes/font_size = 23
+vertical_alignment = 1
+
+[node name="Actions" type="HBoxContainer" parent="ShopPanel"]
+layout_mode = 0
+offset_left = 42.0
+offset_top = 774.0
+offset_right = 858.0
+offset_bottom = 822.0
+theme_override_constants/separation = 10
+
+[node name="Buy" type="Button" parent="ShopPanel/Actions"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Comprar"
+
+[node name="Sell" type="Button" parent="ShopPanel/Actions"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Vender"
+
+[node name="RepairOne" type="Button" parent="ShopPanel/Actions"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Reparar um"
+
+[node name="RepairAll" type="Button" parent="ShopPanel/Actions"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Reparar todos"
+
+[node name="Close" type="Button" parent="ShopPanel/Actions"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Fechar"
+
+[node name="Inventory" parent="." instance=ExtResource("3")]
+layout_mode = 0
+offset_left = 1110.0
+offset_top = 130.0
+offset_right = 1830.0
+offset_bottom = 980.0
+
+[node name="Confirmation" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Dim" type="ColorRect" parent="Confirmation"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.01, 0.015, 0.02, 0.85)
+
+[node name="Modal" type="NinePatchRect" parent="Confirmation"]
+layout_mode = 0
+offset_left = 510.0
+offset_top = 315.0
+offset_right = 1410.0
+offset_bottom = 765.0
+mouse_filter = 2
+script = ExtResource("2")
+kit_texture = "res://assets/kit-modal.png"
+
+[node name="PanelFill" type="ColorRect" parent="Confirmation/Modal"]
+layout_mode = 0
+offset_left = 32.0
+offset_top = 32.0
+offset_right = 868.0
+offset_bottom = 418.0
+color = Color(0.035, 0.04, 0.045, 1)
+mouse_filter = 2
+
+[node name="Title" type="Label" parent="Confirmation/Modal"]
+layout_mode = 0
+offset_left = 60.0
+offset_top = 50.0
+offset_right = 840.0
+offset_bottom = 110.0
+text = "COMPRAR ESTE ITEM?"
+theme_override_colors/font_color = Color(0.9, 0.86, 0.78, 1)
+theme_override_font_sizes/font_size = 30
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Details" type="Label" parent="Confirmation/Modal"]
+layout_mode = 0
+offset_left = 90.0
+offset_top = 145.0
+offset_right = 810.0
+offset_bottom = 265.0
+text = "Espada curta · 120 ouro\nDano 4–8 · Durabilidade 24/24 · Força 18\nPrévia local com valores ilustrativos"
+theme_override_colors/font_color = Color(0.9, 0.86, 0.78, 1)
+theme_override_font_sizes/font_size = 23
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Actions" type="HBoxContainer" parent="Confirmation/Modal"]
+layout_mode = 0
+offset_left = 180.0
+offset_top = 315.0
+offset_right = 720.0
+offset_bottom = 371.0
+theme_override_constants/separation = 30
+
+[node name="ConfirmPreview" type="Button" parent="Confirmation/Modal/Actions"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Sim · prévia"
+
+[node name="CancelPreview" type="Button" parent="Confirmation/Modal/Actions"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Não"
+
+[editable path="Inventory"]

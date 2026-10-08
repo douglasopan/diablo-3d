@@ -1,0 +1,1138 @@
+{
+  "schemaVersion": 2,
+  "kind": "hud-frontend-r2-art-study",
+  "date": "2026-10-08",
+  "scope": "Artes candidatas das telas frontend atuais e variantes de carregamento; somente estudo visual, sem captura real ou implementação.",
+  "generator": {
+    "tool": "built-in",
+    "toolName": "image_gen.imagegen",
+    "fallbackUsed": false,
+    "externalPaidApiUsed": false
+  },
+  "status": "candidate",
+  "installed": false,
+  "counts": {
+    "newPngs": 18,
+    "reusedR1": 1,
+    "newCanonicalIds": 18,
+    "loadingEnvironmentVariants": 11,
+    "preservedExceptions": 1
+  },
+  "sources": {
+    "functionalCatalog": "../data/frontend.json",
+    "catalogSha256": "5e4f6d71d8a4ac3540f0a46a82c0df56e363dce158ab985cc70cd9f21f8a9a61",
+    "sourceInventory": "diagnostics/hud-all-screens-20261008/screen-inventory.json",
+    "supportSource": "Source/DiabloUI/support_lines.cpp",
+    "referenceImages": [
+      {
+        "path": "../images/05-fundo-menus.png",
+        "sha256": "6883e5223ec8b185a7e52248d7540e3f8cb53aecc8f8ebee5b0b5c130db9d1b5",
+        "role": "Fundo aprovado; referência visual de composição e cenário preservada nos prompts, bytes fonte não alterados."
+      },
+      {
+        "path": "../images/07-hud-native-16x9-v1.png",
+        "sha256": "c5bc5e6d324e6b479f2dab673729b6d941921b80c2204ce2055075b1b3fa608a",
+        "role": "Referência de materiais/estilo somente; HUD atual preservado."
+      }
+    ]
+  },
+  "preservedScreens": [
+    {
+      "canonicalId": "F14",
+      "status": "preserved-exception",
+      "reason": "Créditos mantêm arte, autores, conteúdo e comportamento nativos; nenhuma nova arte gerada."
+    }
+  ],
+  "reviewNotes": [
+    "Todos os PNGs são mockups rasterizados de estudo, não capturas do jogo nem interfaces já instaladas.",
+    "Nenhuma coluna original foi desenhada por IA. Originais reais/fixtures e limites source-only pertencem à comparação montada pelo responsável principal.",
+    "Textos PT-BR e dados fictícios ilustram composição; a futura implementação precisa manter textos, fontes, logo, retratos e estados vivos/herdados.",
+    "A composição usa referência visual de 05; não se afirma identidade pixel a pixel do fundo dentro da saída IA. Os bytes do asset aprovado foram preservados.",
+    "As saídas da ferramenta vieram em 1672×941 apesar do alvo Full HD solicitado. O manifesto registra dimensões reais; nenhuma ampliação externa foi feita.",
+    "Painéis e ornamentação são candidatos. Métricas finais de fonte, escala responsiva, foco, rolagem e áreas de clique precisam de implementação/revisão nativa.",
+    "L01 contém artes candidatas de transição e não representa ambientes 3D implementados; não anuncia novos níveis prontos.",
+    "F09 representa o build local Offline/1 jogador. F10, F11, F13 e D04 são capacidades condicionais, sem validação de rede nova."
+  ],
+  "assets": [
+    {
+      "id": "f04-herois",
+      "canonicalIds": [
+        "F04"
+      ],
+      "coveredIds": [
+        "F04"
+      ],
+      "coveredVariantIds": [],
+      "path": "images/frontend-f04-herois.png",
+      "outputPath": "docs/hud-study/r2/images/frontend-f04-herois.png",
+      "sha256": "5df7b260681841bef972b7e9dcadae66fe3be7892a7307b708046582a9b7bbd3",
+      "width": 1672,
+      "height": 941,
+      "dimensions": {
+        "width": 1672,
+        "height": 941
+      },
+      "targetDimensions": {
+        "width": 1920,
+        "height": 1080,
+        "scope": "por tela ou prancha"
+      },
+      "status": "candidate",
+      "installed": false,
+      "tool": "built-in",
+      "toolName": "image_gen.imagegen",
+      "prompt": "Use case: ui-mockup.\nAsset type: Diablo 3D frontend r2 visual study, a proposed polished UI mockup, never a screenshot.\nOutput: one 1920x1080 landscape image, 16:9.\nInput image 1 is the APPROVED menu background. Use exactly its composition, environment, perspective, scenery, candle locations, branches, fog and image framing, as a retained background plate. Do not redesign, replace or stylize the background. Overlay only a UI foreground. Input image 2 is a style reference ONLY for sober charcoal stone, iron, pewter, ivory lettering and restrained warm amber accents. Do not copy its gameplay or HUD.\nVisual style: high definition, elegant dark gothic Diablo I atmosphere, quiet pewter borders and restrained engraved details, readable large ivory text with subtle shadow; selected row has a thin warm amber rule and a dim amber fill. No ornate heavy gold slabs, no bright fantasy glow, no oversized panels. UI should feel consistent across the set.\nComposition: preserve substantial empty background; center the useful UI within the safe rectangle x=320..1600, y=150..950; avoid text touching edges; use balanced title, content and footer with large breathing room. A translucent charcoal panel ensures legibility without hiding the whole approved setting. A small understated study label at bottom-left reads \"ESTUDO VISUAL • R2\". No newly invented game logo, no copyright logo replacement, no original/comparison column.\nPT-BR text is illustrative, rendered verbatim below; future UI will render live text. Do not add functions, explanatory mechanics, navigation tabs or buttons beyond those listed. Names are fictitious.\n\nScreen F04 — saved single player heroes.\nTitle: \"PERSONAGENS\".\nA wide quiet central panel, left column is a scrollable hero list with only three visible real entries: \"Aldren\" (selected), \"Mira\", \"Novo herói\". Do not show numbered save slots, empty slots or multiple checkpoint cards.\nRight column: a restrained empty portrait inset with small neutral label \"Retrato nativo\"; this is a reserved location for the inherited approved portrait, do NOT draw a new character, silhouette or illustration. Below it selected details: \"Aldren\", \"Guerreiro\", \"Nível 1\".\nA two-column detail table reads exactly: \"Força 30\", \"Magia 10\", \"Destreza 20\", \"Vitalidade 25\".\nFooter has exactly three modest buttons \"OK\", \"Excluir\", \"Cancelar\". Highlight \"OK\" softly, keep Excluir secondary.\nOnly the specified functions and data. No account, armor preview, character customization, delete icon repeated per row, level progress bar, quest or equipment.\n",
+      "originalGeneratedFilePreserved": true,
+      "availability": "atual",
+      "condition": "",
+      "regions": [],
+      "reviewNotes": [
+        "Saída nativa 1672×941; alvo de tela 1920×1080 solicitado, não produzido pela ferramenta. Sem redimensionamento externo.",
+        "Áreas textualmente reservadas ao logo/retrato nativo não são assets finais substitutos; recurso herdado deve ser preservado vivo na implementação."
+      ],
+      "visualInspection": {
+        "performed": true,
+        "result": "Candidato legível; conteúdo/funções base inspecionados, sem aprovação artística nem implantação."
+      },
+      "promptSha256": "71c817a639269c1c93d5ddd2cc87f367cfe0b8106dfc768bbf7446f8b19320f9"
+    },
+    {
+      "id": "f05-classes",
+      "canonicalIds": [
+        "F05"
+      ],
+      "coveredIds": [
+        "F05"
+      ],
+      "coveredVariantIds": [],
+      "path": "images/frontend-f05-classes.png",
+      "outputPath": "docs/hud-study/r2/images/frontend-f05-classes.png",
+      "sha256": "c2e840f4dae5d739b06b9c9e688cc649b16be7bd07287e5cf870302a0b00a7cd",
+      "width": 1672,
+      "height": 941,
+      "dimensions": {
+        "width": 1672,
+        "height": 941
+      },
+      "targetDimensions": {
+        "width": 1920,
+        "height": 1080,
+        "scope": "por tela ou prancha"
+      },
+      "status": "candidate",
+      "installed": false,
+      "tool": "built-in",
+      "toolName": "image_gen.imagegen",
+      "prompt": "Use case: ui-mockup.\nAsset type: Diablo 3D frontend r2 visual study, a proposed polished UI mockup, never a screenshot.\nOutput: one 1920x1080 landscape image, 16:9.\nInput image 1 is the APPROVED menu background. Use exactly its composition, environment, perspective, scenery, candle locations, branches, fog and image framing, as a retained background plate. Do not redesign, replace or stylize the background. Overlay only a UI foreground. Input image 2 is a style reference ONLY for sober charcoal stone, iron, pewter, ivory lettering and restrained warm amber accents. Do not copy its gameplay or HUD.\nVisual style: high definition, elegant dark gothic Diablo I atmosphere, quiet pewter borders and restrained engraved details, readable large ivory text with subtle shadow; selected row has a thin warm amber rule and a dim amber fill. No ornate heavy gold slabs, no bright fantasy glow, no oversized panels. UI should feel consistent across the set.\nComposition: preserve substantial empty background; center the useful UI within the safe rectangle x=320..1600, y=150..950; avoid text touching edges; use balanced title, content and footer with large breathing room. A translucent charcoal panel ensures legibility without hiding the whole approved setting. A small understated study label at bottom-left reads \"ESTUDO VISUAL • R2\". No newly invented game logo, no copyright logo replacement, no original/comparison column.\nPT-BR text is illustrative, rendered verbatim below; future UI will render live text. Do not add functions, explanatory mechanics, navigation tabs or buttons beyond those listed. Names are fictitious.\n\nScreen F05 — new hero, choose class. Title \"NOVO HERÓI\"; small subtitle \"Escolher classe\".\nCentral two-column panel, same visual language as F04.\nLeft side list contains EXACTLY: \"Guerreiro\" selected, \"Arqueira\", \"Feiticeiro\". This is the full Diablo base game example, do not add Hellfire-only classes or custom classes.\nRight: quiet empty reserved portrait frame labelled \"Retrato nativo\", no invented person, character, silhouette or artwork. Below: \"Guerreiro\" and \"Nível 1\"; compact attribute rows \"Força 30\", \"Magia 10\", \"Destreza 20\", \"Vitalidade 25\".\nFooter only two buttons \"OK\" and \"Cancelar\". No appearance editor, no class lore, abilities, inventory, gender or traits.\n",
+      "originalGeneratedFilePreserved": true,
+      "availability": "atual",
+      "condition": "",
+      "regions": [],
+      "reviewNotes": [
+        "Saída nativa 1672×941; alvo de tela 1920×1080 solicitado, não produzido pela ferramenta. Sem redimensionamento externo.",
+        "Ícones ornamentais das três classes são candidatos cosméticos; não constituem retratos ou ícones nativos aprovados.",
+        "Áreas textualmente reservadas ao logo/retrato nativo não são assets finais substitutos; recurso herdado deve ser preservado vivo na implementação."
+      ],
+      "visualInspection": {
+        "performed": true,
+        "result": "Candidato legível; conteúdo/funções base inspecionados, sem aprovação artística nem implantação."
+      },
+      "promptSha256": "982de77a6385049f6fd00842e35a12b6759157b6b717a51657dd5b4c83683199"
+    },
+    {
+      "id": "f06-nome",
+      "canonicalIds": [
+        "F06"
+      ],
+      "coveredIds": [
+        "F06"
+      ],
+      "coveredVariantIds": [],
+      "path": "images/frontend-f06-nome.png",
+      "outputPath": "docs/hud-study/r2/images/frontend-f06-nome.png",
+      "sha256": "b012575c8816f78f07bae4df56f0cd63e680a11d8aeaec619531528bf3db571f",
+      "width": 1672,
+      "height": 941,
+      "dimensions": {
+        "width": 1672,
+        "height": 941
+      },
+      "targetDimensions": {
+        "width": 1920,
+        "height": 1080,
+        "scope": "por tela ou prancha"
+      },
+      "status": "candidate",
+      "installed": false,
+      "tool": "built-in",
+      "toolName": "image_gen.imagegen",
+      "prompt": "Use case: ui-mockup.\nAsset type: Diablo 3D frontend r2 visual study, a proposed polished UI mockup, never a screenshot.\nOutput: one 1920x1080 landscape image, 16:9.\nInput image 1 is the APPROVED menu background. Use exactly its composition, environment, perspective, scenery, candle locations, branches, fog and image framing, as a retained background plate. Do not redesign, replace or stylize the background. Overlay only a UI foreground. Input image 2 is a style reference ONLY for sober charcoal stone, iron, pewter, ivory lettering and restrained warm amber accents. Do not copy its gameplay or HUD.\nVisual style: high definition, elegant dark gothic Diablo I atmosphere, quiet pewter borders and restrained engraved details, readable large ivory text with subtle shadow; selected row has a thin warm amber rule and a dim amber fill. No ornate heavy gold slabs, no bright fantasy glow, no oversized panels. UI should feel consistent across the set.\nComposition: preserve substantial empty background; center the useful UI within the safe rectangle x=320..1600, y=150..950; avoid text touching edges; use balanced title, content and footer with large breathing room. A translucent charcoal panel ensures legibility without hiding the whole approved setting. A small understated study label at bottom-left reads \"ESTUDO VISUAL • R2\". No newly invented game logo, no copyright logo replacement, no original/comparison column.\nPT-BR text is illustrative, rendered verbatim below; future UI will render live text. Do not add functions, explanatory mechanics, navigation tabs or buttons beyond those listed. Names are fictitious.\n\nScreen F06 — new hero naming.\nTitle \"NOVO HERÓI\"; subtitle \"Nome do personagem\".\nA compact central panel, left part retains a quiet empty reserved portrait inset labelled \"Retrato nativo\"; do not create any character portrait.\nBeside it selected information \"Guerreiro\", \"Nível 1\"; rows \"Força 30\", \"Magia 10\", \"Destreza 20\", \"Vitalidade 25\".\nBelow those details a single editable text field, label \"Nome\", current example \"Aldren\" with a thin visible caret after the final n. Small count \"6/15\" near the field, for study only; no validation error in this state.\nFooter has ONLY \"OK\" and \"Cancelar\".\nNo account, password, duplicate confirmation field, appearance settings or additional editable stats. Keep original simple naming function.\n",
+      "originalGeneratedFilePreserved": true,
+      "availability": "atual",
+      "condition": "",
+      "regions": [],
+      "reviewNotes": [
+        "O contador 6/15 é anotação visual de limite; remover caso gere affordance nova na implementação.",
+        "Saída nativa 1672×941; alvo de tela 1920×1080 solicitado, não produzido pela ferramenta. Sem redimensionamento externo.",
+        "Contador 6/15 é anotação de limite do estudo; não consta como controle nativo nem autoriza função nova.",
+        "Áreas textualmente reservadas ao logo/retrato nativo não são assets finais substitutos; recurso herdado deve ser preservado vivo na implementação."
+      ],
+      "visualInspection": {
+        "performed": true,
+        "result": "Candidato legível; conteúdo/funções base inspecionados, sem aprovação artística nem implantação."
+      },
+      "promptSha256": "7f0454028851109ae6b75b3ac1955bcbb6fc7e0091fd358c8b210ec97673d654"
+    },
+    {
+      "id": "f07-partida-salva",
+      "canonicalIds": [
+        "F07"
+      ],
+      "coveredIds": [
+        "F07"
+      ],
+      "coveredVariantIds": [],
+      "path": "images/frontend-f07-partida-salva.png",
+      "outputPath": "docs/hud-study/r2/images/frontend-f07-partida-salva.png",
+      "sha256": "be1b8f980e3af6a50bffada932994fc064355412fdae9ad6db9fcc704af72d74",
+      "width": 1672,
+      "height": 941,
+      "dimensions": {
+        "width": 1672,
+        "height": 941
+      },
+      "targetDimensions": {
+        "width": 1920,
+        "height": 1080,
+        "scope": "por tela ou prancha"
+      },
+      "status": "candidate",
+      "installed": false,
+      "tool": "built-in",
+      "toolName": "image_gen.imagegen",
+      "prompt": "Use case: ui-mockup.\nAsset type: Diablo 3D frontend r2 visual study, a proposed polished UI mockup, never a screenshot.\nOutput: one 1920x1080 landscape image, 16:9.\nInput image 1 is the APPROVED menu background. Use exactly its composition, environment, perspective, scenery, candle locations, branches, fog and image framing, as a retained background plate. Do not redesign, replace or stylize the background. Overlay only a UI foreground. Input image 2 is a style reference ONLY for sober charcoal stone, iron, pewter, ivory lettering and restrained warm amber accents. Do not copy its gameplay or HUD.\nVisual style: high definition, elegant dark gothic Diablo I atmosphere, quiet pewter borders and restrained engraved details, readable large ivory text with subtle shadow; selected row has a thin warm amber rule and a dim amber fill. No ornate heavy gold slabs, no bright fantasy glow, no oversized panels. UI should feel consistent across the set.\nComposition: preserve substantial empty background; center the useful UI within the safe rectangle x=320..1600, y=150..950; avoid text touching edges; use balanced title, content and footer with large breathing room. A translucent charcoal panel ensures legibility without hiding the whole approved setting. A small understated study label at bottom-left reads \"ESTUDO VISUAL • R2\". No newly invented game logo, no copyright logo replacement, no original/comparison column.\nPT-BR text is illustrative, rendered verbatim below; future UI will render live text. Do not add functions, explanatory mechanics, navigation tabs or buttons beyond those listed. Names are fictitious.\n\nScreen F07 — existing saved game, a single choice prompt.\nTitle \"PARTIDA SALVA\"; subtitle \"Aldren\".\nA compact centered charcoal panel with two generous rows: \"Carregar partida\" selected, \"Nova partida\". A thin amber marker shows selected first option.\nExactly two footer buttons \"OK\" and \"Cancelar\".\nThis represents one hero's existing game state. Do not show separate save slots, checkpoints, save timestamps, thumbnails, location names, difficulty stats or multiple saves. No invented descriptive line. Keep much approved background visible; this screen should be simpler and smaller than hero/class selection.\n",
+      "originalGeneratedFilePreserved": true,
+      "availability": "atual",
+      "condition": "",
+      "regions": [],
+      "reviewNotes": [
+        "Saída nativa 1672×941; alvo de tela 1920×1080 solicitado, não produzido pela ferramenta. Sem redimensionamento externo."
+      ],
+      "visualInspection": {
+        "performed": true,
+        "result": "Candidato legível; conteúdo/funções base inspecionados, sem aprovação artística nem implantação."
+      },
+      "promptSha256": "c26fa33eceaa0ef8bb1e1ec6869d2c2ff132a5419a1aa954a67a0e7851ddda79"
+    },
+    {
+      "id": "f08-dificuldade",
+      "canonicalIds": [
+        "F08"
+      ],
+      "coveredIds": [
+        "F08"
+      ],
+      "coveredVariantIds": [],
+      "path": "images/frontend-f08-dificuldade.png",
+      "outputPath": "docs/hud-study/r2/images/frontend-f08-dificuldade.png",
+      "sha256": "63b7eb40ea75e3242c98d840f34a9e412f12e1f819f83252fd055c255c7e7931",
+      "width": 1672,
+      "height": 941,
+      "dimensions": {
+        "width": 1672,
+        "height": 941
+      },
+      "targetDimensions": {
+        "width": 1920,
+        "height": 1080,
+        "scope": "por tela ou prancha"
+      },
+      "status": "candidate",
+      "installed": false,
+      "tool": "built-in",
+      "toolName": "image_gen.imagegen",
+      "prompt": "Use case: ui-mockup.\nAsset type: Diablo 3D frontend r2 visual study, a proposed polished UI mockup, never a screenshot.\nOutput: one 1920x1080 landscape image, 16:9.\nInput image 1 is the APPROVED menu background. Use exactly its composition, environment, perspective, scenery, candle locations, branches, fog and image framing, as a retained background plate. Do not redesign, replace or stylize the background. Overlay only a UI foreground. Input image 2 is a style reference ONLY for sober charcoal stone, iron, pewter, ivory lettering and restrained warm amber accents. Do not copy its gameplay or HUD.\nVisual style: high definition, elegant dark gothic Diablo I atmosphere, quiet pewter borders and restrained engraved details, readable large ivory text with subtle shadow; selected row has a thin warm amber rule and a dim amber fill. No ornate heavy gold slabs, no bright fantasy glow, no oversized panels. UI should feel consistent across the set.\nComposition: preserve substantial empty background; center the useful UI within the safe rectangle x=320..1600, y=150..950; avoid text touching edges; use balanced title, content and footer with large breathing room. A translucent charcoal panel ensures legibility without hiding the whole approved setting. A small understated study label at bottom-left reads \"ESTUDO VISUAL • R2\". No newly invented game logo, no copyright logo replacement, no original/comparison column.\nPT-BR text is illustrative, rendered verbatim below; future UI will render live text. Do not add functions, explanatory mechanics, navigation tabs or buttons beyond those listed. Names are fictitious.\n\nScreen F08 — new game difficulty.\nTitle \"DIFICULDADE\".\nA quiet medium central panel contains three large text-only rows: \"Normal\" selected, \"Pesadelo\", \"Inferno\". The selection marker is amber but restrained. No class art or character portrait.\nBeneath the choices a separated readable description block says exactly:\n\"Ponto de partida recomendado para um novo personagem enfrentar Diablo.\"\nFooter only two buttons \"OK\" and \"Cancelar\".\nThis is a single player example. Do not invent Hardcore, seasonal, custom, story-only or extra challenge modes. Do not add a speed selector on this screen, extra rewards, recommended level badges or gameplay modifiers.\n",
+      "originalGeneratedFilePreserved": true,
+      "availability": "atual",
+      "condition": "",
+      "regions": [],
+      "reviewNotes": [
+        "Saída nativa 1672×941; alvo de tela 1920×1080 solicitado, não produzido pela ferramenta. Sem redimensionamento externo."
+      ],
+      "visualInspection": {
+        "performed": true,
+        "result": "Candidato legível; conteúdo/funções base inspecionados, sem aprovação artística nem implantação."
+      },
+      "promptSha256": "9de018300f562c6970c10359b695e9d9818b8660fc8474e56122decf22f7ec3a"
+    },
+    {
+      "id": "f09-conexao-offline",
+      "canonicalIds": [
+        "F09"
+      ],
+      "coveredIds": [
+        "F09"
+      ],
+      "coveredVariantIds": [],
+      "path": "images/frontend-f09-conexao-offline.png",
+      "outputPath": "docs/hud-study/r2/images/frontend-f09-conexao-offline.png",
+      "sha256": "6f266bbe2f2aacb5a5ec45d060dac23df2c332232124d5322c9771c7279d0b4e",
+      "width": 1672,
+      "height": 941,
+      "dimensions": {
+        "width": 1672,
+        "height": 941
+      },
+      "targetDimensions": {
+        "width": 1920,
+        "height": 1080,
+        "scope": "por tela ou prancha"
+      },
+      "status": "candidate",
+      "installed": false,
+      "tool": "built-in",
+      "toolName": "image_gen.imagegen",
+      "prompt": "Use case: ui-mockup.\nAsset type: Diablo 3D frontend r2 visual study, a proposed polished UI mockup, never a screenshot.\nOutput: one 1920x1080 landscape image, 16:9.\nInput image 1 is the APPROVED menu background. Use exactly its composition, environment, perspective, scenery, candle locations, branches, fog and image framing, as a retained background plate. Do not redesign, replace or stylize the background. Overlay only a UI foreground. Input image 2 is a style reference ONLY for sober charcoal stone, iron, pewter, ivory lettering and restrained warm amber accents. Do not copy its gameplay or HUD.\nVisual style: high definition, elegant dark gothic Diablo I atmosphere, quiet pewter borders and restrained engraved details, readable large ivory text with subtle shadow; selected row has a thin warm amber rule and a dim amber fill. No ornate heavy gold slabs, no bright fantasy glow, no oversized panels. UI should feel consistent across the set.\nComposition: preserve substantial empty background; center the useful UI within the safe rectangle x=320..1600, y=150..950; avoid text touching edges; use balanced title, content and footer with large breathing room. A translucent charcoal panel ensures legibility without hiding the whole approved setting. A small understated study label at bottom-left reads \"ESTUDO VISUAL • R2\". No newly invented game logo, no copyright logo replacement, no original/comparison column.\nPT-BR text is illustrative, rendered verbatim below; future UI will render live text. Do not add functions, explanatory mechanics, navigation tabs or buttons beyond those listed. Names are fictitious.\n\nScreen F09 — local multiplayer provider selector.\nTitle \"MULTIJOGADOR\"; subtitle \"Conexão\".\nThis local build actually has only one selectable provider: a single row \"Offline\", selected with quiet amber accent. Do not show disabled fake TCP or ZeroTier options.\nBelow, three clearly readable info rows:\n\"Jogadores suportados\" — \"1\"\n\"Requisitos\" — \"Jogar sozinho, sem exposição à rede.\"\n\"Gateway\" — \"Nenhum gateway necessário\"\nCompact central panel, about 50% viewport width, much approved background visible.\nFooter only two buttons \"OK\" and \"Cancelar\".\nSmall study badge outside the panel at top-left says \"F09 • BUILD LOCAL • OFFLINE\".\nDo not create a gateway change button, network login, server browser, online indicator, voice, chat, refresh or custom server list.\n",
+      "originalGeneratedFilePreserved": true,
+      "availability": "atual",
+      "condition": "Build local NONET=ON; somente Offline.",
+      "regions": [],
+      "reviewNotes": [
+        "Saída nativa 1672×941; alvo de tela 1920×1080 solicitado, não produzido pela ferramenta. Sem redimensionamento externo."
+      ],
+      "visualInspection": {
+        "performed": true,
+        "result": "Candidato legível; conteúdo/funções base inspecionados, sem aprovação artística nem implantação."
+      },
+      "promptSha256": "94c14e0ec98e816a912d8ac634e62963cd3d64d3ce5c053c71dcf033c863b42f"
+    },
+    {
+      "id": "f10-partidas-zerotier",
+      "canonicalIds": [
+        "F10"
+      ],
+      "coveredIds": [
+        "F10"
+      ],
+      "coveredVariantIds": [],
+      "path": "images/frontend-f10-partidas-zerotier.png",
+      "outputPath": "docs/hud-study/r2/images/frontend-f10-partidas-zerotier.png",
+      "sha256": "52c2042303208c6d8f2dadb437a85395fefb4d45b5cac2a6baf411dcc7da6d22",
+      "width": 1672,
+      "height": 941,
+      "dimensions": {
+        "width": 1672,
+        "height": 941
+      },
+      "targetDimensions": {
+        "width": 1920,
+        "height": 1080,
+        "scope": "por tela ou prancha"
+      },
+      "status": "candidate",
+      "installed": false,
+      "tool": "built-in",
+      "toolName": "image_gen.imagegen",
+      "prompt": "Use case: ui-mockup.\nAsset type: Diablo 3D frontend r2 visual study, a proposed polished UI mockup, never a screenshot.\nOutput: one 1920x1080 landscape image, 16:9.\nInput image 1 is the APPROVED menu background. Use exactly its composition, environment, perspective, scenery, candle locations, branches, fog and image framing, as a retained background plate. Do not redesign, replace or stylize the background. Overlay only a UI foreground. Input image 2 is a style reference ONLY for sober charcoal stone, iron, pewter, ivory lettering and restrained warm amber accents. Do not copy its gameplay or HUD.\nVisual style: high definition, elegant dark gothic Diablo I atmosphere, quiet pewter borders and restrained engraved details, readable large ivory text with subtle shadow; selected row has a thin warm amber rule and a dim amber fill. No ornate heavy gold slabs, no bright fantasy glow, no oversized panels. UI should feel consistent across the set.\nComposition: preserve substantial empty background; center the useful UI within the safe rectangle x=320..1600, y=150..950; avoid text touching edges; use balanced title, content and footer with large breathing room. A translucent charcoal panel ensures legibility without hiding the whole approved setting. A small understated study label at bottom-left reads \"ESTUDO VISUAL • R2\". No newly invented game logo, no copyright logo replacement, no original/comparison column.\nPT-BR text is illustrative, rendered verbatim below; future UI will render live text. Do not add functions, explanatory mechanics, navigation tabs or buttons beyond those listed. Names are fictitious.\n\nScreen F10 — conditional ZeroTier actions and public game list.\nTitle \"PARTIDAS\"; subtitle \"ZeroTier\".\nA centered medium panel. At its top three selectable menu rows:\n\"Criar partida\" selected\n\"Criar partida pública\"\n\"Entrar em partida\"\nA thin pewter separator, then a disabled non-clickable section heading \"Partidas públicas\". Under it a subdued disabled row \"Nenhuma\", illustrating empty discovery. Do not invent an active server, game lobby, connected players, room name, latency or session.\nExactly two footer buttons \"OK\" and \"Cancelar\".\nSmall study badge above/outside panel \"F10 • CONDICIONAL • ZEROTIER\".\nThis conditional screen is inherited and not offered by local NONET build. Private create is shown as conditional on compiled encryption. No chat, matchmaking, Refresh button, login, friends, invite, extra server modes or room configuration.\n",
+      "originalGeneratedFilePreserved": true,
+      "availability": "condicional",
+      "condition": "ZeroTier e PACKET_ENCRYPTION compilados; variante Nenhuma partida pública. Não disponível no build local NONET.",
+      "regions": [],
+      "reviewNotes": [
+        "Saída nativa 1672×941; alvo de tela 1920×1080 solicitado, não produzido pela ferramenta. Sem redimensionamento externo."
+      ],
+      "visualInspection": {
+        "performed": true,
+        "result": "Candidato legível; conteúdo/funções base inspecionados, sem aprovação artística nem implantação."
+      },
+      "promptSha256": "ca1131acb2f0f3c8c8b68ced97e491eaf063cc0936b7f343aa0bc25b3907b34a"
+    },
+    {
+      "id": "f11-id-partida",
+      "canonicalIds": [
+        "F11"
+      ],
+      "coveredIds": [
+        "F11"
+      ],
+      "coveredVariantIds": [],
+      "path": "images/frontend-f11-id-partida.png",
+      "outputPath": "docs/hud-study/r2/images/frontend-f11-id-partida.png",
+      "sha256": "2293bd6b6885b7ded8056b89d8d8d863069ef2d77a0eb0ebba8cfc57ca1ca1b2",
+      "width": 1672,
+      "height": 941,
+      "dimensions": {
+        "width": 1672,
+        "height": 941
+      },
+      "targetDimensions": {
+        "width": 1920,
+        "height": 1080,
+        "scope": "por tela ou prancha"
+      },
+      "status": "candidate",
+      "installed": false,
+      "tool": "built-in",
+      "toolName": "image_gen.imagegen",
+      "prompt": "Use case: ui-mockup.\nAsset type: Diablo 3D frontend r2 visual study, a proposed polished UI mockup, never a screenshot.\nOutput: one 1920x1080 landscape image, 16:9.\nInput image 1 is the APPROVED menu background. Use exactly its composition, environment, perspective, scenery, candle locations, branches, fog and image framing, as a retained background plate. Do not redesign, replace or stylize the background. Overlay only a UI foreground. Input image 2 is a style reference ONLY for sober charcoal stone, iron, pewter, ivory lettering and restrained warm amber accents. Do not copy its gameplay or HUD.\nVisual style: high definition, elegant dark gothic Diablo I atmosphere, quiet pewter borders and restrained engraved details, readable large ivory text with subtle shadow; selected row has a thin warm amber rule and a dim amber fill. No ornate heavy gold slabs, no bright fantasy glow, no oversized panels. UI should feel consistent across the set.\nComposition: preserve substantial empty background; center the useful UI within the safe rectangle x=320..1600, y=150..950; avoid text touching edges; use balanced title, content and footer with large breathing room. A translucent charcoal panel ensures legibility without hiding the whole approved setting. A small understated study label at bottom-left reads \"ESTUDO VISUAL • R2\". No newly invented game logo, no copyright logo replacement, no original/comparison column.\nPT-BR text is illustrative, rendered verbatim below; future UI will render live text. Do not add functions, explanatory mechanics, navigation tabs or buttons beyond those listed. Names are fictitious.\n\nScreen F11 — manual join by ZeroTier ID.\nTitle \"ENTRAR EM PARTIDA\"; subtitle \"ZeroTier\".\nA quiet compact centered charcoal panel. Exactly one input field:\nLabel \"ID da partida\", fictitious example value \"RefugioDemo\", with a thin caret.\nBelow only two small buttons \"OK\" and \"Cancelar\".\nSmall study badge above/outside the panel \"F11 • CONDICIONAL • ID FICTÍCIO\".\nNo separate IP/hostname field in this variant, no port, login, account, region, password, confirmation, name-room or Refresh. Do not invent a reachable destination. Future text field has a 128-character limit but DO NOT draw a new counter or explanatory widget. Let the single field and footer have generous spacing; approved background remains clear around the panel.\n",
+      "originalGeneratedFilePreserved": true,
+      "availability": "condicional",
+      "condition": "ZeroTier disponível; ID fictício RefugioDemo, não um destino de rede.",
+      "regions": [],
+      "reviewNotes": [
+        "Saída nativa 1672×941; alvo de tela 1920×1080 solicitado, não produzido pela ferramenta. Sem redimensionamento externo."
+      ],
+      "visualInspection": {
+        "performed": true,
+        "result": "Candidato legível; conteúdo/funções base inspecionados, sem aprovação artística nem implantação."
+      },
+      "promptSha256": "e6e8f0b3ad3e70fa33844c1ff75c2679f690c10aac9ec0791c552eb91d2f65e9"
+    },
+    {
+      "id": "f12-velocidade",
+      "canonicalIds": [
+        "F12"
+      ],
+      "coveredIds": [
+        "F12"
+      ],
+      "coveredVariantIds": [],
+      "path": "images/frontend-f12-velocidade.png",
+      "outputPath": "docs/hud-study/r2/images/frontend-f12-velocidade.png",
+      "sha256": "8c8e94fa012f290eadc48cedb8f8e39b2e35a0ba115575095571f71402315291",
+      "width": 1672,
+      "height": 941,
+      "dimensions": {
+        "width": 1672,
+        "height": 941
+      },
+      "targetDimensions": {
+        "width": 1920,
+        "height": 1080,
+        "scope": "por tela ou prancha"
+      },
+      "status": "candidate",
+      "installed": false,
+      "tool": "built-in",
+      "toolName": "image_gen.imagegen",
+      "prompt": "Use case: ui-mockup.\nAsset type: Diablo 3D frontend r2 visual study, a proposed polished UI mockup, never a screenshot.\nOutput: one 1920x1080 landscape image, 16:9.\nInput image 1 is the APPROVED menu background. Use exactly its composition, environment, perspective, scenery, candle locations, branches, fog and image framing, as a retained background plate. Do not redesign, replace or stylize the background. Overlay only a UI foreground. Input image 2 is a style reference ONLY for sober charcoal stone, iron, pewter, ivory lettering and restrained warm amber accents. Do not copy its gameplay or HUD.\nVisual style: high definition, elegant dark gothic Diablo I atmosphere, quiet pewter borders and restrained engraved details, readable large ivory text with subtle shadow; selected row has a thin warm amber rule and a dim amber fill. No ornate heavy gold slabs, no bright fantasy glow, no oversized panels. UI should feel consistent across the set.\nComposition: preserve substantial empty background; center the useful UI within the safe rectangle x=320..1600, y=150..950; avoid text touching edges; use balanced title, content and footer with large breathing room. A translucent charcoal panel ensures legibility without hiding the whole approved setting. A small understated study label at bottom-left reads \"ESTUDO VISUAL • R2\". No newly invented game logo, no copyright logo replacement, no original/comparison column.\nPT-BR text is illustrative, rendered verbatim below; future UI will render live text. Do not add functions, explanatory mechanics, navigation tabs or buttons beyond those listed. Names are fictitious.\n\nScreen F12 — creation game speed.\nTitle \"VELOCIDADE\".\nMedium centered panel, four selectable rows ONLY:\n\"Normal\" selected\n\"Rápida\"\n\"Mais rápida\"\n\"Máxima\"\nBelow them a clear description section with exactly:\n\"Velocidade recomendada para começar a enfrentar Diablo.\"\nFooter ONLY \"OK\" and \"Cancelar\".\nNo slider, framerate/FPS value, hardware settings, extra presets, game mode or difficulty controls. This is the existing game simulation speed step for Offline or network creation, not a solo new-game step. Do not print ticks per second.\n",
+      "originalGeneratedFilePreserved": true,
+      "availability": "atual",
+      "condition": "Criação multijogador ou Offline após dificuldade; não exibida no fluxo solo.",
+      "regions": [],
+      "reviewNotes": [
+        "Saída nativa 1672×941; alvo de tela 1920×1080 solicitado, não produzido pela ferramenta. Sem redimensionamento externo."
+      ],
+      "visualInspection": {
+        "performed": true,
+        "result": "Candidato legível; conteúdo/funções base inspecionados, sem aprovação artística nem implantação."
+      },
+      "promptSha256": "8988731066d8eae0c6128ca382d9f26f44a25b2f1952a693e0172f9f12ca2b89"
+    },
+    {
+      "id": "f13-senha",
+      "canonicalIds": [
+        "F13"
+      ],
+      "coveredIds": [
+        "F13"
+      ],
+      "coveredVariantIds": [],
+      "path": "images/frontend-f13-senha.png",
+      "outputPath": "docs/hud-study/r2/images/frontend-f13-senha.png",
+      "sha256": "3978fa87405786580fa18711844e3da1c90b05e2ccba1536b93546dc5b490f9a",
+      "width": 1672,
+      "height": 941,
+      "dimensions": {
+        "width": 1672,
+        "height": 941
+      },
+      "targetDimensions": {
+        "width": 1920,
+        "height": 1080,
+        "scope": "por tela ou prancha"
+      },
+      "status": "candidate",
+      "installed": false,
+      "tool": "built-in",
+      "toolName": "image_gen.imagegen",
+      "prompt": "Use case: ui-mockup.\nAsset type: Diablo 3D frontend r2 visual study, a proposed polished UI mockup, never a screenshot.\nOutput: one 1920x1080 landscape image, 16:9.\nInput image 1 is the APPROVED menu background. Use exactly its composition, environment, perspective, scenery, candle locations, branches, fog and image framing, as a retained background plate. Do not redesign, replace or stylize the background. Overlay only a UI foreground. Input image 2 is a style reference ONLY for sober charcoal stone, iron, pewter, ivory lettering and restrained warm amber accents. Do not copy its gameplay or HUD.\nVisual style: high definition, elegant dark gothic Diablo I atmosphere, quiet pewter borders and restrained engraved details, readable large ivory text with subtle shadow; selected row has a thin warm amber rule and a dim amber fill. No ornate heavy gold slabs, no bright fantasy glow, no oversized panels. UI should feel consistent across the set.\nComposition: preserve substantial empty background; center the useful UI within the safe rectangle x=320..1600, y=150..950; avoid text touching edges; use balanced title, content and footer with large breathing room. A translucent charcoal panel ensures legibility without hiding the whole approved setting. A small understated study label at bottom-left reads \"ESTUDO VISUAL • R2\". No newly invented game logo, no copyright logo replacement, no original/comparison column.\nPT-BR text is illustrative, rendered verbatim below; future UI will render live text. Do not add functions, explanatory mechanics, navigation tabs or buttons beyond those listed. Names are fictitious.\n\nScreen F13 — private game password.\nTitle \"PARTIDA PRIVADA\".\nA compact centered panel with ONE text field labelled \"Senha\". Show the fictitious value \"demo123\" in clear text with a thin caret, exactly as inherited UiEdit behaves. Do not mask with dots/asterisks; do not add an eye icon.\nFooter only two buttons \"OK\" and \"Cancelar\".\nSmall study label above/outside panel \"F13 • CONDICIONAL • TEXTO FICTÍCIO\".\nCreation requires nonempty content; no validation error in this selected state. No password confirmation, recovery link, account, username, save password checkbox, room name, privacy slider or encryption toggle.\nMuch background visible; this simple function should feel calm and compact.\n",
+      "originalGeneratedFilePreserved": true,
+      "availability": "condicional",
+      "condition": "Criação privada com PACKET_ENCRYPTION; senha fictícia demo123 em campo não mascarado nativo.",
+      "regions": [],
+      "reviewNotes": [
+        "Saída nativa 1672×941; alvo de tela 1920×1080 solicitado, não produzido pela ferramenta. Sem redimensionamento externo."
+      ],
+      "visualInspection": {
+        "performed": true,
+        "result": "Candidato legível; conteúdo/funções base inspecionados, sem aprovação artística nem implantação."
+      },
+      "promptSha256": "86fa437d483bdb0ba8f807a25b0b80f16dbd68c354ceebe9aa5488c23dbad6fa"
+    },
+    {
+      "id": "d01-d03-dialogos",
+      "canonicalIds": [
+        "D01",
+        "D02",
+        "D03"
+      ],
+      "coveredIds": [
+        "D01",
+        "D02",
+        "D03"
+      ],
+      "coveredVariantIds": [],
+      "path": "images/frontend-d01-d03-dialogos.png",
+      "outputPath": "docs/hud-study/r2/images/frontend-d01-d03-dialogos.png",
+      "sha256": "4f4ea3f0c2273b0da15801a5460ce889c77248c94793dc48c7e0e2ed5d1f77eb",
+      "width": 1672,
+      "height": 941,
+      "dimensions": {
+        "width": 1672,
+        "height": 941
+      },
+      "targetDimensions": {
+        "width": 1920,
+        "height": 1080,
+        "scope": "por tela ou prancha"
+      },
+      "status": "candidate",
+      "installed": false,
+      "tool": "built-in",
+      "toolName": "image_gen.imagegen",
+      "prompt": "Use case: ui-mockup.\nAsset type: Diablo 3D frontend r2 visual study, a proposed polished UI mockup, never a screenshot.\nOutput: one 1920x1080 landscape image, 16:9.\nInput image 1 is the APPROVED menu background. Use exactly its composition, environment, perspective, scenery, candle locations, branches, fog and image framing, as a retained background plate. Do not redesign, replace or stylize the background. Overlay only a UI foreground. Input image 2 is a style reference ONLY for sober charcoal stone, iron, pewter, ivory lettering and restrained warm amber accents. Do not copy its gameplay or HUD.\nVisual style: high definition, elegant dark gothic Diablo I atmosphere, quiet pewter borders and restrained engraved details, readable large ivory text with subtle shadow; selected row has a thin warm amber rule and a dim amber fill. No ornate heavy gold slabs, no bright fantasy glow, no oversized panels. UI should feel consistent across the set.\nComposition: preserve substantial empty background; center the useful UI within the safe rectangle x=320..1600, y=150..950; avoid text touching edges; use balanced title, content and footer with large breathing room. A translucent charcoal panel ensures legibility without hiding the whole approved setting. A small understated study label at bottom-left reads \"ESTUDO VISUAL • R2\". No newly invented game logo, no copyright logo replacement, no original/comparison column.\nPT-BR text is illustrative, rendered verbatim below; future UI will render live text. Do not add functions, explanatory mechanics, navigation tabs or buttons beyond those listed. Names are fictitious.\n\nThis is a STUDY BOARD of THREE INDEPENDENT DIALOG STATES, not a real simultaneous UI screen. Small top label \"DIÁLOGOS • ESTADOS INDEPENDENTES\".\nPlace each modal entirely inside the following normalized regions; label each with ID outside the panel:\nD02 region x=0.18..0.82, y=0.12..0.49 (wide upper central panel).\nAbove it \"D02 • Aviso grande\". Inside it a small empty logo reservation with neutral text \"Logo aprovado\" (do NOT redraw an approved logo); title \"AVISO\". Body:\n\"Seu personagem precisa atingir o nível 20 para entrar numa partida multijogador em Pesadelo.\"\nOnly one button \"OK\".\nD01 region x=0.10..0.48, y=0.60..0.90 (lower left panel).\nAbove it \"D01 • Confirmação\". Title \"EXCLUIR PERSONAGEM\". Body:\n\"Deseja excluir o personagem fictício Aldren?\"\nOnly two buttons \"Sim\" and \"Não\", with Não softly selected.\nD03 region x=0.55..0.90, y=0.64..0.87 (lower right smaller popup).\nAbove it \"D03 • Erro compacto\". Title \"ERRO\". Body:\n\"Não foi possível criar o personagem.\"\nOnly one button \"OK\".\nKeep differences clear: D02 is larger and more spacious; D01 medium yes/no; D03 a modest compact popup. No success toast, extra actions, support link, error code, retry button, icons requiring new mechanics. Never draw an original-comparison column. The approved image1 background plate is retained behind all independent examples.\n",
+      "originalGeneratedFilePreserved": true,
+      "availability": "atual",
+      "condition": "",
+      "regions": [
+        {
+          "coveredId": "D02",
+          "rectPixels": [
+            430,
+            134,
+            815,
+            343
+          ],
+          "label": "Aviso grande; dificuldade indisponível"
+        },
+        {
+          "coveredId": "D01",
+          "rectPixels": [
+            284,
+            548,
+            555,
+            262
+          ],
+          "label": "Confirmação de exclusão"
+        },
+        {
+          "coveredId": "D03",
+          "rectPixels": [
+            928,
+            581,
+            478,
+            228
+          ],
+          "label": "Popup compacto de erro"
+        }
+      ],
+      "reviewNotes": [
+        "Prancha de estados independentes; não são modais simultâneos na partida.",
+        "A área Logo aprovado reserva o asset herdado, sem substituí-lo.",
+        "Saída nativa 1672×941; alvo de tela 1920×1080 solicitado, não produzido pela ferramenta. Sem redimensionamento externo.",
+        "Áreas textualmente reservadas ao logo/retrato nativo não são assets finais substitutos; recurso herdado deve ser preservado vivo na implementação."
+      ],
+      "visualInspection": {
+        "performed": true,
+        "result": "Candidato legível; conteúdo/funções base inspecionados, sem aprovação artística nem implantação."
+      },
+      "promptSha256": "52b6ebc17048de9816e0d78fb401445dfbeb96de54cd6198c177c66e0395e24f"
+    },
+    {
+      "id": "d04-sincronizacao",
+      "canonicalIds": [
+        "D04"
+      ],
+      "coveredIds": [
+        "D04"
+      ],
+      "coveredVariantIds": [],
+      "path": "images/frontend-d04-sincronizacao.png",
+      "outputPath": "docs/hud-study/r2/images/frontend-d04-sincronizacao.png",
+      "sha256": "bc8338df336aaadd6f82c39392444b210134556f0862087789b0007ceaf378ab",
+      "width": 1672,
+      "height": 941,
+      "dimensions": {
+        "width": 1672,
+        "height": 941
+      },
+      "targetDimensions": {
+        "width": 1920,
+        "height": 1080,
+        "scope": "por tela ou prancha"
+      },
+      "status": "candidate",
+      "installed": false,
+      "tool": "built-in",
+      "toolName": "image_gen.imagegen",
+      "prompt": "Use case: ui-mockup.\nAsset type: Diablo 3D frontend r2 visual study, a proposed polished UI mockup, never a screenshot.\nOutput: one 1920x1080 landscape image, 16:9.\nInput image 1 is the APPROVED menu background. Use exactly its composition, environment, perspective, scenery, candle locations, branches, fog and image framing, as a retained background plate. Do not redesign, replace or stylize the background. Overlay only a UI foreground. Input image 2 is a style reference ONLY for sober charcoal stone, iron, pewter, ivory lettering and restrained warm amber accents. Do not copy its gameplay or HUD.\nVisual style: high definition, elegant dark gothic Diablo I atmosphere, quiet pewter borders and restrained engraved details, readable large ivory text with subtle shadow; selected row has a thin warm amber rule and a dim amber fill. No ornate heavy gold slabs, no bright fantasy glow, no oversized panels. UI should feel consistent across the set.\nComposition: preserve substantial empty background; center the useful UI within the safe rectangle x=320..1600, y=150..950; avoid text touching edges; use balanced title, content and footer with large breathing room. A translucent charcoal panel ensures legibility without hiding the whole approved setting. A small understated study label at bottom-left reads \"ESTUDO VISUAL • R2\". No newly invented game logo, no copyright logo replacement, no original/comparison column.\nPT-BR text is illustrative, rendered verbatim below; future UI will render live text. Do not add functions, explanatory mechanics, navigation tabs or buttons beyond those listed. Names are fictitious.\n\nScreen D04 — conditional waiting for multiplayer synchronization.\nA compact centered popup. Title \"SINCRONIZAÇÃO\".\nIt contains exactly one sober horizontal progress bar with a partially filled muted amber segment; this is an illustrative state only. No numeric percentage, no ETA, no time elapsed, no fake network metrics.\nBelow it ONLY one button \"Cancelar\".\nSmall study badge outside the popup \"D04 • CONDICIONAL\".\nDo not add an OK/Continue/Retry button, loading tips, level scenery, character art, connection icons or imaginary synchronization steps. This is a cancelable progress modal, distinct from L01 level loading. Keep much approved menu background visible.\n",
+      "originalGeneratedFilePreserved": true,
+      "availability": "condicional",
+      "condition": "Espera por dados na sincronização multijogador; progresso ilustrativo sem percentual/tempo.",
+      "regions": [],
+      "reviewNotes": [
+        "Saída nativa 1672×941; alvo de tela 1920×1080 solicitado, não produzido pela ferramenta. Sem redimensionamento externo."
+      ],
+      "visualInspection": {
+        "performed": true,
+        "result": "Candidato legível; conteúdo/funções base inspecionados, sem aprovação artística nem implantação."
+      },
+      "promptSha256": "4b7539305598ab5890cf0a8c7220faea8e66fb199df7846f69586b3d374a8804"
+    },
+    {
+      "id": "f01-abertura",
+      "canonicalIds": [
+        "F01"
+      ],
+      "coveredIds": [
+        "F01"
+      ],
+      "coveredVariantIds": [],
+      "path": "images/frontend-f01-abertura.png",
+      "outputPath": "docs/hud-study/r2/images/frontend-f01-abertura.png",
+      "sha256": "5c4f6f115e0262ebb9f171eedcb4facf85c0fc4d752f3f5983f50d915c8d2cc1",
+      "width": 1672,
+      "height": 941,
+      "dimensions": {
+        "width": 1672,
+        "height": 941
+      },
+      "targetDimensions": {
+        "width": 1920,
+        "height": 1080,
+        "scope": "por tela ou prancha"
+      },
+      "status": "candidate",
+      "installed": false,
+      "tool": "built-in",
+      "toolName": "image_gen.imagegen",
+      "prompt": "Use case: ui-mockup.\nAsset type: Diablo 3D frontend r2 visual study, a proposed polished UI mockup, never a screenshot.\nOutput: one 1920x1080 landscape image, 16:9.\nInput image 1 is the APPROVED menu background. Use exactly its composition, environment, perspective, scenery, candle locations, branches, fog and image framing, as a retained background plate. Do not redesign, replace or stylize the background. Overlay only a UI foreground. Input image 2 is a style reference ONLY for sober charcoal stone, iron, pewter, ivory lettering and restrained warm amber accents. Do not copy its gameplay or HUD.\nVisual style: high definition, elegant dark gothic Diablo I atmosphere, quiet pewter borders and restrained engraved details, readable large ivory text with subtle shadow; selected row has a thin warm amber rule and a dim amber fill. No ornate heavy gold slabs, no bright fantasy glow, no oversized panels. UI should feel consistent across the set.\nComposition: preserve substantial empty background; center the useful UI within the safe rectangle x=320..1600, y=150..950; avoid text touching edges; use balanced title, content and footer with large breathing room. A translucent charcoal panel ensures legibility without hiding the whole approved setting. A small understated study label at bottom-left reads \"ESTUDO VISUAL • R2\". No newly invented game logo, no copyright logo replacement, no original/comparison column.\nPT-BR text is illustrative, rendered verbatim below; future UI will render live text. Do not add functions, explanatory mechanics, navigation tabs or buttons beyond those listed. Names are fictitious.\n\nScreen F01 — title opening.\nVery restrained opening screen, keep the approved background dominant and entirely recognizable. No menu, no selectable options, no button, no Continue button, no input field.\nThe approved animated Diablo 3D logo must be preserved by future implementation. Because its artwork is NOT being redesigned, reserve an unadorned broad centered logo location at x=0.28..0.72,y=0.18..0.39 with only a small neutral ivory study annotation \"Logo animado aprovado\" (not a new logo). Do not draw lettered DIABLO lettering, stylized logo, emblem or brand redesign.\nAt lower central safe area draw the inherited credit verbatim:\n\"Copyright © 1996–2001 Blizzard Entertainment\".\nAt bottom-left the small study notation is \"F01 • ABERTURA • ESTUDO VISUAL R2\".\nMake this opening quiet and cinematic; no big UI slab. Only the reserved logo location and legal credit. There is no new functional instruction or affordance.\n",
+      "originalGeneratedFilePreserved": true,
+      "availability": "atual",
+      "condition": "",
+      "regions": [],
+      "reviewNotes": [
+        "A arte reserva a área do logo animado aprovado; não desenha um logo novo. Aplicar o asset herdado vivo na implementação.",
+        "Avanço continua por tecla/clique/controle/ciclo; nenhum botão Continuar foi adicionado.",
+        "Saída nativa 1672×941; alvo de tela 1920×1080 solicitado, não produzido pela ferramenta. Sem redimensionamento externo.",
+        "Áreas textualmente reservadas ao logo/retrato nativo não são assets finais substitutos; recurso herdado deve ser preservado vivo na implementação."
+      ],
+      "visualInspection": {
+        "performed": true,
+        "result": "Candidato legível; conteúdo/funções base inspecionados, sem aprovação artística nem implantação."
+      },
+      "promptSha256": "1397469dfdfdf05c1f65b57c50b2e64d48de0d9de5c17c744b421e7f56108b8c"
+    },
+    {
+      "id": "f02-diablo-hellfire",
+      "canonicalIds": [
+        "F02"
+      ],
+      "coveredIds": [
+        "F02"
+      ],
+      "coveredVariantIds": [],
+      "path": "images/frontend-f02-diablo-hellfire.png",
+      "outputPath": "docs/hud-study/r2/images/frontend-f02-diablo-hellfire.png",
+      "sha256": "6030b618507448885a7b3ec4034d324ad6d5ab50309b242e81d0103f437e5168",
+      "width": 1672,
+      "height": 941,
+      "dimensions": {
+        "width": 1672,
+        "height": 941
+      },
+      "targetDimensions": {
+        "width": 1920,
+        "height": 1080,
+        "scope": "por tela ou prancha"
+      },
+      "status": "candidate",
+      "installed": false,
+      "tool": "built-in",
+      "toolName": "image_gen.imagegen",
+      "prompt": "Use case: ui-mockup.\nAsset type: Diablo 3D frontend r2 visual study, a proposed polished UI mockup, never a screenshot.\nOutput: one 1920x1080 landscape image, 16:9.\nInput image 1 is the APPROVED menu background. Use exactly its composition, environment, perspective, scenery, candle locations, branches, fog and image framing, as a retained background plate. Do not redesign, replace or stylize the background. Overlay only a UI foreground. Input image 2 is a style reference ONLY for sober charcoal stone, iron, pewter, ivory lettering and restrained warm amber accents. Do not copy its gameplay or HUD.\nVisual style: high definition, elegant dark gothic Diablo I atmosphere, quiet pewter borders and restrained engraved details, readable large ivory text with subtle shadow; selected row has a thin warm amber rule and a dim amber fill. No ornate heavy gold slabs, no bright fantasy glow, no oversized panels. UI should feel consistent across the set.\nComposition: preserve substantial empty background; center the useful UI within the safe rectangle x=320..1600, y=150..950; avoid text touching edges; use balanced title, content and footer with large breathing room. A translucent charcoal panel ensures legibility without hiding the whole approved setting. A small understated study label at bottom-left reads \"ESTUDO VISUAL • R2\". No newly invented game logo, no copyright logo replacement, no original/comparison column.\nPT-BR text is illustrative, rendered verbatim below; future UI will render live text. Do not add functions, explanatory mechanics, navigation tabs or buttons beyond those listed. Names are fictitious.\n\nScreen F02 — conditional launch mode selector.\nA compact central translucent charcoal selector; title \"DIABLO / HELLFIRE\".\nONLY two selectable choice rows:\n\"Entrar em Hellfire\" selected\n\"Mudar para Diablo\"\nNo extra footer buttons at all. No OK, Cancelar, Continuar or Voltar button. The choices themselves are the native actions.\nSmall understated outside-panel study badge \"F02 • CONDICIONAL\".\nThe selector only appears when Hellfire is discovered and launch preference asks; do not depict this as a universal campaign selector, extra expansion store or new game modes. Do not add portraits, cover art, logos, mode descriptions or ownership/login indicators. Preserve approved background and quiet spacing.\n",
+      "originalGeneratedFilePreserved": true,
+      "availability": "condicional",
+      "condition": "Hellfire descoberto e inicialização configurada para perguntar.",
+      "regions": [],
+      "reviewNotes": [
+        "Saída nativa 1672×941; alvo de tela 1920×1080 solicitado, não produzido pela ferramenta. Sem redimensionamento externo."
+      ],
+      "visualInspection": {
+        "performed": true,
+        "result": "Candidato legível; conteúdo/funções base inspecionados, sem aprovação artística nem implantação."
+      },
+      "promptSha256": "6e3bc3980b41e2501fcf40d015ef03420230f4bd7bb4c71d85789aa44ab60166"
+    },
+    {
+      "id": "f15-suporte",
+      "canonicalIds": [
+        "F15"
+      ],
+      "coveredIds": [
+        "F15"
+      ],
+      "coveredVariantIds": [],
+      "path": "images/frontend-f15-suporte.png",
+      "outputPath": "docs/hud-study/r2/images/frontend-f15-suporte.png",
+      "sha256": "902d1954686c02a27ceb02e019b8c6949a22bf51f2a20c396f88831640a8af44",
+      "width": 1672,
+      "height": 941,
+      "dimensions": {
+        "width": 1672,
+        "height": 941
+      },
+      "targetDimensions": {
+        "width": 1920,
+        "height": 1080,
+        "scope": "por tela ou prancha"
+      },
+      "status": "candidate",
+      "installed": false,
+      "tool": "built-in",
+      "toolName": "image_gen.imagegen",
+      "prompt": "Use case: ui-mockup.\nAsset type: Diablo 3D frontend r2 visual study, a proposed polished UI mockup, never a screenshot.\nOutput: one 1920x1080 landscape image, 16:9.\nInput image 1 is the APPROVED menu background. Use exactly its composition, environment, perspective, scenery, candle locations, branches, fog and image framing, as a retained background plate. Do not redesign, replace or stylize the background. Overlay only a UI foreground. Input image 2 is a style reference ONLY for sober charcoal stone, iron, pewter, ivory lettering and restrained warm amber accents. Do not copy its gameplay or HUD.\nVisual style: high definition, elegant dark gothic Diablo I atmosphere, quiet pewter borders and restrained engraved details, readable large ivory text with subtle shadow; selected row has a thin warm amber rule and a dim amber fill. No ornate heavy gold slabs, no bright fantasy glow, no oversized panels. UI should feel consistent across the set.\nComposition: preserve substantial empty background; center the useful UI within the safe rectangle x=320..1600, y=150..950; avoid text touching edges; use balanced title, content and footer with large breathing room. A translucent charcoal panel ensures legibility without hiding the whole approved setting. A small understated study label at bottom-left reads \"ESTUDO VISUAL • R2\". No newly invented game logo, no copyright logo replacement, no original/comparison column.\nPT-BR text is illustrative, rendered verbatim below; future UI will render live text. Do not add functions, explanatory mechanics, navigation tabs or buttons beyond those listed. Names are fictitious.\n\nScreen F15 — Support, inherited automatic-scrolling text screen.\nTitle \"SUPORTE\".\nLarge centered quiet translucent charcoal text panel; width around 64% viewport, height around 78%. Ivory body text in an exceptionally legible readable serif, tidy paragraph spacing, restrained headings. No heavy ornament; no scrollbar/slider suggesting a new manual feature.\nShow the following full inherited source-grounded content in PT-BR verbatim. Do not drop ANY organization, software name, license, link, or disclaimer. All text links are plain text, NOT buttons. This is a frozen visual sample of automatic rolling content; future implementation must use the complete inherited live source content.\nTEXT:\nMantemos um servidor de chat em Discord.gg/devilutionx. Siga os links para participar da comunidade e conversar sobre Diablo e a expansão Hellfire.\n\nDevilutionX é mantido pela Diasurgical. Problemas e erros podem ser relatados em https://github.com/diasurgical/devilutionX. Inclua o número da versão, o sistema operacional e a natureza do problema.\n\nAviso de responsabilidade:\nDevilutionX não é suportado nem mantido pela Blizzard Entertainment ou pela GOG.com. Nenhuma delas testou ou certificou a qualidade ou compatibilidade do DevilutionX. Todas as consultas sobre DevilutionX devem ser dirigidas à Diasurgical, não à Blizzard Entertainment ou à GOG.com.\n\nEste port utiliza Charis SIL, New Athena Unicode, Unifont e Noto sob a SIL Open Font License, Twitmoji sob CC-BY 4.0 e SDL sob a licença zlib. Consulte o ReadMe para mais detalhes.\nEND TEXT.\nThere are NO buttons. No Open Discord, Report bug, Contact, link icons, QR codes or new clickable links. Small study note outside bottom of panel \"F15 • SUPORTE • ROLAGEM AUTOMÁTICA\". Keep the approved background visible at edges. Preserve inherited authors and source attribution; do not replace credits with new creators.\n",
+      "originalGeneratedFilePreserved": true,
+      "availability": "atual",
+      "condition": "",
+      "regions": [],
+      "reviewNotes": [
+        "Preserva Diasurgical, Blizzard Entertainment, GOG.com, Charis SIL, New Athena Unicode, Unifont, Noto, SIL OFL, Twitmoji/CC-BY 4.0 e SDL/zlib.",
+        "Conteúdo fonte completo deve continuar vivo em Source/DiabloUI/support_lines.cpp. Imagem é composição candidata estática da rolagem; links permanecem texto e nenhum botão novo foi criado.",
+        "Saída nativa 1672×941; alvo de tela 1920×1080 solicitado, não produzido pela ferramenta. Sem redimensionamento externo."
+      ],
+      "visualInspection": {
+        "performed": true,
+        "result": "Candidato legível; conteúdo/funções base inspecionados, sem aprovação artística nem implantação."
+      },
+      "promptSha256": "cfc380889c888de743f4f42bef91e0ccf9b56f1685287800a519bc3bacbeb0f2"
+    },
+    {
+      "id": "l01-a-inicio-cidade-catedral-catacumbas",
+      "canonicalIds": [
+        "L01"
+      ],
+      "coveredIds": [
+        "L01"
+      ],
+      "coveredVariantIds": [
+        "L01",
+        "L01-V1",
+        "L01-V2",
+        "L01-V3",
+        "L01-V4"
+      ],
+      "path": "images/frontend-l01-a-inicio-cidade-catedral-catacumbas.png",
+      "outputPath": "docs/hud-study/r2/images/frontend-l01-a-inicio-cidade-catedral-catacumbas.png",
+      "sha256": "e4c70831802505e669738d807ed5ce7c7a98613fb3c3ff0676587c4de125ada3",
+      "width": 1672,
+      "height": 941,
+      "dimensions": {
+        "width": 1672,
+        "height": 941
+      },
+      "targetDimensions": {
+        "width": 1920,
+        "height": 1080,
+        "scope": "por variante"
+      },
+      "status": "candidate",
+      "installed": false,
+      "tool": "built-in",
+      "toolName": "image_gen.imagegen",
+      "prompt": "Use case: ui-mockup.\nAsset type: Diablo 3D r2 transition/loading concept STUDY BOARD, never a gameplay screenshot, never a claim of implemented 3D environments.\nReferences: image 1 is the approved gloomy wet medieval village menu background, whose muted charcoal palette, restrained candle amber, wet stone detail and sober Diablo I atmosphere must guide the entire board. Retain its exact composition for the Start cell. Other labeled environment cells are explicitly candidate transition artwork, not replacements installed in the game. Image 2 guides the understated iron/pewter interface framing only, not gameplay HUD.\nComposition: FOUR 16:9 cells in a precise 2×2 grid, no extra cell or perspective skew; each cell is an independent full loading-screen composition. Ask output 3840x2160, giving each cell a 1920x1080 target. Put the environment ID and label clearly in each cell's top-left safe area. Thin quiet pewter grid separators. Do not draw a title overlay across multiple cells or make fake original/comparison columns. Shared style consistent.\nEvery cell has ONE thin long progress bar with pewter/iron edge, muted amber fill that is partially filled as an illustrative state. Use 70% of each cell's width, within safe margin. No progress percentage number, no ETA, time elapsed, buttons, tips, menu, gameplay controls, heroes, monsters, logos or HUD. No debug counters or FPS. Cell labels are study identifiers, not new gameplay UI.\nKeep scenery dark but visible, empty and cinematic, with clean readable ivory labels and generous space for the single progress bar. Palette charcoal gray, pewter, ivory labels, very slight candle amber; blue/red only where a portal requires it. Avoid ornate gilded UI, cartoon, neon glow, overbright orange fantasy illustration.\n\nBOARD A — four distinct transition backgrounds:\nTOP LEFT quadrant: label \"L01 • INÍCIO\". Retain image1's EXACT dark village road background with branches left, barred gothic church right and candle locations unchanged, rendered in full cell framing. Place the progress bar low at y=0.87 of this cell.\nTOP RIGHT quadrant: label \"L01 • CIDADE\". A quiet candlelit medieval Tristram street, wet cobbled lane, timber/stone cottages, no people, matching the approved background atmosphere and sober scale. Progress bar low at y=0.87.\nBOTTOM LEFT quadrant: label \"L01 • CATEDRAL\". An empty dark gothic cathedral interior of tall worn stone arches and sparse candlelight, charcoal stone. Progress bar HIGH at y=0.14, beneath its label, matching the inherited top placement.\nBOTTOM RIGHT quadrant: label \"L01 • CATACUMBAS\". An empty ancient vaulted stone catacomb passage with alcoves and sober candlelight, no bones/skulls foreground clutter. Progress bar HIGH at y=0.14, beneath label.\nDo not add gameplay scenes, faces, monstrous statues or claims of new levels being ready. These are candidate backgrounds for existing loading transition variants only.\n",
+      "originalGeneratedFilePreserved": true,
+      "availability": "atual",
+      "condition": "",
+      "regions": [
+        {
+          "coveredId": "L01",
+          "coveredVariantIds": [
+            "L01",
+            "L01-V1"
+          ],
+          "rectNormalized": [
+            0,
+            0,
+            0.5,
+            0.5
+          ],
+          "label": "Início",
+          "barPlacement": "inferior",
+          "rectPixels": [
+            0,
+            0,
+            836,
+            470
+          ]
+        },
+        {
+          "coveredId": "L01",
+          "coveredVariantIds": [
+            "L01-V2"
+          ],
+          "rectNormalized": [
+            0.5,
+            0,
+            0.5,
+            0.5
+          ],
+          "label": "Cidade",
+          "barPlacement": "inferior",
+          "rectPixels": [
+            836,
+            0,
+            836,
+            470
+          ]
+        },
+        {
+          "coveredId": "L01",
+          "coveredVariantIds": [
+            "L01-V3"
+          ],
+          "rectNormalized": [
+            0,
+            0.5,
+            0.5,
+            0.5
+          ],
+          "label": "Catedral",
+          "barPlacement": "superior",
+          "rectPixels": [
+            0,
+            470,
+            836,
+            471
+          ]
+        },
+        {
+          "coveredId": "L01",
+          "coveredVariantIds": [
+            "L01-V4"
+          ],
+          "rectNormalized": [
+            0.5,
+            0.5,
+            0.5,
+            0.5
+          ],
+          "label": "Catacumbas",
+          "barPlacement": "superior",
+          "rectPixels": [
+            836,
+            470,
+            836,
+            471
+          ]
+        }
+      ],
+      "reviewNotes": [
+        "Prancha de quatro variantes independentes; arte de transição candidata e não visual de ambientes 3D implementados.",
+        "Saída nativa 1672×941; alvo de tela 1920×1080 solicitado, não produzido pela ferramenta. Sem redimensionamento externo.",
+        "A prancha é visão conjunta de variantes. Cada quadrante tem aproximadamente 836×470/471; alvo individual Full HD não foi produzido. Textura/cor/posição da barra são candidatos de estudo, sem alterar a progressão nativa."
+      ],
+      "visualInspection": {
+        "performed": true,
+        "result": "Candidato legível; conteúdo/funções base inspecionados, sem aprovação artística nem implantação."
+      },
+      "promptSha256": "52e47ad2caba62767ccf493233b7c0735a2f17c4b79a1008cf060485762a527b"
+    },
+    {
+      "id": "l01-b-cavernas-inferno-cripta-ninho",
+      "canonicalIds": [
+        "L01"
+      ],
+      "coveredIds": [
+        "L01"
+      ],
+      "coveredVariantIds": [
+        "L01-V5",
+        "L01-V6",
+        "L01-V7",
+        "L01-V8"
+      ],
+      "path": "images/frontend-l01-b-cavernas-inferno-cripta-ninho.png",
+      "outputPath": "docs/hud-study/r2/images/frontend-l01-b-cavernas-inferno-cripta-ninho.png",
+      "sha256": "1b7d419113bcd0356f11dbe762cb999e0a956a47a103063174c4168725c997ea",
+      "width": 1672,
+      "height": 941,
+      "dimensions": {
+        "width": 1672,
+        "height": 941
+      },
+      "targetDimensions": {
+        "width": 1920,
+        "height": 1080,
+        "scope": "por variante"
+      },
+      "status": "candidate",
+      "installed": false,
+      "tool": "built-in",
+      "toolName": "image_gen.imagegen",
+      "prompt": "Use case: ui-mockup.\nAsset type: Diablo 3D r2 transition/loading concept STUDY BOARD, never a gameplay screenshot, never a claim of implemented 3D environments.\nReferences: image 1 is the approved gloomy wet medieval village menu background, whose muted charcoal palette, restrained candle amber, wet stone detail and sober Diablo I atmosphere must guide the entire board. Retain its exact composition for the Start cell. Other labeled environment cells are explicitly candidate transition artwork, not replacements installed in the game. Image 2 guides the understated iron/pewter interface framing only, not gameplay HUD.\nComposition: FOUR 16:9 cells in a precise 2×2 grid, no extra cell or perspective skew; each cell is an independent full loading-screen composition. Ask output 3840x2160, giving each cell a 1920x1080 target. Put the environment ID and label clearly in each cell's top-left safe area. Thin quiet pewter grid separators. Do not draw a title overlay across multiple cells or make fake original/comparison columns. Shared style consistent.\nEvery cell has ONE thin long progress bar with pewter/iron edge, muted amber fill that is partially filled as an illustrative state. Use 70% of each cell's width, within safe margin. No progress percentage number, no ETA, time elapsed, buttons, tips, menu, gameplay controls, heroes, monsters, logos or HUD. No debug counters or FPS. Cell labels are study identifiers, not new gameplay UI.\nKeep scenery dark but visible, empty and cinematic, with clean readable ivory labels and generous space for the single progress bar. Palette charcoal gray, pewter, ivory labels, very slight candle amber; blue/red only where a portal requires it. Avoid ornate gilded UI, cartoon, neon glow, overbright orange fantasy illustration.\n\nBOARD B — four more distinct transition variants; every cell's progress bar is LOW at y=0.87:\nTOP LEFT: label \"L01 • CAVERNAS\". Empty deep natural cave with rough basalt, irregular stone floor and sparse amber torch/candle light; cavernous dark void with readable rocky silhouettes.\nTOP RIGHT: label \"L01 • INFERNO\". Empty infernal stone passage with charred rock, distant dim red ember light and heavy shadows, sober dark medieval horror. No monsters, gore or giant flaming spectacles.\nBOTTOM LEFT: label \"L01 • CRIPTA\"; small label beneath \"HELLFIRE • CONDICIONAL\". Ancient austere stone crypt, sealed burial niches, worn masonry, faint cold ambient light and tiny warm candles; no characters or bodies.\nBOTTOM RIGHT: label \"L01 • NINHO\"; small label beneath \"HELLFIRE • CONDICIONAL\". Empty dark organic hive cavern, weathered chitinous/brown-black ribbed walls and faint damp glints, restrained atmospheric horror; avoid graphic gore, creatures, eggs foreground props or bright alien sci-fi machinery.\nThese are loading-background concept variants, NOT new game levels announced as implemented. Preserve shared iron/pewter single progress bar. No percent or ETA.\n",
+      "originalGeneratedFilePreserved": true,
+      "availability": "atual",
+      "condition": "",
+      "regions": [
+        {
+          "coveredId": "L01",
+          "coveredVariantIds": [
+            "L01-V5"
+          ],
+          "rectNormalized": [
+            0,
+            0,
+            0.5,
+            0.5
+          ],
+          "label": "Cavernas",
+          "barPlacement": "inferior",
+          "rectPixels": [
+            0,
+            0,
+            836,
+            470
+          ]
+        },
+        {
+          "coveredId": "L01",
+          "coveredVariantIds": [
+            "L01-V6"
+          ],
+          "rectNormalized": [
+            0.5,
+            0,
+            0.5,
+            0.5
+          ],
+          "label": "Inferno",
+          "barPlacement": "inferior",
+          "rectPixels": [
+            836,
+            0,
+            836,
+            470
+          ]
+        },
+        {
+          "coveredId": "L01",
+          "coveredVariantIds": [
+            "L01-V7"
+          ],
+          "rectNormalized": [
+            0,
+            0.5,
+            0.5,
+            0.5
+          ],
+          "label": "Cripta",
+          "barPlacement": "inferior",
+          "condition": "Hellfire",
+          "rectPixels": [
+            0,
+            470,
+            836,
+            471
+          ]
+        },
+        {
+          "coveredId": "L01",
+          "coveredVariantIds": [
+            "L01-V8"
+          ],
+          "rectNormalized": [
+            0.5,
+            0.5,
+            0.5,
+            0.5
+          ],
+          "label": "Ninho",
+          "barPlacement": "inferior",
+          "condition": "Hellfire",
+          "rectPixels": [
+            836,
+            470,
+            836,
+            471
+          ]
+        }
+      ],
+      "reviewNotes": [
+        "Prancha de quatro variantes independentes; Cripta e Ninho condicionais a Hellfire.",
+        "São artes de transição candidatas, não ambientes 3D implementados.",
+        "Saída nativa 1672×941; alvo de tela 1920×1080 solicitado, não produzido pela ferramenta. Sem redimensionamento externo.",
+        "A prancha é visão conjunta de variantes. Cada quadrante tem aproximadamente 836×470/471; alvo individual Full HD não foi produzido. Textura/cor/posição da barra são candidatos de estudo, sem alterar a progressão nativa."
+      ],
+      "visualInspection": {
+        "performed": true,
+        "result": "Candidato legível; conteúdo/funções base inspecionados, sem aprovação artística nem implantação."
+      },
+      "promptSha256": "e2a3ddccd1c672f031d42e81801860b8943a2156dc84a4b1c978314cd41af179"
+    },
+    {
+      "id": "l01-c-portais-portao",
+      "canonicalIds": [
+        "L01"
+      ],
+      "coveredIds": [
+        "L01"
+      ],
+      "coveredVariantIds": [
+        "L01-V9",
+        "L01-V10",
+        "L01-V11"
+      ],
+      "path": "images/frontend-l01-c-portais-portao.png",
+      "outputPath": "docs/hud-study/r2/images/frontend-l01-c-portais-portao.png",
+      "sha256": "9ad861b3cec6a55a4a830f63b176adecb910d7df1ec2117874bc834262f36e5f",
+      "width": 1672,
+      "height": 941,
+      "dimensions": {
+        "width": 1672,
+        "height": 941
+      },
+      "targetDimensions": {
+        "width": 1920,
+        "height": 1080,
+        "scope": "por variante"
+      },
+      "status": "candidate",
+      "installed": false,
+      "tool": "built-in",
+      "toolName": "image_gen.imagegen",
+      "prompt": "Use case: ui-mockup.\nAsset type: Diablo 3D r2 transition/loading concept STUDY BOARD, never a gameplay screenshot, never a claim of implemented 3D environments.\nReferences: image 1 is the approved gloomy wet medieval village menu background, whose muted charcoal palette, restrained candle amber, wet stone detail and sober Diablo I atmosphere must guide the entire board. Retain its exact composition for the Start cell. Other labeled environment cells are explicitly candidate transition artwork, not replacements installed in the game. Image 2 guides the understated iron/pewter interface framing only, not gameplay HUD.\nComposition: FOUR 16:9 cells in a precise 2×2 grid, no extra cell or perspective skew; each cell is an independent full loading-screen composition. Ask output 3840x2160, giving each cell a 1920x1080 target. Put the environment ID and label clearly in each cell's top-left safe area. Thin quiet pewter grid separators. Do not draw a title overlay across multiple cells or make fake original/comparison columns. Shared style consistent.\nEvery cell has ONE thin long progress bar with pewter/iron edge, muted amber fill that is partially filled as an illustrative state. Use 70% of each cell's width, within safe margin. No progress percentage number, no ETA, time elapsed, buttons, tips, menu, gameplay controls, heroes, monsters, logos or HUD. No debug counters or FPS. Cell labels are study identifiers, not new gameplay UI.\nKeep scenery dark but visible, empty and cinematic, with clean readable ivory labels and generous space for the single progress bar. Palette charcoal gray, pewter, ivory labels, very slight candle amber; blue/red only where a portal requires it. Avoid ornate gilded UI, cartoon, neon glow, overbright orange fantasy illustration.\n\nBOARD C — THREE loading variants plus ONE non-screen study legend:\nTOP LEFT: label \"L01 • PORTAL AZUL\". Empty ruined medieval stone courtyard with a restrained luminous blue portal opening in a stone arch. Dark charcoal surroundings, small candle amber. Keep the portal blue subdued. One progress bar LOW at y=0.87.\nTOP RIGHT: label \"L01 • PORTAL VERMELHO\". Empty dark stone vault with a restrained red magical portal opening, dim ember red, medieval horror. One progress bar LOW at y=0.87. No demons, no battle.\nBOTTOM LEFT: label \"L01 • PORTÃO\". Monumental closed dark iron gate within worn basalt fortification, dim firelight, empty approach, sober final descent mood. One progress bar LOW at y=0.87.\nBOTTOM RIGHT is NOT another loading screen or environment. Render a plain matte charcoal study legend with these exact centered readable lines:\n\"L01 • VARIANTES DE TRANSIÇÃO\"\n\"Artes candidatas • não instaladas\"\n\"Sem percentual ou tempo restante\"\n\"Não representam ambientes 3D implementados\"\nNO progress bar in this legend quadrant. It is explicitly outside the variant set, do not invent a twelfth environment.\nKeep a precise 2×2 grid and shared pewter bar styling. Candidate concept board only.\n",
+      "originalGeneratedFilePreserved": true,
+      "availability": "atual",
+      "condition": "",
+      "regions": [
+        {
+          "coveredId": "L01",
+          "coveredVariantIds": [
+            "L01-V9"
+          ],
+          "rectNormalized": [
+            0,
+            0,
+            0.5,
+            0.5
+          ],
+          "label": "Portal azul",
+          "barPlacement": "inferior",
+          "rectPixels": [
+            0,
+            0,
+            836,
+            470
+          ]
+        },
+        {
+          "coveredId": "L01",
+          "coveredVariantIds": [
+            "L01-V10"
+          ],
+          "rectNormalized": [
+            0.5,
+            0,
+            0.5,
+            0.5
+          ],
+          "label": "Portal vermelho",
+          "barPlacement": "inferior",
+          "rectPixels": [
+            836,
+            0,
+            836,
+            470
+          ]
+        },
+        {
+          "coveredId": "L01",
+          "coveredVariantIds": [
+            "L01-V11"
+          ],
+          "rectNormalized": [
+            0,
+            0.5,
+            0.5,
+            0.5
+          ],
+          "label": "Portão",
+          "barPlacement": "inferior",
+          "rectPixels": [
+            0,
+            470,
+            836,
+            471
+          ]
+        },
+        {
+          "coveredId": null,
+          "rectNormalized": [
+            0.5,
+            0.5,
+            0.5,
+            0.5
+          ],
+          "label": "Legenda do estudo, não é variante/tela",
+          "excludeFromCoverage": true,
+          "rectPixels": [
+            836,
+            470,
+            836,
+            471
+          ]
+        }
+      ],
+      "reviewNotes": [
+        "Prancha de três variantes independentes; quarto quadrante é somente legenda.",
+        "São artes de transição candidatas, não ambientes 3D implementados.",
+        "Saída nativa 1672×941; alvo de tela 1920×1080 solicitado, não produzido pela ferramenta. Sem redimensionamento externo.",
+        "A prancha é visão conjunta de variantes. Cada quadrante tem aproximadamente 836×470/471; alvo individual Full HD não foi produzido. Textura/cor/posição da barra são candidatos de estudo, sem alterar a progressão nativa."
+      ],
+      "visualInspection": {
+        "performed": true,
+        "result": "Candidato legível; conteúdo/funções base inspecionados, sem aprovação artística nem implantação."
+      },
+      "promptSha256": "d77e085e2a4c7bfce8c224ee331472fb4d23df1f57779d066f25ebdb5e2869e1"
+    },
+    {
+      "id": "f03-menu-principal-r1",
+      "coveredIds": [
+        "F03"
+      ],
+      "status": "reused/r1",
+      "installed": false,
+      "tool": "existing-art",
+      "outputPath": "docs/hud-study/images/06-menu-principal-preview.jpg",
+      "dimensions": {
+        "width": 1920,
+        "height": 1080
+      },
+      "sha256": "9d9b5544d62193f1f7d32c5759b35ef766823ada6ba78ced3235f6bc8ce3f924",
+      "prompt": null,
+      "canonicalIds": [
+        "F03"
+      ],
+      "path": "../images/06-menu-principal-preview.jpg",
+      "width": 1920,
+      "height": 1080,
+      "regions": [],
+      "reviewNotes": [
+        "Direção r1 existente reutilizada sem regeneração; não é captura original."
+      ]
+    }
+  ],
+  "publicProvenance": "Private tool-output paths omitted; original masters and manifests retained locally."
+}

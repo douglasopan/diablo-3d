@@ -1,0 +1,78 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/preview.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/frame.gd" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/components/inventory_panel.tscn" id="3"]
+
+[node name="Inventario" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.025, 0.03, 0.035, 1)
+mouse_filter = 2
+
+[node name="PrototypeTitle" type="Label" parent="."]
+layout_mode = 0
+offset_left = 90.0
+offset_top = 24.0
+offset_right = 1090.0
+offset_bottom = 68.0
+text = "INVENTÁRIO · CAPACIDADES NATIVAS"
+theme_override_colors/font_color = Color(0.9, 0.86, 0.78, 1)
+theme_override_font_sizes/font_size = 30
+vertical_alignment = 1
+
+[node name="Navigation" type="HBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 1020.0
+offset_top = 24.0
+offset_right = 1830.0
+offset_bottom = 72.0
+theme_override_constants/separation = 12
+
+[node name="Configuracoes" type="Button" parent="Navigation"]
+layout_mode = 2
+custom_minimum_size = Vector2(260, 48)
+text = "Configurações"
+
+[node name="Inventario" type="Button" parent="Navigation"]
+layout_mode = 2
+custom_minimum_size = Vector2(260, 48)
+text = "Inventário"
+
+[node name="Comercio" type="Button" parent="Navigation"]
+layout_mode = 2
+custom_minimum_size = Vector2(260, 48)
+text = "Comércio"
+
+[node name="PreviewStatus" type="Label" parent="."]
+layout_mode = 0
+offset_left = 90.0
+offset_top = 1010.0
+offset_right = 1830.0
+offset_bottom = 1050.0
+text = "Protótipo editável local · não aplica alterações no jogo"
+theme_override_colors/font_color = Color(0.9, 0.86, 0.78, 1)
+theme_override_font_sizes/font_size = 20
+vertical_alignment = 1
+
+[node name="Inventory" parent="." instance=ExtResource("3")]
+layout_mode = 0
+offset_left = 600.0
+offset_top = 130.0
+offset_right = 1320.0
+offset_bottom = 980.0
+
+[editable path="Inventory"]

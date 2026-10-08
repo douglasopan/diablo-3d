@@ -1,0 +1,5 @@
+.godot/
+*.import
+images/*.png
+settings-jobs.json
+kit-jobs.json

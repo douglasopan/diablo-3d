@@ -1,0 +1,214 @@
+{
+  "revision": "hud-study-r2",
+  "tool": "image_gen built-in",
+  "status": "candidate",
+  "installed": false,
+  "outputs": [
+    {
+      "id": "s01",
+      "file": "s-01-categorias.png",
+      "canonicalIds": [
+        "O01"
+      ],
+      "coveredIds": [
+        "O01"
+      ],
+      "prompt": "Use case: ui-mockup. Project-bound Diablo 3D interface concept, not a screenshot. Use reference image 1 as the approved EXACT visual direction and scene background: dark ruined chapel, restrained candlelight, same charcoal/earth/amber palette; reference image 2 only for worn pewter/iron framing language. Create a polished readable 1920x1080 landscape UI screen, original Diablo 1 gothic restraint, ivory live-text examples, warm muted selected-row accent, no MMO gradients, no electric neon, no new gameplay. Keep central panel bounded in safe screen area, ample line spacing, bottom horizontal Back footer, crisp professional typography, subtle thin ornament. Do not add logo text unless requested. All text Portuguese (Brazil). No misleading before/after or original column. Do not embed technical implementation labels; screen is a candidate for the player. Screen: pre-game Settings categories. Verbatim title 'CONFIGURAÇÕES'. Single centered panel about 46% width and 84% height with rows 'Idioma', 'Inicialização', 'Gráficos', 'Áudio', 'Trilha sonora', 'Gameplay', 'Mapeamento de teclas', 'Mapeamento do controle'; selected 'Gráficos'. Footer 'Voltar'. No search, Apply, reset, or Save button invented. Thin vertical scrollbar permits conditional Mods/Modo de jogo in real runtime; do not show fictional mod names.",
+      "path": "images/s-01-categorias.png",
+      "status": "candidate",
+      "installed": false,
+      "tool": "image_gen built-in"
+    },
+    {
+      "id": "s02",
+      "file": "s-02-graficos-principal.png",
+      "canonicalIds": [
+        "O02"
+      ],
+      "coveredIds": [
+        "O08"
+      ],
+      "prompt": "Use case: ui-mockup. Project-bound Diablo 3D interface concept, not a screenshot. Use reference image 1 as the approved EXACT visual direction and scene background: dark ruined chapel, restrained candlelight, same charcoal/earth/amber palette; reference image 2 only for worn pewter/iron framing language. Create a polished readable 1920x1080 landscape UI screen, original Diablo 1 gothic restraint, ivory live-text examples, warm muted selected-row accent, no MMO gradients, no electric neon, no new gameplay. Keep central panel bounded in safe screen area, ample line spacing, bottom horizontal Back footer, crisp professional typography, subtle thin ornament. Do not add logo text unless requested. All text Portuguese (Brazil). No misleading before/after or original column. Do not embed technical implementation labels; screen is a candidate for the player. Screen: pre-game graphics options, polished wide panel with 14 two-column rows; title 'GRÁFICOS'. Rows left/right: 'Resolução interna'/'1920 × 1080'; 'Tela cheia'/'Ativo'; 'Controle da taxa de quadros'/'VSync'; 'Qualidade de ampliação'/'Anisotrópica'; 'Iniciar em 3D'/'Ativo'; 'Renderização 3D por GPU'/'Ativo'; 'Ignorar construções fora da câmera 3D'/'Ativo'; 'Suavização de bordas 3D'/'Inativo'; 'Modo de câmera 3D'/'Isométrico'; 'Campo de visão'/'60'; 'Sensibilidade da câmera'/'100'; 'Horizonte e névoa 3D'/'Ativo'; 'Exibir FPS'/'Inativo'; 'Gama'/'0'. Current row 'Iniciar em 3D' highlighted softly. Bottom contextual description 'Aplicado ao iniciar a próxima sessão.' and 'Voltar'. No fictional quality presets, ray tracing, DLSS, day/night or tessellation.",
+      "path": "images/s-02-graficos-principal.png",
+      "status": "candidate",
+      "installed": false,
+      "tool": "image_gen built-in"
+    },
+    {
+      "id": "s03",
+      "file": "s-03-seletor-valores.png",
+      "canonicalIds": [
+        "O03"
+      ],
+      "coveredIds": [
+        "O03"
+      ],
+      "prompt": "Use case: ui-mockup. Project-bound Diablo 3D interface concept, not a screenshot. Use reference image 1 as the approved EXACT visual direction and scene background: dark ruined chapel, restrained candlelight, same charcoal/earth/amber palette; reference image 2 only for worn pewter/iron framing language. Create a polished readable 1920x1080 landscape UI screen, original Diablo 1 gothic restraint, ivory live-text examples, warm muted selected-row accent, no MMO gradients, no electric neon, no new gameplay. Keep central panel bounded in safe screen area, ample line spacing, bottom horizontal Back footer, crisp professional typography, subtle thin ornament. Do not add logo text unless requested. All text Portuguese (Brazil). No misleading before/after or original column. Do not embed technical implementation labels; screen is a candidate for the player. Screen: native language value picker pre-game. Title 'IDIOMA'. Scrollable elegant list 10 visible rows: 'Deutsch', 'English', 'Español', 'Français', 'Italiano', 'Polski', 'Português do Brasil', 'Română', 'Suomi', 'Svenska'. Português do Brasil is selected with understated ivory/gold cursor and thin warm row focus. Selection marker distinct from keyboard focus. Title+list optically centered. Footer 'Voltar'. No flag icons or translation service UI, search, or save button.",
+      "path": "images/s-03-seletor-valores.png",
+      "status": "candidate",
+      "installed": false,
+      "tool": "image_gen built-in"
+    },
+    {
+      "id": "s04",
+      "file": "s-04-categorias-variantes.png",
+      "canonicalIds": [
+        "O02"
+      ],
+      "coveredIds": [
+        "O02",
+        "O04",
+        "O05",
+        "O06",
+        "O13",
+        "O18"
+      ],
+      "prompt": "Use case: ui-mockup. Project-bound Diablo 3D interface concept, not a screenshot. Use reference image 1 as the approved EXACT visual direction and scene background: dark ruined chapel, restrained candlelight, same charcoal/earth/amber palette; reference image 2 only for worn pewter/iron framing language. Create a polished readable 1920x1080 landscape UI screen, original Diablo 1 gothic restraint, ivory live-text examples, warm muted selected-row accent, no MMO gradients, no electric neon, no new gameplay. Keep central panel bounded in safe screen area, ample line spacing, bottom horizontal Back footer, crisp professional typography, subtle thin ornament. Do not add logo text unless requested. All text Portuguese (Brazil). No misleading before/after or original column. Do not embed technical implementation labels; screen is a candidate for the player. Create a design review CONTACT SHEET with six equally sized complete miniature menu screens arranged 3 columns ×2 rows, requested canvas 3072x2048. Thin gutters; each screen numbered outside UI only. Six category variants of the SAME frame. 1 'IDIOMA': Idioma/Português do Brasil. 2 'MODS': empty registered mods panel, 'Nenhum mod disponível' (conditional state, no fictional mod); 3 'MODO DE JOGO': Restringir para Shareware/Inativo. 4 'INICIALIZAÇÃO': Tela de abertura/Tela de título; Mostrar intro/Ativo. 5 'ÁUDIO': Música/70%, Efeitos/80%, Dicas de áudio/70%, Taxa de amostragem/48000 Hz, Buffer/2048, Dispositivo/Padrão. 6 'TRILHA SONORA': Modo/Custom, Menu principal/Rock2, Tristram/Aleatório, Catedral/Original, Catacumbas/Original, Cavernas/Original, Inferno/Original, Ninho/Original, Cripta/Original. Every panel has only Voltar footer. No music play/pause or downloads UI, no fake installation status. All examples are candidate layouts, actual values supplied by runtime.",
+      "path": "images/s-04-categorias-variantes.png",
+      "status": "candidate",
+      "installed": false,
+      "tool": "image_gen built-in"
+    },
+    {
+      "id": "s05",
+      "file": "s-05-gameplay-mapeamentos.png",
+      "canonicalIds": [
+        "O02"
+      ],
+      "coveredIds": [
+        "O21",
+        "O22",
+        "O30",
+        "O31"
+      ],
+      "prompt": "Use case: ui-mockup. Project-bound Diablo 3D interface concept, not a screenshot. Use reference image 1 as the approved EXACT visual direction and scene background: dark ruined chapel, restrained candlelight, same charcoal/earth/amber palette; reference image 2 only for worn pewter/iron framing language. Create a polished readable 1920x1080 landscape UI screen, original Diablo 1 gothic restraint, ivory live-text examples, warm muted selected-row accent, no MMO gradients, no electric neon, no new gameplay. Keep central panel bounded in safe screen area, ample line spacing, bottom horizontal Back footer, crisp professional typography, subtle thin ornament. Do not add logo text unless requested. All text Portuguese (Brazil). No misleading before/after or original column. Do not embed technical implementation labels; screen is a candidate for the player. Create design review contact sheet FOUR full menu screens 2x2 requested3072x2048. 1 'GAMEPLAY · DIABLO': rows 'Correr na cidade/Ativo', 'Interface de lojas/Lista com miniaturas', 'Coleta automática/Ativo', 'Poções de vida/2', 'Poções de mana/2'. 2 'GAMEPLAY · HELLFIRE': similar genuine settings no newmechanics with 'Modo de jogo/Hellfire', 'Correr na cidade/Ativo', 'Interface de lojas/Lista com miniaturas'. 3 'MAPEAMENTO DE TECLAS': 'Personagem/C', 'Inventário/I', 'Grimório/B', 'Missões/Q', 'Automapa/Tab', 'Mudar modo da câmera/K', 'Alternar 2D e 3D/F4'. 4 'MAPEAMENTO DO CONTROLE': simple rows 'Inventário/Back + Y', 'Personagem/Back + X', 'Automapa/Back + A', 'Missões/Back + B' as demonstrative currentbindings. All4 use same gothicframe, clean columns, scroller, Voltar footer; no reset allbutton or fictional abilities. Examples of bindings not authoritative default assignments.",
+      "path": "images/s-05-gameplay-mapeamentos.png",
+      "status": "candidate",
+      "installed": false,
+      "tool": "image_gen built-in",
+      "issues": [
+        "A variante Diablo/Hellfire é contexto do estudo; o campo ilustrado não autoriza mudar a variante do jogo durante uma partida."
+      ],
+      "promotionBlocked": true
+    },
+    {
+      "id": "s06",
+      "file": "s-06-captura-associacoes.png",
+      "canonicalIds": [
+        "O32",
+        "O33"
+      ],
+      "coveredIds": [
+        "O32",
+        "O33",
+        "O34"
+      ],
+      "prompt": "Use case: ui-mockup. Project-bound Diablo 3D interface concept, not a screenshot. Use reference image 1 as the approved EXACT visual direction and scene background: dark ruined chapel, restrained candlelight, same charcoal/earth/amber palette; reference image 2 only for worn pewter/iron framing language. Create a polished readable 1920x1080 landscape UI screen, original Diablo 1 gothic restraint, ivory live-text examples, warm muted selected-row accent, no MMO gradients, no electric neon, no new gameplay. Keep central panel bounded in safe screen area, ample line spacing, bottom horizontal Back footer, crisp professional typography, subtle thin ornament. Do not add logo text unless requested. All text Portuguese (Brazil). No misleading before/after or original column. Do not embed technical implementation labels; screen is a candidate for the player. Design review three panels horizontally, landscape3072x1536. Panel1 pre-game keyboard binding title 'INVENTÁRIO', current 'Tecla vinculada: I', instruction 'Pressione uma tecla ou botão do mouse', buttons 'Desvincular tecla' and 'Voltar'. Panel2 controller binding idle title 'INVENTÁRIO', 'Combinação: Back + Y', buttons 'Iniciar captura', 'Desvincular combinação', 'Voltar'. Panel3 controller capture active, title 'INVENTÁRIO', instruction 'Pressione os botões do controle', text 'Tempo restante: 10 s'; navigation actions hidden whilecapture. Equal materials and typography, dark approvedbackground behind all. No real system device names, no save/apply/reset. Label sheet numbers outsidepanels for design review.",
+      "path": "images/s-06-captura-associacoes.png",
+      "status": "candidate",
+      "installed": false,
+      "tool": "image_gen built-in"
+    },
+    {
+      "id": "s07",
+      "file": "s-07-pausa-menu.png",
+      "canonicalIds": [
+        "G01"
+      ],
+      "coveredIds": [
+        "G01",
+        "G02"
+      ],
+      "prompt": "Use case: ui-mockup. Project-bound Diablo 3D interface concept, not a screenshot. Use reference image 1 as the approved EXACT visual direction and scene background: dark ruined chapel, restrained candlelight, same charcoal/earth/amber palette; reference image 2 only for worn pewter/iron framing language. Create a polished readable 1920x1080 landscape UI screen, original Diablo 1 gothic restraint, ivory live-text examples, warm muted selected-row accent, no MMO gradients, no electric neon, no new gameplay. Keep central panel bounded in safe screen area, ample line spacing, bottom horizontal Back footer, crisp professional typography, subtle thin ornament. Do not add logo text unless requested. All text Portuguese (Brazil). No misleading before/after or original column. Do not embed technical implementation labels; screen is a candidate for the player. Design review TWO side-by-side full menu proposals over subtly dim illustrated Tristram world. Leftsolo title 'DIABLO 3D' small and 'MENU DA PARTIDA', five actions centered 'Configurações', 'Salvar jogo', 'Carregar jogo', 'Sair para o menu principal', 'Sair do jogo'. Right multiplayer same elegantframe with only 'Configurações', 'Sair para o menu principal', 'Sair do jogo'. At bottom unobtrusive 'Esc · Voltar à partida'. No Resume action duplicated inlist, no PhotoMode, social, cosmetics or newcampaign buttons. Menu should use much more monitor effectively, crisp HD easy read, understated dark panel, safe margins.",
+      "path": "images/s-07-pausa-menu.png",
+      "status": "candidate",
+      "installed": false,
+      "tool": "image_gen built-in"
+    },
+    {
+      "id": "s08",
+      "file": "s-08-categorias-partida.png",
+      "canonicalIds": [
+        "IGS01"
+      ],
+      "coveredIds": [],
+      "prompt": "Use case: ui-mockup. Project-bound Diablo 3D interface concept, not a screenshot. Use reference image 1 as the approved EXACT visual direction and scene background: dark ruined chapel, restrained candlelight, same charcoal/earth/amber palette; reference image 2 only for worn pewter/iron framing language. Create a polished readable 1920x1080 landscape UI screen, original Diablo 1 gothic restraint, ivory live-text examples, warm muted selected-row accent, no MMO gradients, no electric neon, no new gameplay. Keep central panel bounded in safe screen area, ample line spacing, bottom horizontal Back footer, crisp professional typography, subtle thin ornament. Do not add logo text unless requested. All text Portuguese (Brazil). No misleading before/after or original column. Do not embed technical implementation labels; screen is a candidate for the player. Screen: live in-game settings categories over dim town illustration, title 'CONFIGURAÇÕES'. Same frame as previoussettings. List priority 'Trilha sonora', 'Gráficos', 'Áudio', 'Gameplay', 'Mapeamento de teclas', 'Mapeamento do controle'. Highlight 'Trilha sonora'. NO startup, resolution, mods, game mode or language configuration here unless editable; these are omitted. Horizontal footer 'Menu anterior' then separate '← Página anterior'/'Próxima página →' only if pagination needed (here listfits, omit paging). Description underrows 'Escolha uma categoria.' Never add Apply/Save/reset. Keep safe area and room for up to18native rows FullHD.",
+      "path": "images/s-08-categorias-partida.png",
+      "status": "candidate",
+      "installed": false,
+      "tool": "image_gen built-in"
+    },
+    {
+      "id": "s09",
+      "file": "s-09-opcoes-partida.png",
+      "canonicalIds": [
+        "IGS02"
+      ],
+      "coveredIds": [
+        "G03",
+        "G04",
+        "G05",
+        "G06",
+        "G07",
+        "G08",
+        "G09",
+        "G10"
+      ],
+      "prompt": "Use case: ui-mockup. Project-bound Diablo 3D interface concept, not a screenshot. Use reference image 1 as the approved EXACT visual direction and scene background: dark ruined chapel, restrained candlelight, same charcoal/earth/amber palette; reference image 2 only for worn pewter/iron framing language. Create a polished readable 1920x1080 landscape UI screen, original Diablo 1 gothic restraint, ivory live-text examples, warm muted selected-row accent, no MMO gradients, no electric neon, no new gameplay. Keep central panel bounded in safe screen area, ample line spacing, bottom horizontal Back footer, crisp professional typography, subtle thin ornament. Do not add logo text unless requested. All text Portuguese (Brazil). No misleading before/after or original column. Do not embed technical implementation labels; screen is a candidate for the player. Screen: graphics settings DURINGgame, title 'GRÁFICOS', over subtly dimtownillustration. Readable wide panel with13rows: 'Gama/0', 'Qualidade de escala/Anisotrópica', 'Zoom/Inativo', 'Renderização 3D por GPU/Ativo', 'Ignorar construções fora da câmera 3D/Ativo', 'Suavização de bordas 3D/Inativo', 'Modo da câmera 3D/Isométrico', 'Campo de visão da câmera/60', 'Sensibilidade da câmera/100', 'Horizonte e névoa 3D/Ativo', 'Exibir FPS/Inativo', 'Iluminação por pixel/Ativo', 'Ciclagem de cores/Ativo'. Select GPUrow, contextualdescription 'Aplicação imediata.' Horizontalbottomfooter 'Menu anterior'. Do NOTinclude Startin3D,resolution,fullscreen,mods,or anyrestartonlysetting. Show labelsivorynotredfortoggles, clear enabled disabled distinction. Preserve allfunctions from functional referenceimage3 but upgradeframe/readability.",
+      "path": "images/s-09-opcoes-partida.png",
+      "status": "candidate",
+      "installed": false,
+      "tool": "image_gen built-in"
+    },
+    {
+      "id": "s10",
+      "file": "s-10-musica-valores-partida.png",
+      "canonicalIds": [
+        "IGS03"
+      ],
+      "coveredIds": [
+        "G11",
+        "G12",
+        "G13",
+        "G14",
+        "G15",
+        "G16",
+        "G17",
+        "G18"
+      ],
+      "prompt": "Use case: ui-mockup. Project-bound Diablo 3D interface concept, not a screenshot. Use reference image 1 as the approved EXACT visual direction and scene background: dark ruined chapel, restrained candlelight, same charcoal/earth/amber palette; reference image 2 only for worn pewter/iron framing language. Create a polished readable 1920x1080 landscape UI screen, original Diablo 1 gothic restraint, ivory live-text examples, warm muted selected-row accent, no MMO gradients, no electric neon, no new gameplay. Keep central panel bounded in safe screen area, ample line spacing, bottom horizontal Back footer, crisp professional typography, subtle thin ornament. Do not add logo text unless requested. All text Portuguese (Brazil). No misleading before/after or original column. Do not embed technical implementation labels; screen is a candidate for the player. Screen: in-game soundtrack choice for Tristram. Title 'TRISTRAM · MÚSICA'. Four choices 'Original', 'Rock · Variação 1', 'Rock · Variação 2', 'Rock · Variação 3', plus 'Aleatório' selected. Contextualdescription 'Novo sorteio ao terminar cada faixa.' Horizontalfooter 'Menu anterior'. Subtle selection diamond left and focused row warmedge. Native choices, NO play/download button, no albumart or audiolevelsvisualizer. Ivory legiblefont. Otherlocaltracks use identicaltemplate withactualruntimechoices; this isonlyTristramexample. Include small breadcrumb 'Configurações › Trilha sonora'.",
+      "path": "images/s-10-musica-valores-partida.png",
+      "status": "candidate",
+      "installed": false,
+      "tool": "image_gen built-in"
+    },
+    {
+      "id": "s11",
+      "file": "s-11-associacoes-partida.png",
+      "canonicalIds": [
+        "IGS04",
+        "IGS05"
+      ],
+      "coveredIds": [],
+      "prompt": "Use case: ui-mockup. Project-bound Diablo 3D interface concept, not a screenshot. Use reference image 1 as the approved EXACT visual direction and scene background: dark ruined chapel, restrained candlelight, same charcoal/earth/amber palette; reference image 2 only for worn pewter/iron framing language. Create a polished readable 1920x1080 landscape UI screen, original Diablo 1 gothic restraint, ivory live-text examples, warm muted selected-row accent, no MMO gradients, no electric neon, no new gameplay. Keep central panel bounded in safe screen area, ample line spacing, bottom horizontal Back footer, crisp professional typography, subtle thin ornament. Do not add logo text unless requested. All text Portuguese (Brazil). No misleading before/after or original column. Do not embed technical implementation labels; screen is a candidate for the player. CONTACT SHEET two fullsettingsscreens sidebyside, requested3072x1536, INGAME dimtownillustrationbackground. Left keyboard/mouse binding title 'ALTERAR TECLA', label 'Inventário', 'Atual: I', 'Pressione uma tecla, botão ou roda do mouse.', buttons 'Desvincular' and 'Menu anterior'. Right active gamepadbindingcapture title 'ALTERAR CONTROLE', label 'Inventário', 'Pressione a combinação de botões.', 'Tempo restante: 10 s'; hide navigationduringactivecapture. Quietgothicframe sameasallsettings, clearfocus. No gameplaykeynames leaked or newbuttons. No actual Saveinthisscreen.",
+      "path": "images/s-11-associacoes-partida.png",
+      "status": "candidate",
+      "installed": false,
+      "tool": "image_gen built-in"
+    },
+    {
+      "id": "s12",
+      "file": "s-12-slider-partida.png",
+      "canonicalIds": [
+        "IGS06"
+      ],
+      "coveredIds": [],
+      "prompt": "Use case: ui-mockup. Project-bound Diablo 3D interface concept, not a screenshot. Use reference image 1 as the approved EXACT visual direction and scene background: dark ruined chapel, restrained candlelight, same charcoal/earth/amber palette; reference image 2 only for worn pewter/iron framing language. Create a polished readable 1920x1080 landscape UI screen, original Diablo 1 gothic restraint, ivory live-text examples, warm muted selected-row accent, no MMO gradients, no electric neon, no new gameplay. Keep central panel bounded in safe screen area, ample line spacing, bottom horizontal Back footer, crisp professional typography, subtle thin ornament. Do not add logo text unless requested. All text Portuguese (Brazil). No misleading before/after or original column. Do not embed technical implementation labels; screen is a candidate for the player. Screen: volume adjustmentduringgame. Compactcenterwidegothicmodal overdimillustratedtown. Title 'VOLUME DA MÚSICA'. Onehorizontalnativevolume slider currently70%, clear track darkiron andmutedwarmfilledsegment, wornpewterthumb, numeric70%shownabove. Text 'Aplicação imediata.' Footer 'Menu anterior'. NoApplySave, no equalizer, noextra volume channels, no invented mute checkbox ifnotneeded; 0sliderposition meansmute. Samewidgetsreusablefor effects,audiocues,gamma,solospeed. Keep roomylegible highres text and generousdraggabletarget.",
+      "path": "images/s-12-slider-partida.png",
+      "status": "candidate",
+      "installed": false,
+      "tool": "image_gen built-in"
+    }
+  ],
+  "publicProvenance": "Private tool-output paths omitted; original masters and manifests retained locally."
+}

@@ -1,0 +1,41 @@
+{
+  "revision": "r2",
+  "status": "candidate",
+  "installed": false,
+  "outputs": [
+    {
+      "id": "kit-panel",
+      "path": "assets/kit-panel.png",
+      "prompt": "Use case: background-extraction. Extract a production-usable EMPTY gothic HUD panel skin from the supplied reference1, preserving its exact worn dark iron, pewter thin border, black charcoalstone interior and restrained corner filigree. The result must be a SINGLE front-on rectangular panel, approximately4:3, centered, occupying90% ofcanvas, fully framed edge-to-edge with clear right angles. REMOVE ALL TEXT, ALL numbers, rows, checkboxes, buttons, icons, slider, decorative wings/skulls projecting outside the rectangular border, backdrop scene and lightingoutsidepanel. Interior is opaque smooth very dark texturedstone lowcontrast (not transparent). Outside rectangle truly transparent alpha, NOT checkerboard image. No bakedshadows outside boundary, no glow. Designed for 9-slice with fixed64px corners, longstraightmiddle edges allowingresize. Highquality2K+ifpossible. This is a clean raster component extracted from the concept to assemble real editable menus withlive text. Do not produce afullmockupscreen. Preserve styleexactly.",
+      "canonicalIds": [],
+      "coveredIds": [],
+      "transparent_background": true,
+      "status": "candidate",
+      "installed": false,
+      "tool": "image_gen built-in"
+    },
+    {
+      "id": "kit-modal",
+      "path": "assets/kit-modal.png",
+      "prompt": "Use case: background-extraction. Extract a SINGLE empty horizontal gothic modal window frame from reference1, the same worn pewter/darkiron/black charcoalstone visual design. Canvaslandscape, rectangle about2:1aspect, centeredoccupying90%. Opaqueverydark lowcontrast interior; borderfineagedmetal/cornerfiligree. REMOVE ALLTEXTnumberssliderbuttonsicons AND worldbackdrop, no projectingwingedgargoyles outside rectangle. Truly transparent alpha outsideframe, no checkerboardpattern. Rectilinear fixedcorners, longstraightedgecentres support9slice64px. No additional panels/components, no watermark. A clean standalone project-bound raster asset extracted from suppliedscreen; live textand controlswillbeoverlaidbyGodot. Highquality2K+target.",
+      "canonicalIds": [],
+      "coveredIds": [],
+      "transparent_background": true,
+      "status": "candidate",
+      "installed": false,
+      "tool": "image_gen built-in"
+    },
+    {
+      "id": "kit-controls",
+      "path": "assets/kit-controls.png",
+      "prompt": "Use case: background-extraction. Extract a SINGLE empty rectangular menu BUTTON skin from the 'Menu anterior' button in suppliedreference1. Keep exactlydarkstone/forgediron, thinfinepewterborder, subtleworncornerornament. REMOVE text, allletters,numbers, icons, arrows, backdrop, shadowoutsidebutton, otherpaneldecoration. Onlyonebutton, horizontal5:1proportion, fronton, symmetricfixedcorners, longstraightedgecentre,support9slice. Canvaswidebuttonnearlyfills90%width, generousfullytransparentalphaoutside. Interioropaque nearblacklowcontrast. Trulytransparentbackground; nevercheckerboardorwhitepaint. No labelword, no tinyduplicatebuttons. Project-bound reusablebuttonframe for liveUItext inGodot. Highquality2Kwidthtarget.",
+      "canonicalIds": [],
+      "coveredIds": [],
+      "transparent_background": true,
+      "status": "candidate",
+      "installed": false,
+      "tool": "image_gen built-in"
+    }
+  ],
+  "publicProvenance": "Private tool-output paths omitted; original masters and manifests retained locally."
+}

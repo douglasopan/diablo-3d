@@ -1,0 +1,462 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/frame.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/components/item_specimen.tscn" id="2"]
+
+[node name="InventoryPanel" type="NinePatchRect"]
+offset_right = 720.0
+offset_bottom = 850.0
+mouse_filter = 2
+script = ExtResource("1")
+kit_texture = "res://assets/kit-panel.png"
+
+[node name="PanelFill" type="ColorRect" parent="."]
+layout_mode = 0
+offset_left = 32.0
+offset_top = 32.0
+offset_right = 688.0
+offset_bottom = 818.0
+color = Color(0.035, 0.04, 0.045, 1)
+mouse_filter = 2
+
+[node name="Title" type="Label" parent="."]
+layout_mode = 0
+offset_left = 48.0
+offset_top = 28.0
+offset_right = 668.0
+offset_bottom = 73.0
+text = "INVENTÁRIO"
+theme_override_colors/font_color = Color(0.9, 0.86, 0.78, 1)
+theme_override_font_sizes/font_size = 30
+vertical_alignment = 1
+
+[node name="Equipment" type="Control" parent="." groups=["equipment_region"]]
+layout_mode = 0
+offset_left = 48.0
+offset_top = 84.0
+offset_right = 668.0
+offset_bottom = 474.0
+
+[node name="Elmo" type="Button" parent="Equipment" groups=["equipment_slot"]]
+layout_mode = 0
+offset_left = 245.0
+offset_top = 0.0
+offset_right = 340.0
+offset_bottom = 105.0
+text = "Elmo"
+toggle_mode = true
+
+[node name="Amuleto" type="Button" parent="Equipment" groups=["equipment_slot"]]
+layout_mode = 0
+offset_left = 370.0
+offset_top = 10.0
+offset_right = 455.0
+offset_bottom = 95.0
+text = "Amuleto"
+toggle_mode = true
+
+[node name="Armadura" type="Button" parent="Equipment" groups=["equipment_slot"]]
+layout_mode = 0
+offset_left = 235.0
+offset_top = 125.0
+offset_right = 355.0
+offset_bottom = 300.0
+text = "Armadura"
+toggle_mode = true
+
+[node name="MaoEsquerda" type="Button" parent="Equipment" groups=["equipment_slot"]]
+layout_mode = 0
+offset_left = 55.0
+offset_top = 125.0
+offset_right = 155.0
+offset_bottom = 300.0
+text = "Mão\nesquerda"
+toggle_mode = true
+
+[node name="MaoDireita" type="Button" parent="Equipment" groups=["equipment_slot"]]
+layout_mode = 0
+offset_left = 430.0
+offset_top = 125.0
+offset_right = 550.0
+offset_bottom = 300.0
+text = "Mão\ndireita"
+toggle_mode = true
+
+[node name="Anel1" type="Button" parent="Equipment" groups=["equipment_slot"]]
+layout_mode = 0
+offset_left = 155.0
+offset_top = 310.0
+offset_right = 235.0
+offset_bottom = 380.0
+text = "Anel 1"
+toggle_mode = true
+
+[node name="Anel2" type="Button" parent="Equipment" groups=["equipment_slot"]]
+layout_mode = 0
+offset_left = 355.0
+offset_top = 310.0
+offset_right = 435.0
+offset_bottom = 380.0
+text = "Anel 2"
+toggle_mode = true
+
+[node name="BackpackTitle" type="Label" parent="."]
+layout_mode = 0
+offset_left = 60.0
+offset_top = 465.0
+offset_right = 660.0
+offset_bottom = 503.0
+text = "MOCHILA · 10 × 4"
+theme_override_colors/font_color = Color(0.9, 0.86, 0.78, 1)
+theme_override_font_sizes/font_size = 22
+vertical_alignment = 1
+
+[node name="Backpack" type="GridContainer" parent="." groups=["backpack_grid"]]
+layout_mode = 0
+offset_left = 60.0
+offset_top = 512.0
+offset_right = 618.0
+offset_bottom = 734.0
+columns = 10
+theme_override_constants/h_separation = 2
+theme_override_constants/v_separation = 2
+
+[node name="Cell_R1_C1" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 1, coluna 1"
+
+[node name="Cell_R1_C2" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 1, coluna 2"
+
+[node name="Cell_R1_C3" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 1, coluna 3"
+
+[node name="Cell_R1_C4" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 1, coluna 4"
+
+[node name="Cell_R1_C5" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 1, coluna 5"
+
+[node name="Cell_R1_C6" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 1, coluna 6"
+
+[node name="Cell_R1_C7" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 1, coluna 7"
+
+[node name="Cell_R1_C8" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 1, coluna 8"
+
+[node name="Cell_R1_C9" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 1, coluna 9"
+
+[node name="Cell_R1_C10" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 1, coluna 10"
+
+[node name="Cell_R2_C1" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 2, coluna 1"
+
+[node name="Cell_R2_C2" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 2, coluna 2"
+
+[node name="Cell_R2_C3" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 2, coluna 3"
+
+[node name="Cell_R2_C4" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 2, coluna 4"
+
+[node name="Cell_R2_C5" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 2, coluna 5"
+
+[node name="Cell_R2_C6" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 2, coluna 6"
+
+[node name="Cell_R2_C7" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 2, coluna 7"
+
+[node name="Cell_R2_C8" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 2, coluna 8"
+
+[node name="Cell_R2_C9" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 2, coluna 9"
+
+[node name="Cell_R2_C10" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 2, coluna 10"
+
+[node name="Cell_R3_C1" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 3, coluna 1"
+
+[node name="Cell_R3_C2" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 3, coluna 2"
+
+[node name="Cell_R3_C3" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 3, coluna 3"
+
+[node name="Cell_R3_C4" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 3, coluna 4"
+
+[node name="Cell_R3_C5" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 3, coluna 5"
+
+[node name="Cell_R3_C6" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 3, coluna 6"
+
+[node name="Cell_R3_C7" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 3, coluna 7"
+
+[node name="Cell_R3_C8" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 3, coluna 8"
+
+[node name="Cell_R3_C9" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 3, coluna 9"
+
+[node name="Cell_R3_C10" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 3, coluna 10"
+
+[node name="Cell_R4_C1" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 4, coluna 1"
+
+[node name="Cell_R4_C2" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 4, coluna 2"
+
+[node name="Cell_R4_C3" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 4, coluna 3"
+
+[node name="Cell_R4_C4" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 4, coluna 4"
+
+[node name="Cell_R4_C5" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 4, coluna 5"
+
+[node name="Cell_R4_C6" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 4, coluna 6"
+
+[node name="Cell_R4_C7" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 4, coluna 7"
+
+[node name="Cell_R4_C8" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 4, coluna 8"
+
+[node name="Cell_R4_C9" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 4, coluna 9"
+
+[node name="Cell_R4_C10" type="Button" parent="Backpack" groups=["native_cell", "backpack_cell"]]
+layout_mode = 2
+custom_minimum_size = Vector2(54, 54)
+toggle_mode = true
+focus_mode = 2
+tooltip_text = "Mochila: linha 4, coluna 10"
+
+[node name="ItemSpecimens" type="Control" parent="."]
+layout_mode = 0
+offset_left = 60.0
+offset_top = 512.0
+offset_right = 618.0
+offset_bottom = 734.0
+mouse_filter = 2
+
+[node name="Sword" parent="ItemSpecimens" instance=ExtResource("2")]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 54.0
+offset_bottom = 166.0
+item_label = "ESPADA\nexemplo"
+native_width_cells = 1
+native_height_cells = 3
+
+[node name="Potion" parent="ItemSpecimens" instance=ExtResource("2")]
+layout_mode = 0
+offset_left = 112.0
+offset_top = 0.0
+offset_right = 166.0
+offset_bottom = 54.0
+item_label = "POÇÃO"
+native_width_cells = 1
+native_height_cells = 1
+
+[node name="Scroll" parent="ItemSpecimens" instance=ExtResource("2")]
+layout_mode = 0
+offset_left = 224.0
+offset_top = 0.0
+offset_right = 278.0
+offset_bottom = 110.0
+item_label = "PERGA-\nMINHO"
+native_width_cells = 1
+native_height_cells = 2
+
+[node name="Gold" type="Label" parent="."]
+layout_mode = 0
+offset_left = 60.0
+offset_top = 765.0
+offset_right = 660.0
+offset_bottom = 805.0
+text = "Ouro · 2.450 (exemplo)"
+theme_override_colors/font_color = Color(0.9, 0.86, 0.78, 1)
+theme_override_font_sizes/font_size = 24
+vertical_alignment = 1
+
+[node name="NativeCapacity" type="Label" parent="."]
+layout_mode = 0
+offset_left = 60.0
+offset_top = 810.0
+offset_right = 660.0
+offset_bottom = 838.0
+text = "7 posições equipadas · 40 células de mochila"
+theme_override_colors/font_color = Color(0.9, 0.86, 0.78, 1)
+theme_override_font_sizes/font_size = 18
+vertical_alignment = 1

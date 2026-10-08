@@ -1,0 +1,272 @@
+{
+  "schemaVersion": 1,
+  "status": "editable-prototype-validated-headless",
+  "candidate": true,
+  "installed": false,
+  "project": "docs/hud-study/r2/project.godot",
+  "engine": "Godot 4.7.2 stable",
+  "mainScene": "res://scenes/configuracoes.tscn",
+  "scope": "Projeto isolado de estudo visual; cenas Control editáveis. Nenhuma integração com o jogo.",
+  "canvas": {
+    "reference": [
+      1920,
+      1080
+    ],
+    "previewWindow": [
+      1280,
+      720
+    ],
+    "stretchMode": "canvas_items",
+    "layoutScope": "Geometria determinística para o canvas de referência; revisão responsiva de produção ainda pendente."
+  },
+  "scenes": [
+    {
+      "path": "res://scenes/configuracoes.tscn",
+      "title": "Configurações",
+      "counts": {
+        "buttons": 24,
+        "controls": 71,
+        "footer_buttons": 3,
+        "footer_top": 778,
+        "live_labels": 22,
+        "nodes": 71,
+        "scene": "res://scenes/configuracoes.tscn",
+        "settings_row_height": 31,
+        "settings_rows": 18,
+        "settings_rows_bottom": 706
+      },
+      "contracts": {
+        "rows": 18,
+        "footerButtons": 3,
+        "rowHeight": 31
+      },
+      "content": "Valores ilustrativos para opções gráficas de pré-partida; labels e valores são nós separados.",
+      "interactions": [
+        "Navegação entre os 3 protótipos",
+        "Cada valor e botão do rodapé atualiza somente PreviewStatus"
+      ]
+    },
+    {
+      "path": "res://scenes/inventario.tscn",
+      "title": "Inventário",
+      "counts": {
+        "backpack_cells": 40,
+        "buttons": 50,
+        "controls": 70,
+        "equipment_slots": 7,
+        "live_labels": 9,
+        "nodes": 70,
+        "scene": "res://scenes/inventario.tscn"
+      },
+      "contracts": {
+        "equipmentSlots": 7,
+        "backpackColumns": 10,
+        "backpackRows": 4,
+        "backpackCells": 40,
+        "cellSize": [
+          54,
+          54
+        ],
+        "gap": 2
+      },
+      "content": "Componente instanciado com filhos editáveis. Três itens geométricos locais são exemplos visuais com footprint explícito.",
+      "interactions": [
+        "Navegação entre os 3 protótipos",
+        "Botões de equipamento e células atualizam somente PreviewStatus"
+      ]
+    },
+    {
+      "path": "res://scenes/comercio.tscn",
+      "title": "Comércio",
+      "counts": {
+        "backpack_cells": 40,
+        "buttons": 149,
+        "controls": 192,
+        "equipment_slots": 7,
+        "live_labels": 18,
+        "nodes": 192,
+        "scene": "res://scenes/comercio.tscn",
+        "shop_cells": 90
+      },
+      "contracts": {
+        "shopColumns": 10,
+        "shopRows": 9,
+        "shopCells": 90,
+        "shopCellSize": [
+          64,
+          48
+        ],
+        "shopGap": 4,
+        "equipmentSlots": 7,
+        "backpackColumns": 10,
+        "backpackRows": 4,
+        "backpackCells": 40
+      },
+      "content": "Grade da loja e mochila são nós reais e contam exatamente 90 e 40 células. ItemDetails mantém texto vivo para preço, dano, durabilidade e requisito ilustrativos.",
+      "interactions": [
+        "Navegação entre os 3 protótipos",
+        "Abas, ações e células atualizam somente PreviewStatus",
+        "Comprar abre modal local; Sim e Não fecham a prévia sem transação"
+      ]
+    }
+  ],
+  "components": [
+    "res://scenes/components/inventory_panel.tscn",
+    "res://scenes/components/item_specimen.tscn"
+  ],
+  "scripts": [
+    "res://scripts/frame.gd",
+    "res://scripts/item_specimen.gd",
+    "res://scripts/preview.gd",
+    "res://scripts/validate_scenes.gd"
+  ],
+  "assets": [
+    {
+      "path": "res://assets/kit-panel.png",
+      "dimensions": [
+        1448,
+        1086
+      ],
+      "sha256": "04fc9f6ae7de28f4d1bd8c5d931200f09cd8ddfd63e61de589b991f54b0b75d3",
+      "usage": "NinePatchRect nos painéis de configuração, inventário e loja",
+      "ninePatchMargins": {
+        "left": 64,
+        "top": 96,
+        "right": 64,
+        "bottom": 64
+      },
+      "editable": true
+    },
+    {
+      "path": "res://assets/kit-modal.png",
+      "dimensions": [
+        1774,
+        887
+      ],
+      "sha256": "37b08df1367edc81158ee56675647872155f09d3a82731974874815fcac4f5c0",
+      "usage": "NinePatchRect do modal local de compra",
+      "ninePatchMargins": {
+        "left": 64,
+        "top": 96,
+        "right": 64,
+        "bottom": 64
+      },
+      "editable": true
+    },
+    {
+      "path": "res://assets/kit-controls.png",
+      "dimensions": [
+        1774,
+        887
+      ],
+      "sha256": "480985f1bbfc447ac99f00dc9a5bb723abed1a9cb1712ab6ddd9b0a086f4cf9f",
+      "usage": "StyleBoxTexture com AtlasTexture; texto separado no Button",
+      "atlasRegion": {
+        "x": 17,
+        "y": 330,
+        "width": 1740,
+        "height": 245
+      },
+      "textureMargins": {
+        "left": 24,
+        "top": 24,
+        "right": 24,
+        "bottom": 24
+      },
+      "pngCropped": false,
+      "editable": true
+    }
+  ],
+  "editor": {
+    "toolScripts": true,
+    "ninePatchMarginsEditable": true,
+    "buttonAtlasEditable": true,
+    "liveText": true,
+    "inventoryInstanceChildrenEditable": true,
+    "conceptImagesExcludedFromImport": "res://images/.gdignore",
+    "cacheExcludedFromGit": "res://.gitignore"
+  },
+  "validation": {
+    "checks": 819,
+    "failures": [],
+    "game_files_written": false,
+    "game_started": false,
+    "kind": "isolated-hud-r2-headless-structure-layout-input",
+    "rendered": false,
+    "scenes": [
+      {
+        "buttons": 24,
+        "controls": 71,
+        "footer_buttons": 3,
+        "footer_top": 778,
+        "live_labels": 22,
+        "nodes": 71,
+        "scene": "res://scenes/configuracoes.tscn",
+        "settings_row_height": 31,
+        "settings_rows": 18,
+        "settings_rows_bottom": 706
+      },
+      {
+        "backpack_cells": 40,
+        "buttons": 50,
+        "controls": 70,
+        "equipment_slots": 7,
+        "live_labels": 9,
+        "nodes": 70,
+        "scene": "res://scenes/inventario.tscn"
+      },
+      {
+        "backpack_cells": 40,
+        "buttons": 149,
+        "controls": 192,
+        "equipment_slots": 7,
+        "live_labels": 18,
+        "nodes": 192,
+        "scene": "res://scenes/comercio.tscn",
+        "shop_cells": 90
+      }
+    ],
+    "exitCode": 0,
+    "physicalInputExecuted": false,
+    "signalInputsExecuted": true,
+    "navigationSignalsConnected": true,
+    "navigationSceneTransitionExecuted": false,
+    "textureResourcesImported": true,
+    "screenshotsExecuted": false,
+    "visualGodotReviewExecuted": false,
+    "rawReceiptRecordedPrivately": true
+  },
+  "limits": [
+    {
+      "severity": "candidate",
+      "issue": "Os kits panel/modal têm ornamento central superior; o 9-slice pode distorcer o ornamento ao mudar a proporção.",
+      "followUp": "Margens expostas para ajuste. Separar ornamento em recurso independente se necessário antes de promoção."
+    },
+    {
+      "severity": "candidate",
+      "issue": "Nenhum render ou screenshot Godot foi executado. Validação cobre importação, parsing, nós, geometria e sinais locais.",
+      "followUp": "Revisão visual no editor e em diferentes proporções permanece pendente."
+    },
+    {
+      "severity": "candidate",
+      "issue": "Itens geométricos, ouro e atributos são exemplos locais; não são sprites ou dados finais do jogo.",
+      "followUp": "Vincular futuramente aos assets aprovados e contratos nativos no trabalho de integração."
+    },
+    {
+      "severity": "promotion-blocker-art-only",
+      "issue": "c-05-commerce-grid-r2.png continua com grade ilustrada 11×8. As cenas Godot usam grade exata 10×9.",
+      "followUp": "Não promover a grade raster. Usar nós determinísticos como fonte de verdade."
+    }
+  ],
+  "unchangedByThisPrototype": [
+    "Source/",
+    "editor/godot/",
+    "MPQ",
+    "saves",
+    "INI/settings do jogo"
+  ],
+  "gameFilesWritten": false,
+  "gameStarted": false,
+  "cppBuildExecuted": false,
+  "gpuRenderExecuted": false
+}

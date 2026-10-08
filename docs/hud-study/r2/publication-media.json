@@ -1,0 +1,3432 @@
+{
+  "schemaVersion": 2,
+  "kind": "publication-media-format-packaging",
+  "createdAt": "2026-10-08T16:07:30.954994+00:00",
+  "status": "complete",
+  "scope": "60 generated concept images and 14 historical full-interface references; 3 alpha kits excluded",
+  "formatConversionOnly": true,
+  "newImageGeneration": false,
+  "sourceCatalogRelativeRepoPath": "docs/hud-study/r2/catalog.json",
+  "sourceCatalogSHA256": "a8d84bd8cd7a46ff9e5fc9e977352023fb828f025a3a214674e56e1cb47c2f37",
+  "sourceInventoryRelativeRepoPath": "../diagnostics/hud-all-screens-20261008/screen-inventory.json",
+  "sourceInventorySHA256": "03d0b2e8eb116f92360f2b493cef5e907850da0d64089b7f2e5fdd3aa05a41c0",
+  "encoder": {
+    "library": "Pillow",
+    "version": "12.0.0",
+    "format": "WebP",
+    "lossless": true,
+    "quality": 100,
+    "method": 4,
+    "exact": true
+  },
+  "pixelVerification": "Byte-for-byte decoded RGBA equality plus SHA-256 of decoded RGBA; dimensions identical. Canonical exact premultiplied color and alpha only if invisible transparent RGB changes.",
+  "notes": [
+    "Packaging only: no resize, crop, retouch, reinterpretation, or new generation.",
+    "Every PNG/source master remained unchanged by hash.",
+    "Output WebP contains no EXIF, XMP, ICC profile, personal absolute path or original generator metadata.",
+    "A lossless re-encode preserves the decoded pixels of the input; it does not recover detail lost in any earlier source encoding.",
+    "Concept promotion/approval blocks remain unchanged in their owner manifests.",
+    "Native references are historical full-interface captures/fixtures, not extracted sprites or MPQ; referenceType and historicalFixtureData identify their limits."
+  ],
+  "totals": {
+    "outputs": 74,
+    "concepts": 60,
+    "nativeReferences": 14,
+    "exactDecodedRGBA": 74,
+    "visiblePixelsEqual": 74,
+    "canonicalTransparentFallbacks": 0,
+    "sourceBytes": 216285111,
+    "outputBytes": 112867084,
+    "conceptOutputBytes": 101649662,
+    "nativeReferenceOutputBytes": 11217422,
+    "failed": 0
+  },
+  "failures": [],
+  "assets": [
+    {
+      "id": "c-01-npc-menus",
+      "kind": "concept",
+      "canonicalIds": [
+        "N01"
+      ],
+      "coveredIds": [
+        "N01",
+        "N02",
+        "N03",
+        "N04",
+        "N05",
+        "N06",
+        "N07",
+        "N08",
+        "V22",
+        "V23",
+        "V24"
+      ],
+      "sourceManifest": "commerce-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/c-01-npc-menus.png",
+      "originalBytes": 2409701,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "width": 1536,
+      "height": 1024,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "deec13fd726d70c1d95f5ed17a1553d24adeaea9922f568a3a471f58531cc1e4",
+      "outputDecodedRGBASHA256": "deec13fd726d70c1d95f5ed17a1553d24adeaea9922f568a3a471f58531cc1e4",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 8.053,
+      "output": "previews/c-01-npc-menus.webp",
+      "originalSha256": "8ca698dff6c75c38739e203d4ed05622f792da92aa1a489b0a9a424e07ac330e",
+      "outputSha256": "2b74b48eb219ce70666d0b3b32a9faa0774c1be975cd2d485c9c0b0e96932e58",
+      "outputBytes": 1626182,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "c-02-npc-subjects",
+      "kind": "concept",
+      "canonicalIds": [
+        "N09"
+      ],
+      "coveredIds": [
+        "N09",
+        "N10",
+        "N11",
+        "N12",
+        "N13",
+        "N14",
+        "N15",
+        "N16",
+        "V25",
+        "V26",
+        "V27",
+        "V28",
+        "V29",
+        "V30",
+        "V31",
+        "V32"
+      ],
+      "sourceManifest": "commerce-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/c-02-npc-subjects.png",
+      "originalBytes": 2063047,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "width": 1536,
+      "height": 1024,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "595401cde0f1ff114185ee9d73b485a43f96a51a7ff4740758123a04656546d1",
+      "outputDecodedRGBASHA256": "595401cde0f1ff114185ee9d73b485a43f96a51a7ff4740758123a04656546d1",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 9.812,
+      "output": "previews/c-02-npc-subjects.webp",
+      "originalSha256": "681189b3dc5ecf79f78d49a952537c4fb45ed98b154bc93b490f13860bf55755",
+      "outputSha256": "1bc994423889cb7a304d38ba696de4da0aabe44a49ff045ba0ae4b138f031f4b",
+      "outputBytes": 1356164,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "c-03-commerce-text",
+      "kind": "concept",
+      "canonicalIds": [
+        "T01"
+      ],
+      "coveredIds": [
+        "T01",
+        "T02",
+        "T03",
+        "T04",
+        "T05",
+        "T06",
+        "T07",
+        "T08",
+        "T09",
+        "T10"
+      ],
+      "sourceManifest": "commerce-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/c-03-commerce-text.png",
+      "originalBytes": 2208702,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "width": 1536,
+      "height": 1024,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "72892be2ea15a9dd8f6641ada7f21011c5a4fef019cf7052154733a5c2157cf8",
+      "outputDecodedRGBASHA256": "72892be2ea15a9dd8f6641ada7f21011c5a4fef019cf7052154733a5c2157cf8",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 8.49,
+      "output": "previews/c-03-commerce-text.webp",
+      "originalSha256": "c74799652b85e7120ffc8749b3da7704c1eef8cba63231111b5493868fbaa101",
+      "outputSha256": "c0e1fd154ea84c30b603b046d7521974249a6013057ad5cae6787e03b0b482b4",
+      "outputBytes": 1474734,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "c-04-commerce-thumbnails",
+      "kind": "concept",
+      "canonicalIds": [
+        "V01"
+      ],
+      "coveredIds": [
+        "V01",
+        "V02",
+        "V03",
+        "V04",
+        "V05",
+        "V06",
+        "V07",
+        "V08",
+        "V09",
+        "V10"
+      ],
+      "sourceManifest": "commerce-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/c-04-commerce-thumbnails.png",
+      "originalBytes": 2245413,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "width": 1536,
+      "height": 1024,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "f0797ecbe0c6daa4cdf469cf63dfa639f0aadffd2e7c2a6ab9846073030401b1",
+      "outputDecodedRGBASHA256": "f0797ecbe0c6daa4cdf469cf63dfa639f0aadffd2e7c2a6ab9846073030401b1",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 6.277,
+      "output": "previews/c-04-commerce-thumbnails.webp",
+      "originalSha256": "4200999a9f3e1c7a54a422a986e25983afec1219a3f715b25390f51aebeb7473",
+      "outputSha256": "f19cbeb38ec9d400fbbd302ee87a034637d97a699d8adb5869c01b3a137704e1",
+      "outputBytes": 1515376,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "c-05-commerce-grid",
+      "kind": "concept",
+      "canonicalIds": [
+        "T11"
+      ],
+      "coveredIds": [
+        "T11",
+        "T12",
+        "T13",
+        "T14"
+      ],
+      "sourceManifest": "commerce-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/c-05-commerce-grid-r2.png",
+      "originalBytes": 2106772,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "width": 1536,
+      "height": 1024,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "8064282f8de88b4d5fb67fce51390db509531ec651cef8748206d9240d3a3d2f",
+      "outputDecodedRGBASHA256": "8064282f8de88b4d5fb67fce51390db509531ec651cef8748206d9240d3a3d2f",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 7.266,
+      "output": "previews/c-05-commerce-grid.webp",
+      "originalSha256": "008ba3bf9fcde46c24bd0c83e81e5541da5be94ee8329ddbd0284e1079cd4ab0",
+      "outputSha256": "123e6ce8601becbc3558beb00c3142b37cd879fa3d0cfc76216b46ee5498ee9a",
+      "outputBytes": 1375140,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "c-06-commerce-confirmation",
+      "kind": "concept",
+      "canonicalIds": [
+        "T15"
+      ],
+      "coveredIds": [
+        "T15",
+        "T16",
+        "T17",
+        "T18",
+        "T19",
+        "T20"
+      ],
+      "sourceManifest": "commerce-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/c-06-commerce-confirmation.png",
+      "originalBytes": 2295201,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "width": 1536,
+      "height": 1024,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "8253400cab0773fbf5d9aa86a9e124651c7f321550d7be06def47a6f50b2877a",
+      "outputDecodedRGBASHA256": "8253400cab0773fbf5d9aa86a9e124651c7f321550d7be06def47a6f50b2877a",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 8.515,
+      "output": "previews/c-06-commerce-confirmation.webp",
+      "originalSha256": "f215085bce9d509ecccb270b24f0fcaf175255de7e5db6ba909b42a8b526f16a",
+      "outputSha256": "abaf5bb7b605094f07ac3a8fcbffc84fb164c9f2338054f56fa0d2483caad429",
+      "outputBytes": 1515744,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "c-07-commerce-blocked",
+      "kind": "concept",
+      "canonicalIds": [
+        "T21"
+      ],
+      "coveredIds": [
+        "T21",
+        "T22"
+      ],
+      "sourceManifest": "commerce-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/c-07-commerce-blocked-r2.png",
+      "originalBytes": 1866694,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "width": 1536,
+      "height": 1024,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "2481cef06fe20b96cf0172291d6a50e86572002736fb97f195583cd329dfd8c1",
+      "outputDecodedRGBASHA256": "2481cef06fe20b96cf0172291d6a50e86572002736fb97f195583cd329dfd8c1",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 6.274,
+      "output": "previews/c-07-commerce-blocked.webp",
+      "originalSha256": "a2f09eaa0794b35b147891149afca47fb1b14b043eee048db95e7c269c698f49",
+      "outputSha256": "025fa107f5b8f823deab4eef4e622a664dbfe2f7371e19a8ec2fed2c05d7f9ee",
+      "outputBytes": 1239922,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "c-08-commerce-empty",
+      "kind": "concept",
+      "canonicalIds": [
+        "T23"
+      ],
+      "coveredIds": [
+        "T23",
+        "T24",
+        "T25",
+        "T26",
+        "V33"
+      ],
+      "sourceManifest": "commerce-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/c-08-commerce-empty.png",
+      "originalBytes": 2055299,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "width": 1536,
+      "height": 1024,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "694bea94b2e4c4c6ed790b3c56e5ea3aa7160dc250c7b05ca35158f0ae234842",
+      "outputDecodedRGBASHA256": "694bea94b2e4c4c6ed790b3c56e5ea3aa7160dc250c7b05ca35158f0ae234842",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 8.608,
+      "output": "previews/c-08-commerce-empty.webp",
+      "originalSha256": "ebd20df3547e497b8da96013c643aa7e079c3cd08a86309853dec49e2cf3af24",
+      "outputSha256": "ab9d75f375fe76e7b3f28c5cfff2f59074a00e70330b40d55a4108053dca93a3",
+      "outputBytes": 1350246,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "c-09-commerce-identified",
+      "kind": "concept",
+      "canonicalIds": [
+        "T27"
+      ],
+      "coveredIds": [
+        "T27"
+      ],
+      "sourceManifest": "commerce-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/c-09-commerce-identified.png",
+      "originalBytes": 2083778,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "width": 1536,
+      "height": 1024,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "008f5c3b475831f8116a366913b7e6d3525bae2756bcbbd9a7e563c1dd4e3bda",
+      "outputDecodedRGBASHA256": "008f5c3b475831f8116a366913b7e6d3525bae2756bcbbd9a7e563c1dd4e3bda",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 5.685,
+      "output": "previews/c-09-commerce-identified.webp",
+      "originalSha256": "82220d8dbc8a17fa951996d86f9db9315e4018fd1a2f52204d51101f11f49462",
+      "outputSha256": "c92f4ae099c2ee5c83365919506315f978967be6eacd307f80060377ea900aa7",
+      "outputBytes": 1390944,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "d01-d03-dialogos",
+      "kind": "concept",
+      "canonicalIds": [
+        "D01",
+        "D02",
+        "D03"
+      ],
+      "coveredIds": [
+        "D01",
+        "D02",
+        "D03"
+      ],
+      "sourceManifest": "frontend-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/frontend-d01-d03-dialogos.png",
+      "originalBytes": 2251649,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "3f276ec5390396b8dec6bec5746378718cd0375e17067b802218702221ffd888",
+      "outputDecodedRGBASHA256": "3f276ec5390396b8dec6bec5746378718cd0375e17067b802218702221ffd888",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 5.537,
+      "output": "previews/d01-d03-dialogos.webp",
+      "originalSha256": "4f4ea3f0c2273b0da15801a5460ce889c77248c94793dc48c7e0e2ed5d1f77eb",
+      "outputSha256": "2bb1aa2e4e4f07d7331cd7afab5aa87e08970b21bc4a3e9d8fa91c89f7b6d571",
+      "outputBytes": 1599010,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "d04-sincronizacao",
+      "kind": "concept",
+      "canonicalIds": [
+        "D04"
+      ],
+      "coveredIds": [
+        "D04"
+      ],
+      "sourceManifest": "frontend-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/frontend-d04-sincronizacao.png",
+      "originalBytes": 2180315,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "b3330a390944d8f8cdfbe095199419b208582d4b21e00c3a7e9c1a8c4a07c3f4",
+      "outputDecodedRGBASHA256": "b3330a390944d8f8cdfbe095199419b208582d4b21e00c3a7e9c1a8c4a07c3f4",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 4.841,
+      "output": "previews/d04-sincronizacao.webp",
+      "originalSha256": "bc8338df336aaadd6f82c39392444b210134556f0862087789b0007ceaf378ab",
+      "outputSha256": "b488de34696a76bdc1a09db6fb5576cd334d5a8cf0d176181a2c26f5801f5443",
+      "outputBytes": 1567982,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "f01-abertura",
+      "kind": "concept",
+      "canonicalIds": [
+        "F01"
+      ],
+      "coveredIds": [
+        "F01"
+      ],
+      "sourceManifest": "frontend-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/frontend-f01-abertura.png",
+      "originalBytes": 2040479,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "719e929a427f6579a9a6c333025d9633a6f21e40158b5877dd9f3bb50607b2bb",
+      "outputDecodedRGBASHA256": "719e929a427f6579a9a6c333025d9633a6f21e40158b5877dd9f3bb50607b2bb",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 4.877,
+      "output": "previews/f01-abertura.webp",
+      "originalSha256": "5c4f6f115e0262ebb9f171eedcb4facf85c0fc4d752f3f5983f50d915c8d2cc1",
+      "outputSha256": "d4ef06217d657ae0aab1838308c5ae736250ac0d130564fa0ea5c104d2d13ce2",
+      "outputBytes": 1476738,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "f02-diablo-hellfire",
+      "kind": "concept",
+      "canonicalIds": [
+        "F02"
+      ],
+      "coveredIds": [
+        "F02"
+      ],
+      "sourceManifest": "frontend-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/frontend-f02-diablo-hellfire.png",
+      "originalBytes": 2148606,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "4e83026507cc9d547963451d878e1314b19907435bb0baa9e5cbdf61f39cd3e8",
+      "outputDecodedRGBASHA256": "4e83026507cc9d547963451d878e1314b19907435bb0baa9e5cbdf61f39cd3e8",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 5.709,
+      "output": "previews/f02-diablo-hellfire.webp",
+      "originalSha256": "6030b618507448885a7b3ec4034d324ad6d5ab50309b242e81d0103f437e5168",
+      "outputSha256": "b1f578e95d8b1158f3f14c86c08ae5fc2223cbff5dc6937513f00e95380a7e0c",
+      "outputBytes": 1546948,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "f04-herois",
+      "kind": "concept",
+      "canonicalIds": [
+        "F04"
+      ],
+      "coveredIds": [
+        "F04"
+      ],
+      "sourceManifest": "frontend-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/frontend-f04-herois.png",
+      "originalBytes": 2214804,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "36ff1cf188caa75780030dad901bfb6b8d8c746fcd162aa8d487b2d1a276db1e",
+      "outputDecodedRGBASHA256": "36ff1cf188caa75780030dad901bfb6b8d8c746fcd162aa8d487b2d1a276db1e",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 5.164,
+      "output": "previews/f04-herois.webp",
+      "originalSha256": "5df7b260681841bef972b7e9dcadae66fe3be7892a7307b708046582a9b7bbd3",
+      "outputSha256": "06a239895e3f0355278bc91aea50e4dc2b1eac2b8cf6d3acda3e801718729b1e",
+      "outputBytes": 1588430,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "f05-classes",
+      "kind": "concept",
+      "canonicalIds": [
+        "F05"
+      ],
+      "coveredIds": [
+        "F05"
+      ],
+      "sourceManifest": "frontend-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/frontend-f05-classes.png",
+      "originalBytes": 2219897,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "24ad406fc449beff88624ed7f88a12c632b53449a0815e8a83e1d6bdaf0ca734",
+      "outputDecodedRGBASHA256": "24ad406fc449beff88624ed7f88a12c632b53449a0815e8a83e1d6bdaf0ca734",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 5.52,
+      "output": "previews/f05-classes.webp",
+      "originalSha256": "c2e840f4dae5d739b06b9c9e688cc649b16be7bd07287e5cf870302a0b00a7cd",
+      "outputSha256": "0fbf775995d2f4041f83cb48e085ff055d4545c7de381ce338261062075f452a",
+      "outputBytes": 1595466,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "f06-nome",
+      "kind": "concept",
+      "canonicalIds": [
+        "F06"
+      ],
+      "coveredIds": [
+        "F06"
+      ],
+      "sourceManifest": "frontend-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/frontend-f06-nome.png",
+      "originalBytes": 2120210,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "e2f663481d12ff7a6741bcfa76c829bbfa1677fcf207685e45f4857c1f6bec7e",
+      "outputDecodedRGBASHA256": "e2f663481d12ff7a6741bcfa76c829bbfa1677fcf207685e45f4857c1f6bec7e",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 5.85,
+      "output": "previews/f06-nome.webp",
+      "originalSha256": "b012575c8816f78f07bae4df56f0cd63e680a11d8aeaec619531528bf3db571f",
+      "outputSha256": "cdba69ed6ccfdd8de32b40d2c9b927070a6e47471126b2ad4f4138bb9267a180",
+      "outputBytes": 1535204,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "f07-partida-salva",
+      "kind": "concept",
+      "canonicalIds": [
+        "F07"
+      ],
+      "coveredIds": [
+        "F07"
+      ],
+      "sourceManifest": "frontend-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/frontend-f07-partida-salva.png",
+      "originalBytes": 2197729,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "4fbdd8b884d7e2309c2f1ddcd4c9e29f0bd954422289a64edbac593ad80cd977",
+      "outputDecodedRGBASHA256": "4fbdd8b884d7e2309c2f1ddcd4c9e29f0bd954422289a64edbac593ad80cd977",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 6.04,
+      "output": "previews/f07-partida-salva.webp",
+      "originalSha256": "be1b8f980e3af6a50bffada932994fc064355412fdae9ad6db9fcc704af72d74",
+      "outputSha256": "10a70f7e25402079b6cb4418c5fab76b66f1a6ab363e770fa13c7ec299d68714",
+      "outputBytes": 1583298,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "f08-dificuldade",
+      "kind": "concept",
+      "canonicalIds": [
+        "F08"
+      ],
+      "coveredIds": [
+        "F08"
+      ],
+      "sourceManifest": "frontend-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/frontend-f08-dificuldade.png",
+      "originalBytes": 2185038,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "6e295266e54b66447c16ae693f404dcbaf7eccff70fc07bce928e2ebf8e90222",
+      "outputDecodedRGBASHA256": "6e295266e54b66447c16ae693f404dcbaf7eccff70fc07bce928e2ebf8e90222",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 4.752,
+      "output": "previews/f08-dificuldade.webp",
+      "originalSha256": "63b7eb40ea75e3242c98d840f34a9e412f12e1f819f83252fd055c255c7e7931",
+      "outputSha256": "9cde4c38d15b46336438f72b9746c58513e4273dada75cd2b742ef2e3edf111a",
+      "outputBytes": 1568986,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "f09-conexao-offline",
+      "kind": "concept",
+      "canonicalIds": [
+        "F09"
+      ],
+      "coveredIds": [
+        "F09"
+      ],
+      "sourceManifest": "frontend-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/frontend-f09-conexao-offline.png",
+      "originalBytes": 2145487,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "1ea8e578ffbad5e25543626c50e4fcdbbced2ea621419ac2304e17beafa1b415",
+      "outputDecodedRGBASHA256": "1ea8e578ffbad5e25543626c50e4fcdbbced2ea621419ac2304e17beafa1b415",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 5.912,
+      "output": "previews/f09-conexao-offline.webp",
+      "originalSha256": "6f266bbe2f2aacb5a5ec45d060dac23df2c332232124d5322c9771c7279d0b4e",
+      "outputSha256": "d5cfa3daa0ed604233bb15f7b08d61d8c17ed2748cfdbf7f49a60fef85eb120a",
+      "outputBytes": 1531050,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "f10-partidas-zerotier",
+      "kind": "concept",
+      "canonicalIds": [
+        "F10"
+      ],
+      "coveredIds": [
+        "F10"
+      ],
+      "sourceManifest": "frontend-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/frontend-f10-partidas-zerotier.png",
+      "originalBytes": 2215040,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "a4405e3bbfce1f8bc7b0032c3d5aec224c30c0650432a8a2f38a92da8277f6dd",
+      "outputDecodedRGBASHA256": "a4405e3bbfce1f8bc7b0032c3d5aec224c30c0650432a8a2f38a92da8277f6dd",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 3.689,
+      "output": "previews/f10-partidas-zerotier.webp",
+      "originalSha256": "52c2042303208c6d8f2dadb437a85395fefb4d45b5cac2a6baf411dcc7da6d22",
+      "outputSha256": "b161231d99fdd7caf9a486b0b909a0b73521f008197a56cc9cbd4b160bf5fb86",
+      "outputBytes": 1599592,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "f11-id-partida",
+      "kind": "concept",
+      "canonicalIds": [
+        "F11"
+      ],
+      "coveredIds": [
+        "F11"
+      ],
+      "sourceManifest": "frontend-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/frontend-f11-id-partida.png",
+      "originalBytes": 2182023,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "40b8b13dd60e8fd06e66c9799087e3ccad61a3c4041e4730a4810bb611275f10",
+      "outputDecodedRGBASHA256": "40b8b13dd60e8fd06e66c9799087e3ccad61a3c4041e4730a4810bb611275f10",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 4.262,
+      "output": "previews/f11-id-partida.webp",
+      "originalSha256": "2293bd6b6885b7ded8056b89d8d8d863069ef2d77a0eb0ebba8cfc57ca1ca1b2",
+      "outputSha256": "9c7e952447e7a03284a59f00b9f4d85ac036b5c7653fdacbc065b2e6401d51bc",
+      "outputBytes": 1568428,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "f12-velocidade",
+      "kind": "concept",
+      "canonicalIds": [
+        "F12"
+      ],
+      "coveredIds": [
+        "F12"
+      ],
+      "sourceManifest": "frontend-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/frontend-f12-velocidade.png",
+      "originalBytes": 2226576,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "52b2405cb4868a6cdc3e69096a83d8038ed7ba43a856d760f713583832a550ef",
+      "outputDecodedRGBASHA256": "52b2405cb4868a6cdc3e69096a83d8038ed7ba43a856d760f713583832a550ef",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 5.156,
+      "output": "previews/f12-velocidade.webp",
+      "originalSha256": "8c8e94fa012f290eadc48cedb8f8e39b2e35a0ba115575095571f71402315291",
+      "outputSha256": "a611ad7c7ba74b81d82d394fdb9c12e833e3126d5ac819dfe0a09fee16d166c7",
+      "outputBytes": 1598558,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "f13-senha",
+      "kind": "concept",
+      "canonicalIds": [
+        "F13"
+      ],
+      "coveredIds": [
+        "F13"
+      ],
+      "sourceManifest": "frontend-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/frontend-f13-senha.png",
+      "originalBytes": 2201049,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "23ff50045f94d27c252738f14590d14ef663ee8f3481a127ad4bba386b33b269",
+      "outputDecodedRGBASHA256": "23ff50045f94d27c252738f14590d14ef663ee8f3481a127ad4bba386b33b269",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 4.769,
+      "output": "previews/f13-senha.webp",
+      "originalSha256": "3978fa87405786580fa18711844e3da1c90b05e2ccba1536b93546dc5b490f9a",
+      "outputSha256": "b1bb7a68de36a55c409df720bbc5bccafe06e4cfbbb58e03c9408cea8551728a",
+      "outputBytes": 1577060,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "f15-suporte",
+      "kind": "concept",
+      "canonicalIds": [
+        "F15"
+      ],
+      "coveredIds": [
+        "F15"
+      ],
+      "sourceManifest": "frontend-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/frontend-f15-suporte.png",
+      "originalBytes": 2235091,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "3f78942e7bf3c29bdb788d5f56c8feaf68a5b6d6572b6057624d1318881f8a8b",
+      "outputDecodedRGBASHA256": "3f78942e7bf3c29bdb788d5f56c8feaf68a5b6d6572b6057624d1318881f8a8b",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 5.106,
+      "output": "previews/f15-suporte.webp",
+      "originalSha256": "902d1954686c02a27ceb02e019b8c6949a22bf51f2a20c396f88831640a8af44",
+      "outputSha256": "84a6c12e60493186390517cab905fd126924f77131c58be90e35cb65b9df6eef",
+      "outputBytes": 1568192,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "l01-a-inicio-cidade-catedral-catacumbas",
+      "kind": "concept",
+      "canonicalIds": [
+        "L01"
+      ],
+      "coveredIds": [
+        "L01"
+      ],
+      "sourceManifest": "frontend-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/frontend-l01-a-inicio-cidade-catedral-catacumbas.png",
+      "originalBytes": 2658139,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "89ca5efd50378694a1ed8031532f4ee64c01c0250739095b53b6ddd847653c99",
+      "outputDecodedRGBASHA256": "89ca5efd50378694a1ed8031532f4ee64c01c0250739095b53b6ddd847653c99",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 4.882,
+      "output": "previews/l01-a-inicio-cidade-catedral-catacumbas.webp",
+      "originalSha256": "e4c70831802505e669738d807ed5ce7c7a98613fb3c3ff0676587c4de125ada3",
+      "outputSha256": "71bb851a6a3bba83300665bd0b768d44c40bdf7d760fc97d9613816ee1670225",
+      "outputBytes": 1963098,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "l01-b-cavernas-inferno-cripta-ninho",
+      "kind": "concept",
+      "canonicalIds": [
+        "L01"
+      ],
+      "coveredIds": [
+        "L01"
+      ],
+      "sourceManifest": "frontend-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/frontend-l01-b-cavernas-inferno-cripta-ninho.png",
+      "originalBytes": 2635581,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "eccd43e52cea06dbcc5d21278d9206445f1794726917e9af22580ff3afeb2593",
+      "outputDecodedRGBASHA256": "eccd43e52cea06dbcc5d21278d9206445f1794726917e9af22580ff3afeb2593",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 4.975,
+      "output": "previews/l01-b-cavernas-inferno-cripta-ninho.webp",
+      "originalSha256": "1b7d419113bcd0356f11dbe762cb999e0a956a47a103063174c4168725c997ea",
+      "outputSha256": "5d713e042935f7933884a50db23fbd2e094543d6de6dbc9e7ef93a26bc150aee",
+      "outputBytes": 1911878,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "l01-c-portais-portao",
+      "kind": "concept",
+      "canonicalIds": [
+        "L01"
+      ],
+      "coveredIds": [
+        "L01"
+      ],
+      "sourceManifest": "frontend-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/frontend-l01-c-portais-portao.png",
+      "originalBytes": 2550790,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "c50c99eb7a885abae4c75bc501a3d753abff042a2aae547d4bd656e0e223e9a4",
+      "outputDecodedRGBASHA256": "c50c99eb7a885abae4c75bc501a3d753abff042a2aae547d4bd656e0e223e9a4",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 5.289,
+      "output": "previews/l01-c-portais-portao.webp",
+      "originalSha256": "9ad861b3cec6a55a4a830f63b176adecb910d7df1ec2117874bc834262f36e5f",
+      "outputSha256": "44e07d9b19cc75c786ada29a3d68da6d13a2c5bb711b1e46902bf6f6d5c1cb82",
+      "outputBytes": 1846434,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "p01-character",
+      "kind": "concept",
+      "canonicalIds": [
+        "P01"
+      ],
+      "coveredIds": [
+        "P01"
+      ],
+      "sourceManifest": "panels-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/p-01-personagem.png",
+      "originalBytes": 2605075,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "fa105326d2fc2feeabf3e349e49594c8cd5e24ea5b0b0720e4c29fd044840596",
+      "outputDecodedRGBASHA256": "fa105326d2fc2feeabf3e349e49594c8cd5e24ea5b0b0720e4c29fd044840596",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 4.759,
+      "output": "previews/p01-character.webp",
+      "originalSha256": "fb6402480f99a9b3fbb212732362e4153862a839f9bb9c3dac9acd5ca70e4229",
+      "outputSha256": "3485488f4150fbabfbfc6f935314c71488e99beab925bd1e1bf67fd44087d30d",
+      "outputBytes": 1865550,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "p02-inventory",
+      "kind": "concept",
+      "canonicalIds": [
+        "P02"
+      ],
+      "coveredIds": [
+        "P02"
+      ],
+      "sourceManifest": "panels-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/p-02-inventario.png",
+      "originalBytes": 2734393,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "f93bf9ff5fab3c7d16fb524f2b4fc59895f49d724b918300dfef58b3b47bf45a",
+      "outputDecodedRGBASHA256": "f93bf9ff5fab3c7d16fb524f2b4fc59895f49d724b918300dfef58b3b47bf45a",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 4.387,
+      "output": "previews/p02-inventory.webp",
+      "originalSha256": "d169bd4a51a7e935a1cf5159f60bc8e84145497026fd6b895863eb75939c5c3b",
+      "outputSha256": "ba26dbed8428c3f820865776e4907cd61e16132e2be05899c71260b194a0e035",
+      "outputBytes": 1904816,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "p03-combined",
+      "kind": "concept",
+      "canonicalIds": [
+        "P01",
+        "P03"
+      ],
+      "coveredIds": [
+        "P03"
+      ],
+      "sourceManifest": "panels-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/p-03-personagem-inventario.png",
+      "originalBytes": 2687269,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "f2191d40c09cc269bb70dc1d6c7b4d9c75f29a07f04a305034c26f0d9e7209c2",
+      "outputDecodedRGBASHA256": "f2191d40c09cc269bb70dc1d6c7b4d9c75f29a07f04a305034c26f0d9e7209c2",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 5.121,
+      "output": "previews/p03-combined.webp",
+      "originalSha256": "8f576fcec456349c4012d69c84a770c7ebf51e7c12f716e687dad6f4befa2fd4",
+      "outputSha256": "9e5989b62a1d463d3eae5cc134f39cf47018f0cde273e46d4a735a8dcbccb91c",
+      "outputBytes": 1870864,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "p04-spellbook-1-3",
+      "kind": "concept",
+      "canonicalIds": [
+        "P04",
+        "V18",
+        "V19"
+      ],
+      "coveredIds": [
+        "P04",
+        "V18",
+        "V19"
+      ],
+      "sourceManifest": "panels-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/p-04-grimorio-paginas-1-3.png",
+      "originalBytes": 2806917,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "835e651f62876995532d94720377a84a1c3d46a865962ecf664f350866844b31",
+      "outputDecodedRGBASHA256": "835e651f62876995532d94720377a84a1c3d46a865962ecf664f350866844b31",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 5.243,
+      "output": "previews/p04-spellbook-1-3.webp",
+      "originalSha256": "771ff612c1d4034e30372f13069041476648dee8c5c2d16ab6db30a06ea8c254",
+      "outputSha256": "941138061383d5a8001ccb1581d1742d23fad2fc97fe853baa0252db1e283ef6",
+      "outputBytes": 1949282,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "p04-spellbook-4-5",
+      "kind": "concept",
+      "canonicalIds": [
+        "P04",
+        "V20",
+        "V21"
+      ],
+      "coveredIds": [
+        "V20",
+        "V21"
+      ],
+      "sourceManifest": "panels-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/p-04-grimorio-paginas-4-5.png",
+      "originalBytes": 2664178,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1983,
+        793
+      ],
+      "width": 1983,
+      "height": 793,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "4b15d15fe180b26556d53282e057e3a85534322a40e300ccd442068f0729cb79",
+      "outputDecodedRGBASHA256": "4b15d15fe180b26556d53282e057e3a85534322a40e300ccd442068f0729cb79",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 4.725,
+      "output": "previews/p04-spellbook-4-5.webp",
+      "originalSha256": "808d6fa6085a8e3e65b6f6b6400602298277c068e4680d9f552d667e8bb312f9",
+      "outputSha256": "7cc10ee19f49ff1ad4d9b63355a91800ee9e2586f79879e06fbbc908d46f5d0c",
+      "outputBytes": 1887830,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "p05-speedbook",
+      "kind": "concept",
+      "canonicalIds": [
+        "P05"
+      ],
+      "coveredIds": [
+        "P05"
+      ],
+      "sourceManifest": "panels-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/p-05-selecao-rapida-magias.png",
+      "originalBytes": 2734867,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "2424c61ea3dab907ed25d08ba506abe21f31c8423cd73143d862af0c230ffd07",
+      "outputDecodedRGBASHA256": "2424c61ea3dab907ed25d08ba506abe21f31c8423cd73143d862af0c230ffd07",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 4.922,
+      "output": "previews/p05-speedbook.webp",
+      "originalSha256": "ac9165a9ede50d4c81cecb521c6cd04705bc41231d7afe032c92899130618682",
+      "outputSha256": "2ec16fab708343b6c1b6c4521cec517d7d8721e34fa810293e4b961557a54002",
+      "outputBytes": 1938340,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "p06-quests",
+      "kind": "concept",
+      "canonicalIds": [
+        "P06"
+      ],
+      "coveredIds": [
+        "P06"
+      ],
+      "sourceManifest": "panels-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/p-06-diario-missoes.png",
+      "originalBytes": 2783815,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "2b7ead515252310a7dd36bbc212c05d4edcf2aab8436521ae6522cab3e5fe540",
+      "outputDecodedRGBASHA256": "2b7ead515252310a7dd36bbc212c05d4edcf2aab8436521ae6522cab3e5fe540",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 5.219,
+      "output": "previews/p06-quests.webp",
+      "originalSha256": "91080f642e4a757481102614eddbb4dd95c9907904875d62fb39cf2bb3de7d7b",
+      "outputSha256": "fc15b3f9ec84538ca622d2aa3514247f54b4d3f9cb6106c68025b52303dd0550",
+      "outputBytes": 1897526,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "p07-narrative",
+      "kind": "concept",
+      "canonicalIds": [
+        "P07"
+      ],
+      "coveredIds": [
+        "P07"
+      ],
+      "sourceManifest": "panels-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/p-07-relato-narrado.png",
+      "originalBytes": 2652443,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "0d9c277a53a45ca5196b15f4c1565726d8be9dce91bb30b706c41e290c628458",
+      "outputDecodedRGBASHA256": "0d9c277a53a45ca5196b15f4c1565726d8be9dce91bb30b706c41e290c628458",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 4.617,
+      "output": "previews/p07-narrative.webp",
+      "originalSha256": "4e60db2cd81b4bea7d3c1ef61a94d88f4577d8d9162ae4431c8fc8bd9efbe111",
+      "outputSha256": "e4ff4af93e25fee48dfc9353018ec66b217f83cf616be6e0952f1b9499f6b418",
+      "outputBytes": 1896500,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "p08-stash",
+      "kind": "concept",
+      "canonicalIds": [
+        "P08"
+      ],
+      "coveredIds": [
+        "P08"
+      ],
+      "sourceManifest": "panels-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/p-08-bau-inventario.png",
+      "originalBytes": 2531886,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "c3fb8b307ad8bceb99c3416123b0c041357c71378eb79102c2fd567717631687",
+      "outputDecodedRGBASHA256": "c3fb8b307ad8bceb99c3416123b0c041357c71378eb79102c2fd567717631687",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 5.674,
+      "output": "previews/p08-stash.webp",
+      "originalSha256": "09e556c5c725149341d995ff10db1532cacc35bcaa0dfda3ec8d7ace80f0c061",
+      "outputSha256": "a2846154d6159b567984f4b3447e34e75dc58c8db88f718f2b86312d49708644",
+      "outputBytes": 1795914,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "p09-gold",
+      "kind": "concept",
+      "canonicalIds": [
+        "P09",
+        "P10"
+      ],
+      "coveredIds": [
+        "P09",
+        "P10"
+      ],
+      "sourceManifest": "panels-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/p-09-ouro-sacar-dividir.png",
+      "originalBytes": 2565164,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1983,
+        793
+      ],
+      "width": 1983,
+      "height": 793,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "3f45499a3644d665488bacda6425891764cc3593ad5ee429ccaa509c22090786",
+      "outputDecodedRGBASHA256": "3f45499a3644d665488bacda6425891764cc3593ad5ee429ccaa509c22090786",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 5.899,
+      "output": "previews/p09-gold.webp",
+      "originalSha256": "a791d31254fc5f06fed28b709bc49bc1ebd72b99073a5a1e0317cd0e526b755b",
+      "outputSha256": "03422eb2e5be9d535c23a7b628cf7c54cd7eb7ce753767f66bf765ff87c1fb93",
+      "outputBytes": 1809394,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "p11-map-modes",
+      "kind": "concept",
+      "canonicalIds": [
+        "P11",
+        "V11",
+        "V12",
+        "V13"
+      ],
+      "coveredIds": [
+        "P11",
+        "V11",
+        "V12",
+        "V13"
+      ],
+      "sourceManifest": "panels-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/p-11-automapa-tres-modos.png",
+      "originalBytes": 2781197,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "83b23a22925c7e81456b3673f243fb56e31f7e2477a620eb06c15551c8846907",
+      "outputDecodedRGBASHA256": "83b23a22925c7e81456b3673f243fb56e31f7e2477a620eb06c15551c8846907",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 5.536,
+      "output": "previews/p11-map-modes.webp",
+      "originalSha256": "5a17abcb5f373e329be673ce31efa83fd75f9fec0719da622b2d0175a93f575b",
+      "outputSha256": "72a8be474238d089e0107c6eb142f954debd3250f1abdcba8d3c8e384b16aff9",
+      "outputBytes": 1907648,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "p12-chat-history",
+      "kind": "concept",
+      "canonicalIds": [
+        "P12",
+        "P13"
+      ],
+      "coveredIds": [
+        "P12",
+        "P13"
+      ],
+      "sourceManifest": "panels-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/p-12-chat-historico.png",
+      "originalBytes": 2739269,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "3fd60a674d5d5458e08502186bfff0a941d180cd985f9ff64f42fec4c8f356e4",
+      "outputDecodedRGBASHA256": "3fd60a674d5d5458e08502186bfff0a941d180cd985f9ff64f42fec4c8f356e4",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 5.782,
+      "output": "previews/p12-chat-history.webp",
+      "originalSha256": "b75ea1f391d1a4d24b1695e94e0fcde6109016a0779a40a8181f55906a38643c",
+      "outputSha256": "f22daf5876d69d0c3c2de8bd29b0937cf01b7b4e950dcfc1dd80d4e3c579db98",
+      "outputBytes": 1930232,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "p14-help",
+      "kind": "concept",
+      "canonicalIds": [
+        "P14"
+      ],
+      "coveredIds": [
+        "P14"
+      ],
+      "sourceManifest": "panels-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/p-14-ajuda.png",
+      "originalBytes": 2745251,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "9de97a435a182b1f71433a57ad1d8044ce7f157234c27978415d9c9a9003a760",
+      "outputDecodedRGBASHA256": "9de97a435a182b1f71433a57ad1d8044ce7f157234c27978415d9c9a9003a760",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 5.802,
+      "output": "previews/p14-help.webp",
+      "originalSha256": "f4a1f6336c9036154bc06bb9ba67c291f361de66695d32a3e2bf273b9f4de385",
+      "outputSha256": "8f078181da9bc3a08a346969317f679312950d6f6b362c4d869f33ba79618ffa",
+      "outputBytes": 1867830,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "p15-unique",
+      "kind": "concept",
+      "canonicalIds": [
+        "P15"
+      ],
+      "coveredIds": [
+        "P15"
+      ],
+      "sourceManifest": "panels-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/p-15-detalhes-item-unico.png",
+      "originalBytes": 2342840,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1671,
+        941
+      ],
+      "width": 1671,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "b7b6a3739e4f14bd73fea81f53107a873c01048064c88744c7cc36e8babbadae",
+      "outputDecodedRGBASHA256": "b7b6a3739e4f14bd73fea81f53107a873c01048064c88744c7cc36e8babbadae",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 4.882,
+      "output": "previews/p15-unique.webp",
+      "originalSha256": "374f7e5c2f324a1ee10e41c326395dd81373822452a266bbacc5e398f104b2b3",
+      "outputSha256": "36b3a02ba7bbf2520c7918cb36622bbd37ea58071dbb5e97203057a39d4b12c5",
+      "outputBytes": 1664312,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "p16-party-inspection",
+      "kind": "concept",
+      "canonicalIds": [
+        "P16",
+        "V14"
+      ],
+      "coveredIds": [
+        "P16",
+        "V14"
+      ],
+      "sourceManifest": "panels-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/p-16-grupo-inspecao.png",
+      "originalBytes": 2547054,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "0c833ef0a965e810a6f711cc8a292b3df62c6dc1941a9f11ed7e0b78ba27d7f8",
+      "outputDecodedRGBASHA256": "0c833ef0a965e810a6f711cc8a292b3df62c6dc1941a9f11ed7e0b78ba27d7f8",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 4.68,
+      "output": "previews/p16-party-inspection.webp",
+      "originalSha256": "b04708614a69010ef7e7d107e28667dba9f8579293d734407e2676416a700139",
+      "outputSha256": "4406594b4feb65bf62f943bb911065f973a2002fcc8a7bcff683f5548310419b",
+      "outputBytes": 1807630,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "p17-death",
+      "kind": "concept",
+      "canonicalIds": [
+        "P17",
+        "V15",
+        "V16",
+        "V17"
+      ],
+      "coveredIds": [
+        "P17",
+        "V15",
+        "V16",
+        "V17"
+      ],
+      "sourceManifest": "panels-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/p-17-morte-tres-contextos.png",
+      "originalBytes": 2240584,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "13a472daa501e1dae70a7662602ee70b4ada3bb694eef23da2bbb5638618caa7",
+      "outputDecodedRGBASHA256": "13a472daa501e1dae70a7662602ee70b4ada3bb694eef23da2bbb5638618caa7",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 4.451,
+      "output": "previews/p17-death.webp",
+      "originalSha256": "193923489d263a4b408027d14f4ac4f6fd3f0a32bcf2ec9fd6d02374bd24126b",
+      "outputSha256": "21add8c11af0f4298458c6552e1d4f3ecf88f3f554dcbc4959eceefc6cf0af44",
+      "outputBytes": 1626672,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "p18-notification-pause",
+      "kind": "concept",
+      "canonicalIds": [
+        "G19",
+        "P18"
+      ],
+      "coveredIds": [
+        "P18",
+        "G19"
+      ],
+      "sourceManifest": "panels-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/p-18-notificacao-pausa.png",
+      "originalBytes": 2486777,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "00fb6a2e4b3a3090de6eadd80f5c38316836a48d7433961dd0395c808f522d16",
+      "outputDecodedRGBASHA256": "00fb6a2e4b3a3090de6eadd80f5c38316836a48d7433961dd0395c808f522d16",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 4.151,
+      "output": "previews/p18-notification-pause.webp",
+      "originalSha256": "31847f6445668558466fb43fa6c2665657d87f0b8a79f6dd841412cb932e3c9d",
+      "outputSha256": "598dbdd0d66b8e8abb1782dbbdc9ad65c6687fd649a2d91d307df664d9d43dde",
+      "outputBytes": 1718656,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "p19-cathedral-map",
+      "kind": "concept",
+      "canonicalIds": [
+        "P19"
+      ],
+      "coveredIds": [
+        "P19"
+      ],
+      "sourceManifest": "panels-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/p-19-mapa-catedral.png",
+      "originalBytes": 3081893,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "539ad6220eabe49dc605adbf4af5355e11f0dfebe75de05edde62f15545e31ea",
+      "outputDecodedRGBASHA256": "539ad6220eabe49dc605adbf4af5355e11f0dfebe75de05edde62f15545e31ea",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 4.488,
+      "output": "previews/p19-cathedral-map.webp",
+      "originalSha256": "b532ead48395e0b13b750391850de5c3a8c77ae800a3a4c15750d6d8d67de334",
+      "outputSha256": "2fd3cd954249dee7a0082ace7994f920f52fc841c56cfa2a4d9f29fad785821d",
+      "outputBytes": 2080034,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "p20-gamepad-hints",
+      "kind": "concept",
+      "canonicalIds": [
+        "P20",
+        "P21"
+      ],
+      "coveredIds": [
+        "P20",
+        "P21"
+      ],
+      "sourceManifest": "panels-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/p-20-controle-menus-magias.png",
+      "originalBytes": 2790232,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "a538ee72b36a2f77d4de28c2e568edbb6da41cbbd16e73b991b60e9db18ce110",
+      "outputDecodedRGBASHA256": "a538ee72b36a2f77d4de28c2e568edbb6da41cbbd16e73b991b60e9db18ce110",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 4.116,
+      "output": "previews/p20-gamepad-hints.webp",
+      "originalSha256": "6fc42ecf832a85f1b3ddf7954da44476fad9e19202235a1de896e72eb3062a49",
+      "outputSha256": "666cfc8bdda3d5cf0561b66f93ac293ee52031f74461a4fc0710eeecb3bfe10a",
+      "outputBytes": 1961820,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "p22-touch",
+      "kind": "concept",
+      "canonicalIds": [
+        "P22"
+      ],
+      "coveredIds": [
+        "P22"
+      ],
+      "sourceManifest": "panels-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/p-22-controles-toque.png",
+      "originalBytes": 2826096,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "ed0fceef1d3f7d72668a42e9237ea76564ea5c025bbc52b4969e198e4fbfc064",
+      "outputDecodedRGBASHA256": "ed0fceef1d3f7d72668a42e9237ea76564ea5c025bbc52b4969e198e4fbfc064",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 4.45,
+      "output": "previews/p22-touch.webp",
+      "originalSha256": "26ffa855eb175af3ab1b1f6b316b38ac63f727b7f7b9bbc469006b579a053520",
+      "outputSha256": "74d50ef179740d490f56bb69fbd7bc01acf699f9eab097f000f46754fcd0f6e2",
+      "outputBytes": 1998164,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "p23-console",
+      "kind": "concept",
+      "canonicalIds": [
+        "P23"
+      ],
+      "coveredIds": [
+        "P23"
+      ],
+      "sourceManifest": "panels-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/p-23-console-debug.png",
+      "originalBytes": 2029468,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "13f7876f0ee4a54cb9a39230592358f06df78571e7a89d4cb1eb05490270d9c0",
+      "outputDecodedRGBASHA256": "13f7876f0ee4a54cb9a39230592358f06df78571e7a89d4cb1eb05490270d9c0",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 4.524,
+      "output": "previews/p23-console.webp",
+      "originalSha256": "8ce03ec0b37d1ec919aa1ccdea0f88a77d4da153c937c3428b8d021157a14303",
+      "outputSha256": "e9fbfed8d6bb24c62deee4faf8d36e8ff791964fcd8849a171f1de5d02678f69",
+      "outputBytes": 1468356,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "s01",
+      "kind": "concept",
+      "canonicalIds": [
+        "O01"
+      ],
+      "coveredIds": [
+        "O01"
+      ],
+      "sourceManifest": "settings-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/s-01-categorias.png",
+      "originalBytes": 2298676,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "e7fef1c695b1bf4f2d01fd09fde055f87df72a4221a2d860279e198ff4f83e08",
+      "outputDecodedRGBASHA256": "e7fef1c695b1bf4f2d01fd09fde055f87df72a4221a2d860279e198ff4f83e08",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 1.303,
+      "output": "previews/s01.webp",
+      "originalSha256": "59ff1dd65f24598e9b7d7cece2f11e4660e2d32641b15b69c287d90888b91d38",
+      "outputSha256": "d4f6d39c96946aa4429ee4baceb17ad2ab619f4f20698808d40e516a88087d89",
+      "outputBytes": 1656766,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "s02",
+      "kind": "concept",
+      "canonicalIds": [
+        "O02"
+      ],
+      "coveredIds": [
+        "O08"
+      ],
+      "sourceManifest": "settings-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/s-02-graficos-principal.png",
+      "originalBytes": 2294222,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "ba3d779deca24b8480103f90c937c848c06118a32b2f1fe6a893912750c26425",
+      "outputDecodedRGBASHA256": "ba3d779deca24b8480103f90c937c848c06118a32b2f1fe6a893912750c26425",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 1.338,
+      "output": "previews/s02.webp",
+      "originalSha256": "c53f7e1f04c3e64b5290a4b3adc8da1f6391afeb9710cf5abd27ec33309ecca6",
+      "outputSha256": "6b78d8422d9abfe3d6cebdf95ef6390101c8ab018388161c3dcd440f8dea0299",
+      "outputBytes": 1668168,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "s03",
+      "kind": "concept",
+      "canonicalIds": [
+        "O03"
+      ],
+      "coveredIds": [
+        "O03"
+      ],
+      "sourceManifest": "settings-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/s-03-seletor-valores.png",
+      "originalBytes": 2267073,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "2938215cd98eabd8e28a60faf8d507190ffa81df2e2870ffc2f9e0b2c6201e53",
+      "outputDecodedRGBASHA256": "2938215cd98eabd8e28a60faf8d507190ffa81df2e2870ffc2f9e0b2c6201e53",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 1.416,
+      "output": "previews/s03.webp",
+      "originalSha256": "315523e944a4691a9c4ee6d02968a4bea8ab9ec07e61dac393784362566f4861",
+      "outputSha256": "b32132ef8e5b7acd577e5dff6734a2942634d74694ac4f2bf28b0a0f47087f2b",
+      "outputBytes": 1627478,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "s04",
+      "kind": "concept",
+      "canonicalIds": [
+        "O02"
+      ],
+      "coveredIds": [
+        "O02",
+        "O04",
+        "O05",
+        "O06",
+        "O13",
+        "O18"
+      ],
+      "sourceManifest": "settings-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/s-04-categorias-variantes.png",
+      "originalBytes": 2694751,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "width": 1536,
+      "height": 1024,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "34a335b8508f9e0ddcbdc5c51cf601d82e2204d8f6bad52420b033fb36e138d5",
+      "outputDecodedRGBASHA256": "34a335b8508f9e0ddcbdc5c51cf601d82e2204d8f6bad52420b033fb36e138d5",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 1.267,
+      "output": "previews/s04.webp",
+      "originalSha256": "7ce4507db5e8f8efbd9094f1a4c6821068aa9e1917965ff16c9155edf893febe",
+      "outputSha256": "7387772f26737f582badf3c04295c8147ea4d905f5cf96e29b6227515250665c",
+      "outputBytes": 1866262,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "s05",
+      "kind": "concept",
+      "canonicalIds": [
+        "O02"
+      ],
+      "coveredIds": [
+        "O21",
+        "O22",
+        "O30",
+        "O31"
+      ],
+      "sourceManifest": "settings-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/s-05-gameplay-mapeamentos.png",
+      "originalBytes": 2682494,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "df896b665176375d3843eb91513b3381ee9e25dc7060460daa3346f9dadd84f7",
+      "outputDecodedRGBASHA256": "df896b665176375d3843eb91513b3381ee9e25dc7060460daa3346f9dadd84f7",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 1.104,
+      "output": "previews/s05.webp",
+      "originalSha256": "b30634f7a7b4565dacda7321eaffc0bc126c80dacf51b7b1854d4e953ec840ca",
+      "outputSha256": "dd1b1f2e222d18a24b5a563ea38b44f7db783746619984183388d7be9f044122",
+      "outputBytes": 1921230,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "s06",
+      "kind": "concept",
+      "canonicalIds": [
+        "O32",
+        "O33"
+      ],
+      "coveredIds": [
+        "O32",
+        "O33",
+        "O34"
+      ],
+      "sourceManifest": "settings-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/s-06-captura-associacoes.png",
+      "originalBytes": 2445679,
+      "originalFormat": "PNG",
+      "dimensions": [
+        2172,
+        724
+      ],
+      "width": 2172,
+      "height": 724,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "61e588a966327a6c6e85295f348524cd52f23db7b2498b830c3ab805a8bab84d",
+      "outputDecodedRGBASHA256": "61e588a966327a6c6e85295f348524cd52f23db7b2498b830c3ab805a8bab84d",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 1.18,
+      "output": "previews/s06.webp",
+      "originalSha256": "a0463cee30a42a696d5cf3004c1b7c792685a5d7d14eed60acdb0e40afdcf4db",
+      "outputSha256": "98ba597f1b7c370607a8364f2bb0d25deac9c54d78cb4247b753c03dbd31ee15",
+      "outputBytes": 1757714,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "s07",
+      "kind": "concept",
+      "canonicalIds": [
+        "G01"
+      ],
+      "coveredIds": [
+        "G01",
+        "G02"
+      ],
+      "sourceManifest": "settings-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/s-07-pausa-menu.png",
+      "originalBytes": 2512927,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "a5d09f17b018cee84d81ade40e11fa7e23fbdd99f25f37e6f2f9a23b3a213598",
+      "outputDecodedRGBASHA256": "a5d09f17b018cee84d81ade40e11fa7e23fbdd99f25f37e6f2f9a23b3a213598",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 3.907,
+      "output": "previews/s07.webp",
+      "originalSha256": "4b2d8461537821c10892e01a1c1e87032a16f90567fa60d6a907462f5edee20e",
+      "outputSha256": "ac9f5bf159bb7fa0baeb7964e712f2cb6f046f27b55cc0894631d7d835590e73",
+      "outputBytes": 1833258,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "s08",
+      "kind": "concept",
+      "canonicalIds": [
+        "IGS01"
+      ],
+      "coveredIds": [],
+      "sourceManifest": "settings-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/s-08-categorias-partida.png",
+      "originalBytes": 2342318,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "655246426d584b02f1cebfa9c3f73d816c6d4ae23299f86be0bb1d87e959a2a6",
+      "outputDecodedRGBASHA256": "655246426d584b02f1cebfa9c3f73d816c6d4ae23299f86be0bb1d87e959a2a6",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 5.318,
+      "output": "previews/s08.webp",
+      "originalSha256": "5c97bf6098f18dac59599ea6f4ec214329de516e01673a7248aa078c80cfbed9",
+      "outputSha256": "fa970bc4fbd4246177ef6e209740ad388294ac5d5d84c8e2253e5eaffe4b0871",
+      "outputBytes": 1689018,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "s09",
+      "kind": "concept",
+      "canonicalIds": [
+        "IGS02"
+      ],
+      "coveredIds": [
+        "G03",
+        "G04",
+        "G05",
+        "G06",
+        "G07",
+        "G08",
+        "G09",
+        "G10"
+      ],
+      "sourceManifest": "settings-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/s-09-opcoes-partida.png",
+      "originalBytes": 2252056,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "484eeefa68b53d0000b53edaaf466c11661bb051b6f0931ab9c8fca2e5b190d9",
+      "outputDecodedRGBASHA256": "484eeefa68b53d0000b53edaaf466c11661bb051b6f0931ab9c8fca2e5b190d9",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 3.676,
+      "output": "previews/s09.webp",
+      "originalSha256": "5890f6fbb4bb2df4342ad16357627622699d60f4a2d3db7876e042ec0b53d2ac",
+      "outputSha256": "1f7349c362d0d0e6ba53b5583ff39ed46e84d2864fdcdf105fc3d90a2bc64d4e",
+      "outputBytes": 1622498,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "s10",
+      "kind": "concept",
+      "canonicalIds": [
+        "IGS03"
+      ],
+      "coveredIds": [
+        "G11",
+        "G12",
+        "G13",
+        "G14",
+        "G15",
+        "G16",
+        "G17",
+        "G18"
+      ],
+      "sourceManifest": "settings-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/s-10-musica-valores-partida.png",
+      "originalBytes": 2256222,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "2ff576896000f21d7fb6dbf0716b52b781e840ab674247b41a3fc2cac0991d60",
+      "outputDecodedRGBASHA256": "2ff576896000f21d7fb6dbf0716b52b781e840ab674247b41a3fc2cac0991d60",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 5.58,
+      "output": "previews/s10.webp",
+      "originalSha256": "be1136224c01e6499b54d673fedb8723b7e4985f1b8d8b9e6a468cf9282884ba",
+      "outputSha256": "277e1282f2defd07fd6fbf766ab8f1f766f97bd2e33b6f7c3a301cbeb091d6b6",
+      "outputBytes": 1623506,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "s11",
+      "kind": "concept",
+      "canonicalIds": [
+        "IGS04",
+        "IGS05"
+      ],
+      "coveredIds": [],
+      "sourceManifest": "settings-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/s-11-associacoes-partida.png",
+      "originalBytes": 2508624,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1774,
+        887
+      ],
+      "width": 1774,
+      "height": 887,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "35cbd4bbaf79fc62319a4f0c2adf07e097805c23f11a7e3fa7d42370b16b7fe2",
+      "outputDecodedRGBASHA256": "35cbd4bbaf79fc62319a4f0c2adf07e097805c23f11a7e3fa7d42370b16b7fe2",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 5.424,
+      "output": "previews/s11.webp",
+      "originalSha256": "2f152c00e4bae60d33d37bffaa0529232bf5d1bb21bf4517db9a414c3826b4fd",
+      "outputSha256": "f75bd0f901f2b77a621537e24c3b697778d59c240567b9e99607305a142463e5",
+      "outputBytes": 1796526,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "s12",
+      "kind": "concept",
+      "canonicalIds": [
+        "IGS06"
+      ],
+      "coveredIds": [],
+      "sourceManifest": "settings-art.json",
+      "status": "candidate",
+      "installed": false,
+      "sourceRelativeRepoPath": "docs/hud-study/r2/images/s-12-slider-partida.png",
+      "originalBytes": 2331826,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "width": 1672,
+      "height": 941,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "7bfc273b05ffa7cf4b072185a2f78af14dfcc764dadf94ae71a40a308a28464f",
+      "outputDecodedRGBASHA256": "7bfc273b05ffa7cf4b072185a2f78af14dfcc764dadf94ae71a40a308a28464f",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 4.545,
+      "output": "previews/s12.webp",
+      "originalSha256": "60fc2b540162e6542c3b1d18ef3af7ade1e01481be07695e062863b017c318e6",
+      "outputSha256": "65e47e9406cb83f13962f54d74508ddd6cbab88fd72df7212272a9321dc6118f",
+      "outputBytes": 1669064,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "F03",
+      "kind": "native-reference",
+      "screenId": "F03",
+      "referenceType": "realwindow",
+      "historicalFixtureData": {
+        "historical": true,
+        "fixture": false,
+        "offscreen": false,
+        "inventoryDate": "2026-10-08",
+        "reason": "Captura histórica fornecida da apresentação nativa Diablo/DevilutionX, com seis ações e logo original; não representa a revisão D3D instalada hoje.",
+        "coverageScope": "representative-current-view",
+        "coveredStudyFrameIds": [
+          "F03"
+        ],
+        "allFunctionalVariantsHaveOriginalImage": false,
+        "fullInterfaceCapture": true,
+        "rawSpritesOrMPQ": false
+      },
+      "sourceRelativeRepoPath": "website/public/assets/captures/author-menu-startup.webp",
+      "originalBytes": 26294,
+      "originalFormat": "WEBP",
+      "dimensions": [
+        949,
+        545
+      ],
+      "width": 949,
+      "height": 545,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "d5a1df62e6ac7a2d923096af376e172f392311b1b86c84eca289a7caffaed16f",
+      "outputDecodedRGBASHA256": "d5a1df62e6ac7a2d923096af376e172f392311b1b86c84eca289a7caffaed16f",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 0.228,
+      "output": "references/f03.webp",
+      "originalSha256": "0d1e876a00bd714bf724eac57bb637a1b7af221c424d8705730dc36285abacca",
+      "outputSha256": "66edfa569e5f6e20e8ba4acaa12691f5f5edbadfb5220664609278f2c604390c",
+      "outputBytes": 25874,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "F04",
+      "kind": "native-reference",
+      "screenId": "F04",
+      "referenceType": "nativefixture",
+      "historicalFixtureData": {
+        "historical": true,
+        "fixture": true,
+        "offscreen": true,
+        "inventoryDate": "2026-10-08",
+        "reason": "Fixture de funções/arte nativas e compositor SDL real sem janela. Herói sintético; fundo RGB D3D aprovado, não screenshot vanilla intacto.",
+        "coverageScope": "representative-current-view",
+        "coveredStudyFrameIds": [
+          "F04"
+        ],
+        "allFunctionalVariantsHaveOriginalImage": false,
+        "fullInterfaceCapture": true,
+        "rawSpritesOrMPQ": false
+      },
+      "sourceRelativeRepoPath": "../diagnostics/menu-ui-20261008/menus-20261008-050806/1920x1080-hero-selection-synthetic.bmp",
+      "originalBytes": 8294522,
+      "originalFormat": "BMP",
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "width": 1920,
+      "height": 1080,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "134537d468fb8a838b6e1c76f1ccd7cf449327ead0d3f4c31a0537b6b2d2a723",
+      "outputDecodedRGBASHA256": "134537d468fb8a838b6e1c76f1ccd7cf449327ead0d3f4c31a0537b6b2d2a723",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 13.754,
+      "output": "references/f04.webp",
+      "originalSha256": "ed974ccbf5069b38432939f55a1ff566b2ca29220c062e5378cdd1e175a5963c",
+      "outputSha256": "e8e0c8e9782a2fa7175a65dc36b6b0fc838d9f7af5a3579c13cc820436e8e7cf",
+      "outputBytes": 1715260,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "F09",
+      "kind": "native-reference",
+      "screenId": "F09",
+      "referenceType": "nativefixture",
+      "historicalFixtureData": {
+        "historical": true,
+        "fixture": true,
+        "offscreen": true,
+        "inventoryDate": "2026-10-08",
+        "reason": "Fixture nativa real sem janela; provider Offline do build NONET, com fundo D3D aprovado. TCP/ZeroTier não foram capturados.",
+        "coverageScope": "representative-current-view",
+        "coveredStudyFrameIds": [
+          "F09"
+        ],
+        "allFunctionalVariantsHaveOriginalImage": false,
+        "fullInterfaceCapture": true,
+        "rawSpritesOrMPQ": false
+      },
+      "sourceRelativeRepoPath": "../diagnostics/menu-ui-20261008/menus-20261008-050806/1920x1080-provider.bmp",
+      "originalBytes": 8294522,
+      "originalFormat": "BMP",
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "width": 1920,
+      "height": 1080,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "626eed3977313779c7992231a8ae97b19220dc0b78c45da8c20426a9c44aff81",
+      "outputDecodedRGBASHA256": "626eed3977313779c7992231a8ae97b19220dc0b78c45da8c20426a9c44aff81",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 12.414,
+      "output": "references/f09.webp",
+      "originalSha256": "f6da3b3165de93b4fb020a57d42279f40d609c2c43ec7e40ddf55dbc456be62a",
+      "outputSha256": "8e3170a39efe0b391fd0cff6c07b57cc2a3d20119a4e33b624da5586d135c363",
+      "outputBytes": 1708188,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "F14",
+      "kind": "native-reference",
+      "screenId": "F14",
+      "referenceType": "nativefixture",
+      "historicalFixtureData": {
+        "historical": true,
+        "fixture": true,
+        "offscreen": true,
+        "inventoryDate": "2026-10-08",
+        "reason": "Fixture sem janela do renderer, fundo e texto nativos de créditos; imagem da taverna e rolagem preservadas.",
+        "coverageScope": "representative-current-view",
+        "coveredStudyFrameIds": [
+          "F14"
+        ],
+        "allFunctionalVariantsHaveOriginalImage": true,
+        "fullInterfaceCapture": true,
+        "rawSpritesOrMPQ": false
+      },
+      "sourceRelativeRepoPath": "../diagnostics/menu-ui-20261008/menus-20261008-050806/1920x1080-credits-native.bmp",
+      "originalBytes": 8294522,
+      "originalFormat": "BMP",
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "width": 1920,
+      "height": 1080,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "6f99627027a84a03c0a478c7cf0edde0fb6f2c484b944ba50df5c283703dc1ec",
+      "outputDecodedRGBASHA256": "6f99627027a84a03c0a478c7cf0edde0fb6f2c484b944ba50df5c283703dc1ec",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 1.552,
+      "output": "references/f14.webp",
+      "originalSha256": "da45cb89b24d1e75b903b9c64ca915ce301b051b6b9ee99566008ca29029351d",
+      "outputSha256": "e1b6cc828bb3b76fa9acef5cefccdf48a9b9deaaf68626b9108f077dd1f895d0",
+      "outputBytes": 155568,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "G01",
+      "kind": "native-reference",
+      "screenId": "G01",
+      "referenceType": "nativefixture",
+      "historicalFixtureData": {
+        "historical": true,
+        "fixture": true,
+        "offscreen": true,
+        "inventoryDate": "2026-10-08",
+        "reason": "Fixture nativa atual sem janela sobre Tristram; ilustra o Esc atual e não o antigo submenu de opções.",
+        "coverageScope": "representative-current-view",
+        "coveredStudyFrameIds": [
+          "G01"
+        ],
+        "allFunctionalVariantsHaveOriginalImage": false,
+        "fullInterfaceCapture": true,
+        "rawSpritesOrMPQ": false
+      },
+      "sourceRelativeRepoPath": "../diagnostics/render-optimization-20261008/menu-r1/1920x1080-escape-focus-first.png",
+      "originalBytes": 884228,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "width": 1920,
+      "height": 1080,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "d26b021c24deef741482d333f4bfc12ed0a0edd2b57d01508ba7bb03da7c0763",
+      "outputDecodedRGBASHA256": "d26b021c24deef741482d333f4bfc12ed0a0edd2b57d01508ba7bb03da7c0763",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 2.633,
+      "output": "references/g01.webp",
+      "originalSha256": "e54ef349c350e7d1025b8a4c9afcc5026ab5559f786aba64271c1c212007ca87",
+      "outputSha256": "04df208068465cfc4ec5688c6b4b4e7bc2c0998998e3899333bc8203a858f9fd",
+      "outputBytes": 456058,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "HUD-BASE",
+      "kind": "native-reference",
+      "screenId": "HUD-BASE",
+      "referenceType": "nativefixture",
+      "historicalFixtureData": {
+        "historical": true,
+        "fixture": true,
+        "offscreen": true,
+        "inventoryDate": "2026-10-08",
+        "reason": "Composição produtiva offscreen da baseline HD atual; ref de integração D3D, não original vanilla. Inventário inclui apenas para continuidade.",
+        "coverageScope": "representative-current-view",
+        "coveredStudyFrameIds": [],
+        "allFunctionalVariantsHaveOriginalImage": false,
+        "fullInterfaceCapture": true,
+        "rawSpritesOrMPQ": false
+      },
+      "sourceRelativeRepoPath": "../diagnostics/hud-hd-regression-20261008/final-production-03/home-1920-fill50.png",
+      "originalBytes": 1485233,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "width": 1920,
+      "height": 1080,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "837262330c41cb1a476d2e5d2c7a6b6548cde99f3333ef92b38c2a1a95af3cbd",
+      "outputDecodedRGBASHA256": "837262330c41cb1a476d2e5d2c7a6b6548cde99f3333ef92b38c2a1a95af3cbd",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        251,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 5.407,
+      "output": "references/hud-base.webp",
+      "originalSha256": "98b20463c2a1b656c9df156e8db3a476bb83b5b8e3d623d93269c440eba30f51",
+      "outputSha256": "53454edf5882dd890bee890a2f0b1dfd6fb74e64e9ab1e8ff85bc2d79fe0313d",
+      "outputBytes": 689302,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "IGS01",
+      "kind": "native-reference",
+      "screenId": "IGS01",
+      "referenceType": "nativefixture",
+      "historicalFixtureData": {
+        "historical": true,
+        "fixture": true,
+        "offscreen": true,
+        "inventoryDate": "2026-10-08",
+        "reason": "Fixture de desenho nativo atual sobre Tristram, sem HUD inferior; prova de composição offscreen, não screenshot de janela.",
+        "coverageScope": "representative-current-view",
+        "coveredStudyFrameIds": [],
+        "allFunctionalVariantsHaveOriginalImage": false,
+        "fullInterfaceCapture": true,
+        "rawSpritesOrMPQ": false
+      },
+      "sourceRelativeRepoPath": "../diagnostics/render-optimization-20261008/menu-r1/1920x1080-categories-page-1-focus-first.png",
+      "originalBytes": 723892,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "width": 1920,
+      "height": 1080,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "0e09126321c3ac1e21d029f7d6263f5a3328ceb638531241e117e8ee376d7709",
+      "outputDecodedRGBASHA256": "0e09126321c3ac1e21d029f7d6263f5a3328ceb638531241e117e8ee376d7709",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 2.395,
+      "output": "references/igs01.webp",
+      "originalSha256": "e85afe40b0f53054960080b9ec0235e8404c995b0e0eb33e6c6b36241324efea",
+      "outputSha256": "b0a45588f902a2c584dbf8b28af5f2edde30f6267202d42384bacf384fa088ee",
+      "outputBytes": 375954,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "IGS02",
+      "kind": "native-reference",
+      "screenId": "IGS02",
+      "referenceType": "nativefixture",
+      "historicalFixtureData": {
+        "historical": true,
+        "fixture": true,
+        "offscreen": true,
+        "inventoryDate": "2026-10-08",
+        "reason": "Fixture nativa atual da variante Gráficos. Música também existe em 1920x1080-music-page-1-focus-first.png no mesmo diretório; demais categorias sem captura própria.",
+        "coverageScope": "representative-current-view",
+        "coveredStudyFrameIds": [],
+        "allFunctionalVariantsHaveOriginalImage": false,
+        "fullInterfaceCapture": true,
+        "rawSpritesOrMPQ": false
+      },
+      "sourceRelativeRepoPath": "../diagnostics/render-optimization-20261008/menu-r1/1920x1080-graphics-page-1-focus-first.png",
+      "originalBytes": 527964,
+      "originalFormat": "PNG",
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "width": 1920,
+      "height": 1080,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "0143ab41f123dafb714bbb7eededfc7dad623576a4adf31e84c8f05b5df9a3fe",
+      "outputDecodedRGBASHA256": "0143ab41f123dafb714bbb7eededfc7dad623576a4adf31e84c8f05b5df9a3fe",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 1.722,
+      "output": "references/igs02.webp",
+      "originalSha256": "345a17721e29353c4716bcd73d7346b38f1a5f5ee0628333044e5d436f344f20",
+      "outputSha256": "e38f4ac14544a733442b83613b394135ca00f542f96c872edb08fb165ef3a021",
+      "outputBytes": 254366,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "O01",
+      "kind": "native-reference",
+      "screenId": "O01",
+      "referenceType": "nativefixture",
+      "historicalFixtureData": {
+        "historical": true,
+        "fixture": true,
+        "offscreen": true,
+        "inventoryDate": "2026-10-08",
+        "reason": "Fixture nativa pré-partida sem janela, fundo D3D aprovado; categorias reais do build no momento do diagnóstico.",
+        "coverageScope": "representative-current-view",
+        "coveredStudyFrameIds": [
+          "O01"
+        ],
+        "allFunctionalVariantsHaveOriginalImage": true,
+        "fullInterfaceCapture": true,
+        "rawSpritesOrMPQ": false
+      },
+      "sourceRelativeRepoPath": "../diagnostics/menu-ui-20261008/menus-20261008-050806/1920x1080-settings-categories.bmp",
+      "originalBytes": 8294522,
+      "originalFormat": "BMP",
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "width": 1920,
+      "height": 1080,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "d765d7794583f109a3ce2753104863a900adb744ea682b14c17a2095087c56f0",
+      "outputDecodedRGBASHA256": "d765d7794583f109a3ce2753104863a900adb744ea682b14c17a2095087c56f0",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 14.001,
+      "output": "references/o01.webp",
+      "originalSha256": "b6ad9c4613a8e5da7400162f507bb7b9e363513c26caf9e2807076d81c0e6da1",
+      "outputSha256": "f18790f988136c03d0fb981fa71c3a49efd6821a37d728c171315ae50f8e561f",
+      "outputBytes": 1713406,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "O02",
+      "kind": "native-reference",
+      "screenId": "O02",
+      "referenceType": "nativefixture",
+      "historicalFixtureData": {
+        "historical": true,
+        "fixture": true,
+        "offscreen": true,
+        "inventoryDate": "2026-10-08",
+        "reason": "Referência direta da variante Gráficos pelo renderer nativo; demais categorias não têm imagem localizada. Fundo D3D aprovado e UI nativa.",
+        "coverageScope": "representative-current-view",
+        "coveredStudyFrameIds": [
+          "O08"
+        ],
+        "allFunctionalVariantsHaveOriginalImage": false,
+        "fullInterfaceCapture": true,
+        "rawSpritesOrMPQ": false
+      },
+      "sourceRelativeRepoPath": "../diagnostics/menu-ui-20261008/menus-20261008-050806/1920x1080-settings-graphics.bmp",
+      "originalBytes": 8294522,
+      "originalFormat": "BMP",
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "width": 1920,
+      "height": 1080,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "e6b5969d8785cdfe674d666a273075f869ff5bf1578e95218c7bf2d57cb4a359",
+      "outputDecodedRGBASHA256": "e6b5969d8785cdfe674d666a273075f869ff5bf1578e95218c7bf2d57cb4a359",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 14.797,
+      "output": "references/o02.webp",
+      "originalSha256": "52dfb1fe2ff761b9277721b09a31687a186414681a5dd37ce2f487624e312ecb",
+      "outputSha256": "9fb4e26dc2f5bea9647d24a6096facc9f5cf543c9b8b70b305817a3fec3e9e2b",
+      "outputBytes": 1744728,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "O03",
+      "kind": "native-reference",
+      "screenId": "O03",
+      "referenceType": "nativefixture",
+      "historicalFixtureData": {
+        "historical": true,
+        "fixture": true,
+        "offscreen": true,
+        "inventoryDate": "2026-10-08",
+        "reason": "Fixture nativa real da opção Scaling Quality; outras enumerações são variantes de conteúdo sem captura própria.",
+        "coverageScope": "representative-current-view",
+        "coveredStudyFrameIds": [
+          "O10"
+        ],
+        "allFunctionalVariantsHaveOriginalImage": false,
+        "fullInterfaceCapture": true,
+        "rawSpritesOrMPQ": false
+      },
+      "sourceRelativeRepoPath": "../diagnostics/menu-ui-20261008/menus-20261008-050806/1920x1080-settings-graphics-option.bmp",
+      "originalBytes": 8294522,
+      "originalFormat": "BMP",
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "width": 1920,
+      "height": 1080,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "9ee45475e6b8d1676cd63744f8a39533e9303d0b63f2f085c221e48af5dce85a",
+      "outputDecodedRGBASHA256": "9ee45475e6b8d1676cd63744f8a39533e9303d0b63f2f085c221e48af5dce85a",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 11.596,
+      "output": "references/o03.webp",
+      "originalSha256": "717c10a8e2ae93c20097cb336991e39996d783c1549425a878e8831a2bd6b360",
+      "outputSha256": "bcd545e18bc441a49d2da8b1202a06ffefad3b6512f0c87b2f0b547e7cdb142c",
+      "outputBytes": 1709308,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "P01",
+      "kind": "native-reference",
+      "screenId": "P01",
+      "referenceType": "nativefixture",
+      "historicalFixtureData": {
+        "historical": true,
+        "fixture": true,
+        "offscreen": true,
+        "inventoryDate": "2026-10-08",
+        "reason": "Fixture integrado do painel e sprites nativos sobre Tristram nativa, composto no SDL real sem janela. Personagem/valores de teste; HUD D3D da revisão histórica. Não é screenshot da janela.",
+        "coverageScope": "representative-current-view",
+        "coveredStudyFrameIds": [
+          "P01"
+        ],
+        "allFunctionalVariantsHaveOriginalImage": false,
+        "fullInterfaceCapture": true,
+        "rawSpritesOrMPQ": false
+      },
+      "sourceRelativeRepoPath": "../diagnostics/hud-regression-20261008/integrated-20261008-045845/native-1920x1080-character.bmp",
+      "originalBytes": 8294522,
+      "originalFormat": "BMP",
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "width": 1920,
+      "height": 1080,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "a9397ea58f72c0dea5574b7b6cdc3b2189b34dc44396c91a58a6d61d98a1e376",
+      "outputDecodedRGBASHA256": "a9397ea58f72c0dea5574b7b6cdc3b2189b34dc44396c91a58a6d61d98a1e376",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 2.458,
+      "output": "references/p01.webp",
+      "originalSha256": "603425ed5bb2331209be8d1a726719d006330cc2492a22d3a71e2447cc1f8cf5",
+      "outputSha256": "fd2f984ff2d64962e16a83464219362b3299fbe491510a5a1090cd9271f8b832",
+      "outputBytes": 318990,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "P02",
+      "kind": "native-reference",
+      "screenId": "P02",
+      "referenceType": "nativefixture",
+      "historicalFixtureData": {
+        "historical": true,
+        "fixture": true,
+        "offscreen": true,
+        "inventoryDate": "2026-10-08",
+        "reason": "Fixture integrado do painel e sprites nativos sobre Tristram nativa, composto no SDL real sem janela. Personagem/valores de teste; HUD D3D da revisão histórica. Não é screenshot da janela.",
+        "coverageScope": "representative-current-view",
+        "coveredStudyFrameIds": [
+          "P02"
+        ],
+        "allFunctionalVariantsHaveOriginalImage": true,
+        "fullInterfaceCapture": true,
+        "rawSpritesOrMPQ": false
+      },
+      "sourceRelativeRepoPath": "../diagnostics/hud-regression-20261008/integrated-20261008-045845/native-1920x1080-inventory.bmp",
+      "originalBytes": 8294522,
+      "originalFormat": "BMP",
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "width": 1920,
+      "height": 1080,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "ae9da89b34f31dbee11ae8b7947638c62829af5e359d86c39ff191e48d83ddd3",
+      "outputDecodedRGBASHA256": "ae9da89b34f31dbee11ae8b7947638c62829af5e359d86c39ff191e48d83ddd3",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 3.013,
+      "output": "references/p02.webp",
+      "originalSha256": "05d6b1d986452b36fdda276bf693df97a7c76d0a6123d805dcd2b120103c19c9",
+      "outputSha256": "34664c9cbfb64ad3a673fc89ec34065238577549890a053430d705218194dc0e",
+      "outputBytes": 328750,
+      "packagingIntegrityValidated": true
+    },
+    {
+      "id": "P12",
+      "kind": "native-reference",
+      "screenId": "P12",
+      "referenceType": "nativefixture",
+      "historicalFixtureData": {
+        "historical": true,
+        "fixture": true,
+        "offscreen": true,
+        "inventoryDate": "2026-10-08",
+        "reason": "Fixture de desenho do painel de chat nativo sobre fundo sintético explicitamente identificado. Texto de teste e controles legados reais; não gameplay nem captura de janela.",
+        "coverageScope": "representative-current-view",
+        "coveredStudyFrameIds": [
+          "P12"
+        ],
+        "allFunctionalVariantsHaveOriginalImage": true,
+        "fullInterfaceCapture": true,
+        "rawSpritesOrMPQ": false
+      },
+      "sourceRelativeRepoPath": "../diagnostics/hud-regression-20261008/native-final/hud-runtime-503344974355800/hud-1920x1080-native-chat-fallback.bmp",
+      "originalBytes": 2074678,
+      "originalFormat": "BMP",
+      "dimensions": [
+        1920,
+        1080
+      ],
+      "width": 1920,
+      "height": 1080,
+      "decodedRGBAEqual": true,
+      "decodedRGBASHAEqual": true,
+      "originalDecodedRGBASHA256": "779f3dbff08001791bac0830f172507cab97dcd255fae8637ccf74add5be4ccc",
+      "outputDecodedRGBASHA256": "779f3dbff08001791bac0830f172507cab97dcd255fae8637ccf74add5be4ccc",
+      "visiblePixelsEqual": true,
+      "alphaExtrema": [
+        255,
+        255
+      ],
+      "sourceMasterUnchanged": true,
+      "metadataStripped": true,
+      "lossless": true,
+      "resize": false,
+      "crop": false,
+      "retouch": false,
+      "elapsedSeconds": 0.531,
+      "output": "references/p12.webp",
+      "originalSha256": "1d39e6a62e324770a24a5e6e447c3c35e9408cd4602787777bc7d28a0dac8be2",
+      "outputSha256": "f44d21963ff01c54393ed5acadd7209ace01d51af62abab1bcf1ef81ca1b52fe",
+      "outputBytes": 21670,
+      "packagingIntegrityValidated": true
+    }
+  ]
+}
