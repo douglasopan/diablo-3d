@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import datetime as dt
+import hashlib
 import html
 import json
 import os
@@ -106,6 +107,11 @@ def url(path):
     return PREFIX + localized_path(path)
 
 
+def versioned_asset(path):
+    digest = hashlib.sha256((PUBLIC / path.lstrip('/')).read_bytes()).hexdigest()[:12]
+    return url(path) + '?v=' + digest
+
+
 def absolute(path):
     return BASE + localized_path(path)
 
@@ -142,11 +148,8 @@ def button(label, href, secondary=False):
 
 
 def logo(eager=False, animated=False, cls='brand-logo'):
-    image = img('/assets/branding/d3d-logo-static.webp', 'Diablo 3D', eager, cls)
-    if not animated:
-        return image
-    image = image.replace('<img ', f'<img data-logo data-static-src="{url("/assets/branding/d3d-logo-static.webp")}" data-animated-src="{url("/assets/branding/d3d-logo-animated.webp")}" ')
-    return '<div class="logo-block">' + image + '<button class="logo-motion" type="button" data-logo-toggle hidden data-enhancement>Animar logomarca</button></div>'
+    asset = 'd3d-logo-animated.webp' if animated else 'd3d-logo-static.webp'
+    return img('/assets/branding/' + asset, 'Diablo 3D', eager, cls)
 
 
 class ContentLinks(HTMLParser):
@@ -330,9 +333,9 @@ def frame(title, description, path, content, image='/assets/banner.webp', articl
 <title>{esc(title)} · Diablo 3D</title><meta name="description" content="{esc(description)}"><meta name="robots" content="{'noindex, follow' if noindex else 'index, follow'}"><link rel="canonical" href="{canonical}">
 <meta name="theme-color" content="#111211"><meta property="og:locale" content="{'en_US' if LANG == 'en' else 'pt_BR'}"><meta property="og:type" content="{'article' if article else 'website'}"><meta property="og:site_name" content="Diablo 3D · D3D"><meta property="og:title" content="{esc(title)}"><meta property="og:description" content="{esc(description)}"><meta property="og:url" content="{canonical}"><meta property="og:image" content="{absolute(image)}"><meta property="og:image:alt" content="{esc(article['image_alt'] if article else 'Banner oficial do projeto Diablo 3D')}">{article_meta}
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{esc(title)}"><meta name="twitter:description" content="{esc(description)}"><meta name="twitter:image" content="{absolute(image)}">
-<link rel="icon" type="image/png" href="{url('/assets/d3d-icon.png')}"><link rel="apple-touch-icon" href="{url('/assets/d3d-touch.png')}"><link rel="alternate" type="application/rss+xml" title="Diablo 3D — Devlog" href="{url('/rss.xml')}"><link rel="stylesheet" href="{url('/site.css')}">
-{alternates}<script src="{url('/language.js')}"></script><script type="application/ld+json">{json.dumps(structured, ensure_ascii=False).replace('<', chr(92) + 'u003c')}</script><script src="{url('/site.js')}" defer></script></head>
-<body><a class="skip-link" href="#main">Pular para o conteúdo</a><header class="site-header"><div class="wrap"><a class="brand" href="{url('/')}" aria-label="D3D — Início">{logo(True)}</a><button class="menu-toggle" type="button" aria-controls="navigation" aria-expanded="false" hidden data-enhancement>Menu <span aria-hidden="true">☰</span></button><nav id="navigation" class="main-nav" aria-label="Navegação principal">{nav}</nav>{languages}</div></header>
+<link rel="icon" type="image/png" href="{url('/assets/d3d-icon.png')}"><link rel="apple-touch-icon" href="{url('/assets/d3d-touch.png')}"><link rel="alternate" type="application/rss+xml" title="Diablo 3D — Devlog" href="{url('/rss.xml')}"><link rel="stylesheet" href="{versioned_asset('/site.css')}">
+{alternates}<script src="{versioned_asset('/language.js')}"></script><script type="application/ld+json">{json.dumps(structured, ensure_ascii=False).replace('<', chr(92) + 'u003c')}</script><script src="{versioned_asset('/site.js')}" defer></script></head>
+<body><a class="skip-link" href="#main">Pular para o conteúdo</a><header class="site-header"><div class="wrap"><a class="brand" href="{url('/')}" aria-label="D3D — Início">{logo(True, True)}</a><button class="menu-toggle" type="button" aria-controls="navigation" aria-expanded="false" hidden data-enhancement>Menu <span aria-hidden="true">☰</span></button><nav id="navigation" class="main-nav" aria-label="Navegação principal">{nav}</nav>{languages}</div></header>
 <main id="main" class="wrap">{content}</main><footer class="site-footer"><div class="wrap"><div class="footer-top"><a class="brand" href="{url('/')}">{logo()}</a><nav aria-label="Links do projeto"><a href="{GITHUB}">GitHub ↗</a><a href="{DISCORD}">Discord ↗</a><a href="{url('/apoiar/')}">Apoiar ↗</a><a href="{url('/rss.xml')}">RSS ↗</a><a href="{source('LICENSE.md', False)}">Licença ↗</a></nav></div><p>Projeto de fã independente, sem afiliação com a Blizzard Entertainment. Diablo e suas marcas pertencem aos respectivos titulares.</p><p>Código público sob <a href="{source('LICENSE.md', False)}">Sustainable Use License</a>: distribuição gratuita e não comercial. Dados originais do jogo não são distribuídos.</p></div></footer>{lightbox()}</body></html>'''
     return localize_html(document)
 

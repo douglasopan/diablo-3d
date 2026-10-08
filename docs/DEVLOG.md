@@ -52,9 +52,9 @@ Não publique MPQ, saves, CEL/CL2/MIN/TIL/SOL extraídos, texturas isoladas, mod
 
 ## Identidade e animação
 
-A logomarca transparente original fornecida pelo responsável pelo projeto contém 240 quadros PNG RGBA de 640×160, a 30 fps, em um ciclo de oito segundos. Sua versão WebP animada preserva o alpha, inclusive a transparência gradual das chamas e as faces escuras opacas das letras. O cabeçalho e o rodapé usam o quadro estático; o hero da página inicial oferece animação com controle de iniciar e pausar. A imagem estática é o fallback sem JavaScript e o estado inicial para quem solicita redução de movimento. A origem da sequência está documentada em [ANIMATED-LOGO.md](ANIMATED-LOGO.md).
+A logomarca transparente original fornecida pelo responsável pelo projeto contém 240 quadros PNG RGBA de 640×160, a 30 fps, em um ciclo de oito segundos. Sua versão WebP animada preserva o alpha, inclusive a transparência gradual das chamas e as faces escuras opacas das letras. O cabeçalho e o destaque inicial usam o WebP animado diretamente no HTML, com repetição automática inclusive sem JavaScript e sem botão de iniciar ou pausar. Por pedido explícito do usuário, a logomarca continua animada quando a preferência de redução de movimento está ativa; o parallax continua respeitando essa preferência. O rodapé usa o quadro estático. A origem da sequência está documentada em [ANIMATED-LOGO.md](ANIMATED-LOGO.md).
 
-Os títulos usam a Diablo WebFont fornecida pelo usuário; o texto de leitura continua em Manrope. As letras Mason já fazem parte do desenho original da logomarca, sem incorporar o arquivo de fonte Mason. As fontes Cormorant e Manrope existentes, seus registros de origem e os textos OFL permanecem em `website/public/assets/fonts/`.
+Os títulos usam a Cormorant Garamond já hospedada como `D3D Serif`, para uma leitura clara; o texto de leitura continua em Manrope. A Diablo WebFont fornecida pelo usuário é preservada como referência histórica, sem ser aplicada ou carregada nos títulos. As letras Mason já fazem parte do desenho original da logomarca, sem incorporar o arquivo de fonte Mason. As fontes Cormorant e Manrope existentes, seus registros de origem e os textos OFL permanecem em `website/public/assets/fonts/`.
 
 ## Verificação local
 
@@ -65,7 +65,7 @@ python website/verify.py
 python website/serve.py
 ```
 
-Abra `http://127.0.0.1:4173/diablo-3d/` e `http://127.0.0.1:4173/diablo-3d/en/`. O servidor expõe somente `website/dist/`, não a raiz do repositório. Confira desktop, celular, navegação, busca, ampliação das capturas e controle da animação nos dois idiomas antes do commit. Teste também a troca PT/EN numa seção de artigo e a preferência de idioma do navegador. A saída `website/dist/` e as capturas locais de QA não são versionadas.
+Abra `http://127.0.0.1:4173/diablo-3d/` e `http://127.0.0.1:4173/diablo-3d/en/`. O servidor expõe somente `website/dist/`, não a raiz do repositório. Confira desktop, celular, navegação, busca, ampliação das capturas e repetição automática da logomarca no cabeçalho e no destaque inicial nos dois idiomas antes do commit. Confirme a animação com JavaScript desativado e com redução de movimento ativa, mantendo o parallax reduzido neste último caso. Teste também a troca PT/EN numa seção de artigo e a preferência de idioma do navegador. A saída `website/dist/` e as capturas locais de QA não são versionadas.
 
 O workflow `.github/workflows/pages.yml` valida a publicação e envia **somente** `website/dist/` ao Pages. PRs executam build e verificação; o deploy ocorre em `main` ou por execução manual. A configuração do repositório deve usar **Settings → Pages → Source → GitHub Actions**.
 

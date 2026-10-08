@@ -23,25 +23,6 @@
     });
   }
 
-  function initLogoMotion() {
-    const image = document.querySelector('[data-logo]');
-    const button = document.querySelector('[data-logo-toggle]');
-    if (!image || !button) return;
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    let playing = !reducedMotion.matches;
-    const render = () => {
-      image.src = playing ? image.dataset.animatedSrc : image.dataset.staticSrc;
-      button.textContent = playing
-        ? text('Pausar animação', 'Pause animation')
-        : text('Animar logomarca', 'Animate logo');
-      button.setAttribute('aria-pressed', String(playing));
-    };
-    button.addEventListener('click', () => { playing = !playing; render(); });
-    reducedMotion.addEventListener('change', () => { playing = !reducedMotion.matches; render(); });
-    button.hidden = false;
-    render();
-  }
-
   const normalize = (value) => String(value || '')
     .normalize('NFD')
     .replace(/\p{M}/gu, '')
@@ -371,7 +352,6 @@
 
   const init = () => {
     initLanguage();
-    initLogoMotion();
     initAtmosphere();
     initMenu();
     initFilters();

@@ -1,4 +1,5 @@
-Diablo WebFont supplied by the project owner for website headings.
+Diablo WebFont supplied by the project owner and preserved as a historical source.
+It is not applied or requested by the current website styles.
 Source: diablo-webfont.zip, diablo.woff (unchanged).
 Embedded font name: Diablo Heavy.
 Embedded copyright: (c) MaGiK Software, 1997.

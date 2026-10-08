@@ -7,8 +7,6 @@ audit. URLs, filenames, commits and evidence hashes are language independent.
 from __future__ import annotations
 
 TRANSLATIONS: dict[str, str] = {
-    'Animar logomarca': 'Animate logo',
-    'Pausar animação': 'Pause animation',
     'min de leitura': 'min read',
     'capturas selecionadas.': 'selected screenshots.',
     'Início': 'Home',
