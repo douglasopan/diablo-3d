@@ -274,6 +274,14 @@ kbd { display: inline-block; padding: 6px 10px; border: 1px solid #79796e; borde
 .gallery-item figcaption p { margin-bottom: 0; }
 .gallery-item figcaption strong { display: block; margin-bottom: 4px; font: 1.25rem/1.4 var(--serif); }
 .gallery-item .meta { margin-block: 10px 0; }
+.study-nav { display: flex; flex-wrap: wrap; gap: 10px; margin: 24px 0 36px; }
+.study-nav a { padding: 8px 12px; border: 1px solid var(--line); border-radius: var(--radius); font-size: .8rem; }
+.study-gallery > section { margin-top: 48px; scroll-margin-top: 100px; }
+.study-gallery .gallery-item h4 { margin: 14px 0 9px; font-size: 1.6rem; }
+.study-gallery .study-warning { margin-top: 12px; color: var(--gold-light); }
+.study-prompt { margin-top: 16px; }
+.study-prompt summary { padding: 12px; font-size: .8rem; }
+.study-prompt pre { max-height: 18rem; margin: 0; padding: 12px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; font-size: .72rem; }
 .image-open { position: absolute; bottom: 12px; right: 12px; padding: 5px 10px; border: 1px solid #696858; border-radius: 3px; background: rgb(17 18 17 / 85%); color: var(--ink); font: .75rem/1.5 var(--sans); }
 .lightbox-open { overflow: hidden; }
 #image-dialog { width: min(1160px, calc(100vw - 48px)); max-width: none; max-height: calc(100dvh - 48px); padding: 56px 26px 23px; overflow-y: auto; border: 1px solid #71634d; border-radius: 6px; background: #111211; color: var(--ink); box-shadow: 0 20px 100px rgb(0 0 0 / 70%); }

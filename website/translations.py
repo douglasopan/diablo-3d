@@ -406,6 +406,9 @@ TRANSLATIONS: dict[str, str] = {
 
 
 TRANSLATIONS.update({
+    'Comunidade': 'Community',
+    'Todas as telas, uma mesma atmosfera': 'Every screen, one shared atmosphere',
+    'Sessenta conceitos novos de interface, peças sem texto e referências nativas identificadas. Explore o estudo R2 e veja o que ainda precisa de revisão.': 'Sixty new interface concepts, components without text and identified native references. Explore the R2 study and see what still needs review.',
     'câmeras, cache GPU, descarte espacial e menus revisados': 'cameras, GPU cache, spatial culling and revised menus',
     'O horizonte atual é provisório. Dia/noite e fog são planos posteriores. Expansão lateral de mapas continua aberta.': 'The current horizon is provisional. Day/night and fog are later plans. Lateral map expansion remains an open question.',
     'Refinar o horizonte provisório e investigar dia/noite e fog. A expansão lateral dos mapas permanece uma questão aberta.': 'Refine the provisional horizon and investigate day/night and fog. Lateral map expansion remains an open question.',

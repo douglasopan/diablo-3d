@@ -1,0 +1,580 @@
+{
+  "assetTitles": {
+    "s01": {
+      "pt-BR": "Configurações pré-partida — categorias",
+      "en": "Pre-game settings — categories"
+    },
+    "s02": {
+      "pt-BR": "Configurações pré-partida — gráficos",
+      "en": "Pre-game settings — graphics"
+    },
+    "s03": {
+      "pt-BR": "Configurações pré-partida — escolha de idioma",
+      "en": "Pre-game settings — language selection"
+    },
+    "s04": {
+      "pt-BR": "Configurações pré-partida — idioma, mods, modo, inicialização, áudio e trilha",
+      "en": "Pre-game settings — language, mods, mode, startup, audio and soundtrack"
+    },
+    "s05": {
+      "pt-BR": "Configurações pré-partida — gameplay e mapeamentos",
+      "en": "Pre-game settings — gameplay and bindings"
+    },
+    "s06": {
+      "pt-BR": "Configurações pré-partida — captura de tecla, mouse e controle",
+      "en": "Pre-game settings — keyboard, mouse and controller capture"
+    },
+    "s07": {
+      "pt-BR": "Menu de pausa da partida",
+      "en": "In-game pause menu"
+    },
+    "s08": {
+      "pt-BR": "Configurações na partida — categorias",
+      "en": "In-game settings — categories"
+    },
+    "s09": {
+      "pt-BR": "Configurações na partida — gráficos",
+      "en": "In-game settings — graphics"
+    },
+    "s10": {
+      "pt-BR": "Configurações na partida — música de Tristram",
+      "en": "In-game settings — Tristram music"
+    },
+    "s11": {
+      "pt-BR": "Configurações na partida — captura de tecla, mouse e controle",
+      "en": "In-game settings — keyboard, mouse and controller capture"
+    },
+    "s12": {
+      "pt-BR": "Configurações na partida — volume da música",
+      "en": "In-game settings — music volume"
+    },
+    "f04-herois": {
+      "pt-BR": "Personagens de um jogador",
+      "en": "Single-player characters"
+    },
+    "f05-classes": {
+      "pt-BR": "Novo herói — escolher classe",
+      "en": "New hero — choose a class"
+    },
+    "f06-nome": {
+      "pt-BR": "Novo herói — nome",
+      "en": "New hero — name"
+    },
+    "f07-partida-salva": {
+      "pt-BR": "Partida salva existente",
+      "en": "Existing saved game"
+    },
+    "f08-dificuldade": {
+      "pt-BR": "Criar partida — dificuldade",
+      "en": "Create game — difficulty"
+    },
+    "f09-conexao-offline": {
+      "pt-BR": "Multijogador — conexão Offline",
+      "en": "Multiplayer — Offline connection"
+    },
+    "f10-partidas-zerotier": {
+      "pt-BR": "ZeroTier — ações e partidas públicas",
+      "en": "ZeroTier — actions and public games"
+    },
+    "f11-id-partida": {
+      "pt-BR": "Entrar em partida — ID ZeroTier",
+      "en": "Join game — ZeroTier ID"
+    },
+    "f12-velocidade": {
+      "pt-BR": "Criar partida — velocidade",
+      "en": "Create game — speed"
+    },
+    "f13-senha": {
+      "pt-BR": "Criar partida privada — senha",
+      "en": "Create private game — password"
+    },
+    "d01-d03-dialogos": {
+      "pt-BR": "Diálogos — exclusão de herói, dificuldade e erro de criação",
+      "en": "Dialogs — hero deletion, difficulty and creation error"
+    },
+    "d04-sincronizacao": {
+      "pt-BR": "Sincronização — progresso cancelável",
+      "en": "Synchronization — cancellable progress"
+    },
+    "f01-abertura": {
+      "pt-BR": "Abertura — título",
+      "en": "Opening — title"
+    },
+    "f02-diablo-hellfire": {
+      "pt-BR": "Escolher Diablo ou Hellfire",
+      "en": "Choose Diablo or Hellfire"
+    },
+    "f15-suporte": {
+      "pt-BR": "Suporte",
+      "en": "Support"
+    },
+    "l01-a-inicio-cidade-catedral-catacumbas": {
+      "pt-BR": "Carregamentos — início, cidade, Catedral e Catacumbas",
+      "en": "Loading screens — start, town, Cathedral and Catacombs"
+    },
+    "l01-b-cavernas-inferno-cripta-ninho": {
+      "pt-BR": "Carregamentos — Cavernas, Inferno, Cripta e Ninho",
+      "en": "Loading screens — Caves, Hell, Crypt and Nest"
+    },
+    "l01-c-portais-portao": {
+      "pt-BR": "Carregamentos — portais e portão",
+      "en": "Loading screens — portals and gate"
+    },
+    "f03-menu-principal-r1": {
+      "pt-BR": "Menu principal — estudo r1 reutilizado",
+      "en": "Main menu — reused r1 study"
+    },
+    "p01-character": {
+      "pt-BR": "Personagem",
+      "en": "Character"
+    },
+    "p02-inventory": {
+      "pt-BR": "Inventário",
+      "en": "Inventory"
+    },
+    "p03-combined": {
+      "pt-BR": "Personagem e inventário abertos",
+      "en": "Character and inventory open"
+    },
+    "p04-spellbook-1-3": {
+      "pt-BR": "Grimório — páginas 1 a 3",
+      "en": "Spellbook — pages 1 to 3"
+    },
+    "p04-spellbook-4-5": {
+      "pt-BR": "Grimório — páginas 4 e 5 · Hellfire",
+      "en": "Spellbook — pages 4 and 5 · Hellfire"
+    },
+    "p05-speedbook": {
+      "pt-BR": "Lista rápida de magias",
+      "en": "Quick spell list"
+    },
+    "p06-quests": {
+      "pt-BR": "Diário de missões",
+      "en": "Quest log"
+    },
+    "p07-narrative": {
+      "pt-BR": "Diálogo e relato narrado",
+      "en": "Dialogue and narrated account"
+    },
+    "p08-stash": {
+      "pt-BR": "Baú e inventário",
+      "en": "Stash and inventory"
+    },
+    "p09-gold": {
+      "pt-BR": "Sacar ouro do baú e dividir pilha",
+      "en": "Withdraw gold from stash and split a stack"
+    },
+    "p11-map-modes": {
+      "pt-BR": "Automapa — modos opaco, transparente e minimapa",
+      "en": "Automap — opaque, transparent and minimap modes"
+    },
+    "p12-chat-history": {
+      "pt-BR": "Escrever mensagem e histórico",
+      "en": "Write a message and message history"
+    },
+    "p14-help": {
+      "pt-BR": "Ajuda",
+      "en": "Help"
+    },
+    "p15-unique": {
+      "pt-BR": "Detalhes de item único",
+      "en": "Unique item details"
+    },
+    "p16-party-inspection": {
+      "pt-BR": "Grupo e inspeção de aliado",
+      "en": "Party and ally inspection"
+    },
+    "p17-death": {
+      "pt-BR": "Morte — solo com save, solo sem save e multijogador",
+      "en": "Death — single player with a save, without a save and multiplayer"
+    },
+    "p18-notification-pause": {
+      "pt-BR": "Notificação da partida e pausa simples",
+      "en": "In-game notification and simple pause"
+    },
+    "p19-cathedral-map": {
+      "pt-BR": "Mapa da Catedral",
+      "en": "Cathedral map"
+    },
+    "p20-gamepad-hints": {
+      "pt-BR": "Auxiliares do controle — menus e magias",
+      "en": "Controller hints — menus and spells"
+    },
+    "p22-touch": {
+      "pt-BR": "Controles de toque",
+      "en": "Touch controls"
+    },
+    "p23-console": {
+      "pt-BR": "Console de desenvolvimento",
+      "en": "Development console"
+    },
+    "c-01-npc-menus": {
+      "pt-BR": "NPCs — oito menus iniciais",
+      "en": "NPCs — eight initial menus"
+    },
+    "c-02-npc-subjects": {
+      "pt-BR": "NPCs — assuntos e shareware",
+      "en": "NPCs — topics and shareware"
+    },
+    "c-03-commerce-text": {
+      "pt-BR": "Comércio — lista textual e dados",
+      "en": "Trading — text list and details"
+    },
+    "c-04-commerce-thumbnails": {
+      "pt-BR": "Comércio — lista com miniaturas",
+      "en": "Trading — list with thumbnails"
+    },
+    "c-05-commerce-grid": {
+      "pt-BR": "Comércio — estudo de grade e inventário",
+      "en": "Trading — grid and inventory study"
+    },
+    "c-06-commerce-confirmation": {
+      "pt-BR": "Comércio — seis confirmações",
+      "en": "Trading — six confirmations"
+    },
+    "c-07-commerce-blocked": {
+      "pt-BR": "Comércio — dinheiro e espaço insuficientes",
+      "en": "Trading — insufficient money and space"
+    },
+    "c-08-commerce-empty": {
+      "pt-BR": "Comércio — cinco estados sem itens",
+      "en": "Trading — five empty-item states"
+    },
+    "c-09-commerce-identified": {
+      "pt-BR": "Comércio — identificação revelada",
+      "en": "Trading — identification result"
+    },
+    "kit-panel": {
+      "pt-BR": "Kit sem texto — moldura de painel",
+      "en": "Text-free kit — panel frame"
+    },
+    "kit-modal": {
+      "pt-BR": "Kit sem texto — moldura de modal",
+      "en": "Text-free kit — modal frame"
+    },
+    "kit-controls": {
+      "pt-BR": "Kit sem texto — moldura de controle",
+      "en": "Text-free kit — control frame"
+    }
+  },
+  "screenTitles": {
+    "F01": {
+      "pt-BR": "Abertura — título",
+      "en": "Opening — title"
+    },
+    "F02": {
+      "pt-BR": "Escolher Diablo ou Hellfire",
+      "en": "Choose Diablo or Hellfire"
+    },
+    "F03": {
+      "pt-BR": "Menu principal — Diablo",
+      "en": "Main menu — Diablo"
+    },
+    "F04": {
+      "pt-BR": "Personagens de um jogador",
+      "en": "Single-player characters"
+    },
+    "F05": {
+      "pt-BR": "Novo herói — escolher classe",
+      "en": "New hero — choose a class"
+    },
+    "F06": {
+      "pt-BR": "Novo herói — nome",
+      "en": "New hero — name"
+    },
+    "F07": {
+      "pt-BR": "Partida salva existente",
+      "en": "Existing saved game"
+    },
+    "F08": {
+      "pt-BR": "Criar partida — dificuldade",
+      "en": "Create game — difficulty"
+    },
+    "F09": {
+      "pt-BR": "Multijogador — conexão Offline",
+      "en": "Multiplayer — Offline connection"
+    },
+    "F10": {
+      "pt-BR": "ZeroTier — ações e partidas públicas",
+      "en": "ZeroTier — actions and public games"
+    },
+    "F11": {
+      "pt-BR": "Entrar em partida — ID ZeroTier",
+      "en": "Join game — ZeroTier ID"
+    },
+    "F12": {
+      "pt-BR": "Criar partida — velocidade",
+      "en": "Create game — speed"
+    },
+    "F13": {
+      "pt-BR": "Criar partida privada — senha",
+      "en": "Create private game — password"
+    },
+    "F14": {
+      "pt-BR": "Créditos",
+      "en": "Credits"
+    },
+    "F15": {
+      "pt-BR": "Suporte",
+      "en": "Support"
+    },
+    "D01": {
+      "pt-BR": "Confirmar exclusão de herói",
+      "en": "Confirm hero deletion"
+    },
+    "D02": {
+      "pt-BR": "Aviso — dificuldade indisponível",
+      "en": "Warning — difficulty unavailable"
+    },
+    "D03": {
+      "pt-BR": "Erro — criar personagem",
+      "en": "Error — character creation"
+    },
+    "D04": {
+      "pt-BR": "Sincronização — progresso cancelável",
+      "en": "Synchronization — cancellable progress"
+    },
+    "L01": {
+      "pt-BR": "Carregamento de partida ou nível",
+      "en": "Game or level loading"
+    },
+    "O01": {
+      "pt-BR": "Configurações pré-partida — categorias",
+      "en": "Pre-game settings — categories"
+    },
+    "O02": {
+      "pt-BR": "Configurações pré-partida — opções da categoria",
+      "en": "Pre-game settings — category options"
+    },
+    "O03": {
+      "pt-BR": "Configurações pré-partida — escolher valor",
+      "en": "Pre-game settings — choose a value"
+    },
+    "O32": {
+      "pt-BR": "Configurações pré-partida — capturar tecla/mouse",
+      "en": "Pre-game settings — capture keyboard/mouse input"
+    },
+    "O33": {
+      "pt-BR": "Configurações pré-partida — capturar controle",
+      "en": "Pre-game settings — capture controller input"
+    },
+    "G01": {
+      "pt-BR": "Menu Esc da partida",
+      "en": "In-game Esc menu"
+    },
+    "IGS01": {
+      "pt-BR": "Configurações na partida — categorias",
+      "en": "In-game settings — categories"
+    },
+    "IGS02": {
+      "pt-BR": "Configurações na partida — opções da categoria",
+      "en": "In-game settings — category options"
+    },
+    "IGS03": {
+      "pt-BR": "Configurações na partida — escolher valor",
+      "en": "In-game settings — choose a value"
+    },
+    "IGS04": {
+      "pt-BR": "Configurações na partida — capturar tecla/mouse",
+      "en": "In-game settings — capture keyboard/mouse input"
+    },
+    "IGS05": {
+      "pt-BR": "Configurações na partida — capturar controle",
+      "en": "In-game settings — capture controller input"
+    },
+    "IGS06": {
+      "pt-BR": "Configurações na partida — ajuste por slider",
+      "en": "In-game settings — slider adjustment"
+    },
+    "G19": {
+      "pt-BR": "Pausa simples",
+      "en": "Simple pause"
+    },
+    "P01": {
+      "pt-BR": "Personagem",
+      "en": "Character"
+    },
+    "P02": {
+      "pt-BR": "Inventário",
+      "en": "Inventory"
+    },
+    "P04": {
+      "pt-BR": "Grimório",
+      "en": "Spellbook"
+    },
+    "P05": {
+      "pt-BR": "Lista rápida de magias",
+      "en": "Quick spell list"
+    },
+    "P06": {
+      "pt-BR": "Diário de missões",
+      "en": "Quest log"
+    },
+    "P07": {
+      "pt-BR": "Diálogo e relato narrado",
+      "en": "Dialogue and narrated account"
+    },
+    "P08": {
+      "pt-BR": "Baú e inventário",
+      "en": "Stash and inventory"
+    },
+    "P09": {
+      "pt-BR": "Sacar ouro do baú",
+      "en": "Withdraw gold from stash"
+    },
+    "P10": {
+      "pt-BR": "Dividir pilha de ouro",
+      "en": "Split a gold stack"
+    },
+    "P11": {
+      "pt-BR": "Automapa e minimapa",
+      "en": "Automap and minimap"
+    },
+    "P12": {
+      "pt-BR": "Escrever mensagem",
+      "en": "Write a message"
+    },
+    "P13": {
+      "pt-BR": "Histórico de mensagens",
+      "en": "Message history"
+    },
+    "P14": {
+      "pt-BR": "Ajuda",
+      "en": "Help"
+    },
+    "P15": {
+      "pt-BR": "Detalhes de item único",
+      "en": "Unique item details"
+    },
+    "P16": {
+      "pt-BR": "Grupo e inspeção de aliado",
+      "en": "Party and ally inspection"
+    },
+    "V14": {
+      "pt-BR": "Inspeção de aliado",
+      "en": "Ally inspection"
+    },
+    "P17": {
+      "pt-BR": "Morte",
+      "en": "Death"
+    },
+    "P18": {
+      "pt-BR": "Notificação da partida",
+      "en": "In-game notification"
+    },
+    "P19": {
+      "pt-BR": "Mapa da Catedral",
+      "en": "Cathedral map"
+    },
+    "P20": {
+      "pt-BR": "Auxiliar de menus no controle",
+      "en": "Controller menu hints"
+    },
+    "P22": {
+      "pt-BR": "Controles de toque",
+      "en": "Touch controls"
+    },
+    "P23": {
+      "pt-BR": "Console de desenvolvimento",
+      "en": "Development console"
+    },
+    "N01": {
+      "pt-BR": "NPC — menu inicial",
+      "en": "NPC — initial menu"
+    },
+    "N09": {
+      "pt-BR": "NPC — conversar e escolher assunto",
+      "en": "NPC — talk and choose a topic"
+    },
+    "T01": {
+      "pt-BR": "Comércio — lista textual",
+      "en": "Trading — text list"
+    },
+    "V01": {
+      "pt-BR": "Comércio — lista com miniaturas",
+      "en": "Trading — list with thumbnails"
+    },
+    "T11": {
+      "pt-BR": "Comércio — grade visual e inventário",
+      "en": "Trading — visual grid and inventory"
+    },
+    "T15": {
+      "pt-BR": "Comércio — confirmar transação",
+      "en": "Trading — confirm transaction"
+    },
+    "T21": {
+      "pt-BR": "Comércio — transação bloqueada",
+      "en": "Trading — transaction blocked"
+    },
+    "T23": {
+      "pt-BR": "Comércio — lista sem itens elegíveis",
+      "en": "Trading — list with no eligible items"
+    },
+    "T27": {
+      "pt-BR": "Comércio — resultado da identificação",
+      "en": "Trading — identification result"
+    },
+    "HUD-BASE": {
+      "pt-BR": "HUD principal já instalado — referência preservada",
+      "en": "Main HUD already installed — preserved reference"
+    }
+  },
+  "referenceNotes": {
+    "F03": {
+      "pt-BR": "Captura histórica fornecida da apresentação nativa Diablo/DevilutionX, com seis ações e logo original; não representa a revisão D3D instalada hoje.",
+      "en": "Supplied historical capture of the native Diablo/DevilutionX presentation, with six actions and the original logo; it does not represent the D3D revision installed today."
+    },
+    "F04": {
+      "pt-BR": "Fixture de funções/arte nativas e compositor SDL real sem janela. Herói sintético; fundo RGB D3D aprovado, não screenshot vanilla intacto.",
+      "en": "Fixture using native functions/art and the real SDL compositor without a window. Synthetic hero; approved D3D RGB background, not an unmodified vanilla screenshot."
+    },
+    "F09": {
+      "pt-BR": "Fixture nativa real sem janela; provider Offline do build NONET, com fundo D3D aprovado. TCP/ZeroTier não foram capturados.",
+      "en": "Actual offscreen native fixture; Offline provider from the NONET build, with an approved D3D background. TCP/ZeroTier were not captured."
+    },
+    "F14": {
+      "pt-BR": "Fixture sem janela do renderer, fundo e texto nativos de créditos; imagem da taverna e rolagem preservadas.",
+      "en": "Offscreen fixture of the native credits renderer, background and text; tavern image and scrolling preserved."
+    },
+    "O01": {
+      "pt-BR": "Fixture nativa pré-partida sem janela, fundo D3D aprovado; categorias reais do build no momento do diagnóstico.",
+      "en": "Offscreen native pre-game fixture with an approved D3D background; actual build categories at the time of the diagnostic."
+    },
+    "O02": {
+      "pt-BR": "Referência direta da variante Gráficos pelo renderer nativo; demais categorias não têm imagem localizada. Fundo D3D aprovado e UI nativa.",
+      "en": "Direct reference of the Graphics variant rendered by the native renderer; no images were located for the other categories. Approved D3D background and native UI."
+    },
+    "O03": {
+      "pt-BR": "Fixture nativa real da opção Scaling Quality; outras enumerações são variantes de conteúdo sem captura própria.",
+      "en": "Actual native fixture of the Scaling Quality option; other enumerated choices are content variants without their own capture."
+    },
+    "G01": {
+      "pt-BR": "Fixture nativa atual sem janela sobre Tristram; ilustra o Esc atual e não o antigo submenu de opções.",
+      "en": "Current offscreen native fixture over Tristram; illustrates the current Esc menu, rather than the old options submenu."
+    },
+    "IGS01": {
+      "pt-BR": "Fixture de desenho nativo atual sobre Tristram, sem HUD inferior; prova de composição offscreen, não screenshot de janela.",
+      "en": "Current native drawing fixture over Tristram, without the lower HUD; evidence of offscreen composition, not a window screenshot."
+    },
+    "IGS02": {
+      "pt-BR": "Fixture nativa atual da variante Gráficos. Música também existe em 1920x1080-music-page-1-focus-first.png no mesmo diretório; demais categorias sem captura própria.",
+      "en": "Current native fixture of the Graphics variant. Music is also available in 1920x1080-music-page-1-focus-first.png in the same directory; other categories have no individual capture."
+    },
+    "P01": {
+      "pt-BR": "Fixture integrado do painel e sprites nativos sobre Tristram nativa, composto no SDL real sem janela. Personagem/valores de teste; HUD D3D da revisão histórica. Não é screenshot da janela.",
+      "en": "Integrated fixture of the native panel and sprites over native Tristram, composed through the real SDL renderer without a window. Test character/values; D3D HUD from the historical revision. This is not a window screenshot."
+    },
+    "P02": {
+      "pt-BR": "Fixture integrado do painel e sprites nativos sobre Tristram nativa, composto no SDL real sem janela. Personagem/valores de teste; HUD D3D da revisão histórica. Não é screenshot da janela.",
+      "en": "Integrated fixture of the native panel and sprites over native Tristram, composed through the real SDL renderer without a window. Test character/values; D3D HUD from the historical revision. This is not a window screenshot."
+    },
+    "P12": {
+      "pt-BR": "Fixture de desenho do painel de chat nativo sobre fundo sintético explicitamente identificado. Texto de teste e controles legados reais; não gameplay nem captura de janela.",
+      "en": "Native chat panel drawing fixture over an explicitly identified synthetic background. Test text and actual legacy controls; neither gameplay nor a window capture."
+    },
+    "HUD-BASE": {
+      "pt-BR": "Composição produtiva offscreen da baseline HD atual; ref de integração D3D, não original vanilla. Inventário inclui apenas para continuidade.",
+      "en": "Production offscreen composition of the current HD baseline; D3D integration reference, not the vanilla original. Included in the inventory only for continuity."
+    }
+  }
+}

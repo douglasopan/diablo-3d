@@ -7,6 +7,8 @@ on:
       - 'website/**'
       - 'Source/engine/music_catalog.hpp'
       - 'docs/devlog/**'
+      - 'docs/hud-study/r2/**'
+      - 'docs/hud-study/images/06-menu-principal-preview.jpg'
       - 'docs/DEVLOG.md'
       - '.github/workflows/pages.yml'
   pull_request:
@@ -14,6 +16,8 @@ on:
       - 'website/**'
       - 'Source/engine/music_catalog.hpp'
       - 'docs/devlog/**'
+      - 'docs/hud-study/r2/**'
+      - 'docs/hud-study/images/06-menu-principal-preview.jpg'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 

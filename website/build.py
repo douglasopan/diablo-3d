@@ -19,6 +19,9 @@ import yaml
 
 from translations import EVIDENCE_EN, translate_text
 from soundtrack import load_soundtrack
+from hud_study import copy_study, gallery as hud_study_gallery, image_source as hud_study_image_source, load_study
+from community import community_invite, YOUTUBE_URL
+from videos import showcase_section, videos_section
 
 ROOT = Path(__file__).resolve().parent
 REPO = ROOT.parent
@@ -139,7 +142,7 @@ def date_label(date):
 def image_info(path):
     if not path.startswith('/assets/') or '..' in Path(path).parts:
         raise ValueError(f'Image must be in public /assets/: {path}')
-    file = PUBLIC / path.lstrip('/')
+    file = hud_study_image_source(path) or PUBLIC / path.lstrip('/')
     if not file.is_file():
         raise ValueError(f'Missing public image: {path}')
     with Image.open(file) as im:
@@ -272,6 +275,16 @@ def load_posts(language=None):
             match_body = english[2]
         else:
             match_body = match[2]
+        marker = '<div data-study-gallery="hud-r2"></div>'
+        if marker in data['body']:
+            if slug != 'interfaces-diablo-r2':
+                raise ValueError('The R2 gallery belongs to its identified study article')
+            data['body'] = data['body'].replace(marker, hud_study_gallery(language, url))
+        showcase_marker = '<div data-model-showcase="public"></div>'
+        if showcase_marker in data['body']:
+            if slug != 'interfaces-diablo-r2':
+                raise ValueError('The public model showcase belongs to its identified article')
+            data['body'] = data['body'].replace(showcase_marker, showcase_section(language, url))
         data['minutes'] = max(1, round(len(re.findall(r'\w+', match_body)) / 200))
         data['path'] = f'/devlog/{slug}/'
         data['file'] = path.name
@@ -317,7 +330,7 @@ def no_results():
 
 
 def devlog_highlight():
-    return f'''<section class="panel prose"><h2>Itens e novo HUD</h2><p>Nove conceitos de itens ligados ao catálogo e o novo HUD instalado. Veja as artes em revisão, a composição técnica da interface e os próximos passos.</p><div class="actions">{button('Ler o novo registro', '/devlog/itens-e-novo-hud/')}{button('Acompanhar Tristram', '/devlog/tristram-de-perto/', True)}</div></section>'''
+    return f'''<section class="panel prose"><h2>Todas as telas, uma mesma atmosfera</h2><p>Sessenta conceitos novos de interface, peças sem texto e referências nativas identificadas. Explore o estudo R2 e veja o que ainda precisa de revisão.</p><div class="actions">{button('Ler o novo registro', '/devlog/interfaces-diablo-r2/')}{button('Itens e novo HUD', '/devlog/itens-e-novo-hud/', True)}</div></section>'''
 
 
 def lightbox():
@@ -369,6 +382,8 @@ def frame(title, description, path, content, image='/assets/banner.webp', articl
         structured.append({'@context': 'https://schema.org', '@type': 'MusicAlbum', 'name': music['album'], 'url': canonical, 'byArtist': artist, 'numTracks': len(music['tracks']), 'isAccessibleForFree': True, 'track': [{'@type': 'MusicRecording', 'name': track['title'], 'byArtist': artist, 'duration': f"PT{round(track['duration_seconds'])}S", 'audio': {'@type': 'AudioObject', 'contentUrl': absolute(track['public_path']), 'encodingFormat': 'audio/mpeg', 'creator': artist}, 'isAccessibleForFree': True} for track in music['tracks']]})
     nav = ''.join(f'<a href="{url(p)}"{" aria-current=" + chr(34) + "page" + chr(34) if (p == path or (p == "/devlog/" and article)) else ""}>{name}</a>' for name, p in NAV)
     soundtrack_script = f'<script src="{versioned_asset("/soundtrack.js")}" defer></script>' if music else ''
+    community_assets = f'<link rel="stylesheet" href="{versioned_asset("/community.css")}"><script src="{versioned_asset("/community.js")}" defer></script>'
+    video_assets = f'<link rel="stylesheet" href="{versioned_asset("/youtube-videos.css")}"><script src="{versioned_asset("/youtube-videos.js")}" defer></script>' if path in ('/', '/musica/', '/devlog/interfaces-diablo-r2/') else ''
     article_meta = f'<meta property="article:published_time" content="{article["date"]}"><meta property="article:modified_time" content="{article.get("updated", article["date"])}">' if article else ''
     languages = '<nav class="language-switch" aria-label="Idioma">' + ''.join(f'<a href="{urlsplit(alternate_url(path, lang)).path}" hreflang="{lang}" lang="{lang}" data-language-link="{lang}" aria-label="{label}"' + (' aria-current="true"' if LANG == lang else '') + f'>{short}</a>' for lang, label, short in [('pt-BR', 'Ler em português', 'PT'), ('en', 'Read in English', 'EN')]) + '</nav>'
     alternates = ''.join(f'<link rel="alternate" hreflang="{lang}" href="{alternate_url(path, lang)}">' for lang in ('pt-BR', 'en', 'x-default'))
@@ -378,15 +393,17 @@ def frame(title, description, path, content, image='/assets/banner.webp', articl
 <meta name="theme-color" content="#111211"><meta property="og:locale" content="{'en_US' if LANG == 'en' else 'pt_BR'}"><meta property="og:type" content="{'article' if article else 'website'}"><meta property="og:site_name" content="Diablo 3D · D3D"><meta property="og:title" content="{esc(title)}"><meta property="og:description" content="{esc(description)}"><meta property="og:url" content="{canonical}"><meta property="og:image" content="{absolute(image)}"><meta property="og:image:alt" content="{esc(article['image_alt'] if article else 'Banner oficial do projeto Diablo 3D')}">{article_meta}
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{esc(title)}"><meta name="twitter:description" content="{esc(description)}"><meta name="twitter:image" content="{absolute(image)}">
 <link rel="icon" type="image/png" href="{url('/assets/d3d-icon.png')}"><link rel="apple-touch-icon" href="{url('/assets/d3d-touch.png')}"><link rel="alternate" type="application/rss+xml" title="Diablo 3D — Devlog" href="{url('/rss.xml')}"><link rel="stylesheet" href="{versioned_asset('/vendor/plyr/plyr.css')}"><link rel="stylesheet" href="{versioned_asset('/site.css')}">
-{alternates}<script src="{versioned_asset('/language.js')}"></script><script type="application/ld+json">{json.dumps(structured, ensure_ascii=False).replace('<', chr(92) + 'u003c')}</script><script src="{versioned_asset('/site.js')}" defer></script><script src="{versioned_asset('/vendor/plyr/plyr.js')}" defer></script><script src="{versioned_asset('/music.js')}" defer></script>{soundtrack_script}</head>
+{alternates}<script src="{versioned_asset('/language.js')}"></script><script type="application/ld+json">{json.dumps(structured, ensure_ascii=False).replace('<', chr(92) + 'u003c')}</script><script src="{versioned_asset('/site.js')}" defer></script><script src="{versioned_asset('/vendor/plyr/plyr.js')}" defer></script><script src="{versioned_asset('/music.js')}" defer></script>{soundtrack_script}{community_assets}{video_assets}</head>
 <body><a class="skip-link" href="#main">Pular para o conteúdo</a><header class="site-header"><div class="wrap"><a class="brand" href="{url('/')}" aria-label="D3D — Início">{logo(True, True)}</a><button class="menu-toggle" type="button" aria-controls="navigation" aria-expanded="false" hidden data-enhancement>Menu <span aria-hidden="true">☰</span></button><nav id="navigation" class="main-nav" aria-label="Navegação principal">{nav}</nav>{languages}</div></header>
-<main id="main" class="wrap">{content}</main><footer class="site-footer"><div class="wrap"><div class="footer-top"><a class="brand" href="{url('/')}">{logo()}</a><nav aria-label="Links do projeto"><a href="{GITHUB}">GitHub ↗</a><a href="{DISCORD}">Discord ↗</a><a href="{url('/musica/')}">Música ↗</a><a href="{url('/apoiar/')}">Apoiar ↗</a><a href="{url('/novidades/')}">Novidades ↗</a><a href="{url('/rss.xml')}">RSS ↗</a><a href="{source('LICENSE.md', False)}">Licença ↗</a></nav></div><p>Projeto de fã independente, sem afiliação com a Blizzard Entertainment. Diablo e suas marcas pertencem aos respectivos titulares.</p><p>Código público sob <a href="{source('LICENSE.md', False)}">Sustainable Use License</a>: distribuição gratuita e não comercial. Dados originais do jogo não são distribuídos.</p></div></footer>{'' if music else background_music()}{lightbox()}</body></html>'''
+<main id="main" class="wrap">{content}</main><footer class="site-footer"><div class="wrap"><div class="footer-top"><a class="brand" href="{url('/')}">{logo()}</a><nav aria-label="Links do projeto"><a href="{GITHUB}">GitHub ↗</a><a href="{DISCORD}">Discord ↗</a><a href="{YOUTUBE_URL}">YouTube ↗</a><button type="button" data-community-open hidden data-enhancement aria-haspopup="dialog" aria-controls="community-invite">Comunidade</button><a href="{url('/musica/')}">Música ↗</a><a href="{url('/apoiar/')}">Apoiar ↗</a><a href="{url('/novidades/')}">Novidades ↗</a><a href="{url('/rss.xml')}">RSS ↗</a><a href="{source('LICENSE.md', False)}">Licença ↗</a></nav></div><p>Projeto de fã independente, sem afiliação com a Blizzard Entertainment. Diablo e suas marcas pertencem aos respectivos titulares.</p><p>Código público sob <a href="{source('LICENSE.md', False)}">Sustainable Use License</a>: distribuição gratuita e não comercial. Dados originais do jogo não são distribuídos.</p></div></footer>{'' if music else background_music()}{lightbox()}{community_invite(LANG)}</body></html>'''
     return localize_html(document)
 
 
 def home(posts):
     return f'''<section class="hero hero-atmospheric atmospheric bleed">{scene(eager=True)}<div class="hero-copy"><p class="eyebrow">DIABLO 3D · DEVLOG ABERTO</p>{logo(True, True, 'project-banner')}<h1>Diablo 1 sob uma nova dimensão.</h1><p class="lede">Reconstruir todo Diablo 1 em 3D, com todos os níveis, preservando a partida e a atmosfera do original. Tristram é o primeiro marco de um trabalho que avança com testes e colaboração.</p><div class="actions">{button('Acompanhar o devlog', '/devlog/')}{button('Apoiar o projeto', '/apoiar/', True)}</div><div class="status-strip"><span><i aria-hidden="true"></i> Objetivo: jogo completo</span><span>Etapa atual: Tristram</span><span>Protótipo offline · GPU opcional</span></div></div>{art_credit()}</section><figure class="wide-capture evidence-capture"><a href="{url('/galeria/')}">{img('/assets/captures/cabin-interior-final.webp', 'Cabana leste: jogo original, protótipo antes e protótipo depois do interior iluminado', True)}</a><figcaption><span class="tag">CAPTURA REAL · 63e5e749</span> Original, antes e depois: o interior da cabana de revisão em Tristram. Forma e materiais continuam em revisão.</figcaption></figure>
 <section class="section-atmosphere atmospheric bleed">{scene('/assets/art/journal-atmosphere.webp')}<div class="atmosphere-content wrap">{section_head('Cada mudança deixa um registro.', 'Capturas, decisões e limites do desenvolvimento.', '/devlog/')}<div class="card-grid">{''.join(card(p) for p in posts[:3])}</div></div>{art_credit()}</section>
+{showcase_section(LANG, url)}
+{videos_section(LANG, url, featured=True)}
 <section class="split"><div class="panel"><p class="eyebrow">UMA PARTIDA, DUAS VISÕES</p><h2>O jogo continua.<br>A câmera muda.</h2><p><kbd>F4</kbd> alterna entre o original e o protótipo na mesma partida. Movimento, colisões, inventário e interação continuam usando a simulação do DevilutionX.</p><p class="notice"><kbd>Home</kbd> retorna ao backend original. Pixels iguais nessa rota comprovam esse retorno; a fidelidade da geometria precisa de comparações com a malha ativa.</p>{button('Entender a tecnologia', '/tecnologia/', True)}</div><div class="panel"><p class="eyebrow">DO PRIMEIRO MARCO AO JOGO COMPLETO</p><h2>A jornada começa<br>em Tristram.</h2><p>A cidade é a etapa atual de calibração. Depois vem o primeiro nível procedural da Catedral, seguido dos demais níveis da Catedral, Catacumbas, Cavernas e Inferno, com o conteúdo do jogo.</p><p class="meta">As masmorras ainda usam o renderer original. Os marcos futuros serão registrados com evidências à medida que forem implementados.</p>{button('Ver o roadmap completo', '/roadmap/', True)}</div></section>
 <section class="contribute-banner chapter-band atmospheric bleed">{scene()}<div class="atmosphere-content wrap"><div><p class="eyebrow">UM PROJETO EM COMUNIDADE</p><h2>Ajude a construir o próximo capítulo.</h2><p>Modelagem, código, testes e documentação fazem o projeto avançar. Apoio financeiro e ajuda com ferramentas de geração sustentam as revisões, a continuidade e a expansão para todos os níveis.</p></div><div class="actions">{button('Apoiar o desenvolvimento', '/apoiar/')}{button('Como contribuir', '/participar/', True)}</div></div>{art_credit()}</section>'''
 
@@ -462,12 +479,13 @@ def soundtrack_page(music):
         asset = versioned_asset(track['public_path'])
         title = esc(track['title'] + (' — Alternate Export' if track['id'] == 'town-third' else ''))
         youtube_url = SOUNDTRACK_YOUTUBE.get(track['id'])
-        youtube_link = button('Ouvir no YouTube', youtube_url, True) if youtube_url else ''
+        youtube_link = button('Ouvir no YouTube', youtube_url, True).replace('<a ', f'<a data-soundtrack-youtube="{esc(track["id"])}" ', 1) if youtube_url else ''
         size = f"{track['size_bytes'] / 1_000_000:.1f} MB"
         tracks.append(f'''<li class="soundtrack-track panel"><span class="track-number" aria-hidden="true">{number:02}</span><div class="track-copy"><p class="eyebrow">{esc(contexts.get(track['id'], track['environment']))}</p><h2>{title}</h2><p class="meta">Douglas Pan <span aria-hidden="true">·</span> {esc(track['duration_label'])} <span aria-hidden="true">·</span> MP3 · {size}</p></div><div class="actions"><button class="button secondary" type="button" data-soundtrack-src="{esc(asset)}" data-soundtrack-title="{title}" aria-label="{esc(translated('Tocar') + ' ' + track['title'])}" aria-pressed="false" hidden data-enhancement><span data-soundtrack-label>Tocar</span></button><a class="button" href="{esc(asset)}" download="Douglas-Pan--{esc(track['id'])}.mp3" aria-label="{esc(translated('Baixar MP3') + ' · ' + track['title'])}">Baixar MP3 <span aria-hidden="true">↓</span></a>{youtube_link}<noscript><a href="{esc(asset)}">Ouvir MP3 ↗</a></noscript></div></li>''')
     return intro('TRILHA PERSONALIZADA', 'A música do projeto.<br>Por Douglas Pan.', 'Ouça e baixe gratuitamente as versões personalizadas que já estão no catálogo do jogo. Começamos pelo menu principal e por Tristram; os demais ambientes receberão suas faixas ao longo do desenvolvimento.') + f'''
 <section class="soundtrack-player panel" aria-label="Player da trilha"><p class="eyebrow">ESCUTE A TRILHA</p><h2 id="soundtrack-title">{esc(first['title'])}</h2><p>Douglas Pan</p><audio id="soundtrack-player" controls preload="none" src="{esc(versioned_asset(first['public_path']))}" aria-label="{esc(translated('Ouvir') + ' ' + first['title'])}">Seu navegador pode baixar as faixas pelos links abaixo.</audio><p id="soundtrack-status" class="meta" role="status" aria-live="polite">Escolha uma faixa para ouvir.</p><p>{button('Ouvir a playlist no YouTube', SOUNDTRACK_YOUTUBE_PLAYLIST, True)}</p></section>
 <ol class="soundtrack-list" aria-label="Faixas para ouvir e baixar">{''.join(tracks)}</ol>
+{videos_section(LANG, url)}
 <aside class="notice prose"><h2>Versões do projeto</h2><p>{esc(translated('Esta biblioteca reúne {count} arquivos personalizados.').format(count=len(music['tracks'])))}</p><p>Tristram 3 aparenta ser outra exportação da primeira opção; a lista reúne versões disponíveis, sem contar cada arquivo como uma composição distinta.</p><p>O crédito Douglas Pan está também nos metadados internos dos MP3s. A biblioteca contém apenas a trilha personalizada; as músicas originais do jogo não são distribuídas aqui.</p><p>Não é necessário cadastrar e-mail para ouvir ou baixar.</p></aside>
 <section class="panel prose"><h2>Acompanhe os próximos capítulos.</h2><p>O objetivo é reconstruir todo Diablo 1 em 3D. Novas faixas e avanços aparecem no devlog.</p><div class="actions">{button('Acompanhar o devlog', '/devlog/')}{button('Apoiar o projeto', '/apoiar/', True)}</div></section>'''
 
@@ -549,6 +567,7 @@ def build():
     load_analytics()  # Invalid tracking configuration must fail before replacing the artifact.
     soundtrack = load_soundtrack()  # Validate actual final MP3 tags and hashes before touching output.
     newsletter = load_newsletter()
+    load_study()  # Validate the selected document media before replacing output.
     posts = load_posts()
     raw_evidence = json.loads((ROOT / 'evidence.json').read_text(encoding='utf-8'))
     evidence = raw_evidence['entries'] if isinstance(raw_evidence, dict) else raw_evidence
@@ -568,6 +587,7 @@ def build():
     if OUT.exists():
         shutil.rmtree(OUT)
     shutil.copytree(PUBLIC, OUT)
+    copy_study(OUT)
     write('/.nojekyll', '')
     write('/evidence.json', json.dumps(raw_evidence, ensure_ascii=False, indent=2) + '\n')
     paths = []

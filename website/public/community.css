@@ -1,0 +1,119 @@
+/* Optional community dialog. All rules are scoped to its markup and launcher. */
+#community-invite {
+  position: fixed;
+  width: min(35rem, calc(100% - 2rem));
+  max-height: calc(100vh - 2rem);
+  max-height: calc(100dvh - 2rem);
+  margin: auto;
+  padding: clamp(1.5rem, 5vw, 2.5rem);
+  overflow: auto;
+  border: 1px solid var(--gold);
+  border-radius: var(--radius, 3px);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 1rem 4rem #0009;
+  font: inherit;
+}
+
+#community-invite:not([open]) { display: none; }
+#community-invite::backdrop { background: rgb(0 0 0 / 75%); }
+/* Automatic invitations are nonmodal and leave the page fully interactive. */
+#community-invite[data-community-mode="automatic"] {
+  z-index: 45;
+  inset: auto auto max(110px, env(safe-area-inset-bottom)) 1rem;
+  width: min(26rem, calc(100% - 2rem));
+  max-height: min(24rem, calc(100vh - 8rem));
+  max-height: min(24rem, calc(100dvh - 8rem));
+  margin: 0;
+  padding: 1.25rem;
+  font-size: 0.9rem;
+}
+#community-invite[data-community-mode="automatic"] h2 { font-size: 1.45rem; }
+#community-invite[data-community-mode="automatic"] .community-invite-eyebrow { font-size: 0.65rem; }
+#community-invite[data-community-mode="automatic"] .community-invite-actions { gap: 0.5rem; margin: 1rem 0; }
+#community-invite[data-community-mode="automatic"] .community-invite-link { padding: 0.6rem; font-size: 0.8rem; }
+#community-invite[data-community-mode="automatic"] .community-invite-note { font-size: 0.75rem; }
+#community-invite h2 {
+  margin: 0 1.5rem 1rem 0;
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: clamp(1.8rem, 5vw, 2.4rem);
+  line-height: 1.15;
+}
+#community-invite p { margin: 0 0 1.25rem; }
+#community-invite .community-invite-eyebrow {
+  margin: 0 2rem 0.75rem 0;
+  color: var(--gold);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.community-invite-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius, 3px);
+  background: transparent;
+  color: var(--ink);
+  font: 2rem/1 var(--sans, sans-serif);
+  cursor: pointer;
+}
+.community-invite-close:hover { border-color: var(--gold); color: var(--gold); }
+.community-invite-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 1.5rem 0;
+}
+.community-invite-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--gold);
+  border-radius: var(--radius, 3px);
+  background: var(--gold);
+  color: var(--surface);
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: center;
+  text-decoration: none;
+}
+.community-invite-link-secondary { background: transparent; color: var(--ink); }
+.community-invite-link:hover { background: var(--ink); border-color: var(--ink); color: var(--surface); }
+#community-invite .community-invite-note { margin-bottom: 0.75rem; color: var(--muted, var(--ink)); font-size: 0.85rem; }
+.community-invite-later {
+  min-height: 44px;
+  padding: 0.5rem 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+.community-invite-later:hover { color: var(--gold); }
+[data-community-open] {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--gold);
+  font: inherit;
+  text-align: inherit;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+#community-invite :focus-visible, [data-community-open]:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 4px;
+}
+@media (max-width: 480px) {
+  .community-invite-actions { grid-template-columns: 1fr; }
+}
