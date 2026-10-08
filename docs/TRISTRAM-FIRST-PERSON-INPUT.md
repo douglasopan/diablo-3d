@@ -12,7 +12,7 @@ Atualização: **8 de outubro de 2026**. O pedido de mouse para olhar e setas re
 | Testes | 673 verificações puras, 1.652 produtivas, 946 do HUD e 59.452 das configurações passaram. Limites abaixo. |
 | Instalação | 8 de outubro, **20:30:00 UTC**: aliases v4/quality/godot idênticos, pelo mesmo `Iniciar-Tristram.cmd`; nenhum processo encerrado. |
 
-Executável instalado: SHA-256 `30701f820a9908e4a81205e5e560acb1e901f6e29be1cead7737b58ae7c0e8f5`. Recibo privado: `diagnostics/first-person-integration-20261008/installed-20261008T202953Z/receipt.json`.
+Executável desta instalação histórica: SHA-256 `30701f820a9908e4a81205e5e560acb1e901f6e29be1cead7737b58ae7c0e8f5`. O incremento posterior de [altura ocular](TRISTRAM-HORIZON-CAMERAS.md#calibração-da-altura-ocular--8-de-outubro) usa o mesmo iniciador, SHA-256 `f442b771d01b2b12a275eecce7027c31093ee60c43f55c64861682a15eb894a2`, e repetiu as 1.652 verificações produtivas; não muda o contrato de controles descrito aqui. Recibo privado: `diagnostics/first-person-integration-20261008/installed-20261008T202953Z/receipt.json`.
 
 Os **41 arquivos do perfil** preservaram bytes, tamanho e data na instalação. A preparação posterior do iniciador alterou somente `runtime-baseline-receipt.json`, como esperado. Launcher, preferências, saves, assets selecionados e arquivos de outras frentes foram preservados. Este incremento não altera backend GPU, qualidade dos modelos, LOD, materiais ou iluminação; não houve benchmark de desempenho. A participação de `scrollrt.cpp` e do compositor se limita ao retículo e à máscara do cursor.
 

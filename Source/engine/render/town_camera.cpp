@@ -47,6 +47,7 @@ TownCameraPreferences Sanitize(TownCameraPreferences preferences)
 	preferences.nearClip = Bounded(preferences.nearClip, 0.08F, 0.02F, 0.5F);
 	preferences.farClip = Bounded(preferences.farClip, 320, 64, 1024);
 	preferences.eyeHeight = Bounded(preferences.eyeHeight, 1.1F, 0.4F, 2);
+	preferences.firstPersonEyeHeight = Bounded(preferences.firstPersonEyeHeight, 1.7F, 0.4F, 2);
 	preferences.orbitRadiansPerPixel = Bounded(preferences.orbitRadiansPerPixel, 0.006F, 0.001F, 0.02F);
 	preferences.zoomExponentPerStep = Bounded(preferences.zoomExponentPerStep, 0.12783337F, 0.01F, 0.5F);
 	return preferences;
@@ -231,8 +232,10 @@ TownCameraFrame BuildTownCameraFrame(const TownCameraRig &rig, TownCameraPoint a
 	frame.right = { sy, 0, -cy };
 	frame.up = { -cy * sp, cp, -sy * sp };
 	TownCameraPoint target = anchor + pose.pan;
-	if (rig.mode() == TownCameraMode::ThirdPerson || rig.mode() == TownCameraMode::FirstPerson)
+	if (rig.mode() == TownCameraMode::ThirdPerson)
 		target.height += preferences.eyeHeight;
+	else if (rig.mode() == TownCameraMode::FirstPerson)
+		target.height += preferences.firstPersonEyeHeight;
 	const float distance = !frame.perspective ? 256 : pose.distance;
 	frame.eye = target + TownCameraPoint { outward.x, outward.height / frame.heightScale, outward.z } * distance;
 	frame.focalPixels = frame.perspective

@@ -100,7 +100,7 @@ inline bool RunTownCameraChecks(std::ostream &out, size_t &checks)
 	eyeRig.SetPose({ 0, 0, 0, {} });
 	TownCameraPreferences eyePreferences;
 	eyePreferences.verticalFovDegrees = 90;
-	eyePreferences.eyeHeight = 1.4F;
+	eyePreferences.firstPersonEyeHeight = 1.4F;
 	eyeRig.SetPreferences(eyePreferences);
 	const TownCameraFrame eye = BuildTownCameraFrame(eyeRig, { 10, 2, 20 }, 320, 180, 160, 90);
 	check(eye.valid && eye.perspective && close(eye.heightScale, 1), "first person uses perspective without native height compression");
@@ -115,6 +115,78 @@ inline bool RunTownCameraChecks(std::ostream &out, size_t &checks)
 	const TownCameraRay eyeRight = TownCameraScreenRay(eye, 250, 90);
 	const float inverseSqrt2 = 0.7071067811865475F;
 	check(eyeRight.valid && samePoint(eyeRight.direction, { -inverseSqrt2, 0, -inverseSqrt2 }), "90 degree FOV right ray has equal forward and lateral components");
+
+	TownCameraRig heightRig;
+	const TownCameraPoint heightAnchor { 10, 2, 20 };
+	check(close(heightRig.preferences().eyeHeight, 1.1F)
+	        && close(heightRig.preferences().firstPersonEyeHeight, 1.7F),
+	    "separate defaults preserve the third-person target and calibrate the first-person eye");
+	heightRig.SetMode(TownCameraMode::FirstPerson);
+	heightRig.SetPose({ 0, 0, 23, { 4, 9, -3 } });
+	const TownCameraFrame defaultHeightFrame = BuildTownCameraFrame(heightRig, heightAnchor, 320, 180, 160, 90);
+	check(defaultHeightFrame.valid && samePoint(defaultHeightFrame.eye, { 10, 3.7F, 20 })
+	        && close(heightRig.pose().distance, 0) && samePoint(heightRig.pose().pan, {}),
+	    "first-person default eye is 1.7 above the anchor with no orbit or pan displacement");
+	TownCameraProjectedVertex equalHeightPoint, groundHeightPoint;
+	check(ProjectTownCameraPoint(defaultHeightFrame, { 6, 3.7F, 20 }, equalHeightPoint)
+	        && close(equalHeightPoint.x, 160) && close(equalHeightPoint.y, 90),
+	    "a point four units ahead at the default eye height lies on the horizontal center ray");
+	check(ProjectTownCameraPoint(defaultHeightFrame, { 6, 2, 20 }, groundHeightPoint)
+	        && close(groundHeightPoint.y, 90 + defaultHeightFrame.focalPixels * 1.7F / 4),
+	    "ground displacement follows focal length times physical eye height over depth");
+
+	heightRig.SetMode(TownCameraMode::ThirdPerson);
+	heightRig.SetPose({ 0, 0.3F, 5, {} });
+	const TownCameraFrame thirdHeightBaseline = BuildTownCameraFrame(heightRig, heightAnchor, 320, 180, 160, 90);
+	check(thirdHeightBaseline.valid && samePoint(thirdHeightBaseline.eye,
+	          { 10 + 5 * std::cos(0.3F), 3.1F + 5 * std::sin(0.3F), 20 }),
+	    "third-person baseline still orbits the existing 1.1-high target");
+	TownCameraPreferences heightPreferences = heightRig.preferences();
+	heightPreferences.firstPersonEyeHeight = 2;
+	heightRig.SetPreferences(heightPreferences);
+	const TownCameraFrame thirdHeightAfterFppChange = BuildTownCameraFrame(heightRig, heightAnchor, 320, 180, 160, 90);
+	check(samePoint(thirdHeightAfterFppChange.eye, thirdHeightBaseline.eye)
+	        && samePoint(thirdHeightAfterFppChange.forward, thirdHeightBaseline.forward)
+	        && close(thirdHeightAfterFppChange.focalPixels, thirdHeightBaseline.focalPixels),
+	    "changing only first-person eye height leaves the third-person frame unchanged");
+
+	heightPreferences.eyeHeight = 0.8F;
+	heightPreferences.firstPersonEyeHeight = 1.4F;
+	heightRig.SetPreferences(heightPreferences);
+	heightRig.SetMode(TownCameraMode::FirstPerson);
+	const TownCameraFrame customHeightFrame = BuildTownCameraFrame(heightRig, heightAnchor, 320, 180, 160, 90);
+	check(customHeightFrame.valid && samePoint(customHeightFrame.eye, { 10, 3.4F, 20 }),
+	    "first person uses its custom 1.4 eye height independently of the third-person target height");
+	heightRig.SetMode(TownCameraMode::ThirdPerson);
+	const TownCameraFrame customThirdHeightFrame = BuildTownCameraFrame(heightRig, heightAnchor, 320, 180, 160, 90);
+	check(customThirdHeightFrame.valid && samePoint(customThirdHeightFrame.eye,
+	          { 10 + 5 * std::cos(0.3F), 2.8F + 5 * std::sin(0.3F), 20 }),
+	    "third person still honors its independent custom target height");
+
+	heightRig.SetMode(TownCameraMode::FirstPerson);
+	for (const float invalidFirstHeight : { nan, infinity, -infinity }) {
+		heightPreferences.firstPersonEyeHeight = invalidFirstHeight;
+		heightRig.SetPreferences(heightPreferences);
+		const TownCameraFrame fallbackHeightFrame = BuildTownCameraFrame(heightRig, heightAnchor, 320, 180, 160, 90);
+		check(close(heightRig.preferences().firstPersonEyeHeight, 1.7F)
+		        && fallbackHeightFrame.valid && samePoint(fallbackHeightFrame.eye, { 10, 3.7F, 20 }),
+		    "nonfinite first-person eye height falls back to a finite 1.7 above the anchor");
+	}
+	for (const std::array<float, 2> heightClamp : { std::array<float, 2> { -10, 0.4F }, std::array<float, 2> { 10, 2 } }) {
+		heightPreferences.firstPersonEyeHeight = heightClamp[0];
+		heightRig.SetPreferences(heightPreferences);
+		const TownCameraFrame clampedHeightFrame = BuildTownCameraFrame(heightRig, heightAnchor, 320, 180, 160, 90);
+		check(close(heightRig.preferences().firstPersonEyeHeight, heightClamp[1])
+		        && clampedHeightFrame.valid && samePoint(clampedHeightFrame.eye, { 10, 2 + heightClamp[1], 20 }),
+		    "finite first-person eye height is bounded to 0.4 through 2 without moving the floor anchor");
+	}
+
+	heightPreferences.firstPersonEyeHeight = 1.7F;
+	heightRig.SetPreferences(heightPreferences);
+	heightRig.SetPose({ -1.2F, -0.8F, 17, { 5, 4, 3 } });
+	const TownCameraFrame highAnchorHeightFrame = BuildTownCameraFrame(heightRig, { 31, 17.25F, 44 }, 960, 540, 480, 270);
+	check(highAnchorHeightFrame.valid && samePoint(highAnchorHeightFrame.eye, { 31, 18.95F, 44 }),
+	    "first-person height adds to an elevated anchor without a yaw, pitch, viewport or orbit offset");
 
 	// Round trips include an offset anchor, pitched basis and legacy height scale.
 	TownCameraRig roundTripRig;
@@ -360,6 +432,7 @@ inline bool RunTownCameraChecks(std::ostream &out, size_t &checks)
 	invalidPreferences.nearClip = infinity;
 	invalidPreferences.farClip = nan;
 	invalidPreferences.eyeHeight = nan;
+	invalidPreferences.firstPersonEyeHeight = nan;
 	invalidRig.SetPreferences(invalidPreferences);
 	invalidRig.SetMode(TownCameraMode::FirstPerson);
 	invalidRig.SetPose({ nan, infinity, nan, { infinity, nan, nan } });

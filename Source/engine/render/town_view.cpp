@@ -2503,7 +2503,8 @@ void ResetTownViewCamera()
 TownViewCameraState GetTownViewCameraState()
 {
 	return { CameraYaw, CameraPitch, CameraDistance, CameraPanOffset.x, CameraPanOffset.z,
-		CameraRig.mode(), CameraRig.preferences().verticalFovDegrees, CameraRig.preferences().eyeHeight };
+		CameraRig.mode(), CameraRig.preferences().verticalFovDegrees,
+		CameraRig.mode() == TownCameraMode::FirstPerson ? CameraRig.preferences().firstPersonEyeHeight : CameraRig.preferences().eyeHeight };
 }
 
 TownCameraMode GetTownViewCameraMode()

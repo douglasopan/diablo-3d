@@ -34,7 +34,8 @@ struct TownCameraPreferences {
 	float verticalFovDegrees = 60;
 	float nearClip = 0.08F;
 	float farClip = 320;
-	float eyeHeight = 1.1F; // Provisional art scale; calibrate against native hero.
+	float eyeHeight = 1.1F; // Preserve the accepted third-person target height.
+	float firstPersonEyeHeight = 1.7F; // Initial standing-body calibration; no frame/weapon bob.
 	float orbitRadiansPerPixel = 0.006F;
 	float zoomExponentPerStep = 0.12783337F;
 };
