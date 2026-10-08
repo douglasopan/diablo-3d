@@ -126,14 +126,36 @@ void PushClick(size_t index)
 	Check(SDL_PushEvent(&event) == 1, "queue a native mouse release");
 }
 
-void CheckLayout()
+void CheckLayout(bool checkText = false)
 {
 	Check(FixtureActiveList != nullptr, "screen has a native input list");
+	int previousBottom = 0;
 	for (const auto *item : FixtureActiveItems) {
 		if (item->IsType(UiType::ArtText) || item->IsType(UiType::List)) {
 			const SDL_Rect rect = item->m_rect;
 			Check(rect.x >= 0 && rect.y >= 0 && rect.x + rect.w <= gnScreenWidth && rect.y + rect.h <= gnScreenHeight,
 			    "text and clickable rectangles stay inside the screen");
+			if (checkText) {
+				Check(rect.y >= previousBottom, "project credit blocks and links do not overlap");
+				previousBottom = rect.y + rect.h;
+			}
+			if (checkText && item->IsType(UiType::ArtText)) {
+				const auto *text = static_cast<const UiArtText *>(item);
+				const auto font = GetFontSizeFromUiFlags(item->GetFlags());
+				std::string_view remaining = text->GetText();
+				size_t lines = 0;
+				do {
+					const auto end = remaining.find('\n');
+					Check(GetLineWidth(remaining.substr(0, end), font, text->GetSpacing()) <= rect.w,
+					    "complete wrapped credit line fits its text box");
+					++lines;
+					if (end == std::string_view::npos)
+						break;
+					remaining.remove_prefix(end + 1);
+				} while (true);
+				const int lineHeight = text->GetLineHeight() >= 0 ? text->GetLineHeight() : GetLineHeight(text->GetText(), font);
+				Check(lines * lineHeight <= rect.h, "complete wrapped credit text fits its height");
+			}
 		}
 	}
 	const int focus = FixtureActiveList->m_height >= 42 ? FOCUS_BIG : FixtureActiveList->m_height >= 30 ? FOCUS_MED : FOCUS_SMALL;
@@ -152,6 +174,26 @@ void CheckLayout()
 			remaining.remove_prefix(end + 1);
 		} while (true);
 		Check(lines * GetLineHeight(item->m_text.str(), font) <= FixtureActiveList->m_height, "wrapped row label fits its clickable height");
+	}
+}
+
+void CheckMusicCredits()
+{
+	for (const char *expected : {
+	         "Main Menu / Tristram — Original composition: Matt Uelmen, for Diablo (Blizzard Entertainment). Cover/reinterpretation produced by Douglas Pan using AI.",
+	         "Authorship and direction: Douglas Pan",
+	         "Based on Diablo and DevilutionX, preserving the original authors, contributors, licenses, and credits." }) {
+		size_t matches = 0;
+		for (const auto *item : FixtureActiveItems) {
+			if (!item->IsType(UiType::ArtText))
+				continue;
+			std::string text(static_cast<const UiArtText *>(item)->GetText());
+			std::replace(text.begin(), text.end(), '\n', ' ');
+			matches += text == _(expected);
+		}
+		Check(matches == 1, "full translated composer, cover production and inherited credit each appear once");
+		if (GetLanguageCode() == "pt_BR")
+			Check(_(expected) != expected, "Portuguese credit uses the compiled translation");
 	}
 }
 
@@ -250,7 +292,8 @@ void CheckProjectLinks(const std::string &label)
 			PushKey(SDLK_DOWN);
 			PushKey(SDLK_RETURN);
 		} else if (step == 1) {
-			CheckLayout();
+			CheckLayout(true);
+			CheckMusicCredits();
 			for (size_t i = 0; i < ProjectLinks.size(); ++i)
 				Check(FixtureActiveList->GetItem(i)->m_text.str() == ProjectLinks[i], "official address is visible and selectable");
 			Capture(label + "-project-credits.png");
@@ -269,7 +312,8 @@ void CheckProjectLinks(const std::string &label)
 				if (item->IsType(UiType::ArtText))
 					foundError |= static_cast<const UiArtText *>(item)->GetText() == _("Could not open a browser. Use the addresses shown above.");
 			Check(foundError, "browser failure is explained while addresses remain available");
-			CheckLayout();
+			CheckLayout(true);
+			CheckMusicCredits();
 			Capture(label + "-project-credits-link-failure.png");
 			PushKey(SDLK_ESCAPE);
 		} else if (step == 5) {
@@ -418,7 +462,7 @@ int main(int argc, char **argv)
 			forceLocale = language;
 			LanguageInitialize();
 			Check(GetLanguageCode() == language, "requested language is effective");
-			for (const Size size : { Size { 640, 480 }, Size { 960, 540 }, Size { 1920, 1080 } }) {
+			for (const Size size : { Size { 640, 480 }, Size { 853, 480 }, Size { 960, 540 }, Size { 1920, 1080 } }) {
 				Frame frame(size.width, size.height);
 				const std::string label = std::string(language) + "-" + std::to_string(size.width) + "x" + std::to_string(size.height);
 				CheckMainMenu(label);

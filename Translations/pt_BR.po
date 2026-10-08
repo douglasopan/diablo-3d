@@ -480,6 +480,10 @@ msgid "Based on Diablo and DevilutionX, preserving the original authors, contrib
 msgstr "Baseado em Diablo e DevilutionX, preservando autores, colaboradores, licenças e créditos originais."
 
 #: Source/DiabloUI/credits.cpp
+msgid "Main Menu / Tristram — Original composition: Matt Uelmen, for Diablo (Blizzard Entertainment). Cover/reinterpretation produced by Douglas Pan using AI."
+msgstr "Menu principal / Tristram — Composição original: Matt Uelmen, para Diablo (Blizzard Entertainment). Regravação/reinterpretação produzida por Douglas Pan com auxílio de IA."
+
+#: Source/DiabloUI/credits.cpp
 msgid "Help shape the project with art, code, testing, and feedback. Join our community."
 msgstr "Colabore com arte, código, testes e sugestões. Participe da nossa comunidade."
 

@@ -257,9 +257,11 @@ void UiDiablo3DCreditsDialog()
 		const int x = (gnScreenWidth - width) / 2;
 		constexpr int LineHeight = 20;
 		constexpr int RowHeight = 32;
-		const std::array<std::string, 3> paragraphs {
+		constexpr int ParagraphGap = 6;
+		const std::array<std::string, 4> paragraphs {
 			WordWrapString(_("Goal: rebuild the whole Diablo 1 in 3D. Tristram is the first stage."), width, GameFont12, 1),
 			WordWrapString(_("Based on Diablo and DevilutionX, preserving the original authors, contributors, licenses, and credits."), width, GameFont12, 1),
+			WordWrapString(_("Main Menu / Tristram — Original composition: Matt Uelmen, for Diablo (Blizzard Entertainment). Cover/reinterpretation produced by Douglas Pan using AI."), width, GameFont12, 1),
 			WordWrapString(_("Help shape the project with art, code, testing, and feedback. Join our community."), width, GameFont12, 1),
 		};
 		const std::string error = linkFailed
@@ -270,7 +272,7 @@ void UiDiablo3DCreditsDialog()
 		};
 		int height = 40 + 8 + 36 + 12 + 4 + RowHeight * (ProjectCreditsBack + 1);
 		for (const auto &paragraph : paragraphs)
-			height += textHeight(paragraph) + 8;
+			height += textHeight(paragraph) + ParagraphGap;
 		if (linkFailed)
 			height += 8 + textHeight(error);
 		int y = std::max(0, (gnScreenHeight - height) / 2);
@@ -285,7 +287,7 @@ void UiDiablo3DCreditsDialog()
 		y += 12;
 		for (const auto &paragraph : paragraphs) {
 			addText(paragraph.c_str(), textHeight(paragraph), UiFlags::FontSize12, UiFlags::ColorUiSilver);
-			y += 8;
+			y += ParagraphGap;
 		}
 		y += 4;
 		for (const char *url : ProjectLinks)
