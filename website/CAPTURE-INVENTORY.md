@@ -12,7 +12,7 @@ Auditoria local realizada em 07/10/2026, acrescida das cinco comparações conte
 | Imagens classificadas como fontes, texturas ou material isolado e excluídas | 8,641 |
 | Candidatas contextuais de diagnóstico antes da seleção visual | 3,961 |
 | Hashes distintos dessas candidatas contextuais | 1,093 |
-| Imagens selecionadas e visualmente revisadas para o site | 40 |
+| Imagens selecionadas e visualmente revisadas para o site | 44 |
 | Prints do autor incluídos nessa seleção | 4 |
 
 O inventário completo, as folhas de contato e o mapeamento privado das capturas do autor ficam somente na área local de auditoria, fora do repositório. Este documento não expõe nomes de arquivos de outros projetos, dados de conta, conversas privadas ou caminhos pessoais.
@@ -36,6 +36,10 @@ As três capturas de 08/10 preservam a resolução e os pixels originais após c
 
 | Asset | Etapa | Categoria |
 | --- | --- | --- |
+| `project-credits-main-pt.webp` | 08/10 · UI nativa offscreen · fc9642982 | Ferramentas |
+| `project-credits-submenu-pt.webp` | 08/10 · UI nativa offscreen · fc9642982 | Ferramentas |
+| `project-credits-author-pt.webp` | 08/10 · UI nativa offscreen · fc9642982 | Ferramentas |
+| `project-credits-author-en.webp` | 08/10 · UI nativa offscreen · fc9642982 | Ferramentas |
 | `tristram-camera-modes.webp` | 08/10 · comparação técnica de câmeras | Protótipo |
 | `adria-master-textured-comparison.webp` | 08/10 · revisão de autoria | Geometria |
 | `adria-material-transfer-review.webp` | 08/10 · transferência experimental não instalada | Geometria |
@@ -76,6 +80,10 @@ As três capturas de 08/10 preservam a resolução e os pixels originais após c
 | `cabin-rear-fire.webp` | V4 · fogo e duas janelas publicados | Luz |
 | `cabin-fire-orbits.webp` | V4 · fogo e duas janelas publicados | Luz |
 | `cabin-fire-angles.webp` | V4 · fogo e duas janelas publicados | Luz |
+
+## Suporte e créditos — 8 de outubro
+
+Quatro imagens da entrega [fc9642982](https://github.com/douglasopan/diablo-3d/commit/fc9642982da2b74b37af366f74c75e966aad4578) mostram o menu principal e o submenu em português e os créditos de Douglas Pan em português e inglês. São renders da interface nativa produzidos por diagnóstico offscreen, sem iniciar uma partida; não são gameplay nem screenshots da janela do jogo. A revisão visual confirmou ausência de dados privados e preservou o enquadramento inteiro. A conversão WebP lossless conserva 1920×1080 e igualdade integral dos pixels RGBA, sem recorte, redimensionamento ou retoque. Os 40 registros anteriores permanecem; a seleção passa a 44. Recibos privados e caminhos locais não entram no site. Os testes e limites estão no [guia do editor dessa revisão](https://github.com/douglasopan/diablo-3d/blob/fc9642982da2b74b37af366f74c75e966aad4578/docs/GODOT-EDITOR.md).
 
 ## Comparações da versão publicada
 

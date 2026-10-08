@@ -73,6 +73,12 @@ Abra `http://127.0.0.1:4173/diablo-3d/` e `http://127.0.0.1:4173/diablo-3d/en/`.
 
 O workflow `.github/workflows/pages.yml` valida a publicação e envia **somente** `website/dist/` ao Pages. PRs executam build e verificação; o deploy ocorre em `main` ou por execução manual. A configuração do repositório deve usar **Settings → Pages → Source → GitHub Actions**.
 
+## Suporte, créditos e geometria residente — 8 de outubro de 2026
+
+O registro `2026-10-08-creditos-e-geometria-gpu.md` e sua tradução integral documentam a entrega instalada do commit `fc9642982da2b74b37af366f74c75e966aad4578`. O menu reúne suporte e créditos, mantém as telas herdadas e acrescenta autoria e direção de Douglas Pan, objetivo do jogo inteiro e links da comunidade. Passaram 1.193 verificações nativas, 26 capturas e 103 verificações Godot; gamepad físico e reprodução sonora não foram exercitados. Quatro capturas selecionadas entram como diagnósticos nativos offscreen, com pixels RGBA e resolução preservados em WebP lossless. Não são gameplay. A galeria passa a 44 registros, preservando os 40 anteriores.
+
+Props e árvores em perspectiva agora reutilizam buffers indexados residentes na GPU, com cache geométrico independente de 256 MiB. Construções, cenário individual, atores e isométrica permanecem projetados. As medianas de quatro pares AB/BA em Full HD/RX 570 foram 229,183→77,821 ms em terceira pessoa e 214,149→68,647 ms em primeira: desenho isolado do mundo incluindo readback, excluindo simulação, interface e SDL. Não são FPS sustentado nem uma promessa de 60 FPS. A publicação identifica a classificação de uma borda em 960×540, a exclusão do caminho isométrico residente, 1.768 verificações sintéticas e os gargalos restantes. Início, destaque do devlog, tecnologia, roadmap, galeria e feeds acompanham a nova entrega; os registros anteriores preservam suas medições históricas. Nenhum renderer, perfil, modelo, cache ou dado original do jogo é modificado pela publicação.
+
 ## Registro GPU de 8 de outubro de 2026
 
 O registro `2026-10-08-renderizacao-gpu-tristram.md` e sua tradução integral documentam o piloto Windows/Direct3D 11 do commit `c8329403e6b69ff3c95f97adeff38cb4a8c1e8a2`. As páginas atuais de tecnologia, início e roadmap acompanham essa revisão; os artigos de 07/10 preservam o estado histórico. A imagem de abertura reutilizada é explicitamente histórica, sem representar uma comparação CPU/GPU. Nenhuma nova captura local ou arquivo privado entra nesta publicação.

@@ -7,6 +7,16 @@ audit. URLs, filenames, commits and evidence hashes are language independent.
 from __future__ import annotations
 
 TRANSLATIONS: dict[str, str] = {
+    'Créditos do projeto e menos trabalho por quadro': 'Project credits and less work per frame',
+    'Suporte e créditos reunidos no menu, autoria de Douglas Pan e geometria de props e árvores reutilizada na GPU. Conheça a entrega instalada, as medições e seus limites.': 'Support and credits grouped in the menu, authorship by Douglas Pan, and prop and tree geometry reused on the GPU. Explore the installed delivery, its measurements and limitations.',
+    'Estudo de interfaces R2': 'R2 interface study',
+    'Geometria residente na GPU': 'GPU-resident geometry',
+    'Props e árvores em perspectiva reutilizam buffers indexados na placa de vídeo, sem reduzir modelos ou texturas. Construções, cenário individual, atores e isométrica continuam no caminho projetado.': 'Props and trees in perspective reuse indexed buffers on the graphics card, without reducing models or textures. Buildings, individual scenery, actors and isometric views retain the projected path.',
+    'Em Full HD na RX 570, a mediana de quatro pares AB/BA caiu de 229,183 para 77,821 ms em terceira pessoa e de 214,149 para 68,647 ms em primeira. São tempos do desenho do mundo com readback, excluindo simulação, interface e SDL; não são FPS sustentado.': 'At Full HD on the RX 570, the median of four AB/BA pairs fell from 229.183 to 77.821 ms in third person and from 214.149 to 68.647 ms in first person. These are world drawing times including readback, excluding simulation, the interface and SDL; they are not sustained frame rates.',
+    'Conhecer a entrega instalada': 'Explore the installed delivery',
+    'Ler o registro anterior da GPU': 'Read the earlier GPU entry',
+    'menu de suporte e créditos e geometria residente para props e árvores': 'support and credits menu and resident geometry for props and trees',
+    '08/10 · UI nativa offscreen · fc9642982': 'October 8 · Native offscreen UI · fc9642982',
     'Tristram de perto': 'Tristram up close',
     'Quatro câmeras, revisão dos modelos, desempenho e uma comunidade bilíngue. Conheça os grandes avanços desta rodada, as comparações reais e o que ainda está em teste.': 'Four camera modes, model review, performance and a bilingual community. Explore the major advances in this round, real comparisons and the work still being tested.',
     'Ler a nova rodada': 'Read the latest round',
@@ -481,6 +491,10 @@ def translate_text(value: str) -> str:
 # Public asset paths are the stable evidence identifiers; the inventory has no
 # separate ID field. These overlays never change image bytes or provenance.
 EVIDENCE_EN: dict[str, dict[str, str]] = {
+    '/assets/captures/project-credits-main-pt.webp': {'title': 'Main menu with project support and credits', 'alt': 'Portuguese main menu with Project Support and Credits; native interface in an offscreen diagnostic.', 'caption': 'Native Portuguese main menu, produced by the offscreen diagnostic for delivery fc9642982. This is not gameplay or a game-window capture.'},
+    '/assets/captures/project-credits-submenu-pt.webp': {'title': 'Support and credits together', 'alt': 'Portuguese submenu with Support, Show Credits, Diablo 3D Credits and Back, in an offscreen diagnostic.', 'caption': 'The submenu preserves the inherited screens and adds project credits. Native interface in an offscreen diagnostic; this does not show a running game session.'},
+    '/assets/captures/project-credits-author-pt.webp': {'title': 'Douglas Pan credits in Portuguese', 'alt': 'Diablo 3D Credits in Portuguese, with authorship and direction by Douglas Pan, the whole-game goal and community links; offscreen diagnostic.', 'caption': 'Native Portuguese credits screen from delivery fc9642982. Authorship and direction by Douglas Pan, with inherited credits preserved; technical offscreen capture, without new artistic approval.'},
+    '/assets/captures/project-credits-author-en.webp': {'title': 'Douglas Pan credits in English', 'alt': 'Diablo 3D Credits in English, with Douglas Pan, the goal of rebuilding all of Diablo 1 and community links; native offscreen diagnostic.', 'caption': 'The same credits screen in English, produced by the offscreen diagnostic. Both languages are part of the installed delivery; this image is not gameplay.'},
     '/assets/captures/tristram-camera-modes.webp': {
         'title': 'Four cameras in Tristram',
         'alt': 'Technical comparison of isometric, free-orbit, third-person and first-person modes, with CPU above and GPU below.',
