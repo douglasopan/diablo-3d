@@ -36,6 +36,7 @@
 #include "engine/render/light_render.hpp"
 #include "engine/render/text_render.hpp"
 #include "engine/render/town_view.hpp"
+#include "engine/render/ui_overlay_regions.hpp"
 #include "engine/trn.hpp"
 #include "engine/world_tile.hpp"
 #include "game_mode.hpp"
@@ -1324,7 +1325,15 @@ void DrawView(const Surface &out, Point startPosition)
 #endif
 	Displacement offset = {};
 	CalcFirstTilePosition(startPosition, offset);
+	ClearUiOverlayRegions();
 	DrawGame(out, startPosition, offset);
+#ifndef USE_SDL1
+	if (GetTownViewHighResolutionFrame() != nullptr) {
+		BeginUiOverlayRegions(out);
+		const Rectangle &panel = GetMainPanel();
+		MarkUiOverlayRect(out, panel.position.x, panel.position.y, panel.size.width, panel.size.height);
+	}
+#endif
 	if (IsTownViewActive()) {
 		DrawString(out.subregionY(0, gnViewportHeight), IsTownViewNativePose()
 				? "Tristram 3D | Vista original | F4: alternar"
@@ -1367,6 +1376,7 @@ void DrawView(const Surface &out, Point startPosition)
 				    { .flags = UiFlags::ColorRed | UiFlags::AlignCenter | UiFlags::VerticalCenter });
 			}
 			if (DebugGrid) {
+				MarkUiOverlayRect(out, 0, 0, out.w(), gnViewportHeight);
 				int halfTileWidth = TILE_WIDTH / 2;
 				int halfTileHeight = TILE_HEIGHT / 2;
 				if (*GetOptions().Graphics.zoom) {
@@ -1861,10 +1871,12 @@ void scrollrt_draw_game_screen()
 
 	const Surface &out = GlobalBackBuffer();
 	UndrawCursor(out);
+	BeginUiOverlayCursor();
 	DrawCursor(out);
+	EndUiOverlayCursor();
 	DrawMain(hgt, false, false, false, false, false);
 
-	RenderPresent();
+	RenderPresent(true);
 }
 
 void DrawAndBlit()
@@ -1938,7 +1950,9 @@ void DrawAndBlit()
 	if (*GetOptions().Gameplay.showMultiplayerPartyInfo && PartySidePanelOpen)
 		DrawPartyMemberInfoPanel(out);
 
+	BeginUiOverlayCursor();
 	DrawCursor(out);
+	EndUiOverlayCursor();
 
 	DrawFPS(out);
 
@@ -1958,7 +1972,7 @@ void DrawAndBlit()
 		}
 	}
 
-	RenderPresent();
+	RenderPresent(true);
 }
 
 } // namespace devilution

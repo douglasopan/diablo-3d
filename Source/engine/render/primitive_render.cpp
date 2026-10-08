@@ -5,6 +5,7 @@
 #include <cstring>
 
 #include "engine/point.hpp"
+#include "engine/render/ui_overlay_regions.hpp"
 #include "engine/size.hpp"
 #include "engine/surface.hpp"
 #include "utils/palette_blending.hpp"
@@ -81,6 +82,7 @@ void DrawHalfTransparentBlendedRectTo(const Surface &out, unsigned sx, unsigned 
 
 void FillRect(const Surface &out, int x, int y, int width, int height, uint8_t colorIndex)
 {
+	MarkUiOverlayRect(out, x, y, width, height);
 	for (int j = 0; j < height; j++) {
 		DrawHorizontalLine(out, { x, y + j }, width, colorIndex);
 	}
@@ -101,6 +103,7 @@ void DrawHorizontalLine(const Surface &out, Point from, int width, std::uint8_t 
 
 void UnsafeDrawHorizontalLine(const Surface &out, Point from, int width, std::uint8_t colorIndex)
 {
+	MarkUiOverlayRect(out, from.x, from.y, width, 1);
 	std::memset(&out[from], colorIndex, width);
 }
 
@@ -119,6 +122,7 @@ void DrawVerticalLine(const Surface &out, Point from, int height, std::uint8_t c
 
 void UnsafeDrawVerticalLine(const Surface &out, Point from, int height, std::uint8_t colorIndex)
 {
+	MarkUiOverlayRect(out, from.x, from.y, 1, height);
 	auto *dst = &out[from];
 	const auto pitch = out.pitch();
 	while (height-- > 0) {
@@ -181,6 +185,7 @@ void DrawHalfTransparentRectTo(const Surface &out, int sx, int sy, int width, in
 		height = out.h() - sy;
 	}
 
+	MarkUiOverlayRect(out, sx, sy, width, height);
 	DrawHalfTransparentBlendedRectTo(out, sx, sy, width, height);
 }
 
@@ -209,12 +214,14 @@ void DrawHalfTransparentRectTo(const Surface &out, int sx, int sy, int width, in
 		height = out.h() - sy;
 	}
 
+	MarkUiOverlayRect(out, sx, sy, width, height);
 	DrawHalfTransparentUnalignedBlendedRectTo(out, sx, sy, width, height, color);
 }
 
 void SetHalfTransparentPixel(const Surface &out, Point position, uint8_t color)
 {
 	if (out.InBounds(position)) {
+		MarkUiOverlayRect(out, position.x, position.y, 1, 1);
 		uint8_t *pix = out.at(position.x, position.y);
 		const auto &lookupTable = paletteTransparencyLookup[color];
 		*pix = lookupTable[*pix];
@@ -223,6 +230,7 @@ void SetHalfTransparentPixel(const Surface &out, Point position, uint8_t color)
 
 void UnsafeDrawBorder2px(const Surface &out, Rectangle rect, uint8_t color)
 {
+	MarkUiOverlayRect(out, rect.position.x, rect.position.y, rect.size.width, rect.size.height);
 	const size_t width = rect.size.width;
 	const size_t height = rect.size.height;
 	uint8_t *buf = &out[rect.position];

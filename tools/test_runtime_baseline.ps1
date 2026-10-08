@@ -204,6 +204,30 @@ function Assert-PinnedReceipt {
     return $taskReceipt
 }
 
+function Assert-RequestedGraphics {
+    param($Receipt, [System.Collections.IDictionary]$Expected, [string]$ConfigPath)
+    Assert-Equal 'requested-from-final-ini' $Receipt.graphicsScope 'Receipt Graphics scope'
+    $taskFinalGraphicsBody = $null
+    if (-not [string]::IsNullOrWhiteSpace($ConfigPath)) {
+        $taskFinalIni = [System.IO.File]::ReadAllText($ConfigPath)
+        $taskFinalGraphicsMatch = [regex]::Match($taskFinalIni, '(?ims)^\[Graphics\][ \t]*\r?\n(.*?)(?=^\[|\z)')
+        Assert-True $taskFinalGraphicsMatch.Success 'Final fixture INI has no Graphics section'
+        $taskFinalGraphicsBody = $taskFinalGraphicsMatch.Groups[1].Value
+    }
+    foreach ($taskExpectedGraphics in $Expected.GetEnumerator()) {
+        $taskRecordedProperty = $Receipt.graphicsRequested.PSObject.Properties[$taskExpectedGraphics.Key]
+        Assert-True ($null -ne $taskRecordedProperty) ('Missing requested Graphics key: ' + $taskExpectedGraphics.Key)
+        $taskRecordedValue = $taskRecordedProperty.Value
+        Assert-True (($taskRecordedValue -is [int]) -or ($taskRecordedValue -is [long])) ('Requested Graphics value is not an integer: ' + $taskExpectedGraphics.Key)
+        Assert-Equal $taskExpectedGraphics.Value $taskRecordedValue ('Requested Graphics value: ' + $taskExpectedGraphics.Key)
+        if ($null -ne $taskFinalGraphicsBody) {
+            $taskFinalValueMatch = [regex]::Match($taskFinalGraphicsBody, '(?im)^' + [regex]::Escape($taskExpectedGraphics.Key) + '[ \t]*=[ \t]*(-?\d+)[ \t]*\r?$')
+            Assert-True $taskFinalValueMatch.Success ('Final INI is missing an explicit Graphics value: ' + $taskExpectedGraphics.Key)
+            Assert-Equal ([int]$taskFinalValueMatch.Groups[1].Value) $taskRecordedValue ('Receipt differs from final INI: ' + $taskExpectedGraphics.Key)
+        }
+    }
+}
+
 foreach ($taskPresentation in @('Atual', 'Nitido', 'Suave', 'Amplo')) {
     Invoke-FixtureCase ('baseline-' + $taskPresentation.ToLowerInvariant()) {
         $taskFixture = New-TestFixture ('baseline-' + $taskPresentation.ToLowerInvariant())
@@ -230,6 +254,70 @@ Invoke-FixtureCase 'quality-review-uses-same-baseline' {
     $null = Assert-PinnedReceipt $taskFixture $taskProfile 'devilutionx-tristram-quality.exe'
     $taskIni = [System.IO.File]::ReadAllText((Join-Path $taskProfile 'diablo.ini'))
     Assert-True ($taskIni -match '(?m)^3D Edge Smoothing=1\r?$') 'Quality review did not prepare edge smoothing'
+}
+
+Invoke-FixtureCase 'normal-launch-records-persisted-smoothing-without-changing-ini' {
+    $taskFixture = New-TestFixture 'normal-persisted-smoothing'
+    $taskExpectedGraphics = [ordered]@{
+        'Width' = 1024
+        'Height' = 768
+        'Fullscreen' = 1
+        'Fit to Screen' = 0
+        'Upscale' = 1
+        'Scaling Quality' = 2
+        'Integer Scaling' = 0
+        'Zoom' = 0
+        '3D Edge Smoothing' = 1
+    }
+    $taskIniLines = @('[Graphics]')
+    foreach ($taskEntry in $taskExpectedGraphics.GetEnumerator()) { $taskIniLines += $taskEntry.Key + '=' + $taskEntry.Value }
+    $taskIniLines += @('', '[Audio]', 'Music Volume=34')
+    $taskIniPath = Join-Path $taskFixture.SourceProfile 'diablo.ini'
+    Write-FixtureText $taskIniPath ([string]::Join("`r`n", $taskIniLines) + "`r`n")
+    $taskBeforeIniHash = Get-FixtureHash $taskIniPath
+    Invoke-FixturePrepare $taskFixture @{}
+    $taskReceipt = Assert-PinnedReceipt $taskFixture (Get-ProfilePath $taskFixture)
+    Assert-Equal $taskBeforeIniHash (Get-FixtureHash $taskIniPath) 'Normal preparation changed a persisted Graphics INI'
+    Assert-Equal $false $taskReceipt.qualityReview 'Persisted edge smoothing must not imply the QualityReview flag'
+    Assert-RequestedGraphics $taskReceipt $taskExpectedGraphics $taskIniPath
+}
+
+Invoke-FixtureCase 'quality-review-records-final-copy-graphics-and-preserves-source' {
+    $taskFixture = New-TestFixture 'quality-final-copy-graphics'
+    $taskSourceGraphics = [ordered]@{
+        'Width' = 1111
+        'Height' = 777
+        'Fullscreen' = 1
+        'Fit to Screen' = 1
+        'Upscale' = 0
+        'Scaling Quality' = 0
+        'Integer Scaling' = 1
+        'Zoom' = 1
+        '3D Edge Smoothing' = 0
+    }
+    $taskIniLines = @('[Graphics]')
+    foreach ($taskEntry in $taskSourceGraphics.GetEnumerator()) { $taskIniLines += $taskEntry.Key + '=' + $taskEntry.Value }
+    $taskIniLines += @('', '[Audio]', 'Music Volume=34')
+    Write-FixtureText (Join-Path $taskFixture.SourceProfile 'diablo.ini') ([string]::Join("`r`n", $taskIniLines) + "`r`n")
+    $taskSourceFingerprint = Get-FixtureFingerprint $taskFixture.SourceProfile
+    Invoke-FixturePrepare $taskFixture @{ QualityReview = $true }
+    $taskProfile = Get-ProfilePath $taskFixture -QualityReview
+    Assert-True ($taskProfile -ne $taskFixture.SourceProfile) 'Quality review must prepare a separate profile'
+    $taskReceipt = Assert-PinnedReceipt $taskFixture $taskProfile 'devilutionx-tristram-quality.exe'
+    Assert-Equal $taskSourceFingerprint (Get-FixtureFingerprint $taskFixture.SourceProfile) 'Quality review changed source INI or saves'
+    Assert-Equal (Get-FixtureHash (Join-Path $taskFixture.SourceProfile 'single_0.sv')) (Get-FixtureHash (Join-Path $taskProfile 'single_0.sv')) 'Quality review initial save copy changed bytes'
+    Assert-Equal $true $taskReceipt.qualityReview 'QualityReview flag missing from the copy receipt'
+    Assert-RequestedGraphics $taskReceipt ([ordered]@{
+        'Width' = 960
+        'Height' = 540
+        'Fullscreen' = 1
+        'Fit to Screen' = 0
+        'Upscale' = 1
+        'Scaling Quality' = 2
+        'Integer Scaling' = 0
+        'Zoom' = 0
+        '3D Edge Smoothing' = 1
+    }) (Join-Path $taskProfile 'diablo.ini')
 }
 
 Invoke-FixtureCase 'meshy-review-is-an-isolated-pinned-profile' {
@@ -272,6 +360,7 @@ Invoke-FixtureCase 'existing-save-and-unrelated-ini-values-survive' {
 
 Invoke-FixtureCase 'missing-private-source-has-explicit-procedural-fallback' {
     $taskFixture = New-TestFixture 'missing-source-fallback'
+    Write-FixtureText (Join-Path $taskFixture.SourceProfile 'diablo.ini') "[Graphics]`r`nCustom Fixture=preserve-this`r`n"
     Remove-Item -LiteralPath $taskFixture.ModelSource
     Invoke-FixturePrepare $taskFixture @{}
     $taskProfile = Get-ProfilePath $taskFixture
@@ -279,6 +368,17 @@ Invoke-FixtureCase 'missing-private-source-has-explicit-procedural-fallback' {
     $taskReceipt = Get-Content -LiteralPath (Join-Path $taskProfile 'runtime-baseline-receipt.json') -Raw | ConvertFrom-Json
     Assert-Equal 'fallback-procedural' $taskReceipt.model.status 'Fallback must be explicit in the receipt'
     Assert-Equal $false $taskReceipt.model.sourceAvailable 'Missing private source recorded as available'
+    Assert-RequestedGraphics $taskReceipt ([ordered]@{
+        'Width' = 640
+        'Height' = 480
+        'Fullscreen' = 1
+        'Fit to Screen' = 1
+        'Upscale' = 1
+        'Scaling Quality' = 2
+        'Integer Scaling' = 0
+        'Zoom' = 0
+        '3D Edge Smoothing' = 0
+    })
 }
 
 Invoke-FixtureCase 'missing-private-source-retains-matching-profile-model' {

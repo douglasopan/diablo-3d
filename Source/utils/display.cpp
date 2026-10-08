@@ -46,6 +46,8 @@
 #include "controls/touch/gamepad.h"
 #include "engine/backbuffer_state.hpp"
 #include "engine/dx.h"
+#include "engine/render/town_presentation.hpp"
+#include "engine/render/ui_overlay_regions.hpp"
 #include "headless_mode.hpp"
 #include "options.h"
 #include "utils/log.hpp"
@@ -697,6 +699,8 @@ bool SpawnWindow(const char *lpWindowName)
 #ifndef USE_SDL1
 void ReinitializeTexture()
 {
+	ResetTownPresentationResources();
+	ClearUiOverlayRegions();
 	if (texture)
 		texture.reset();
 

@@ -30,6 +30,7 @@
 #include "engine/render/d3d_logo.hpp"
 #include "engine/render/primitive_render.hpp"
 #include "engine/render/text_render.hpp"
+#include "engine/render/ui_overlay_regions.hpp"
 #include "headless_mode.hpp"
 #include "options.h"
 #include "stores.h"
@@ -139,6 +140,8 @@ void GmenuDrawMenuItem(const Surface &out, TMenuItem *pItem, int y)
 		const uint16_t steps = std::max<uint16_t>(pItem->sliderSteps(), 2);
 		const uint16_t pos = SliderFillMin + (step * (SliderFillMax - SliderFillMin) / steps);
 		SDL_Rect rect = MakeSdlRect(SliderValueLeft + uiPositionX, y + SliderValuePaddingTop, pos, SliderValueHeight);
+		// SDL writes in underlying-surface coordinates, independent of out.region.
+		MarkUiOverlayRect(Surface(out.surface), rect.x, rect.y, rect.w, rect.h);
 		SDL_FillSurfaceRect(out.surface, &rect, 205);
 		ClxDraw(out, { SliderValueLeft + pos - (SliderMarkerWidth / 2) + uiPositionX, y + SliderValuePaddingTop + SliderValueHeight - 1 }, (*option_cel)[0]);
 	}

@@ -2,6 +2,26 @@
 
 O D3D pretende transformar todo o Diablo 1 em 3D, incluindo os níveis procedurais. A resolução e a apresentação já podem ser comparadas usando os recursos do DevilutionX. A nova entrada, o novo menu e a separação completa entre escala da interface e renderização do mundo continuam como etapas próprias de desenvolvimento.
 
+## Cabana e apresentação na partida habitual
+
+O iniciador normal `Iniciar-Tristram.cmd` usa a mesma cabana selecionada dos perfis de revisão. No workspace local, a opção `3D Edge Smoothing` foi ligada uma vez no perfil habitual 960×540, preservando seu save e as demais preferências. Ela continua ajustável em Gráficos; instalações novas mantêm o padrão desligado por causa do custo. Não é necessário abrir uma cópia de personagem para reunir modelo e qualidade.
+
+Com a opção ativa e o mundo efetivamente em 2×, o novo compositor SDL preserva essa imagem até a saída física. A câmera e a área visível permanecem iguais: em uma saída maior, o mesmo objeto pode conservar mais detalhe, em vez de receber apenas a ampliação da imagem lógica já reduzida. O mundo continua rasterizado na CPU e limitado à paleta; nenhum pacote de texturas do Belzebub foi importado.
+
+A interface é composta por cima usando regiões explícitas de desenho no quadro lógico final. Preto permanece opaco, painéis em cache são cobertos e o cursor tem regiões transitórias próprias. O filtro do mundo segue a preferência gráfica; a camada da interface usa vizinho mais próximo para evitar halos nas bordas transparentes. Isso não acrescenta fontes/ícones HD nem escala independente à interface herdada.
+
+Este primeiro compositor é conservador: dentro do retângulo de uma letra, sprite ou painel transparente, o fundo já composto também permanece na resolução lógica. Ao exceder 4096 regiões por canal, a cobertura recua ao quadro inteiro. A saída de superfície sem renderer SDL, SDL1, Home, mundo em 1× e falhas opcionais de criação/composição usam a apresentação anterior. Carregamentos, vídeos e menus fora da partida não recebem uma imagem 3D antiga.
+
+O ganho depende da saída física: uma janela com o mesmo tamanho lógico não exibe quatro pixels físicos por pixel lógico. A amostragem continua cara na CPU; este incremento não transforma o rasterizador em GPU nem estabelece uma meta de FPS.
+
+Validação local em 8 de outubro de 2026: jogo e diagnóstico compilados; fixtures sintéticas do compositor SDL passaram, incluindo detalhe físico pixel a pixel, preto opaco, paleta, clipping, cursor sem rastros, troca de renderer, resize e escala fracionária sem halo. A revisão do cenário real e a suíte de regressão também passaram, com 75 amostras geométricas independentes sem falhas. O mundo 2× da cabana foi exportado e inspecionado fora da janela. Não foi possível observar automaticamente a interface na janela do jogo: a ferramenta de controle falhou antes de abrir os aplicativos. Isso permanece uma revisão visual a fazer na partida.
+
+```powershell
+.\build\town_view_smoke.exe --presentation-layers '.\diagnostics\presentation-layers-synthetic'
+```
+
+Esse modo usa apenas imagens sintéticas e um renderer SDL de software, sem arquivos do Diablo. As evidências locais desta entrega estão em `diagnostics/presentation-layers-synthetic-20261008`, `diagnostics/presentation-layers-quality-gog-20261008` e `diagnostics/presentation-layers-regression-gog-20261008`. A medição de CPU do mundo em 960×540 foi 44,0 ms em 1× e 162,4 ms em 2×, excluindo a composição SDL; não é FPS de uma partida nem medição controlada definitiva. A preparação final do perfil normal preservou seu INI já ajustado e o save, verificou modelo/luz e renovou o recibo. Normal e alias local de qualidade receberam o mesmo binário atualizado.
+
 ## Comparar agora
 
 Abra `Comparar-Apresentacao.cmd` e escolha uma opção. Para incluir a cabana Meshy disponível localmente, use:
@@ -40,7 +60,7 @@ Em **Configurações → Gráficos → Suavização de bordas 3D** (`3D Edge Smo
 
 Para uma revisão isolada, abra `Revisar-Qualidade3D.cmd`. A cabana local selecionada é usada automaticamente; `-MeshyReview` também pode ser passado para exigir suas fontes. O iniciador cria uma cópia em `perfil-apresentacao-suave-qualidade[-meshy]` e ativa essa opção somente nela. Saves e preferências do perfil habitual são preservados; o progresso da cópia permanece separado. Se existir `build/devilutionx-tristram-quality.exe`, a revisão usa esse candidato; caso contrário, usa o executável normal compilado com o código atualizado. Isso permite testar uma versão separada quando o Windows mantém o executável habitual bloqueado por uma partida aberta.
 
-O mundo é desenhado em duas vezes a largura e a altura, e cada grupo de quatro amostras é reduzido a um pixel lógico. A redução usa cores RGB e uma tabela de aproximação à paleta, preservando índices uniformes. Ela não calcula médias dos números dos índices. Essa suavização pode reduzir serrilhado e mudar detalhes de alto contraste; não cria novas texturas ou novos modelos. A iluminação existente e o mapa de sombras continuam em coordenadas do mundo.
+O mundo é desenhado em duas vezes a largura e a altura. Cada grupo de quatro amostras também é reduzido a um pixel lógico para a composição herdada e o fallback. A redução usa cores RGB e uma tabela de aproximação à paleta, preservando índices uniformes. Ela não calcula médias dos números dos índices. Na saída SDL em camadas, o buffer 2× é preservado e convertido usando a paleta ativa, incluindo fades. Essa suavização pode reduzir serrilhado e mudar detalhes de alto contraste; não cria novas texturas ou novos modelos. A iluminação existente e o mapa de sombras continuam em coordenadas do mundo.
 
 Para seleção, arquitetura e profundidade, a redução escolhe a mesma subamostra visível mais próxima. Uma borda que ocupa somente parte do pixel pode, portanto, selecionar o objeto da frente. A câmera, a colisão e os tiles nativos continuam autoritativos. Alterar a opção, o zoom nativo, os painéis ou as dimensões da tela invalida a seleção antiga até o próximo desenho.
 
@@ -62,7 +82,7 @@ O atlas local `ctrlpan/modernui.png`, de 1024×1024, contém globos, barra de a�
 
 ## Limites e próxima evolução
 
-O nosso renderizador 3D atual desenha geometria na CPU e converte o resultado para a paleta do jogo. A apresentação SDL amplia a imagem final usando os recursos disponíveis do sistema. Aumentar somente `Width` e `Height` aumenta a área visível: a projeção nativa mantém sua escala em pixels. Isso não faz o mesmo objeto ganhar automaticamente mais amostras na tela, e os menus herdados não têm um controle geral de escala independente.
+O nosso renderizador 3D atual desenha geometria na CPU e converte o resultado para a paleta do jogo. A apresentação SDL preserva o mundo 2× quando disponível e compõe regiões da interface lógica; o caminho herdado amplia o quadro final único. Aumentar somente `Width` e `Height` aumenta a área visível: a projeção nativa mantém sua escala em pixels. Isso não faz o mesmo objeto ganhar automaticamente mais amostras na tela, e os menus herdados não têm um controle geral de escala independente.
 
 O experimento `town_view_smoke --presentation` produz capturas e tempos do renderizador fora da janela do jogo. Ele compara diferentes áreas internas com a mesma escala de projeção e preserva o estado nativo. Os resultados medem esse experimento de CPU; não são FPS finais do jogo, uma validação da saída SDL/monitor, nem uma medição do Belzebub.
 

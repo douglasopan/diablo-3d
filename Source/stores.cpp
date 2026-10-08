@@ -21,6 +21,7 @@
 #include "engine/render/clx_render.hpp"
 #include "engine/render/primitive_render.hpp"
 #include "engine/render/text_render.hpp"
+#include "engine/render/ui_overlay_regions.hpp"
 #include "engine/trn.hpp"
 #include "game_mode.hpp"
 #include "lua/lua_event.hpp"
@@ -2258,6 +2259,7 @@ void DrawSLine(const Surface &out, int sy)
 		width -= SidePanelSize.width;
 	}
 
+	MarkUiOverlayRect(out, uiPosition.x + sx, sy, width, 3);
 	uint8_t *src = out.at(uiPosition.x + sx, uiPosition.y + 25);
 	uint8_t *dst = out.at(uiPosition.x + sx, sy);
 

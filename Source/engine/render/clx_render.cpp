@@ -11,6 +11,7 @@
 
 #include "engine/point.hpp"
 #include "engine/render/blit_impl.hpp"
+#include "engine/render/ui_overlay_regions.hpp"
 #include "engine/surface.hpp"
 #include "utils/attributes.h"
 #include "utils/clx_decode.hpp"
@@ -224,6 +225,8 @@ void DoRenderBackwards(
 	const ClipX clipX = CalculateClipX(position.x, srcWidth, out);
 	if (clipX.width <= 0)
 		return;
+	MarkUiOverlayRect(out, position.x, position.y - static_cast<int>(srcHeight) + 1,
+	    static_cast<int>(srcWidth), static_cast<int>(srcHeight));
 	const RenderSrc srcForBackwards { src, src + srcSize, static_cast<uint_fast16_t>(srcWidth) };
 	if (static_cast<std::size_t>(clipX.width) == srcWidth) {
 		DoRenderBackwardsClipY(
@@ -408,6 +411,7 @@ void RenderClxOutline(const Surface &out, Point position, ClxSprite sprite, uint
 	UpdateOutlinePixelsCache<SkipColorIndexZero>(sprite);
 	--position.x;
 	position.y -= sprite.height();
+	MarkUiOverlayRect(out, position.x, position.y, sprite.width() + 2, sprite.height() + 2);
 	if (position.x >= 0 && position.x + sprite.width() + 2 < out.w()
 	    && position.y >= 0 && position.y + sprite.height() + 2 < out.h()) {
 		for (const auto &[x, y] : OutlinePixelsCache.outlinePixels) {

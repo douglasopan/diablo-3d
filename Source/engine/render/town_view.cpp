@@ -41,6 +41,8 @@
 #include "engine/render/town_body.hpp"
 #include "engine/render/town_actor_mask.hpp"
 #include "engine/render/town_view_resolve.hpp"
+#include "engine/render/town_presentation.hpp"
+#include "engine/render/ui_overlay_regions.hpp"
 #include "engine/surface.hpp"
 #include "items.h"
 #include "levels/dun_tile_data.hpp"
@@ -1846,6 +1848,15 @@ TownViewSamplingState GetTownViewSamplingState()
 	return SamplingState;
 }
 
+const Surface *GetTownViewHighResolutionFrame()
+{
+	if (!IsTownViewActive() || !CurrentPickingValid() || CachedDungeonData != pDungeonCels.get()
+	    || SamplingState.factor != 2 || !SamplingSurface
+	    || SamplingSurface->w() != gnScreenWidth * 2 || SamplingSurface->h() != gnViewportHeight * 2)
+		return nullptr;
+	return SamplingSurface.get();
+}
+
 bool BeginTownViewCameraDrag(Point screen, bool pan)
 {
 	if (!IsTownViewActive() || screen.x < 0 || screen.y < 0 || screen.x >= gnScreenWidth || screen.y >= gnViewportHeight)
@@ -1911,6 +1922,10 @@ void SetTownViewFireTimeForDiagnostics(double seconds)
 
 void ResetTownViewResources()
 {
+	ClearUiOverlayRegions();
+#ifndef USE_SDL1
+	ResetTownPresentationResources();
+#endif
 	SamplingSurface.reset();
 	SamplingState = {};
 	RasterSampleFactor = 1;

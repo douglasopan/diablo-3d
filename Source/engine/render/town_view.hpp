@@ -37,6 +37,8 @@ struct TownViewSamplingState {
 	bool limited = false;
 };
 TownViewSamplingState GetTownViewSamplingState();
+/** Borrowed world-only 2x image, or nullptr when its draw epoch is stale. */
+const Surface *GetTownViewHighResolutionFrame();
 bool BeginTownViewCameraDrag(Point screen, bool pan = false);
 bool UpdateTownViewCameraDrag(Point screen);
 void EndTownViewCameraDrag();

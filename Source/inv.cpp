@@ -27,6 +27,7 @@
 #include "engine/palette.h"
 #include "engine/render/clx_render.hpp"
 #include "engine/render/text_render.hpp"
+#include "engine/render/ui_overlay_regions.hpp"
 #include "engine/size.hpp"
 #include "hwcursor.hpp"
 #include "inv_iterators.hpp"
@@ -1146,6 +1147,8 @@ void InvDrawSlotBack(const Surface &out, Point targetPosition, Size size, item_q
 		break;
 	}
 
+	// This tint loop writes upwards from the slot's bottom row.
+	MarkUiOverlayRect(out, targetPosition.x, targetPosition.y - size.height + 1, size.width, size.height);
 	uint8_t *dst = &out[targetPosition];
 	const auto dstPitch = out.pitch();
 	for (int y = size.height; y != 0; --y, dst -= dstPitch + size.width) {

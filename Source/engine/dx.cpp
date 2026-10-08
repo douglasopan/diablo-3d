@@ -24,6 +24,10 @@
 #include "controls/control_mode.hpp"
 #include "controls/plrctrls.h"
 #include "engine/render/primitive_render.hpp"
+#include "engine/render/town_presentation.hpp"
+#include "engine/render/town_view.hpp"
+#include "engine/render/ui_overlay_regions.hpp"
+#include "game_mode.hpp"
 #include "headless_mode.hpp"
 #include "init.hpp"
 #include "options.h"
@@ -131,7 +135,9 @@ Surface GlobalBackBuffer()
 
 void dx_cleanup()
 {
+	ClearUiOverlayRegions();
 #ifndef USE_SDL1
+	ResetTownPresentationResources();
 	if (ghMainWnd != nullptr)
 		SDL_HideWindow(ghMainWnd);
 #endif
@@ -284,7 +290,7 @@ void UpdateOutputSurface()
 } // namespace
 #endif
 
-void RenderPresent()
+void RenderPresent([[maybe_unused]] bool allowTownLayers)
 {
 	if (HeadlessMode)
 		return;
@@ -314,6 +320,21 @@ void RenderPresent()
 		if (SDL_UpdateTexture(texture.get(), nullptr, surface->pixels, surface->pitch) <= -1) ErrSdl();
 		if (SDL_RenderCopy(renderer, texture.get(), nullptr, nullptr) <= -1) ErrSdl();
 #endif
+
+		if (allowTownLayers && gbRunGame) {
+			const Surface *world = GetTownViewHighResolutionFrame();
+			const UiOverlayFrame ui = GetUiOverlayFrame();
+			if (world != nullptr && ui.source == PalSurface
+			    && !RenderTownPresentationLayers(renderer, surface, *world, ui, Palette.get(),
+			        *GetOptions().Graphics.scaleQuality != ScalingQuality::NearestPixel)) {
+				// Cover any partially drawn optional layers on failure.
+#ifdef USE_SDL3
+				if (!SDL_RenderTexture(renderer, texture.get(), nullptr, nullptr)) ErrSdl();
+#else
+				if (SDL_RenderCopy(renderer, texture.get(), nullptr, nullptr) < 0) ErrSdl();
+#endif
+			}
+		}
 
 		if (ControlMode == ControlTypes::VirtualGamepad) {
 			RenderVirtualGamepad(renderer);

@@ -37,6 +37,7 @@
 #include "engine/render/town_actor_mask.hpp"
 #include "engine/render/town_body.hpp"
 #include "engine/render/town_model_import.hpp"
+#include "engine/render/town_presentation.hpp"
 #include "engine/render/town_props.hpp"
 #include "engine/render/town_scene.hpp"
 #include "engine/render/town_shadow.hpp"
@@ -2953,6 +2954,7 @@ void RunQuality(const std::filesystem::path &output)
 		Case { "odd-canvas", 645, 481, false, false }, Case { "wide-canvas", 960, 540, false, true },
 		Case { "left-panel-pan-zoom", 640, 480, true, false } };
 	bool firstCase = true;
+	bool retainedWorldExported = false;
 	for (const auto &test : cases) {
 		gnScreenWidth = test.width;
 		gnScreenHeight = test.height;
@@ -2996,7 +2998,7 @@ void RunQuality(const std::filesystem::path &output)
 				int npc, item, player;
 				Check(!Pick(baselinePicking.probe, tile, npc, item, player)
 				        && TownViewArchitectureAt(baselinePicking.probe) == -1
-				        && !std::isfinite(TownViewDepthAt(baselinePicking.probe)),
+				        && !std::isfinite(TownViewDepthAt(baselinePicking.probe)) && GetTownViewHighResolutionFrame() == nullptr,
 				    "quality option change invalidates stale selection, ownership and depth before redraw");
 			} else {
 				GetOptions().Graphics.townViewAntialiasing.SetValue(false);
@@ -3007,6 +3009,19 @@ void RunQuality(const std::filesystem::path &output)
 			Check(sampling.requested == quality && sampling.factor == factor && !sampling.limited
 			        && sampling.width == out.w() * factor && sampling.height == gnViewportHeight * factor,
 			    "effective raster density matches quality request while logical dimensions remain fixed");
+			const Surface *retainedWorld = GetTownViewHighResolutionFrame();
+			Check(quality ? retainedWorld != nullptr && retainedWorld->w() == out.w() * 2 && retainedWorld->h() == gnViewportHeight * 2
+			              : retainedWorld == nullptr,
+			    "only a current 2x draw exposes its borrowed world-only image for SDL presentation");
+			if (quality && !retainedWorldExported) {
+				OwnedSurface evidence(retainedWorld->w(), retainedWorld->h());
+				SDL_SetPaletteColors(evidence.surface->format->palette, logical_palette.data(), 0, 256);
+				for (int y = 0; y < evidence.h(); ++y)
+					std::memcpy(evidence.at(0, y), retainedWorld->at(0, y), evidence.w());
+				SavePng(evidence, output / (std::string(test.name) + "-world-retained-2x.png"));
+				retainedWorldExported = true;
+				Record("INFO retained 2x capture is world-only offscreen evidence, not a game-window screenshot");
+			}
 			const auto pixels = ViewportPixels(out);
 			const auto picking = InspectQualityPicking(out);
 			Check(picking.valid && picking.picked > 0, "resolved picks retain valid live IDs, architecture ownership and finite depth");
@@ -3094,7 +3109,7 @@ void RunQuality(const std::filesystem::path &output)
 			int npc, item, player;
 			return !Pick(baselinePicking.probe, tile, npc, item, player)
 			    && TownViewArchitectureAt(baselinePicking.probe) == -1
-			    && !std::isfinite(TownViewDepthAt(baselinePicking.probe));
+			    && !std::isfinite(TownViewDepthAt(baselinePicking.probe)) && GetTownViewHighResolutionFrame() == nullptr;
 		};
 		++gnScreenWidth;
 		Check(staleRejected(), "logical resize invalidates previous quality selection before redraw");
@@ -3115,7 +3130,8 @@ void RunQuality(const std::filesystem::path &output)
 			const auto native = ViewportPixels(out);
 			for (const bool quality : { false, true }) {
 				GetOptions().Graphics.townViewAntialiasing.SetValue(quality);
-				Check(DrawTownView(out) && ViewportPixels(out) == native && GetTownViewSamplingState().factor == 1,
+				Check(DrawTownView(out) && ViewportPixels(out) == native && GetTownViewSamplingState().factor == 1
+				        && GetTownViewHighResolutionFrame() == nullptr,
 				    "native pose remains pixel-identical to the real original backend at both quality settings");
 				Point tile;
 				int npc, item, player;
@@ -3136,7 +3152,8 @@ void RunQuality(const std::filesystem::path &output)
 	GetOptions().Graphics.townViewAntialiasing.SetValue(true);
 	Check(DrawTownView(limited.subregionY(0, 1080), true), "oversized optional quality request retains a working world renderer");
 	const auto fallback = GetTownViewSamplingState();
-	Check(fallback.requested && fallback.limited && fallback.factor == 1 && fallback.width == 1920 && fallback.height == 1080,
+	Check(fallback.requested && fallback.limited && fallback.factor == 1 && fallback.width == 1920 && fallback.height == 1080
+	        && GetTownViewHighResolutionFrame() == nullptr,
 	    "sample budget bounds optional quality memory and reports its explicit 1x fallback");
 	bool guard = true;
 	for (int y = 1080; y < limited.h(); ++y)
@@ -3260,6 +3277,272 @@ void Run(const std::filesystem::path &output)
 	CheckGroundPicking();
 	FreeTownerGFX();
 }
+
+#ifndef USE_SDL1
+std::vector<uint8_t> OverlayCoverage(std::span<const SDL_Rect> regions, int width, int height)
+{
+	std::vector<uint8_t> result(static_cast<size_t>(width) * height);
+	for (const SDL_Rect &rect : regions) {
+		const int firstX = static_cast<int>(std::max<int64_t>(0, rect.x));
+		const int firstY = static_cast<int>(std::max<int64_t>(0, rect.y));
+		const int lastX = static_cast<int>(std::min<int64_t>(width, static_cast<int64_t>(rect.x) + rect.w));
+		const int lastY = static_cast<int>(std::min<int64_t>(height, static_cast<int64_t>(rect.y) + rect.h));
+		for (int y = firstY; y < lastY; ++y)
+			for (int x = firstX; x < lastX; ++x)
+				result[static_cast<size_t>(y) * width + x] = 1;
+	}
+	return result;
+}
+
+void CheckUiOverlayRegionTracking()
+{
+	OwnedSurface storage(12, 11);
+	const Surface view = storage.subregion(2, 3, 8, 8);
+	OwnedSurface foreign(8, 8);
+	BeginUiOverlayRegions(view);
+	MarkUiOverlayRect(view.subregion(1, 2, 4, 3), -1, -1, 3, 3);
+	MarkUiOverlayRect(view, -2, 5, 5, 2);
+	MarkUiOverlayRect(foreign, 0, 0, 8, 8);
+	MarkUiOverlayRect(view, std::numeric_limits<int>::max(), 0, std::numeric_limits<int>::max(), 1);
+	const std::array<SDL_Rect, 2> expected { SDL_Rect { 1, 2, 2, 2 }, SDL_Rect { 0, 5, 3, 2 } };
+	auto frame = GetUiOverlayFrame();
+	Check(frame.source == storage.surface && frame.sourceRegion.x == 2 && frame.sourceRegion.y == 3
+	        && frame.sourceRegion.w == 8 && frame.sourceRegion.h == 8
+	        && OverlayCoverage(frame.regions, 8, 8) == OverlayCoverage(expected, 8, 8),
+	    "UI regions clip local subviews, retain source origin and ignore foreign surfaces/overflowing coordinates");
+	BeginUiOverlayCursor();
+	MarkUiOverlayRect(view, 6, 1, 1, 1);
+	EndUiOverlayCursor();
+	MarkUiOverlayRect(view, 7, 7, 1, 1);
+	frame = GetUiOverlayFrame();
+	const auto retainedUi = OverlayCoverage(frame.regions, 8, 8);
+	Check(retainedUi[63] == 1 && OverlayCoverage(frame.cursorRegions, 8, 8)[14] == 1,
+	    "cursor recording uses its own channel and End resumes ordinary UI recording");
+	BeginUiOverlayCursor();
+	MarkUiOverlayRect(view, 1, 0, 1, 1);
+	EndUiOverlayCursor();
+	frame = GetUiOverlayFrame();
+	const auto cursor = OverlayCoverage(frame.cursorRegions, 8, 8);
+	Check(OverlayCoverage(frame.regions, 8, 8) == retainedUi && cursor[1] == 1 && cursor[14] == 0,
+	    "replacing cursor regions preserves UI and discards the previous cursor position");
+	ClearUiOverlayRegions();
+	MarkUiOverlayRect(view, 0, 0, 8, 8);
+	frame = GetUiOverlayFrame();
+	Check(frame.source == nullptr && frame.regions.empty() && frame.cursorRegions.empty(),
+	    "clearing UI regions disables recording and removes both previous frame channels");
+	BeginUiOverlayRegions(Surface { storage.surface, SDL_Rect { -1, 2, 8, 4 } });
+	frame = GetUiOverlayFrame();
+	Check(frame.sourceRegion.x == 0 && frame.sourceRegion.y == 2 && frame.sourceRegion.w == 7 && frame.sourceRegion.h == 4,
+	    "partially outside source regions are clipped before logical overlay coordinates are assigned");
+	ClearUiOverlayRegions();
+	OwnedSurface many(130, 130);
+	BeginUiOverlayRegions(many);
+	for (int i = 0; i < 4097; ++i)
+		MarkUiOverlayRect(many, 2 * (i % 65), 2 * (i / 65), 1, 1);
+	frame = GetUiOverlayFrame();
+	Check(frame.regions.size() == 1 && frame.regions.front().x == 0 && frame.regions.front().y == 0
+	        && frame.regions.front().w == many.w() && frame.regions.front().h == many.h(),
+	    "fragmented UI coverage has a bounded conservative full-frame fallback");
+	ClearUiOverlayRegions();
+}
+
+struct SyntheticPresentationTarget {
+	std::unique_ptr<SDL_Surface, decltype(&SDL_FreeSurface)> output { nullptr, SDL_FreeSurface };
+	std::unique_ptr<SDL_Renderer, decltype(&SDL_DestroyRenderer)> renderer { nullptr, SDL_DestroyRenderer };
+
+	SyntheticPresentationTarget(int logicalWidth, int logicalHeight, int physicalWidth = 0, int physicalHeight = 0)
+	{
+		output.reset(SDL_CreateRGBSurfaceWithFormat(0, physicalWidth > 0 ? physicalWidth : logicalWidth * 2,
+		    physicalHeight > 0 ? physicalHeight : logicalHeight * 2, 32, SDL_PIXELFORMAT_ARGB8888));
+		Check(output != nullptr, "allocate synthetic physical RGB output");
+		renderer.reset(SDL_CreateSoftwareRenderer(output.get()));
+		Check(renderer != nullptr && SDL_RenderSetLogicalSize(renderer.get(), logicalWidth, logicalHeight) == 0,
+		    "create offscreen software renderer with externally configured logical size");
+	}
+
+	~SyntheticPresentationTarget()
+	{
+		// SDL destroys textures with their renderer; the cache must release them first.
+		ResetTownPresentationResources();
+	}
+};
+
+uint32_t SyntheticArgb(SDL_Color color)
+{
+	return 0xFF000000U | static_cast<uint32_t>(color.r) << 16 | static_cast<uint32_t>(color.g) << 8 | color.b;
+}
+
+void DrawSyntheticLegacy(SDL_Renderer *renderer, SDL_Surface *logical)
+{
+	std::unique_ptr<SDL_Texture, decltype(&SDL_DestroyTexture)> legacy(SDL_CreateTextureFromSurface(renderer, logical), SDL_DestroyTexture);
+	Check(legacy != nullptr && SDL_SetTextureBlendMode(legacy.get(), SDL_BLENDMODE_NONE) == 0,
+	    "prepare opaque synthetic legacy fallback");
+#if SDL_VERSION_ATLEAST(2, 0, 12)
+	Check(SDL_SetTextureScaleMode(legacy.get(), SDL_ScaleModeNearest) == 0, "use exact nearest sampling for synthetic legacy reference");
+#endif
+	Check(SDL_RenderCopy(renderer, legacy.get(), nullptr, nullptr) == 0, "draw complete synthetic legacy frame before optional layers");
+}
+
+std::vector<uint32_t> ReadSyntheticPresentation(SyntheticPresentationTarget &target)
+{
+	SDL_RenderPresent(target.renderer.get());
+	std::vector<uint32_t> result(static_cast<size_t>(target.output->w) * target.output->h);
+	Check(SDL_RenderReadPixels(target.renderer.get(), nullptr, SDL_PIXELFORMAT_ARGB8888,
+	          result.data(), target.output->w * static_cast<int>(sizeof(uint32_t))) == 0,
+	    "read back synthetic software-renderer pixels");
+	return result;
+}
+
+void RunPresentationLayers(const std::filesystem::path &output)
+{
+	Record("INFO synthetic SDL software-renderer fixtures only; no game assets, gameplay or real window screenshots");
+	CheckUiOverlayRegionTracking();
+	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
+	constexpr int Width = 8;
+	constexpr int Height = 8;
+	constexpr int ViewportHeight = 6;
+	std::unique_ptr<SDL_Surface, decltype(&SDL_FreeSurface)> logical(
+	    SDL_CreateRGBSurfaceWithFormat(0, Width, Height, 24, SDL_PIXELFORMAT_RGB24), SDL_FreeSurface);
+	Check(logical != nullptr, "allocate final logical RGB24 pixels independently of the indexed overlay source");
+	const SDL_Color legacyColor { 17, 37, 91, 255 };
+	SDL_FillRect(logical.get(), nullptr, SDL_MapRGB(logical->format, legacyColor.r, legacyColor.g, legacyColor.b));
+	SDL_Rect black { 2, 1, 2, 2 };
+	SDL_FillRect(logical.get(), &black, SDL_MapRGB(logical->format, 0, 0, 0));
+	SDL_Rect colored { 5, 0, 1, 3 };
+	const SDL_Color uiColor { 213, 71, 43, 255 };
+	SDL_FillRect(logical.get(), &colored, SDL_MapRGB(logical->format, uiColor.r, uiColor.g, uiColor.b));
+	OwnedSurface sourceStorage(12, 11);
+	const Surface indexedSource = sourceStorage.subregion(2, 3, Width, Height);
+	SDL_FillRect(sourceStorage.surface, nullptr, 3); // Deliberately not the RGB UI pixels.
+	OwnedSurface worldStorage(20, 16);
+	SDL_FillRect(worldStorage.surface, nullptr, 3);
+	const Surface world = worldStorage.subregion(2, 1, Width * 2, ViewportHeight * 2);
+	for (int y = 0; y < world.h(); ++y)
+		for (int x = 0; x < world.w(); ++x)
+			world[{ x, y }] = static_cast<uint8_t>(1 + (x + y) % 2);
+	std::array<SDL_Color, 256> colors {};
+	for (auto &color : colors)
+		color.a = 255;
+	colors[0] = { 0, 0, 0, 0 }; // Black is opaque UI by region, independent of palette alpha.
+	colors[1] = { 231, 31, 19, 255 };
+	colors[2] = { 29, 223, 47, 255 };
+	colors[3] = { 201, 7, 211, 255 };
+	Check(SDL_SetPaletteColors(worldStorage.surface->format->palette, colors.data(), 0, 256) == 0,
+	    "prepare explicit synthetic world palette");
+	const std::array<SDL_Rect, 5> regions { black, colored, SDL_Rect { -1, 4, 3, 2 },
+		SDL_Rect { 7, 5, 3, 3 }, SDL_Rect { 3, 2, 2, 1 } };
+	UiOverlayFrame frame { indexedSource.surface, indexedSource.region, regions, {} };
+	const auto logicalColor = [&](int x, int y) {
+		if (x >= black.x && x < black.x + black.w && y >= black.y && y < black.y + black.h)
+			return SyntheticArgb(SDL_Color { 0, 0, 0, 255 });
+		if (x >= colored.x && x < colored.x + colored.w && y >= colored.y && y < colored.y + colored.h)
+			return SyntheticArgb(uiColor);
+		return SyntheticArgb(legacyColor);
+	};
+	const auto expected = [&] {
+		auto mask = OverlayCoverage(frame.regions, Width, Height);
+		const auto cursorMask = OverlayCoverage(frame.cursorRegions, Width, Height);
+		for (size_t i = 0; i < mask.size(); ++i)
+			mask[i] |= cursorMask[i];
+		std::vector<uint32_t> pixels(Width * 2 * Height * 2);
+		for (int y = 0; y < Height * 2; ++y)
+			for (int x = 0; x < Width * 2; ++x)
+				pixels[static_cast<size_t>(y) * Width * 2 + x] = y >= ViewportHeight * 2 || mask[static_cast<size_t>(y / 2) * Width + x / 2]
+				    ? logicalColor(x / 2, y / 2) : SyntheticArgb(colors[world[{ x, y }]]);
+		return pixels;
+	};
+	SyntheticPresentationTarget target(Width, Height);
+	DrawSyntheticLegacy(target.renderer.get(), logical.get());
+	Check(RenderTownPresentationLayers(target.renderer.get(), logical.get(), world, frame, worldStorage.surface->format->palette, false),
+	    "compose retained 2x indexed world with RGB24 logical UI");
+	Check(ReadSyntheticPresentation(target) == expected(),
+	    "physical output retains every 1px high-resolution detail and clips opaque black/color UI to its logical regions");
+	SavePng(Surface { target.output.get() }, output / "synthetic-2x-density-black-ui.png");
+	colors[1] = { 23, 53, 239, 255 };
+	colors[2] = { 241, 227, 13, 255 };
+	Check(SDL_SetPaletteColors(worldStorage.surface->format->palette, colors.data(), 0, 256) == 0, "change world palette between synthetic frames");
+	DrawSyntheticLegacy(target.renderer.get(), logical.get());
+	Check(RenderTownPresentationLayers(target.renderer.get(), logical.get(), world, frame, worldStorage.surface->format->palette, false)
+	        && ReadSyntheticPresentation(target) == expected(),
+	    "palette changes refresh retained-world RGB while logical UI colors stay independent");
+	SavePng(Surface { target.output.get() }, output / "synthetic-palette-changed.png");
+	const std::array<SDL_Rect, 1> oldCursor { SDL_Rect { 0, 0, 1, 1 } };
+	const std::array<SDL_Rect, 1> movedCursor { SDL_Rect { 6, 3, 1, 1 } };
+	frame.cursorRegions = oldCursor;
+	DrawSyntheticLegacy(target.renderer.get(), logical.get());
+	Check(RenderTownPresentationLayers(target.renderer.get(), logical.get(), world, frame, worldStorage.surface->format->palette, false)
+	        && ReadSyntheticPresentation(target) == expected(),
+	    "compose transient cursor independently over persistent opaque UI");
+	frame.cursorRegions = movedCursor;
+	DrawSyntheticLegacy(target.renderer.get(), logical.get());
+	Check(RenderTownPresentationLayers(target.renderer.get(), logical.get(), world, frame, worldStorage.surface->format->palette, false)
+	        && ReadSyntheticPresentation(target) == expected(),
+	    "moving cursor restores the retained world at its previous position without removing persistent UI");
+	SavePng(Surface { target.output.get() }, output / "synthetic-cursor-moved.png");
+	frame.cursorRegions = {};
+	const auto beforeInvalid = ReadSyntheticPresentation(target);
+	UiOverlayFrame invalid = frame;
+	++invalid.sourceRegion.w;
+	Check(!RenderTownPresentationLayers(target.renderer.get(), logical.get(), world, invalid, worldStorage.surface->format->palette, false)
+	        && ReadSyntheticPresentation(target) == beforeInvalid,
+	    "unsupported overlay dimensions fail without changing the existing renderer output");
+	Check(!RenderTownPresentationLayers(nullptr, logical.get(), world, frame, worldStorage.surface->format->palette, false)
+	        && !RenderTownPresentationLayers(target.renderer.get(), logical.get(), Surface {}, frame, worldStorage.surface->format->palette, false)
+	        && !RenderTownPresentationLayers(target.renderer.get(), logical.get(), world, frame, nullptr, false),
+	    "missing renderer, world or palette gracefully reject layered presentation");
+	SyntheticPresentationTarget second(Width, Height);
+	DrawSyntheticLegacy(second.renderer.get(), logical.get());
+	Check(RenderTownPresentationLayers(second.renderer.get(), logical.get(), world, frame, worldStorage.surface->format->palette, false)
+	        && ReadSyntheticPresentation(second) == expected(),
+	    "switching between live renderer instances recreates renderer-owned textures");
+	ResetTownPresentationResources();
+	ResetTownPresentationResources();
+	DrawSyntheticLegacy(target.renderer.get(), logical.get());
+	Check(RenderTownPresentationLayers(target.renderer.get(), logical.get(), world, frame, worldStorage.surface->format->palette, false)
+	        && ReadSyntheticPresentation(target) == expected(),
+	    "repeated reset releases caches safely and the original renderer can rebuild them");
+	std::unique_ptr<SDL_Surface, decltype(&SDL_FreeSurface)> resizedLogical(
+	    SDL_CreateRGBSurfaceWithFormat(0, 9, 7, 32, SDL_PIXELFORMAT_ARGB8888), SDL_FreeSurface);
+	Check(resizedLogical != nullptr, "allocate resized RGB32 logical UI fixture");
+	SDL_FillRect(resizedLogical.get(), nullptr, SDL_MapRGB(resizedLogical->format, 255, 255, 255));
+	OwnedSurface resizedWorld(18, 10);
+	SDL_FillRect(resizedWorld.surface, nullptr, 1);
+	OwnedSurface resizedSource(9, 7);
+	const std::array<SDL_Rect, 1> resizedRegions { SDL_Rect { 1, 1, 3, 3 } };
+	const UiOverlayFrame resizedFrame { resizedSource.surface, resizedSource.region, resizedRegions, {} };
+	Check(SDL_RenderSetLogicalSize(target.renderer.get(), 9, 7) == 0
+	        && RenderTownPresentationLayers(target.renderer.get(), resizedLogical.get(), resizedWorld, resizedFrame,
+	            worldStorage.surface->format->palette, false),
+	    "same renderer accepts odd logical dimensions and reallocates world/UI textures");
+	Check(SDL_RenderSetLogicalSize(target.renderer.get(), Width, Height) == 0, "restore original logical size after texture resize");
+	DrawSyntheticLegacy(target.renderer.get(), logical.get());
+	Check(RenderTownPresentationLayers(target.renderer.get(), logical.get(), world, frame, worldStorage.surface->format->palette, false)
+	        && ReadSyntheticPresentation(target) == expected(),
+	    "resizing back preserves exact retained world and opaque UI composition");
+	std::array<SDL_Color, 256> whitePalette = colors;
+	whitePalette[1] = { 255, 255, 255, 255 };
+	OwnedSurface whiteWorld(16, 12);
+	SDL_FillRect(whiteWorld.surface, nullptr, 1);
+	Check(SDL_SetPaletteColors(whiteWorld.surface->format->palette, whitePalette.data(), 0, 256) == 0,
+	    "prepare uniform white world for fractional-scale UI seam check");
+	SDL_FillRect(logical.get(), nullptr, SDL_MapRGB(logical->format, 255, 255, 255));
+	SyntheticPresentationTarget fractional(Width, Height, 13, 13);
+	DrawSyntheticLegacy(fractional.renderer.get(), logical.get());
+	Check(RenderTownPresentationLayers(fractional.renderer.get(), logical.get(), whiteWorld, frame, whiteWorld.surface->format->palette, true),
+	    "compose linear world with logical UI at fractional 13x13 physical output");
+	const auto whitePixels = ReadSyntheticPresentation(fractional);
+	Check(std::all_of(whitePixels.begin(), whitePixels.end(), [](uint32_t pixel) { return pixel == 0xFFFFFFFFU; }),
+	    "opaque white UI over white world has no dark straight-alpha edge halo at fractional scaling");
+	SavePng(Surface { fractional.output.get() }, output / "synthetic-fractional-white-ui.png");
+	std::ofstream manifest(output / "synthetic-presentation.json");
+	manifest << "{\"scope\":\"synthetic-software-renderer-only\",\"actualGameCapture\":false,"
+	         << "\"logicalWidth\":8,\"logicalHeight\":8,\"worldWidth\":16,\"worldHeight\":12,"
+	         << "\"outputWidth\":16,\"outputHeight\":16,\"exactPhysicalPixels\":true,\"blackUiOpaque\":true,"
+	         << "\"sourceRegionOrigin\":[2,3],\"paletteRefresh\":true,\"rendererLifecycle\":true,"
+	         << "\"oddLogicalResize\":true,\"cursorNoTrail\":true,\"fractionalWhiteUiNoHalo\":true}\n";
+	Check(manifest.good(), "record clearly labeled synthetic layered-presentation evidence");
+}
+#endif
 } // namespace
 
 int main(int argc, char **argv)
@@ -3268,11 +3551,13 @@ int main(int argc, char **argv)
 	std::cerr << std::unitbuf;
 	const bool presentation = argc == 5 && std::string(argv[4]) == "--presentation";
 	const bool quality = argc == 5 && std::string(argv[4]) == "--quality";
-	if (argc != 4 && !presentation && !quality) {
-		std::cerr << "Usage: town_view_smoke <game-data-directory> <built-assets-directory> <capture-directory> [--presentation|--quality]\n";
+	const bool layers = argc == 3 && std::string(argv[1]) == "--presentation-layers";
+	if (argc != 4 && !presentation && !quality && !layers) {
+		std::cerr << "Usage: town_view_smoke <game-data-directory> <built-assets-directory> <capture-directory> [--presentation|--quality]\n"
+		          << "       town_view_smoke --presentation-layers <synthetic-capture-directory>\n";
 		return 2;
 	}
-	const std::filesystem::path output = std::filesystem::absolute(argv[3]);
+	const std::filesystem::path output = std::filesystem::absolute(argv[layers ? 2 : 3]);
 	std::filesystem::create_directories(output);
 	std::ofstream log(output / "town-view-runtime.txt");
 	SDL_LogSetOutputFunction([](void *userdata, int, SDL_LogPriority, const char *message) {
@@ -3280,8 +3565,10 @@ int main(int argc, char **argv)
 		stream << message << std::endl;
 		std::cerr << message << '\n';
 	}, &log);
-	devilution::paths::SetBasePath(argv[1]);
-	devilution::paths::SetAssetsPath(argv[2]);
+	if (!layers) {
+		devilution::paths::SetBasePath(argv[1]);
+		devilution::paths::SetAssetsPath(argv[2]);
+	}
 	devilution::paths::SetPrefPath(output.string());
 	devilution::paths::SetConfigPath(output.string());
 	SDL_SetMainReady();
@@ -3293,7 +3580,13 @@ int main(int argc, char **argv)
 	const auto start = std::chrono::steady_clock::now();
 	int status = 0;
 	try {
-		if (presentation)
+		if (layers) {
+#ifndef USE_SDL1
+			RunPresentationLayers(output);
+#else
+			Check(false, "layered presentation fixtures require SDL2 or newer");
+#endif
+		} else if (presentation)
 			RunPresentation(output);
 		else if (quality)
 			RunQuality(output);

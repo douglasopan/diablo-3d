@@ -84,6 +84,58 @@ function Install-TaskAsset($Plan, [string]$Label) {
     }
 }
 
+function Get-TaskGraphicsRequested([string]$ConfigPath) {
+    # Windows desktop defaults from options.h/options.cpp; runtime viewport/budget are not inferred.
+    $taskDefaults = [ordered]@{
+        'Width' = 640
+        'Height' = 480
+        'Fullscreen' = 1
+        'Fit to Screen' = 1
+        'Upscale' = 1
+        'Scaling Quality' = 2
+        'Integer Scaling' = 0
+        'Zoom' = 0
+        '3D Edge Smoothing' = 0
+    }
+    $taskBooleanKeys = @('Fullscreen', 'Fit to Screen', 'Upscale', 'Integer Scaling', 'Zoom', '3D Edge Smoothing')
+    $taskValues = [System.Collections.Generic.Dictionary[string, string]]::new([System.StringComparer]::Ordinal)
+    $taskInGraphics = $false
+    foreach ($taskLine in [System.IO.File]::ReadAllLines($ConfigPath)) {
+        $taskSection = [regex]::Match($taskLine, '^[ \t]*\[([^\]]*)\][ \t]*$')
+        if ($taskSection.Success) {
+            $taskInGraphics = $taskSection.Groups[1].Value -ceq 'Graphics'
+            continue
+        }
+        if (-not $taskInGraphics) { continue }
+        $taskEntry = [regex]::Match($taskLine, '^[ \t]*([^=;]+?)=[ \t]*(.*)$')
+        if (-not $taskEntry.Success) { continue }
+        $taskKey = $taskEntry.Groups[1].Value.TrimEnd(' ', "`t")
+        if ($taskDefaults.Keys -ccontains $taskKey) {
+            # The engine keeps exact key case and uses the last occurrence.
+            $taskValues[$taskKey] = $taskEntry.Groups[2].Value
+        }
+    }
+    $taskRequested = [ordered]@{}
+    foreach ($taskEntry in $taskDefaults.GetEnumerator()) {
+        $taskKey = $taskEntry.Key
+        $taskValue = [int]$taskEntry.Value
+        if ($taskValues.ContainsKey($taskKey)) {
+            $taskRaw = $taskValues[$taskKey]
+            if ($taskBooleanKeys -ccontains $taskKey) {
+                if ($taskRaw -cne '0' -and $taskRaw -cne '1') { throw ('Entrada grafica invalida: [Graphics].' + $taskKey) }
+                $taskValue = [int]$taskRaw
+            } else {
+                $taskNumber = [regex]::Match($taskRaw, '^-?[0-9]+')
+                if (-not $taskNumber.Success -or -not [int]::TryParse($taskNumber.Value, [ref]$taskValue)) {
+                    throw ('Entrada grafica invalida: [Graphics].' + $taskKey)
+                }
+            }
+        }
+        $taskRequested[$taskKey] = $taskValue
+    }
+    return $taskRequested
+}
+
 $taskExecutable = Join-Path $taskRoot 'build\devilutionx-tristram-v4.exe'
 if ($QualityReview) {
     $taskQualityExecutable = Join-Path $taskRoot 'build\devilutionx-tristram-quality.exe'
@@ -228,6 +280,8 @@ $taskReceipt = [ordered]@{
     profile = Split-Path -Leaf $taskProfile
     presentation = $Presentation
     qualityReview = [bool]$QualityReview
+    graphicsScope = 'requested-from-final-ini'
+    graphicsRequested = Get-TaskGraphicsRequested $taskConfig
     model = $taskModelReceipt
     lighting = $taskLightingReceipt
     executable = [ordered]@{ name = Split-Path -Leaf $taskExecutable; sha256 = Get-TaskHash $taskExecutable }

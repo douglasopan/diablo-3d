@@ -16,6 +16,7 @@ void SurfaceBlit(const Surface &src, SDL_Rect srcRect, const Surface &dst, Point
 	dst.Clip(&srcRect, &dstPosition);
 	if (srcRect.w <= 0 || srcRect.h <= 0)
 		return;
+	MarkUiOverlayRect(dst, dstPosition.x, dstPosition.y, srcRect.w, srcRect.h);
 
 	const std::uint8_t *srcBuf = src.at(srcRect.x, srcRect.y);
 	const auto srcPitch = src.pitch();

@@ -83,6 +83,8 @@ set(libdevilutionx_SRCS
   engine/render/d3d_logo.cpp
   engine/render/scrollrt.cpp
   engine/render/town_view.cpp
+  engine/render/town_presentation.cpp
+  engine/render/ui_overlay_regions.cpp
   engine/render/town_scene.cpp
   engine/render/town_scene_projection.cpp
   engine/render/town_shadow.cpp
