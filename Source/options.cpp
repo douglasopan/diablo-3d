@@ -795,6 +795,7 @@ GraphicsOptions::GraphicsOptions()
           })
     , brightness("Brightness Correction", OptionEntryFlags::Invisible, "Brightness Correction", "Brightness correction level.", 0)
     , zoom("Zoom", OptionEntryFlags::None, N_("Zoom"), N_("Zoom on when enabled."), false)
+    , townViewGpuRendering("3D GPU Rendering", OptionEntryFlags::None, N_("3D GPU Rendering"), N_("Use GPU acceleration for the 3D town view when available. Changes apply on the next frame; CPU rendering is used if unavailable."), false)
     , townViewAntialiasing("3D Edge Smoothing", OptionEntryFlags::None, N_("3D Edge Smoothing"), N_("Smooth edges in the 3D town view without resizing the interface. Requires more processing power."), false)
     , perPixelLighting("Per-pixel Lighting", OptionEntryFlags::None, N_("Per-pixel Lighting"), N_("Subtile lighting for smoother light gradients."), DEFAULT_PER_PIXEL_LIGHTING)
     , colorCycling("Color Cycling", OptionEntryFlags::None, N_("Color Cycling"), N_("Color cycling effect used for water, lava, and acid animation."), true)
@@ -826,6 +827,7 @@ std::vector<OptionEntryBase *> GraphicsOptions::GetEntries()
 		&frameRateControl,
 		&brightness,
 		&zoom,
+		&townViewGpuRendering,
 		&townViewAntialiasing,
 		&showFPS,
 		&perPixelLighting,

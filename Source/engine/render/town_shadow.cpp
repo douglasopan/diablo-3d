@@ -293,4 +293,15 @@ TownShadowDirection GetTownShadowLightDirection()
 	return { Map.light.x, Map.light.height, Map.light.z };
 }
 
+TownShadowMapView GetTownShadowMapView()
+{
+	if (!Map.stats.ready)
+		return {};
+	return { Map.depth, Map.config,
+		{ Map.light.x, Map.light.height, Map.light.z },
+		{ Map.right.x, Map.right.height, Map.right.z },
+		{ Map.up.x, Map.up.height, Map.up.z },
+		Map.minU, Map.minV, Map.texelU, Map.texelV, Map.stats.sceneHash };
+}
+
 } // namespace devilution

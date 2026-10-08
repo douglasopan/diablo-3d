@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <span>
 #include <vector>
 
 #include "engine/render/town_scene.hpp"
@@ -42,6 +43,16 @@ struct TownShadowStats {
 	double buildMilliseconds = 0;
 	uint64_t sceneHash = 0;
 };
+
+/** Borrowed, immutable light-space map; invalidated by build/reset. */
+struct TownShadowMapView {
+	std::span<const float> depth;
+	TownShadowConfig config;
+	TownShadowDirection light, right, up;
+	float minU = 0, minV = 0, texelU = 1, texelV = 1;
+	uint64_t revision = 0;
+};
+TownShadowMapView GetTownShadowMapView();
 
 /**
  * Cache an orthographic light depth map of actual static architecture triangles.

@@ -84,6 +84,7 @@ set(libdevilutionx_SRCS
   engine/render/scrollrt.cpp
   engine/render/town_view.cpp
   engine/render/town_presentation.cpp
+  engine/render/town_gpu.cpp
   engine/render/ui_overlay_regions.cpp
   engine/render/town_scene.cpp
   engine/render/town_scene_projection.cpp
@@ -1155,6 +1156,10 @@ file(GENERATE OUTPUT ${CONFIG_PATH} CONTENT
 if(DISCORD_INTEGRATION)
   target_compile_definitions(libdevilutionx PRIVATE DISCORD)
   target_link_libraries(libdevilutionx PRIVATE discord discord_game_sdk)
+endif()
+
+if(WIN32)
+  target_link_libraries(libdevilutionx PUBLIC d3d11 dxgi d3dcompiler)
 endif()
 
 if(SCREEN_READER_INTEGRATION)

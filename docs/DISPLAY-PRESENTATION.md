@@ -6,13 +6,13 @@ O D3D pretende transformar todo o Diablo 1 em 3D, incluindo os níveis procedura
 
 O iniciador normal `Iniciar-Tristram.cmd` usa a mesma cabana selecionada dos perfis de revisão. No workspace local, a opção `3D Edge Smoothing` foi ligada uma vez no perfil habitual 960×540, preservando seu save e as demais preferências. Ela continua ajustável em Gráficos; instalações novas mantêm o padrão desligado por causa do custo. Não é necessário abrir uma cópia de personagem para reunir modelo e qualidade.
 
-Com a opção ativa e o mundo efetivamente em 2×, o novo compositor SDL preserva essa imagem até a saída física. A câmera e a área visível permanecem iguais: em uma saída maior, o mesmo objeto pode conservar mais detalhe, em vez de receber apenas a ampliação da imagem lógica já reduzida. O mundo continua rasterizado na CPU e limitado à paleta; nenhum pacote de texturas do Belzebub foi importado.
+Com a opção ativa e o mundo efetivamente em 2×, o novo compositor SDL preserva essa imagem até a saída física. A câmera e a área visível permanecem iguais: em uma saída maior, o mesmo objeto pode conservar mais detalhe, em vez de receber apenas a ampliação da imagem lógica já reduzida. O mundo permanece limitado à paleta e pode usar a referência CPU ou o [backend GPU opcional](GPU-RENDERER.md); nenhum pacote de texturas do Belzebub foi importado.
 
 A interface é composta por cima usando regiões explícitas de desenho no quadro lógico final. Preto permanece opaco, painéis em cache são cobertos e o cursor tem regiões transitórias próprias. O filtro do mundo segue a preferência gráfica; a camada da interface usa vizinho mais próximo para evitar halos nas bordas transparentes. Isso não acrescenta fontes/ícones HD nem escala independente à interface herdada.
 
 Este primeiro compositor é conservador: dentro do retângulo de uma letra, sprite ou painel transparente, o fundo já composto também permanece na resolução lógica. Ao exceder 4096 regiões por canal, a cobertura recua ao quadro inteiro. A saída de superfície sem renderer SDL, SDL1, Home, mundo em 1× e falhas opcionais de criação/composição usam a apresentação anterior. Carregamentos, vídeos e menus fora da partida não recebem uma imagem 3D antiga.
 
-O ganho depende da saída física: uma janela com o mesmo tamanho lógico não exibe quatro pixels físicos por pixel lógico. A amostragem continua cara na CPU; este incremento não transforma o rasterizador em GPU nem estabelece uma meta de FPS.
+O ganho depende da saída física: uma janela com o mesmo tamanho lógico não exibe quatro pixels físicos por pixel lógico. A amostragem continua cara na CPU; o compositor funciona com ambos os backends e não estabelece uma meta de FPS. A migração da rasterização para GPU é documentada separadamente.
 
 Validação local em 8 de outubro de 2026: jogo e diagnóstico compilados; fixtures sintéticas do compositor SDL passaram, incluindo detalhe físico pixel a pixel, preto opaco, paleta, clipping, cursor sem rastros, troca de renderer, resize e escala fracionária sem halo. A revisão do cenário real e a suíte de regressão também passaram, com 75 amostras geométricas independentes sem falhas. O mundo 2× da cabana foi exportado e inspecionado fora da janela. Não foi possível observar automaticamente a interface na janela do jogo: a ferramenta de controle falhou antes de abrir os aplicativos. Isso permanece uma revisão visual a fazer na partida.
 
@@ -56,7 +56,7 @@ F4 alterna a vista em Tristram; o botão do meio gira/inclina a câmera, a roda 
 
 ## Suavizar o contorno do mundo 3D
 
-Em **Configurações → Gráficos → Suavização de bordas 3D** (`3D Edge Smoothing`), é possível ativar uma amostragem maior somente para o mundo reconstruído. A opção começa desligada. Ela mantém câmera, enquadramento, menus e coordenadas do mouse; não aumenta a área visível como o perfil Campo ampliado.
+Em **Esc → Options → Video Options → 3D Edge Smoothing**, ou **Configurações → Gráficos → Suavização de bordas 3D** (`3D Edge Smoothing`), é possível ativar uma amostragem maior somente para o mundo reconstruído. A opção começa desligada. Ela mantém câmera, enquadramento, menus e coordenadas do mouse; não aumenta a área visível como o perfil Campo ampliado.
 
 Para uma revisão isolada, abra `Revisar-Qualidade3D.cmd`. A cabana local selecionada é usada automaticamente; `-MeshyReview` também pode ser passado para exigir suas fontes. O iniciador cria uma cópia em `perfil-apresentacao-suave-qualidade[-meshy]` e ativa essa opção somente nela. Saves e preferências do perfil habitual são preservados; o progresso da cópia permanece separado. Se existir `build/devilutionx-tristram-quality.exe`, a revisão usa esse candidato; caso contrário, usa o executável normal compilado com o código atualizado. Isso permite testar uma versão separada quando o Windows mantém o executável habitual bloqueado por uma partida aberta.
 
@@ -82,7 +82,7 @@ O atlas local `ctrlpan/modernui.png`, de 1024×1024, contém globos, barra de a�
 
 ## Limites e próxima evolução
 
-O nosso renderizador 3D atual desenha geometria na CPU e converte o resultado para a paleta do jogo. A apresentação SDL preserva o mundo 2× quando disponível e compõe regiões da interface lógica; o caminho herdado amplia o quadro final único. Aumentar somente `Width` e `Height` aumenta a área visível: a projeção nativa mantém sua escala em pixels. Isso não faz o mesmo objeto ganhar automaticamente mais amostras na tela, e os menus herdados não têm um controle geral de escala independente.
+O renderizador 3D mantém uma referência CPU e um backend Direct3D 11 opcional no Windows; ambos produzem índices da paleta do jogo. A apresentação SDL preserva o mundo 2× quando disponível e compõe regiões da interface lógica; o caminho herdado amplia o quadro final único. Aumentar somente `Width` e `Height` aumenta a área visível: a projeção nativa mantém sua escala em pixels. Isso não faz o mesmo objeto ganhar automaticamente mais amostras na tela, e os menus herdados não têm um controle geral de escala independente.
 
 O experimento `town_view_smoke --presentation` produz capturas e tempos do renderizador fora da janela do jogo. Ele compara diferentes áreas internas com a mesma escala de projeção e preserva o estado nativo. Os resultados medem esse experimento de CPU; não são FPS finais do jogo, uma validação da saída SDL/monitor, nem uma medição do Belzebub.
 

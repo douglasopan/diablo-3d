@@ -201,6 +201,7 @@ function Assert-PinnedReceipt {
     Assert-Equal (Get-FixtureHash $taskLighting) $taskReceipt.lighting.sha256 'Receipt destination lighting hash'
     Assert-Equal $ExecutableName $taskReceipt.executable.name 'Receipt executable choice'
     Assert-Equal (Get-FixtureHash (Join-Path $Fixture.Root ('build\' + $ExecutableName))) $taskReceipt.executable.sha256 'Receipt executable hash'
+    Assert-Equal 10 (@($taskReceipt.graphicsRequested.PSObject.Properties).Count) 'Receipt Graphics key count'
     return $taskReceipt
 }
 
@@ -254,32 +255,39 @@ Invoke-FixtureCase 'quality-review-uses-same-baseline' {
     $null = Assert-PinnedReceipt $taskFixture $taskProfile 'devilutionx-tristram-quality.exe'
     $taskIni = [System.IO.File]::ReadAllText((Join-Path $taskProfile 'diablo.ini'))
     Assert-True ($taskIni -match '(?m)^3D Edge Smoothing=1\r?$') 'Quality review did not prepare edge smoothing'
+    $taskReceipt = Get-Content -LiteralPath (Join-Path $taskProfile 'runtime-baseline-receipt.json') -Raw | ConvertFrom-Json
+    Assert-Equal 0 $taskReceipt.graphicsRequested.'3D GPU Rendering' 'Quality review must not implicitly enable GPU rendering'
 }
 
-Invoke-FixtureCase 'normal-launch-records-persisted-smoothing-without-changing-ini' {
-    $taskFixture = New-TestFixture 'normal-persisted-smoothing'
-    $taskExpectedGraphics = [ordered]@{
-        'Width' = 1024
-        'Height' = 768
-        'Fullscreen' = 1
-        'Fit to Screen' = 0
-        'Upscale' = 1
-        'Scaling Quality' = 2
-        'Integer Scaling' = 0
-        'Zoom' = 0
-        '3D Edge Smoothing' = 1
+foreach ($taskGpu in @(0, 1)) {
+    foreach ($taskSmoothing in @(0, 1)) {
+        Invoke-FixtureCase ('normal-launch-persisted-gpu-' + $taskGpu + '-smoothing-' + $taskSmoothing) {
+            $taskFixture = New-TestFixture ('normal-persisted-gpu-' + $taskGpu + '-smoothing-' + $taskSmoothing)
+            $taskExpectedGraphics = [ordered]@{
+                'Width' = 1024
+                'Height' = 768
+                'Fullscreen' = 1
+                'Fit to Screen' = 0
+                'Upscale' = 1
+                'Scaling Quality' = 2
+                'Integer Scaling' = 0
+                'Zoom' = 0
+                '3D GPU Rendering' = $taskGpu
+                '3D Edge Smoothing' = $taskSmoothing
+            }
+            $taskIniLines = @('[Graphics]')
+            foreach ($taskEntry in $taskExpectedGraphics.GetEnumerator()) { $taskIniLines += $taskEntry.Key + '=' + $taskEntry.Value }
+            $taskIniLines += @('', '[Audio]', 'Music Volume=34')
+            $taskIniPath = Join-Path $taskFixture.SourceProfile 'diablo.ini'
+            Write-FixtureText $taskIniPath ([string]::Join("`r`n", $taskIniLines) + "`r`n")
+            $taskBeforeIniHash = Get-FixtureHash $taskIniPath
+            Invoke-FixturePrepare $taskFixture @{}
+            $taskReceipt = Assert-PinnedReceipt $taskFixture (Get-ProfilePath $taskFixture)
+            Assert-Equal $taskBeforeIniHash (Get-FixtureHash $taskIniPath) 'Normal preparation changed a persisted Graphics INI'
+            Assert-Equal $false $taskReceipt.qualityReview 'Persisted edge smoothing must not imply the QualityReview flag'
+            Assert-RequestedGraphics $taskReceipt $taskExpectedGraphics $taskIniPath
+        }
     }
-    $taskIniLines = @('[Graphics]')
-    foreach ($taskEntry in $taskExpectedGraphics.GetEnumerator()) { $taskIniLines += $taskEntry.Key + '=' + $taskEntry.Value }
-    $taskIniLines += @('', '[Audio]', 'Music Volume=34')
-    $taskIniPath = Join-Path $taskFixture.SourceProfile 'diablo.ini'
-    Write-FixtureText $taskIniPath ([string]::Join("`r`n", $taskIniLines) + "`r`n")
-    $taskBeforeIniHash = Get-FixtureHash $taskIniPath
-    Invoke-FixturePrepare $taskFixture @{}
-    $taskReceipt = Assert-PinnedReceipt $taskFixture (Get-ProfilePath $taskFixture)
-    Assert-Equal $taskBeforeIniHash (Get-FixtureHash $taskIniPath) 'Normal preparation changed a persisted Graphics INI'
-    Assert-Equal $false $taskReceipt.qualityReview 'Persisted edge smoothing must not imply the QualityReview flag'
-    Assert-RequestedGraphics $taskReceipt $taskExpectedGraphics $taskIniPath
 }
 
 Invoke-FixtureCase 'quality-review-records-final-copy-graphics-and-preserves-source' {
@@ -293,6 +301,7 @@ Invoke-FixtureCase 'quality-review-records-final-copy-graphics-and-preserves-sou
         'Scaling Quality' = 0
         'Integer Scaling' = 1
         'Zoom' = 1
+        '3D GPU Rendering' = 1
         '3D Edge Smoothing' = 0
     }
     $taskIniLines = @('[Graphics]')
@@ -316,6 +325,7 @@ Invoke-FixtureCase 'quality-review-records-final-copy-graphics-and-preserves-sou
         'Scaling Quality' = 2
         'Integer Scaling' = 0
         'Zoom' = 0
+        '3D GPU Rendering' = 1
         '3D Edge Smoothing' = 1
     }) (Join-Path $taskProfile 'diablo.ini')
 }
@@ -377,6 +387,7 @@ Invoke-FixtureCase 'missing-private-source-has-explicit-procedural-fallback' {
         'Scaling Quality' = 2
         'Integer Scaling' = 0
         'Zoom' = 0
+        '3D GPU Rendering' = 0
         '3D Edge Smoothing' = 0
     })
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <string>
 
 #include "engine/point.hpp"
 #include "engine/render/town_lighting.hpp"
@@ -37,6 +38,15 @@ struct TownViewSamplingState {
 	bool limited = false;
 };
 TownViewSamplingState GetTownViewSamplingState();
+/** Last world draw, including explicit fallback and CPU work for validation. */
+struct TownViewRendererState {
+	bool requestedGpu = false;
+	bool usedGpu = false;
+	size_t cpuRasterizedTriangles = 0;
+	size_t gpuSubmittedTriangles = 0;
+	std::string failure;
+};
+TownViewRendererState GetTownViewRendererState();
 /** Borrowed world-only 2x image, or nullptr when its draw epoch is stale. */
 const Surface *GetTownViewHighResolutionFrame();
 bool BeginTownViewCameraDrag(Point screen, bool pan = false);

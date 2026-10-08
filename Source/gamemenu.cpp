@@ -40,6 +40,10 @@ namespace {
 void GamemenuPrevious(bool bActivate);
 void GamemenuNewGame(bool bActivate);
 void GamemenuOptions(bool bActivate);
+void GamemenuVideoOptions(bool bActivate);
+void GamemenuVideoPrevious(bool bActivate);
+void GamemenuGpuRendering(bool bActivate);
+void GamemenuEdgeSmoothing(bool bActivate);
 void GamemenuMusicVolume(bool bActivate);
 void GamemenuSoundVolume(bool bActivate);
 void GamemenuBrightness(bool bActivate);
@@ -72,12 +76,32 @@ TMenuItem sgOptionsMenu[] = {
 	// dwFlags,                     pszStr,              fnMenu
 	{ GMENU_ENABLED | GMENU_SLIDER, nullptr,             &GamemenuMusicVolume  },
 	{ GMENU_ENABLED | GMENU_SLIDER, nullptr,             &GamemenuSoundVolume  },
-	{ GMENU_ENABLED | GMENU_SLIDER, N_("Gamma"),         &GamemenuBrightness   },
+	{ GMENU_ENABLED               , N_("Video Options"), &GamemenuVideoOptions  },
 	{ GMENU_ENABLED | GMENU_SLIDER, N_("Speed"),         &GamemenuSpeed        },
 	{ GMENU_ENABLED               , N_("Previous Menu"), &GamemenuPrevious     },
 	{ GMENU_ENABLED               , nullptr,             nullptr               },
 	// clang-format on
 };
+// Keeping Gamma in this submenu avoids a sixth Options row underneath the
+// control panel at 640x480. Existing audio and speed slider indices stay stable.
+TMenuItem sgVideoOptionsMenu[] = {
+	// clang-format off
+	{ GMENU_ENABLED               , nullptr,             &GamemenuGpuRendering  },
+	{ GMENU_ENABLED               , nullptr,             &GamemenuEdgeSmoothing },
+	{ GMENU_ENABLED | GMENU_SLIDER, N_("Gamma"),          &GamemenuBrightness    },
+	{ GMENU_ENABLED               , N_("Previous Menu"), &GamemenuVideoPrevious },
+	{ GMENU_ENABLED               , nullptr,             nullptr                },
+	// clang-format on
+};
+const char *const GpuRenderingToggleNames[] = {
+	N_("3D GPU Rendering: Off"),
+	N_("3D GPU Rendering: On"),
+};
+const char *const EdgeSmoothingToggleNames[] = {
+	N_("3D Edge Smoothing: Off"),
+	N_("3D Edge Smoothing: On"),
+};
+
 /** Specifies the menu names for music enabled and disabled. */
 const char *const MusicToggleNames[] = {
 	N_("Music"),
@@ -151,8 +175,8 @@ void GamemenuGetSound()
 
 void GamemenuGetBrightness()
 {
-	gmenu_slider_steps(&sgOptionsMenu[2], 21);
-	gmenu_slider_set(&sgOptionsMenu[2], 0, 100, UpdateBrightness(-1));
+	gmenu_slider_steps(&sgVideoOptionsMenu[2], 21);
+	gmenu_slider_set(&sgVideoOptionsMenu[2], 0, 100, UpdateBrightness(-1));
 }
 
 void GamemenuGetSpeed()
@@ -179,16 +203,56 @@ void GamemenuGetSpeed()
 
 int GamemenuSliderBrightness()
 {
-	return gmenu_slider_get(&sgOptionsMenu[2], 0, 100);
+	return gmenu_slider_get(&sgVideoOptionsMenu[2], 0, 100);
 }
 
 void GamemenuOptions(bool /*bActivate*/)
 {
 	GamemenuGetMusic();
 	GamemenuGetSound();
-	GamemenuGetBrightness();
 	GamemenuGetSpeed();
 	gmenu_set_items(sgOptionsMenu, nullptr);
+}
+
+void GamemenuGetVideoOptions()
+{
+	const GraphicsOptions &graphics = GetOptions().Graphics;
+	sgVideoOptionsMenu[0].pszStr = GpuRenderingToggleNames[*graphics.townViewGpuRendering ? 1 : 0];
+	sgVideoOptionsMenu[1].pszStr = EdgeSmoothingToggleNames[*graphics.townViewAntialiasing ? 1 : 0];
+	GamemenuGetBrightness();
+}
+
+void GamemenuVideoOptions(bool /*bActivate*/)
+{
+	GamemenuGetVideoOptions();
+	gmenu_set_items(sgVideoOptionsMenu, nullptr);
+}
+
+void GamemenuVideoPrevious(bool /*bActivate*/)
+{
+	GamemenuOptions(true);
+}
+
+void GamemenuToggleVideoOption(OptionEntryBoolean &option)
+{
+	option.SetValue(!*option);
+	GamemenuGetVideoOptions();
+	RedrawEverything();
+	// Match the existing menu policy: playback must not rewrite preferences.
+	if (!demo::IsRunning())
+		SaveOptions();
+}
+
+void GamemenuGpuRendering(bool bActivate)
+{
+	if (bActivate)
+		GamemenuToggleVideoOption(GetOptions().Graphics.townViewGpuRendering);
+}
+
+void GamemenuEdgeSmoothing(bool bActivate)
+{
+	if (bActivate)
+		GamemenuToggleVideoOption(GetOptions().Graphics.townViewAntialiasing);
 }
 
 void GamemenuMusicVolume(bool bActivate)

@@ -95,9 +95,10 @@ function Get-TaskGraphicsRequested([string]$ConfigPath) {
         'Scaling Quality' = 2
         'Integer Scaling' = 0
         'Zoom' = 0
+        '3D GPU Rendering' = 0
         '3D Edge Smoothing' = 0
     }
-    $taskBooleanKeys = @('Fullscreen', 'Fit to Screen', 'Upscale', 'Integer Scaling', 'Zoom', '3D Edge Smoothing')
+    $taskBooleanKeys = @('Fullscreen', 'Fit to Screen', 'Upscale', 'Integer Scaling', 'Zoom', '3D GPU Rendering', '3D Edge Smoothing')
     $taskValues = [System.Collections.Generic.Dictionary[string, string]]::new([System.StringComparer]::Ordinal)
     $taskInGraphics = $false
     foreach ($taskLine in [System.IO.File]::ReadAllLines($ConfigPath)) {

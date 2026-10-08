@@ -1342,6 +1342,14 @@ void DrawView(const Surface &out, Point startPosition)
 		DrawString(out.subregionY(0, gnViewportHeight), "Botao do meio: girar/inclinar | Roda: zoom | Shift+meio: mover",
 		    Point { 8, 44 }, { .flags = UiFlags::ColorWhite });
 		const auto sampling = GetTownViewSamplingState();
+		const auto renderer = GetTownViewRendererState();
+		if (!IsTownViewNativePose()) {
+			DrawString(out.subregionY(0, gnViewportHeight), renderer.usedGpu
+					? "3D na GPU | Direct3D 11"
+					: renderer.requestedGpu ? "GPU indisponivel | 3D na CPU | Opcoes de video"
+					                       : "3D na CPU | Opcoes de video",
+			    Point { 8, 76 }, { .flags = UiFlags::ColorWhite });
+		}
 		if (!IsTownViewNativePose() && sampling.requested) {
 			DrawString(out.subregionY(0, gnViewportHeight), sampling.factor == 2
 					? "Suavizacao 3D ativa"

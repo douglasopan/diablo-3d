@@ -33,6 +33,7 @@
 #include "engine/render/dun_render.hpp"
 #include "engine/render/scrollrt.h"
 #include "engine/render/town_ground_shadow.hpp"
+#include "engine/render/town_gpu.hpp"
 #include "engine/render/town_actor.hpp"
 #include "engine/render/town_actor_mask.hpp"
 #include "engine/render/town_body.hpp"
@@ -47,6 +48,8 @@
 #include "engine/render/town_volume.hpp"
 #include "engine/surface.hpp"
 #include "game_mode.hpp"
+#include "gamemenu.h"
+#include "gmenu.h"
 #include "headless_mode.hpp"
 #include "levels/dun_tile_data.hpp"
 #include "levels/tile_properties.hpp"
@@ -3543,6 +3546,864 @@ void RunPresentationLayers(const std::filesystem::path &output)
 	Check(manifest.good(), "record clearly labeled synthetic layered-presentation evidence");
 }
 #endif
+struct GpuFixtureTexture {
+	std::vector<uint32_t> codes;
+	std::vector<uint8_t> opacity;
+	std::vector<uint8_t> lut;
+	TownGpuTexture view;
+
+	GpuFixtureTexture(uint64_t key, int width, int height, std::vector<uint32_t> colors,
+	    std::vector<uint8_t> mask = {})
+	    : codes(std::move(colors))
+	    , opacity(std::move(mask))
+	{
+		view.stableKey = key;
+		view.revision = 1;
+		view.width = width;
+		view.height = height;
+		Refresh();
+	}
+
+	void Refresh()
+	{
+		view.texelCodes = codes;
+		view.opacity = opacity;
+		view.lightLut = lut;
+	}
+};
+
+void GpuFixtureBegin(int width, int height)
+{
+	Check(TownGpuBeginFrame(width, height, true), "start explicit offscreen GPU diagnostic frame: " + GetTownGpuStatus().failure);
+	Check(TownGpuSetShadow({}), "empty shadow view disables the previous frame's shadow binding");
+}
+
+void GpuFixtureQuad(float x, float y, float width, float height, float depth,
+	const TownGpuTexture &texture, const TownGpuMaterial &material, uint32_t pickId,
+	float uMaximum = 1, float vMaximum = 1, bool reverse = false)
+{
+	const auto vertex = [&](float px, float py, float u, float v) {
+		return TownGpuVertex { px, py, depth, u, v, { px * 0.01F, 0, py * 0.01F } };
+	};
+	const std::array<TownGpuVertex, 4> vertices { vertex(x, y, 0, 0), vertex(x + width, y, uMaximum, 0),
+		vertex(x + width, y + height, uMaximum, vMaximum), vertex(x, y + height, 0, vMaximum) };
+	std::array<TownGpuVertex, 3> first { vertices[0], vertices[1], vertices[2] };
+	std::array<TownGpuVertex, 3> second { vertices[0], vertices[2], vertices[3] };
+	if (reverse) {
+		std::swap(first[1], first[2]);
+		std::swap(second[1], second[2]);
+	}
+	Check(TownGpuSubmitProjectedTriangle(first, texture, material, pickId)
+	        && TownGpuSubmitProjectedTriangle(second, texture, material, pickId),
+	    "submit both windings of a synthetic affine quad without CPU rasterization");
+}
+
+TownGpuFrame GpuFixtureEnd(int width, int height, size_t triangles)
+{
+	TownGpuFrame frame;
+	Check(TownGpuEndFrame(frame), "complete GPU color, depth and pick readback: " + GetTownGpuStatus().failure);
+	const auto &status = GetTownGpuStatus();
+	const size_t pixels = static_cast<size_t>(width) * height;
+	Check(status.available && status.frameSucceeded && status.submittedTriangles == triangles
+	        && (triangles == 0 || status.drawCalls > 0) && frame.width == width && frame.height == height
+	        && frame.indexed.size() == pixels && frame.pickIds.size() == pixels && frame.depth.size() == pixels,
+	    "GPU success explicitly publishes three equally sized outputs, never a silent CPU fallback");
+	return frame;
+}
+
+void CaptureGpuFixture(const TownGpuFrame &frame, const std::filesystem::path &path)
+{
+	OwnedSurface evidence(frame.width, frame.height);
+	std::array<SDL_Color, 256> palette {};
+	for (size_t i = 0; i < palette.size(); ++i)
+		palette[i] = { static_cast<uint8_t>(i), static_cast<uint8_t>((i * 37) % 256), static_cast<uint8_t>((i * 71) % 256), 255 };
+	SDL_SetPaletteColors(evidence.surface->format->palette, palette.data(), 0, 256);
+	for (int y = 0; y < frame.height; ++y)
+		std::memcpy(evidence.at(0, y), frame.indexed.data() + static_cast<size_t>(y) * frame.width, frame.width);
+	SavePng(evidence, path);
+}
+
+void RunGpuFixtures(const std::filesystem::path &output)
+{
+	Record("INFO synthetic D3D11 fixtures, not a game-window capture; WARP is permitted explicitly for diagnostics");
+	ResetTownGpuResources();
+	TownGpuMaterial plain;
+	GpuFixtureTexture base(0x10001, 1, 1, { 11 });
+	GpuFixtureTexture black(0x10002, 1, 1, { 0 });
+	GpuFixtureTexture decal(0x10003, 1, 1, { 99 });
+	GpuFixtureTexture nearer(0x10004, 1, 1, { 77 });
+	constexpr int Width = 19;
+	constexpr int Height = 13;
+	const auto index = [](int x, int y) { return static_cast<size_t>(y) * Width + x; };
+
+	GpuFixtureBegin(Width, Height);
+	GpuFixtureQuad(0, 0, Width, Height, 100, base.view, plain, 11);
+	auto frame = GpuFixtureEnd(Width, Height, 2);
+	bool completeQuad = true;
+	for (size_t i = 0; i < frame.indexed.size(); ++i)
+		completeQuad = completeQuad && frame.indexed[i] == 11 && frame.pickIds[i] == 11 && std::abs(frame.depth[i] - 100) < 0.001F;
+	Check(completeQuad, "odd-width readback and split diagonal retain every color, depth and ID sample");
+	const bool warp = GetTownGpuStatus().warp;
+	const std::string adapter = GetTownGpuStatus().adapter;
+	Record("INFO GPU adapter=" + adapter + " WARP=" + (warp ? "true" : "false"));
+	const auto first = frame;
+
+	// These odd target dimensions avoid the 3x3 texel boundaries. Native GPU
+	// interpolation may fall on either side of an exact rational boundary.
+	GpuFixtureTexture masked(0x10005, 3, 3, { 0, 33, 44, 55, 66, 77, 88, 101, 111 }, { 1, 0, 1, 1, 1, 0, 0, 1, 1 });
+	GpuFixtureBegin(Width, Height);
+	GpuFixtureQuad(0, 0, Width, Height, 100, base.view, plain, 11);
+	GpuFixtureQuad(0, 0, Width, Height, 50, masked.view, plain, 22, 1, 1, true);
+	frame = GpuFixtureEnd(Width, Height, 4);
+	bool maskCorrect = true;
+	size_t maskMismatches = 0;
+	for (int y = 0; y < Height; ++y) {
+		for (int x = 0; x < Width; ++x) {
+			const int tx = (6 * x + 3) / (2 * Width);
+			const int ty = (6 * y + 3) / (2 * Height);
+			const size_t texel = static_cast<size_t>(ty) * 3 + tx;
+			const bool visible = masked.opacity[texel] != 0;
+			const size_t pixel = index(x, y);
+			const bool correct = frame.indexed[pixel] == (visible ? masked.codes[texel] : 11)
+			        && frame.pickIds[pixel] == (visible ? 22 : 11)
+			        && std::abs(frame.depth[pixel] - (visible ? 50 : 100)) < 0.001F;
+			maskCorrect = maskCorrect && correct;
+			if (!correct && ++maskMismatches <= 12)
+				Record("INFO GPU mask mismatch x=" + std::to_string(x) + " y=" + std::to_string(y)
+				    + " actual=" + std::to_string(frame.indexed[pixel]) + "," + std::to_string(frame.pickIds[pixel]) + "," + std::to_string(frame.depth[pixel])
+				    + " expected=" + std::to_string(visible ? masked.codes[texel] : 11) + "," + std::to_string(visible ? 22 : 11)
+				    + "," + std::to_string(visible ? 50 : 100));
+		}
+	}
+	CaptureGpuFixture(frame, output / "synthetic-opacity-index-zero.png");
+	Check(maskCorrect, "explicit opacity preserves painted index zero and discards masked pixels before depth or pick writes");
+
+	TownGpuMaterial transparent = plain;
+	transparent.transparentZero = true;
+	TownGpuMaterial preserve = plain;
+	preserve.preservePicking = true;
+	GpuFixtureBegin(Width, Height);
+	GpuFixtureQuad(0, 0, Width, Height, 100, base.view, plain, 11);
+	GpuFixtureQuad(0, 0, Width, Height, 80, decal.view, preserve, 99);
+	GpuFixtureQuad(0, 0, Width, Height, 90, nearer.view, plain, 77);
+	GpuFixtureQuad(0, 0, Width, Height, 70, black.view, transparent, 66);
+	frame = GpuFixtureEnd(Width, Height, 8);
+	Check(std::all_of(frame.indexed.begin(), frame.indexed.end(), [](uint8_t color) { return color == 99; })
+	        && std::all_of(frame.pickIds.begin(), frame.pickIds.end(), [](uint32_t id) { return id == 11; })
+	        && std::all_of(frame.depth.begin(), frame.depth.end(), [](float depth) { return std::abs(depth - 80) < 0.001F; }),
+	    "shadow-like decals preserve underlying picks while updating depth; farther geometry and legacy transparent zero cannot overwrite them");
+
+	GpuFixtureBegin(Width, Height);
+	GpuFixtureQuad(0, 0, Width, Height, 100, base.view, plain, 11);
+	GpuFixtureQuad(0, 0, Width, Height, 100, nearer.view, plain, 77);
+	frame = GpuFixtureEnd(Width, Height, 4);
+	Check(std::all_of(frame.indexed.begin(), frame.indexed.end(), [](uint8_t color) { return color == 77; })
+	        && std::all_of(frame.pickIds.begin(), frame.pickIds.end(), [](uint32_t id) { return id == 77; }),
+	    "exact coplanar overlays drawn later win color and selection together");
+
+	GpuFixtureTexture stripes(0x10006, 3, 1, { 41, 83, 121 });
+	TownGpuMaterial repeat = plain;
+	repeat.repeat = true;
+	GpuFixtureBegin(Width, Height);
+	// 1.75 periods crosses a wrap while keeping every sample off a texel edge.
+	GpuFixtureQuad(0, 0, Width, Height, 100, stripes.view, repeat, 41, 1.75F, 1);
+	frame = GpuFixtureEnd(Width, Height, 2);
+	bool repeated = true;
+	for (int y = 0; y < Height; ++y)
+		for (int x = 0; x < Width; ++x) {
+			const int texel = (21 * (2 * x + 1) / (8 * Width)) % 3;
+			repeated = repeated && frame.indexed[index(x, y)] == stripes.codes[texel];
+		}
+	Check(repeated, "affine UVs repeat in material units with nearest texel sampling");
+	GpuFixtureTexture directional(0x10009, 1, 1, { 1 });
+	directional.lut = { 0, 0, 0, 0, 41, 52, 63, 74 };
+	directional.view.lightLevels = 4;
+	directional.Refresh();
+	TownGpuMaterial lit = plain;
+	lit.lighting = TownGpuLighting::Directional;
+	lit.diffuse = 0.5F;
+	GpuFixtureBegin(Width, Height);
+	GpuFixtureQuad(0, 0, Width, Height, 100, directional.view, lit, 52);
+	frame = GpuFixtureEnd(Width, Height, 2);
+	Check(std::all_of(frame.indexed.begin(), frame.indexed.end(), [](uint8_t color) { return color == 63; }),
+	    "directional materials index the lighting LUT by texel code and rounded irradiance level");
+	GpuFixtureBegin(Width, Height);
+	GpuFixtureQuad(0, 0, Width, Height, 100, base.view, plain, 11);
+	const std::array<TownGpuVertex, 3> sloped { TownGpuVertex { 0, 0, 20, 0, 0, {} },
+		TownGpuVertex { Width, 0, 40, 1, 0, {} }, TownGpuVertex { 0, Height, 60, 0, 1, {} } };
+	Check(TownGpuSubmitProjectedTriangle(sloped, nearer.view, plain, 77), "submit a triangle with distinct affine vertex depths");
+	frame = GpuFixtureEnd(Width, Height, 3);
+	const float expectedDepth = 20 + 20 * 2.5F / Width + 40 * 2.5F / Height;
+	Check(frame.pickIds[index(2, 2)] == 77 && std::abs(frame.depth[index(2, 2)] - expectedDepth) < 0.001F
+	        && frame.pickIds[index(Width - 2, Height - 2)] == 11,
+	    "readback depth is unnormalized affine camera depth and excludes points outside the triangle");
+	GpuFixtureBegin(Width, Height);
+	GpuFixtureQuad(0, 0, 9, Height, 100, base.view, plain, 11);
+	GpuFixtureQuad(9, 0, Width - 9, Height, 100, nearer.view, plain, 77);
+	GpuFixtureQuad(5, 4, 9, 5, 50, decal.view, plain, 99);
+	frame = GpuFixtureEnd(Width, Height, 6);
+	bool geometricPicks = true;
+	for (int y = 0; y < Height; ++y)
+		for (int x = 0; x < Width; ++x) {
+			// Parallel rays through pixel centers meet these exact rectangles;
+			// every boundary is between sample centers, independent of raster rules.
+			const bool foreground = x >= 5 && x < 14 && y >= 4 && y < 9;
+			const uint32_t expected = foreground ? 99 : (x < 9 ? 11 : 77);
+			geometricPicks = geometricPicks && frame.pickIds[index(x, y)] == expected
+			    && frame.indexed[index(x, y)] == expected && std::abs(frame.depth[index(x, y)] - (foreground ? 50 : 100)) < 0.001F;
+		}
+	Check(geometricPicks, "independent parallel-ray rectangle oracle verifies adjacent ground IDs and frontmost object depth at every pixel");
+	GpuFixtureTexture volumeBase(0x10010, 1, 1, { 87 });
+	GpuFixtureTexture volumeFront(0x10011, 3, 3, masked.codes, masked.opacity);
+	for (GpuFixtureTexture *texture : { &volumeBase, &volumeFront }) {
+		texture->lut.resize(256 * 16);
+		for (size_t code = 0; code < 256; ++code)
+			for (size_t shade = 0; shade < 4; ++shade)
+				for (size_t shadow = 0; shadow < 4; ++shadow)
+					texture->lut[code * 16 + shade * 4 + shadow] = static_cast<uint8_t>((code + shade * 17 + shadow * 3) % 256);
+		texture->view.lightLevels = 16;
+		texture->Refresh();
+	}
+	TownGpuMaterial baseShade = plain;
+	baseShade.lighting = TownGpuLighting::Shadow;
+	baseShade.shade = 2;
+	TownGpuMaterial frontShade = baseShade;
+	frontShade.shade = 0;
+	GpuFixtureBegin(Width, Height);
+	GpuFixtureQuad(0, 0, Width, Height, 100, volumeBase.view, baseShade, 11, 1.3F, 1.2F);
+	GpuFixtureQuad(0, 0, Width, Height, 100, volumeFront.view, frontShade, 11, 1.3F, 1.2F);
+	const auto twoPassVolume = GpuFixtureEnd(Width, Height, 4);
+	TownGpuMaterial fused = frontShade;
+	fused.fallbackPaletteIndex = 87;
+	fused.fallbackShade = 2;
+	GpuFixtureBegin(Width, Height);
+	GpuFixtureQuad(0, 0, Width, Height, 100, volumeFront.view, fused, 11, 1.3F, 1.2F);
+	frame = GpuFixtureEnd(Width, Height, 2);
+	Check(frame.indexed == twoPassVolume.indexed && frame.pickIds == twoPassVolume.pickIds && frame.depth == twoPassVolume.depth,
+	    "one-pass volume fallback exactly matches opaque base plus masked front, including index zero, shaded base and UVs outside the front texture");
+	CaptureGpuFixture(frame, output / "synthetic-fused-volume.png");
+
+	GpuFixtureTexture transient(0x10007, 1, 1, { 42 });
+	GpuFixtureBegin(Width, Height);
+	GpuFixtureQuad(0, 0, Width, Height, 100, transient.view, plain, 42);
+	transient.codes[0] = 125;
+	frame = GpuFixtureEnd(Width, Height, 2);
+	Check(std::all_of(frame.indexed.begin(), frame.indexed.end(), [](uint8_t color) { return color == 42; }),
+	    "submitted texture bytes are owned before borrowed sprite storage can change");
+	++transient.view.revision;
+	GpuFixtureBegin(Width, Height);
+	GpuFixtureQuad(0, 0, Width, Height, 100, transient.view, plain, 125);
+	frame = GpuFixtureEnd(Width, Height, 2);
+	Check(std::all_of(frame.indexed.begin(), frame.indexed.end(), [](uint8_t color) { return color == 125; }),
+	    "texture revision invalidates an otherwise stable upload key");
+
+	GpuFixtureBegin(7, 5);
+	frame = GpuFixtureEnd(7, 5, 0);
+	Check(std::all_of(frame.pickIds.begin(), frame.pickIds.end(), [](uint32_t id) { return id == 0; })
+	        && std::all_of(frame.depth.begin(), frame.depth.end(), [](float depth) { return !std::isfinite(depth); }),
+	    "resizing and starting an empty frame clears stale picking and depth");
+	GpuFixtureBegin(Width, Height);
+	GpuFixtureTexture malformed(0x10008, 2, 2, { 1, 2, 3 });
+	const std::array<TownGpuVertex, 3> triangle { TownGpuVertex { 0, 0, 100, 0, 0, {} },
+		TownGpuVertex { 10, 0, 100, 1, 0, {} }, TownGpuVertex { 0, 10, 100, 0, 1, {} } };
+	Check(!TownGpuSubmitProjectedTriangle(triangle, malformed.view, plain, 3), "reject a texture whose storage does not match its declared dimensions");
+	Check(!TownGpuEndFrame(frame) && !GetTownGpuStatus().frameSucceeded && frame.width == 0 && frame.height == 0
+	        && frame.indexed.empty() && frame.pickIds.empty() && frame.depth.empty(),
+	    "a failed GPU frame never publishes a partial image or stale depth and picking");
+	Check(!TownGpuBeginFrame(0, Height, true), "invalid frame dimensions fail before GPU allocation");
+	ResetTownGpuResources();
+	ResetTownGpuResources();
+	GpuFixtureBegin(Width, Height);
+	GpuFixtureQuad(0, 0, Width, Height, 100, base.view, plain, 11);
+	frame = GpuFixtureEnd(Width, Height, 2);
+	Check(frame.indexed == first.indexed && frame.pickIds == first.pickIds && frame.depth == first.depth,
+	    "device reset and recreation restore the same synthetic frame");
+	std::ofstream metadata(output / "synthetic-gpu.json");
+	metadata << "{\"synthetic\":true,\"gameWindowCapture\":false,\"backend\":\"D3D11\",\"warp\":" << (warp ? "true" : "false")
+	    << ",\"adapter\":" << std::quoted(adapter) << ",\"width\":" << Width << ",\"height\":" << Height
+	    << ",\"cpuRasterFallbackAllowed\":false,\"depthTiePolicy\":\"exact LEQUAL; CPU subepsilon tolerance is not claimed equivalent\"}\n";
+	Check(metadata.good(), "record the actual GPU adapter and synthetic test scope");
+	ResetTownGpuResources();
+}
+
+struct GpuPickSnapshot {
+	Point tile { -1, -1 };
+	int npc = -1, item = -1, player = -1, architecture = -1;
+	float depth = std::numeric_limits<float>::infinity();
+	bool picked = false;
+
+	bool SameIdentity(const GpuPickSnapshot &other) const
+	{
+		return picked == other.picked && tile == other.tile && npc == other.npc && item == other.item
+		    && player == other.player && architecture == other.architecture;
+	}
+};
+
+struct GpuRayFrame {
+	RayVector eye, right, up, direction;
+	Point anchor;
+	double focal;
+	TownViewCameraState camera;
+	int zoom;
+
+	GpuRayFrame()
+	{
+		camera = GetTownViewCameraState();
+		constexpr double HeightScale = 0.816496580927726;
+		zoom = *GetOptions().Graphics.zoom ? 2 : 1;
+		focal = 45.25483399593904 * 22 / camera.distance * zoom;
+		anchor = GetScreenPosition(ViewPosition) + Displacement { 32, 0 };
+		anchor = { anchor.x * zoom, anchor.y * zoom };
+		if (zoom == 2 && CanPanelsCoverView() && IsLeftPanelOpen())
+			anchor.x += SidePanelSize.width;
+		const double cy = std::cos(camera.yaw), sy = std::sin(camera.yaw);
+		const double cp = std::cos(camera.pitch), sp = std::sin(camera.pitch);
+		right = { sy, 0, -cy };
+		up = { -cy * sp, cp, -sy * sp };
+		const RayVector eyeDirection { cy * cp, sp, sy * cp };
+		const RayVector target { ViewPosition.x + camera.offsetX, 0, ViewPosition.y + camera.offsetZ };
+		eye = target + eyeDirection * 256;
+		direction = { -eyeDirection.x, -eyeDirection.y / HeightScale, -eyeDirection.z };
+	}
+
+	RayVector Origin(double pixelX, double pixelY) const
+	{
+		RayVector origin = eye + right * ((pixelX - anchor.x) / focal) + up * ((anchor.y - pixelY) / focal);
+		origin.y /= 0.816496580927726;
+		return origin;
+	}
+
+	std::array<double, 3> RasterVertex(const TownSceneVertex &vertex, int factor) const
+	{
+		// Match the submitted float projection, then separately quantize coverage.
+		const float cy = std::cos(camera.yaw), sy = std::sin(camera.yaw);
+		const float cp = std::cos(camera.pitch), sp = std::sin(camera.pitch);
+		const float eyeX = (static_cast<float>(ViewPosition.x) + camera.offsetX) + cy * cp * 256.0F;
+		const float eyeY = sp * 256.0F;
+		const float eyeZ = (static_cast<float>(ViewPosition.y) + camera.offsetZ) + sy * cp * 256.0F;
+		const float x = vertex.x - eyeX, y = vertex.height * 0.816496580927726F - eyeY, z = vertex.z - eyeZ;
+		const float cameraX = x * sy + y * 0 + z * -cy;
+		const float cameraY = x * (-cy * sp) + y * cp + z * (-sy * sp);
+		const float cameraDepth = x * (-cy * cp) + y * -sp + z * (-sy * cp);
+		const float scale = 45.25483399593904F * 22.0F / camera.distance * zoom;
+		const float screenX = (static_cast<float>(anchor.x) + cameraX * scale) * factor;
+		const float screenY = (static_cast<float>(anchor.y) - cameraY * scale) * factor;
+		return { screenX, screenY, cameraDepth };
+	}
+
+	bool MatchesGroundDepth(Point pixel, int factor, float depth) const
+	{
+		for (int dy = 0; dy < factor; ++dy) {
+			for (int dx = 0; dx < factor; ++dx) {
+				const auto origin = Origin(pixel.x + (dx + 0.5) / factor, pixel.y + (dy + 0.5) / factor);
+				const double distance = -origin.y / direction.y;
+				if (std::isfinite(distance) && std::abs(distance - depth) <= 0.0001)
+					return true;
+			}
+		}
+		return false;
+	}
+};
+
+bool AuditGpuVegetationDepth(Point tile, Point pixel, int factor, float cpuDepth, float gpuDepth)
+{
+	const auto &groups = GetTownVegetationGroups();
+	const auto group = std::find_if(groups.begin(), groups.end(), [&](const TownVegetationGroup &entry) { return entry.referenceFootpoint == tile; });
+	if (group == groups.end())
+		return false;
+	const size_t groupIndex = static_cast<size_t>(group - groups.begin());
+	const TownVolumeMesh *volume = TownViewVegetationVolume(groupIndex);
+	if (volume == nullptr)
+		return false;
+	const GpuRayFrame rays;
+	std::vector<TownSceneTriangle> geometry;
+	geometry.reserve(volume->triangles.size());
+	constexpr float InverseSqrt2 = 0.7071067811865475F;
+	for (const auto &source : volume->triangles) {
+		TownSceneTriangle triangle;
+		for (size_t i = 0; i < 3; ++i) {
+			const auto &v = source.vertices[i];
+			triangle.vertices[i] = { tile.x + (v.x + v.z) * InverseSqrt2,
+				v.height + v.z * InverseSqrt2 - 1 / 32.0F, tile.y + (-v.x + v.z) * InverseSqrt2, v.u, v.v };
+		}
+		geometry.push_back(triangle);
+	}
+	double nearestStrict = std::numeric_limits<double>::infinity();
+	double nearestExpanded = nearestStrict;
+	double nearestQuantized = nearestStrict;
+	double winningEdgeDistance = nearestStrict;
+	bool winningQuantizedCoverage = true;
+	const auto screenEdge = [](const std::array<double, 3> &a, const std::array<double, 3> &b, double x, double y) {
+		return (x - a[0]) * (b[1] - a[1]) - (y - a[1]) * (b[0] - a[0]);
+	};
+	for (int dy = 0; dy < factor; ++dy) {
+		for (int dx = 0; dx < factor; ++dx) {
+			const auto origin = rays.Origin(pixel.x + (dx + 0.5) / factor, pixel.y + (dy + 0.5) / factor);
+			double strict = std::numeric_limits<double>::infinity(), expanded = strict;
+			double quantized = strict, strictEdgeDistance = strict;
+			double strictBarycentric = 0, expandedBarycentric = 0;
+			size_t strictTriangle = geometry.size(), expandedTriangle = geometry.size();
+			bool strictQuantizedCoverage = true;
+			for (size_t i = 0; i < geometry.size(); ++i) {
+				const auto &triangle = geometry[i];
+				const auto a = RayPosition(triangle.vertices[0]);
+				const auto e1 = RayPosition(triangle.vertices[1]) - a;
+				const auto e2 = RayPosition(triangle.vertices[2]) - a;
+				const auto h = RayCross(rays.direction, e2);
+				const double determinant = RayDot(e1, h);
+				const RayVector physicalEye { rays.eye.x, rays.eye.y / 0.816496580927726, rays.eye.z };
+				if (std::abs(determinant) < 1e-10 || RayDot(RayCross(e1, e2), physicalEye - a) <= 0)
+					continue;
+				const auto s = origin - a;
+				const double u = RayDot(s, h) / determinant;
+				const auto q = RayCross(s, e1);
+				const double v = RayDot(rays.direction, q) / determinant;
+				const double distance = RayDot(e2, q) / determinant;
+				const double margin = std::min({ u, v, 1 - u - v });
+				if (distance <= 0)
+					continue;
+				std::array<std::array<double, 3>, 3> projected, snapped;
+				for (size_t corner = 0; corner < 3; ++corner) {
+					projected[corner] = rays.RasterVertex(triangle.vertices[corner], factor);
+					snapped[corner] = projected[corner];
+					for (size_t axis = 0; axis < 2; ++axis)
+						snapped[corner][axis] = std::round(projected[corner][axis] * 256) / 256;
+				}
+				const double sampleX = pixel.x * factor + dx + 0.5, sampleY = pixel.y * factor + dy + 0.5;
+				const double snappedArea = screenEdge(snapped[0], snapped[1], snapped[2][0], snapped[2][1]);
+				bool quantizedCoverage = std::abs(snappedArea) > 1e-12;
+				if (quantizedCoverage)
+					for (size_t edge = 0; edge < 3; ++edge)
+						quantizedCoverage = quantizedCoverage && screenEdge(snapped[edge], snapped[(edge + 1) % 3], sampleX, sampleY) / snappedArea >= 0;
+				if (quantizedCoverage)
+					quantized = std::min(quantized, distance);
+				if (margin < -0.0001)
+					continue;
+				if (distance < expanded) {
+					expanded = distance;
+					expandedBarycentric = margin;
+					expandedTriangle = i;
+				}
+				if (margin >= 0 && distance < strict) {
+					strict = distance;
+					strictBarycentric = margin;
+					strictTriangle = i;
+					strictQuantizedCoverage = quantizedCoverage;
+					strictEdgeDistance = std::numeric_limits<double>::infinity();
+					for (size_t edge = 0; edge < 3; ++edge) {
+						const auto &pa = projected[edge], &pb = projected[(edge + 1) % 3];
+						const double length = std::hypot(pb[0] - pa[0], pb[1] - pa[1]);
+						if (length > 0)
+							strictEdgeDistance = std::min(strictEdgeDistance, std::abs(screenEdge(pa, pb, sampleX, sampleY)) / length);
+					}
+				}
+			}
+			if (strict < nearestStrict) {
+				nearestStrict = strict;
+				winningEdgeDistance = strictEdgeDistance;
+				winningQuantizedCoverage = strictQuantizedCoverage;
+			}
+			nearestExpanded = std::min(nearestExpanded, expanded);
+			nearestQuantized = std::min(nearestQuantized, quantized);
+			std::ostringstream details;
+			details << std::setprecision(12) << "INFO GPU tree ray foot=" << tile.x << ',' << tile.y
+			    << " pixel=" << pixel.x << ',' << pixel.y << " sample=" << dx << ',' << dy << " group=" << groupIndex
+			    << " strictDepth=" << strict << " strictTriangle=" << strictTriangle << " strictMargin=" << strictBarycentric
+			    << " strictScreenEdgeDistance=" << strictEdgeDistance << " strictQuantizedCoverage=" << strictQuantizedCoverage
+			    << " quantizedDepth=" << quantized
+			    << " expandedDepth=" << expanded << " expandedTriangle=" << expandedTriangle << " expandedMargin=" << expandedBarycentric;
+			Record(details.str());
+		}
+	}
+	const bool classified = std::abs(nearestStrict - cpuDepth) <= 0.001 && std::abs(nearestQuantized - gpuDepth) <= 0.001
+	    && nearestStrict + 0.0001 < nearestQuantized && winningEdgeDistance <= 1.0 / 256 && !winningQuantizedCoverage;
+	std::ostringstream summary;
+	summary << std::setprecision(12) << "INFO GPU tree ray minima CPU=" << cpuDepth << " GPU=" << gpuDepth
+	    << " independentStrict=" << nearestStrict << " independentBarycentricExpanded=" << nearestExpanded
+	    << " independentQuantized=" << nearestQuantized << " winningScreenEdgeDistance=" << winningEdgeDistance
+	    << " classifiedFixedPointCoverage=" << classified;
+	Record(summary.str());
+	return classified;
+}
+
+std::vector<GpuPickSnapshot> ReadGpuWorldPicks(const Surface &out)
+{
+	std::vector<GpuPickSnapshot> samples(static_cast<size_t>(out.w()) * gnViewportHeight);
+	for (int y = 0; y < gnViewportHeight; ++y) {
+		for (int x = 0; x < out.w(); ++x) {
+			auto &sample = samples[static_cast<size_t>(y) * out.w() + x];
+			sample.picked = Pick({ x, y }, sample.tile, sample.npc, sample.item, sample.player);
+			sample.architecture = TownViewArchitectureAt({ x, y });
+			sample.depth = TownViewDepthAt({ x, y });
+		}
+	}
+	return samples;
+}
+
+void CheckGpuVideoOptions()
+{
+	// Main binds ConfigPath to the diagnostic output, never a player's profile.
+	LoadOptions();
+	GetOptions().Graphics.townViewGpuRendering.SetValue(false);
+	GetOptions().Graphics.townViewAntialiasing.SetValue(false);
+	SaveOptions();
+	const auto state = NativeSceneState();
+	gamemenu_on();
+	Check(sgpCurrentMenu != nullptr && sgpCurrentMenu[0].fnMenu != nullptr, "open the real headless game Options menu");
+	sgpCurrentMenu[0].fnMenu(true);
+	Check(sgpCurrentMenu[2].fnMenu != nullptr && sgpCurrentMenu[4].fnMenu != nullptr && sgpCurrentMenu[5].fnMenu == nullptr,
+	    "Options retains five rows with Video at the old Gamma position");
+	sgpCurrentMenu[2].fnMenu(true);
+	Check(sgpCurrentMenu[0].fnMenu != nullptr && sgpCurrentMenu[1].fnMenu != nullptr
+	        && sgpCurrentMenu[2].isSlider() && sgpCurrentMenu[3].fnMenu != nullptr && sgpCurrentMenu[4].fnMenu == nullptr,
+	    "Video exposes GPU, smoothing, Gamma and Previous without overflowing the legacy menu");
+	sgpCurrentMenu[0].fnMenu(true);
+	sgpCurrentMenu[1].fnMenu(true);
+	Check(*GetOptions().Graphics.townViewGpuRendering && *GetOptions().Graphics.townViewAntialiasing,
+	    "real Video callbacks enable GPU and smoothing independently");
+	GetOptions().Graphics.townViewGpuRendering.SetValue(false);
+	GetOptions().Graphics.townViewAntialiasing.SetValue(false);
+	LoadOptions();
+	Check(*GetOptions().Graphics.townViewGpuRendering && *GetOptions().Graphics.townViewAntialiasing,
+	    "Video callbacks persist both switches immediately to the isolated diagnostic INI");
+	sgpCurrentMenu[0].fnMenu(false);
+	Check(*GetOptions().Graphics.townViewGpuRendering, "a non-activation menu callback cannot toggle GPU rendering");
+	sgpCurrentMenu[0].fnMenu(true);
+	Check(!*GetOptions().Graphics.townViewGpuRendering && *GetOptions().Graphics.townViewAntialiasing,
+	    "disabling GPU preserves the independent smoothing preference");
+	sgpCurrentMenu[3].fnMenu(true);
+	Check(sgpCurrentMenu[5].fnMenu == nullptr && sgpCurrentMenu[2].fnMenu != nullptr, "Video Previous returns to the five-row Options menu");
+	gamemenu_off();
+	LoadOptions();
+	Check(!*GetOptions().Graphics.townViewGpuRendering && *GetOptions().Graphics.townViewAntialiasing
+	        && NativeSceneState() == state, "menu close and reload preserve independent settings without changing the native scene");
+	GetOptions().Graphics.townViewAntialiasing.SetValue(false);
+}
+
+std::string CheckGpuWorldBudgetFallback()
+{
+	const std::string original = NativeSceneState();
+	const auto randomState = GetLCGEngineState();
+	CharFlag = false;
+	GetOptions().Graphics.zoom.SetValue(false);
+	GetOptions().Graphics.townViewAntialiasing.SetValue(false);
+	GetOptions().Graphics.townViewGpuRendering.SetValue(false);
+	gnScreenWidth = 2304;
+	gnScreenHeight = 2048;
+	CalculatePanelAreas();
+	CalcViewportGeometry();
+	ResetTownViewCamera();
+	OrbitTownView(0.12F, 0);
+	Check(static_cast<uint64_t>(gnScreenWidth) * gnViewportHeight > 4ULL * 1024 * 1024,
+	    "real GPU fallback fixture exceeds the GPU frame budget with quality disabled");
+	const int budgetViewportHeight = gnViewportHeight;
+	std::string failure;
+	double fallbackMilliseconds = 0;
+	{
+		OwnedSurface allocation(gnScreenWidth, gnScreenHeight + 2);
+		SDL_SetPaletteColors(allocation.surface->format->palette, logical_palette.data(), 0, 256);
+		SDL_FillRect(allocation.surface, nullptr, 255);
+		const Surface out = allocation.subregionY(0, gnScreenHeight);
+		Check(DrawTownView(out, true) && !GetTownViewRendererState().requestedGpu
+		        && GetTownViewRendererState().cpuRasterizedTriangles > 0,
+		    "oversized fallback has a real CPU reference without forcing a GPU allocation");
+		const auto referencePixels = ViewportPixels(out);
+		const auto referencePicking = InspectQualityPicking(out);
+		Check(referencePicking.valid && referencePicking.picked > 0, "oversized CPU reference publishes valid live selection and depth");
+		GetOptions().Graphics.townViewGpuRendering.SetValue(true);
+		Point tile;
+		int npc, item, player;
+		Check(!Pick(referencePicking.probe, tile, npc, item, player) && !std::isfinite(TownViewDepthAt(referencePicking.probe)),
+		    "requesting the rejected GPU frame invalidates the previous CPU selection before redraw");
+		const auto begin = std::chrono::steady_clock::now();
+		Check(DrawTownView(out, true), "a real GPU pixel-budget rejection completes through the CPU backend");
+		fallbackMilliseconds = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - begin).count();
+		const auto fallback = GetTownViewRendererState();
+		const auto rejected = GetTownGpuStatus();
+		failure = fallback.failure;
+		Check(fallback.requestedGpu && !fallback.usedGpu && fallback.cpuRasterizedTriangles > 0
+		        && fallback.gpuSubmittedTriangles == 0 && !rejected.frameSucceeded && rejected.drawCalls == 0
+		        && failure.find("pixel budget") != std::string::npos,
+		    "real GPU budget failure is explicit and occurs before any triangle submission: " + failure);
+		Check(GetTownViewSamplingState().factor == 1 && GetTownViewHighResolutionFrame() == nullptr
+		        && ViewportPixels(out) == referencePixels && InspectQualityPicking(out).hash == referencePicking.hash,
+		    "the rejected GPU request restores exact CPU colors, selection and depth without a partial GPU frame");
+		Check(DrawTownView(out, true) && GetTownViewRendererState().requestedGpu && !GetTownViewRendererState().usedGpu
+		        && GetTownViewRendererState().cpuRasterizedTriangles > 0 && GetTownViewRendererState().gpuSubmittedTriangles == 0
+		        && GetTownViewRendererState().failure == failure
+		        && ViewportPixels(out) == referencePixels && InspectQualityPicking(out).hash == referencePicking.hash,
+		    "a repeated blocked GPU request remains an exact CPU frame with the original failure reason");
+		bool guards = true;
+		for (int y = gnViewportHeight; y < allocation.h(); ++y)
+			for (int x = 0; x < allocation.w(); ++x)
+				guards = guards && allocation[{ x, y }] == 255;
+		Check(guards, "the rejected GPU frame and its CPU fallback preserve every UI and allocation guard row");
+	}
+	gnScreenWidth = 640;
+	gnScreenHeight = 480;
+	CalculatePanelAreas();
+	CalcViewportGeometry();
+	ResetTownViewCamera();
+	OrbitTownView(0.12F, 0);
+	OwnedSurface recovery(640, 482);
+	SDL_FillRect(recovery.surface, nullptr, 255);
+	const Surface out = recovery.subregionY(0, 480);
+	GetOptions().Graphics.townViewGpuRendering.SetValue(false);
+	Check(DrawTownView(out, true) && !GetTownViewRendererState().usedGpu && GetTownViewRendererState().failure.empty(),
+	    "switching GPU off clears the blocked backend after returning to a supported viewport");
+	GetOptions().Graphics.townViewGpuRendering.SetValue(true);
+	Check(DrawTownView(out, true) && GetTownViewRendererState().requestedGpu && GetTownViewRendererState().usedGpu
+	        && GetTownViewRendererState().cpuRasterizedTriangles == 0 && GetTownViewRendererState().gpuSubmittedTriangles > 0
+	        && GetTownViewRendererState().failure.empty() && GetTownGpuStatus().frameSucceeded && !GetTownGpuStatus().warp
+	        && InspectQualityPicking(out).valid,
+	    "switching GPU back on recovers real hardware rendering after a bounded budget failure");
+	bool recoveryGuards = true;
+	for (int y = gnViewportHeight; y < recovery.h(); ++y)
+		for (int x = 0; x < recovery.w(); ++x)
+			recoveryGuards = recoveryGuards && recovery[{ x, y }] == 255;
+	Check(recoveryGuards && NativeSceneState() == original && GetLCGEngineState() == randomState,
+	    "real GPU failure and OFF/ON recovery preserve simulation, RNG and UI guard rows");
+	std::ostringstream result;
+	result << "{\"width\":2304,\"viewportHeight\":" << budgetViewportHeight
+	       << ",\"qualityRequested\":false,\"requestedGpu\":true,\"usedGpu\":false,\"failure\":" << std::quoted(failure)
+	       << ",\"exactCpuFallback\":true,\"repeatedBlockedFrameExact\":true,\"hardwareRecoveredAfterOffOn\":true,\"fallbackFullDrawMilliseconds\":"
+	       << fallbackMilliseconds << '}';
+	Record("INFO GPU real budget fallback " + result.str());
+	return result.str();
+}
+
+void RunGpuWorld(const std::filesystem::path &output)
+{
+	InitializeTownDiagnostic();
+	CheckGpuVideoOptions();
+	ToggleTownView();
+	GetOptions().Graphics.townViewGpuRendering.SetValue(false);
+	GetOptions().Graphics.townViewAntialiasing.SetValue(false);
+	const std::string original = NativeSceneState();
+	const auto randomState = GetLCGEngineState();
+	std::ofstream manifest(output / "gpu-world.json");
+	manifest << std::setprecision(9) << "{\"archiveMode\":\"" << (gbIsSpawn ? "shareware" : "retail")
+	    << "\",\"gameWindowCapture\":false,\"hardwareRequired\":true,\"cpuRasterFallbackAllowedInComparisonCases\":false,"
+	    << "\"timingScope\":\"first calls and five warm DrawTownView calls per backend including resolve/readback; excludes SDL/UI and is not game FPS\","
+	    << "\"comparison\":\"identity and depth on stable planar interiors; raster edge rules and subepsilon ties can differ\",\"cases\":[\n";
+	struct Case { const char *name; int width, height; float yaw; bool panel, zoom, quality; };
+	const std::array<Case, 6> cases { Case { "native-forced", 640, 480, 0, false, false, false },
+		Case { "orbit-90", 640, 480, 1.57079632679F, false, false, false },
+		Case { "odd-panel-pan-zoom", 645, 481, 0.08F, true, true, false },
+		Case { "retained-world-2x", 640, 480, 0.12F, false, false, true },
+		Case { "wide-2x", 960, 540, 0.12F, false, false, true },
+		Case { "full-hd-native-zoom", 1920, 1080, 0.12F, false, true, false } };
+	bool firstCase = true;
+	bool allComparisonsPassed = true;
+	for (const auto &test : cases) {
+		gnScreenWidth = test.width;
+		gnScreenHeight = test.height;
+		CharFlag = test.panel;
+		GetOptions().Graphics.zoom.SetValue(test.zoom);
+		GetOptions().Graphics.townViewAntialiasing.SetValue(test.quality);
+		CalculatePanelAreas();
+		CalcViewportGeometry();
+		ResetTownViewCamera();
+		OrbitTownView(test.yaw, test.panel ? 0.04F : 0);
+		if (test.panel) {
+			Check(BeginTownViewCameraDrag({ 410, 150 }, true) && UpdateTownViewCameraDrag({ 427, 161 }),
+			    "GPU fixture uses the live logical panel and pan path");
+			EndTownViewCameraDrag();
+			ZoomTownView(1);
+		}
+		const auto camera = GetTownViewCameraState();
+		const auto cameraPreserved = [&] {
+			const auto now = GetTownViewCameraState();
+			return now.yaw == camera.yaw && now.pitch == camera.pitch && now.distance == camera.distance
+			    && now.offsetX == camera.offsetX && now.offsetZ == camera.offsetZ;
+		};
+		OwnedSurface allocation(test.width, test.height + 2);
+		SDL_SetPaletteColors(allocation.surface->format->palette, logical_palette.data(), 0, 256);
+		SDL_FillRect(allocation.surface, nullptr, 255);
+		const Surface out = allocation.subregionY(0, test.height);
+		const auto timedDraw = [&] {
+			const auto begin = std::chrono::steady_clock::now();
+			const bool drawn = DrawTownView(out, true);
+			const auto end = std::chrono::steady_clock::now();
+			Check(drawn, "complete world draw including GPU readback and optional color resolve");
+			return std::chrono::duration<double, std::milli>(end - begin).count();
+		};
+		const auto guardsPreserved = [&] {
+			for (int y = gnViewportHeight; y < allocation.h(); ++y)
+				for (int x = 0; x < allocation.w(); ++x)
+					if (allocation[{ x, y }] != 255)
+						return false;
+			return true;
+		};
+		GetOptions().Graphics.townViewGpuRendering.SetValue(false);
+		Record("INFO GPU real-asset case=" + std::string(test.name));
+		const double cpuFirstMilliseconds = timedDraw();
+		const auto cpuState = GetTownViewRendererState();
+		Check(!cpuState.requestedGpu && !cpuState.usedGpu && cpuState.cpuRasterizedTriangles > 0,
+		    "CPU reference explicitly identifies its active raster backend");
+		const auto cpuPixels = ViewportPixels(out);
+		const auto cpuPicks = ReadGpuWorldPicks(out);
+		const auto cpuHash = InspectQualityPicking(out).hash;
+		std::array<double, 5> cpuWarmMilliseconds;
+		for (double &time : cpuWarmMilliseconds)
+			time = timedDraw();
+		Check(ViewportPixels(out) == cpuPixels && InspectQualityPicking(out).hash == cpuHash,
+		    "five warm CPU timing draws preserve the frozen reference pixels, picks and depth");
+		const auto projection = TownViewScreenPosition(ViewPosition);
+		SavePng(out.subregionY(0, gnViewportHeight), output / (std::string(test.name) + "-cpu.png"));
+		GetOptions().Graphics.townViewGpuRendering.SetValue(true);
+		Point tile;
+		int npc, item, player;
+		Check(!Pick(projection, tile, npc, item, player) && TownViewArchitectureAt(projection) == -1
+		        && !std::isfinite(TownViewDepthAt(projection)) && GetTownViewHighResolutionFrame() == nullptr,
+		    "changing the requested GPU backend invalidates the previous frame before redraw");
+		const double gpuFirstMilliseconds = timedDraw();
+		const auto gpuState = GetTownViewRendererState();
+		const auto status = GetTownGpuStatus();
+		Check(gpuState.requestedGpu && gpuState.usedGpu && gpuState.cpuRasterizedTriangles == 0
+		        && gpuState.gpuSubmittedTriangles > 0 && status.available && status.frameSucceeded && !status.warp,
+		    "hardware GPU renders the entire world without CPU triangle rasterization or WARP: " + gpuState.failure);
+		const auto sampling = GetTownViewSamplingState();
+		const Surface *retained = GetTownViewHighResolutionFrame();
+		Check(sampling.factor == (test.quality ? 2 : 1)
+		        && (test.quality ? retained != nullptr && retained->w() == out.w() * 2 && retained->h() == gnViewportHeight * 2 : retained == nullptr)
+		        && TownViewScreenPosition(ViewPosition) == projection,
+		    "GPU density and retained presentation preserve logical projection and UI framing");
+		const auto gpuPixels = ViewportPixels(out);
+		const auto gpuPicks = ReadGpuWorldPicks(out);
+		const auto picking = InspectQualityPicking(out);
+		Check(picking.valid && picking.picked > 0 && picking.architecture > 0,
+		    "GPU readback exposes valid live entity IDs and architectural ownership");
+		const GpuRayFrame independentRays;
+		size_t stable = 0, identityMismatch = 0, depthMismatch = 0, colorMismatch = 0, classifiedGroundTies = 0, classifiedRasterEdges = 0;
+		for (int y = 1; y + 1 < gnViewportHeight; ++y) {
+			for (int x = 1; x + 1 < out.w(); ++x) {
+				const size_t i = static_cast<size_t>(y) * out.w() + x;
+				colorMismatch += gpuPixels[i] != cpuPixels[i] ? 1 : 0;
+				const auto &reference = cpuPicks[i];
+				if (!reference.picked || !std::isfinite(reference.depth))
+					continue;
+				bool interior = true;
+				for (int dy = -1; dy <= 1; ++dy)
+					for (int dx = -1; dx <= 1; ++dx)
+						interior = interior && reference.SameIdentity(cpuPicks[static_cast<size_t>(y + dy) * out.w() + x + dx]);
+				const auto at = [&](int dx, int dy) { return cpuPicks[static_cast<size_t>(y + dy) * out.w() + x + dx].depth; };
+				interior = interior && std::abs(at(-1, 0) + at(1, 0) - 2 * reference.depth) < 0.001F
+				    && std::abs(at(0, -1) + at(0, 1) - 2 * reference.depth) < 0.001F;
+				if (!interior)
+					continue;
+				++stable;
+				const bool identityDiffers = !reference.SameIdentity(gpuPicks[i]);
+				const bool depthDiffers = !std::isfinite(gpuPicks[i].depth) || std::abs(gpuPicks[i].depth - reference.depth) > 0.002F;
+				identityMismatch += identityDiffers ? 1 : 0;
+				depthMismatch += depthDiffers ? 1 : 0;
+				const auto groundIdentity = [](const GpuPickSnapshot &sample) {
+					return sample.picked && sample.npc < 0 && sample.item < 0 && sample.player < 0 && sample.architecture < 0;
+				};
+				const bool groundTie = identityDiffers && groundIdentity(reference) && groundIdentity(gpuPicks[i])
+				    && std::abs(reference.depth - gpuPicks[i].depth) <= 0.0001F
+				    && independentRays.MatchesGroundDepth({ x, y }, sampling.factor, reference.depth)
+				    && independentRays.MatchesGroundDepth({ x, y }, sampling.factor, gpuPicks[i].depth);
+				classifiedGroundTies += groundTie ? 1 : 0;
+				if (depthDiffers && groundIdentity(reference) && reference.SameIdentity(gpuPicks[i]))
+					classifiedRasterEdges += AuditGpuVegetationDepth(reference.tile, { x, y }, sampling.factor, reference.depth, gpuPicks[i].depth) ? 1 : 0;
+				if ((identityDiffers || depthDiffers) && identityMismatch + depthMismatch <= 16) {
+					const auto describe = [](const GpuPickSnapshot &sample) {
+						return "picked=" + std::to_string(sample.picked) + " tile=" + std::to_string(sample.tile.x) + "," + std::to_string(sample.tile.y)
+						    + " npc=" + std::to_string(sample.npc) + " item=" + std::to_string(sample.item) + " player=" + std::to_string(sample.player)
+						    + " architecture=" + std::to_string(sample.architecture) + " depth=" + std::to_string(sample.depth);
+					};
+					Record("INFO GPU world mismatch " + std::string(test.name) + " x=" + std::to_string(x) + " y=" + std::to_string(y)
+					    + " CPU[" + describe(reference) + "] GPU[" + describe(gpuPicks[i]) + "]");
+				}
+			}
+		}
+		Record("INFO GPU " + std::string(test.name) + " stable=" + std::to_string(stable)
+		    + " identityMismatch=" + std::to_string(identityMismatch) + " depthMismatch=" + std::to_string(depthMismatch)
+		    + " classifiedGroundTies=" + std::to_string(classifiedGroundTies) + " classifiedRasterEdges=" + std::to_string(classifiedRasterEdges)
+		    + " indexedColorDifferences=" + std::to_string(colorMismatch));
+		SavePng(out.subregionY(0, gnViewportHeight), output / (std::string(test.name) + "-gpu.png"));
+		allComparisonsPassed = allComparisonsPassed && stable > 0 && identityMismatch == classifiedGroundTies && depthMismatch == classifiedRasterEdges;
+		std::array<double, 5> gpuWarmMilliseconds;
+		for (double &time : gpuWarmMilliseconds) {
+			time = timedDraw();
+			Check(GetTownViewRendererState().usedGpu && GetTownViewRendererState().cpuRasterizedTriangles == 0,
+			    "each warm GPU timing draw uses hardware without CPU triangle rasterization");
+		}
+		const auto warmStatus = GetTownGpuStatus();
+		Check(GetTownViewRendererState().usedGpu
+		        && GetTownViewRendererState().cpuRasterizedTriangles == 0
+		        && ViewportPixels(out) == gpuPixels && InspectQualityPicking(out).hash == picking.hash,
+		    "a frozen GPU frame repeats deterministically, including selection and depth");
+		Check(cameraPreserved() && NativeSceneState() == original && GetLCGEngineState() == randomState && guardsPreserved(),
+		    "GPU draws preserve camera, native map, collision, actors, simulation RNG and all UI guard rows");
+		++gnScreenWidth;
+		Check(!Pick(projection, tile, npc, item, player) && !std::isfinite(TownViewDepthAt(projection))
+		        && GetTownViewHighResolutionFrame() == nullptr, "logical resize invalidates GPU readback and retained image before redraw");
+		--gnScreenWidth;
+		GetOptions().Graphics.townViewGpuRendering.SetValue(false);
+		const double cpuRepeatMilliseconds = timedDraw();
+		Check(!GetTownViewRendererState().usedGpu && ViewportPixels(out) == cpuPixels
+		        && InspectQualityPicking(out).hash == cpuHash,
+		    "CPU to GPU to CPU restores the exact original CPU pixels, IDs and depth");
+		if (!firstCase)
+			manifest << ",\n";
+		firstCase = false;
+		auto sortedCpu = cpuWarmMilliseconds;
+		auto sortedGpu = gpuWarmMilliseconds;
+		std::sort(sortedCpu.begin(), sortedCpu.end());
+		std::sort(sortedGpu.begin(), sortedGpu.end());
+		Record("INFO GPU timing " + std::string(test.name) + " CPUmedian=" + std::to_string(sortedCpu[2])
+		    + " ms GPUmedian=" + std::to_string(sortedGpu[2]) + " ms readbackLast=" + std::to_string(warmStatus.readbackMilliseconds) + " ms");
+		manifest << "{\"name\":\"" << test.name << "\",\"width\":" << out.w() << ",\"height\":" << gnViewportHeight
+		    << ",\"factor\":" << sampling.factor << ",\"nativeZoom\":" << (test.zoom ? "true" : "false")
+		    << ",\"leftPanelOpen\":" << (test.panel ? "true" : "false") << ",\"triangles\":" << gpuState.gpuSubmittedTriangles
+		    << ",\"drawCalls\":" << status.drawCalls << ",\"frameMilliseconds\":" << status.frameMilliseconds
+		    << ",\"readbackMilliseconds\":" << status.readbackMilliseconds << ",\"adapter\":" << std::quoted(status.adapter)
+		    << ",\"cpuFirstFullDrawMilliseconds\":" << cpuFirstMilliseconds << ",\"gpuFirstFullDrawMilliseconds\":" << gpuFirstMilliseconds
+		    << ",\"cpuRoundtripFullDrawMilliseconds\":" << cpuRepeatMilliseconds
+		    << ",\"cpuMedianFullDrawMilliseconds\":" << sortedCpu[2] << ",\"gpuMedianFullDrawMilliseconds\":" << sortedGpu[2]
+		    << ",\"gpuWarmBackendMilliseconds\":" << warmStatus.frameMilliseconds << ",\"gpuWarmReadbackMilliseconds\":" << warmStatus.readbackMilliseconds
+		    << ",\"stableInteriorPixels\":" << stable << ",\"identityMismatch\":" << identityMismatch
+		    << ",\"depthMismatch\":" << depthMismatch << ",\"classifiedGroundTies\":" << classifiedGroundTies
+		    << ",\"classifiedFixedPointEdges\":" << classifiedRasterEdges
+		    << ",\"unexplainedIdentityMismatch\":" << identityMismatch - classifiedGroundTies
+		    << ",\"unexplainedDepthMismatch\":" << depthMismatch - classifiedRasterEdges
+		    << ",\"indexedColorDifferences\":" << colorMismatch << ",\"cpuWarmMilliseconds\":[";
+		for (size_t i = 0; i < cpuWarmMilliseconds.size(); ++i)
+			manifest << (i == 0 ? "" : ",") << cpuWarmMilliseconds[i];
+		manifest << "],\"gpuWarmMilliseconds\":[";
+		for (size_t i = 0; i < gpuWarmMilliseconds.size(); ++i)
+			manifest << (i == 0 ? "" : ",") << gpuWarmMilliseconds[i];
+		manifest << "]}";
+	}
+	const std::string budgetFallback = CheckGpuWorldBudgetFallback();
+	CharFlag = false;
+	GetOptions().Graphics.zoom.SetValue(false);
+	GetOptions().Graphics.townViewAntialiasing.SetValue(false);
+	GetOptions().Graphics.townViewGpuRendering.SetValue(true);
+	gnScreenWidth = 640;
+	gnScreenHeight = 480;
+	CalculatePanelAreas();
+	CalcViewportGeometry();
+	ResetTownViewCamera();
+	OwnedSurface native(640, 480);
+	DrawActualNativeReference(native);
+	const auto originalPixels = ViewportPixels(native);
+	Check(DrawTownView(native) && ViewportPixels(native) == originalPixels && !GetTownViewRendererState().usedGpu
+	        && GetTownViewHighResolutionFrame() == nullptr, "Home keeps the exact original backend authoritative even when GPU rendering is requested");
+	Check(NativeSceneState() == original && GetLCGEngineState() == randomState,
+	    "complete GPU fixture preserves native state and simulation RNG");
+	manifest << "\n],\"budgetFallback\":" << budgetFallback
+	    << ",\"nativeBackendExact\":true,\"cpuRoundtripExact\":true,\"statePreserved\":true,\"allComparisonsPassed\":"
+	    << (allComparisonsPassed ? "true" : "false") << "}\n";
+	Check(manifest.good(), "record GPU backend, draw submission, readback and comparison limits");
+	GetOptions().Graphics.townViewGpuRendering.SetValue(false);
+	ResetTownViewResources();
+	FreeTownerGFX();
+	Check(allComparisonsPassed, "GPU selection and depth have no unexplained disagreement; classified ground ties and fixed-point edges retain explicit independent geometric evidence");
+}
+
 } // namespace
 
 int main(int argc, char **argv)
@@ -3551,13 +4412,17 @@ int main(int argc, char **argv)
 	std::cerr << std::unitbuf;
 	const bool presentation = argc == 5 && std::string(argv[4]) == "--presentation";
 	const bool quality = argc == 5 && std::string(argv[4]) == "--quality";
+	const bool gpu = argc == 5 && std::string(argv[4]) == "--gpu";
 	const bool layers = argc == 3 && std::string(argv[1]) == "--presentation-layers";
-	if (argc != 4 && !presentation && !quality && !layers) {
-		std::cerr << "Usage: town_view_smoke <game-data-directory> <built-assets-directory> <capture-directory> [--presentation|--quality]\n"
-		          << "       town_view_smoke --presentation-layers <synthetic-capture-directory>\n";
+	const bool gpuFixtures = argc == 3 && std::string(argv[1]) == "--gpu-fixtures";
+	const bool synthetic = layers || gpuFixtures;
+	if (argc != 4 && !presentation && !quality && !gpu && !synthetic) {
+		std::cerr << "Usage: town_view_smoke <game-data-directory> <built-assets-directory> <capture-directory> [--presentation|--quality|--gpu]\n"
+		          << "       town_view_smoke --presentation-layers <synthetic-capture-directory>\n"
+		          << "       town_view_smoke --gpu-fixtures <synthetic-capture-directory>\n";
 		return 2;
 	}
-	const std::filesystem::path output = std::filesystem::absolute(argv[layers ? 2 : 3]);
+	const std::filesystem::path output = std::filesystem::absolute(argv[synthetic ? 2 : 3]);
 	std::filesystem::create_directories(output);
 	std::ofstream log(output / "town-view-runtime.txt");
 	SDL_LogSetOutputFunction([](void *userdata, int, SDL_LogPriority, const char *message) {
@@ -3565,7 +4430,7 @@ int main(int argc, char **argv)
 		stream << message << std::endl;
 		std::cerr << message << '\n';
 	}, &log);
-	if (!layers) {
+	if (!synthetic) {
 		devilution::paths::SetBasePath(argv[1]);
 		devilution::paths::SetAssetsPath(argv[2]);
 	}
@@ -3586,10 +4451,14 @@ int main(int argc, char **argv)
 #else
 			Check(false, "layered presentation fixtures require SDL2 or newer");
 #endif
-		} else if (presentation)
+		} else if (gpuFixtures)
+			RunGpuFixtures(output);
+		else if (presentation)
 			RunPresentation(output);
 		else if (quality)
 			RunQuality(output);
+		else if (gpu)
+			RunGpuWorld(output);
 		else
 			Run(output);
 	} catch (const std::exception &error) {

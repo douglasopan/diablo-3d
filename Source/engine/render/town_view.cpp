@@ -28,6 +28,7 @@
 #include "engine/render/dun_render.hpp"
 #include "engine/render/scrollrt.h"
 #include "engine/render/town_ground_shadow.hpp"
+#include "engine/render/town_gpu.hpp"
 #include "engine/render/town_lighting.hpp"
 #include "engine/render/town_lighting_profile.hpp"
 #include "engine/render/town_scene.hpp"
@@ -76,6 +77,11 @@ struct InteriorLighting {
 	size_t lightCount = 0;
 };
 
+struct GpuVolumeFallback {
+	int palette = -1;
+	int shade = 0;
+};
+
 struct Vec3 {
 	float x;
 	float y;
@@ -122,6 +128,23 @@ struct ProjectedVertex {
 	float v;
 };
 
+uint64_t NextTextureGpuIdentity()
+{
+	static uint64_t next = 1;
+	return next++;
+}
+
+// A moved/copied texture is a new immutable upload. Pointer addresses can be
+// reused when an actor cache recycles, so they cannot identify GPU resources.
+struct TextureGpuIdentity {
+	uint64_t value = NextTextureGpuIdentity();
+	TextureGpuIdentity() = default;
+	TextureGpuIdentity(const TextureGpuIdentity &) : value(NextTextureGpuIdentity()) { }
+	TextureGpuIdentity(TextureGpuIdentity &&) noexcept : value(NextTextureGpuIdentity()) { }
+	TextureGpuIdentity &operator=(const TextureGpuIdentity &) { value = NextTextureGpuIdentity(); return *this; }
+	TextureGpuIdentity &operator=(TextureGpuIdentity &&) noexcept { value = NextTextureGpuIdentity(); return *this; }
+};
+
 struct Texture {
 	int width = 0;
 	int height = 0;
@@ -133,6 +156,7 @@ struct Texture {
 	// Interior materials use a small point-irradiance LUT and clean base colors.
 	std::vector<std::array<uint8_t, ImportedLightLevels>> interiorLightTables;
 	bool emissive = false;
+	TextureGpuIdentity gpuIdentity;
 	bool sample(float u, float v, uint8_t &color, uint32_t *albedoColor = nullptr) const
 	{
 		if (width <= 0 || height <= 0 || !std::isfinite(u) || !std::isfinite(v))
@@ -205,6 +229,7 @@ int PickViewportHeight = 0;
 bool PickZoom = false;
 bool PickLeftPanel = false;
 bool PickRightPanel = false;
+bool PickGpuRequested = false;
 float CameraYaw = Pi * 0.25F;
 float CameraDistance = 22.0F;
 float CameraPitch = Pi / 6;
@@ -224,6 +249,24 @@ TownViewColorResolve SamplingColors;
 constexpr size_t MaxSmoothWorldPixels = 4 * 1024 * 1024;
 std::vector<float> DepthBuffer;
 std::vector<PickRecord> PickBuffer;
+TownViewRendererState RendererState;
+bool CaptureGpu = false;
+bool CaptureGpuFailed = false;
+bool GpuBlocked = false;
+std::string GpuFailure;
+uint64_t GpuFrameNumber = 0;
+TownGpuFrame GpuFrame;
+std::vector<PickRecord> GpuPickRecords;
+std::unordered_map<uint64_t, uint32_t> GpuPickIds;
+struct PreparedGpuTexture {
+	std::vector<uint32_t> codes;
+	std::vector<uint8_t> interiorLut;
+	uint64_t lastSeen = 0;
+};
+std::unordered_map<uint64_t, PreparedGpuTexture> PreparedGpuTextures;
+std::vector<uint8_t> GpuOrdinaryLut;
+std::vector<uint8_t> GpuImportedLut;
+size_t GpuImportedLutColors = 0;
 std::unordered_map<uint16_t, TileArt> TerrainCache;
 std::unordered_map<uint16_t, Texture> SceneGroundCache;
 std::unordered_map<size_t, NativeSceneArt> SceneArtworkCache;
@@ -249,6 +292,11 @@ std::vector<std::array<uint8_t, ImportedLightLevels>> ImportedAlbedoLightTables;
 TownLightingConfig SceneLightingConfig = TristramLightingConfig();
 bool SceneLightingProfileLoaded = false;
 std::unordered_map<const uint8_t *, VolumeArtwork> ActorVolumeCache;
+struct BillboardArtwork {
+	Texture texture;
+	uint64_t sourceHash;
+};
+std::unordered_map<const uint8_t *, BillboardArtwork> BillboardTextureCache;
 std::unordered_map<size_t, VolumeArtwork> VegetationArtworkCache;
 std::unordered_map<size_t, VolumeArtwork> PropArtworkCache;
 std::unordered_map<uint16_t, VolumeArtwork> SceneryVolumeCache;
@@ -260,6 +308,16 @@ const std::array<Texture, 256> PaletteTextures = [] {
 		textures[i].pixels.push_back(static_cast<uint8_t>(i));
 	}
 	return textures;
+}();
+// Volume triangles use constant palette colors. A shared GPU atlas lets their
+// different colors remain per-vertex data instead of thousands of texture binds.
+const Texture GpuPaletteAtlas = [] {
+	Texture texture;
+	texture.width = 256;
+	texture.height = 1;
+	for (size_t i = 0; i < 256; ++i)
+		texture.pixels.push_back(static_cast<uint8_t>(i));
+	return texture;
 }();
 std::array<std::array<uint8_t, 256>, 4> SceneLightTables;
 std::array<std::array<std::array<uint8_t, 256>, 4>, 4> SceneShadowTables;
@@ -427,9 +485,88 @@ float Edge(const ProjectedVertex &a, const ProjectedVertex &b, float x, float y)
 	return (x - a.x) * (b.y - a.y) - (y - a.y) * (b.x - a.x);
 }
 
+void ClearGpuSceneResources()
+{
+	ResetTownGpuResources();
+	PreparedGpuTextures.clear();
+	GpuOrdinaryLut.clear();
+	GpuImportedLut.clear();
+	GpuImportedLutColors = 0;
+	GpuPickRecords.clear();
+	GpuPickIds.clear();
+	GpuFrame = {};
+	RendererState = {};
+	CaptureGpu = CaptureGpuFailed = GpuBlocked = false;
+	GpuFailure.clear();
+}
+
+TownGpuTexture PrepareGpuTexture(const Texture &texture, const InteriorLighting *interior)
+{
+	auto [entry, inserted] = PreparedGpuTextures.try_emplace(texture.gpuIdentity.value);
+	PreparedGpuTexture &prepared = entry->second;
+	prepared.lastSeen = GpuFrameNumber;
+	const bool albedo = !texture.emissive && !texture.albedoPixels.empty();
+	if (inserted) {
+		if (albedo)
+			prepared.codes = texture.albedoPixels;
+		else
+			prepared.codes.assign(texture.pixels.begin(), texture.pixels.end());
+		for (const auto &row : texture.interiorLightTables)
+			prepared.interiorLut.insert(prepared.interiorLut.end(), row.begin(), row.end());
+	}
+	TownGpuTexture result;
+	result.stableKey = texture.gpuIdentity.value;
+	result.width = texture.width;
+	result.height = texture.height;
+	result.texelCodes = prepared.codes;
+	result.opacity = texture.opacity;
+	if (texture.emissive)
+		return result;
+	if (interior != nullptr) {
+		result.lightLut = prepared.interiorLut;
+		result.lightLevels = ImportedLightLevels;
+	} else if (albedo) {
+		if (GpuImportedLutColors != ImportedAlbedoLightTables.size()) {
+			GpuImportedLut.clear();
+			GpuImportedLut.reserve(ImportedAlbedoLightTables.size() * ImportedLightLevels);
+			for (const auto &row : ImportedAlbedoLightTables)
+				GpuImportedLut.insert(GpuImportedLut.end(), row.begin(), row.end());
+			GpuImportedLutColors = ImportedAlbedoLightTables.size();
+		}
+		result.revision = GpuImportedLutColors;
+		result.lightLut = GpuImportedLut;
+		result.lightLevels = ImportedLightLevels;
+	} else {
+		if (GpuOrdinaryLut.empty()) {
+			GpuOrdinaryLut.resize(256 * 16);
+			for (size_t code = 0; code < 256; ++code)
+				for (size_t shade = 0; shade < 4; ++shade)
+					for (size_t shadow = 0; shadow < 4; ++shadow)
+						GpuOrdinaryLut[code * 16 + shade * 4 + shadow] = SceneShadowTables[shade][shadow][code];
+		}
+		result.lightLut = GpuOrdinaryLut;
+		result.lightLevels = 16;
+	}
+	return result;
+}
+
+uint32_t GpuPickId(PickRecord pick)
+{
+	if (pick.preservePicking)
+		return 0;
+	const uint64_t key = static_cast<uint64_t>(pick.tile)
+	    | (static_cast<uint64_t>(static_cast<uint16_t>(pick.entity)) << 16)
+	    | (static_cast<uint64_t>(pick.kind) << 32)
+	    | (static_cast<uint64_t>(static_cast<uint16_t>(pick.architecture)) << 40);
+	auto [entry, inserted] = GpuPickIds.try_emplace(key, static_cast<uint32_t>(GpuPickRecords.size()));
+	if (inserted)
+		GpuPickRecords.push_back(pick);
+	return entry->second;
+}
+
 void Rasterize(const Surface &out, const std::array<Vertex, 3> &triangle, const Texture &texture,
 	PickRecord pick, int shade, bool transparent, const TownSceneNormal *authoredNormal,
-	const InteriorLighting *interior)
+	const InteriorLighting *interior, GpuVolumeFallback fallback)
 {
 	const ProjectedVertex a = ProjectRaster(triangle[0]);
 	const ProjectedVertex b = ProjectRaster(triangle[1]);
@@ -476,6 +613,50 @@ void Rasterize(const Surface &out, const std::array<Vertex, 3> &triangle, const 
 	// the source. Shadowing their absent direct light again crushed the masonry.
 	const bool receivesDirectLight = normal.x * light.x + normal.y * light.height + normal.z * light.z > 0.02F;
 	const float diffuse = std::clamp(normal.x * light.x + normal.y * light.height + normal.z * light.z, 0.0F, 1.0F);
+	if (CaptureGpu) {
+		if (CaptureGpuFailed)
+			return;
+		TownGpuMaterial material;
+		material.lighting = texture.emissive ? TownGpuLighting::Unlit
+		    : interior != nullptr ? TownGpuLighting::Interior
+		    : hasAlbedo ? TownGpuLighting::Directional : TownGpuLighting::Shadow;
+		material.repeat = texture.repeat;
+		material.transparentZero = transparent && !hasAlbedo && texture.opacity.empty();
+		material.preservePicking = pick.preservePicking;
+		material.receivesShadow = interior == nullptr && !texture.emissive && (hasAlbedo ? diffuse > 0 : receivesDirectLight);
+		material.shade = shade;
+		material.fallbackPaletteIndex = fallback.palette;
+		material.fallbackShade = fallback.shade;
+		material.diffuse = diffuse;
+		material.shadowBias = shadowReceiver.depthBias;
+		material.shadowSlopeU = shadowReceiver.depthSlopeU;
+		material.shadowSlopeV = shadowReceiver.depthSlopeV;
+		material.normal = { normal.x, normal.y, normal.z };
+		TownLightOccluder room;
+		if (interior != nullptr) {
+			material.lights = { interior->lights.data(), interior->lightCount };
+			material.interiorRedNormalization = interior->room->fireColor.red;
+			material.interiorPointRange = InteriorPointLightRange;
+			room = { interior->room->roomMinimum, interior->room->roomMaximum, interior->room->apertures };
+			material.room = &room;
+		}
+		const bool constantPalette = !hasAlbedo && !texture.emissive && texture.opacity.empty()
+		    && texture.width == 1 && texture.height == 1 && texture.pixels.size() == 1;
+		if (constantPalette)
+			material.repeat = false;
+		const auto vertex = [&](ProjectedVertex p, Vec3 w) {
+			if (constantPalette) {
+				p.u = (static_cast<float>(texture.pixels[0]) + 0.5F) / 256;
+				p.v = 0.5F;
+			}
+			return TownGpuVertex { p.x, p.y, p.depth, p.u, p.v, { w.x, w.y, w.z } };
+		};
+		CaptureGpuFailed = !TownGpuSubmitProjectedTriangle({ vertex(a, worldA), vertex(b, worldB), vertex(c, worldC) },
+			PrepareGpuTexture(constantPalette ? GpuPaletteAtlas : texture, interior), material, GpuPickId(pick));
+		++RendererState.gpuSubmittedTriangles;
+		return;
+	}
+	++RendererState.cpuRasterizedTriangles;
 	for (int y = minY; y <= maxY; ++y) {
 		uint8_t *destination = out.at(0, y);
 		for (int x = minX; x <= maxX; ++x) {
@@ -530,7 +711,7 @@ void Rasterize(const Surface &out, const std::array<Vertex, 3> &triangle, const 
 
 void DrawTriangle(const Surface &out, std::array<Vertex, 3> triangle, const Texture &texture,
 	PickRecord pick, int shade, bool transparent = false, const TownSceneNormal *authoredNormal = nullptr,
-	const InteriorLighting *interior = nullptr)
+	const InteriorLighting *interior = nullptr, GpuVolumeFallback fallback = {})
 {
 	for (Vertex &vertex : triangle)
 		vertex.position = ToCamera(vertex.position);
@@ -544,14 +725,17 @@ void DrawTriangle(const Surface &out, std::array<Vertex, 3> triangle, const Text
 		const bool currentInside = current.position.z >= NearPlane;
 		if (previousInside != currentInside) {
 			const float t = (NearPlane - previous.position.z) / (current.position.z - previous.position.z);
-			clipped[count++] = { previous.position + (current.position - previous.position) * t,
+			clipped[count] = { previous.position + (current.position - previous.position) * t,
 				previous.u + (current.u - previous.u) * t, previous.v + (current.v - previous.v) * t };
+			// Interpolation can round just below the plane; both backends receive
+			// the exact same clipped position and the GPU validates this boundary.
+			clipped[count++].position.z = NearPlane;
 		}
 		if (currentInside)
 			clipped[count++] = current;
 	}
 	for (size_t i = 1; i + 1 < count; ++i)
-		Rasterize(out, { clipped[0], clipped[i], clipped[i + 1] }, texture, pick, shade, transparent, authoredNormal, interior);
+		Rasterize(out, { clipped[0], clipped[i], clipped[i + 1] }, texture, pick, shade, transparent, authoredNormal, interior, fallback);
 }
 
 void DrawQuad(const Surface &out, const std::array<Vec3, 4> &corners, const Texture &texture,
@@ -1357,6 +1541,16 @@ void DrawVolume(const Surface &out, Vec3 position, Point tile, const VolumeArtwo
 		const float length = std::sqrt(Dot(normal, normal));
 		const float light = length > 0 ? (normal.x + normal.y + normal.z) / (length * 1.7320508F) : 0;
 		const int shade = std::clamp(lighting + (light < -0.1F ? 2 : (light < 0.4F ? 1 : 0)), 0, 3);
+		if (CaptureGpu && triangle.material == TownVolumeMaterial::SpriteFront) {
+			const Texture &texture = art.physicalFrame && !art.directionalTextures[triangle.textureView].pixels.empty()
+			    ? art.directionalTextures[triangle.textureView] : art.texture;
+			// The CPU draws a solid backing and a cutout at identical depth. The
+			// GPU samples both choices in one pass, preserving their exact order
+			// without a texture switch and draw call for every small front face.
+			DrawTriangle(out, vertices, texture, pick, lighting, true, nullptr, nullptr,
+				{ triangle.paletteIndex, shade });
+			continue;
+		}
 		DrawTriangle(out, vertices, PaletteTextures[triangle.paletteIndex], pick, shade);
 		if (triangle.material == TownVolumeMaterial::SpriteFront) {
 			const Texture &texture = art.physicalFrame && !art.directionalTextures[triangle.textureView].pixels.empty()
@@ -1673,7 +1867,24 @@ void DrawBillboard(const Surface &out, Vec3 position, Point tile, ClxSprite spri
 {
 	if (std::abs(position.x - ViewCamera.target.x) > 80 || std::abs(position.z - ViewCamera.target.z) > 80)
 		return;
-	const Texture texture = DecodeSprite(sprite);
+	const uint8_t *key = sprite.pixelData();
+	uint64_t hash = 1469598103934665603ULL;
+	for (uint32_t i = 0; i < sprite.pixelDataSize(); ++i) {
+		hash ^= key[i];
+		hash *= 1099511628211ULL;
+	}
+	auto found = BillboardTextureCache.find(key);
+	if (found != BillboardTextureCache.end() && (found->second.sourceHash != hash
+	    || found->second.texture.width != sprite.width() || found->second.texture.height != sprite.height())) {
+		BillboardTextureCache.erase(found);
+		found = BillboardTextureCache.end();
+	}
+	if (found == BillboardTextureCache.end()) {
+		if (BillboardTextureCache.size() >= 192)
+			BillboardTextureCache.clear();
+		found = BillboardTextureCache.emplace(key, BillboardArtwork { DecodeSprite(sprite), hash }).first;
+	}
+	const Texture &texture = found->second.texture;
 	const float width = static_cast<float>(texture.width) / NativeCameraScale;
 	const float height = static_cast<float>(texture.height) / PixelsPerWorldUnit;
 	// CLX's anchor is the bottom pixel, while a rasterized quad ends at the edge
@@ -1767,6 +1978,7 @@ void ResolveSampling(const Surface &logical, const Surface &sampled)
 bool CurrentPickingValid()
 {
 	return PickingValid && SamplingState.requested == *GetOptions().Graphics.townViewAntialiasing
+	    && PickGpuRequested == *GetOptions().Graphics.townViewGpuRendering
 	    && PickScreenWidth == gnScreenWidth && PickScreenHeight == gnScreenHeight
 	    && PickViewportHeight == gnViewportHeight && PickZoom == *GetOptions().Graphics.zoom
 	    && PickLeftPanel == IsLeftPanelOpen() && PickRightPanel == IsRightPanelOpen()
@@ -1848,6 +2060,11 @@ TownViewSamplingState GetTownViewSamplingState()
 	return SamplingState;
 }
 
+TownViewRendererState GetTownViewRendererState()
+{
+	return RendererState;
+}
+
 const Surface *GetTownViewHighResolutionFrame()
 {
 	if (!IsTownViewActive() || !CurrentPickingValid() || CachedDungeonData != pDungeonCels.get()
@@ -1922,6 +2139,8 @@ void SetTownViewFireTimeForDiagnostics(double seconds)
 
 void ResetTownViewResources()
 {
+	ClearGpuSceneResources();
+	BillboardTextureCache.clear();
 	ClearUiOverlayRegions();
 #ifndef USE_SDL1
 	ResetTownPresentationResources();
@@ -1960,11 +2179,21 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 {
 	PickingValid = false;
 	RasterSampleFactor = 1;
+	RendererState = {};
+	RendererState.requestedGpu = *GetOptions().Graphics.townViewGpuRendering;
+	CaptureGpu = CaptureGpuFailed = false;
+	if (!RendererState.requestedGpu) {
+		GpuBlocked = false;
+		GpuFailure.clear();
+	}
 	if (!IsTownViewActive() || !pDungeonCels || MicroTileLen == 0 || MyPlayer == nullptr) {
 		PickingValid = false;
 		return false;
 	}
 	if (CachedDungeonData != pDungeonCels.get()) {
+		ClearGpuSceneResources();
+		RendererState.requestedGpu = *GetOptions().Graphics.townViewGpuRendering;
+		BillboardTextureCache.clear();
 		ClearTownShadowMap();
 		TerrainCache.clear();
 		SceneGroundCache.clear();
@@ -2008,89 +2237,152 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 	TownShadowConfig shadowConfig;
 	shadowConfig.toLight = { SceneLightingConfig.toLight.x, SceneLightingConfig.toLight.height, SceneLightingConfig.toLight.z };
 	BuildTownShadowMap(GetTownScene(), shadowConfig);
-	const Texture &fallback = FallbackGround();
-	// Native town generation fills the entire dungeon grid, including the outer
-	// grass visible around Farnham and Adria in wide views.
-	// Camera exploration changes only drawing; movement keeps the native dmin/dmax bounds.
-	const int minX = 0;
-	const int maxX = MAXDUNX;
-	const int minY = 0;
-	const int maxY = MAXDUNY;
-	std::vector<Point> tiles;
-	for (int y = minY; y < maxY; ++y)
-		for (int x = minX; x < maxX; ++x)
-			// Zero is the first valid MIN piece, not an empty cell.
-			if (dPiece[x][y] < MAXTILES)
-				tiles.push_back({ x, y });
-	std::stable_sort(tiles.begin(), tiles.end(), [](Point a, Point b) {
-		return a.x + a.y != b.x + b.y ? a.x + a.y < b.x + b.y : a.x < b.x;
-	});
-	// Native floor diamonds are drawn before the SOL cell artwork. Coplanar
-	// painted bases can overlap those diamonds; retain their native draw order.
-	for (Point tile : tiles) {
-		const TileArt &art = GetTile(dPiece[tile.x][tile.y]);
-		if (!art.solid)
-			DrawGround(out, tile, TownPropReplacesTile(tile) ? fallback : SceneGround(dPiece[tile.x][tile.y]));
+	++GpuFrameNumber;
+	if (RendererState.requestedGpu && !GpuBlocked) {
+		CaptureGpu = TownGpuBeginFrame(out.w(), out.h());
+		if (CaptureGpu) {
+			GpuPickIds.clear();
+			GpuPickRecords.assign(1, PickRecord {});
+			const TownShadowMapView view = GetTownShadowMapView();
+			TownGpuShadow shadow;
+			if (!view.depth.empty()) {
+				shadow.stableKey = 1;
+				shadow.revision = view.revision;
+				shadow.resolution = view.config.resolution;
+				shadow.depth = view.depth;
+				shadow.right = { view.right.x, view.right.height, view.right.z };
+				shadow.up = { view.up.x, view.up.height, view.up.z };
+				shadow.light = { view.light.x, view.light.height, view.light.z };
+				shadow.minU = view.minU;
+				shadow.minV = view.minV;
+				shadow.texelU = view.texelU;
+				shadow.texelV = view.texelV;
+				shadow.pcfRadius = view.config.pcfRadius;
+			}
+			CaptureGpuFailed = !TownGpuSetShadow(shadow);
+		} else {
+			GpuBlocked = true;
+			GpuFailure = GetTownGpuStatus().failure;
+		}
 	}
-	for (Point tile : tiles)
-		DrawScenery(out, tile, GetTile(dPiece[tile.x][tile.y]), fallback);
-	DrawScene(out);
-	DrawVegetation(out);
-	DrawProps(out);
-	for (size_t i = 0; i < Towners.size(); ++i) {
-		const Towner &towner = Towners[i];
-		if (!towner.anim)
-			continue;
-		if (towner._ttype == TOWN_COW) {
-			const auto sheet = GetTownCowSpriteSheet();
-			const ClxSprite current = towner.currentSprite();
-			const int frame = towner._tAnimFrame;
-			if (sheet && sheet->numLists() == 8 && frame >= 0) {
-				int direction = -1;
-				for (int view = 0; view < 8; ++view) {
-					if (static_cast<uint32_t>(frame) < (*sheet)[view].numSprites()
-						&& (*sheet)[view][frame].pixelData() == current.pixelData()) {
-						direction = view;
-						break;
+	const auto drawWorld = [&]() {
+		const Texture &fallback = FallbackGround();
+		// Native town generation fills the entire dungeon grid, including the outer
+		// grass visible around Farnham and Adria in wide views.
+		// Camera exploration changes only drawing; movement keeps the native dmin/dmax bounds.
+		const int minX = 0;
+		const int maxX = MAXDUNX;
+		const int minY = 0;
+		const int maxY = MAXDUNY;
+		std::vector<Point> tiles;
+		for (int y = minY; y < maxY; ++y)
+			for (int x = minX; x < maxX; ++x)
+				// Zero is the first valid MIN piece, not an empty cell.
+				if (dPiece[x][y] < MAXTILES)
+					tiles.push_back({ x, y });
+		std::stable_sort(tiles.begin(), tiles.end(), [](Point a, Point b) {
+			return a.x + a.y != b.x + b.y ? a.x + a.y < b.x + b.y : a.x < b.x;
+		});
+		// Native floor diamonds are drawn before the SOL cell artwork. Coplanar
+		// painted bases can overlap those diamonds; retain their native draw order.
+		for (Point tile : tiles) {
+			const TileArt &art = GetTile(dPiece[tile.x][tile.y]);
+			if (!art.solid)
+				DrawGround(out, tile, TownPropReplacesTile(tile) ? fallback : SceneGround(dPiece[tile.x][tile.y]));
+		}
+		for (Point tile : tiles)
+			DrawScenery(out, tile, GetTile(dPiece[tile.x][tile.y]), fallback);
+		DrawScene(out);
+		DrawVegetation(out);
+		DrawProps(out);
+		for (size_t i = 0; i < Towners.size(); ++i) {
+			const Towner &towner = Towners[i];
+			if (!towner.anim)
+				continue;
+			if (towner._ttype == TOWN_COW) {
+				const auto sheet = GetTownCowSpriteSheet();
+				const ClxSprite current = towner.currentSprite();
+				const int frame = towner._tAnimFrame;
+				if (sheet && sheet->numLists() == 8 && frame >= 0) {
+					int direction = -1;
+					for (int view = 0; view < 8; ++view) {
+						if (static_cast<uint32_t>(frame) < (*sheet)[view].numSprites()
+							&& (*sheet)[view][frame].pixelData() == current.pixelData()) {
+							direction = view;
+							break;
+						}
+					}
+					if (direction >= 0) {
+						DrawDirectionalActorVolume(out, { static_cast<float>(towner.position.x), 0, static_cast<float>(towner.position.y) },
+							towner.position, *sheet, direction, frame, current, PickKind::Towner, static_cast<int>(i));
+						continue;
 					}
 				}
-				if (direction >= 0) {
-					DrawDirectionalActorVolume(out, { static_cast<float>(towner.position.x), 0, static_cast<float>(towner.position.y) },
-						towner.position, *sheet, direction, frame, current, PickKind::Towner, static_cast<int>(i));
-					continue;
-				}
 			}
+			DrawVolumetricSprite(out, { static_cast<float>(towner.position.x), 0, static_cast<float>(towner.position.y) },
+				towner.position, towner.currentSprite(), PickKind::Towner, static_cast<int>(i));
 		}
-		DrawVolumetricSprite(out, { static_cast<float>(towner.position.x), 0, static_cast<float>(towner.position.y) },
-			towner.position, towner.currentSprite(), PickKind::Towner, static_cast<int>(i));
+		for (uint8_t i = 0; i < ActiveItemCount; ++i) {
+			const int index = ActiveItems[i];
+			const Item &item = Items[index];
+			if (!item.AnimInfo.sprites)
+				continue;
+			DrawVolumetricSprite(out, { static_cast<float>(item.position.x), 0, static_cast<float>(item.position.y) },
+				item.position, item.AnimInfo.currentSprite(), PickKind::Item, index);
+		}
+		for (size_t i = 0; i < Players.size(); ++i) {
+			const Player &player = Players[i];
+			if (!player.plractive || !player.isOnActiveLevel() || !player.AnimInfo.sprites)
+				continue;
+			Vec3 position = PlayerPosition(player);
+			position.y = 0;
+			DrawPlayerVolume(out, position, player, static_cast<int>(i));
+		}
+		for (const Missile &missile : Missiles) {
+			if (!missile._miDrawFlag || missile._miDelFlag || !missile._miAnimData
+				|| missile._miAnimFrame <= 0 || static_cast<size_t>(missile._miAnimFrame) > missile._miAnimData->numSprites())
+				continue;
+			const Point tile = missile.position.tileForRendering;
+			const Displacement offset = missile.position.offsetForRendering;
+			Vec3 position { static_cast<float>(tile.x) + static_cast<float>(2 * offset.deltaY + offset.deltaX) / 64.0F,
+				0, static_cast<float>(tile.y) + static_cast<float>(2 * offset.deltaY - offset.deltaX) / 64.0F };
+			const int light = InDungeonBounds(tile) && missile._miLightFlag ? dLight[tile.x][tile.y] : 0;
+			if (InDungeonBounds(tile))
+				DrawBillboard(out, position, tile, (*missile._miAnimData)[missile._miAnimFrame - 1], PickKind::Ground, -1, light);
+		}
+	};
+	drawWorld();
+	if (CaptureGpu) {
+		const bool complete = TownGpuEndFrame(GpuFrame) && !CaptureGpuFailed
+		    && GpuFrame.width == out.w() && GpuFrame.height == out.h()
+		    && GpuFrame.indexed.size() == DepthBuffer.size()
+		    && GpuFrame.depth.size() == DepthBuffer.size() && GpuFrame.pickIds.size() == PickBuffer.size()
+		    && std::all_of(GpuFrame.pickIds.begin(), GpuFrame.pickIds.end(), [](uint32_t id) { return id < GpuPickRecords.size(); });
+		CaptureGpu = false;
+		if (complete) {
+			for (int y = 0; y < out.h(); ++y)
+				std::memcpy(out.at(0, y), GpuFrame.indexed.data() + static_cast<size_t>(y) * out.w(), out.w());
+			DepthBuffer.swap(GpuFrame.depth);
+			for (size_t i = 0; i < PickBuffer.size(); ++i)
+				PickBuffer[i] = GpuPickRecords[GpuFrame.pickIds[i]];
+			RendererState.usedGpu = true;
+		} else {
+			GpuBlocked = true;
+			GpuFailure = GetTownGpuStatus().failure;
+			if (GpuFailure.empty())
+				GpuFailure = "GPU frame validation failed";
+			ClearSurface(out);
+			std::fill(DepthBuffer.begin(), DepthBuffer.end(), std::numeric_limits<float>::infinity());
+			std::fill(PickBuffer.begin(), PickBuffer.end(), PickRecord {});
+			drawWorld();
+		}
 	}
-	for (uint8_t i = 0; i < ActiveItemCount; ++i) {
-		const int index = ActiveItems[i];
-		const Item &item = Items[index];
-		if (!item.AnimInfo.sprites)
-			continue;
-		DrawVolumetricSprite(out, { static_cast<float>(item.position.x), 0, static_cast<float>(item.position.y) },
-			item.position, item.AnimInfo.currentSprite(), PickKind::Item, index);
-	}
-	for (size_t i = 0; i < Players.size(); ++i) {
-		const Player &player = Players[i];
-		if (!player.plractive || !player.isOnActiveLevel() || !player.AnimInfo.sprites)
-			continue;
-		Vec3 position = PlayerPosition(player);
-		position.y = 0;
-		DrawPlayerVolume(out, position, player, static_cast<int>(i));
-	}
-	for (const Missile &missile : Missiles) {
-		if (!missile._miDrawFlag || missile._miDelFlag || !missile._miAnimData
-			|| missile._miAnimFrame <= 0 || static_cast<size_t>(missile._miAnimFrame) > missile._miAnimData->numSprites())
-			continue;
-		const Point tile = missile.position.tileForRendering;
-		const Displacement offset = missile.position.offsetForRendering;
-		Vec3 position { static_cast<float>(tile.x) + static_cast<float>(2 * offset.deltaY + offset.deltaX) / 64.0F,
-			0, static_cast<float>(tile.y) + static_cast<float>(2 * offset.deltaY - offset.deltaX) / 64.0F };
-		const int light = InDungeonBounds(tile) && missile._miLightFlag ? dLight[tile.x][tile.y] : 0;
-		if (InDungeonBounds(tile))
-			DrawBillboard(out, position, tile, (*missile._miAnimData)[missile._miAnimFrame - 1], PickKind::Ground, -1, light);
+	RendererState.failure = GpuFailure;
+	for (auto it = PreparedGpuTextures.begin(); it != PreparedGpuTextures.end();) {
+		if (it->second.lastSeen + 2 < GpuFrameNumber)
+			it = PreparedGpuTextures.erase(it);
+		else
+			++it;
 	}
 	ResolveSampling(logical, out);
 	PickScreenWidth = gnScreenWidth;
@@ -2099,6 +2391,7 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 	PickZoom = *GetOptions().Graphics.zoom;
 	PickLeftPanel = IsLeftPanelOpen();
 	PickRightPanel = IsRightPanelOpen();
+	PickGpuRequested = RendererState.requestedGpu;
 	PickingValid = true;
 	return true;
 }

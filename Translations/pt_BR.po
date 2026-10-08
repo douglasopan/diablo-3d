@@ -12259,3 +12259,31 @@ msgstr "Suavização de bordas 3D"
 #: Source/options.cpp
 msgid "Smooth edges in the 3D town view without resizing the interface. Requires more processing power."
 msgstr "Suaviza as bordas da cidade em 3D mantendo o tamanho da interface. Exige mais processamento."
+
+#: Source/gamemenu.cpp
+msgid "Video Options"
+msgstr "Opções de vídeo"
+
+#: Source/gamemenu.cpp
+msgid "3D GPU Rendering: Off"
+msgstr "GPU 3D: Desligada"
+
+#: Source/gamemenu.cpp
+msgid "3D GPU Rendering: On"
+msgstr "GPU 3D: Ligada"
+
+#: Source/gamemenu.cpp
+msgid "3D Edge Smoothing: Off"
+msgstr "Suavização 3D: Desligada"
+
+#: Source/gamemenu.cpp
+msgid "3D Edge Smoothing: On"
+msgstr "Suavização 3D: Ligada"
+
+#: Source/options.cpp
+msgid "3D GPU Rendering"
+msgstr "Renderização 3D por GPU"
+
+#: Source/options.cpp
+msgid "Use GPU acceleration for the 3D town view when available. Changes apply on the next frame; CPU rendering is used if unavailable."
+msgstr "Usa a GPU para renderizar a cidade em 3D quando disponível. A mudança vale no próximo quadro; a renderização pela CPU é usada se a GPU estiver indisponível."
