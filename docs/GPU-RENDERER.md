@@ -50,7 +50,7 @@ Os seis casos incluem órbita de 90°, painel/pan/zoom, dimensões ímpares e mu
 
 A rejeição real de um viewport 2304×2048 excedendo o orçamento foi exercitada: nenhum triângulo enviado, quadro CPU completo idêntico, bloqueio repetido seguro e recuperação do hardware após OFF/ON. Passaram também fixtures sintéticos, regressão, qualidade, compositor SDL e os 25 testes do launcher em PowerShell 5.1. Evidências privadas: `diagnostics/gpu-pilot/final`, `fixtures-fused.log`, `quality`, `regression`, `presentation-layers.log` e `runtime-baseline-gpu-tests`.
 
-O executável habitual e o alias de qualidade receberam o mesmo build. O perfil local permanece em 1920×1080, Zoom ligado e suavização desligada; sua única mudança foi `3D GPU Rendering=1`. Modelo, luz e save conservaram hash, tamanho e data. Isso não promove o modelo a aceitação artística integral. Observação do FPS e da interface na janela habitual ainda depende de uma partida; o diagnóstico não abre essa janela.
+O executável habitual e o alias de qualidade receberam o mesmo build. O perfil local permanece em 1920×1080, Zoom ligado e suavização desligada; sua única mudança foi `3D GPU Rendering=1`. Modelo, luz e save conservaram hash, tamanho e data. Isso não promove o modelo a aceitação artística integral. Após os testes técnicos, o usuário experimentou a versão GPU na partida habitual e relatou “melhorou muito!!”. Isso confirma uma melhora percebida de desempenho, sem acrescentar uma medição de FPS ou aprovar integralmente os modelos. A medição de FPS sustentado, a revisão específica da interface e o acompanhamento em uso prolongado continuam pendentes; o diagnóstico não abre a janela da partida.
 
 ## Limites do incremento
 

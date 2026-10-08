@@ -7,6 +7,10 @@ audit. URLs, filenames, commits and evidence hashes are language independent.
 from __future__ import annotations
 
 TRANSLATIONS: dict[str, str] = {
+    'GPU testada na partida': 'GPU tested during gameplay',
+    'Após testar a versão GPU, o responsável pelo projeto confirmou uma melhora percebida de desempenho. O artigo reúne o relato, a medição controlada e os limites desta etapa.': 'After testing the GPU version, the project lead confirmed that performance felt better. The article brings together this report, the controlled measurement and the limitations of this stage.',
+    'Ver essa novidade': 'Read the update',
+    'A primeira avaliação na partida habitual trouxe um relato de melhora percebida de desempenho. O FPS sustentado ainda precisa ser medido, e a revisão artística dos modelos continua.': 'The first review during a normal game session indicated that performance felt better. Sustained frame rate still needs to be measured, and art review of the models continues.',
     'Protótipo offline · GPU opcional': 'Offline prototype · Optional GPU',
     'GPU opcional e retorno à CPU': 'Optional GPU and CPU fallback',
     'Direct3D 11 no Windows desenha a mesma cena e devolve cor, profundidade e seleção. A CPU continua disponível para retorno integral em caso de falha.': 'Direct3D 11 on Windows renders the same scene and returns color, depth and selection data. The CPU remains available for a complete fallback if GPU rendering fails.',
@@ -14,7 +18,7 @@ TRANSLATIONS: dict[str, str] = {
     'Imagem na GPU ou CPU': 'Image rendered on the GPU or CPU',
     'Paleta, profundidade e seleção': 'Palette, depth and selection',
     'GPU em Tristram': 'GPU rendering in Tristram',
-    'Na mediana de cinco chamadas após aquecimento em 1920×1080, com Radeon RX 570 e Core i7-14700, o desenho do mundo passou de 154,0 ms na CPU para 29,6 ms na GPU. A medição inclui a leitura de volta da GPU, mas exclui interface e apresentação SDL; não mede o FPS final da partida.': 'Across five calls after warm-up at 1920×1080, with a Radeon RX 570 and Core i7-14700, median world rendering time fell from 154.0 ms on the CPU to 29.6 ms on the GPU. The measurement includes GPU readback but excludes the interface and SDL presentation; it does not measure the final frame rate during gameplay.',
+    'Na mediana de cinco chamadas após aquecimento em 1920×1080, com Radeon RX 570 e Core i7-14700, o desenho do mundo passou de 154,00 ms na CPU para 29,58 ms na GPU. A medição inclui a leitura de volta da GPU, mas exclui interface e apresentação SDL; não mede o FPS final da partida.': 'Across five calls after warm-up at 1920×1080, with a Radeon RX 570 and Core i7-14700, median world rendering time fell from 154.00 ms on the CPU to 29.58 ms on the GPU. The measurement includes GPU readback but excludes the interface and SDL presentation; it does not measure the final frame rate during gameplay.',
     'Ler o registro da GPU': 'Read the GPU development entry',
     'Controles e limites': 'Controls and limitations',
     'Durante a partida, Esc → Options → Video Options permite alternar GPU e suavização de bordas separadamente. As opções persistem no perfil e valem no próximo desenho. O padrão público da GPU é desligado; uma falha refaz o quadro inteiro na CPU.': 'During gameplay, Esc → Options → Video Options lets you toggle GPU rendering and edge smoothing separately. These options persist in the profile and take effect on the next rendered frame. GPU rendering is disabled by default in the public configuration; a failure redraws the entire frame on the CPU.',

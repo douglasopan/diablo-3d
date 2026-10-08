@@ -1,7 +1,8 @@
 ---
 title: "Tristram gains GPU rendering"
 date: 2026-10-08
-description: "The Direct3D 11 pilot on Windows reduces world drawing time, with an in-game option and CPU fallback. The measured result is not yet the final frame rate."
+updated: 2026-10-08
+description: "The GPU reached in-game testing: improved performance reported by the project lead, alongside controlled measurements and the limits of the Direct3D 11 pilot on Windows."
 slug: renderizacao-gpu-tristram
 image: /assets/captures/v4-town.webp
 image_alt: "Historical screenshot of Tristram from the v4 stage, used for context. This image is not a CPU versus GPU comparison."
@@ -11,6 +12,12 @@ status: published
 ---
 
 The Tristram prototype now has an optional renderer that runs on the graphics card. The pilot uses Direct3D 11 on Windows, within DevilutionX, and was published in [commit c8329403e](https://github.com/douglasopan/diablo-3d/commit/c8329403e6b69ff3c95f97adeff38cb4a8c1e8a2). The immediate goal is to reduce the cost of drawing the same scene while preserving the game and the hut with its current lighting.
+
+After the technical tests, the project lead tried the GPU version in the usual game session and reported (translated from Portuguese):
+
+> It improved a lot!!
+
+This first observation confirms a perceived performance improvement during use. It complements the controlled measurement below without adding a frame-rate figure or representing complete approval of the 3D models. This article was updated on October 8, 2026 to record that milestone.
 
 The screenshot above belongs to the previously published v4 stage. The evidence for this delivery consists of the results described in the [versioned GPU renderer documentation](https://github.com/douglasopan/diablo-3d/blob/c8329403e6b69ff3c95f97adeff38cb4a8c1e8a2/docs/GPU-RENDERER.md); no new local screenshots have been added to the site.
 
@@ -34,7 +41,7 @@ The controlled run used Windows, a Radeon RX 570 and an Intel Core i7-14700, wit
 | --- | ---: | ---: |
 | 640×352, 1×, forced geometry at the original camera angle | 24.8 ms | 8.1 ms |
 | 960×540, 2× per axis | 191.8 ms | 40.9 ms |
-| 1920×1080, 1×, native zoom enabled | 154.0 ms | 29.6 ms |
+| 1920×1080, 1×, native zoom enabled | 154.00 ms | 29.58 ms |
 
 At Full HD, world drawing time was reduced by a factor of about **5.2**. The measurement includes GPU readback and downsampling where applicable, but excludes the interface and SDL presentation. **This is not a measurement of the final in-game frame rate.** Times vary between runs and do not guarantee the same improvement on another computer.
 
@@ -48,4 +55,4 @@ The comparison found 108 selection differences on coplanar terrain bases and one
 
 The bridge still reads GPU results synchronously, and the static shadow map is still built on the CPU. Other platforms continue to use the CPU. The current budget can also cause a large area to fall back to the CPU; this increment does not promise GPU support at 4K.
 
-HD menus, direct GPU presentation and 3D rendering of the procedural levels remain pending. The next step is to observe performance in the usual game session and resume the complete hut review, without automatically generating another model. The [execution guide for this revision](https://github.com/douglasopan/diablo-3d/blob/c8329403e6b69ff3c95f97adeff38cb4a8c1e8a2/docs/PROJECT-EXECUTION.md) records this sequence. Tristram remains the first milestone toward reconstructing all of Diablo 1 in 3D.
+HD menus, direct GPU presentation and 3D rendering of the procedural levels remain pending. Following the perceived improvement in the first game session, the next steps are to observe performance during extended use and complete the hut review, without automatically generating another model. Sustained frame rate still needs to be measured. The [execution guide for the technical delivery](https://github.com/douglasopan/diablo-3d/blob/c8329403e6b69ff3c95f97adeff38cb4a8c1e8a2/docs/PROJECT-EXECUTION.md) records its milestones and dependencies. Tristram remains the first milestone toward reconstructing all of Diablo 1 in 3D.
