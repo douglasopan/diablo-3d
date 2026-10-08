@@ -69,6 +69,12 @@ Abra `http://127.0.0.1:4173/diablo-3d/` e `http://127.0.0.1:4173/diablo-3d/en/`.
 
 O workflow `.github/workflows/pages.yml` valida a publicação e envia **somente** `website/dist/` ao Pages. PRs executam build e verificação; o deploy ocorre em `main` ou por execução manual. A configuração do repositório deve usar **Settings → Pages → Source → GitHub Actions**.
 
+## Registro GPU de 8 de outubro de 2026
+
+O registro `2026-10-08-renderizacao-gpu-tristram.md` e sua tradução integral documentam o piloto Windows/Direct3D 11 do commit `c8329403e6b69ff3c95f97adeff38cb4a8c1e8a2`. As páginas atuais de tecnologia, início e roadmap acompanham essa revisão; os artigos de 07/10 preservam o estado histórico. A imagem de abertura reutilizada é explicitamente histórica, sem representar uma comparação CPU/GPU. Nenhuma nova captura local ou arquivo privado entra nesta publicação.
+
+O resultado Full HD é o tempo de desenho do mundo, incluindo readback e excluindo interface/apresentação SDL: 154,0 ms CPU e 29,6 ms GPU, mediana de cinco chamadas aquecidas na Radeon RX 570 com Core i7-14700. Não converter essa medição em uma promessa de FPS. Permanecem explícitos o padrão público desligado, os controles separados de GPU e suavização, o retorno à CPU, a ponte síncrona e o mapa estático de sombras na CPU. A próxima etapa continua sendo observar a partida habitual e revisar a cabana; não houve aceitação artística integral nem entrega de menus HD ou níveis procedurais em 3D.
+
 ## Fontes e limites do primeiro registro
 
 A retrospectiva foi publicada em 07/10/2026 e cobre as etapas locais v1–v4, os cinco primeiros commits D3D até `f673fc709`, o interior e a limpeza do terreno em `63e5e749`, e as duas velas com janelas físicas em `cdeaaab0d`. O histórico anterior pertence ao DevilutionX upstream. O novo quarto existe no modelo Meshy opcional de revisão; o detalhe do piso não é legível pela janela pequena na câmera normal, exigindo os giros. A janela traseira dessa revisão é uma inferência artística aprovada, sem vista original dessa face. Os artigos anteriores preservam o estado e os limites da etapa que representam. Home usa o backend original; pixels iguais nessa rota não aprovam a geometria.

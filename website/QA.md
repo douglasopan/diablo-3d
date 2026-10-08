@@ -37,3 +37,10 @@ Screenshots remain in ignored `website/qa/`. GitHub Pages uses GitHub Actions; l
 - Removed the animation toggle, its labels, wrapper and JavaScript. Both requested placements use the same cached animated image resource and its original eight-second loop.
 - Reviewed Portuguese desktop/mobile home, English mobile home, devlog and the latest complete article. The serif loads, headings remain readable, no document overflow occurs and the header/home images are loaded from the animated source, with zero animation controls.
 - Styles and scripts have content-derived version parameters so a subsequent page load requests revised files instead of reusing an old cached heading font or animation control.
+
+## GPU renderer record — October 8, 2026
+
+- Added the complete Portuguese/English GPU article, bringing the artifact to 38 indexable pages plus two 404 pages, with 11 full articles per language. Build, ten authoring checks and artifact verification pass; both RSS feeds, metadata, local links and fragments include the new record.
+- Current home, technology, roadmap and devlog wording now follows public game commit `c8329403e`. Historical articles and all 37 gallery captures retain their original context. The reused v4 article image is explicitly labelled historical, with no CPU/GPU comparison claim; no new local capture or private file was added.
+- Reviewed the new article and its results table on desktop and at effective 320 px, plus both language versions of the revised technology blocks. No document overflow or clipped headings. Numeric table values keep their units together. Switching PT to EN from the results section preserves the original section anchor.
+- English interface review covers all new visible nodes and labels, including roadmap text split by evidence links. GPU remains optional and Windows-specific; the public default is off. World drawing time includes GPU readback and excludes UI/SDL, so the 5.2 factor is kept separate from in-game frame rate. CPU fallback, synchronous readback and CPU shadow-map construction remain explicit.
