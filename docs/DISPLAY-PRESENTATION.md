@@ -18,7 +18,7 @@ Também é possível selecionar diretamente:
 .\Iniciar-Tristram.ps1 -Presentation Amplo -MeshyReview
 ```
 
-O modelo Meshy não acompanha o repositório público. Sem esse arquivo local, omita `-MeshyReview` para comparar a reconstrução disponível. O iniciador normal continua usando o perfil habitual.
+O modelo Meshy não acompanha o repositório público. Todos os modos usam a mesma [baseline selecionada](ASSET-APPROVAL.md) quando o arquivo local está disponível, inclusive o iniciador normal e os perfis de apresentação. `-MeshyReview` exige essas fontes locais e usa o perfil de revisão separado; sem a opção e sem o modelo, o iniciador anuncia o fallback procedural. A seleção não representa aceitação artística integral.
 
 | Opção | Área interna | Ampliação | O que comparar |
 |---|---|---|---|
@@ -33,6 +33,24 @@ Cada opção cria um `perfil-apresentacao-*` separado, com uma cópia inicial da
 O iniciador informa se faltam dados ou o modelo solicitado. `-PrepareOnly` prepara o perfil sem iniciar o jogo. Os perfis de comparação são ignorados pelo Git, assim como saves, modelos e extrações privadas.
 
 F4 alterna a vista em Tristram; o botão do meio gira/inclina a câmera, a roda ajusta o zoom e Home restaura a vista original. Nas outras regiões, o renderizador original permanece ativo. Compare o mesmo objeto, estado e câmera ao avaliar nitidez; um campo de visão maior não é uma comparação de detalhe equivalente.
+
+## Suavizar o contorno do mundo 3D
+
+Em **Configurações → Gráficos → Suavização de bordas 3D** (`3D Edge Smoothing`), é possível ativar uma amostragem maior somente para o mundo reconstruído. A opção começa desligada. Ela mantém câmera, enquadramento, menus e coordenadas do mouse; não aumenta a área visível como o perfil Campo ampliado.
+
+Para uma revisão isolada, abra `Revisar-Qualidade3D.cmd`. A cabana local selecionada é usada automaticamente; `-MeshyReview` também pode ser passado para exigir suas fontes. O iniciador cria uma cópia em `perfil-apresentacao-suave-qualidade[-meshy]` e ativa essa opção somente nela. Saves e preferências do perfil habitual são preservados; o progresso da cópia permanece separado. Se existir `build/devilutionx-tristram-quality.exe`, a revisão usa esse candidato; caso contrário, usa o executável normal compilado com o código atualizado. Isso permite testar uma versão separada quando o Windows mantém o executável habitual bloqueado por uma partida aberta.
+
+O mundo é desenhado em duas vezes a largura e a altura, e cada grupo de quatro amostras é reduzido a um pixel lógico. A redução usa cores RGB e uma tabela de aproximação à paleta, preservando índices uniformes. Ela não calcula médias dos números dos índices. Essa suavização pode reduzir serrilhado e mudar detalhes de alto contraste; não cria novas texturas ou novos modelos. A iluminação existente e o mapa de sombras continuam em coordenadas do mundo.
+
+Para seleção, arquitetura e profundidade, a redução escolhe a mesma subamostra visível mais próxima. Uma borda que ocupa somente parte do pixel pode, portanto, selecionar o objeto da frente. A câmera, a colisão e os tiles nativos continuam autoritativos. Alterar a opção, o zoom nativo, os painéis ou as dimensões da tela invalida a seleção antiga até o próximo desenho.
+
+O caminho Home permanece no renderizador original, sem essa redução. HUD e painéis são desenhados depois do mundo, com sua resolução habitual. A opção afeta por enquanto a reconstrução de Tristram; os outros níveis continuam no backend original.
+
+Há um orçamento de **4.194.304 amostras** para o buffer ampliado. Áreas lógicas até 1.048.576 pixels podem usar 2× por eixo; acima disso, a opção recua para 1× e o HUD informa o limite. Por exemplo, 960×540 e 1280×720 cabem; 1920×1080 recua. Uma falha de criação da superfície SDL também recua. A recuperação de falhas do alocador C++ depende do suporte a exceções da compilação; não é uma garantia contra falta geral de memória.
+
+Quatro amostras por pixel exigem mais processamento. Por isso a opção é experimental e desligada por padrão. O diagnóstico `town_view_smoke ... --quality` mede seu custo e verifica o retorno 1× → 2× → 1×, seleção por subpixels, dimensões ímpares, limites do viewport e comparação nativa. As capturas ficam locais e contêm somente o mundo; não representam FPS finais nem uma observação da interface na janela.
+
+Na rodada de 7 de outubro de 2026, a suíte normal e a revisão de qualidade passaram, incluindo 75 amostras geométricas independentes sem falhas. Em 960×540, as medianas de CPU foram 41,8 ms em 1× e 136,9 ms em 2×, aproximadamente 3,27 vezes o custo. Havia duas instâncias do jogo abertas; esses tempos não demonstram desempenho sustentado. As imagens mostram uma melhoria sutil de contorno e minificação, com a suavização esperada de detalhes de alto contraste. O candidato do jogo foi compilado separadamente como `devilutionx-tristram-quality.exe`; depois que as partidas foram encerradas, o v4 habitual também recebeu os mesmos objetos já validados.
 
 ## O que foi aprendido com o Belzebub
 

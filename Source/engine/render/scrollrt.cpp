@@ -1332,6 +1332,13 @@ void DrawView(const Surface &out, Point startPosition)
 		    Point { 8, 28 }, { .flags = UiFlags::ColorWhite });
 		DrawString(out.subregionY(0, gnViewportHeight), "Botao do meio: girar/inclinar | Roda: zoom | Shift+meio: mover",
 		    Point { 8, 44 }, { .flags = UiFlags::ColorWhite });
+		const auto sampling = GetTownViewSamplingState();
+		if (!IsTownViewNativePose() && sampling.requested) {
+			DrawString(out.subregionY(0, gnViewportHeight), sampling.factor == 2
+					? "Suavizacao 3D ativa"
+					: "Suavizacao 3D: qualidade padrao (limite de recursos)",
+			    Point { 8, 60 }, { .flags = UiFlags::ColorWhite });
+		}
 	}
 	if (AutomapActive) {
 		DrawAutomap(out.subregionY(0, gnViewportHeight));

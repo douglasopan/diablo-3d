@@ -12251,3 +12251,11 @@ msgstr ","
 
 #~ msgid "Right click to read"
 #~ msgstr "Clique direito para ler"
+
+#: Source/options.cpp
+msgid "3D Edge Smoothing"
+msgstr "Suavização de bordas 3D"
+
+#: Source/options.cpp
+msgid "Smooth edges in the 3D town view without resizing the interface. Requires more processing power."
+msgstr "Suaviza as bordas da cidade em 3D mantendo o tamanho da interface. Exige mais processamento."

@@ -13,6 +13,8 @@ The 44-credit experiment is stored locally in `models/meshy/cabin-east-v2-views`
 
 The resulting stone surfaces and complete shape improve the starting material, but the candidate still duplicates a dark round window on both gables, changes the ridge and glass, and includes floor plates. The inspected mesh also has boundary and nonmanifold edges. It is **an experimental review asset, not an accepted replacement**.
 
+The exterior and lighting were approved for continuing local work. The [selected review baseline](ASSET-APPROVAL.md) now keeps the same private model and calibrated lighting across normal and presentation launchers when available. This selection does not establish full artistic acceptance. Window cuts and the lit interior are added by executable code; the original runtime mesh hash remains unchanged. Preserve both model and executable identity when comparing revisions.
+
 ## Run the review
 
 After generating and converting the local candidate, use `Comparar-Cabana-Meshy.cmd`, or:

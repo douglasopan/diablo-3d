@@ -1,0 +1,42 @@
+{
+  "format": "d3d.runtime-baseline",
+  "schemaVersion": 1,
+  "assetId": "tristram.arch.cabin",
+  "variantId": "east-long",
+  "revision": "meshy-v2-multiview",
+  "selection": "baseline-for-review",
+  "status": "review",
+  "accepted": false,
+  "partialApproval": {
+    "scope": [
+      "Exterior selected to continue development",
+      "Exterior tonal balance and warm lighting direction"
+    ],
+    "meaning": "The user approved continuing from this exterior and lighting direction; this is not final approval of the complete asset."
+  },
+  "sourcePath": "models/meshy/cabin-east-v2-multiview/runtime/cabin-east.d3d",
+  "sourceSha256": "d12cc57e798151fb4abf3173149a4d7cf1da2cc8bdbc6ac39439aee3fe9069f9",
+  "runtimePath": "d3d-models/cabin-east.d3d",
+  "lightingSourcePath": "build/assets/d3d-lighting.ini",
+  "lightingSha256": "844f90ac50449287e6314419de1c2945587d9b84688b88fd0292b3781cffca8a",
+  "lightingRuntimePath": "d3d-lighting.ini",
+  "privateAssets": true,
+  "pipeline": {
+    "id": "cabin-east-openings-fire-v2",
+    "implementation": "runtime-code-adjunct",
+    "sourcePaths": [
+      "Source/engine/render/town_scene.cpp",
+      "Source/engine/render/town_view.cpp",
+      "Source/engine/render/town_lighting.cpp"
+    ],
+    "description": "Declared code adjunct: a front opening measured on the imported mesh and an inferred, user-requested rear opening under review, plus room, timber floor and two candle sources. This declaration does not prove arbitrary executable support. The selected D3DMESH1 geometry and UV source remain unchanged."
+  },
+  "pendingReview": [
+    "360-degree geometry and material fidelity",
+    "Base and ground fit",
+    "Interior construction and appearance",
+    "Window openings and interior visibility",
+    "Roof shape and reference matching"
+  ],
+  "distribution": "Metadata only. Private generated models, textures and game extracts are not distributed by this manifest."
+}

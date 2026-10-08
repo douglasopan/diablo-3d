@@ -8,6 +8,7 @@
 #include <cstring>
 #include <limits>
 #include <memory>
+#include <new>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -39,6 +40,7 @@
 #include "engine/render/town_actor.hpp"
 #include "engine/render/town_body.hpp"
 #include "engine/render/town_actor_mask.hpp"
+#include "engine/render/town_view_resolve.hpp"
 #include "engine/surface.hpp"
 #include "items.h"
 #include "levels/dun_tile_data.hpp"
@@ -195,6 +197,12 @@ struct PickRecord {
 
 bool Enabled = false;
 bool PickingValid = false;
+int PickScreenWidth = 0;
+int PickScreenHeight = 0;
+int PickViewportHeight = 0;
+bool PickZoom = false;
+bool PickLeftPanel = false;
+bool PickRightPanel = false;
 float CameraYaw = Pi * 0.25F;
 float CameraDistance = 22.0F;
 float CameraPitch = Pi / 6;
@@ -207,6 +215,11 @@ constexpr float MaxCameraDistance = 52.0F;
 constexpr float MinCameraPitch = 0.35F;
 constexpr float MaxCameraPitch = 1.40F;
 Camera ViewCamera;
+TownViewSamplingState SamplingState;
+int RasterSampleFactor = 1;
+std::unique_ptr<OwnedSurface> SamplingSurface;
+TownViewColorResolve SamplingColors;
+constexpr size_t MaxSmoothWorldPixels = 4 * 1024 * 1024;
 std::vector<float> DepthBuffer;
 std::vector<PickRecord> PickBuffer;
 std::unordered_map<uint16_t, TileArt> TerrainCache;
@@ -399,6 +412,14 @@ ProjectedVertex Project(Vertex vertex)
 		vertex.position.z, vertex.u, vertex.v };
 }
 
+ProjectedVertex ProjectRaster(Vertex vertex)
+{
+	ProjectedVertex projected = Project(vertex);
+	projected.x *= RasterSampleFactor;
+	projected.y *= RasterSampleFactor;
+	return projected;
+}
+
 float Edge(const ProjectedVertex &a, const ProjectedVertex &b, float x, float y)
 {
 	return (x - a.x) * (b.y - a.y) - (y - a.y) * (b.x - a.x);
@@ -408,16 +429,18 @@ void Rasterize(const Surface &out, const std::array<Vertex, 3> &triangle, const 
 	PickRecord pick, int shade, bool transparent, const TownSceneNormal *authoredNormal,
 	const InteriorLighting *interior)
 {
-	const ProjectedVertex a = Project(triangle[0]);
-	const ProjectedVertex b = Project(triangle[1]);
-	const ProjectedVertex c = Project(triangle[2]);
+	const ProjectedVertex a = ProjectRaster(triangle[0]);
+	const ProjectedVertex b = ProjectRaster(triangle[1]);
+	const ProjectedVertex c = ProjectRaster(triangle[2]);
 	const float area = Edge(a, b, c.x, c.y);
-	if (std::abs(area) < 0.001F)
+	if (std::abs(area) < 0.001F * RasterSampleFactor * RasterSampleFactor)
 		return;
 	const int minX = std::max(0, static_cast<int>(std::floor(std::min({ a.x, b.x, c.x }))));
 	const int maxX = std::min(out.w() - 1, static_cast<int>(std::ceil(std::max({ a.x, b.x, c.x }))));
 	const int minY = std::max(0, static_cast<int>(std::floor(std::min({ a.y, b.y, c.y }))));
 	const int maxY = std::min(out.h() - 1, static_cast<int>(std::ceil(std::max({ a.y, b.y, c.y }))));
+	if (minX > maxX || minY > maxY)
+		return;
 	const float inverseArea = 1.0F / area;
 	const uint8_t *lightTable = SceneLightTables[std::clamp(shade, 0, 3)].data();
 	const auto worldPosition = [](Vec3 camera) {
@@ -1310,7 +1333,7 @@ void DrawVolume(const Surface &out, Vec3 position, Point tile, const VolumeArtwo
 	for (const float x : { art.minimum.x - 0.01F, art.maximum.x + 0.01F }) {
 		for (const float height : { art.minimum.y - 0.01F, art.maximum.y + 0.01F }) {
 			for (const float z : { art.minimum.z - 0.01F, art.maximum.z + 0.01F }) {
-				const ProjectedVertex projected = Project({ ToCamera(world({ x, height, z, 0, 0 })), 0, 0 });
+				const ProjectedVertex projected = ProjectRaster({ ToCamera(world({ x, height, z, 0, 0 })), 0, 0 });
 				minX = std::min(minX, projected.x);
 				maxX = std::max(maxX, projected.x);
 				minY = std::min(minY, projected.y);
@@ -1660,6 +1683,96 @@ void DrawBillboard(const Surface &out, Vec3 position, Point tile, ClxSprite spri
 		position + halfWidth, position - halfWidth }, texture, PickAt(tile, kind, entity), lighting, true);
 }
 
+Surface PrepareSamplingBuffers(const Surface &logical)
+{
+	SamplingState = { *GetOptions().Graphics.townViewAntialiasing, 1, logical.w(), logical.h(), false };
+	RasterSampleFactor = 1;
+	const size_t logicalPixels = static_cast<size_t>(logical.w()) * logical.h();
+	// Bound the extra pixel/depth/ownership storage and avoid integer/pitch overflow.
+	if (SamplingState.requested && logical.w() <= 8192 && logical.h() <= 8192
+	    && logicalPixels <= MaxSmoothWorldPixels / 4) {
+#if defined(__cpp_exceptions) || defined(_CPPUNWIND)
+		try {
+#endif
+			const int width = logical.w() * 2;
+			const int height = logical.h() * 2;
+			if (!SamplingSurface || SamplingSurface->w() != width || SamplingSurface->h() != height) {
+#ifdef USE_SDL3
+				SDLSurfaceUniquePtr allocation { SDL_CreateSurface(width, height, SDL_PIXELFORMAT_INDEX8) };
+#else
+				SDLSurfaceUniquePtr allocation { SDL_CreateRGBSurfaceWithFormat(0, width, height, 8, SDL_PIXELFORMAT_INDEX8) };
+#endif
+				if (allocation)
+					SamplingSurface = std::make_unique<OwnedSurface>(std::move(allocation));
+				else
+					SamplingSurface.reset();
+			}
+			if (SamplingSurface) {
+				DepthBuffer.assign(logicalPixels * 4, std::numeric_limits<float>::infinity());
+				PickBuffer.assign(logicalPixels * 4, PickRecord {});
+				SamplingColors.Prepare(logical_palette);
+				SamplingState.factor = RasterSampleFactor = 2;
+				SamplingState.width = width;
+				SamplingState.height = height;
+				return *SamplingSurface;
+			}
+#if defined(__cpp_exceptions) || defined(_CPPUNWIND)
+		} catch (const std::bad_alloc &) {
+			// The ordinary path remains usable if the optional allocation fails.
+			SamplingSurface.reset();
+			std::vector<float>().swap(DepthBuffer);
+			std::vector<PickRecord>().swap(PickBuffer);
+		}
+#endif
+	}
+	SamplingState.limited = SamplingState.requested;
+	DepthBuffer.assign(logicalPixels, std::numeric_limits<float>::infinity());
+	PickBuffer.assign(logicalPixels, PickRecord {});
+	return logical;
+}
+
+void ResolveSampling(const Surface &logical, const Surface &sampled)
+{
+	if (RasterSampleFactor == 1)
+		return;
+	for (int y = 0; y < logical.h(); ++y) {
+		uint8_t *destination = logical.at(0, y);
+		const uint8_t *top = sampled.at(0, y * 2);
+		const uint8_t *bottom = sampled.at(0, y * 2 + 1);
+		for (int x = 0; x < logical.w(); ++x) {
+			const int sx = x * 2;
+			destination[x] = SamplingColors.Resolve({ top[sx], top[sx + 1], bottom[sx], bottom[sx + 1] });
+			const size_t source = static_cast<size_t>(y * 2) * sampled.w() + sx;
+			const std::array<size_t, 4> indices { source, source + 1, source + sampled.w(), source + sampled.w() + 1 };
+			size_t front = source;
+			for (const size_t index : indices) {
+				if (DepthBuffer[index] < DepthBuffer[front])
+					front = index;
+			}
+			const size_t target = static_cast<size_t>(y) * logical.w() + x;
+			// Forward in-place resolution is safe: every source index is >= target.
+			// One visible subpixel supplies all ownership and depth information.
+			DepthBuffer[target] = DepthBuffer[front];
+			PickBuffer[target] = PickBuffer[front];
+		}
+	}
+	const size_t size = static_cast<size_t>(logical.w()) * logical.h();
+	DepthBuffer.resize(size);
+	PickBuffer.resize(size);
+	RasterSampleFactor = 1;
+}
+
+bool CurrentPickingValid()
+{
+	return PickingValid && SamplingState.requested == *GetOptions().Graphics.townViewAntialiasing
+	    && PickScreenWidth == gnScreenWidth && PickScreenHeight == gnScreenHeight
+	    && PickViewportHeight == gnViewportHeight && PickZoom == *GetOptions().Graphics.zoom
+	    && PickLeftPanel == IsLeftPanelOpen() && PickRightPanel == IsRightPanelOpen()
+	    && ViewCamera.width > 0 && ViewCamera.height > 0
+	    && DepthBuffer.size() == static_cast<size_t>(ViewCamera.width) * ViewCamera.height
+	    && PickBuffer.size() == DepthBuffer.size();
+}
+
 } // namespace
 
 bool IsTownViewActive()
@@ -1728,6 +1841,11 @@ TownViewCameraState GetTownViewCameraState()
 	return { CameraYaw, CameraPitch, CameraDistance, CameraPanOffset.x, CameraPanOffset.z };
 }
 
+TownViewSamplingState GetTownViewSamplingState()
+{
+	return SamplingState;
+}
+
 bool BeginTownViewCameraDrag(Point screen, bool pan)
 {
 	if (!IsTownViewActive() || screen.x < 0 || screen.y < 0 || screen.x >= gnScreenWidth || screen.y >= gnViewportHeight)
@@ -1793,6 +1911,11 @@ void SetTownViewFireTimeForDiagnostics(double seconds)
 
 void ResetTownViewResources()
 {
+	SamplingSurface.reset();
+	SamplingState = {};
+	RasterSampleFactor = 1;
+	std::vector<float>().swap(DepthBuffer);
+	std::vector<PickRecord>().swap(PickBuffer);
 	ClearTownShadowMap();
 	TerrainCache.clear();
 	SceneGroundCache.clear();
@@ -1820,6 +1943,8 @@ void ResetTownViewResources()
 
 bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 {
+	PickingValid = false;
+	RasterSampleFactor = 1;
 	if (!IsTownViewActive() || !pDungeonCels || MicroTileLen == 0 || MyPlayer == nullptr) {
 		PickingValid = false;
 		return false;
@@ -1850,19 +1975,18 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 	const int height = std::min<int>(gnViewportHeight, fullOut.h());
 	if (fullOut.w() <= 0 || height <= 0)
 		return false;
-	const Surface out = fullOut.subregionY(0, height);
-	ConfigureCamera(out.w(), out.h());
+	const Surface logical = fullOut.subregionY(0, height);
+	ConfigureCamera(logical.w(), logical.h());
 	if (IsTownViewNativePose() && !forceGeometry) {
 		// A reference angle must reproduce the real game, including its painter
 		// order, trees, actors and zoom. Rotation exposes the reconstructed volumes.
 		// Cursor selection follows the same native path at this exact pose.
 		PickingValid = false;
-		ClearSurface(out);
+		SamplingState = { *GetOptions().Graphics.townViewAntialiasing, 1, logical.w(), logical.h(), false };
+		ClearSurface(logical);
 		return DrawNativeTownViewReference(fullOut, ViewPosition);
 	}
-	const size_t size = static_cast<size_t>(out.w()) * out.h();
-	DepthBuffer.assign(size, std::numeric_limits<float>::infinity());
-	PickBuffer.assign(size, PickRecord {});
+	const Surface out = PrepareSamplingBuffers(logical);
 	ClearSurface(out);
 	PrepareSceneLighting();
 	FrameFireTime = CabinFireDiagnosticTime >= 0 ? CabinFireDiagnosticTime : static_cast<double>(SDL_GetTicks()) / 1000;
@@ -1953,13 +2077,20 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 		if (InDungeonBounds(tile))
 			DrawBillboard(out, position, tile, (*missile._miAnimData)[missile._miAnimFrame - 1], PickKind::Ground, -1, light);
 	}
+	ResolveSampling(logical, out);
+	PickScreenWidth = gnScreenWidth;
+	PickScreenHeight = gnScreenHeight;
+	PickViewportHeight = gnViewportHeight;
+	PickZoom = *GetOptions().Graphics.zoom;
+	PickLeftPanel = IsLeftPanelOpen();
+	PickRightPanel = IsRightPanelOpen();
 	PickingValid = true;
 	return true;
 }
 
 int TownViewArchitectureAt(Point screen)
 {
-	if (!IsTownViewActive() || !PickingValid || CachedDungeonData != pDungeonCels.get()
+	if (!IsTownViewActive() || !CurrentPickingValid() || CachedDungeonData != pDungeonCels.get()
 		|| screen.x < 0 || screen.y < 0 || screen.x >= ViewCamera.width || screen.y >= ViewCamera.height)
 		return -1;
 	return PickBuffer[static_cast<size_t>(screen.y) * ViewCamera.width + screen.x].architecture;
@@ -1967,7 +2098,7 @@ int TownViewArchitectureAt(Point screen)
 
 float TownViewDepthAt(Point screen)
 {
-	if (!IsTownViewActive() || !PickingValid || CachedDungeonData != pDungeonCels.get()
+	if (!IsTownViewActive() || !CurrentPickingValid() || CachedDungeonData != pDungeonCels.get()
 		|| screen.x < 0 || screen.y < 0 || screen.x >= ViewCamera.width || screen.y >= ViewCamera.height)
 		return std::numeric_limits<float>::infinity();
 	return DepthBuffer[static_cast<size_t>(screen.y) * ViewCamera.width + screen.x];
@@ -1978,7 +2109,7 @@ bool PickTownView(Point screen, Point &tile, int &townerIndex, int &itemIndex, i
 	townerIndex = -1;
 	itemIndex = -1;
 	playerIndex = -1;
-	if (!IsTownViewActive() || !PickingValid || CachedDungeonData != pDungeonCels.get()
+	if (!IsTownViewActive() || !CurrentPickingValid() || CachedDungeonData != pDungeonCels.get()
 		|| screen.x < 0 || screen.y < 0 || screen.x >= ViewCamera.width || screen.y >= ViewCamera.height)
 		return false;
 	const PickRecord &pick = PickBuffer[static_cast<size_t>(screen.y) * ViewCamera.width + screen.x];

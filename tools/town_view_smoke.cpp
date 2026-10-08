@@ -42,6 +42,7 @@
 #include "engine/render/town_shadow.hpp"
 #include "engine/render/town_vegetation.hpp"
 #include "engine/render/town_view.hpp"
+#include "engine/render/town_view_resolve.hpp"
 #include "engine/render/town_volume.hpp"
 #include "engine/surface.hpp"
 #include "game_mode.hpp"
@@ -2757,6 +2758,398 @@ void RunPresentation(const std::filesystem::path &output)
 	FreeTownerGFX();
 }
 
+// This experiment exercises optional world sampling separately from the normal
+// smoke suite. The logical canvas, camera, cursor coordinates and UI stay fixed.
+void CheckQualityPaletteResolve()
+{
+	TownViewColorResolve resolve;
+	Check(resolve.Resolve({ 7, 8, 9, 10 }) == 7, "unprepared quality color helper has a safe first-sample fallback");
+	std::array<SDL_Color, 256> palette;
+	palette.fill({ 255, 0, 255, 255 });
+	palette[0] = { 0, 0, 0, 255 };
+	palette[17] = { 255, 255, 255, 255 };
+	palette[89] = { 66, 66, 66, 255 };
+	palette[203] = palette[204] = { 132, 132, 132, 255 };
+	resolve.Prepare(palette);
+	Check(resolve.Resolve({ 0, 0, 0, 0 }) == 0 && resolve.Resolve({ 204, 204, 204, 204 }) == 204,
+	    "quality resolve preserves opaque black and exact uniform palette indices");
+	Check(resolve.Resolve({ 0, 17, 0, 17 }) == 203 && resolve.Resolve({ 0, 0, 0, 17 }) == 89,
+	    "quality resolve averages actual RGB rather than unordered palette indices, with deterministic nearest-color ties");
+	palette[203].a = 0;
+	resolve.Prepare(palette);
+	Check(resolve.Resolve({ 0, 17, 0, 17 }) == 203, "quality color lookup treats palette alpha independently of opaque indexed samples");
+	palette[203] = { 255, 0, 0, 255 };
+	resolve.Prepare(palette);
+	Check(resolve.Resolve({ 0, 17, 0, 17 }) == 204, "quality color lookup refreshes after an RGB palette change");
+}
+
+uint64_t QualityHashBytes(const std::vector<uint8_t> &bytes)
+{
+	uint64_t hash = 14695981039346656037ULL;
+	for (uint8_t value : bytes)
+		hash = (hash ^ value) * 1099511628211ULL;
+	return hash;
+}
+
+struct QualityPicking {
+	uint64_t hash = 14695981039346656037ULL;
+	size_t picked = 0, architecture = 0, player = 0, npc = 0;
+	Point probe { -1, -1 };
+	bool valid = true;
+};
+
+QualityPicking InspectQualityPicking(const Surface &out)
+{
+	QualityPicking result;
+	const auto append = [&](uint32_t value) {
+		for (int shift = 0; shift < 32; shift += 8)
+			result.hash = (result.hash ^ static_cast<uint8_t>(value >> shift)) * 1099511628211ULL;
+	};
+	for (int y = 0; y < gnViewportHeight; ++y) {
+		for (int x = 0; x < out.w(); ++x) {
+			Point tile { -1, -1 };
+			int npc, item, player;
+			const bool picked = Pick({ x, y }, tile, npc, item, player);
+			const int architecture = TownViewArchitectureAt({ x, y });
+			const float depth = TownViewDepthAt({ x, y });
+			for (int value : { static_cast<int>(picked), tile.x, tile.y, npc, item, player, architecture })
+				append(static_cast<uint32_t>(value));
+			append(std::bit_cast<uint32_t>(depth));
+			if (!picked)
+				continue;
+			if (result.probe.x < 0)
+				result.probe = { x, y };
+			++result.picked;
+			result.architecture += architecture >= 0 ? 1 : 0;
+			result.player += player >= 0 ? 1 : 0;
+			result.npc += npc >= 0 ? 1 : 0;
+			result.valid = result.valid && InDungeonBounds(tile) && std::isfinite(depth) && depth > 0
+			    && architecture >= -1 && architecture < static_cast<int>(GetTownScene().size())
+			    && item >= -1 && player >= -1 && npc >= -1
+			    && (player < 0 || (player < static_cast<int>(Players.size()) && tile == Players[player].position.tile))
+			    && (npc < 0 || (npc < static_cast<int>(Towners.size()) && tile == Towners[npc].position));
+		}
+	}
+	return result;
+}
+
+struct QualityRayAudit {
+	int tested = 0, matched = 0, occluded = 0, failed = 0;
+};
+
+// Independent world-space rays use the actual logical subpixel centers. This
+// compares resolved depth against the nearest of four rays, not the central ray
+// with a widened tolerance. Live trees/actors may legitimately be closer.
+QualityRayAudit AuditQualityArchitecture(const Surface &out, int factor)
+{
+	QualityRayAudit result;
+	const auto camera = GetTownViewCameraState();
+	constexpr double HeightScale = 0.816496580927726;
+	const int zoom = *GetOptions().Graphics.zoom ? 2 : 1;
+	const double focal = 45.25483399593904 * 22 / camera.distance * zoom;
+	Point anchor = GetScreenPosition(ViewPosition) + Displacement { 32, 0 };
+	anchor = { anchor.x * zoom, anchor.y * zoom };
+	if (zoom == 2 && CanPanelsCoverView() && IsLeftPanelOpen())
+		anchor.x += SidePanelSize.width;
+	const double cy = std::cos(camera.yaw), sy = std::sin(camera.yaw);
+	const double cp = std::cos(camera.pitch), sp = std::sin(camera.pitch);
+	const RayVector right { sy, 0, -cy }, up { -cy * sp, cp, -sy * sp };
+	const RayVector eyeDirection { cy * cp, sp, sy * cp };
+	const RayVector target { ViewPosition.x + camera.offsetX, 0, ViewPosition.y + camera.offsetZ };
+	const RayVector eye = target + eyeDirection * 256;
+	const RayVector direction { -eyeDirection.x, -eyeDirection.y / HeightScale, -eyeDirection.z };
+	const auto &scene = GetTownScene();
+	std::vector<std::pair<const TownSceneTriangle *, int>> architecture;
+	for (size_t model = 0; model < scene.size(); ++model) {
+		const auto append = [&](const std::vector<TownSceneTriangle> &triangles) {
+			for (const auto &triangle : triangles)
+				architecture.emplace_back(&triangle, static_cast<int>(model));
+		};
+		append(TownSceneExteriorTriangles(scene[model]));
+		if (scene[model].cabinInterior) {
+			append(scene[model].cabinInterior->interiorTriangles);
+			for (const auto &fire : scene[model].cabinInterior->fireSources)
+				append(fire.emissiveTriangles);
+		}
+	}
+	std::set<std::pair<int, int>> samples;
+	// Distributed triangle centroids provide architectural samples without
+	// relying on screenshot colors or assuming ground is never black.
+	for (const auto &model : scene) {
+		const auto &triangles = TownSceneExteriorTriangles(model);
+		const size_t step = std::max<size_t>(1, triangles.size() / 12);
+		for (size_t i = 0; i < triangles.size(); i += step) {
+			RayVector center { 0, 0, 0 };
+			for (const auto &vertex : triangles[i].vertices)
+				center = center + RayPosition(vertex) * (1.0 / 3);
+			center.y *= HeightScale;
+			const RayVector relative = center - target;
+			const int x = static_cast<int>(std::floor(anchor.x + focal * RayDot(relative, right)));
+			const int y = static_cast<int>(std::floor(anchor.y - focal * RayDot(relative, up)));
+			if (x >= 0 && x < out.w() && y >= 0 && y < gnViewportHeight)
+				samples.emplace(x, y);
+		}
+	}
+	for (const auto &[x, y] : samples) {
+		double nearest = std::numeric_limits<double>::infinity();
+		int expected = -1;
+		double interior = 0;
+		for (int dy = 0; dy < factor; ++dy) {
+			for (int dx = 0; dx < factor; ++dx) {
+				const double px = x + (dx + 0.5) / factor;
+				const double py = y + (dy + 0.5) / factor;
+				RayVector origin = eye + right * ((px - anchor.x) / focal) + up * ((anchor.y - py) / focal);
+				origin.y /= HeightScale;
+				for (const auto &[triangle, model] : architecture) {
+					double distance, u, v;
+					if (RayTriangle(origin, direction, *triangle, distance, u, v) && distance < nearest) {
+						nearest = distance;
+						expected = model;
+						interior = std::min({ u, v, 1 - u - v });
+					}
+				}
+			}
+		}
+		if (expected < 0 || interior < 0.04)
+			continue; // Silhouette/triangle seams are outside this interior oracle.
+		++result.tested;
+		Point tile;
+		int npc, item, player;
+		const bool picked = Pick({ x, y }, tile, npc, item, player);
+		const float rendered = TownViewDepthAt({ x, y });
+		if (picked && TownViewArchitectureAt({ x, y }) == expected && std::abs(rendered - nearest) < 0.001) {
+			++result.matched;
+		} else if (picked && TownViewArchitectureAt({ x, y }) < 0
+		    && std::isfinite(rendered) && rendered > 0 && rendered < nearest - 0.001) {
+			++result.occluded;
+		} else {
+			++result.failed;
+			if (result.failed <= 3)
+				Record("INFO quality ray mismatch screen=" + std::to_string(x) + "," + std::to_string(y)
+				    + " expected architecture=" + std::to_string(expected) + " actual=" + std::to_string(TownViewArchitectureAt({ x, y }))
+				    + " expected depth=" + std::to_string(nearest) + " actual=" + std::to_string(rendered));
+		}
+	}
+	return result;
+}
+
+void RunQuality(const std::filesystem::path &output)
+{
+	InitializeTownDiagnostic();
+	Check(!*GetOptions().Graphics.townViewAntialiasing, "optional world antialiasing defaults off");
+	CheckQualityPaletteResolve();
+	ToggleTownView();
+	const auto initialState = NativeSceneState();
+	const bool originalCharFlag = CharFlag;
+	std::ofstream manifest(output / "quality.json");
+	manifest << std::setprecision(9)
+	    << "{\"experiment\":\"optional 2x world sampling at fixed logical framing\",\"archiveMode\":\""
+	    << (gbIsSpawn ? "shareware" : "retail") << "\",\"uiDrawn\":false,\"gpuPresentationMeasured\":false,"
+	    << "\"sourceArtAddsDetail\":false,\"fieldOfViewEquivalent\":true,\"fireTimeSeconds\":0,\"warmupDraws\":3,\"measuredDraws\":5,"
+	    << "\"costScope\":\"CPU world draw only, not game FPS; optional 2x requests four samples per logical pixel\","
+	    << "\"pickPolicy\":\"nearest finite depth sample and that same sample's entity/architecture record\",\"cases\":[\n";
+	struct Case { const char *name; int width, height; bool panelPanZoom, benchmark; };
+	const std::array<Case, 4> cases { Case { "native-scale", 640, 480, false, false },
+		Case { "odd-canvas", 645, 481, false, false }, Case { "wide-canvas", 960, 540, false, true },
+		Case { "left-panel-pan-zoom", 640, 480, true, false } };
+	bool firstCase = true;
+	for (const auto &test : cases) {
+		gnScreenWidth = test.width;
+		gnScreenHeight = test.height;
+		CharFlag = test.panelPanZoom;
+		GetOptions().Graphics.zoom.SetValue(test.panelPanZoom);
+		CalculatePanelAreas();
+		CalcViewportGeometry();
+		ResetTownViewCamera();
+		if (test.panelPanZoom) {
+			Check(BeginTownViewCameraDrag({ 400, 150 }, true) && UpdateTownViewCameraDrag({ 423, 161 }),
+			    "quality fixture accepts logical pan with the left panel open");
+			EndTownViewCameraDrag();
+			OrbitTownView(0.08F, 0.04F);
+			ZoomTownView(1);
+		}
+		const auto camera = GetTownViewCameraState();
+		const auto cameraPreserved = [&] {
+			const auto current = GetTownViewCameraState();
+			return current.yaw == camera.yaw && current.pitch == camera.pitch && current.distance == camera.distance
+			    && current.offsetX == camera.offsetX && current.offsetZ == camera.offsetZ;
+		};
+		OwnedSurface allocation(test.width, test.height + 2);
+		SDL_SetPaletteColors(allocation.surface->format->palette, logical_palette.data(), 0, 256);
+		SDL_FillRect(allocation.surface, nullptr, 255);
+		const Surface out = allocation.subregionY(0, test.height);
+		const auto guardsPreserved = [&] {
+			for (int y = gnViewportHeight; y < allocation.h(); ++y)
+				for (int x = 0; x < allocation.w(); ++x)
+					if (allocation[{ x, y }] != 255)
+						return false;
+			return true;
+		};
+		std::vector<uint8_t> baseline;
+		QualityPicking baselinePicking;
+		std::array<Point, 3> logicalProbes;
+		for (int mode = 0; mode < 3; ++mode) {
+			const bool quality = mode == 1;
+			if (mode != 0) {
+				GetOptions().Graphics.townViewAntialiasing.SetValue(quality);
+				Point tile;
+				int npc, item, player;
+				Check(!Pick(baselinePicking.probe, tile, npc, item, player)
+				        && TownViewArchitectureAt(baselinePicking.probe) == -1
+				        && !std::isfinite(TownViewDepthAt(baselinePicking.probe)),
+				    "quality option change invalidates stale selection, ownership and depth before redraw");
+			} else {
+				GetOptions().Graphics.townViewAntialiasing.SetValue(false);
+			}
+			Check(DrawTownView(out, true), std::string("draw quality fixture ") + test.name + (quality ? " 2x" : " 1x"));
+			const auto sampling = GetTownViewSamplingState();
+			const int factor = quality ? 2 : 1;
+			Check(sampling.requested == quality && sampling.factor == factor && !sampling.limited
+			        && sampling.width == out.w() * factor && sampling.height == gnViewportHeight * factor,
+			    "effective raster density matches quality request while logical dimensions remain fixed");
+			const auto pixels = ViewportPixels(out);
+			const auto picking = InspectQualityPicking(out);
+			Check(picking.valid && picking.picked > 0, "resolved picks retain valid live IDs, architecture ownership and finite depth");
+			const std::array<Point, 3> probes { TownViewScreenPosition(ViewPosition),
+				TownViewScreenPosition(ViewPosition + Displacement { 1, 0 }), TownViewScreenPosition(ViewPosition + Displacement { 0, 1 }) };
+			if (mode == 0) {
+				baseline = pixels;
+				baselinePicking = picking;
+				logicalProbes = probes;
+			} else {
+				Check(probes == logicalProbes, "quality density preserves logical world projection exactly");
+				if (mode == 2)
+					Check(pixels == baseline && picking.hash == baselinePicking.hash,
+					    "1x to 2x to 1x restores exact indexed pixels, picks, ownership and depth");
+			}
+			Check(guardsPreserved(), "quality draw preserves UI rows and both allocation guard rows");
+			Check(cameraPreserved() && NativeSceneState() == initialState, "quality draw preserves camera, original map, collision and actor state");
+			for (Point screen : { Point { -1, 0 }, Point { out.w(), 0 }, Point { 0, gnViewportHeight }, Point { 0, -1 } }) {
+				Point tile;
+				int npc, item, player;
+				Check(!Pick(screen, tile, npc, item, player) && TownViewArchitectureAt(screen) == -1
+				        && !std::isfinite(TownViewDepthAt(screen)), "quality queries reject coordinates outside the logical world viewport");
+			}
+			if (mode == 2)
+				continue;
+			const auto rays = AuditQualityArchitecture(out, factor);
+			Check(rays.tested > 0 && rays.matched > 0 && rays.failed == 0,
+			    "resolved architecture depth matches independent logical subpixel rays or a demonstrably nearer live occluder");
+			const std::string filename = std::string(test.name) + (quality ? "-2x.png" : "-1x.png");
+			SavePng(out.subregionY(0, gnViewportHeight), output / filename);
+			std::array<double, 3> warmup {};
+			std::array<double, 5> measured {};
+			if (test.benchmark) {
+				const auto timed = [&] {
+					const auto begin = std::chrono::steady_clock::now();
+					const bool drawn = DrawTownView(out, true);
+					const auto end = std::chrono::steady_clock::now();
+					if (!drawn)
+						throw std::runtime_error("quality benchmark draw failed");
+					return std::chrono::duration<double, std::milli>(end - begin).count();
+				};
+				for (double &value : warmup)
+					value = timed();
+				bool deterministic = ViewportPixels(out) == pixels;
+				for (double &value : measured) {
+					value = timed();
+					deterministic = deterministic && ViewportPixels(out) == pixels;
+				}
+				Check(deterministic && InspectQualityPicking(out).hash == picking.hash && guardsPreserved()
+				        && cameraPreserved() && NativeSceneState() == initialState,
+				    "warm quality measurements preserve frozen pixels, picking, bounds and live state");
+			}
+			if (!firstCase)
+				manifest << ",\n";
+			firstCase = false;
+			manifest << "{\"name\":\"" << test.name << "\",\"quality\":" << (quality ? "true" : "false")
+			    << ",\"file\":\"" << filename << "\",\"logicalWidth\":" << out.w() << ",\"logicalHeight\":" << gnViewportHeight
+			    << ",\"screenHeight\":" << test.height << ",\"rasterWidth\":" << sampling.width << ",\"rasterHeight\":" << sampling.height
+			    << ",\"camera\":{\"yaw\":" << camera.yaw << ",\"pitch\":" << camera.pitch << ",\"distance\":" << camera.distance
+			    << ",\"pan\":[" << camera.offsetX << ',' << camera.offsetZ << "]},\"nativeZoom\":" << (test.panelPanZoom ? "true" : "false")
+			    << ",\"leftPanelOpen\":" << (test.panelPanZoom ? "true" : "false") << ",\"uiPanelHeight\":" << GetMainPanel().size.height
+			    << ",\"factor\":" << sampling.factor << ",\"pixelHash\":\"" << QualityHashBytes(pixels) << "\",\"pickDepthHash\":\"" << picking.hash
+			    << "\",\"pickedPixels\":" << picking.picked << ",\"architecturePixels\":" << picking.architecture
+			    << ",\"playerPixels\":" << picking.player << ",\"npcPixels\":" << picking.npc
+			    << ",\"rayTested\":" << rays.tested << ",\"rayMatched\":" << rays.matched << ",\"rayOccluded\":" << rays.occluded
+			    << ",\"rayFailed\":" << rays.failed << ",\"uiRowsPreserved\":" << test.height - gnViewportHeight
+			    << ",\"allocationGuardRows\":2,\"benchmarked\":" << (test.benchmark ? "true" : "false");
+			if (test.benchmark) {
+				auto sorted = measured;
+				std::sort(sorted.begin(), sorted.end());
+				manifest << ",\"warmupMilliseconds\":[";
+				for (size_t i = 0; i < warmup.size(); ++i)
+					manifest << (i == 0 ? "" : ",") << warmup[i];
+				manifest << "],\"renderMilliseconds\":[";
+				for (size_t i = 0; i < measured.size(); ++i)
+					manifest << (i == 0 ? "" : ",") << measured[i];
+				manifest << "],\"medianMilliseconds\":" << sorted[2] << ",\"minimumMilliseconds\":" << sorted.front()
+				    << ",\"maximumMilliseconds\":" << sorted.back();
+				Record(std::string("INFO optional quality ") + (quality ? "2x" : "1x") + " 960x540 CPU world median=" + std::to_string(sorted[2]) + " ms");
+			}
+			manifest << '}';
+		}
+		const auto staleRejected = [&] {
+			Point tile;
+			int npc, item, player;
+			return !Pick(baselinePicking.probe, tile, npc, item, player)
+			    && TownViewArchitectureAt(baselinePicking.probe) == -1
+			    && !std::isfinite(TownViewDepthAt(baselinePicking.probe));
+		};
+		++gnScreenWidth;
+		Check(staleRejected(), "logical resize invalidates previous quality selection before redraw");
+		--gnScreenWidth;
+		Check(DrawTownView(out, true), "redraw after restoring logical size");
+		GetOptions().Graphics.zoom.SetValue(!test.panelPanZoom);
+		Check(staleRejected(), "native zoom change invalidates previous quality selection before redraw");
+		GetOptions().Graphics.zoom.SetValue(test.panelPanZoom);
+		Check(DrawTownView(out, true), "redraw after restoring native zoom");
+		CharFlag = !test.panelPanZoom;
+		Check(staleRejected(), "side-panel change invalidates previous quality selection before redraw");
+		CharFlag = test.panelPanZoom;
+		Check(DrawTownView(out, true) && ViewportPixels(out) == baseline && InspectQualityPicking(out).hash == baselinePicking.hash,
+		    "restoring size, zoom and panel state recreates the same 1x world and picking");
+		if (!test.panelPanZoom) {
+			ResetTownViewCamera();
+			DrawActualNativeReference(out);
+			const auto native = ViewportPixels(out);
+			for (const bool quality : { false, true }) {
+				GetOptions().Graphics.townViewAntialiasing.SetValue(quality);
+				Check(DrawTownView(out) && ViewportPixels(out) == native && GetTownViewSamplingState().factor == 1,
+				    "native pose remains pixel-identical to the real original backend at both quality settings");
+				Point tile;
+				int npc, item, player;
+				Check(!Pick({ out.w() / 2, gnViewportHeight / 2 }, tile, npc, item, player) && guardsPreserved(),
+				    "native pose keeps original selection authoritative and preserves guards");
+			}
+		}
+	}
+	CharFlag = originalCharFlag;
+	GetOptions().Graphics.zoom.SetValue(false);
+	ResetTownViewCamera();
+	gnScreenWidth = 1920;
+	gnScreenHeight = 1080;
+	CalculatePanelAreas();
+	CalcViewportGeometry();
+	OwnedSurface limited(1920, 1082);
+	SDL_FillRect(limited.surface, nullptr, 255);
+	GetOptions().Graphics.townViewAntialiasing.SetValue(true);
+	Check(DrawTownView(limited.subregionY(0, 1080), true), "oversized optional quality request retains a working world renderer");
+	const auto fallback = GetTownViewSamplingState();
+	Check(fallback.requested && fallback.limited && fallback.factor == 1 && fallback.width == 1920 && fallback.height == 1080,
+	    "sample budget bounds optional quality memory and reports its explicit 1x fallback");
+	bool guard = true;
+	for (int y = 1080; y < limited.h(); ++y)
+		for (int x = 0; x < limited.w(); ++x)
+			guard = guard && limited[{ x, y }] == 255;
+	Check(guard && NativeSceneState() == initialState, "limited quality fallback preserves guard rows and original simulation state");
+	manifest << "\n],\"limitedRequest\":{\"logicalWidth\":1920,\"logicalHeight\":1080,\"requested\":true,\"factor\":1,\"limited\":true},"
+	    << "\"roundtripPixelsAndPickingExact\":true,\"nativeBackendExact\":true,\"statePreserved\":true}\n";
+	Check(manifest.good(), "record optional sampling evidence and CPU measurement limits");
+	GetOptions().Graphics.townViewAntialiasing.SetValue(false);
+	FreeTownerGFX();
+}
+
 void Run(const std::filesystem::path &output)
 {
 	InitializeTownDiagnostic();
@@ -2874,8 +3267,9 @@ int main(int argc, char **argv)
 	std::cout << std::unitbuf;
 	std::cerr << std::unitbuf;
 	const bool presentation = argc == 5 && std::string(argv[4]) == "--presentation";
-	if (argc != 4 && !presentation) {
-		std::cerr << "Usage: town_view_smoke <game-data-directory> <built-assets-directory> <capture-directory> [--presentation]\n";
+	const bool quality = argc == 5 && std::string(argv[4]) == "--quality";
+	if (argc != 4 && !presentation && !quality) {
+		std::cerr << "Usage: town_view_smoke <game-data-directory> <built-assets-directory> <capture-directory> [--presentation|--quality]\n";
 		return 2;
 	}
 	const std::filesystem::path output = std::filesystem::absolute(argv[3]);
@@ -2901,6 +3295,8 @@ int main(int argc, char **argv)
 	try {
 		if (presentation)
 			RunPresentation(output);
+		else if (quality)
+			RunQuality(output);
 		else
 			Run(output);
 	} catch (const std::exception &error) {

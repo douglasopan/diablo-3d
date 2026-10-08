@@ -28,6 +28,15 @@ struct TownViewCameraState {
 	float offsetZ;
 };
 TownViewCameraState GetTownViewCameraState();
+/** Effective world sampling; camera, pointer coordinates and UI remain logical. */
+struct TownViewSamplingState {
+	bool requested = false;
+	int factor = 1;
+	int width = 0;
+	int height = 0;
+	bool limited = false;
+};
+TownViewSamplingState GetTownViewSamplingState();
 bool BeginTownViewCameraDrag(Point screen, bool pan = false);
 bool UpdateTownViewCameraDrag(Point screen);
 void EndTownViewCameraDrag();

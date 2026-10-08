@@ -13,7 +13,7 @@ D3D aims to render the whole Diablo 1 game in 3D, including its procedural dunge
 - Actor ground shadows currently include compatibility decals from the original artwork. These are **not dynamic shadows cast by 3D lights**.
 - The supplied Windows build uses `NONET=ON` and a separate local player profile. This prototype does not implement a multiplayer hub, extra player capacity or voice chat.
 
-See the [roadmap](ROADMAP.md) for the order of work. Report the build or commit you tested; a completed build alone is not a claim of visual approval.
+Use the [execution guide](PROJECT-EXECUTION.md) for the active stage, architecture, dependencies and completion gates, and the [roadmap](ROADMAP.md) for planned capabilities. Follow [AGENTS.md](../AGENTS.md) when using development agents. Report the build or commit you tested; a completed build alone is not a claim of visual approval.
 
 ## Source, data and build setup
 

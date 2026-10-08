@@ -547,6 +547,8 @@ struct GraphicsOptions : OptionCategoryBase {
 	OptionEntryInt<int> brightness;
 	/** @brief Zoom on start. */
 	OptionEntryBoolean zoom;
+	/** @brief Optional smoothing of reconstructed 3D world edges, independent of UI. */
+	OptionEntryBoolean townViewAntialiasing;
 	/** @brief Subtile lighting for smoother light gradients. */
 	OptionEntryBoolean perPixelLighting;
 	/** @brief Enable color cycling animations. */

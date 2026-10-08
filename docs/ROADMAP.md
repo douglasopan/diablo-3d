@@ -1,5 +1,7 @@
 # D3D roadmap
 
+For the current execution stage, architecture, dependencies and completion gates, use [PROJECT-EXECUTION.md](PROJECT-EXECUTION.md). This roadmap describes the desired capabilities; the execution guide controls their implementation order and evidence.
+
 The goal of D3D is to render **the whole Diablo 1 game in 3D**: Tristram, the procedurally generated dungeon levels, characters, monsters, objects and effects. F4 should switch views within the same running game while preserving its simulation. Tristram is the first implementation stage, where we establish the asset and rendering pipeline before tackling generated maps. This roadmap describes that sequence; it is not a release schedule or a claim that planned features already work. Join [Discord](https://discord.gg/4YxQ7s69S) or open an issue to coordinate work.
 
 **Resumo em português:** a proposta é o Diablo 1 inteiro em 3D, incluindo seus níveis procedurais. Tristram é a etapa atual para validar objetos, materiais, luz e câmera. Depois vem o primeiro andar procedural da Catedral; com esse fluxo validado, ampliaremos a reconstrução para os demais níveis e ambientes, personagens, monstros e efeitos. Dia/noite, horizonte, voz e mais jogadores também estão planejados, sem promessa de que já funcionem no build atual.
@@ -86,7 +88,13 @@ Track evidence and open decisions in [networking research](NETWORKING-RESEARCH.m
 
 The existing D3D logo already covers title, main and Escape menus. A complete new entry/menu layout remains planned. Build project-specific screens on the inherited character, settings and input flows, with readable interface scale across display sizes and preserved upstream credits. Record the actual [engine bases and reference influences](ENGINE-BASES-AND-CREDITS.md): DevilutionX is modified source; Belzebub is studied through [binary reverse engineering](BELZEBUB-BINARY-ANALYSIS.md), with no code incorporated.
 
-[Presentation review profiles](DISPLAY-PRESENTATION.md) now compare output sampling and wider view areas separately. Higher internal resolution increases CPU rasterization cost and does not independently preserve object/UI size. The next rendering work should define world framing, pixel density and UI scale as separate choices, then evaluate acceleration with actual performance and image evidence. Keep gameplay timing, collision, saves and the original comparison renderer while extending this to the whole game.
+[Presentation review profiles](DISPLAY-PRESENTATION.md) now compare output sampling and wider view areas separately. Optional world-only 2× sampling smooths reconstructed edges while retaining logical camera/UI coordinates, under an explicit memory budget; it defaults off and does not increase source-art detail. Higher sampling increases CPU rasterization cost. Further work should evaluate acceleration and independent readable UI layout with actual performance and image evidence. Keep gameplay timing, collision, saves and the original comparison renderer while extending this to the whole game.
+
+## 8. Plan an original expansion after the faithful reconstruction
+
+D3D should have its own coherent identity, integrating what we learn from the native game, DevilutionX and the Belzebub presentation study. First reconstruct the whole original game in 3D, preserving its recognizable elements, positions, rules, progression and generated dungeon layouts. That foundation precedes original expansion content.
+
+The owner's preferred future expansion direction is above ground: additional outdoor areas beyond the existing surface town. Scope, maps, traversal, quests and multiplayer implications are not defined or implemented. Treat this separately from the decorative horizon/fog work and from reproducing the original underground levels. New traversable terrain requires its own collision, world and gameplay design; a background alone does not create an expansion.
 
 ## How to propose work
 
