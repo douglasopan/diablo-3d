@@ -69,6 +69,7 @@
 #include "town_camera_runtime_entry.hpp"
 #include "town_camera_capture_checks.hpp"
 #include "town_architecture_culling_checks.hpp"
+#include "town_resident_mesh_checks.hpp"
 #include "ingame_menu_visual_checks.hpp"
 
 namespace {
@@ -4680,6 +4681,8 @@ int main(int argc, char **argv)
 	const bool cameraExtra = argc == 5 && std::string(argv[4]) == "--camera-extra";
 	const bool architectureCulling = argc == 5 && std::string(argv[4]) == "--architecture-culling";
 	const bool firstPersonPerformance = argc == 5 && std::string(argv[4]) == "--first-person-performance";
+	const bool residentMeshes = argc == 5 && (std::string(argv[4]) == "--resident-meshes" || std::string(argv[4]) == "--resident-fullhd");
+	const bool residentFullHd = residentMeshes && std::string(argv[4]) == "--resident-fullhd";
 	const bool ingameMenuVisual = argc == 5 && std::string(argv[4]) == "--ingame-menu-visual";
 	const bool cabinOpenings = argc == 5 && std::string(argv[4]) == "--cabin-openings";
 	const bool cabinReview = argc == 5 && std::string(argv[4]) == "--cabin-review";
@@ -4688,8 +4691,8 @@ int main(int argc, char **argv)
 	const bool layers = argc == 3 && std::string(argv[1]) == "--presentation-layers";
 	const bool gpuFixtures = argc == 3 && std::string(argv[1]) == "--gpu-fixtures";
 	const bool synthetic = layers || gpuFixtures;
-	if (argc != 4 && !presentation && !quality && !gpu && !camera && !cameraExtra && !architectureCulling && !firstPersonPerformance && !ingameMenuVisual && !cabinOpenings && !cabinReview && !editorSnapshot && !editorChecks && !synthetic) {
-		std::cerr << "Usage: town_view_smoke <game-data-directory> <built-assets-directory> <capture-directory> [--presentation|--quality|--gpu|--camera|--camera-extra|--architecture-culling|--first-person-performance|--ingame-menu-visual|--cabin-openings|--cabin-review|--editor-snapshot|--editor-map-checks]\n"
+	if (argc != 4 && !presentation && !quality && !gpu && !camera && !cameraExtra && !architectureCulling && !firstPersonPerformance && !residentMeshes && !ingameMenuVisual && !cabinOpenings && !cabinReview && !editorSnapshot && !editorChecks && !synthetic) {
+		std::cerr << "Usage: town_view_smoke <game-data-directory> <built-assets-directory> <capture-directory> [--presentation|--quality|--gpu|--camera|--camera-extra|--architecture-culling|--first-person-performance|--resident-meshes|--resident-fullhd|--ingame-menu-visual|--cabin-openings|--cabin-review|--editor-snapshot|--editor-map-checks]\n"
 		          << "       town_view_smoke --presentation-layers <synthetic-capture-directory>\n"
 		          << "       town_view_smoke --gpu-fixtures <synthetic-capture-directory>\n";
 		return 2;
@@ -4747,6 +4750,23 @@ int main(int argc, char **argv)
 				const auto directory = output / (useGpu ? "gpu" : "cpu");
 				std::filesystem::create_directories(directory);
 				RunTownCameraCaptureChecks(out, Check, NativeSceneState, ViewportPixels, SavePng, directory, std::cout, useGpu);
+			}
+			FreeTownerGFX();
+		}
+		else if (residentMeshes) {
+			InitializeTownDiagnostic();
+			gnScreenWidth = residentFullHd ? 1920 : 960;
+			gnScreenHeight = residentFullHd ? 1080 : 540;
+			CalculatePanelAreas();
+			CalcViewportGeometry();
+			OwnedSurface out(gnScreenWidth, gnScreenHeight);
+			SDL_SetPaletteColors(out.surface->format->palette, logical_palette.data(), 0, 256);
+			GetOptions().Graphics.townViewCameraFov.SetValue(80);
+			if (residentFullHd) {
+				for (const int mode : { 2, 3 })
+					RunTownResidentMeshCaptureChecks(out, Check, NativeSceneState, ViewportPixels, std::cout, mode, false);
+			} else {
+				RunTownResidentMeshCaptureChecks(out, Check, NativeSceneState, ViewportPixels, std::cout);
 			}
 			FreeTownerGFX();
 		}

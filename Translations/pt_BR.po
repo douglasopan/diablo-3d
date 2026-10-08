@@ -459,6 +459,34 @@ msgstr "Suporte"
 msgid "Show Credits"
 msgstr "Exibir Créditos"
 
+#: Source/DiabloUI/mainmenu.cpp
+msgid "Project Support and Credits"
+msgstr "Suporte e Créditos ao Projeto"
+
+#: Source/DiabloUI/mainmenu.cpp Source/DiabloUI/credits.cpp
+msgid "Diablo 3D Credits"
+msgstr "Créditos do Diablo 3D"
+
+#: Source/DiabloUI/credits.cpp
+msgid "Authorship and direction: Douglas Pan"
+msgstr "Autoria e direção: Douglas Pan"
+
+#: Source/DiabloUI/credits.cpp
+msgid "Goal: rebuild the whole Diablo 1 in 3D. Tristram is the first stage."
+msgstr "Objetivo: reconstruir o Diablo 1 inteiro em 3D. Tristram é a primeira etapa."
+
+#: Source/DiabloUI/credits.cpp
+msgid "Based on Diablo and DevilutionX, preserving the original authors, contributors, licenses, and credits."
+msgstr "Baseado em Diablo e DevilutionX, preservando autores, colaboradores, licenças e créditos originais."
+
+#: Source/DiabloUI/credits.cpp
+msgid "Help shape the project with art, code, testing, and feedback. Join our community."
+msgstr "Colabore com arte, código, testes e sugestões. Participe da nossa comunidade."
+
+#: Source/DiabloUI/credits.cpp
+msgid "Could not open a browser. Use the addresses shown above."
+msgstr "Não foi possível abrir o navegador. Use os endereços mostrados acima."
+
 #: Source/DiabloUI/mainmenu.cpp:54
 msgid "Exit Hellfire"
 msgstr "Sair do Hellfire"

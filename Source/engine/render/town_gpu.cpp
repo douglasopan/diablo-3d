@@ -1,4 +1,5 @@
 #include "engine/render/town_gpu.hpp"
+#include "engine/render/town_gpu_mesh.hpp"
 
 #include <algorithm>
 #include <chrono>
@@ -271,6 +272,7 @@ struct Interpolated {
  nointerpolation float4 normalDiffuse : TEXCOORD3;
  nointerpolation float4 shadowParameters : TEXCOORD4;
  nointerpolation float2 fallback : TEXCOORD5;
+ nointerpolation float2 volume : TEXCOORD7;
 };
 Interpolated VS(Input input) {
  Interpolated output;
@@ -286,6 +288,7 @@ Interpolated VS(Input input) {
  output.normalDiffuse = input.normalDiffuse;
  output.shadowParameters = input.shadowParameters;
  output.fallback = input.fallback;
+ output.volume = float2(-1, 1);
  return output;
 }
 float directionalShadow(float3 world, float4 receiver) {
@@ -420,6 +423,7 @@ struct Pixel {
  float depth : SV_Target2;
 };
 Pixel PS(Interpolated input) {
+ if (input.volume.y <= 0) discard;
  uint width, height;
  codes.GetDimensions(width, height);
  float2 uv = input.uv;
@@ -429,6 +433,12 @@ Pixel PS(Interpolated input) {
  absent = absent || ((flags.w & 4) != 0 && opacity.Load(int3(texel, 0)) == 0);
  uint code = codes.Load(int3(texel, 0));
  absent = absent || ((flags.w & 2) != 0 && code == 0);
+ // Volume side faces share the front texture binding but are opaque palette
+ // samples. A painted palette zero must bypass sprite masks/transparent zero.
+ if (input.volume.x >= 0) {
+  code = (uint)input.volume.x;
+  absent = false;
+ }
  if (absent) {
   if (input.fallback.x < 0) discard;
   code = (uint)input.fallback.x;
@@ -874,6 +884,8 @@ bool Readback(Target &target, std::vector<T> &output)
 
 } // namespace
 
+#include "engine/render/town_gpu_mesh_backend.inc"
+
 bool TownGpuBeginFrame(int width, int height, bool allowWarpForDiagnostics, const TownGpuProjection &projection)
 {
 #ifdef _WIN32
@@ -881,6 +893,7 @@ bool TownGpuBeginFrame(int width, int height, bool allowWarpForDiagnostics, cons
 	FrameFailed = false;
 	Vertices.clear();
 	Batches.clear();
+	BeginMeshFrame();
 	TextureCache.clear();
 	++FrameSerial;
 	for (auto entry = TexelCache.begin(); entry != TexelCache.end();) {
@@ -945,7 +958,7 @@ bool TownGpuBeginFrame(int width, int height, bool allowWarpForDiagnostics, cons
 bool TownGpuSetShadow(const TownGpuShadow &shadow)
 {
 #ifdef _WIN32
-	if (!FrameActive || FrameFailed || !Batches.empty())
+	if (!FrameActive || FrameFailed || !GeometryCommands.empty())
 		return Fail("Shadow upload must precede GPU triangle submission");
 	if (shadow.resolution == 0 && shadow.depth.empty()) {
 		FrameShadow = {};
@@ -1006,11 +1019,13 @@ bool TownGpuSubmitProjectedTriangle(const std::array<TownGpuVertex, 3> &vertices
 		    { material.shadowBias, material.shadowSlopeU, material.shadowSlopeV,
 		        static_cast<float>(std::clamp(material.shade, 0, 3) + (material.receivesShadow ? 4 : 0)) },
 		    { static_cast<float>(material.fallbackPaletteIndex), static_cast<float>(std::clamp(material.fallbackShade, 0, 3)) } });
-	if (!Batches.empty() && Batches.back().texture == uploaded && Batches.back().preservePicking == material.preservePicking
+	if (!GeometryCommands.empty() && !GeometryCommands.back().mesh && !Batches.empty() && Batches.back().texture == uploaded && Batches.back().preservePicking == material.preservePicking
 	    && std::memcmp(&Batches.back().constants, &constants, sizeof(constants)) == 0)
 		Batches.back().count += 3;
-	else
+	else {
+		GeometryCommands.push_back({ false, Batches.size() });
 		Batches.push_back({ uploaded, constants, first, 3, material.preservePicking });
+	}
 	++Status.submittedTriangles;
 	return true;
 #else
@@ -1036,6 +1051,7 @@ bool TownGpuEndFrame(TownGpuFrame &output)
 		return Fail("Cannot publish an incomplete GPU frame");
 	}
 	FrameActive = false;
+	const auto commandStart = Clock::now();
 	const float zero[] { 0, 0, 0, 0 };
 	const float infinity[] { std::numeric_limits<float>::infinity(), 0, 0, 0 };
 	Context->ClearRenderTargetView(Targets[0].view.get(), zero);
@@ -1074,23 +1090,28 @@ bool TownGpuEndFrame(TownGpuFrame &output)
 			return Fail("Map frame vertex buffer", result);
 		std::memcpy(mapped.pData, Vertices.data(), Vertices.size() * sizeof(GpuVertex));
 		Context->Unmap(VertexBuffer.get(), 0);
+		MeshStats.projectedUploadBytes = Vertices.size() * sizeof(GpuVertex);
+	}
+	for (const GeometryCommand &command : GeometryCommands) {
+		if (command.mesh) {
+			if (!DrawMeshBatch(MeshBatches[command.batch]))
+				return false;
+			continue;
+		}
+		const Batch &batch = Batches[command.batch];
+		if (!BindGeometryConstants(batch.constants))
+			return false;
+		Context->IASetInputLayout(InputLayout.get());
+		Context->VSSetShader(VertexShader.get(), nullptr, 0);
 		ID3D11Buffer *vertexBuffer = VertexBuffer.get();
 		const UINT stride = sizeof(GpuVertex);
 		const UINT offset = 0;
 		Context->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
-		for (const Batch &batch : Batches) {
-			result = Context->Map(ConstantBuffer.get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
-			if (FAILED(result))
-				return Fail("Map batch constants", result);
-			std::memcpy(mapped.pData, &batch.constants, sizeof(Constants));
-			Context->Unmap(ConstantBuffer.get(), 0);
-			ID3D11ShaderResourceView *resources[] { batch.texture->texels->codes.get(), batch.texture->texels->opacity.get(), batch.texture->lut != nullptr ? batch.texture->lut->view.get() : nullptr, ShadowResource.get() };
-			Context->PSSetShaderResources(0, 4, resources);
-			Context->OMSetBlendState(BlendStates[batch.preservePicking ? 1 : 0].get(), nullptr, 0xFFFFFFFFU);
-			Context->Draw(batch.count, batch.first);
-			++Status.drawCalls;
-		}
+		BindGeometryMaterial(*batch.texture, batch.preservePicking);
+		Context->Draw(batch.count, batch.first);
+		++Status.drawCalls;
 	}
+	MeshStats.commandMilliseconds = std::chrono::duration<double, std::milli>(Clock::now() - commandStart).count();
 	ID3D11ShaderResourceView *emptyResources[4] {};
 	Context->PSSetShaderResources(0, 4, emptyResources);
 	Context->OMSetRenderTargets(0, nullptr, nullptr);
@@ -1126,6 +1147,7 @@ void ResetTownGpuResources()
 	FrameActive = false;
 	FrameFailed = false;
 	Batches.clear();
+	ResetMeshResources();
 	Vertices.clear();
 	FrameShadow = {};
 	FrameProjection = {};

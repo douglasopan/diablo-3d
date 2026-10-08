@@ -2,11 +2,13 @@
 
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
 #include <limits>
+#include <map>
 #include <memory>
 #include <new>
 #include <string>
@@ -29,6 +31,7 @@
 #include "engine/render/scrollrt.h"
 #include "engine/render/town_ground_shadow.hpp"
 #include "engine/render/town_gpu.hpp"
+#include "engine/render/town_gpu_mesh.hpp"
 #include "engine/render/town_horizon.hpp"
 #include "engine/render/town_lighting.hpp"
 #include "engine/render/town_lighting_profile.hpp"
@@ -52,6 +55,7 @@
 #include "missiles.h"
 #include "options.h"
 #include "player.h"
+#include "utils/log.hpp"
 #include "towners.h"
 #include "utils/ui_fwd.h"
 
@@ -201,6 +205,22 @@ struct TileArt {
 	bool solid = false;
 };
 
+struct ResidentMeshRange {
+	uint32_t firstIndex = 0;
+	uint32_t indexCount = 0;
+	uint8_t textureView = 0;
+};
+
+struct ResidentMeshArtwork {
+	// Uses the same monotonic allocator as texture generations, never addresses.
+	TextureGpuIdentity generation;
+	std::vector<TownGpuMeshVertex> vertices;
+	std::vector<uint32_t> indices;
+	std::vector<ResidentMeshRange> ranges;
+	bool ready = false;
+	TownGpuMeshIdentity identity() const { return { generation.value, 1 }; }
+};
+
 struct VolumeArtwork {
 	Texture texture;
 	TownVolumeMesh mesh;
@@ -211,6 +231,7 @@ struct VolumeArtwork {
 	mutable Vec3 minimum {};
 	mutable Vec3 maximum {};
 	mutable bool boundsReady = false;
+	mutable std::map<std::array<float, 3>, ResidentMeshArtwork> residentPlacements;
 };
 
 enum class PickKind : uint8_t { Ground, Towner, Item, Player };
@@ -254,6 +275,8 @@ std::vector<PickRecord> PickBuffer;
 TownViewRendererState RendererState;
 bool CaptureGpu = false;
 bool CaptureGpuFailed = false;
+bool ResidentMeshesEnabledForDiagnostics = true;
+std::array<float, 2> RasterJitterForDiagnostics {};
 bool GpuBlocked = false;
 std::string GpuFailure;
 uint64_t GpuFrameNumber = 0;
@@ -617,6 +640,43 @@ uint32_t GpuPickId(PickRecord pick)
 	if (inserted)
 		GpuPickRecords.push_back(pick);
 	return entry->second;
+}
+
+bool PrepareResidentMesh(const ResidentMeshArtwork &mesh)
+{
+	if (CaptureGpuFailed)
+		return false;
+	if (!TownGpuHasMesh(mesh.identity())
+	    && !TownGpuUploadMesh({ mesh.identity(), mesh.vertices, mesh.indices })) {
+		CaptureGpuFailed = true;
+		return false;
+	}
+	return true;
+}
+
+void ConfigureResidentMeshCamera()
+{
+	const TownCameraFrame &frame = ViewCamera.projection;
+	const auto row = [](TownCameraPoint basis) {
+		return std::array<float, 4> { basis.x, basis.height, basis.z, 0 };
+	};
+	TownGpuMeshCamera camera;
+	camera.worldToView = { row(frame.right), row(frame.up), row(frame.forward) };
+	camera.nativeArithmetic = true;
+	camera.heightScale = frame.heightScale;
+	camera.focalPixels = frame.focalPixels * RasterSampleFactor;
+	camera.centerX = frame.centerX * RasterSampleFactor;
+	camera.centerY = frame.centerY * RasterSampleFactor;
+	camera.eye = { frame.eye.x, frame.eye.height, frame.eye.z };
+	camera.towardViewer = { -frame.forward.x, -frame.forward.height / frame.heightScale, -frame.forward.z };
+	CaptureGpuFailed = !TownGpuSetMeshCamera(camera);
+}
+
+void ConfigureResidentMeshLighting(TownGpuMeshInstance &instance)
+{
+	const TownShadowDirection light = GetTownShadowLightDirection();
+	instance.vertexNormals = true;
+	instance.toLight = { light.x, light.height, light.z };
 }
 
 void Rasterize(const Surface &out, const std::array<TownCameraProjectedVertex, 3> &triangle, const Texture &texture,
@@ -1671,7 +1731,67 @@ void DrawGround(const Surface &out, Point tile, const Texture &ground)
 		Vec3 { x + 0.53125F, 0, z - 0.46875F }, Vec3 { x - 0.46875F, 0, z + 0.53125F } }, ground, pick, lighting, true);
 }
 
-void DrawVolume(const Surface &out, Vec3 position, Point tile, const VolumeArtwork &art, PickKind kind, int entity, int lighting)
+void DrawResidentVolume(Vec3 position, const VolumeArtwork &art, PickRecord pick, int lighting)
+{
+	auto &cached = art.residentPlacements[{ position.x, position.y, position.z }];
+	if (!cached.ready) {
+		const auto world = [&](const TownVolumeVertex &v) {
+			constexpr float s = 0.7071067811865475F;
+			return Vec3 { position.x + (v.x + v.z) * s,
+				position.y + v.height + (art.physicalFrame ? 0 : v.z * s - 1 / PixelsPerWorldUnit),
+				position.z + (-v.x + v.z) * s };
+		};
+		cached.vertices.reserve(art.mesh.triangles.size() * 3);
+		cached.indices.reserve(art.mesh.triangles.size() * 3);
+		for (const auto &triangle : art.mesh.triangles) {
+			Vec3 normal = Cross(world(triangle.vertices[1]) - world(triangle.vertices[0]),
+				world(triangle.vertices[2]) - world(triangle.vertices[0]));
+			const float length = std::sqrt(Dot(normal, normal));
+			if (!(length > 0))
+				continue; // DrawVolume rejects these as a zero-facing plane too.
+			normal = normal * (1 / length);
+			const bool front = triangle.material == TownVolumeMaterial::SpriteFront;
+			const uint8_t view = front ? (art.physicalFrame && !art.directionalTextures[triangle.textureView].pixels.empty()
+				? triangle.textureView : 8) : (cached.ranges.empty() ? 8 : cached.ranges.back().textureView);
+			if (cached.ranges.empty() || cached.ranges.back().textureView != view)
+				cached.ranges.push_back({ static_cast<uint32_t>(cached.indices.size()), 0, view });
+			for (const auto &v : triangle.vertices) {
+				const Vec3 point = world(v);
+				cached.indices.push_back(static_cast<uint32_t>(cached.vertices.size()));
+				cached.vertices.push_back({ { point.x, point.y, point.z }, { v.u, v.v }, { normal.x, normal.y, normal.z },
+					static_cast<uint32_t>(triangle.paletteIndex) | (front ? 256U : 0U) });
+			}
+			cached.ranges.back().indexCount += 3;
+		}
+		cached.ready = true;
+	}
+	if (cached.indices.empty() || !PrepareResidentMesh(cached))
+		return;
+	TownGpuMeshInstance instance;
+	instance.identity = cached.identity();
+	instance.pickId = GpuPickId(pick);
+	instance.volumeMaterial = true;
+	instance.volumeLighting = std::clamp(lighting, 0, 3);
+	ConfigureResidentMeshLighting(instance);
+	TownGpuMaterial material;
+	material.lighting = TownGpuLighting::Shadow;
+	material.receivesShadow = DirectionalShadowsEnabledForDiagnostics;
+	material.shade = instance.volumeLighting;
+	for (const auto &range : cached.ranges) {
+		const Texture &texture = range.textureView < 8 ? art.directionalTextures[range.textureView] : art.texture;
+		material.repeat = texture.repeat;
+		material.transparentZero = texture.opacity.empty();
+		instance.firstIndex = range.firstIndex;
+		instance.indexCount = range.indexCount;
+		if (!TownGpuSubmitMeshInstance(instance, PrepareGpuTexture(texture, nullptr), material)) {
+			CaptureGpuFailed = true;
+			return;
+		}
+		RendererState.gpuSubmittedTriangles += range.indexCount / 3;
+	}
+}
+
+void DrawVolume(const Surface &out, Vec3 position, Point tile, const VolumeArtwork &art, PickKind kind, int entity, int lighting, bool residentAllowed = true)
 {
 	constexpr float InverseSqrt2 = 0.7071067811865475F;
 	const auto world = [&](const TownVolumeVertex &vertex) {
@@ -1751,6 +1871,12 @@ void DrawVolume(const Surface &out, Vec3 position, Point tile, const VolumeArtwo
 	// Keep near/eye crossings for authoritative per-triangle clipping. Ground
 	// decals above have independent extents and must survive a culled body.
 	const PickRecord pick = PickAt(tile, kind, entity);
+	// Orthographic edge clipping still uses the validated projected path.
+	// Resident buffers are enabled only for perspective props and vegetation.
+	if (CaptureGpu && ResidentMeshesEnabledForDiagnostics && ViewCamera.projection.perspective && residentAllowed && kind == PickKind::Ground) {
+		DrawResidentVolume(position, art, pick, lighting);
+		return;
+	}
 	for (const TownVolumeTriangle &triangle : art.mesh.triangles) {
 		std::array<Vertex, 3> vertices;
 		for (size_t i = 0; i < vertices.size(); ++i)
@@ -1800,7 +1926,7 @@ void DrawScenery(const Surface &out, Point tile, const TileArt &art, const Textu
 	const VolumeArtwork &volume = found != SceneryVolumeCache.end() ? found->second
 		: SceneryVolumeCache.emplace(piece, VolumeArtwork { art.facade,
 			BuildTownPropVolume({ art.facade.width, art.facade.height, art.facade.pixels, art.facade.opacity }) }).first->second;
-	DrawVolume(out, { x, 0, z }, tile, volume, PickKind::Ground, -1, lighting);
+	DrawVolume(out, { x, 0, z }, tile, volume, PickKind::Ground, -1, lighting, false);
 }
 
 Texture DecodeSprite(ClxSprite sprite)
@@ -2506,6 +2632,18 @@ void SetTownViewFireTimeForDiagnostics(double seconds)
 	CabinFireDiagnosticTime = std::isfinite(seconds) && seconds >= 0 ? seconds : -1;
 }
 
+void SetTownViewResidentMeshesEnabledForDiagnostics(bool enabled)
+{
+	ResidentMeshesEnabledForDiagnostics = enabled;
+	PickingValid = false;
+}
+
+void SetTownViewRasterJitterForDiagnostics(float x, float y)
+{
+	RasterJitterForDiagnostics = { std::isfinite(x) ? x : 0, std::isfinite(y) ? y : 0 };
+	PickingValid = false;
+}
+
 void ResetTownViewResources()
 {
 	ClearGpuSceneResources();
@@ -2553,6 +2691,7 @@ void ResetTownViewResources()
 
 bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 {
+	const auto worldStart = std::chrono::steady_clock::now();
 	PickingValid = false;
 	RasterSampleFactor = 1;
 	RendererState = {};
@@ -2603,6 +2742,10 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 		return false;
 	const Surface logical = fullOut.subregionY(0, height);
 	ConfigureCamera(logical.w(), logical.h());
+	ViewCamera.centerX += RasterJitterForDiagnostics[0];
+	ViewCamera.centerY += RasterJitterForDiagnostics[1];
+	ViewCamera.projection.centerX = ViewCamera.centerX;
+	ViewCamera.projection.centerY = ViewCamera.centerY;
 	if (IsTownViewNativePose() && !forceGeometry) {
 		// A reference angle must reproduce the real game, including its painter
 		// order, trees, actors and zoom. Rotation exposes the reconstructed volumes.
@@ -2655,12 +2798,15 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 				shadow.pcfRadius = view.config.pcfRadius;
 			}
 			CaptureGpuFailed = !TownGpuSetShadow(shadow);
+			if (!CaptureGpuFailed && ResidentMeshesEnabledForDiagnostics)
+				ConfigureResidentMeshCamera();
 		} else {
 			GpuBlocked = true;
 			GpuFailure = GetTownGpuStatus().failure;
 		}
 	}
 	const auto drawWorld = [&]() {
+		const auto recordStart = std::chrono::steady_clock::now();
 		if (horizonEnabled)
 			DrawHorizon(out);
 		const Texture &fallback = FallbackGround();
@@ -2751,6 +2897,7 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 			if (InDungeonBounds(tile))
 				DrawBillboard(out, position, tile, (*missile._miAnimData)[missile._miAnimFrame - 1], PickKind::Ground, -1, light);
 		}
+		RendererState.sceneRecordMilliseconds += std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - recordStart).count();
 	};
 	drawWorld();
 	if (CaptureGpu) {
@@ -2800,6 +2947,26 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 	PickCameraRevision = CameraRig.revision();
 	PickHorizonEnabled = *GetOptions().Graphics.townViewHorizon;
 	PickingValid = true;
+	RendererState.worldMilliseconds = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - worldStart).count();
+	if (!forceGeometry) {
+		// A bounded real-session trace identifies the effective backend/fallback.
+		// World timing deliberately excludes the HUD, SDL presentation and game loop.
+		static uint32_t lastReport = 0;
+		static bool lastGpu = false;
+		static std::string lastFailure;
+		const uint32_t now = SDL_GetTicks();
+		if (lastReport == 0 || lastGpu != RendererState.usedGpu || lastFailure != RendererState.failure || now - lastReport >= 10000) {
+			const auto &gpu = GetTownGpuStatus();
+			const auto &mesh = GetTownGpuMeshStats();
+			Log("Tristram renderer: GPU={}, adapter={}, mode={}, raster={}x{}, world={:.2f}ms, record={:.2f}ms, draws={}, inputTriangles={}, residentInstances={}, geometryUpload={}B, projectedUpload={}B, fallback={}",
+				RendererState.usedGpu, gpu.adapter, static_cast<int>(CameraRig.mode()), out.w(), out.h(), RendererState.worldMilliseconds,
+				RendererState.sceneRecordMilliseconds, gpu.drawCalls, gpu.submittedTriangles, mesh.instances,
+				mesh.uploadedVertexBytes + mesh.uploadedIndexBytes, mesh.projectedUploadBytes, RendererState.failure);
+			lastReport = now;
+			lastGpu = RendererState.usedGpu;
+			lastFailure = RendererState.failure;
+		}
+	}
 	return true;
 }
 

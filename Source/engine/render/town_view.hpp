@@ -68,6 +68,9 @@ struct TownViewRendererState {
 	size_t cpuCoveredFragments = 0;
 	size_t cpuDepthRejected = 0;
 	size_t cpuShadedFragments = 0;
+	/** World draw/recording only; exclude HUD, presentation and simulation. */
+	double worldMilliseconds = 0;
+	double sceneRecordMilliseconds = 0;
 };
 TownViewRendererState GetTownViewRendererState();
 /** Real assembled world geometry, including interior and every flame pose.
@@ -125,6 +128,10 @@ void SetTownViewDirectionalShadowsEnabledForDiagnostics(bool enabled);
 /** A nonnegative time freezes visual flames for reproducible captures; negative
  * restores the runtime timer. Simulation time and random state are untouched. */
 void SetTownViewFireTimeForDiagnostics(double seconds);
+/** Private A/B of the resident path; no preferences, assets or simulation writes. */
+void SetTownViewResidentMeshesEnabledForDiagnostics(bool enabled);
+/** Subpixel reference sensitivity fixture; production defaults to zero. */
+void SetTownViewRasterJitterForDiagnostics(float x, float y);
 
 /** Draw only the world viewport. forceGeometry is for reconstruction diagnostics. */
 bool DrawTownView(const Surface &fullOut, bool forceGeometry = false);

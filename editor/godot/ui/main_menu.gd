@@ -11,11 +11,28 @@ extends Control
 @export_multiline var status: String = "Arraste MenuLogo e MenuList na área 2D. Salve a cena e exporte."
 
 func _ready() -> void:
+	(get_node("MenuList") as Control).resized.connect(_fit_project_action_label)
+	(get_node("MenuList/ProjectSupportCredits") as Button).minimum_size_changed.connect(_fit_project_action_label)
 	_apply_size()
 
 func _apply_size() -> void:
 	var parts := preview_size.split("x")
 	size = Vector2(float(parts[0]), float(parts[1]))
+	_fit_project_action_label()
+
+func _fit_project_action_label() -> void:
+	var menu := get_node("MenuList") as Control
+	var action := menu.get_node("ProjectSupportCredits") as Button
+	var font := action.get_theme_font("font")
+	var padding := 0.0
+	for style_name: String in ["normal", "hover", "pressed", "disabled", "focus"]:
+		padding = maxf(padding, action.get_theme_stylebox(style_name).get_minimum_size().x)
+	var available_width := maxf(1.0, menu.size.x - padding - 12.0)
+	var font_size := 25
+	while font_size > 12 and font.get_string_size(action.text, HORIZONTAL_ALIGNMENT_LEFT, -1, font_size).x > available_width:
+		font_size -= 1
+	if action.get_theme_font_size("font_size") != font_size:
+		action.add_theme_font_size_override("font_size", font_size)
 
 func export_layout(output_path: String = "res://local/ui/layout.ini") -> bool:
 	var logo := get_node("MenuLogo") as Control

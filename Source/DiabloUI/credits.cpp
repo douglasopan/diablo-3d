@@ -1,6 +1,8 @@
 #include <algorithm>
+#include <array>
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -8,6 +10,7 @@
 
 #ifdef USE_SDL3
 #include <SDL3/SDL_events.h>
+#include <SDL3/SDL_misc.h>
 #include <SDL3/SDL_rect.h>
 #include <SDL3/SDL_surface.h>
 #include <SDL3/SDL_timer.h>
@@ -24,8 +27,10 @@
 #include "engine/load_clx.hpp"
 #include "engine/point.hpp"
 #include "engine/render/clx_render.hpp"
+#include "engine/render/d3d_menu_presentation.hpp"
 #include "engine/render/text_render.hpp"
 #include "engine/surface.hpp"
+#include "game_mode.hpp"
 #include "hwcursor.hpp"
 #include "utils/display.h"
 #include "utils/is_of.hpp"
@@ -45,6 +50,37 @@ const int LINE_H = 22;
 // (VIEWPORT.h / LINE_H) rounded up, plus one extra line for when
 // a line is leaving the screen while another one is entering.
 #define MAX_VISIBLE_LINES ((VIEWPORT.h - 1) / LINE_H + 2)
+
+constexpr std::array<const char *, 3> ProjectLinks {
+	"https://github.com/douglasopan/diablo-3d",
+	"https://douglasopan.github.io/diablo-3d/",
+	"https://discord.gg/4YxQ7s69S",
+};
+constexpr int ProjectCreditsBack = ProjectLinks.size();
+int ProjectCreditsAction = -1;
+
+void ProjectCreditsSelect(size_t value)
+{
+	ProjectCreditsAction = static_cast<int>(value);
+}
+
+void ProjectCreditsEsc()
+{
+	ProjectCreditsAction = ProjectCreditsBack;
+}
+
+bool OpenProjectLink(const char *url)
+{
+#ifdef USE_SDL3
+	return SDL_OpenURL(url);
+#elif SDL_VERSION_ATLEAST(2, 0, 14)
+	return SDL_OpenURL(url) == 0;
+#else
+	// The address stays visible on platforms without an URL-opening API.
+	(void)url;
+	return false;
+#endif
+}
 
 class CreditsRenderer {
 
@@ -204,6 +240,80 @@ bool UiSupportDialog()
 	}
 
 	return TextDialog(SupportLines, SupportLinesSize);
+}
+
+void UiDiablo3DCreditsDialog()
+{
+	std::size_t selectedItem = 0;
+	bool linkFailed = false;
+	while (true) {
+		ProjectCreditsAction = -1;
+		std::vector<std::unique_ptr<UiItemBase>> dialog;
+		std::vector<std::unique_ptr<UiListItem>> links;
+		UiLoadMenuBackground(!gbIsSpawn || gbIsHellfire ? "ui_art\\mainmenu" : "ui_art\\swmmenu");
+		UiAddBackground(&dialog);
+
+		const int width = std::min(720, gnScreenWidth - 64);
+		const int x = (gnScreenWidth - width) / 2;
+		constexpr int LineHeight = 20;
+		constexpr int RowHeight = 32;
+		const std::array<std::string, 3> paragraphs {
+			WordWrapString(_("Goal: rebuild the whole Diablo 1 in 3D. Tristram is the first stage."), width, GameFont12, 1),
+			WordWrapString(_("Based on Diablo and DevilutionX, preserving the original authors, contributors, licenses, and credits."), width, GameFont12, 1),
+			WordWrapString(_("Help shape the project with art, code, testing, and feedback. Join our community."), width, GameFont12, 1),
+		};
+		const std::string error = linkFailed
+		    ? WordWrapString(_("Could not open a browser. Use the addresses shown above."), width, GameFont12, 1)
+		    : std::string {};
+		auto textHeight = [](const std::string &text) {
+			return (1 + static_cast<int>(std::count(text.begin(), text.end(), '\n'))) * LineHeight;
+		};
+		int height = 40 + 8 + 36 + 12 + 4 + RowHeight * (ProjectCreditsBack + 1);
+		for (const auto &paragraph : paragraphs)
+			height += textHeight(paragraph) + 8;
+		if (linkFailed)
+			height += 8 + textHeight(error);
+		int y = std::max(0, (gnScreenHeight - height) / 2);
+		auto addText = [&](const char *text, int textBoxHeight, UiFlags font, UiFlags color) {
+			dialog.push_back(std::make_unique<UiArtText>(text,
+			    MakeSdlRect(x, y, width, textBoxHeight), font | color | UiFlags::AlignCenter, 1, LineHeight));
+			y += textBoxHeight;
+		};
+		addText(_("Diablo 3D Credits").data(), 40, UiFlags::FontSize30, UiFlags::ColorUiSilver);
+		y += 8;
+		addText(_("Authorship and direction: Douglas Pan").data(), 36, UiFlags::FontSize24, UiFlags::ColorUiGold);
+		y += 12;
+		for (const auto &paragraph : paragraphs) {
+			addText(paragraph.c_str(), textHeight(paragraph), UiFlags::FontSize12, UiFlags::ColorUiSilver);
+			y += 8;
+		}
+		y += 4;
+		for (const char *url : ProjectLinks)
+			links.push_back(std::make_unique<UiListItem>(std::string_view { url }));
+		links.push_back(std::make_unique<UiListItem>(_("Back")));
+		dialog.push_back(std::make_unique<UiList>(links, links.size(), x, y, width, RowHeight,
+		    UiFlags::FontSize12 | UiFlags::ColorUiGold | UiFlags::AlignCenter, 1));
+		if (linkFailed) {
+			y += RowHeight * static_cast<int>(links.size()) + 8;
+			addText(error.c_str(), textHeight(error), UiFlags::FontSize12, UiFlags::ColorUiSilver);
+		}
+		UiInitList(nullptr, ProjectCreditsSelect, ProjectCreditsEsc, dialog, true, nullptr, nullptr, selectedItem);
+		while (ProjectCreditsAction < 0) {
+			UiClearScreen();
+			UiPollAndRender();
+		}
+		selectedItem = SelectedItem;
+		UiInitList_clear();
+		dialog.clear();
+		links.clear();
+		SetD3dMainMenuActive(false);
+		ArtBackgroundWidescreen = std::nullopt;
+		ArtBackground = std::nullopt;
+
+		if (ProjectCreditsAction == ProjectCreditsBack)
+			return;
+		linkFailed = !OpenProjectLink(ProjectLinks[ProjectCreditsAction]);
+	}
 }
 
 } // namespace devilution

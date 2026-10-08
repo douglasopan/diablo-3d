@@ -194,6 +194,9 @@ void mainmenu_loop()
 		case MAINMENU_SHOW_SUPPORT:
 			UiSupportDialog();
 			break;
+		case MAINMENU_SUPPORT_AND_CREDITS:
+			UiSupportAndCreditsDialog();
+			break;
 		case MAINMENU_EXIT_DIABLO:
 			mainmenu_wait_for_button_sound();
 			done = true;

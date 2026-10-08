@@ -41,6 +41,7 @@ enum _mainmenu_selections : uint8_t {
 	MAINMENU_SHOW_CREDITS,
 	MAINMENU_EXIT_DIABLO,
 	MAINMENU_ATTRACT_MODE,
+	MAINMENU_SUPPORT_AND_CREDITS,
 };
 
 enum _selhero_selections : uint8_t {
@@ -94,6 +95,8 @@ void UiSelHeroMultDialog(bool (*fninfo)(bool (*fninfofunc)(_uiheroinfo *)), bool
 void UiSelHeroSingDialog(bool (*fninfo)(bool (*fninfofunc)(_uiheroinfo *)), bool (*fncreate)(_uiheroinfo *), bool (*fnremove)(_uiheroinfo *), void (*fnstats)(HeroClass, _uidefaultstats *), _selhero_selections *dlgresult, uint32_t *saveNumber, _difficulty *difficulty);
 bool UiCreditsDialog();
 bool UiSupportDialog();
+void UiSupportAndCreditsDialog();
+void UiDiablo3DCreditsDialog();
 bool UiMainMenuDialog(const char *name, _mainmenu_selections *pdwResult, int attractTimeOut);
 bool UiProgressDialog(int (*fnfunc)());
 bool UiSelectGame(GameData *gameData, int *playerId);

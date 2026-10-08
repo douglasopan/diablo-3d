@@ -77,15 +77,11 @@ layout_mode = 2
 size_flags_vertical = 3
 text = "Configurações"
 
-[node name="Support" type="Button" parent="MenuList"]
+[node name="ProjectSupportCredits" type="Button" parent="MenuList"]
 layout_mode = 2
 size_flags_vertical = 3
-text = "Suporte"
-
-[node name="Credits" type="Button" parent="MenuList"]
-layout_mode = 2
-size_flags_vertical = 3
-text = "Créditos"
+text = "Suporte e Créditos ao Projeto"
+autowrap_mode = 3
 
 [node name="Exit" type="Button" parent="MenuList"]
 layout_mode = 2
