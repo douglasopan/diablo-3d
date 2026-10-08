@@ -11,17 +11,37 @@ if(USE_GETTEXT_FROM_VCPKG)
   list(APPEND Gettext_ROOT ${CMAKE_CURRENT_BINARY_DIR}/vcpkg_installed/${VCPKG_TARGET_TRIPLET}/tools/gettext/bin)
 endif()
 find_package(Gettext)
-if (Gettext_FOUND)
+if(Gettext_FOUND)
+  set(_catalog_compiler "${GETTEXT_MSGFMT_EXECUTABLE}" -o)
+else()
+  find_package(Python3 3.8 QUIET COMPONENTS Interpreter)
+  if(Python3_Interpreter_FOUND)
+    set(_catalog_compiler "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tools/compile_translations.py")
+    set(_catalog_compiler_dependencies
+      "${CMAKE_CURRENT_SOURCE_DIR}/tools/compile_translations.py"
+      "${CMAKE_CURRENT_SOURCE_DIR}/tools/third_party/cpython/msgfmt.py")
+    message(STATUS "Compiling translations with the bundled CPython compiler")
+  else()
+    message(WARNING "Translations will not be built: install GNU gettext or Python 3")
+  endif()
+endif()
+if(_catalog_compiler)
   file(MAKE_DIRECTORY "${DEVILUTIONX_ASSETS_OUTPUT_DIRECTORY}")
   foreach(lang ${devilutionx_langs})
     set(_po_file "${CMAKE_CURRENT_SOURCE_DIR}/Translations/${lang}.po")
     set(_gmo_file "${DEVILUTIONX_ASSETS_OUTPUT_DIRECTORY}/${lang}.gmo")
     set(_lang_target devilutionx_lang_${lang})
+    if(Gettext_FOUND)
+      set(_catalog_arguments "${_gmo_file}" "${_po_file}")
+    else()
+      set(_catalog_arguments "${_po_file}" "${_gmo_file}")
+    endif()
     add_custom_command(
-      COMMAND "${GETTEXT_MSGFMT_EXECUTABLE}" -o "${_gmo_file}" "${_po_file}"
+      COMMAND ${_catalog_compiler} ${_catalog_arguments}
       WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
       OUTPUT "${_gmo_file}"
       MAIN_DEPENDENCY "${_po_file}"
+      DEPENDS ${_catalog_compiler_dependencies}
       VERBATIM
     )
     add_custom_target("${_lang_target}" DEPENDS "${_gmo_file}")
@@ -285,7 +305,7 @@ else()
     OUTPUT_DIR "${DEVILUTIONX_ASSETS_OUTPUT_DIRECTORY}"
     OUTPUT_VARIABLE DEVILUTIONX_OUTPUT_ASSETS_FILES)
   set(DEVILUTIONX_MPQ_FILES ${devilutionx_assets})
-  if (Gettext_FOUND)
+  if(devilutionx_lang_files)
     foreach(lang ${devilutionx_langs})
       list(APPEND DEVILUTIONX_MPQ_FILES "${lang}.gmo")
     endforeach()

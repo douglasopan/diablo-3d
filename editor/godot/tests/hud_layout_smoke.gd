@@ -5,13 +5,13 @@ const HUD := preload("res://ui/hud.gd")
 const SCENE := preload("res://ui/hud.tscn")
 const OUTPUT := "res://local/hud-layout-tests/layout.ini"
 const DEFAULTS := {
-	"HudHealthOrb": [-224, -104, 88, 88], "HudManaOrb": [136, -104, 88, 88],
-	"HudBelt": [-116, -43, 232, 29], "HudSpell": [60, -103, 56, 56],
-	"HudInfo": [-200, -210, 400, 64],
-	"HudCharacter": [-198, -44, 30, 32], "HudInventory": [-166, -44, 30, 32],
-	"HudSpellbook": [-134, -44, 30, 32], "HudQuests": [-102, -44, 30, 32],
-	"HudMap": [-70, -44, 30, 32], "HudMenu": [-38, -44, 30, 32],
-	"HudChat": [-70, -80, 30, 32], "HudFriendly": [-38, -80, 30, 32],
+	"HudHealthOrb": [-226, -122, 88, 113], "HudManaOrb": [138, -122, 88, 113],
+	"HudBelt": [-116, -103, 232, 29], "HudSpell": [252, -58, 44, 44],
+	"HudInfo": [-132, -72, 264, 64],
+	"HudCharacter": [-310, -106, 71, 20], "HudInventory": [239, -106, 71, 20],
+	"HudSpellbook": [239, -82, 71, 20], "HudQuests": [-310, -82, 71, 20],
+	"HudMap": [-310, -54, 71, 20], "HudMenu": [-310, -30, 71, 20],
+	"HudChat": [-199, -150, 33, 24], "HudFriendly": [166, -150, 33, 24],
 }
 
 var checks := 0
@@ -47,6 +47,8 @@ func _run() -> void:
 	_check(hud.get_element("Missing") == null, "Nome fora do contrato não é resolvido")
 	for element_name: String in HUD.RETIRED_ELEMENTS:
 		_check(hud.get_element(element_name) == null and hud.get_node_or_null("SafeFrame/" + element_name) == null, "Botão extra removido da cena e do contrato: " + element_name)
+	for element_name: String in ["HudCharacter", "HudQuests", "HudMap", "HudMenu", "HudInventory", "HudSpellbook"]:
+		_check(HUD.BUTTON_TEXT[element_name].length() > 2, "Botão mostra seu nome funcional em vez de somente a tecla: " + element_name)
 	for logical_width: int in [640, 720, 800, 843, 844, 853, 854, 1120, 1706]:
 		hud.set_logical_size(Vector2i(logical_width, 480))
 		await process_frame
@@ -63,25 +65,36 @@ func _run() -> void:
 		for element_name: String in DEFAULTS:
 			var layout := _layout(config, element_name)
 			var expected: Array = DEFAULTS[element_name]
-			_check([layout.offsetX, layout.offsetY, layout.width, layout.height] == expected, "Defaults/compact shift preservados: %s / %d" % [element_name, logical_width])
-			_check(layout.anchor == ("bottom-right" if element_name in HUD.COMPACT_NAMES else "bottom-center"), "Âncora nativa exportada: " + element_name)
+			_check([layout.offsetX, layout.offsetY, layout.width, layout.height] == expected, "Defaults preservados sem translação compacta: %s / %d" % [element_name, logical_width])
+			_check(layout.anchor == "bottom-center", "Âncora nativa exportada: " + element_name)
 			var rect := HUD.resolve_layout_rect(layout, Vector2i(safe_width, 480))
-			if element_name in HUD.COMPACT_NAMES and safe_width < 844:
-				rect.position.y -= 100
 			_check(Rect2i(0, 0, safe_width, 480).encloses(rect), "Retângulo visível: %s / %d" % [element_name, logical_width])
 			var actual: Transform2D = frame.get_global_transform().affine_inverse() * hud.get_element(element_name).get_global_transform()
 			_check((actual.origin + Vector2.ONE * 0.0001).floor() == Vector2(rect.position) and hud.get_element(element_name).size == Vector2(rect.size), "Control corresponde ao retângulo inteiro nativo: %s / %d" % [element_name, logical_width])
 			rects[element_name] = rect
-		for utility_name: String in HUD.COMPACT_NAMES:
-			for core_name: String in ["HudHealthOrb", "HudManaOrb", "HudBelt", "HudSpell"]:
-				_check(not rects[utility_name].intersects(rects[core_name]), "Sem colisão utilitário/core: %s/%s/%d" % [utility_name, core_name, logical_width])
+		for first: int in range(HUD.ELEMENT_NAMES.size()):
+			for second: int in range(first + 1, HUD.ELEMENT_NAMES.size()):
+				var first_name: String = HUD.ELEMENT_NAMES[first]
+				var second_name: String = HUD.ELEMENT_NAMES[second]
+				_check(not rects[first_name].intersects(rects[second_name]), "Sem colisão entre controles originais: %s/%s/%d" % [first_name, second_name, logical_width])
+		_check(rects.HudBelt.end.y + 2 == rects.HudInfo.position.y, "Cinto fica acima da informação, com intervalo2: %d" % logical_width)
+		_check(rects.HudBelt.get_center().x == rects.HudInfo.get_center().x, "Cinto e informação compartilham o centro: %d" % logical_width)
+		_check(rects.HudSpell.position.y >= rects.HudSpellbook.end.y + 4, "Magia preparada fica abaixo do livro: %d" % logical_width)
+		_check(rects.HudChat.end.y + 4 == rects.HudHealthOrb.position.y and rects.HudFriendly.end.y + 4 == rects.HudManaOrb.position.y, "Controles MP ficam acima dos globos sem cobrir a faixa: %d" % logical_width)
+		var plate: Rect2i = hud.get_panel_preview_rect()
+		_check(plate.size == Vector2i(640, 104) and plate.position.y == 368, "Faixa de fundo640×104 tem rodapé8: %d" % logical_width)
+		plate.position -= Vector2i(frame.position)
+		_check(rects.HudHealthOrb.position.y == plate.position.y - 10 and rects.HudManaOrb.position.y == plate.position.y - 10 and rects.HudHealthOrb.end.y <= plate.end.y and rects.HudManaOrb.end.y <= plate.end.y, "Colunas dos globos sobressaem10 sem recortar as esculturas: %d" % logical_width)
+		for element_name: String in HUD.ELEMENT_NAMES:
+			if element_name not in ["HudChat", "HudFriendly", "HudHealthOrb", "HudManaOrb"]:
+				_check(plate.encloses(rects[element_name]), "Faixa contém todo o controle de jogador único: %s/%d" % [element_name, logical_width])
 	# Defaults are read from the C++ contract to catch drift between languages.
 	var source := FileAccess.get_file_as_string("res://../../Source/control/d3d_hud_layout.hpp")
 	_check(source.contains("std::array<D3dHudLayoutEntry, 13>"), "Contrato C++ possui somente os 13 controles originais")
 	_check(not source.contains('"HudQuickSpell'), "Contrato C++ não recria os quatro botões extras")
 	for element_name: String in DEFAULTS:
 		var values: Array = DEFAULTS[element_name]
-		var entry := '"%s", %s, %d, %d, %d, %d' % [element_name, "true" if element_name in HUD.COMPACT_NAMES else "false", values[0], values[1], values[2], values[3]]
+		var entry := '"%s", false, %d, %d, %d, %d' % [element_name, values[0], values[1], values[2], values[3]]
 		_check(source.contains(entry), "Cena e contrato C++ concordam: " + element_name)
 	for physical: Vector2i in [Vector2i(640, 480), Vector2i(800, 600), Vector2i(1280, 720), Vector2i(1920, 1080), Vector2i(2560, 1080), Vector2i(3440, 1440)]:
 		var logical_width := physical.x * 480 / physical.y
@@ -90,8 +103,6 @@ func _run() -> void:
 		var config: ConfigFile = hud.collect_layout().config
 		for element_name: String in DEFAULTS:
 			var rect := HUD.resolve_layout_rect(_layout(config, element_name), Vector2i(safe_width, 480))
-			if element_name in HUD.COMPACT_NAMES and safe_width < 844:
-				rect.position.y -= 100
 			rect.position.x += (logical_width - safe_width) / 2
 			var left := rect.position.x * physical.y / 480
 			var right := rect.end.x * physical.y / 480
@@ -116,9 +127,9 @@ func _run() -> void:
 	var reopened := packed.instantiate()
 	root.add_child(reopened)
 	await process_frame
-	_check(reopened.collect_layout().config.get_value("HudInventory", "offsetX") == -171, "Edição nativa sobrevive ao reabrir e ao compact shift")
+	_check(reopened.collect_layout().config.get_value("HudInventory", "offsetX") == 234, "Edição nativa sobrevive ao reabrir sem translação compacta")
 	reopened.free()
-	_check(hud.collect_layout().config.get_value("HudInventory", "offsetY") == -44, "Export remove compact shift sem mutar offset nativo")
+	_check(hud.collect_layout().config.get_value("HudInventory", "offsetY") == -106, "Export preserva offset nativo sem apresentação adicional")
 	hud.demo_life_percent = -4
 	hud.demo_mana_percent = 110
 	_check(hud.demo_life_percent == 0 and hud.demo_mana_percent == 100, "Vida/mana demonstrativas respeitam 0..100")
@@ -142,7 +153,7 @@ func _run() -> void:
 	_check(exported.contains("format=d3d.ui-layout") and not exported.contains('"bottom-'), "Export INI usa strings cruas compatíveis com loader C++")
 	var parsed: Dictionary = HUD._read_ini(exported)
 	_check(parsed.ok and parsed.config.get_sections().size() == 17, "Export possui header, 13 HUD originais e três seções preservadas")
-	_check(parsed.config.get_value("HudInventory", "offsetX") == -171, "Export contém a edição visual real")
+	_check(parsed.config.get_value("HudInventory", "offsetX") == 234, "Export contém a edição visual real")
 	_check(FileAccess.get_file_as_string(OUTPUT + ".previous").contains(foreign), "Versão anterior preservada no backup")
 	var invalid := "[Layout]\nformat=d3d.ui-layout\nschemaVersion=1\n[MenuList]\nanchor=center\n[MenuList]\nwidth=510\n"
 	_write(invalid)

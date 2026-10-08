@@ -17,7 +17,6 @@
 #endif
 
 #include <ankerl/unordered_dense.h>
-#include <function_ref.hpp>
 
 #include "engine/assets.hpp"
 #include "options.h"
@@ -43,6 +42,9 @@ constexpr std::array<const char *, 2> Extensions { ".mo", ".gmo" };
 
 std::unique_ptr<char[]> translationKeys;
 std::unique_ptr<char[]> translationValues;
+// A failed catalog affects only this load. Keep the explicit --lang override
+// intact so another selection or a newly installed catalog can recover.
+bool EnglishFallback = false;
 
 using TranslationRef = uint32_t;
 
@@ -119,7 +121,16 @@ int PluralIfNotOne(int n)
 
 // English, Danish, Spanish, Italian, Swedish
 unsigned PluralForms = 2;
-tl::function_ref<int(int n)> GetLocalPluralId = PluralIfNotOne;
+int (*GetLocalPluralId)(int n) = PluralIfNotOne;
+
+void ResetTranslations()
+{
+	translation = { {}, {} };
+	translationKeys = nullptr;
+	translationValues = nullptr;
+	PluralForms = 2;
+	GetLocalPluralId = PluralIfNotOne;
+}
 
 /**
  * Match plural=(n != 1);"
@@ -341,6 +352,8 @@ bool HasTranslation(const std::string &locale)
 
 std::string_view GetLanguageCode()
 {
+	if (EnglishFallback)
+		return "en";
 	if (!forceLocale.empty())
 		return forceLocale;
 	return *GetOptions().Language.code;
@@ -348,9 +361,8 @@ std::string_view GetLanguageCode()
 
 void LanguageInitialize()
 {
-	translation = { {}, {} };
-	translationKeys = nullptr;
-	translationValues = nullptr;
+	EnglishFallback = false;
+	ResetTranslations();
 
 	const std::string lang(GetLanguageCode());
 
@@ -368,10 +380,11 @@ void LanguageInitialize()
 		        "\"\n\n"
 		        "Please download fonts.mpq from:\n"
 		        "github.com/diasurgical/\ndevilutionx-assets/releases"));
-		forceLocale = "en";
-		GetLocalPluralId = PluralIfNotOne;
+		EnglishFallback = true;
 		return;
 	}
+	// Publish this language only after its catalog has loaded successfully.
+	EnglishFallback = true;
 
 	AssetHandle handle;
 	const uint32_t loadTranslationsStart = SDL_GetTicks();
@@ -385,9 +398,7 @@ void LanguageInitialize()
 			break;
 	}
 	if (!handle.ok()) {
-		// Reset to English, which is always available:
-		forceLocale = "en";
-		GetLocalPluralId = PluralIfNotOne;
+		// English is available while the requested catalog is absent.
 		return;
 	}
 
@@ -429,6 +440,9 @@ void LanguageInitialize()
 	if (head.revision.major > 1 || head.revision.minor > 1) {
 		return; // unsupported revision
 	}
+	if (head.nbMappings == 0 || head.nbMappings > fileSize / sizeof(MoEntry)) {
+		return; // the mandatory metadata entry and mapping tables must exist
+	}
 
 	// Read entries of source strings
 	const std::unique_ptr<MoEntry[]> src { new MoEntry[head.nbMappings] };
@@ -450,6 +464,13 @@ void LanguageInitialize()
 	}
 	for (size_t i = 0; i < head.nbMappings; ++i) {
 		SwapLE(dst[i]);
+	}
+	for (size_t i = 0; i < head.nbMappings; ++i) {
+		// Validate lengths before allocating string buffers (including their NUL).
+		if (src[i].offset >= fileSize || src[i].length >= fileSize - src[i].offset
+		    || dst[i].offset >= fileSize || dst[i].length >= fileSize - dst[i].offset) {
+			return;
+		}
 	}
 
 	// MO header
@@ -484,22 +505,26 @@ void LanguageInitialize()
 	char *valuePtr = &translationValues[0];
 	translation[0].reserve(head.nbMappings - 1);
 	for (uint32_t i = 1; i < head.nbMappings; i++) {
-		if (readWholeFile
-		        ? ReadEntry(data.get(), fileSize, src[i], keyPtr) && ReadEntry(data.get(), fileSize, dst[i], valuePtr)
-		        : ReadEntry(handle, src[i], keyPtr) && ReadEntry(handle, dst[i], valuePtr)) {
-			// Plural keys also have a plural form but it does not participate in lookup.
-			// Plural values are \0-terminated.
-			std::string_view value { valuePtr, dst[i].length + 1 };
-			for (size_t j = 0; j < PluralForms && !value.empty(); j++) {
-				const size_t formValueEnd = value.find('\0');
-				translation[j].emplace(keyPtr, EncodeTranslationRef(static_cast<uint32_t>(value.data() - &translationValues[0]), static_cast<uint32_t>(formValueEnd)));
-				value.remove_prefix(formValueEnd + 1);
-			}
-
-			keyPtr += src[i].length + 1;
-			valuePtr += dst[i].length + 1;
+		const bool read = readWholeFile
+		    ? ReadEntry(data.get(), fileSize, src[i], keyPtr) && ReadEntry(data.get(), fileSize, dst[i], valuePtr)
+		    : ReadEntry(handle, src[i], keyPtr) && ReadEntry(handle, dst[i], valuePtr);
+		if (!read) {
+			ResetTranslations();
+			return;
 		}
+		// Plural keys also have a plural form but it does not participate in lookup.
+		// Plural values are \0-terminated.
+		std::string_view value { valuePtr, dst[i].length + 1 };
+		for (size_t j = 0; j < PluralForms && !value.empty(); j++) {
+			const size_t formValueEnd = value.find('\0');
+			translation[j].emplace(keyPtr, EncodeTranslationRef(static_cast<uint32_t>(value.data() - &translationValues[0]), static_cast<uint32_t>(formValueEnd)));
+			value.remove_prefix(formValueEnd + 1);
+		}
+
+		keyPtr += src[i].length + 1;
+		valuePtr += dst[i].length + 1;
 	}
 
+	EnglishFallback = false;
 	LogVerbose(StrCat("Loaded translations from ", translationsPath, " in ", SDL_GetTicks() - loadTranslationsStart, "ms"));
 }

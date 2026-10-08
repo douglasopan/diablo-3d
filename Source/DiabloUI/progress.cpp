@@ -42,7 +42,7 @@ void DialogActionCancel()
 
 void ProgressLoadBackground()
 {
-	UiLoadBlackBackground();
+	UiLoadMenuBackground();
 	ArtPopupSm = LoadPcx("ui_art\\spopup");
 	ArtProgBG = LoadPcx("ui_art\\prog_bg");
 }

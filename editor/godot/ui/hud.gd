@@ -14,7 +14,7 @@ const ELEMENT_NAMES := [
 # Removed at the user's request: preserve the original HUD's controls only.
 # These old sections are discarded during export instead of resurfacing later.
 const RETIRED_ELEMENTS := ["HudQuickSpell0", "HudQuickSpell1", "HudQuickSpell2", "HudQuickSpell3"]
-const COMPACT_NAMES := [
+const UTILITY_NAMES := [
 	"HudCharacter", "HudInventory", "HudSpellbook", "HudQuests", "HudMap", "HudMenu",
 	"HudChat", "HudFriendly",
 ]
@@ -24,8 +24,8 @@ const ANCHORS := {
 	"bottom-right": Vector2(1, 1),
 }
 const BUTTON_TEXT := {
-	"HudCharacter": "C", "HudInventory": "I", "HudSpellbook": "B",
-	"HudQuests": "Q", "HudMap": "Tab", "HudMenu": "Esc",
+	"HudCharacter": "PERSONAGEM", "HudInventory": "INVENTÁRIO", "HudSpellbook": "MAGIAS",
+	"HudQuests": "MISSÕES", "HudMap": "MAPA", "HudMenu": "MENU",
 	"HudChat": "Chat", "HudFriendly": "Paz",
 }
 
@@ -47,6 +47,10 @@ const BUTTON_TEXT := {
 	set(value):
 		demo_multiplayer = value
 		_refresh_visuals()
+@export_multiline var demo_info_text := "Informações nativas":
+	set(value):
+		demo_info_text = value
+		_refresh_visuals()
 @export var show_safe_frame := true:
 	set(value):
 		show_safe_frame = value
@@ -59,7 +63,6 @@ const BUTTON_TEXT := {
 @export_tool_button("Exportar layout HUD", "Save") var export_action: Callable = _export_button_pressed
 @export_multiline var status := "Edite os Control em SafeFrame. Salve a cena e exporte o layout. Vida/mana e itens são demonstrativos."
 
-var _compact_shift := 0
 var _last_size := Vector2.ZERO
 
 func _ready() -> void:
@@ -113,11 +116,10 @@ func _sync_safe_frame() -> void:
 	var safe_width := mini(screen.x, floori(screen.y * 16.0 / 9.0))
 	frame.position = Vector2((screen.x - safe_width) / 2, 0)
 	frame.size = Vector2(safe_width, screen.y)
-	_compact_shift = -100 if safe_width < 844 else 0
-	# A presentation parent avoids baking the compact shift into authored offsets.
+	# The connected native panel uses the same grouping at 4:3 and 16:9.
 	var utilities := get_node("SafeFrame/Utilities") as Control
-	utilities.offset_top = _compact_shift
-	utilities.offset_bottom = _compact_shift
+	utilities.offset_top = 0
+	utilities.offset_bottom = 0
 	var output := get_node_or_null("PreviewStatus") as Control
 	if output:
 		output.offset_right = size.x - 16
@@ -126,8 +128,24 @@ func _sync_safe_frame() -> void:
 func get_element(element_name: String) -> Control:
 	if not element_name in ELEMENT_NAMES:
 		return null
-	var prefix := "SafeFrame/Utilities/" if element_name in COMPACT_NAMES else "SafeFrame/"
+	var prefix := "SafeFrame/Utilities/" if element_name in UTILITY_NAMES else "SafeFrame/"
 	return get_node_or_null(prefix + element_name) as Control
+
+func get_panel_preview_rect() -> Rect2i:
+	var frame := get_node("SafeFrame") as Control
+	var bounds := Rect2i()
+	var found := false
+	for element_name: String in ELEMENT_NAMES:
+		if element_name in ["HudHealthOrb", "HudManaOrb", "HudChat", "HudFriendly"]:
+			continue
+		var element := get_element(element_name)
+		if element == null:
+			continue
+		var transform := frame.get_global_transform().affine_inverse() * element.get_global_transform()
+		var rect := Rect2i(Vector2i((transform.origin + Vector2.ONE * 0.0001).floor()), Vector2i(element.size.round()))
+		bounds = bounds.merge(rect) if found else rect
+		found = true
+	return Rect2i(Vector2i(frame.position) + bounds.position - Vector2i(10, 6), bounds.size + Vector2i(20, 6))
 
 func _refresh_visuals() -> void:
 	if not is_inside_tree():
@@ -170,6 +188,21 @@ func _draw() -> void:
 	if show_safe_frame and frame:
 		draw_rect(frame.get_rect().grow(-1), Color(0.66, 0.56, 0.36, 0.3), false, 1)
 		draw_string(font, frame.position + Vector2(10, 18), "SafeFrame %d × %d" % [frame.size.x, frame.size.y], HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color("877d65"))
+	if frame:
+		_draw_backplate(Rect2(get_panel_preview_rect()))
+
+func _draw_backplate(rect: Rect2) -> void:
+	# Geometric stone/metal approximation only, not an HD art asset or game capture.
+	draw_rect(rect, Color("292c2b"))
+	for row: int in range(3):
+		var y := rect.position.y + row * 34
+		draw_line(Vector2(rect.position.x + 3, y + 2), Vector2(rect.end.x - 3, y + 2), Color("343734"), 1)
+		for column: int in range(12):
+			var x := rect.position.x + column * 54 + (27 if row % 2 else 0)
+			if x < rect.end.x - 3:
+				draw_line(Vector2(x, y + 3), Vector2(x, minf(y + 33, rect.end.y - 3)), Color("1a1d1e"), 1)
+	draw_rect(rect.grow(-1), Color("9a8055"), false, 1)
+	draw_rect(rect.grow(-3), Color("14191b"), false, 2)
 
 func _draw_element(element: Control) -> void:
 	var rect := Rect2(Vector2.ZERO, element.size)
@@ -178,15 +211,17 @@ func _draw_element(element: Control) -> void:
 		"HudManaOrb": _draw_orb(element, demo_mana_percent / 100.0, Color("2257ce"), "MANA")
 		"HudBelt": _draw_belt(element)
 		"HudInfo":
-			element.draw_rect(rect, Color(0.02, 0.025, 0.028, 0.45))
-			_text(element, "Área de informações nativas", Vector2(element.size.x / 2, element.size.y / 2 + 3), 10, Color("b5ad99"))
+			_panel(element, rect)
+			var lines := demo_info_text.split("\n")
+			var first_baseline := (element.size.y - lines.size() * 10) / 2.0 + 8
+			for index: int in range(lines.size()):
+				_text(element, lines[index], Vector2(element.size.x / 2, first_baseline + index * 10), 9, Color("d4c3a0"))
 		_:
 			_panel(element, rect, String(element.name) == "HudSpell")
 			if String(element.name) == "HudSpell":
-				_draw_rune(element, rect.grow(-10), 0)
-				_text(element, "MAGIA", Vector2(element.size.x / 2, element.size.y - 4), 8)
+				_draw_spell_glyph(element, rect.grow(-7))
 			else:
-				_text(element, BUTTON_TEXT.get(String(element.name), ""), Vector2(element.size.x / 2, element.size.y / 2 + 4), 10)
+				_text(element, BUTTON_TEXT.get(String(element.name), ""), Vector2(element.size.x / 2, element.size.y / 2 + 3), 9)
 	if show_hitboxes:
 		element.draw_rect(rect.grow(-0.5), Color(0.2, 0.9, 0.75, 0.85), false, 1)
 
@@ -194,12 +229,23 @@ func _panel(target: Control, rect: Rect2, selected := false) -> void:
 	target.draw_rect(rect, Color("0c1012"))
 	target.draw_rect(rect.grow(-1), Color("aa8750") if selected else Color("756347"), false, 1)
 	target.draw_rect(rect.grow(-3), Color("302e29"), false, 1)
-	for point: Vector2 in [rect.position + Vector2(3, 3), Vector2(rect.end.x - 3, 3), rect.end - Vector2(3, 3), Vector2(3, rect.end.y - 3)]:
+	for point: Vector2 in [rect.position + Vector2(3, 3), Vector2(rect.end.x - 3, rect.position.y + 3), rect.end - Vector2(3, 3), Vector2(rect.position.x + 3, rect.end.y - 3)]:
 		target.draw_circle(point, 1, Color("b79a65"))
 
 func _draw_orb(target: Control, fraction: float, color: Color, caption: String) -> void:
-	var radius := minf(target.size.x * 0.4, target.size.y * 0.4)
-	var center := Vector2(target.size.x / 2, radius + 2)
+	# A full 88 x 113 ornament column with a ~69 px globe, like the native
+	# 112 x 144 column. These simple shapes show its footprint, not final art.
+	var column_size := Vector2(88, 113)
+	target.draw_set_transform(Vector2.ZERO, 0, target.size / column_size)
+	var radius := 34.5
+	var center := Vector2(column_size.x / 2, radius + 2)
+	var left := PackedVector2Array([Vector2(4, 14), Vector2(12, 24), Vector2(14, 66), Vector2(28, 88), Vector2(43, 102), Vector2(22, 106), Vector2(5, 91)])
+	var right := PackedVector2Array()
+	for point: Vector2 in left:
+		right.append(Vector2(column_size.x - point.x, point.y))
+	target.draw_colored_polygon(left, Color("464b49"))
+	target.draw_colored_polygon(right, Color("464b49"))
+	target.draw_colored_polygon(PackedVector2Array([Vector2(3, 107), Vector2(27, 98), Vector2(44, 104), Vector2(61, 98), Vector2(85, 107), Vector2(85, 112), Vector2(3, 112)]), Color("53564f"))
 	target.draw_circle(center, radius + 4, Color("24272a"))
 	target.draw_circle(center, radius + 2, Color("82735b"))
 	target.draw_circle(center, radius, Color("070c12"))
@@ -216,29 +262,30 @@ func _draw_orb(target: Control, fraction: float, color: Color, caption: String) 
 	for index: int in range(12):
 		var angle := TAU * index / 12.0
 		target.draw_line(center + Vector2.from_angle(angle) * (radius + 2), center + Vector2.from_angle(angle) * (radius + 4), Color("a3906c"), 1)
-	_text(target, "%s %.0f%%" % [caption, fraction * 100], Vector2(target.size.x / 2, target.size.y - 2), 8)
+	_text(target, "%s %.0f%%" % [caption, fraction * 100], Vector2(column_size.x / 2, column_size.y - 2), 8)
+	target.draw_set_transform(Vector2.ZERO)
 
 func _draw_belt(target: Control) -> void:
 	var slot_width := target.size.x / 8.0
 	for index: int in range(8):
 		var rect := Rect2(Vector2(index * slot_width + 1, 1), Vector2(slot_width - 2, target.size.y - 2))
 		_panel(target, rect)
-		if index < 6:
-			var bottle := Rect2(rect.position + Vector2(rect.size.x * 0.35, 5), Vector2(rect.size.x * 0.3, rect.size.y - 13))
+		if index < 2:
+			var bottle := Rect2(rect.position + Vector2(rect.size.x * 0.35, 7), Vector2(rect.size.x * 0.3, rect.size.y - 11))
 			target.draw_rect(bottle, Color("a5a9a6"), false, 1)
-			target.draw_rect(bottle.grow(-1), Color("aa2028") if index < 3 else Color("285bb7"))
+			target.draw_rect(bottle.grow(-1), Color("aa2028"))
 			target.draw_line(bottle.position + Vector2(1, -2), bottle.position + Vector2(bottle.size.x - 1, -2), Color("ceb881"), 2)
-		_text(target, str(index + 1), Vector2(rect.get_center().x, target.size.y - 2), 7)
+		_text(target, str(index + 1), Vector2(rect.get_center().x, -3), 7)
 
-func _draw_rune(target: Control, rect: Rect2, index: int) -> void:
+func _draw_spell_glyph(target: Control, rect: Rect2) -> void:
+	# One prepared-spell placeholder, no extra action or hotkey button.
 	var center := rect.get_center()
-	var radius := minf(rect.size.x, rect.size.y) * 0.42
-	var color := Color("d4b37a") if index == 0 else Color("9da7ac")
-	var points := PackedVector2Array()
-	for point: int in range(5):
-		points.append(center + Vector2.from_angle(-PI / 2 + TAU * point / 5.0) * radius)
-	for point: int in range(5):
-		target.draw_line(points[point], points[(point + 2 + index % 2) % 5], color, 1.2, true)
+	var color := Color("d4c3a0")
+	target.draw_rect(Rect2(center + Vector2(-5, -1), Vector2(10, 11)), color)
+	for finger: int in range(4):
+		var x := center.x - 4 + finger * 3
+		target.draw_line(Vector2(x, center.y), Vector2(x - 1, center.y - 8 - (2 if finger == 1 else 0)), color, 2)
+	target.draw_line(center + Vector2(-4, 5), center + Vector2(-11, -1), color, 3)
 
 func _text(target: Control, text: String, center_baseline: Vector2, font_size: int, color := Color("d4c3a0")) -> void:
 	var font := ThemeDB.fallback_font
@@ -265,8 +312,6 @@ func collect_layout() -> Dictionary:
 		var transform := frame.get_global_transform().affine_inverse() * element.get_global_transform()
 		var point: Vector2 = ANCHORS[anchor]
 		var offset := transform.origin - frame.size * point
-		if element_name in COMPACT_NAMES:
-			offset.y -= _compact_shift
 		var width := roundi(element.size.x)
 		var height := roundi(element.size.y)
 		var offset_x := roundi(offset.x)

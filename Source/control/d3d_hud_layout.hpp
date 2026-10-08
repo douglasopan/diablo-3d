@@ -17,19 +17,19 @@ struct D3dHudLayoutEntry {
 
 // Logical pixels, identical to the editable Control nodes in ui/hud.tscn.
 inline constexpr std::array<D3dHudLayoutEntry, 13> D3dHudLayoutEntries {{
-	{ "HudHealthOrb", false, -224, -104, 88, 88 },
-	{ "HudManaOrb", false, 136, -104, 88, 88 },
-	{ "HudBelt", false, -116, -43, 232, 29 },
-	{ "HudSpell", false, 60, -103, 56, 56 },
-	{ "HudInfo", false, -200, -210, 400, 64 },
-	{ "HudCharacter", true, -198, -44, 30, 32, true },
-	{ "HudInventory", true, -166, -44, 30, 32, true },
-	{ "HudSpellbook", true, -134, -44, 30, 32, true },
-	{ "HudQuests", true, -102, -44, 30, 32, true },
-	{ "HudMap", true, -70, -44, 30, 32, true },
-	{ "HudMenu", true, -38, -44, 30, 32, true },
-	{ "HudChat", true, -70, -80, 30, 32, true },
-	{ "HudFriendly", true, -38, -80, 30, 32, true },
+	{ "HudHealthOrb", false, -226, -122, 88, 113 },
+	{ "HudManaOrb", false, 138, -122, 88, 113 },
+	{ "HudBelt", false, -116, -103, 232, 29 },
+	{ "HudSpell", false, 252, -58, 44, 44 },
+	{ "HudInfo", false, -132, -72, 264, 64 },
+	{ "HudCharacter", false, -310, -106, 71, 20, true },
+	{ "HudInventory", false, 239, -106, 71, 20, true },
+	{ "HudSpellbook", false, 239, -82, 71, 20, true },
+	{ "HudQuests", false, -310, -82, 71, 20, true },
+	{ "HudMap", false, -310, -54, 71, 20, true },
+	{ "HudMenu", false, -310, -30, 71, 20, true },
+	{ "HudChat", false, -199, -150, 33, 24, true },
+	{ "HudFriendly", false, 166, -150, 33, 24, true },
 }};
 
 inline int D3dHudSafeWidth(int width, int height)
@@ -42,11 +42,9 @@ inline Rectangle D3dHudDefaultRect(const D3dHudLayoutEntry &entry, int safeWidth
 	return { { (entry.rightAnchor ? safeWidth : safeWidth / 2) + entry.x, height + entry.y }, { entry.width, entry.height } };
 }
 
-inline Rectangle D3dHudPlaceRect(Rectangle rect, const D3dHudLayoutEntry &entry, int width, int height)
+inline Rectangle D3dHudPlaceRect(Rectangle rect, const D3dHudLayoutEntry &, int width, int height)
 {
 	const int safeWidth = D3dHudSafeWidth(width, height);
-	if (entry.utility && safeWidth < 844)
-		rect.position.y -= 100;
 	rect.size.width = std::clamp(rect.size.width, 1, std::max(1, safeWidth));
 	rect.size.height = std::clamp(rect.size.height, 1, std::max(1, height));
 	rect.position.x = std::clamp(rect.position.x, 0, safeWidth - rect.size.width) + (width - safeWidth) / 2;

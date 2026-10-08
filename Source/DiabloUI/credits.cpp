@@ -114,7 +114,8 @@ void CreditsRenderer::Render()
 	const Point uiPosition = GetUIRectangle().position;
 	if (ArtBackgroundWidescreen)
 		RenderClxSprite(Surface(DiabloUiSurface()), (*ArtBackgroundWidescreen)[0], uiPosition - Displacement { 320, 0 });
-	RenderClxSprite(Surface(DiabloUiSurface()), (*ArtBackground)[0], uiPosition);
+	if (ArtBackground)
+		RenderClxSprite(Surface(DiabloUiSurface()), (*ArtBackground)[0], uiPosition);
 
 	const std::size_t linesBegin = std::max(offsetY / LINE_H, 0);
 	const std::size_t linesEnd = std::min(linesBegin + MAX_VISIBLE_LINES, linesToRender.size());
@@ -196,10 +197,10 @@ bool UiSupportDialog()
 {
 	ArtBackgroundWidescreen = LoadOptionalClx("ui_art\\supportw.clx");
 	if (ArtBackgroundWidescreen.has_value()) {
-		LoadBackgroundArt("ui_art\\support");
+		UiLoadMenuBackground("ui_art\\support");
 	} else {
 		ArtBackgroundWidescreen = LoadOptionalClx("ui_art\\creditsw.clx");
-		LoadBackgroundArt("ui_art\\credits");
+		UiLoadMenuBackground("ui_art\\credits");
 	}
 
 	return TextDialog(SupportLines, SupportLinesSize);

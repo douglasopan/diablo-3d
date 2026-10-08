@@ -19,8 +19,10 @@
 #define N_(x) (x)
 #define P_(context, x) (x)
 
+// Explicit command-line override; catalog fallback must not overwrite it.
 extern std::string forceLocale;
 
+// Effective runtime language, English when the requested catalog cannot load.
 std::string_view GetLanguageCode();
 
 bool HasTranslation(const std::string &locale);

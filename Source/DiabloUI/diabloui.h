@@ -106,6 +106,7 @@ Sint16 GetCenterOffset(Sint16 w, Sint16 bw = 0);
 void DrawMouse();
 void UiLoadDefaultPalette();
 bool UiLoadBlackBackground();
+void UiLoadMenuBackground(const char *fallbackArt = nullptr);
 void LoadBackgroundArt(const char *pszFile, int frames = 1);
 void UiAddBackground(std::vector<std::unique_ptr<UiItemBase>> *vecDialog);
 void UiAddLogo(std::vector<std::unique_ptr<UiItemBase>> *vecDialog, int y = GetUIRectangle().position.y);

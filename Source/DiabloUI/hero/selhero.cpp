@@ -275,15 +275,18 @@ bool ShouldPrefillHeroName()
 
 void RemoveSelHeroBackground()
 {
-	vecSelHeroDialog.erase(vecSelHeroDialog.begin());
+	if (ArtBackground)
+		vecSelHeroDialog.erase(vecSelHeroDialog.begin());
 	ArtBackground = std::nullopt;
 }
 
 void AddSelHeroBackground()
 {
-	LoadBackgroundArt("ui_art\\selhero");
-	vecSelHeroDialog.insert(vecSelHeroDialog.begin(),
-	    std::make_unique<UiImageClx>((*ArtBackground)[0], MakeSdlRect(0, GetUIRectangle().position.y, 0, 0), UiFlags::AlignCenter));
+	UiLoadMenuBackground("ui_art\\selhero");
+	if (ArtBackground) {
+		vecSelHeroDialog.insert(vecSelHeroDialog.begin(),
+		    std::make_unique<UiImageClx>((*ArtBackground)[0], MakeSdlRect(0, GetUIRectangle().position.y, 0, 0), UiFlags::AlignCenter));
+	}
 }
 
 void SelheroClassSelectorSelect(size_t value)
@@ -384,7 +387,7 @@ void SelheroLoadSelect(size_t value)
 		selhero_isSavegame = false;
 
 		SelheroFree();
-		LoadBackgroundArt("ui_art\\selgame");
+		UiLoadMenuBackground("ui_art\\selgame");
 		selgame_GameSelection_Select(0);
 	}
 

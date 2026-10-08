@@ -57,7 +57,7 @@ void SelyesnoEsc()
 
 bool UiSelHeroYesNoDialog(const char *title, const char *body)
 {
-	UiLoadBlackBackground();
+	UiLoadMenuBackground();
 	UiAddBackground(&vecSelYesNoDialog);
 	UiAddLogo(&vecSelYesNoDialog);
 

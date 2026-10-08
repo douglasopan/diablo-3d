@@ -684,6 +684,7 @@ ClxSprite UiGetHeroDialogSprite(size_t heroClassIndex)
 
 void UnloadUiGFX()
 {
+	SetD3dMainMenuActive(false);
 	ArtHero = std::nullopt;
 	for (OptionalOwnedClxSpriteList &override : ArtHeroOverrides)
 		override = std::nullopt;
@@ -769,14 +770,31 @@ void UiLoadDefaultPalette()
 
 bool UiLoadBlackBackground()
 {
+	SetD3dMainMenuActive(false);
 	ArtBackground = std::nullopt;
 	UiLoadDefaultPalette();
 	UiOnBackgroundChange();
 	return true;
 }
 
+void UiLoadMenuBackground(const char *fallbackArt)
+{
+	if (SetD3dMainMenuActive(true)) {
+		ArtBackground = std::nullopt;
+		ArtBackgroundWidescreen = std::nullopt;
+		UiLoadDefaultPalette();
+		UiOnBackgroundChange();
+		return;
+	}
+	if (fallbackArt != nullptr)
+		LoadBackgroundArt(fallbackArt);
+	else
+		UiLoadBlackBackground();
+}
+
 void LoadBackgroundArt(const char *pszFile, int frames)
 {
+	SetD3dMainMenuActive(false);
 	ArtBackground = std::nullopt;
 	ArtBackground = LoadPcxSpriteList(pszFile, static_cast<uint16_t>(frames), /*transparentColor=*/std::nullopt, logical_palette.data());
 	if (!ArtBackground)

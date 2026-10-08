@@ -13,6 +13,7 @@
 #include "qol/xpbar.h"
 #include "towners.h"
 #include "utils/algorithm/container.hpp"
+#include "utils/display.h"
 #include "utils/format.hpp"
 #include "utils/format_int.hpp"
 #include "utils/log.hpp"
@@ -49,11 +50,16 @@ void PrintInfo(const Surface &out)
 
 	std::optional<OwnedSurface> hudInfo;
 	if (IsD3dHudEnabled()) {
-		hudInfo.emplace(400, 64);
-		DrawD3dHudPlate(*hudInfo, { { 0, 0 }, { 400, 64 } });
+		// Text uses the authored dimensions before the uniform screen scale.
+		// Keep the native 12px font and all five lines instead of squeezing a
+		// 400px text image into the narrower contextual box.
+		const int screenHeight = std::max<int>(1, GetScreenHeight());
+		hudInfo.emplace(std::max(1, infoBox.size.width * 480 / screenHeight),
+		    std::max(1, infoBox.size.height * 480 / screenHeight));
+		DrawD3dHudPlate(*hudInfo, { { 0, 0 }, { hudInfo->w(), hudInfo->h() } });
 	}
 	const Surface &textOut = hudInfo ? *hudInfo : out;
-	DrawString(textOut, InfoString, hudInfo ? Rectangle { { 0, spacing / 2 }, { 400, 64 } } : infoBox,
+	DrawString(textOut, InfoString, hudInfo ? Rectangle { { 0, spacing / 2 }, { hudInfo->w(), hudInfo->h() } } : infoBox,
 	    {
 	        .flags = InfoColor | UiFlags::AlignCenter | UiFlags::VerticalCenter | UiFlags::KerningFitSpacing,
 	        .spacing = 2,

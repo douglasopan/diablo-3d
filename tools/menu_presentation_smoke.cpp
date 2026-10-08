@@ -26,6 +26,7 @@ int main()
 #include <vector>
 
 #include "DiabloUI/diabloui.h"
+#include "DiabloUI/settings_layout.hpp"
 #include "engine/palette.h"
 #include "engine/render/d3d_menu_presentation.hpp"
 #include "engine/render/d3d_ui_layout.hpp"
@@ -72,6 +73,7 @@ struct Files {
 	std::filesystem::path assets;
 	std::filesystem::path background;
 	std::filesystem::path layout;
+	std::filesystem::path palette;
 
 	explicit Files(const std::filesystem::path &input)
 	{
@@ -84,6 +86,9 @@ struct Files {
 		background = assets / "menu-background.png";
 		layout = assets / "layout.ini";
 		std::filesystem::copy_file(input, background);
+		std::filesystem::create_directory(directory / "ui_art");
+		palette = directory / "ui_art" / "diablo.pal";
+		std::filesystem::copy_file(input.parent_path().parent_path() / "ui_art" / "diablo.pal", palette);
 		paths::SetBasePath(directory.string());
 		paths::SetAssetsPath(directory.string());
 		paths::SetPrefPath(directory.string());
@@ -96,6 +101,8 @@ struct Files {
 		std::error_code ignored;
 		std::filesystem::remove(layout, ignored);
 		std::filesystem::remove(background, ignored);
+		std::filesystem::remove(palette, ignored);
+		std::filesystem::remove(directory / "ui_art", ignored);
 		std::filesystem::remove(assets, ignored);
 		std::filesystem::remove(directory, ignored);
 	}
@@ -210,6 +217,26 @@ void CheckLayouts(const Files &files)
 	Check(!UiItemMouseEvents(&event, items), "right edge stays outside the authored hitbox");
 }
 
+void CheckSettingsLayouts()
+{
+	for (const Size size : { Size { 640, 480 }, Size { 853, 480 }, Size { 1280, 720 }, Size { 1920, 1080 }, Size { 2560, 1080 } }) {
+		for (const size_t count : { 3, 8, 13, 60 }) {
+			const auto bounds = GetSettingsUiRectangle(size.width, size.height, count);
+			const std::string label = std::to_string(size.width) + "x" + std::to_string(size.height) + "/" + std::to_string(count);
+			Check(std::abs(bounds.Center().x - size.width / 2) <= 1 && std::abs(bounds.Center().y - size.height / 2) <= 1,
+			    "Settings occupied block is centered: " + label);
+			Check(bounds.position.y >= 0 && bounds.position.y + bounds.size.height <= size.height,
+			    "Settings block stays inside the screen: " + label);
+			const int rows = (bounds.size.height - 284) / 26;
+			Check(rows >= 1 && rows <= static_cast<int>(count) && (count <= 8 || bounds.size.height >= 466),
+			    "Settings keeps selectable rows and scrolls long lists: " + label);
+			const Rectangle description { { bounds.position.x + 25, bounds.position.y + 204 + rows * 26 + 16 }, { bounds.size.width - 50, 64 } };
+			Check(description.Center().x == bounds.Center().x && description.position.y + description.size.height <= size.height,
+			    "Settings description shares the title/list center and fits: " + label);
+		}
+	}
+}
+
 struct RendererDeleter {
 	void operator()(SDL_Renderer *value) const { SDL_DestroyRenderer(value); }
 };
@@ -299,6 +326,18 @@ void CheckRendering(const Files &files)
 {
 	{
 		Frame frame(640, 480);
+		UiLoadMenuBackground("unused-original-menu");
+		Check(IsD3dMainMenuActive() && !ArtBackground && !ArtBackgroundWidescreen,
+		    "submenu loader shares the custom RGB background without loading its inherited art");
+		UiLoadBlackBackground();
+		Check(!IsD3dMainMenuActive(), "native black-background screens disable the custom layer");
+		UiLoadMenuBackground();
+		Check(IsD3dMainMenuActive(), "Settings and nested menus reactivate the shared background");
+		UnloadUiGFX();
+		Check(!IsD3dMainMenuActive(), "leaving UI for gameplay disables the custom background");
+	}
+	{
+		Frame frame(640, 480);
 		Check(DiabloUiSurface() == frame.ui.get(), "menu UI and PalSurface refer to the same indexed surface");
 		Check(SetD3dMainMenuActive(true), "provided PNG loads through the real asset and texture path");
 		SetD3dMainMenuFade(256);
@@ -381,6 +420,7 @@ int main(int argc, char **argv)
 		RequireSdl((InitPNG() & IMG_INIT_PNG) != 0, "initialize PNG support");
 		const Files files(argv[1]);
 		CheckLayouts(files);
+		CheckSettingsLayouts();
 		CheckRendering(files);
 		std::cout << "PASS " << Checks << " checks; no window, game archives, player profile or saves accessed\n";
 	} catch (const std::exception &error) {

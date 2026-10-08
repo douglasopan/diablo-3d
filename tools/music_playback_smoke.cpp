@@ -24,6 +24,7 @@ int main()
 #include <string_view>
 #include <vector>
 
+#include "engine/menu_music.hpp"
 #include "engine/music_catalog.hpp"
 #include "engine/random.hpp"
 #include "headless_mode.hpp"
@@ -126,8 +127,11 @@ struct PlaybackFixture {
 	std::filesystem::path second;
 	std::filesystem::path third;
 	std::filesystem::path menu;
+	std::filesystem::path menuAlternative;
 	std::filesystem::path townOriginal;
 	std::filesystem::path menuOriginal;
+	std::filesystem::path catacombsOriginal;
+	std::filesystem::path cavesOriginal;
 
 	explicit PlaybackFixture(const std::filesystem::path &syntheticMp3)
 	{
@@ -143,14 +147,20 @@ struct PlaybackFixture {
 		second = replacementDirectory / "town-alternative.mp3";
 		third = replacementDirectory / "town-third.mp3";
 		menu = replacementDirectory / "menu-rock2.mp3";
+		menuAlternative = replacementDirectory / "menu-alternative.mp3";
 		townOriginal = musicDirectory / "dtowne.wav";
 		menuOriginal = musicDirectory / "dintro.wav";
+		catacombsOriginal = musicDirectory / "dlvlb.wav";
+		cavesOriginal = musicDirectory / "dlvlc.wav";
 		std::filesystem::copy_file(syntheticMp3, first);
 		std::filesystem::copy_file(syntheticMp3, second);
 		std::filesystem::copy_file(syntheticMp3, third);
 		std::filesystem::copy_file(syntheticMp3, menu);
+		std::filesystem::copy_file(syntheticMp3, menuAlternative);
 		WriteTone(townOriginal);
 		WriteTone(menuOriginal);
+		WriteTone(catacombsOriginal);
+		WriteTone(cavesOriginal);
 		paths::SetBasePath(directory.string());
 		paths::SetAssetsPath(directory.string());
 		paths::SetPrefPath(directory.string());
@@ -161,13 +171,103 @@ struct PlaybackFixture {
 	{
 		// Remove only exact files and empty directories that this fixture owns.
 		std::error_code ignored;
-		for (const auto &path : { first, second, third, menu, townOriginal, menuOriginal, directory / "diablo.ini" })
+		for (const auto &path : { first, second, third, menu, menuAlternative, townOriginal, menuOriginal,
+		         catacombsOriginal, cavesOriginal, directory / "diablo.ini" })
 			std::filesystem::remove(path, ignored);
 		std::filesystem::remove(replacementDirectory, ignored);
 		std::filesystem::remove(musicDirectory, ignored);
 		std::filesystem::remove(directory, ignored);
 	}
 };
+
+void CheckMenuContinuity(const PlaybackFixture &fixture)
+{
+	Options &options = GetOptions();
+	const uint32_t simulationRng = GetLCGEngineState();
+	options.Music.theme.SetValue(MusicTheme::Rock);
+	music_stop();
+	const size_t initial = PlaybackCount();
+	RefreshMenuMusic(TMUSIC_INTRO);
+	Check(PlaybackCount() == initial + 1 && sgnMusicTrack == TMUSIC_INTRO
+	        && LastPlaybackHas("menu-rock2.mp3") && LastPlaybackHas("context=menu"),
+	    "initial menu entry starts the selected real stream");
+	SDL_Delay(75);
+	// InitMenu reaches this same continuation path after cancelled provider,
+	// game-selection or hero dialogs. The inherited NextTrack would advance here.
+	RefreshMenuMusic(TMUSIC_CATACOMBS);
+	Check(PlaybackCount() == initial + 1 && sgnMusicTrack == TMUSIC_INTRO,
+	    "provider cancellation preserves Rock2 without replay or native-track advance");
+	SDL_Delay(75);
+	RefreshMenuMusic(TMUSIC_CATACOMBS);
+	Check(PlaybackCount() == initial + 1 && sgnMusicTrack == TMUSIC_INTRO,
+	    "hero-selection cancellation and return preserve the active menu stream");
+	for (unsigned i = 0; i < 10; ++i)
+		RefreshMenuMusic(TMUSIC_CATACOMBS);
+	Check(PlaybackCount() == initial + 1, "repeated multiplayer round trips never restart unchanged menu music");
+
+	options.Music.menu.SetValue(MusicVariant::Alternative);
+	Check(PlaybackCount() == initial + 2 && LastPlaybackHas("menu-alternative.mp3"),
+	    "explicit menu soundtrack change still replaces the active stream immediately");
+	RefreshMenuMusic(TMUSIC_CATACOMBS);
+	Check(PlaybackCount() == initial + 2 && sgnMusicTrack == TMUSIC_INTRO,
+	    "multiplayer cancellation also preserves the explicitly selected alternative");
+	options.Music.theme.SetValue(MusicTheme::Vanilla);
+	Check(PlaybackCount() == initial + 3 && LastPlaybackHas("dintro.wav"),
+	    "explicit Vanilla selection still applies immediately");
+	RefreshMenuMusic(TMUSIC_CATACOMBS);
+	Check(PlaybackCount() == initial + 3 && sgnMusicTrack == TMUSIC_INTRO,
+	    "Vanilla menu music is not advanced merely by cancelling multiplayer");
+	music_start(TMUSIC_CATACOMBS);
+	const size_t nativeRotation = PlaybackCount();
+	RefreshMenuMusic(TMUSIC_CAVES);
+	Check(PlaybackCount() == nativeRotation && sgnMusicTrack == TMUSIC_CATACOMBS
+	        && LastPlaybackHas("dlvlb.wav"),
+	    "a playing native rotation track also retains its stream and identity");
+
+	music_stop();
+	std::filesystem::remove(fixture.menu);
+	options.Music.theme.SetValue(MusicTheme::Rock);
+	RefreshMenuMusic(TMUSIC_INTRO);
+	Check(LastPlaybackHas("dintro.wav") && LastPlaybackHas("fallback=true"),
+	    "missing menu replacement still uses the generated original");
+	const size_t missing = PlaybackCount();
+	RefreshMenuMusic(TMUSIC_CATACOMBS);
+	Check(PlaybackCount() == missing && sgnMusicTrack == TMUSIC_INTRO,
+	    "multiplayer cancellation preserves the missing-file fallback");
+	music_stop();
+	{
+		std::ofstream invalid(fixture.menu, std::ios::binary);
+		invalid << "invalid menu MPEG audio fixture";
+	}
+	RefreshMenuMusic(TMUSIC_INTRO);
+	Check(LastPlaybackHas("dintro.wav") && LastPlaybackHas("fallback=true"),
+	    "corrupt menu replacement still falls back through the real decoder");
+	const size_t rejected = PlaybackCount();
+	RefreshMenuMusic(TMUSIC_CATACOMBS);
+	Check(PlaybackCount() == rejected && sgnMusicTrack == TMUSIC_INTRO,
+	    "returning from multiplayer does not retry a rejected menu replacement");
+	music_stop();
+	std::filesystem::copy_file(fixture.source, fixture.menu, std::filesystem::copy_options::overwrite_existing);
+
+	music_set_game_context(true);
+	music_start(TMUSIC_TOWN);
+	Check(LastPlaybackHas("context=game"), "real game entry still loads its own soundtrack");
+	// FreeGame stops the soundtrack before returning from a real session.
+	music_stop();
+	const size_t afterGame = PlaybackCount();
+	RefreshMenuMusic(TMUSIC_INTRO);
+	Check(PlaybackCount() == afterGame + 1 && LastPlaybackHas("context=menu")
+	        && LastPlaybackHas("menu-rock2.mp3") && sgnMusicTrack == TMUSIC_INTRO,
+	    "return from a stopped real game starts the menu soundtrack normally");
+	music_stop();
+	gbMusicOn = false;
+	const size_t disabled = PlaybackCount();
+	RefreshMenuMusic(TMUSIC_INTRO);
+	Check(PlaybackCount() == disabled && sgnMusicTrack == NUM_MUSIC,
+	    "menu navigation never starts audio while music is disabled");
+	gbMusicOn = true;
+	Check(GetLCGEngineState() == simulationRng, "menu continuation preserves the simulation RNG");
+}
 
 void CheckPlayback(const PlaybackFixture &fixture)
 {
@@ -341,6 +441,7 @@ int main(int argc, char **argv)
 		LoadOptions();
 		snd_init();
 		Check(gbSndInited, "real SDL audio initializes with the isolated dummy device");
+		CheckMenuContinuity(fixture);
 		CheckPlayback(fixture);
 		music_stop();
 		snd_deinit();

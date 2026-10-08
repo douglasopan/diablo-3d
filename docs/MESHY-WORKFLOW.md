@@ -2,6 +2,12 @@
 
 The cabin workflow now calls Meshy's API and can load the generated triangles and their UV texture into Tristram. Generation success does not approve fidelity. Keep the original camera composition as the reference and inspect 360° views before adopting an asset.
 
+## Provider decision — 8 October 2026
+
+The user chose Tripo for the next integration, then explicitly authorized one final Meshy batch using only the existing balance. The game chat coordinates separate limits for scenery and characters; these are not independent authorizations to spend the whole account balance. No credit purchase or automatic refill is authorized. After that batch, pause new Meshy submissions while retaining these instructions, both tools, protected credentials, task IDs, parameters, source hashes, masters and downloaded candidates for possible future reuse. Queries/downloads of already paid tasks remain useful; they must not trigger another generation.
+
+Reusing an asset in Godot does not depend on which provider generated it. Preserve the catalog ID, variant, revision and content hash. Never regenerate a paid candidate merely because the provider changed, and never pick a file by its modification date. Current per-front production records are separate from the historical cabin experiment below.
+
 ## Current experiment
 
 On 7 October 2026 the east cabin received:

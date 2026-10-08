@@ -22,6 +22,7 @@ A pasta informada deve conter seu próprio `DIABDAT.MPQ` ou `spawn.mpq`. O inici
 - CMake **3.22 or newer**, matching the minimum in the engine's `CMakeLists.txt`.
 - Ninja. Visual Studio's optional **C++ CMake tools for Windows** component can supply CMake and Ninja; otherwise make their executables available on `PATH`.
 - Your own local retail Diablo data, or your own shareware data. No game archives are distributed by this repository.
+- GNU gettext tools or Python 3 to build the translated catalogs. CMake prefers gettext; when unavailable it uses the included CPython compiler with Python's standard library. Without either tool, CMake reports that translations cannot be built.
 
 Clone the repository with Git and open PowerShell in the clone's root. The build script locates Visual Studio through `vswhere` and prepares the x64 compiler environment in its own process. It looks for CMake and Ninja in an existing local `.tools` folder, then on `PATH`, then in the selected Visual Studio installation. A clean public clone does not need `.tools`. The script does not install missing tools.
 
@@ -34,6 +35,8 @@ For the game and the offscreen diagnostic:
 ```
 
 The game executable is `build/devilutionx-tristram-v4.exe`; the diagnostic is `build/town_view_smoke.exe`. The game target also prepares the engine's built assets in `build/assets`. These engine support assets do not replace the user's Diablo archive.
+
+Translations are compiled from `Translations/*.po` into 25 `.gmo` catalogs in `build/assets`, registered with asset trimming and packaging. The Python fallback retains upstream attribution and license under `tools/third_party/cpython`; it validates each catalog before replacing the output. `python tools/test_translation_catalogs.py` exercises the complete source set, UTF-8, contexts, plurals and fuzzy entries. Fonts required by some languages remain a separate upstream resource.
 
 Useful script options include:
 

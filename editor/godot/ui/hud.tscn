@@ -33,10 +33,10 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -224.0
-offset_top = -104.0
-offset_right = -136.0
-offset_bottom = -16.0
+offset_left = -226.0
+offset_top = -122.0
+offset_right = -138.0
+offset_bottom = -9.0
 tooltip_text = "Vida nativa. Nesta cena: valor demonstrativo ajustável."
 
 [node name="HudManaOrb" type="Control" parent="SafeFrame"]
@@ -45,10 +45,10 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = 136.0
-offset_top = -104.0
-offset_right = 224.0
-offset_bottom = -16.0
+offset_left = 138.0
+offset_top = -122.0
+offset_right = 226.0
+offset_bottom = -9.0
 tooltip_text = "Mana nativa. Nesta cena: valor demonstrativo ajustável."
 
 [node name="HudBelt" type="Control" parent="SafeFrame"]
@@ -58,9 +58,9 @@ anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
 offset_left = -116.0
-offset_top = -43.0
+offset_top = -103.0
 offset_right = 116.0
-offset_bottom = -14.0
+offset_bottom = -74.0
 tooltip_text = "Cinto nativo: oito espaços iguais, atalhos 1–8. Itens desenhados aqui são demonstrativos."
 
 [node name="HudSpell" type="Control" parent="SafeFrame"]
@@ -69,10 +69,10 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = 60.0
-offset_top = -103.0
-offset_right = 116.0
-offset_bottom = -47.0
+offset_left = 252.0
+offset_top = -58.0
+offset_right = 296.0
+offset_bottom = -14.0
 tooltip_text = "Magia selecionada / seletor de magias nativo."
 
 [node name="HudInfo" type="Control" parent="SafeFrame"]
@@ -81,10 +81,10 @@ anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -200.0
-offset_top = -210.0
-offset_right = 200.0
-offset_bottom = -146.0
+offset_left = -132.0
+offset_top = -72.0
+offset_right = 132.0
+offset_bottom = -8.0
 tooltip_text = "Informações nativas de item, magia e interação."
 
 [node name="Utilities" type="Control" parent="SafeFrame"]
@@ -92,104 +92,104 @@ layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
-metadata/_editor_description = "Apresentação compacta: o script sobe este grupo 100 px quando SafeFrame < 844. A exportação remove esse deslocamento. Edite os Control filhos."
+metadata/_editor_description = "Organização dos controles nativos, todos ancorados no centro inferior. A mesma faixa funciona em 4:3 e 16:9, sem deslocamento compacto."
 
 [node name="HudCharacter" type="Control" parent="SafeFrame/Utilities"]
 layout_mode = 0
-anchor_left = 1.0
+anchor_left = 0.5
 anchor_top = 1.0
-anchor_right = 1.0
+anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -198.0
-offset_top = -44.0
-offset_right = -168.0
-offset_bottom = -12.0
+offset_left = -310.0
+offset_top = -106.0
+offset_right = -239.0
+offset_bottom = -86.0
 tooltip_text = "Personagem · C"
 
 [node name="HudInventory" type="Control" parent="SafeFrame/Utilities"]
 layout_mode = 0
-anchor_left = 1.0
+anchor_left = 0.5
 anchor_top = 1.0
-anchor_right = 1.0
+anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -166.0
-offset_top = -44.0
-offset_right = -136.0
-offset_bottom = -12.0
+offset_left = 239.0
+offset_top = -106.0
+offset_right = 310.0
+offset_bottom = -86.0
 tooltip_text = "Inventário · I"
 
 [node name="HudSpellbook" type="Control" parent="SafeFrame/Utilities"]
 layout_mode = 0
-anchor_left = 1.0
+anchor_left = 0.5
 anchor_top = 1.0
-anchor_right = 1.0
+anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -134.0
-offset_top = -44.0
-offset_right = -104.0
-offset_bottom = -12.0
+offset_left = 239.0
+offset_top = -82.0
+offset_right = 310.0
+offset_bottom = -62.0
 tooltip_text = "Livro de magias · B"
 
 [node name="HudQuests" type="Control" parent="SafeFrame/Utilities"]
 layout_mode = 0
-anchor_left = 1.0
+anchor_left = 0.5
 anchor_top = 1.0
-anchor_right = 1.0
+anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -102.0
-offset_top = -44.0
-offset_right = -72.0
-offset_bottom = -12.0
+offset_left = -310.0
+offset_top = -82.0
+offset_right = -239.0
+offset_bottom = -62.0
 tooltip_text = "Missões · Q"
 
 [node name="HudMap" type="Control" parent="SafeFrame/Utilities"]
 layout_mode = 0
-anchor_left = 1.0
+anchor_left = 0.5
 anchor_top = 1.0
-anchor_right = 1.0
+anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -70.0
-offset_top = -44.0
-offset_right = -40.0
-offset_bottom = -12.0
+offset_left = -310.0
+offset_top = -54.0
+offset_right = -239.0
+offset_bottom = -34.0
 tooltip_text = "Alternar automapa nativo · Tab. Esta cena não implementa um minimapa."
 
 [node name="HudMenu" type="Control" parent="SafeFrame/Utilities"]
 layout_mode = 0
-anchor_left = 1.0
+anchor_left = 0.5
 anchor_top = 1.0
-anchor_right = 1.0
+anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -38.0
-offset_top = -44.0
-offset_right = -8.0
-offset_bottom = -12.0
+offset_left = -310.0
+offset_top = -30.0
+offset_right = -239.0
+offset_bottom = -10.0
 tooltip_text = "Menu nativo da partida · Esc"
 
 [node name="HudChat" type="Control" parent="SafeFrame/Utilities"]
 visible = false
 layout_mode = 0
-anchor_left = 1.0
+anchor_left = 0.5
 anchor_top = 1.0
-anchor_right = 1.0
+anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -70.0
-offset_top = -80.0
-offset_right = -40.0
-offset_bottom = -48.0
+offset_left = -199.0
+offset_top = -150.0
+offset_right = -166.0
+offset_bottom = -126.0
 tooltip_text = "Chat nativo, quando disponível na partida."
 
 [node name="HudFriendly" type="Control" parent="SafeFrame/Utilities"]
 visible = false
 layout_mode = 0
-anchor_left = 1.0
+anchor_left = 0.5
 anchor_top = 1.0
-anchor_right = 1.0
+anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -38.0
-offset_top = -80.0
-offset_right = -8.0
-offset_bottom = -48.0
+offset_left = 166.0
+offset_top = -150.0
+offset_right = 199.0
+offset_bottom = -126.0
 tooltip_text = "Modo amistoso nativo, quando disponível na partida."
 
 [node name="PreviewTools" type="PanelContainer" parent="."]

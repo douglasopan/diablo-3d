@@ -16,6 +16,7 @@
 #include <vector>
 
 #include "control/control.hpp"
+#include "control/control_chat.hpp"
 #include "control/d3d_hud.hpp"
 #include "control/d3d_hud_layout.hpp"
 #include "controls/control_mode.hpp"
@@ -169,7 +170,11 @@ void InitializeFixture()
 	MyPlayer->_pRSpell = SpellID::Healing;
 	MyPlayer->_pRSplType = SpellType::Spell;
 	MyPlayer->HoldItem.clear();
-	NewCursor(CURSOR_HAND);
+	// Match entering a real level: pcursitem otherwise retains its static zero
+	// and DrawInfoBox replaces HUD information with the unrelated world item.
+	InitLevelCursor();
+	Check(pcursitem == -1 && pcursmonst == -1 && ObjectUnderCursor == nullptr && PlayerUnderCursor == nullptr,
+	    "native level cursor initialization clears unrelated world hover references");
 	ReloadD3dUiLayout();
 }
 
@@ -277,7 +282,19 @@ void RenderHud(const Surface &out)
 	DrawMainPanelButtons(out);
 	DrawInvBelt(out);
 	DrawSpell(out);
-	DrawD3dHudValues(out);
+	if (IsD3dHudEnabled()) {
+		DrawD3dHudValues(out);
+	} else {
+		const Point panel = GetMainPanel().position;
+		if (*GetOptions().Gameplay.showHealthValues)
+			DrawFlaskValues(out, panel + Displacement { 134, 28 }, MyPlayer->_pHitPoints >> 6, MyPlayer->_pMaxHP >> 6);
+		if (*GetOptions().Gameplay.showManaValues) {
+			const bool noMana = HasAnyOf(InspectPlayer->_pIFlags, ItemSpecialEffect::NoMana);
+			DrawFlaskValues(out, panel + Displacement { GetMainPanel().size.width - 138, 28 },
+			    noMana || MyPlayer->hasNoMana() ? 0 : MyPlayer->_pMana >> 6,
+			    noMana ? 0 : MyPlayer->_pMaxMana >> 6);
+		}
+	}
 	MousePosition = GetD3dHudBeltSlotRect(0).Center();
 	CheckPanelInfo();
 	DrawInfoBox(out);
@@ -398,6 +415,55 @@ void CheckAuxiliaryControls(const Surface &out, const std::filesystem::path &dir
 	MousePosition = originalMouse;
 }
 
+void CheckFrameComposition(const Surface &out)
+{
+	const Rectangle frame = GetD3dHudFrameRect();
+	const Rectangle belt = GetD3dHudBeltRect();
+	const Rectangle info = GetD3dHudInfoRect();
+	const Rectangle spell = GetD3dHudSpellRect();
+	const Rectangle character = GetD3dHudPanelButtonRect(0);
+	const Rectangle inventory = GetD3dHudPanelButtonRect(4);
+	const Rectangle book = GetD3dHudPanelButtonRect(5);
+	Check(frame.size.width >= 640 * gnScreenHeight / 480 - 1 && frame.size.width <= 640 * gnScreenHeight / 480 + 1
+	        && frame.size.height >= 104 * gnScreenHeight / 480 - 1 && frame.size.height <= 104 * gnScreenHeight / 480 + 1,
+	    "cohesive native frame retains the 640 by 104 composition on the 480-high canvas");
+	Check(belt.position.y + belt.size.height <= info.position.y,
+	    "all eight belt cells sit above the information panel");
+	Check(spell.position.x >= inventory.position.x && spell.position.x + spell.size.width <= inventory.position.x + inventory.size.width
+	        && spell.position.y >= book.position.y + book.size.height,
+	    "current spell sits below INV and SPELLS inside the right column");
+	Check(character.position.x + character.size.width < GetD3dHudOrbRect(false).position.x
+	        && inventory.position.x > GetD3dHudOrbRect(true).position.x + GetD3dHudOrbRect(true).size.width,
+	    "native text button columns flank the complete life and mana globes");
+	const Point stone { frame.Center().x, frame.position.y + frame.size.height - 2 };
+	Check(IsPointOnD3dHud(stone), "native stone frame blocks world input between the individual controls");
+	for (bool mana : { false, true }) {
+		const Rectangle value = GetD3dHudValueRect(mana);
+		Check(value.position.x >= 0 && value.position.y >= 0
+		        && value.position.x + value.size.width <= gnScreenWidth
+		        && value.position.y + value.size.height <= gnScreenHeight,
+		    "native life and mana values remain completely visible below the full sculptures");
+	}
+	FillRect(out, 0, 0, out.w(), out.h(), PAL16_GRAY + 13);
+	const auto empty = Pixels(out, frame);
+	DrawMainPanel(out);
+	Check(Pixels(out, frame) != empty, "DrawMainPanel actually draws the cohesive native background");
+	std::array<std::vector<uint8_t>, 6> captions;
+	for (int i = 0; i < 6; ++i) {
+		const Rectangle button = GetD3dHudPanelButtonRect(i);
+		DrawD3dHudPanelButton(out, i, false);
+		captions[i] = Pixels(out, button);
+		MousePosition = button.Center();
+		CheckMainPanelButton();
+		DrawMainPanelButtons(out);
+		Check(Pixels(out, button) != captions[i], "actual native button press changes its written button pixels");
+		ResetMainPanelButtons();
+	}
+	for (int i = 0; i < 6; ++i)
+		for (int j = i + 1; j < 6; ++j)
+			Check(captions[i] != captions[j], "all six native captions retain their distinct rendered content");
+}
+
 void CheckMenuAndInputGates(const Surface &out)
 {
 	ClosePanels();
@@ -431,12 +497,18 @@ void CheckMenuAndInputGates(const Surface &out)
 			break;
 		}
 	}
-	Check(foundWorld && native.contains(MousePosition), "floating HUD releases actual world space inside the old main panel");
+	if (foundWorld) {
+		Check(native.contains(MousePosition), "world input remains available in any old-panel area outside the new native frame");
+	} else {
+		Check(IsPointOnD3dHud(native.Center()), "cohesive native frame protects the old main panel when it fully covers that region");
+		MousePosition = { gnScreenWidth / 2, GetD3dHudFrameRect().position.y / 2 };
+		Check(!IsPointOnD3dHud(MousePosition), "world input remains available above the cohesive native frame");
+	}
 	cursPosition = MyPlayer->position.tile;
 	LastPlayerAction = PlayerActionType::None;
 	CheckPlrSpell(false, SpellID::Healing, SpellType::Skill);
 	Check(LastPlayerAction == PlayerActionType::Spell,
-	    "real native spell dispatch accepts released world space through the isolated provider without a game loop");
+	    "real native spell dispatch accepts unobstructed world space through the isolated provider without a game loop");
 	LastPlayerAction = originalAction;
 	cursPosition = originalTile;
 	MousePosition = GetD3dHudPanelButtonRect(3).Center();
@@ -536,6 +608,7 @@ void CheckResolution(const std::filesystem::path &directory, int width, int heig
 	CalculatePanelAreas();
 	CheckNativeInput();
 	OwnedSurface surface(width, height);
+	CheckFrameComposition(surface);
 	CheckAuxiliaryControls(surface, directory);
 	CheckMenuAndInputGates(surface);
 	std::array<std::vector<uint8_t>, 3> life, mana;
@@ -613,15 +686,158 @@ void CheckOverride(const std::filesystem::path &profile, const std::filesystem::
 	CheckNativeInput();
 	RenderHud(out);
 	Capture(out, directory, "hud-1920x1080-belt-inventory-overlap.bmp");
+}
+
+void CheckMultiplayer(const std::filesystem::path &directory)
+{
 	const bool originalFriendly = MyPlayer->friendlyMode;
+	const uint32_t random = GetLCGEngineState();
+	FreeControlPan();
+	gbIsMultiplayer = true;
+	const auto initialized = InitMainPanel();
+	Check(initialized.has_value(), initialized ? "bootstrap native multiplayer HUD resources" : initialized.error());
+	Check(IsChatAvailable() && BottomBuffer->h() == 288,
+	    "multiplayer bootstrap loads the real two-page panel and native chat/friendly assets");
+	ClosePanels();
+	gnScreenWidth = 1920;
+	gnScreenHeight = 1080;
+	CalculatePanelAreas();
+	OwnedSurface out(gnScreenWidth, gnScreenHeight);
+	RenderHud(out);
+	const Rectangle chat = GetD3dHudPanelButtonRect(6);
+	const Rectangle friendly = GetD3dHudPanelButtonRect(7);
+	Check(!IsPointOnD3dHud({ (chat.Center().x + friendly.Center().x) / 2, chat.Center().y }),
+	    "multiplayer buttons protect their two rectangles without consuming the empty world space between them");
+	CheckAuxiliaryRect(GetD3dHudLevelButtonRect());
+	CheckAuxiliaryRect(GetD3dHudLevelLabelRect());
+	CheckAuxiliaryRect(GetD3dHudDurabilityRect());
+	for (int i : { 6, 7 }) {
+		MousePosition = GetD3dHudPanelButtonRect(i).Center();
+		CheckPanelInfo();
+		Check(MainPanelFlag && !InfoString.empty(), "real multiplayer button preserves native hover information");
+		DrawD3dHudPanelButton(out, i, false);
+		const auto normal = Pixels(out, GetD3dHudPanelButtonRect(i));
+		CheckMainPanelButton();
+		Check(MainPanelButtonDown, "native multiplayer button recognizes its drawn press target");
+		DrawMainPanelButtons(out);
+		Check(Pixels(out, GetD3dHudPanelButtonRect(i)) != normal,
+		    "real multiplayer button sprite changes to its native pressed frame");
+		ResetMainPanelButtons();
+	}
 	MyPlayer->friendlyMode = false;
 	DrawD3dHudPanelButton(out, 7, false);
 	const auto hostile = Pixels(out, GetD3dHudPanelButtonRect(7));
+	DrawD3dHudPanelButton(out, 7, true);
+	const auto hostilePressed = Pixels(out, GetD3dHudPanelButtonRect(7));
+	Check(hostilePressed != hostile, "loaded native hostile sprite preserves its separate pressed frame");
 	MyPlayer->friendlyMode = true;
 	DrawD3dHudPanelButton(out, 7, false);
-	Check(Pixels(out, GetD3dHudPanelButtonRect(7)) != hostile,
-	    "friendly and hostile state produce distinct native HUD button pixels without sending PvP commands");
+	const auto friendlyNormal = Pixels(out, GetD3dHudPanelButtonRect(7));
+	Check(friendlyNormal != hostile,
+	    "loaded native friendly and hostile sprites reflect the real player state without sending PvP commands");
+	DrawD3dHudPanelButton(out, 7, true);
+	Check(Pixels(out, GetD3dHudPanelButtonRect(7)) != friendlyNormal
+	        && Pixels(out, GetD3dHudPanelButtonRect(7)) != hostilePressed,
+	    "loaded native friendly pressed sprite stays distinct from both other states");
+	DrawD3dHudPanelButton(out, 7, false);
+	Capture(out, directory, "hud-1920x1080-native-multiplayer.bmp");
+	ClickPanelButton(6);
+	Check(ChatFlag && IsChatActive() && !IsD3dHudEnabled(), "native chat button enters the complete legacy chat surface");
+	RenderHud(out);
+	LoadSmallSelectionSpinner();
+	Check(pSPentSpn2Cels.has_value(), "load the real native chat cursor sprite for the isolated fixture");
+	ChatInputState->assign("Native chat fixture");
+	const Rectangle chatText { GetMainPanel().position + Displacement { 200, 10 }, { 250, 39 } };
+	const auto emptyChat = Pixels(out, chatText);
+	DrawChatBox(out);
+	Check(Pixels(out, chatText) != emptyChat, "real native chat text and cursor render over the restored chat page");
+	Capture(out, directory, "hud-1920x1080-native-chat-fallback.bmp");
+	ResetChat();
+	Check(!ChatFlag && IsD3dHudEnabled(), "native chat reset returns to the cohesive HUD");
+	gnScreenWidth = 853;
+	gnScreenHeight = 480;
+	CalculatePanelAreas();
+	ClosePanels();
+	Check(IsD3dHudEnabled(), "multiplayer at 853 by 480 uses the cohesive HUD with side panels closed");
+	const Rectangle compactChat = GetD3dHudPanelButtonRect(6);
+	const Rectangle compactFriendly = GetD3dHudPanelButtonRect(7);
+	Check(Overlaps(compactChat, GetLeftPanel()) && Overlaps(compactFriendly, GetRightPanel()),
+	    "853-wide native side panels intersect the authored multiplayer button rectangles");
+	ClickPanelButton(0);
+	Check(CharFlag && !IsD3dHudEnabled() && Overlaps(compactChat, GetLeftPanel()),
+	    "native Character handler selects the complete legacy HUD when its panel covers multiplayer chat");
+	Check(GetD3dHudFrameRect().position == GetMainPanel().position && GetD3dHudFrameRect().size == GetMainPanel().size,
+	    "Character overlap fallback restores the exact native panel surface");
+	ClickPanelButton(0);
+	Check(!CharFlag && IsD3dHudEnabled(), "closing Character through its native fallback button restores the cohesive HUD");
+	ClickPanelButton(4);
+	Check(invflag && !IsD3dHudEnabled() && Overlaps(compactFriendly, GetRightPanel()),
+	    "native Inventory handler selects the complete legacy HUD when its panel covers the friendly button");
+	Check(GetD3dHudFrameRect().position == GetMainPanel().position && GetD3dHudFrameRect().size == GetMainPanel().size,
+	    "Inventory overlap fallback restores the exact native panel surface");
+	ClickPanelButton(4);
+	Check(!invflag && IsD3dHudEnabled(), "closing Inventory through its native fallback button restores the cohesive HUD");
+	gnScreenWidth = 1920;
+	gnScreenHeight = 1080;
+	CalculatePanelAreas();
+	Check(IsD3dHudEnabled() && !IsLeftPanelOpen() && !IsRightPanelOpen(),
+	    "multiplayer side-panel regression restores the original 1920 by 1080 context");
 	MyPlayer->friendlyMode = originalFriendly;
+	FreeControlPan();
+	gbIsMultiplayer = false;
+	const auto restored = InitMainPanel();
+	Check(restored.has_value(), restored ? "restore the native single-player HUD resources" : restored.error());
+	ClosePanels();
+	Check(GetLCGEngineState() == random, "multiplayer bootstrap and UI handlers preserve simulation RNG");
+}
+
+void CheckScaleBoundaryAndInformation(const std::filesystem::path &directory)
+{
+	Rectangle previousBelt;
+	Rectangle previousFrame;
+	for (int width : { 853, 854 }) {
+		gnScreenWidth = width;
+		gnScreenHeight = 480;
+		CalculatePanelAreas();
+		OwnedSurface out(width, 480);
+		CheckFrameComposition(out);
+		const Rectangle frame = GetD3dHudFrameRect();
+		const Rectangle belt = GetD3dHudBeltRect();
+		if (width == 854)
+			Check(frame.size == previousFrame.size && belt.size == previousBelt.size
+			        && frame.position.y == previousFrame.position.y && belt.position.y == previousBelt.position.y
+			        && frame.position.x - previousFrame.position.x >= 0 && frame.position.x - previousFrame.position.x <= 1
+			        && belt.position.x - previousBelt.position.x >= 0 && belt.position.x - previousBelt.position.x <= 1,
+			    "853 and 854 widths keep the same 480-canvas scale without a compact-layout jump");
+		previousBelt = belt;
+		previousFrame = frame;
+		RenderHud(out);
+		MousePosition = GetD3dHudPanelButtonRect(3).Center();
+		pcursinvitem = -1;
+		CheckPanelInfo();
+		constexpr std::string_view FiveLines { "Native information 1\nNative information 2\nNative information 3\nNative information 4\ngjpqy information 5" };
+		InfoString = FiveLines;
+		InfoColor = UiFlags::ColorWhite;
+		const Rectangle info = GetD3dHudInfoRect();
+		DrawD3dHudPlate(out, info);
+		const auto before = Pixels(out, info);
+		DrawInfoBox(out);
+		Check(InfoString.str() == FiveLines, "native information preserves all five lines without a stale world hover override");
+		const auto after = Pixels(out, info);
+		Check(after != before, "five-line native information is rendered in the compact shared panel");
+		for (int line = 0; line < 5; ++line) {
+			bool changed = false;
+			const int top = (2 + line * 12) * info.size.height / 64;
+			const int bottom = (14 + line * 12) * info.size.height / 64;
+			for (int y = top; y < bottom && !changed; ++y)
+				for (int x = 0; x < info.size.width && !changed; ++x) {
+					const size_t pixel = static_cast<size_t>(y) * info.size.width + x;
+					changed = after[pixel] != before[pixel];
+				}
+			Check(changed, "each of the five native text rows changes pixels inside the information box");
+		}
+		Capture(out, directory, "hud-" + std::to_string(width) + "x480-native-frame-five-lines.bmp");
+	}
 }
 
 } // namespace
@@ -656,6 +872,8 @@ int main(int argc, char **argv)
 		CheckCompactViewportAndValues();
 		for (const Size resolution : { Size { 1920, 1080 }, Size { 1280, 720 }, Size { 2560, 1080 }, Size { 640, 480 } })
 			CheckResolution(directory, resolution.width, resolution.height);
+		CheckScaleBoundaryAndInformation(directory);
+		CheckMultiplayer(directory);
 		CheckOverride(profile, directory);
 		std::ofstream receipt(directory / "receipt.json");
 		receipt << "{\"kind\":\"native-hud-technical-fixture\",\"gameplayScreenshot\":false,\"visualApproval\":false,\"worldRendered\":false,\"gameLoopStarted\":false,\"savesWritten\":false,\"configurationWrites\":\"private-fixture-profile-only\",\"checks\":" << Checks << ",\"captures\":[";

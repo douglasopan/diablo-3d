@@ -434,10 +434,34 @@ std::expected<void, std::string> InitMainPanel()
 
 void DrawMainPanel(const Surface &out)
 {
-	if (IsD3dHudEnabled())
+	if (IsD3dHudEnabled()) {
+		DrawD3dHudBackground(out);
+		// DrawView has already drawn contextual information. The connected
+		// frame replaces that area, so redraw its native text after the frame.
+		DrawInfoBox(out);
 		return;
+	}
 	DrawPanelBox(out, MakeSdlRect(0, sgbPlrTalkTbl + PanelPaddingHeight, GetMainPanel().size.width, GetMainPanel().size.height), GetMainPanel().position);
 	DrawInfoBox(out);
+}
+
+void DrawNativePanelButton(const Surface &out, int button, bool pressed)
+{
+	if (button < TotalSpMainPanelButtons) {
+		const Rectangle source = MainPanelButtonRect[button];
+		DrawPanelBox(out, MakeSdlRect(source.position.x, source.position.y + PanelPaddingHeight,
+		                     source.size.width, source.size.height + 1), { 0, 0 });
+		if (pressed) {
+			RenderClxSprite(out, (*pMainPanelButtons)[button], { 0, 0 });
+			RenderClxSprite(out, (*PanelButtonDown)[button], { 4, 0 });
+		}
+		return;
+	}
+	if (!multiButtons)
+		return;
+	const int frame = button == PanelButtonSendmsg ? (pressed ? 1 : 0)
+	    : MyPlayer->friendlyMode ? (pressed ? 3 : 2) : (pressed ? 5 : 4);
+	RenderClxSprite(out, (*multiButtons)[frame], { 0, 0 });
 }
 
 void DrawMainPanelButtons(const Surface &out)

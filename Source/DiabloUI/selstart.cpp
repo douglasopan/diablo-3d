@@ -41,7 +41,7 @@ void EscPressed()
 void UiSelStartUpGameOption()
 {
 	ArtBackgroundWidescreen = LoadOptionalClx("ui_art\\mainmenuw.clx");
-	LoadBackgroundArt("ui_art\\mainmenu");
+	UiLoadMenuBackground("ui_art\\mainmenu");
 	UiAddBackground(&vecDialog);
 	UiAddLogo(&vecDialog);
 

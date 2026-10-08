@@ -1319,7 +1319,9 @@ void DrawInvBelt(const Surface &out)
 		    ? Point { 1, InventorySlotSizeInPixels.height }
 		    : slot.position + Displacement { 0, InventorySlotSizeInPixels.height };
 		if (customHud)
-			FillRect(itemOut, 0, 0, itemOut.w(), itemOut.h(), PAL16_GRAY + 5);
+			// Preserve the native cell texture beneath the quality tint, item and
+			// hover outline, including the temporary surface's one-pixel margin.
+			DrawPanelBox(itemOut, { 204 + i * 29, 21, itemOut.w(), itemOut.h() }, { 0, 0 });
 		InvDrawSlotBack(itemOut, position, InventorySlotSizeInPixels, myPlayer.SpdList[i]._iMagical);
 		const int cursId = myPlayer.SpdList[i]._iCurs + CURSOR_FIRSTITEM;
 

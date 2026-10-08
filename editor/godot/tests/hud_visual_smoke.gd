@@ -18,7 +18,10 @@ func _run() -> void:
 	await _capture("hud-ultrawide", Vector2i(2560, 1080), 70, 55.4)
 	await _capture("hud-compact", Vector2i(640, 480), 70, 55.4)
 	await _capture("hud-empty-life-full-mana", Vector2i(1280, 720), 0, 100)
-	if captures.size() == 4:
+	await _capture("hud-native-panel-fullhd", Vector2i(1920, 1080), 70, 55.4)
+	await _capture("hud-native-panel-multiplayer", Vector2i(1280, 720), 70, 55.4, true)
+	await _capture("hud-native-panel-five-lines", Vector2i(640, 480), 70, 55.4, false, "Espada curta\nDano: 2–6\nDurabilidade: 17 / 24\nForça necessária: 10\nValor demonstrativo")
+	if captures.size() == 7:
 		if captures[0].red_pixels <= captures[3].red_pixels * 2:
 			failures.append("Render de vida não respondeu à mudança 70% → 0%.")
 		if captures[0].blue_pixels >= captures[3].blue_pixels:
@@ -31,7 +34,7 @@ func _run() -> void:
 	print("HUD_VISUAL_SMOKE: %d renders; %d failures" % [captures.size(), failures.size()])
 	quit(0 if failures.is_empty() else 1)
 
-func _capture(label: String, resolution: Vector2i, life: float, mana: float) -> void:
+func _capture(label: String, resolution: Vector2i, life: float, mana: float, multiplayer := false, info := "Informações nativas") -> void:
 	var viewport := SubViewport.new()
 	viewport.size = resolution
 	viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
@@ -42,6 +45,8 @@ func _capture(label: String, resolution: Vector2i, life: float, mana: float) -> 
 		failures.append("Prévia contém controles além dos 13 originais: " + label)
 	hud.demo_life_percent = life
 	hud.demo_mana_percent = mana
+	hud.demo_multiplayer = multiplayer
+	hud.demo_info_text = info
 	await process_frame
 	await process_frame
 	await RenderingServer.frame_post_draw
@@ -62,5 +67,5 @@ func _capture(label: String, resolution: Vector2i, life: float, mana: float) -> 
 				red += 1
 			if color.b > 0.25 and color.b > color.r * 2 and color.b > color.g * 1.3:
 				blue += 1
-	captures.append({"path": path, "width": resolution.x, "height": resolution.y, "life": life, "mana": mana, "red_pixels": red, "blue_pixels": blue})
+	captures.append({"path": path, "width": resolution.x, "height": resolution.y, "life": life, "mana": mana, "multiplayer": multiplayer, "info_lines": info.split("\n").size(), "red_pixels": red, "blue_pixels": blue})
 	viewport.free()

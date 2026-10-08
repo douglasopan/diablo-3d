@@ -51,7 +51,7 @@ void SelconnSelect(size_t value);
 
 void SelconnLoad()
 {
-	LoadBackgroundArt("ui_art\\selconn");
+	UiLoadMenuBackground("ui_art\\selconn");
 
 #ifndef NONET
 #ifndef DISABLE_ZERO_TIER

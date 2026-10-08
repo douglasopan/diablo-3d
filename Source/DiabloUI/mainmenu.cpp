@@ -63,14 +63,11 @@ void MainmenuLoad(const char *name)
 	vecMenuItems.push_back(std::make_unique<UiListItem>(gbIsHellfire ? _("Exit Hellfire") : _("Exit Diablo"), MAINMENU_EXIT_DIABLO));
 #endif
 
-	if (SetD3dMainMenuActive(true)) {
-		ArtBackgroundWidescreen = std::nullopt;
-		UiLoadBlackBackground();
-	} else if (!gbIsSpawn || gbIsHellfire) {
+	if (!gbIsSpawn || gbIsHellfire) {
 		ArtBackgroundWidescreen = LoadOptionalClx("ui_art\\mainmenuw.clx");
-		LoadBackgroundArt("ui_art\\mainmenu");
+		UiLoadMenuBackground("ui_art\\mainmenu");
 	} else {
-		LoadBackgroundArt("ui_art\\swmmenu");
+		UiLoadMenuBackground("ui_art\\swmmenu");
 	}
 
 	UiAddBackground(&vecMainMenuDialog);

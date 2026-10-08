@@ -77,7 +77,7 @@ void selgame_FreeVectors()
 
 void selgame_Init()
 {
-	LoadBackgroundArt("ui_art\\selgame");
+	UiLoadMenuBackground("ui_art\\selgame");
 	LoadScrollBar();
 }
 
