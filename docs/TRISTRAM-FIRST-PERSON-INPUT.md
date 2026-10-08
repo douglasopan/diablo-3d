@@ -4,6 +4,8 @@ Atualização: **8 de outubro de 2026**. Mouse para olhar, WASD/setas relativos 
 
 ## Estado verificável
 
+O incremento posterior de [convivência do menu com o HUD](INGAME-SETTINGS.md#convivência-com-o-hud-hd--8-de-outubro), instalado às 19:51 (Brasília), preserva estes controles e repetiu as 2.777 verificações produtivas. O iniciador habitual passou a usar SHA-256 `b14993a682f85b4d3e8070ebfce59a4fddc517224ce1ee27efb7a06dd57e1692`; o hash abaixo identifica a instalação anterior específica de câmera.
+
 Instalado pelo principal às **19:31 de 8 de outubro (Brasília)**, no mesmo `Iniciar-Tristram.cmd`. SHA-256 `550257d4f4eab6ccc8ee1115151947cab5a33278ac8f631fd4865664e7e55410`; aliases v4/quality/godot idênticos, backup e nenhum processo encerrado. Os **44 arquivos do perfil** preservaram hash/tamanho/data; `PrepareOnly` alterou somente `runtime-baseline-receipt.json`. Modelos, texturas, iluminação, áudio, preferências, saves e backend GPU foram preservados.
 
 | Validação atual | Resultado |
@@ -11,7 +13,7 @@ Instalado pelo principal às **19:31 de 8 de outubro (Brasília)**, no mesmo `In
 | Compilação | Release/NONET, MSVC x64; jogo e diagnósticos. |
 | Câmera / input puro / colisão | 253 / 1.239 / 29 verificações, zero falhas. |
 | Input produtivo | 2.777 verificações, com handler, comandos, movimento e picking CPU nativos. |
-| Regressões HUD / configurações | 946 / 59.452 verificações. Não cobrem o novo relato de páginas Gameplay. |
+| Regressões HUD / configurações | 946 / 59.452 verificações nesta entrega de câmera. O incremento posterior acima trata a sobreposição das páginas Gameplay com fixture específica e 59.916 verificações de configurações. |
 | Pacote selecionado na CPU | 34 quadros, seis capturas; 14 quadros limitados por arquitetura, zero sem olho seguro. BVH de 82.086 triângulos construído uma vez. |
 
 Recibo privado: `diagnostics/camera-wheel-20261008/installed-20261008T223057Z/receipt.json`; logs finais em `diagnostics/camera-wheel-20261008/`. Os serviços físicos SDL são simulados. **Sem execução GPU, mouse físico, Alt+Tab ou medição de FPS nesta rodada.** O caminho de quadro fechado por ausência de olho seguro foi revisado estaticamente; não ocorreu nas 34 poses reais. Não se comprova cobertura de todos os NPCs/itens/combate ou todas as estruturas/câmeras.

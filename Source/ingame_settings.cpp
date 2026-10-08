@@ -298,7 +298,7 @@ void StopCapture()
 
 size_t PageCapacity()
 {
-	return std::clamp(gmenu_settings_page_size({ gnScreenWidth, gnScreenHeight }, GetMainPanel().position.y), size_t { 1 }, MaxEntriesPerPage);
+	return std::clamp(gmenu_settings_page_size({ gnScreenWidth, gnScreenHeight }, gmenu_settings_bottom()), size_t { 1 }, MaxEntriesPerPage);
 }
 
 void UpdateCapture()

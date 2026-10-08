@@ -2,7 +2,21 @@
 
 Revisão solicitada em 8 de outubro de 2026 após a primeira instalação: remover da partida as opções que não podem ser alteradas nela, mostrar mais opções e melhorar a legibilidade e a coerência visual entre Esc e Configurações. O navegador continua usando o modelo nativo, com trilha sonora acessível e sem alterar o HUD principal, os assets selecionados ou a simulação.
 
-**Estado desta revisão: compilada, validada e instalada pelo principal às 10:45:49 UTC de 8 de outubro.** O chat principal mantém CMake/build/cache, perfil, instalação, Git, recibo do executável e o guia operacional. Os resultados desta revisão são registrados separadamente dos históricos. Nenhum perfil habitual foi alterado pela frente do menu.
+**Estado atual: correção de convivência com o HUD compilada, validada e instalada pelo principal às 19:51 (Brasília), 8 de outubro.** O chat principal mantém CMake/build/cache, perfil, instalação, Git, recibo do executável e o guia operacional. A revisão inicial foi instalada às 10:45:49 UTC; os resultados abaixo distinguem os incrementos históricos. Nenhum perfil habitual foi alterado pela frente do menu.
+
+## Convivência com o HUD HD — 8 de outubro
+
+Alternar Gameplay 1→2→1 podia mudar a arte inferior: a página longa ainda usava o topo do painel nativo de 128 px, cruzava os globos escalados e acionava o gate conservador do compositor HD. A segunda página menor podia conservar a arte. O teste anterior à correção falhou no cruzamento real em Full HD; a fixture composta confirmou cobertura sobre o HUD e resultado `Inactive`.
+
+`gmenu_settings_bottom()` agora fornece o mesmo limite para `GetSettingsGeometry()` e `PageCapacity()`, usando frame, globos e botões visíveis do HUD. Chat/Friendly também entram no multiplayer; sem HUD ativo, mantém o limite legado. Getters seguem o layout autorado. Desenho e cliques continuam usando os mesmos retângulos do menu; nenhuma arte, hitbox, callback, limpeza de foreground ou renderer do HUD foi alterado. A página pode mostrar menos entradas para liberar os globos, conservando fonte, todas as opções e navegação. Com layout padrão/solo, a fixture confirmou **14 entradas em 1920×1080** e **9 em 640×480**; multiplayer e overrides podem mudar a capacidade.
+
+Release/NONET MSVC x64 passou, assim como **59.916 verificações de configurações, 2.777 de input produtivo e 946 do HUD**. O novo teste percorre páginas Gameplay em quatro resoluções, solo e multiplayer, verificando que o painel não cruza footprints visíveis; a suíte existente verifica acessibilidade das entradas, geometria, navegação, resize, captura e persistência em perfil descartável.
+
+A comparação offscreen usou as fontes congeladas anterior/candidata com o mesmo diagnóstico, mundo original CPU e compositor SDL software: **36 quadros por versão**, 623 verificações estruturais por execução. Páginas 1→2→1 repetidas, rodapé por Enter/mouse, retorno ao jogo, personagem/inventário abrir/fechar e resize 1920→640→1920 foram exercitados. Todos os quadros elegíveis do candidato apresentaram a arte HD sem overlap ou falha de desenho. Os 13 retângulos do HUD permaneceram iguais entre versões; **14 retornos ao estado anterior tiveram zero diferenças na região inferior de pixels**. Quatro amostras antes/depois/compactas foram inspecionadas visualmente, sem novo bloqueador. O resize é lógico e offscreen, não uma janela física.
+
+Instalado no mesmo `Iniciar-Tristram.cmd`, SHA-256 `b14993a682f85b4d3e8070ebfce59a4fddc517224ce1ee27efb7a06dd57e1692`, aliases v4/quality/godot idênticos, backup e nenhum processo encerrado. **44 arquivos do perfil** preservaram hash/tamanho/data; preparação posterior alterou somente `runtime-baseline-receipt.json`. Recibo privado: `diagnostics/hud-ui-transition-20261008/installed-20261008T225108Z/receipt.json`; comparação em `comparison-final.json` no mesmo diretório pai. Modelos, texturas, luzes, músicas, saves e preferências habituais foram preservados.
+
+As capturas humanas da Library não ficaram acessíveis e não foram comparadas. A reprodução técnica própria não equivale à confirmação artística/interativa do usuário. Sem GPU física, input/foco físicos ou benchmark de FPS nesta entrega. Combinações arbitrárias de layout/painéis e gameplay prolongado continuam para revisão. Próxima ação: conferir Esc → Configurações → Jogabilidade, trocar páginas, abrir/fechar painéis e retornar à partida pelo iniciador habitual.
 
 ## Acesso e navegação
 
@@ -24,7 +38,7 @@ A apresentação usa fontes, cores e seletores nativos sobre uma placa central e
 | 1920×1080 | 18 | 30 / 42 |
 | 1440p com largura a partir de 960 | 18 | 42 / 46 |
 
-Essas capacidades reservam o rodapé e a descrição acima do limite nativo do HUD. O menu Esc mantém seu logo e seletores de pausa, com fonte nativa 46 em 960×540 e 1920×1080 e 42 em 640×480. Sliders conservam as dimensões e sprites originais; o bloqueio de navegação por stick durante a captura não impede clicar em Voltar para cancelá-la.
+Esta tabela registra as capacidades históricas calculadas com o limite nativo. A correção atual usa o limite visível do HUD descrito acima; em Full HD/solo são 14 entradas, mantendo fonte 30/título 42. O menu Esc mantém seu logo e seletores de pausa, ajustando o tier nativo ao espaço disponível. Sliders conservam as dimensões e sprites originais; o bloqueio de navegação por stick durante a captura não impede clicar em Voltar para cancelá-la.
 
 ## Modelo e cobertura
 

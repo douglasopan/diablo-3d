@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "control/control.hpp"
+#include "control/d3d_hud.hpp"
 #include "controls/controller.h"
 #include "controls/controller_buttons.h"
 #ifndef USE_SDL1
@@ -451,7 +452,7 @@ void CheckNavigation()
 	for (size_t screenIndex = 0; screenIndex < screens.size(); ++screenIndex) {
 		setScreen(screens[screenIndex]);
 		OpenCategory(GetOptions().Keymapper);
-		const size_t capacity = gmenu_settings_page_size(screens[screenIndex], GetMainPanel().position.y);
+		const size_t capacity = gmenu_settings_page_size(screens[screenIndex], gmenu_settings_bottom());
 		const auto layout = gmenu_get_settings_geometry();
 		Check(capacity > 5 && capacity <= GMenuSettingsMaxContentRows, "available height exposes more than five bounded content rows");
 		Check(layout.contentRows == capacity && layout.rows == MenuCount() && layout.navigationItems == 3,
@@ -505,6 +506,40 @@ void CheckNavigation()
 	gamemenu_off();
 	Check(!IsInGameSettingsOpen() && !gmenu_is_active() && CurrentEventHandler == SentinelEventHandler,
 	    "closing the game menu also releases the settings input wrapper");
+}
+
+void CheckGameplayHudBoundary()
+{
+	const auto overlaps = [](Rectangle a, Rectangle b) {
+		return a.position.x < b.position.x + b.size.width && b.position.x < a.position.x + a.size.width
+		    && a.position.y < b.position.y + b.size.height && b.position.y < a.position.y + a.size.height;
+	};
+	for (const Size screen : { Size { 1920, 1080 }, Size { 960, 540 }, Size { 853, 480 }, Size { 640, 480 } }) {
+		for (const bool multiplayer : { false, true }) {
+			gbIsMultiplayer = multiplayer;
+			gnScreenWidth = screen.width;
+			gnScreenHeight = screen.height;
+			CalculatePanelAreas();
+			OpenCategory(GetOptions().Gameplay);
+			Check(IsD3dHudEnabled(), "Gameplay boundary regression starts with the actual cohesive HUD active");
+			const std::array<Rectangle, 5> footprints { GetD3dHudFrameRect(), GetD3dHudOrbRect(false),
+				GetD3dHudOrbRect(true), GetD3dHudPanelButtonRect(6), GetD3dHudPanelButtonRect(7) };
+			for (int repeat = 0; repeat < 3; ++repeat) {
+				for (const SDL_Keycode key : { SDLK_PAGEDOWN, SDLK_PAGEUP }) {
+					const auto layout = gmenu_get_settings_geometry();
+					Check(layout.rows != 0, "Gameplay page has visible native rows");
+					for (size_t i = 0; i < (multiplayer ? footprints.size() : size_t { 3 }); ++i)
+						Check(!overlaps(layout.panel, footprints[i]), "complete Gameplay page stays outside every visible HD footprint");
+					SendKey(key);
+				}
+			}
+		}
+	}
+	gbIsMultiplayer = false;
+	gnScreenWidth = 640;
+	gnScreenHeight = 480;
+	CalculatePanelAreas();
+	gamemenu_off();
 }
 
 void CheckChanges()
@@ -900,6 +935,7 @@ int main()
 		CheckDynamicNamePaging();
 		CheckCoverageAndRestrictions();
 		CheckNavigation();
+		CheckGameplayHudBoundary();
 		CheckChanges();
 		CheckSliders();
 		CheckKeyCapture();

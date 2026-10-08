@@ -131,6 +131,8 @@ struct GMenuSettingsGeometry {
 	}
 };
 
+/** @brief Shared bottom boundary for menu layout and pagination, above the visible HUD. */
+[[nodiscard]] int gmenu_settings_bottom();
 /** @brief Native font tiers and a shared footer, bounded by screen/HUD and eighteen content rows. */
 [[nodiscard]] GMenuSettingsGeometry gmenu_settings_geometry(Size screenSize, int mainPanelTop, size_t rowCount, bool containsSlider = false, size_t navigationItems = 0);
 /** @brief Content capacity with room for both page actions and Back. */

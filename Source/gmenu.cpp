@@ -23,6 +23,7 @@
 #include "DiabloUI/ui_flags.hpp"
 #include "appfat.h"
 #include "control/control.hpp"
+#include "control/d3d_hud.hpp"
 #include "controls/axis_direction.h"
 #include "controls/controller_motion.h"
 #include "engine/clx_sprite.hpp"
@@ -103,7 +104,7 @@ GMenuSettingsGeometry GetSettingsGeometry()
 		else if (sgpLogo)
 			logoHeight = (*sgpLogo)[0].height();
 	}
-	return BuildSettingsGeometry({ gnScreenWidth, gnScreenHeight }, GetMainPanel().position.y, sgCurrentMenuIdx,
+	return BuildSettingsGeometry({ gnScreenWidth, gnScreenHeight }, gmenu_settings_bottom(), sgCurrentMenuIdx,
 	    containsSlider, SettingsPresentation->navigationItems, SettingsPresentation->pauseMenu, logoHeight);
 }
 
@@ -491,6 +492,22 @@ GMenuSettingsGeometry BuildSettingsGeometry(Size screenSize, int mainPanelTop, s
 } // namespace
 
 TMenuItem *sgpCurrentMenu;
+
+int gmenu_settings_bottom()
+{
+	int bottom = GetMainPanel().position.y;
+	if (!IsD3dHudEnabled())
+		return bottom;
+
+	// The authored HUD scales and can be moved in the editor. Reserve its
+	// actual visible footprints, not the legacy panel's fixed 128px height.
+	bottom = std::min({ bottom, GetD3dHudFrameRect().position.y,
+	    GetD3dHudOrbRect(false).position.y, GetD3dHudOrbRect(true).position.y });
+	const int buttons = IsChatAvailable() ? 8 : 6;
+	for (int button = 0; button < buttons; ++button)
+		bottom = std::min(bottom, GetD3dHudPanelButtonRect(button).position.y);
+	return std::clamp(bottom, 0, static_cast<int>(gnScreenHeight));
+}
 
 GMenuSettingsGeometry gmenu_settings_geometry(Size screenSize, int mainPanelTop, size_t rowCount, bool containsSlider, size_t navigationItems)
 {
