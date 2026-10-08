@@ -1,6 +1,16 @@
 # Música do site e biblioteca pública
 
-Entrega solicitada pelo usuário em 8 de outubro de 2026. A biblioteca em `/musica/` e `/en/musica/` permite ouvir e baixar gratuitamente as versões personalizadas presentes no catálogo do jogo. As músicas originais de Diablo não entram nessa publicação. Não se exige cadastro de e-mail.
+Entrega solicitada pelo usuário em 8 de outubro de 2026. A biblioteca em `/musica/` e `/en/musica/` permite ouvir e baixar gratuitamente regravações/reinterpretações das músicas originais de Diablo. As gravações originais do jogo não entram nessa publicação. Não se exige cadastro de e-mail.
+
+## Composição original e produção das versões
+
+**Composição original: Matt Uelmen, para Diablo (Blizzard Entertainment). Regravação/reinterpretação produzida por Douglas Pan com auxílio de IA.**
+
+Em inglês: **Original composition: Matt Uelmen, for Diablo (Blizzard Entertainment). Cover/reinterpretation produced by Douglas Pan using AI.** A fonte de autoria original é o [manual oficial de Diablo, página impressa 78](https://ftp.blizzard.com/pub/misc/Diablo.PDF). `Main Menu` permanece o rótulo local; o slot técnico `dintro` não confirma por si só o título oficial da composição.
+
+`music_credits.py` aplica esse crédito ao player, faixas, cards do YouTube, descrição da página, JSON-LD e manifestos públicos PT/EN. No JSON-LD, `MusicRecording.recordingOf.composer` identifica Matt Uelmen; `producer` e `creditText` identificam a produção de Douglas Pan com IA. O manifesto público recebe campos adicionais `credits`; os campos de identidade, hashes e `tags` continuam descrevendo os mesmos bytes validados no manifesto fonte.
+
+Esta correção editorial preserva todos os MP3s e masters. A lista permitida de tags existente não inclui `TCOM`; ela é validada sem mudança nesta entrega. As tags Douglas Pan creditam a produção das versões e não substituem o crédito da composição original exibido no site. Alterações futuras nas tags de áudio exigem coordenação com o responsável pelo catálogo/preparo, fora desta correção textual.
 
 ## Catálogo e autoria interna
 

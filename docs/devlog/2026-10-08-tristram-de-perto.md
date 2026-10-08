@@ -80,7 +80,9 @@ O HUD atual recebeu uma correção funcional de composição com a arte nativa, 
 
 A trilha sonora já permite **Vanilla**, **Rock** ou **Custom**, com escolhas por ambiente. Tristram oferece três arquivos locais e sorteia novamente ao fim de cada faixa quando o modo aleatório está selecionado. Ambientes sem substituição conservam a música original.
 
-A [biblioteca de músicas](/musica/) reúne cinco arquivos personalizados do menu e de Tristram para **ouvir e baixar gratuitamente**, com **Douglas Pan** nos créditos da página e nos metadados internos dos MP3s. A terceira opção de Tristram aparenta ser outra exportação da primeira; os arquivos disponíveis não são contados como composições distintas. As músicas originais do jogo não são distribuídas nessa biblioteca.
+A [biblioteca de músicas](/musica/) reúne cinco arquivos de regravações/reinterpretações do menu e de Tristram para **ouvir e baixar gratuitamente**. **Composição original: Matt Uelmen, para Diablo (Blizzard Entertainment). Regravação/reinterpretação produzida por Douglas Pan com auxílio de IA.** O crédito da produção também consta nos metadados internos dos MP3s. A terceira opção de Tristram aparenta ser outra exportação da primeira; os arquivos disponíveis não são contados como composições distintas. As gravações originais do jogo não são distribuídas nessa biblioteca.
+
+*Crédito musical esclarecido em 8 de outubro de 2026, conforme o [manual oficial de Diablo, página 78](https://ftp.blizzard.com/pub/misc/Diablo.PDF). Main Menu permanece como rótulo local, sem confirmação do título oficial da composição correspondente.*
 
 A revisão mais recente dos menus já está instalada. Ela retira da partida as opções que só funcionam no menu principal, aumenta a quantidade de linhas conforme o espaço disponível e usa fontes nativas maiores. Anterior, Próxima e Voltar passam a dividir um rodapé. A seleção é conservada ao redimensionar a janela. A suíte de configurações passou por **59.452 verificações**, acompanhada de capturas nativas em duas resoluções; a avaliação visual na partida continua com o autor.
 

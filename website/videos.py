@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from html import escape
+from music_credits import credit_text
 
 
 YOUTUBE_CHANNEL = 'https://www.youtube.com/channel/UCQrVADTRa7sXr0GIeaq7SqQ'
@@ -57,11 +58,11 @@ def videos_section(language, url, featured=False):
     heading = text('A trilha também está no YouTube', 'The soundtrack is on YouTube too')
     introduction = (
         text(
-            'Comece por Main Menu — Rock2, por Douglas Pan. Acompanhe os vídeos do projeto e participe da comunidade.',
-            'Start with Main Menu — Rock2, by Douglas Pan. Follow the project’s videos and join the community.',
+            'Comece por Main Menu — Rock2, uma regravação/reinterpretação da música de Diablo. Acompanhe os vídeos do projeto e participe da comunidade.',
+            'Start with Main Menu — Rock2, a cover/reinterpretation of Diablo music. Follow the project’s videos and join the community.',
         ) if featured else text(
-            'Cinco vídeos e versões da trilha do projeto, por Douglas Pan. Tristram 3 é uma exportação alternativa.',
-            'Five videos and versions of the project’s soundtrack, by Douglas Pan. Tristram 3 is an alternate export.',
+            'Cinco vídeos das regravações/reinterpretações da música de Diablo. Tristram 3 é uma exportação alternativa; cinco arquivos não representam cinco composições distintas.',
+            'Five videos of covers/reinterpretations of Diablo music. Tristram 3 is an alternate export; five files do not represent five distinct compositions.',
         )
     )
     load_note = text(
@@ -77,12 +78,12 @@ def videos_section(language, url, featured=False):
         slot_id = f'youtube-{variant}-{key}'
         play_label = text('Ouvir aqui', 'Listen here')
         player_title = text('Player do YouTube: ', 'YouTube player: ') + title
-        version = text('Exportação alternativa', 'Alternate export') if key == 'town-third' else text('Trilha do projeto', 'Project soundtrack')
+        version = text('Exportação alternativa', 'Alternate export') if key == 'town-third' else text('Regravação / reinterpretação', 'Cover / reinterpretation')
         cards.append(f'''<article class="youtube-video-card" data-youtube-card>
 <div class="youtube-video-slot" id="{slot_id}" data-youtube-slot>
 <div class="youtube-video-poster" aria-hidden="true"><span class="youtube-video-mark">D3D</span><span class="youtube-video-symbol">▶</span><span class="youtube-video-poster-title">{escape(title)}</span></div>
 </div>
-<div class="youtube-video-copy"><p class="youtube-video-kind">{escape(version)}</p><h3>{escape(title)}</h3><p class="youtube-video-credit">Douglas Pan</p>
+<div class="youtube-video-copy"><p class="youtube-video-kind">{escape(version)}</p><h3>{escape(title)}</h3><p class="youtube-video-credit">{escape(credit_text(language))}</p>
 <div class="youtube-video-actions"><button type="button" class="youtube-video-load" hidden data-enhancement="youtube" data-youtube-id="{video_id}" data-youtube-title="{escape(player_title, quote=True)}" aria-controls="{slot_id}" aria-expanded="false" aria-label="{escape(play_label + ': ' + title, quote=True)}">{escape(play_label)}</button>{_external_link(text('Ouvir no YouTube', 'Listen on YouTube'), 'https://www.youtube.com/watch?v=' + video_id)}</div>
 <p class="sr-only" data-youtube-status role="status" aria-live="polite"></p></div>
 </article>''')

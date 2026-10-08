@@ -19,6 +19,7 @@ import yaml
 
 from translations import EVIDENCE_EN, translate_text
 from soundtrack import load_soundtrack
+from music_credits import SOURCE as MUSIC_CREDIT_SOURCE, album_metadata, credit_text, public_soundtrack
 from hud_study import copy_study, gallery as hud_study_gallery, image_source as hud_study_image_source, load_study
 from community import community_invite, YOUTUBE_URL
 from videos import showcase_section, videos_section
@@ -338,7 +339,7 @@ def lightbox():
 
 
 def background_music():
-    return f'''<aside class="music-player" aria-label="Música de fundo"><div class="music-heading"><span>Música de fundo</span><span id="music-status" role="status">Toque para ouvir</span></div><audio id="background-music" controls loop preload="none" playsinline aria-label="Reproduzir música de fundo" data-icon-url="{url('/vendor/plyr/plyr.svg')}" src="{versioned_asset('/assets/audio/background-music.mp3')}">Seu navegador não oferece reprodução de áudio.</audio></aside>'''
+    return f'''<aside class="music-player" aria-label="Música de fundo"><div class="music-heading"><span>Música de fundo</span><span id="music-status" role="status">Toque para ouvir</span></div><audio id="background-music" controls loop preload="none" playsinline aria-label="Reproduzir música de fundo" data-icon-url="{url('/vendor/plyr/plyr.svg')}" src="{versioned_asset('/assets/audio/background-music.mp3')}">Seu navegador não oferece reprodução de áudio.</audio><a class="music-credit" href="{url('/musica/#music-credits')}" title="{esc(credit_text(LANG))}">Matt Uelmen · regravação Douglas Pan (IA)</a></aside>'''
 
 
 def load_analytics():
@@ -378,8 +379,7 @@ def frame(title, description, path, content, image='/assets/banner.webp', articl
         {'@context': 'https://schema.org', '@type': 'BlogPosting' if article else 'WebPage', 'headline' if article else 'name': title, 'description': description, 'url': canonical, 'inLanguage': LANG, 'isPartOf': {'@id': absolute('/#website')}, **({'datePublished': article['date'], 'dateModified': article.get('updated', article['date']), 'image': absolute(image), 'author': {'@type': 'Organization', 'name': translated('Projeto D3D'), 'url': absolute('/projeto/')}, 'mainEntityOfPage': canonical} if article else {})}
     ]
     if music:
-        artist = {'@type': 'Person', 'name': music['artist']}
-        structured.append({'@context': 'https://schema.org', '@type': 'MusicAlbum', 'name': music['album'], 'url': canonical, 'byArtist': artist, 'numTracks': len(music['tracks']), 'isAccessibleForFree': True, 'track': [{'@type': 'MusicRecording', 'name': track['title'], 'byArtist': artist, 'duration': f"PT{round(track['duration_seconds'])}S", 'audio': {'@type': 'AudioObject', 'contentUrl': absolute(track['public_path']), 'encodingFormat': 'audio/mpeg', 'creator': artist}, 'isAccessibleForFree': True} for track in music['tracks']]})
+        structured.append(album_metadata(music, LANG, canonical, absolute))
     nav = ''.join(f'<a href="{url(p)}"{" aria-current=" + chr(34) + "page" + chr(34) if (p == path or (p == "/devlog/" and article)) else ""}>{name}</a>' for name, p in NAV)
     soundtrack_script = f'<script src="{versioned_asset("/soundtrack.js")}" defer></script>' if music else ''
     community_assets = f'<link rel="stylesheet" href="{versioned_asset("/community.css")}"><script src="{versioned_asset("/community.js")}" defer></script>'
@@ -467,6 +467,7 @@ def support():
 
 def soundtrack_page(music):
     first = music['tracks'][0]
+    credit = esc(credit_text(LANG))
     contexts = {
         'menu-rock2': 'Menu principal · versão Rock2',
         'menu-alternative': 'Menu principal · versão anterior',
@@ -481,12 +482,13 @@ def soundtrack_page(music):
         youtube_url = SOUNDTRACK_YOUTUBE.get(track['id'])
         youtube_link = button('Ouvir no YouTube', youtube_url, True).replace('<a ', f'<a data-soundtrack-youtube="{esc(track["id"])}" ', 1) if youtube_url else ''
         size = f"{track['size_bytes'] / 1_000_000:.1f} MB"
-        tracks.append(f'''<li class="soundtrack-track panel"><span class="track-number" aria-hidden="true">{number:02}</span><div class="track-copy"><p class="eyebrow">{esc(contexts.get(track['id'], track['environment']))}</p><h2>{title}</h2><p class="meta">Douglas Pan <span aria-hidden="true">·</span> {esc(track['duration_label'])} <span aria-hidden="true">·</span> MP3 · {size}</p></div><div class="actions"><button class="button secondary" type="button" data-soundtrack-src="{esc(asset)}" data-soundtrack-title="{title}" aria-label="{esc(translated('Tocar') + ' ' + track['title'])}" aria-pressed="false" hidden data-enhancement><span data-soundtrack-label>Tocar</span></button><a class="button" href="{esc(asset)}" download="Douglas-Pan--{esc(track['id'])}.mp3" aria-label="{esc(translated('Baixar MP3') + ' · ' + track['title'])}">Baixar MP3 <span aria-hidden="true">↓</span></a>{youtube_link}<noscript><a href="{esc(asset)}">Ouvir MP3 ↗</a></noscript></div></li>''')
-    return intro('TRILHA PERSONALIZADA', 'A música do projeto.<br>Por Douglas Pan.', 'Ouça e baixe gratuitamente as versões personalizadas que já estão no catálogo do jogo. Começamos pelo menu principal e por Tristram; os demais ambientes receberão suas faixas ao longo do desenvolvimento.') + f'''
-<section class="soundtrack-player panel" aria-label="Player da trilha"><p class="eyebrow">ESCUTE A TRILHA</p><h2 id="soundtrack-title">{esc(first['title'])}</h2><p>Douglas Pan</p><audio id="soundtrack-player" controls preload="none" src="{esc(versioned_asset(first['public_path']))}" aria-label="{esc(translated('Ouvir') + ' ' + first['title'])}">Seu navegador pode baixar as faixas pelos links abaixo.</audio><p id="soundtrack-status" class="meta" role="status" aria-live="polite">Escolha uma faixa para ouvir.</p><p>{button('Ouvir a playlist no YouTube', SOUNDTRACK_YOUTUBE_PLAYLIST, True)}</p></section>
+        tracks.append(f'''<li class="soundtrack-track panel"><span class="track-number" aria-hidden="true">{number:02}</span><div class="track-copy"><p class="eyebrow">{esc(contexts.get(track['id'], track['environment']))}</p><h2>{title}</h2><p class="track-credit">{credit}</p><p class="meta">{esc(track['duration_label'])} <span aria-hidden="true">·</span> MP3 · {size}</p></div><div class="actions"><button class="button secondary" type="button" data-soundtrack-src="{esc(asset)}" data-soundtrack-title="{title}" aria-label="{esc(translated('Tocar') + ' ' + track['title'])}" aria-pressed="false" hidden data-enhancement><span data-soundtrack-label>Tocar</span></button><a class="button" href="{esc(asset)}" download="Douglas-Pan--{esc(track['id'])}.mp3" aria-label="{esc(translated('Baixar MP3') + ' · ' + track['title'])}">Baixar MP3 <span aria-hidden="true">↓</span></a>{youtube_link}<noscript><a href="{esc(asset)}">Ouvir MP3 ↗</a></noscript></div></li>''')
+    return intro('REGRAVAÇÕES · DIABLO 3D', 'A música de Diablo.<br>Em novas interpretações.', 'Ouça e baixe gratuitamente regravações e reinterpretações das músicas originais de Diablo, produzidas por Douglas Pan com auxílio de IA. A biblioteca atual reúne versões do menu principal e de Tristram.') + f'''
+<section class="notice prose" id="music-credits"><h2>Créditos musicais</h2><p>{credit}</p><p><a href="{MUSIC_CREDIT_SOURCE}">Créditos oficiais de Diablo — manual, página 78 ↗</a></p></section>
+<section class="soundtrack-player panel" aria-label="Player da trilha"><p class="eyebrow">ESCUTE A TRILHA</p><h2 id="soundtrack-title">{esc(first['title'])}</h2><p>{credit}</p><audio id="soundtrack-player" controls preload="none" src="{esc(versioned_asset(first['public_path']))}" aria-label="{esc(translated('Ouvir') + ' ' + first['title'])}">Seu navegador pode baixar as faixas pelos links abaixo.</audio><p id="soundtrack-status" class="meta" role="status" aria-live="polite">Escolha uma faixa para ouvir.</p><p>{button('Ouvir a playlist no YouTube', SOUNDTRACK_YOUTUBE_PLAYLIST, True)}</p></section>
 <ol class="soundtrack-list" aria-label="Faixas para ouvir e baixar">{''.join(tracks)}</ol>
 {videos_section(LANG, url)}
-<aside class="notice prose"><h2>Versões do projeto</h2><p>{esc(translated('Esta biblioteca reúne {count} arquivos personalizados.').format(count=len(music['tracks'])))}</p><p>Tristram 3 aparenta ser outra exportação da primeira opção; a lista reúne versões disponíveis, sem contar cada arquivo como uma composição distinta.</p><p>O crédito Douglas Pan está também nos metadados internos dos MP3s. A biblioteca contém apenas a trilha personalizada; as músicas originais do jogo não são distribuídas aqui.</p><p>Não é necessário cadastrar e-mail para ouvir ou baixar.</p></aside>
+<aside class="notice prose"><h2>Versões do projeto</h2><p>{esc(translated('Esta biblioteca reúne {count} arquivos personalizados.').format(count=len(music['tracks'])))}</p><p>Tristram 3 aparenta ser outra exportação da primeira opção; a lista reúne versões disponíveis, sem contar cada arquivo como uma composição distinta.</p><p>Main Menu é o rótulo usado no projeto; o título oficial da composição correspondente ainda não foi confirmado.</p><p>Douglas Pan também consta nas tags internas dos MP3s como crédito da produção destas versões. A composição original é de Matt Uelmen. Esta biblioteca oferece regravações/reinterpretações; as gravações originais do jogo não são distribuídas aqui.</p><p>Não é necessário cadastrar e-mail para ouvir ou baixar.</p></aside>
 <section class="panel prose"><h2>Acompanhe os próximos capítulos.</h2><p>O objetivo é reconstruir todo Diablo 1 em 3D. Novas faixas e avanços aparecem no devlog.</p><div class="actions">{button('Acompanhar o devlog', '/devlog/')}{button('Apoiar o projeto', '/apoiar/', True)}</div></section>'''
 
 
@@ -524,7 +526,7 @@ def build_locale(posts, evidence, soundtrack, newsletter):
     pages = [
         ('/', 'Diablo 1 sob uma nova dimensão.', 'Diablo 3D: um projeto para reconstruir todo Diablo 1 em 3D, com todos os níveis. Etapa atual: Tristram. Devlog, capturas, comparações técnicas e formas de apoiar.', home(posts)),
         ('/devlog/', 'Diário de construção', 'Acompanhe o desenvolvimento do jogo completo em Diablo 3D. Registros atuais de Tristram, capturas, comparações técnicas, decisões e verificações.', intro('DEVLOG', 'Diário de construção.', 'Do primeiro protótipo ao objetivo de reconstruir todo Diablo 1 em 3D. O que mudou, como foi testado e o que ainda precisa de revisão, com capturas, comparações técnicas e fontes versionadas.') + devlog_highlight() + '<p class="notice">Os registros de 07/10/2026 formam a retrospectiva inicial. v1–v4 representam etapas locais anteriores; novos registros acompanham as entregas seguintes.</p>' + filters(CATEGORIES, True) + '<h2 class="sr-only">Registros publicados</h2><section class="card-grid devlog-feed">' + ''.join(card(p) for p in posts) + '</section>' + no_results()),
-        ('/musica/', 'Trilha personalizada · Douglas Pan', 'Ouça e baixe gratuitamente as versões personalizadas de menu e Tristram do Diablo 3D, com crédito Douglas Pan nos arquivos MP3.', soundtrack_page(soundtrack)),
+        ('/musica/', 'Música de Diablo · Regravações', 'Composição original de Matt Uelmen para Diablo (Blizzard Entertainment). Ouça as regravações/reinterpretações produzidas por Douglas Pan com auxílio de IA.', soundtrack_page(soundtrack)),
         ('/novidades/', 'Receba novidades do Diablo 3D', 'Inscreva-se voluntariamente para receber novidades do Diablo 3D em português ou inglês. Respostas privadas e cancelamento disponível.', newsletter_page(newsletter)),
         ('/projeto/', 'Sobre o projeto', 'Conheça o D3D: projeto independente para reconstruir todo Diablo 1 em 3D, com todos os níveis, preservando a partida. Tristram é a etapa atual.', project()),
         ('/tecnologia/', 'Tecnologia do protótipo', 'DevilutionX, GPU opcional no Windows e editor externo Godot para arquitetura estática, com exportação validada e perfil de revisão.', technology()),
@@ -557,7 +559,7 @@ def build_locale(posts, evidence, soundtrack, newsletter):
         ET.SubElement(item, f'{{{dc}}}date').text = post['date']
         ET.SubElement(item, 'guid', isPermaLink='true').text = absolute(post['path'])
     write('/rss.xml', ET.tostring(rss, encoding='unicode', xml_declaration=True))
-    write('/soundtrack.json', json.dumps(soundtrack, ensure_ascii=False, indent=2) + '\n')
+    write('/soundtrack.json', json.dumps(public_soundtrack(soundtrack, LANG), ensure_ascii=False, indent=2) + '\n')
     return [localized_path(p[0]) for p in pages] + [localized_path(p['path']) for p in posts]
 
 

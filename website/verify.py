@@ -10,6 +10,7 @@ import xml.etree.ElementTree as ET
 import build
 from community import DISCORD_URL, YOUTUBE_URL
 from soundtrack import load_soundtrack, safe_file, sha256, validate_mp3
+from music_credits import COMPOSER, PRODUCER, SOURCE, credit_text, public_soundtrack
 from videos import SHOWCASE_VIDEO_IDS, VIDEO_IDS
 
 
@@ -55,6 +56,8 @@ def verify():
         for locale in ('pt-BR', 'en', 'x-default'):
             assert alternates[locale] == build.alternate_url(logical, locale), f'{path}: incorrect alternate page'
         raw = path.read_text(encoding='utf-8')
+        if logical != '/musica/':
+            assert any(t == 'a' and a.get('class') == 'music-credit' and a.get('href') == build.PREFIX + ('/en' if language == 'en' else '') + '/musica/#music-credits' and a.get('title') == credit_text(language) for t, a in document.tags), f'{path}: background player needs localized music credits'
         invitations = [a for t, a in document.tags if t == 'dialog' and a.get('id') == 'community-invite']
         assert len(invitations) == 1 and 'open' not in invitations[0], f'{path}: one initially closed community invitation required'
         assert invitations[0].get('aria-labelledby') == 'community-invite-title' and invitations[0].get('aria-describedby') == 'community-invite-text'
@@ -137,8 +140,28 @@ def verify():
             assert [a['data-youtube-id'] for a in buttons] == expected_ids, 'Only the confirmed public videos may be offered'
             assert all('hidden' in a and a.get('aria-controls') in video_page.ids for a in buttons), 'On-demand buttons require a real local target and progressive enhancement'
             assert sum(t == 'script' and urlsplit(a.get('src', '')).path == build.PREFIX + '/youtube-videos.js' and 'defer' in a for t, a in video_page.tags) == 1
-        assert json.loads((root / (language + 'soundtrack.json')).read_text(encoding='utf-8')) == soundtrack, 'Published soundtrack manifest differs from validated source'
+        locale = 'en' if language else 'pt-BR'
+        published_manifest = json.loads((root / (language + 'soundtrack.json')).read_text(encoding='utf-8'))
+        assert published_manifest == public_soundtrack(soundtrack, locale), 'Published soundtrack credits or validated audio manifest differ'
         library = documents[root / (language + 'musica/index.html')]
+        raw_library = (root / (language + 'musica/index.html')).read_text(encoding='utf-8')
+        assert 'music-credits' in library.ids and SOURCE in raw_library
+        import re
+        visible_library = re.sub(r'<script\b[^>]*>.*?</script>', '', raw_library, flags=re.S)
+        assert visible_library.count(credit_text(locale)) == 12, 'Player, five track rows and five video cards need complete visible music credits'
+        structured = json.loads(re.search(r'<script type="application/ld\+json">(.*?)</script>', raw_library, re.S).group(1))
+        album = next(entry for entry in structured if entry.get('@type') == 'MusicAlbum')
+        assert album['numTracks'] == len(album['track']) == len(soundtrack['tracks']) and album['creditText'] == credit_text(locale)
+        for recording, track in zip(album['track'], soundtrack['tracks']):
+            assert recording['recordingOf']['composer']['name'] == COMPOSER, 'Original composition must retain Matt Uelmen'
+            assert recording['producer']['name'] == PRODUCER and recording['creditText'] == credit_text(locale), 'Recording production must name Douglas Pan and AI assistance'
+            assert recording['audio']['creditText'] == credit_text(locale)
+            assert recording['audio']['contentUrl'] == build.BASE + track['public_path']
+            assert recording['recordingOf']['citation'] == SOURCE
+            if track['environment'] == 'Menu':
+                assert 'name' not in recording['recordingOf'], 'Do not guess an official composition title for Main Menu'
+        home_raw = (root / (language + 'index.html')).read_text(encoding='utf-8')
+        assert credit_text(locale) in home_raw, 'Featured music card needs original and production credits'
         assert sum(t == 'audio' for t, a in library.tags) == 1, 'Library must have one player'
         assert any(t == 'audio' and a.get('id') == 'soundtrack-player' and 'autoplay' not in a for t, a in library.tags)
         downloads = [a for t, a in library.tags if t == 'a' and 'download' in a]

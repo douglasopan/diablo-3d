@@ -85,6 +85,7 @@ main > .actions + section, main > .notice + section { margin-top: 48px; }
 .music-heading > span:first-child { color: var(--gold-light); }
 #music-status { color: var(--muted); text-align: right; font-size: .62rem; }
 .music-player audio { width: 100%; height: 40px; margin-top: 6px; }
+.music-credit { display: block; margin-top: 4px; font-size: .62rem; line-height: 1.5; color: var(--muted); }
 .music-player .plyr { margin-top: 4px; }
 .music-player .plyr__controls { padding: 0; }
 .music-player .plyr__control { min-width: 40px; min-height: 40px; }
@@ -629,6 +630,7 @@ kbd { display: inline-block; padding: 6px 10px; border: 1px solid #79796e; borde
 .track-copy { flex: 1; min-width: 0; }
 .track-copy h2 { margin: 8px 0; font-size: 2rem; }
 .track-copy p { margin: 0; }
+.track-copy .track-credit { margin: 10px 0; font-size: .8rem; line-height: 1.6; }
 .soundtrack-track .actions { margin: 0; flex-shrink: 0; }
 .soundtrack-track button[aria-current="true"] { border-color: var(--gold-light); }
 @media (max-width: 780px) {

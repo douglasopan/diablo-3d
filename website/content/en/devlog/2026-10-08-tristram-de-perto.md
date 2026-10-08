@@ -80,7 +80,9 @@ The current HUD received a functional composition fix using the native artwork, 
 
 The soundtrack already offers **Vanilla**, **Rock** or **Custom**, with choices for each environment. Tristram offers three local files and makes a new random choice at the end of each track when random mode is selected. Environments without replacements retain the original music.
 
-The [music library](/musica/) contains five custom menu and Tristram files to **listen to and download for free**, with **Douglas Pan** credited on the page and in the MP3s' internal metadata. Tristram's third option appears to be another export of the first; the available files are not counted as distinct compositions. The original game music is not distributed in this library.
+The [music library](/musica/) contains five menu and Tristram cover/reinterpretation files to **listen to and download for free**. **Original composition: Matt Uelmen, for Diablo (Blizzard Entertainment). Cover/reinterpretation produced by Douglas Pan using AI.** The production credit also appears in the MP3s' internal metadata. Tristram's third option appears to be another export of the first; the available files are not counted as distinct compositions. The original game recordings are not distributed in this library.
+
+*Music credit clarified on October 8, 2026, according to the [official Diablo manual, printed page 78](https://ftp.blizzard.com/pub/misc/Diablo.PDF). Main Menu remains a local label, without confirmation of the official title of the corresponding composition.*
 
 The latest menu revision is already installed. It removes options from the in-game menu that only work in the main menu, increases the number of rows according to the available space and uses larger native fonts. Previous, Next and Back now share a footer. The selection is preserved when the window is resized. The settings suite passed **59,452 checks**, accompanied by native screenshots at two resolutions; visual assessment during play remains with the author.
 

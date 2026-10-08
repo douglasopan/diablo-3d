@@ -7,6 +7,17 @@ audit. URLs, filenames, commits and evidence hashes are language independent.
 from __future__ import annotations
 
 TRANSLATIONS: dict[str, str] = {
+    'REGRAVAÇÕES · DIABLO 3D': 'COVERS · DIABLO 3D',
+    'A música de Diablo.': 'The music of Diablo.',
+    'Em novas interpretações.': 'In new interpretations.',
+    'Música de Diablo · Regravações': 'Diablo music · Covers',
+    'Composição original de Matt Uelmen para Diablo (Blizzard Entertainment). Ouça as regravações/reinterpretações produzidas por Douglas Pan com auxílio de IA.': 'Original composition by Matt Uelmen for Diablo (Blizzard Entertainment). Listen to covers/reinterpretations produced by Douglas Pan using AI.',
+    'Ouça e baixe gratuitamente regravações e reinterpretações das músicas originais de Diablo, produzidas por Douglas Pan com auxílio de IA. A biblioteca atual reúne versões do menu principal e de Tristram.': 'Listen to and download covers and reinterpretations of the original Diablo music for free, produced by Douglas Pan using AI. The current library contains main menu and Tristram versions.',
+    'Créditos musicais': 'Music credits',
+    'Créditos oficiais de Diablo — manual, página 78 ↗': 'Official Diablo credits — manual, page 78 ↗',
+    'Matt Uelmen · regravação Douglas Pan (IA)': 'Matt Uelmen · cover by Douglas Pan (AI)',
+    'Main Menu é o rótulo usado no projeto; o título oficial da composição correspondente ainda não foi confirmado.': 'Main Menu is the label used by the project; the official title of the corresponding composition has not yet been confirmed.',
+    'Douglas Pan também consta nas tags internas dos MP3s como crédito da produção destas versões. A composição original é de Matt Uelmen. Esta biblioteca oferece regravações/reinterpretações; as gravações originais do jogo não são distribuídas aqui.': 'Douglas Pan also appears in the MP3s’ internal tags as the production credit for these versions. The original composition is by Matt Uelmen. This library offers covers/reinterpretations; the original game recordings are not distributed here.',
     'GPU continua ativa ao afastar a câmera': 'GPU stays active when zooming out',
     'Corrigida a contagem que provocava queda para CPU com mais objetos. A recuperação por capacidade acompanha mudanças de carga, mantendo os limites de memória e o fallback de segurança.': 'Fixed the count that caused CPU fallback when more objects were visible. Capacity recovery responds to load changes while preserving memory limits and safe fallback.',
     'Créditos e geometria residente': 'Credits and resident geometry',

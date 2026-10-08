@@ -12,6 +12,8 @@ A publicação é completa em português brasileiro e inglês: a versão PT-BR f
 
 A música de fundo do site usa a faixa fornecida pelo usuário, com controles simples e preferência local de pausa/volume. A origem, a preparação, o player e os limites de início automático e navegação estão em [Música do site](../website/MUSIC.md). Essa integração é independente do seletor de trilhas do jogo.
 
+**Correção de créditos, 8 de outubro de 2026:** biblioteca PT/EN, player de fundo, cards musicais, metadados de página e JSON-LD passam a distinguir: **Composição original: Matt Uelmen, para Diablo (Blizzard Entertainment). Regravação/reinterpretação produzida por Douglas Pan com auxílio de IA.** A fonte é o manual oficial de Diablo, página impressa 78. O artigo `tristram-de-perto` também recebe o esclarecimento nos dois idiomas. Main Menu conserva o rótulo local; cinco arquivos, incluindo Tristram 3 como exportação alternativa, não equivalem a cinco composições. Os manifestos públicos recebem créditos editoriais adicionais, preservando hashes, tags e todos os bytes de áudio. A correção do site não comprova atualização do YouTube nem instalação do menu do jogo, que têm responsáveis próprios.
+
 ## Publicar um registro
 
 Crie `docs/devlog/YYYY-MM-DD-slug.md`. Use UTF-8 e metadados YAML:
