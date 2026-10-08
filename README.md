@@ -10,6 +10,8 @@ A community project to bring **the whole Diablo 1 game into 3D**, including its 
 
 **[Website & Devlog](https://douglasopan.github.io/diablo-3d/)** · **[Official Discord](https://discord.gg/4YxQ7s69S)** · **[Contribute](docs/CONTRIBUTING.md)** · **[Roadmap](docs/ROADMAP.md)** · **[Build and play](docs/BUILDING-D3D.md)** · **[Estado em português](docs/TRISTRAM-STATUS.pt-BR.md)**
 
+**[Community model inspector / Inspetor de modelos](docs/MODEL-INSPECTOR.md)** — open the Godot scene to review the public catalog of 130 unique GLB files, distinguish generated revisions from installed map bindings, compare locally available GLB/D3D files and export review notes. This catalog contains metadata; model and reference media are not bundled.
+
 > This is modified DevilutionX software, distributed under its inherited **[Sustainable Use License](LICENSE.md)**. Source is public for collaboration; distribution must be free of charge and non-commercial. This is not an MIT/GPL release or an OSI-approved open-source license. Preserve upstream notices. Original Diablo game data is required and is not included.
 
 ## What works today
