@@ -329,3 +329,7 @@ Atualizar o documento responsável e manter links nos demais. Não copiar estado
 ### Música de fundo do site — 8 de outubro de 2026
 
 Solicitação explícita do usuário para publicar a faixa fornecida com player simples. O site PT-BR/EN recebeu controles de tocar/pausar, silêncio e volume, repetição e preferência local, usando Plyr auto-hospedado e fallback HTML. O usuário confirmou a reprodução durante a revisão; a preparação preservou o áudio sem recompressão e removeu capa/metadados privados. Início automático e retomada entre páginas respeitam os limites do navegador. Detalhes e manutenção em [Música do site](../website/MUSIC.md). Esta entrega é independente das trilhas da engine; G1 do mundo mantém seu escopo. Próxima ação: acompanhar o uso e somente substituir a faixa por nova solicitação explícita.
+
+### Medição do site — 8 de outubro de 2026
+
+Por solicitação explícita do usuário, o cabeçalho compartilhado inclui a tag padrão do Google Analytics 4, `G-86NLRX1F38`, nas 42 páginas HTML PT-BR/EN. A conta e o fluxo Web foram criados após autorização dos termos. Passaram 13 testes Python, build e verificação do artefato; configuração e limites estão no [README do site](../website/README.md). A medição começa com o carregamento da versão publicada e não recupera visitas anteriores nem visualizações dos posts do Reddit. Próxima ação: verificar a publicação no GitHub Pages e o recebimento no relatório em tempo real.

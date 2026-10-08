@@ -319,6 +319,29 @@ def background_music():
     return f'''<aside class="music-player" aria-label="Música de fundo"><div class="music-heading"><span>Música de fundo</span><span id="music-status" role="status">Toque para ouvir</span></div><audio id="background-music" controls loop preload="none" playsinline aria-label="Reproduzir música de fundo" data-icon-url="{url('/vendor/plyr/plyr.svg')}" src="{versioned_asset('/assets/audio/background-music.mp3')}">Seu navegador não oferece reprodução de áudio.</audio></aside>'''
 
 
+def load_analytics():
+    config = json.loads((ROOT / 'analytics.json').read_text(encoding='utf-8'))
+    measurement_id = config.get('measurement_id')
+    if not isinstance(measurement_id, str) or (measurement_id and not re.fullmatch(r'G-[A-Z0-9]{10}', measurement_id)):
+        raise ValueError('analytics.json measurement_id must be empty or a GA4 G-XXXXXXXXXX ID')
+    return {'measurement_id': measurement_id}
+
+
+def analytics_tag():
+    measurement_id = load_analytics()['measurement_id']
+    if not measurement_id:
+        return ''
+    return f'''<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id={measurement_id}"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){{dataLayer.push(arguments);}}
+  gtag('js', new Date());
+
+  gtag('config', '{measurement_id}');
+</script>'''
+
+
 def frame(title, description, path, content, image='/assets/banner.webp', article=None, noindex=False):
     title, description = translated(title), translated(description)
     canonical = absolute(path)
@@ -337,7 +360,7 @@ def frame(title, description, path, content, image='/assets/banner.webp', articl
     languages = '<nav class="language-switch" aria-label="Idioma">' + ''.join(f'<a href="{urlsplit(alternate_url(path, lang)).path}" hreflang="{lang}" lang="{lang}" data-language-link="{lang}" aria-label="{label}"' + (' aria-current="true"' if LANG == lang else '') + f'>{short}</a>' for lang, label, short in [('pt-BR', 'Ler em português', 'PT'), ('en', 'Read in English', 'EN')]) + '</nav>'
     alternates = ''.join(f'<link rel="alternate" hreflang="{lang}" href="{alternate_url(path, lang)}">' for lang in ('pt-BR', 'en', 'x-default'))
     document = f'''<!doctype html>
-<html lang="{LANG}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<html lang="{LANG}"><head>{analytics_tag()}<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{esc(title)} · Diablo 3D</title><meta name="description" content="{esc(description)}"><meta name="robots" content="{'noindex, follow' if noindex else 'index, follow'}"><link rel="canonical" href="{canonical}">
 <meta name="theme-color" content="#111211"><meta property="og:locale" content="{'en_US' if LANG == 'en' else 'pt_BR'}"><meta property="og:type" content="{'article' if article else 'website'}"><meta property="og:site_name" content="Diablo 3D · D3D"><meta property="og:title" content="{esc(title)}"><meta property="og:description" content="{esc(description)}"><meta property="og:url" content="{canonical}"><meta property="og:image" content="{absolute(image)}"><meta property="og:image:alt" content="{esc(article['image_alt'] if article else 'Banner oficial do projeto Diablo 3D')}">{article_meta}
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{esc(title)}"><meta name="twitter:description" content="{esc(description)}"><meta name="twitter:image" content="{absolute(image)}">
@@ -459,6 +482,7 @@ def build_locale(posts, evidence):
 def build():
     global LANG
     LANG = 'pt-BR'
+    load_analytics()  # Invalid tracking configuration must fail before replacing the artifact.
     posts = load_posts()
     raw_evidence = json.loads((ROOT / 'evidence.json').read_text(encoding='utf-8'))
     evidence = raw_evidence['entries'] if isinstance(raw_evidence, dict) else raw_evidence

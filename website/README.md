@@ -13,7 +13,11 @@ Static development journal in Brazilian Portuguese and complete English for the 
 
 The default URL is `https://douglasopan.github.io/diablo-3d`. Set `SITE_URL` when deliberately changing the host or project prefix; every local URL, canonical and feed uses it.
 
-No client-only content fetching, third-party analytics, externally fetched fonts or runtime framework. Menu, filters and the image dialog progressively enhance the static HTML. Captures are kept in full in thumbnails and the viewer, including defects and before/after labels. Original game data and derived model files are excluded. Ambient illustrations are labelled separately. Parallax honors reduced-motion preferences.
+No client-only content fetching, externally fetched fonts or runtime framework. Menu, filters and the image dialog progressively enhance the static HTML. Captures are kept in full in thumbnails and the viewer, including defects and before/after labels. Original game data and derived model files are excluded. Ambient illustrations are labelled separately. Parallax honors reduced-motion preferences.
+
+Google Analytics 4 uses the public measurement ID in `analytics.json`. The shared page frame includes the standard Google tag supplied by the project owner once in the head of every Portuguese and English page, loading `gtag.js` asynchronously and calling `gtag('config', 'G-86NLRX1F38')`. It starts when the page loads; no custom consent UI or wrapper is included. An empty ID omits the tag and an invalid ID fails the build. The web stream was configured on 8 October 2026 with Enhanced Measurement off.
+
+Tracking begins after deployment and cannot recover earlier visits or Reddit post views. Script blocking and delivery failures can reduce the reported totals. The standard tag can use analytics cookies and collect page/referral information; do not put personal data or secrets in URLs. The measurement ID is public, while private account credentials do not belong in this repository. Validate with the Python authoring tests, `python website/build.py` and `python website/verify.py`.
 
 The PT/EN selector links to the equivalent page and preserves article section anchors. A selection is remembered locally when browser storage is available. On a Portuguese page without a saved choice, an English primary browser language opens the English equivalent. Direct `/en/` links work independently, and both languages remain readable without JavaScript. Each language has its own HTML, metadata and RSS; canonical and alternate-language links identify the corresponding pages.
 

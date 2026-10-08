@@ -1,5 +1,6 @@
 """Regression checks for the authoring contract and publication boundary."""
 import tempfile
+import json
 from pathlib import Path
 import unittest
 from unittest.mock import patch
@@ -107,6 +108,44 @@ class PublicationContract(unittest.TestCase):
         self.english_post()
         with self.assertRaisesRegex(ValueError, 'heading structure must match original'):
             build.load_posts('en')
+
+
+class AnalyticsPublication(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.root = Path(self.temp.name)
+        self.root_patch = patch.object(build, 'ROOT', self.root)
+        self.root_patch.start()
+
+    def tearDown(self):
+        self.root_patch.stop()
+        self.temp.cleanup()
+
+    def config(self, **changes):
+        config = dict({'measurement_id': ''}, **changes)
+        (self.root / 'analytics.json').write_text(json.dumps(config), encoding='utf-8')
+
+    def test_empty_id_disables_tag(self):
+        self.config()
+        self.assertEqual(build.analytics_tag(), '')
+
+    def test_invalid_tracking_config_fails_closed(self):
+        for value in ('UA-123-1', 'G-short', '<script>', None):
+            with self.subTest(value=value):
+                self.config(measurement_id=value)
+                with self.assertRaisesRegex(ValueError, 'measurement_id'):
+                    build.load_analytics()
+
+    def test_shared_frame_adds_one_standard_google_tag_in_both_languages(self):
+        self.config(measurement_id='G-AB12CD34EF')
+        for language in ('pt-BR', 'en'):
+            with self.subTest(language=language), patch.object(build, 'LANG', language), patch.object(build, 'logo', return_value=''), patch.object(build, 'versioned_asset', side_effect=lambda path: build.url(path) + '?v=test'):
+                page = build.frame('Devlog', 'Devlog', '/devlog/', '<h1>Devlog</h1>')
+                self.assertEqual(page.count('<script async src="https://www.googletagmanager.com/gtag/js?id=G-AB12CD34EF"></script>'), 1)
+                self.assertEqual(page.count("gtag('config', 'G-AB12CD34EF');"), 1)
+                self.assertIn('function gtag(){dataLayer.push(arguments);}', page)
+                self.assertLess(page.index('www.googletagmanager.com'), page.index('</head>'))
+                self.assertNotIn('analytics-notice', page)
 
 
 if __name__ == '__main__':

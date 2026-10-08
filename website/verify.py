@@ -34,6 +34,7 @@ def verify():
     assert root.is_dir(), 'Build the website before verifying'
     documents = {p: Document(p.read_text(encoding='utf-8')) for p in files if p.suffix == '.html'}
     assert len(documents) >= 9, 'Expected the complete website and article pages'
+    analytics = build.load_analytics()
     for path, document in documents.items():
         assert document.h1 == 1, f'{path}: exactly one h1 required'
         language = 'en' if path.relative_to(root).parts[0] == 'en' else 'pt-BR'
@@ -51,6 +52,14 @@ def verify():
         for locale in ('pt-BR', 'en', 'x-default'):
             assert alternates[locale] == build.alternate_url(logical, locale), f'{path}: incorrect alternate page'
         raw = path.read_text(encoding='utf-8')
+        tracking_scripts = [a for t, a in document.tags if t == 'script' and a.get('src', '').startswith('https://www.googletagmanager.com/gtag/js')]
+        if analytics['measurement_id']:
+            assert len(tracking_scripts) == 1, f'{path}: one Google tag required'
+            assert tracking_scripts[0]['src'] == 'https://www.googletagmanager.com/gtag/js?id=' + analytics['measurement_id'], f'{path}: incorrect measurement ID'
+            assert 'async' in tracking_scripts[0], f'{path}: Google tag must be async'
+            assert raw.count("gtag('config', '" + analytics['measurement_id'] + "');") == 1, f'{path}: one standard Google config required'
+        else:
+            assert not tracking_scripts, f'{path}: disabled tracking must omit Google tag'
         import re
         for data in re.findall(r'<script type="application/ld\+json">(.*?)</script>', raw, re.S):
             json.loads(data)
@@ -78,7 +87,7 @@ def verify():
                 assert target.is_file(), f'{path}: broken local link {attrs[name]}'
                 if parsed.fragment:
                     assert target in documents and unquote(parsed.fragment) in documents[target].ids, f'{path}: broken fragment {attrs[name]}'
-        assert not any(t == 'script' and a.get('src', '').startswith('http') for t, a in document.tags), 'No third-party scripts'
+        assert not any(t == 'script' and a.get('src', '').startswith('http') and a not in tracking_scripts for t, a in document.tags), 'Only the configured Google tag may be external'
     sitemap = ET.parse(root / 'sitemap.xml')
     locations = [element.text for element in sitemap.getroot().iter() if element.tag.endswith('loc')]
     assert len(locations) == len(documents) - 2, 'Sitemap must include both languages and omit both 404 pages'
