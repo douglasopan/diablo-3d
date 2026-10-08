@@ -1,15 +1,17 @@
 #pragma once
 
 #include "engine/assets.hpp"
+#include "engine/music_catalog.hpp"
+#include "options.h"
 
 namespace devilution {
 
-// Optional owner-provided soundtrack; original game music remains the fallback.
-inline constexpr char MenuMusicOverridePath[] = "music\\d3d-main-menu.mp3";
-
 [[nodiscard]] inline bool HaveMenuMusicOverride()
 {
-	return FindAsset(MenuMusicOverridePath).ok();
+	const auto &options = GetOptions().Music;
+	return ResolveMusicSelection(TMUSIC_INTRO, *options.theme, *options.menu, true,
+	           [](const char *path) { return FindAsset(path).ok(); })
+	           .actual != MusicVariant::Original;
 }
 
 } // namespace devilution

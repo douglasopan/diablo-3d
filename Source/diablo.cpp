@@ -954,6 +954,7 @@ void GameEventHandler(const SDL_Event &event, uint16_t modState)
 void RunGameLoop(interface_mode uMsg)
 {
 	demo::NotifyGameLoopStart();
+	music_set_game_context(true);
 
 	nthread_ignore_mutex(true);
 	StartGame(uMsg);
@@ -2856,6 +2857,7 @@ bool StartGame(bool bNewGame, bool bSinglePlayer)
 		if (gbValidSaveFile && gbLoadGame) {
 			uMsg = WM_DIABLOADGAME;
 		}
+		InitializeTownViewForGame();
 		RunGameLoop(uMsg);
 		NetClose();
 		UnloadFonts();
@@ -3223,6 +3225,8 @@ void LoadGameLevelStartMusic(_music_id neededTrack)
 {
 	if (sgnMusicTrack != neededTrack)
 		music_start(neededTrack);
+	else
+		music_refresh();
 
 	if (MinimizePaused) {
 		music_mute();

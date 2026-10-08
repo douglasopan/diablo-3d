@@ -57,6 +57,7 @@ _music_id NextTrack()
 
 void RefreshMusic()
 {
+	music_set_game_context(false);
 	music_start(NextTrack());
 }
 

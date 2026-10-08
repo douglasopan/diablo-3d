@@ -232,9 +232,11 @@ list(APPEND devilutionx_assets
 
 # Optional locally supplied soundtrack. Register it so asset trimming preserves
 # the file on subsequent builds; public clones retain the original soundtrack.
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/assets/music/d3d-main-menu.mp3")
-  list(APPEND devilutionx_assets music/d3d-main-menu.mp3)
-endif()
+foreach(_d3d_music menu-rock2 menu-alternative town-rock cathedral-rock catacombs-rock caves-rock hell-rock nest-rock crypt-rock)
+  if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/assets/music/d3d/${_d3d_music}.mp3")
+    list(APPEND devilutionx_assets "music/d3d/${_d3d_music}.mp3")
+  endif()
+endforeach()
 
 if(NOT UNPACKED_MPQS)
   list(APPEND devilutionx_assets

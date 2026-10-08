@@ -509,4 +509,5 @@ uwp-project/Assets/ui_art
 
 # Local owner-supplied menu music; not part of the public art distribution.
 /assets/music/d3d-main-menu.mp3
+/assets/music/d3d/
 /audio/

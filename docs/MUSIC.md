@@ -1,37 +1,48 @@
-# Música do menu do Diablo 3D
+# Trilha sonora do Diablo 3D
 
-Em 8 de outubro de 2026, o responsável pelo projeto forneceu `Main_Menu.mp3` como nova música do menu. O arquivo foi instalado localmente, sem alterar seu áudio ou substituir arquivos da instalação GOG. O MP3 original, a cópia de trabalho e a cópia carregada pelo jogo têm o mesmo SHA-256.
+O jogo permite escolher **Vanilla**, **Rock** ou uma combinação por ambiente. Em 8 de outubro de 2026, o autor forneceu `Main_Menu_Rock2.mp3` como nova escolha padrão do menu. A primeira composição, `Main_Menu.mp3`, continua disponível como alternativa. Os arquivos de áudio permanecem locais; o repositório publica o suporte, os controles e o [inventário completo](MUSIC-CATALOG.md).
 
-## Carregamento
+## Escolher no jogo
 
-O recurso opcional é `music/d3d-main-menu.mp3`. Com ele presente, a faixa INTRO usa esse arquivo, e o menu retorna a essa faixa depois de uma partida ou da apresentação. Sem ele, permanece a escolha/rotação herdada. O arquivo não faz o jogo confundir uma instalação shareware com uma instalação que contém todas as músicas.
+- No menu principal: **Settings → Soundtrack**.
+- Durante a partida: **Esc → Options → Audio Options → Soundtrack**.
+- **Vanilla** usa as músicas originais, inclusive a rotação herdada do menu.
+- **Rock** usa as substituições instaladas; onde ainda não há uma, toca a original.
+- **Custom** combina as escolhas individuais. Alterar uma faixa individual seleciona esse modo automaticamente.
 
-As músicas da cidade e dos níveis conservam seus caminhos originais. O menu de pausa não troca a música da partida. Volume, mute e streaming continuam usando os controles de áudio existentes; o playback usa a repetição nativa. Isso não comprova uma transição musical imperceptível no fim da composição.
+O menu tem **Original**, **Rock2** e **Main Menu**, a composição anterior. Os outros sete ambientes têm **Original** e **Rock**. No menu da partida, **Music by Location** lista os oito ambientes em três páginas, com até cinco linhas por tela. A marca `*` identifica a variante selecionada; `pending` indica que falta o arquivo e a música original será usada. Ninho e Cripta são conteúdo Hellfire; aparecer no catálogo não os desbloqueia na campanha Diablo.
 
-O build SDL2 atual possui decoders MP3 e WAV, sem Vorbis/OGG. Por isso, o runtime usa o MP3 fornecido, sem recompressão. A cópia OGG é uma exportação separada para uso futuro; não é carregada por esta versão do jogo.
+As escolhas são salvas por perfil em `[Music]`: `Theme` (0 Vanilla, 1 Rock, 2 Custom) e `Menu`, `Town`, `Cathedral`, `Catacombs`, `Caves`, `Hell`, `Nest`, `Crypt` (0 Original, 1 Rock; 2 alternativa somente no menu). O padrão é Rock. A escolha da música atualmente tocada é aplicada imediatamente; as demais valem quando seu ambiente for carregado. Uma preferência que não muda o arquivo ativo não reinicia a faixa. Volume, desligar música e mute conservam os controles existentes.
 
-## Preparar um arquivo local
+A pausa mantém a música do ambiente. O contexto de menu é explícito, porque o carregamento da partida ocorre antes de `gbRunGame` se tornar verdadeiro. A rotação Vanilla do menu pode usar IDs de níveis, mas não usa as escolhas Rock desses níveis: menu e partida são independentes. Músicas/vozes embutidas nos vídeos não fazem parte deste seletor; estão listadas separadamente no inventário.
 
-1. Preserve sua fonte fora do repositório. Neste workspace, o master está em `audio/menu/main-menu-v1/Main_Menu.mp3` e a conversão em `Main_Menu.ogg` na mesma pasta.
-2. Copie a fonte MP3 para `assets/music/d3d-main-menu.mp3` na raiz do código-fonte.
-3. Configure e compile novamente, sem `-SkipConfigure` nessa primeira inclusão. `CMake/Assets.cmake` registra a faixa opcional e a copia para `build/assets/music/d3d-main-menu.mp3`. A lista de assets preserva o arquivo na limpeza dos próximos builds.
-4. Inicie o jogo pelo atalho habitual. Um override com o mesmo caminho em um perfil/mod tem a precedência normal da engine.
+## Arquivos opcionais
 
-O arquivo de áudio, seus metadados, masters e diagnósticos permanecem locais nesta entrega. O repositório publica o suporte opcional e este contrato; não distribui a faixa. Para uma futura distribuição da música, registrar sua autoria, origem e licença junto do asset. O contrato não altera a licença herdada da engine.
-
-## Revisão local selecionada
-
-| Arquivo | SHA-256 | Uso |
+| Ambiente | Recurso local, relativo a `assets/` | Disponível nesta entrega |
 | --- | --- | --- |
-| `Main_Menu.mp3` | `4cacef45cfb55ce58fb3cee1761ffc848001ddfa71dafe3dcb084ef8d59793d7` | Fonte e runtime; 1.983.623 bytes, 48 kHz, estéreo. |
-| `Main_Menu.ogg` | `a1f9a503b7dc415982c13161bde71725ba783cef39bf218c38299859d00d6261` | Vorbis, qualidade 6, 48 kHz estéreo; 1.780.482 bytes. Exportação sem capa/metadados da fonte. |
+| Menu — Rock2 | `music/d3d/menu-rock2.mp3` | Sim, instalado localmente. |
+| Menu — primeira composição | `music/d3d/menu-alternative.mp3` | Sim, instalado localmente. |
+| Tristram | `music/d3d/town-rock.mp3` | Pendente. |
+| Catedral | `music/d3d/cathedral-rock.mp3` | Pendente. |
+| Catacumbas | `music/d3d/catacombs-rock.mp3` | Pendente. |
+| Cavernas | `music/d3d/caves-rock.mp3` | Pendente. |
+| Inferno | `music/d3d/hell-rock.mp3` | Pendente. |
+| Ninho — Hellfire | `music/d3d/nest-rock.mp3` | Pendente. |
+| Cripta — Hellfire | `music/d3d/crypt-rock.mp3` | Pendente. |
 
-Conversão utilizada: FFmpeg, seleção apenas do stream de áudio, `libvorbis -q:a 6`, sem alteração do MP3 original. A duração informada pelo contêiner é 85 segundos; o decoder real do jogo lê 85,056 segundos incluindo o padding do MP3.
+Preserve o master fora do repositório, copie a faixa para o caminho correspondente e configure/compile novamente, sem `-SkipConfigure` na primeira inclusão. CMake registra apenas os arquivos existentes e os mantém durante a limpeza de assets. Os originais permanecem nos dados locais do jogador, sem alteração da instalação GOG. O antigo caminho `music/d3d-main-menu.mp3` foi aposentado; use os caminhos da tabela.
 
-## Evidência técnica
+Ausência de uma substituição retorna à original. Se o decoder rejeitar um arquivo instalado, o jogo registra o erro e tenta a original sem encerrar a partida. A presença de um MP3 autoral não faz uma instalação shareware parecer possuir a trilha completa. Arquivos originais ausentes também continuam sujeitos às limitações dos dados instalados.
 
-O probe privado foi ligado às mesmas bibliotecas estáticas SDL_audiolib e SDL2 do jogo. `Aulib::DecoderDrmp3` leu 4.082.688 frames / 8.165.376 amostras, sem valores não finitos e com conteúdo não silencioso. Rewind após EOF, segunda decodificação integral idêntica e seek para o meio passaram, sem abrir dispositivo ou tocar som. Evidência local: `diagnostics/menu-music/decoder-evidence.json`.
+O build SDL2 atual lê MP3 e WAV; não habilita Vorbis/OGG. O runtime usa os MP3 recebidos sem recompressão. A exportação OGG da primeira composição continua disponível separadamente para uso futuro. Distribuir músicas exigirá registrar autoria, origem e licença; esta entrega não publica os arquivos nem seus metadados incorporados e não altera a licença herdada da engine.
 
-O build candidato foi concluído, e os bytes da fonte e do asset copiado foram comparados. A revisão artística da composição e da transição de repetição pertence ao autor; os testes de arquivo não substituem essa escuta.
+## Fontes locais e validação
 
-O menu foi iniciado com vídeo/áudio normais, e o log confirmou `Diablo 3D menu music playing: music\d3d-main-menu.mp3` após o sucesso de `Play`. Os executáveis Godot, habitual e de qualidade receberam os mesmos bytes: SHA-256 `87536019928150c931b681d378ec2e85bd750a8cff1d679c3cdfdade023892be`. A instalação preservou configuração/saves, e os saves continuaram idênticos após o teste do menu. Evidência: `diagnostics/menu-music/installed-20261008-023431/validation.json`. Uma tentativa anterior com drivers SDL dummy foi inconclusiva na inicialização; ela não foi usada como prova de playback.
+| Composição | SHA-256 do MP3 fonte/runtime | Propriedades |
+| --- | --- | --- |
+| Rock2 | `f100f775332cd3d39357ece3b38549029075fe36d6f73476f14657c173edf2e4` | 1.854.648 bytes; 48 kHz, estéreo; 83,52 s decodificados. |
+| Primeira versão | `4cacef45cfb55ce58fb3cee1761ffc848001ddfa71dafe3dcb084ef8d59793d7` | 1.983.623 bytes; 48 kHz, estéreo; 85,056 s decodificados. |
+
+Masters privados em `audio/menu/main-menu-rock2-v1/` e `audio/menu/main-menu-v1/`. O decoder real SDL_audiolib passou leitura completa, ausência de valores não finitos, conteúdo não silencioso, rewind após EOF, segunda leitura idêntica e seek nas duas composições. Na Rock2 foram 4.008.960 frames / 8.017.920 amostras. Isso valida o arquivo e a repetição técnica; a transição musical no fim da composição depende da escuta do autor.
+
+Evidência da primeira entrega: `diagnostics/menu-music/`. Evidência desta entrega e dos seletores: `diagnostics/music-selection/`. O teste `music_selection_smoke` cobre seleção, contextos independentes, persistência, navegação dos menus e preferência inicial 3D, usando configuração descartável e sem alterar saves do jogador.

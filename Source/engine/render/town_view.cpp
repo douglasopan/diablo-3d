@@ -1994,6 +1994,16 @@ bool IsTownViewActive()
 	return Enabled && leveltype == DTYPE_TOWN;
 }
 
+void InitializeTownViewForGame()
+{
+	Enabled = *GetOptions().Graphics.townViewStartIn3D;
+	ResetTownViewCamera();
+	// Home remains an exact native comparison. Start just off that pose so the
+	// initial 3D view actually renders geometry and uses its matching picking.
+	if (Enabled)
+		RotateTownView(0.15F);
+}
+
 bool IsTownViewNativePose()
 {
 	constexpr float Tolerance = 0.00001F;

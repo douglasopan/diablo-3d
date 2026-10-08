@@ -27,7 +27,7 @@
 
 #include "appfat.h"
 #include "engine/assets.hpp"
-#include "engine/menu_music.hpp"
+#include "engine/music_catalog.hpp"
 #include "game_mode.hpp"
 #include "options.h"
 #include "utils/log.hpp"
@@ -56,6 +56,16 @@ bool gbSoundOn = true;
 namespace {
 
 SoundSample music;
+std::string ActiveMusicSelectionPath;
+bool MusicMuted = false;
+bool MusicInGame = false;
+
+MusicSelection SelectedMusic(_music_id track)
+{
+	const auto &options = GetOptions().Music;
+	return ResolveMusicSelection(track, *options.theme, *options.ForTrack(track), HaveFullMusic(),
+	    [](const char *path) { return FindAsset(path).ok(); }, !MusicInGame, *options.menu);
+}
 
 std::string GetMp3Path(const char *path)
 {
@@ -140,29 +150,6 @@ SoundSample *DuplicateSound(const SoundSample &sound)
 	return result;
 }
 
-/** Maps from track ID to track name in spawn. */
-const char *const SpawnMusicTracks[NUM_MUSIC] = {
-	"music\\stowne.wav",
-	"music\\slvla.wav",
-	"music\\slvla.wav",
-	"music\\slvla.wav",
-	"music\\slvla.wav",
-	"music\\dlvlf.wav",
-	"music\\dlvle.wav",
-	"music\\sintro.wav",
-};
-/** Maps from track ID to track name. */
-const char *const MusicTracks[NUM_MUSIC] = {
-	"music\\dtowne.wav",
-	"music\\dlvla.wav",
-	"music\\dlvlb.wav",
-	"music\\dlvlc.wav",
-	"music\\dlvld.wav",
-	"music\\dlvlf.wav",
-	"music\\dlvle.wav",
-	"music\\dintro.wav",
-};
-
 int CapVolume(int volume)
 {
 	return std::clamp(volume, VOLUME_MIN, VOLUME_MAX);
@@ -187,6 +174,20 @@ const auto OptionChangeBufferSize = (GetOptions().Audio.bufferSize.SetValueChang
 const auto OptionChangeResamplingQuality = (GetOptions().Audio.resamplingQuality.SetValueChangedCallback(OptionAudioChanged), true);
 const auto OptionChangeResampler = (GetOptions().Audio.resampler.SetValueChangedCallback(OptionAudioChanged), true);
 const auto OptionChangeDevice = (GetOptions().Audio.device.SetValueChangedCallback(OptionAudioChanged), true);
+
+void OptionMusicVariantChanged()
+{
+	GetOptions().Music.theme.SetValue(MusicTheme::Custom);
+	music_refresh();
+}
+
+const auto MusicOptionCallbacks = [] {
+	auto &options = GetOptions().Music;
+	options.theme.SetValueChangedCallback(music_refresh);
+	for (int track = 0; track < NUM_MUSIC; ++track)
+		options.ForTrack(static_cast<_music_id>(track)).SetValueChangedCallback(OptionMusicVariantChanged);
+	return true;
+}();
 
 } // namespace
 
@@ -334,34 +335,40 @@ void music_stop()
 {
 	music.Release();
 	sgnMusicTrack = NUM_MUSIC;
+	ActiveMusicSelectionPath.clear();
 }
 
 void music_start(_music_id nTrack)
 {
-	const char *trackPath;
-
 	assert(nTrack < NUM_MUSIC);
 	music_stop();
 	if (!gbMusicOn)
 		return;
-	if (nTrack == TMUSIC_INTRO && HaveMenuMusicOverride())
-		trackPath = MenuMusicOverridePath;
-	else if (HaveFullMusic())
-		trackPath = MusicTracks[nTrack];
-	else
-		trackPath = SpawnMusicTracks[nTrack];
+	const MusicSelection selection = SelectedMusic(nTrack);
+	const char *trackPath = selection.path;
 
 #ifdef DISABLE_STREAMING_MUSIC
 	const bool stream = false;
 #else
 	const bool stream = true;
 #endif
-	if (!LoadAudioFile(trackPath, stream, music).has_value()) {
+	auto loaded = LoadAudioFile(trackPath, stream, music);
+	if (!loaded.has_value() && selection.actual != MusicVariant::Original) {
+		LogWarn(LogCategory::Audio, "Diablo 3D replacement could not be loaded; using original music: {}", trackPath);
+		music.Release();
+		const auto &definition = MusicTrackCatalog[nTrack];
+		trackPath = HaveFullMusic() ? definition.originalPath : definition.sharewarePath;
+		loaded = LoadAudioFile(trackPath, stream, music);
+	}
+	if (!loaded.has_value()) {
+		LogError(LogCategory::Audio, "Music could not be loaded: {}", loaded.error());
 		music_stop();
 		return;
 	}
 
 	music.SetVolume(*GetOptions().Audio.musicVolume, VOLUME_MIN, VOLUME_MAX);
+	if (MusicMuted)
+		music.Mute();
 	if (!music.Play(/*numIterations=*/0)) {
 		LogError(LogCategory::Audio, "Aulib::Stream::play (from music_start): {}", SDL_GetError());
 		music_stop();
@@ -369,8 +376,23 @@ void music_start(_music_id nTrack)
 	}
 
 	sgnMusicTrack = nTrack;
-	if (trackPath == MenuMusicOverridePath)
-		LogInfo(LogCategory::Audio, "Diablo 3D menu music playing: {}", trackPath);
+	ActiveMusicSelectionPath = selection.path;
+	LogInfo(LogCategory::Audio, "Diablo 3D music playing: {} (context={}, track={}, fallback={})", trackPath,
+	    MusicInGame ? "game" : "menu", static_cast<int>(nTrack), selection.fallback || std::string_view(trackPath) != selection.path);
+}
+
+void music_set_game_context(bool inGame)
+{
+	MusicInGame = inGame;
+}
+
+void music_refresh()
+{
+	if (!gbSndInited || !gbMusicOn || sgnMusicTrack == NUM_MUSIC)
+		return;
+	const _music_id track = sgnMusicTrack;
+	if (SelectedMusic(track).path != ActiveMusicSelectionPath)
+		music_start(track);
 }
 
 void sound_disable_music(bool disable)
@@ -417,12 +439,14 @@ int SoundGetOrSetAudioCuesVolume(int volume)
 
 void music_mute()
 {
+	MusicMuted = true;
 	if (music.IsLoaded())
 		music.Mute();
 }
 
 void music_unmute()
 {
+	MusicMuted = false;
 	if (music.IsLoaded())
 		music.Unmute();
 }

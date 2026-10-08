@@ -27,6 +27,7 @@
 
 #include "appfat.h"
 #include "controls/controller_buttons.h"
+#include "engine/music_catalog.hpp"
 #include "engine/size.hpp"
 #include "engine/sound_defs.hpp"
 #include "mods/mod_identity.h"
@@ -255,6 +256,18 @@ public:
 	{
 		SetValueInternal(static_cast<int>(value));
 	}
+};
+
+/** @brief A per-environment music choice, including replacement availability. */
+class OptionEntryMusicVariant : public OptionEntryEnum<MusicVariant> {
+public:
+	explicit OptionEntryMusicVariant(_music_id track);
+	[[nodiscard]] std::string_view GetListDescription(size_t index) const override;
+	[[nodiscard]] std::string_view GetValueDescription() const override;
+	[[nodiscard]] bool HasReplacement(MusicVariant variant) const;
+
+private:
+	_music_id track_;
 };
 
 class OptionEntryIntBase : public OptionEntryListBase {
@@ -522,6 +535,23 @@ struct AudioOptions : OptionCategoryBase {
 	OptionEntryAudioDevice device;
 };
 
+struct MusicOptions : OptionCategoryBase {
+	MusicOptions();
+	std::vector<OptionEntryBase *> GetEntries() override;
+	[[nodiscard]] OptionEntryMusicVariant &ForTrack(_music_id track);
+	[[nodiscard]] const OptionEntryMusicVariant &ForTrack(_music_id track) const;
+
+	OptionEntryEnum<MusicTheme> theme;
+	OptionEntryMusicVariant menu;
+	OptionEntryMusicVariant town;
+	OptionEntryMusicVariant cathedral;
+	OptionEntryMusicVariant catacombs;
+	OptionEntryMusicVariant caves;
+	OptionEntryMusicVariant hell;
+	OptionEntryMusicVariant nest;
+	OptionEntryMusicVariant crypt;
+};
+
 struct GraphicsOptions : OptionCategoryBase {
 	GraphicsOptions();
 	std::vector<OptionEntryBase *> GetEntries() override;
@@ -547,6 +577,8 @@ struct GraphicsOptions : OptionCategoryBase {
 	OptionEntryInt<int> brightness;
 	/** @brief Zoom on start. */
 	OptionEntryBoolean zoom;
+	/** @brief Preferred view when a new game session starts; F4 remains session-local. */
+	OptionEntryBoolean townViewStartIn3D;
 	/** @brief Request the GPU town backend on the next draw, with CPU fallback. */
 	OptionEntryBoolean townViewGpuRendering;
 	/** @brief Optional smoothing of reconstructed 3D world edges, independent of UI. */
@@ -884,6 +916,7 @@ struct Options {
 	DiabloOptions Diablo;
 	HellfireOptions Hellfire;
 	AudioOptions Audio;
+	MusicOptions Music;
 	GameplayOptions Gameplay;
 	GraphicsOptions Graphics;
 	ControllerOptions Controller;
@@ -903,6 +936,7 @@ struct Options {
 			&StartUp,
 			&Graphics,
 			&Audio,
+			&Music,
 			&Diablo,
 			&Hellfire,
 			&Gameplay,

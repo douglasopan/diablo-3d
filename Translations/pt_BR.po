@@ -12287,3 +12287,139 @@ msgstr "Renderização 3D por GPU"
 #: Source/options.cpp
 msgid "Use GPU acceleration for the 3D town view when available. Changes apply on the next frame; CPU rendering is used if unavailable."
 msgstr "Usa a GPU para renderizar a cidade em 3D quando disponível. A mudança vale no próximo quadro; a renderização pela CPU é usada se a GPU estiver indisponível."
+
+#: Source/options.cpp Source/gamemenu.cpp
+msgid "Soundtrack"
+msgstr "Trilha sonora"
+
+#: Source/options.cpp
+msgid "Soundtrack Mode"
+msgstr "Modo da trilha sonora"
+
+#: Source/options.cpp
+msgid "Choose original or replacement music for the menu and each environment. Missing replacements use the original music."
+msgstr "Escolha músicas originais ou novas para o menu e cada ambiente. Na ausência de uma substituição, toca a original."
+
+#: Source/options.cpp
+msgid "Vanilla plays the original music. Rock uses installed replacements. Custom uses your choices below. Changes apply to the current location immediately."
+msgstr "Vanilla toca as originais. Rock usa as novas músicas instaladas. Personalizado usa suas escolhas abaixo. A mudança no ambiente atual é imediata."
+
+#: Source/options.cpp
+msgid "Original"
+msgstr "Original"
+
+#: Source/options.cpp
+msgid "Vanilla"
+msgstr "Vanilla"
+
+#: Source/options.cpp
+msgid "Rock"
+msgstr "Rock"
+
+#: Source/options.cpp
+msgid "Rock2"
+msgstr "Rock2"
+
+#: Source/options.cpp
+msgid "Custom"
+msgstr "Personalizado"
+
+#: Source/options.cpp
+msgid "Rock (pending)"
+msgstr "Rock (pendente)"
+
+#: Source/options.cpp
+msgid "Rock2 (pending)"
+msgstr "Rock2 (pendente)"
+
+#: Source/options.cpp
+msgid "Main Menu (missing)"
+msgstr "Menu (ausente)"
+
+#: Source/engine/music_catalog.hpp
+msgid "Tristram"
+msgstr "Tristram"
+
+#: Source/engine/music_catalog.hpp
+msgid "Nest (Hellfire)"
+msgstr "Ninho (Hellfire)"
+
+#: Source/engine/music_catalog.hpp
+msgid "Crypt (Hellfire)"
+msgstr "Cripta (Hellfire)"
+
+#: Source/engine/music_catalog.hpp
+msgid "Town and outdoor services. Rock uses the original until a replacement is installed."
+msgstr "Cidade e seus serviços. Rock usa a original até uma nova música ser instalada."
+
+#: Source/engine/music_catalog.hpp
+msgid "Cathedral floors 1-4 and maps using that environment. Rock uses the original until a replacement is installed."
+msgstr "Catedral, andares 1–4 e mapas com esse ambiente. Rock usa a original até uma nova música ser instalada."
+
+#: Source/engine/music_catalog.hpp
+msgid "Catacombs floors 5-8 and maps using that environment. Rock uses the original until a replacement is installed."
+msgstr "Catacumbas, andares 5–8 e mapas com esse ambiente. Rock usa a original até uma nova música ser instalada."
+
+#: Source/engine/music_catalog.hpp
+msgid "Caves floors 9-12 and maps using that environment. Rock uses the original until a replacement is installed."
+msgstr "Cavernas, andares 9–12 e mapas com esse ambiente. Rock usa a original até uma nova música ser instalada."
+
+#: Source/engine/music_catalog.hpp
+msgid "Hell floors 13-16 and maps using that environment. Rock uses the original until a replacement is installed."
+msgstr "Inferno, andares 13–16 e mapas com esse ambiente. Rock usa a original até uma nova música ser instalada."
+
+#: Source/engine/music_catalog.hpp
+msgid "Hellfire Nest floors 17-20. Rock uses the original until a replacement is installed."
+msgstr "Ninho do Hellfire, andares 17–20. Rock usa a original até uma nova música ser instalada."
+
+#: Source/engine/music_catalog.hpp
+msgid "Hellfire Crypt floors 21-24. Rock uses the original until a replacement is installed."
+msgstr "Cripta do Hellfire, andares 21–24. Rock usa a original até uma nova música ser instalada."
+
+#: Source/engine/music_catalog.hpp
+msgid "Main menu, hero selection, settings, credits and support. Rock2 is the latest version; Main Menu is the earlier alternative."
+msgstr "Menu principal, seleção de herói, configurações, créditos e suporte. Rock2 é a versão mais recente; Main Menu é a alternativa anterior."
+
+#: Source/gamemenu.cpp
+msgid "Audio Options"
+msgstr "Opções de áudio"
+
+#: Source/gamemenu.cpp
+msgid "Music by Location"
+msgstr "Músicas por local"
+
+#: Source/gamemenu.cpp
+msgid "More Tracks"
+msgstr "Mais músicas"
+
+#: Source/gamemenu.cpp
+msgid "First Page"
+msgstr "Primeira página"
+
+#: Source/gamemenu.cpp
+msgid "Theme: Vanilla"
+msgstr "Modo: Vanilla"
+
+#: Source/gamemenu.cpp
+msgid "Theme: Rock"
+msgstr "Modo: Rock"
+
+#: Source/gamemenu.cpp
+msgid "Theme: Custom"
+msgstr "Modo: Personalizado"
+
+#: Source/options.cpp
+msgid "Start in 3D"
+msgstr "Iniciar em 3D"
+
+#: Source/options.cpp
+msgid "Start each game in the 3D town view. Applies when starting or loading a game; F4 still switches views during play. Other levels use the original renderer until their 3D version is available."
+msgstr "Inicia cada sessão com a cidade em 3D. Vale ao iniciar ou carregar uma partida pelo menu principal; F4 continua alternando durante o jogo. Outros níveis usam o visual original até sua versão 3D estar disponível."
+
+#: Source/gamemenu.cpp
+msgid "Start in 3D: Off"
+msgstr "Iniciar em 3D: Não"
+
+#: Source/gamemenu.cpp
+msgid "Start in 3D: On"
+msgstr "Iniciar em 3D: Sim"

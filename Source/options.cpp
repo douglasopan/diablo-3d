@@ -370,6 +370,44 @@ void OptionEntryEnumBase::SetActiveListIndex(size_t index)
 	this->NotifyValueChanged();
 }
 
+OptionEntryMusicVariant::OptionEntryMusicVariant(_music_id track)
+    : OptionEntryEnum<MusicVariant>(MusicTrackCatalog[track].key, OptionEntryFlags::None,
+          MusicTrackCatalog[track].name, MusicTrackCatalog[track].description, MusicVariant::Rock,
+          {
+              { MusicVariant::Original, N_("Original") },
+              { MusicVariant::Rock, N_("Rock") },
+          })
+    , track_(track)
+{
+	if (track == TMUSIC_INTRO)
+		AddEntry(static_cast<int>(MusicVariant::Alternative), N_("Main Menu"));
+}
+
+std::string_view OptionEntryMusicVariant::GetListDescription(size_t index) const
+{
+	if (index == 0)
+		return _("Original");
+	if (index == 1) {
+		if (track_ == TMUSIC_INTRO)
+			return HasReplacement(MusicVariant::Rock) ? _("Rock2") : _("Rock2 (pending)");
+		return HasReplacement(MusicVariant::Rock) ? _("Rock") : _("Rock (pending)");
+	}
+	return HasReplacement(MusicVariant::Alternative) ? _("Main Menu") : _("Main Menu (missing)");
+}
+
+std::string_view OptionEntryMusicVariant::GetValueDescription() const
+{
+	return GetListDescription(GetActiveListIndex());
+}
+
+bool OptionEntryMusicVariant::HasReplacement(MusicVariant variant) const
+{
+	const MusicTrackDefinition &definition = MusicTrackCatalog[track_];
+	const char *path = variant == MusicVariant::Rock ? definition.rockPath
+	    : variant == MusicVariant::Alternative ? definition.alternativePath : "";
+	return path[0] != '\0' && FindAsset(path).ok();
+}
+
 void OptionEntryIntBase::LoadFromIni(std::string_view category)
 {
 	value = ini->getInt(category, key, defaultValue);
@@ -543,6 +581,57 @@ std::vector<OptionEntryBase *> AudioOptions::GetEntries()
 #endif
 	};
 	// clang-format on
+}
+
+MusicOptions::MusicOptions()
+    : OptionCategoryBase("Music", N_("Soundtrack"), N_("Choose original or replacement music for the menu and each environment. Missing replacements use the original music."))
+    , theme("Theme", OptionEntryFlags::None, N_("Soundtrack Mode"), N_("Vanilla plays the original music. Rock uses installed replacements. Custom uses your choices below. Changes apply to the current location immediately."), MusicTheme::Rock,
+          {
+              { MusicTheme::Vanilla, N_("Vanilla") },
+              { MusicTheme::Rock, N_("Rock") },
+              { MusicTheme::Custom, N_("Custom") },
+          })
+    , menu(TMUSIC_INTRO)
+    , town(TMUSIC_TOWN)
+    , cathedral(TMUSIC_CATHEDRAL)
+    , catacombs(TMUSIC_CATACOMBS)
+    , caves(TMUSIC_CAVES)
+    , hell(TMUSIC_HELL)
+    , nest(TMUSIC_NEST)
+    , crypt(TMUSIC_CRYPT)
+{
+}
+
+std::vector<OptionEntryBase *> MusicOptions::GetEntries()
+{
+	return { &theme, &menu, &town, &cathedral, &catacombs, &caves, &hell, &nest, &crypt };
+}
+
+OptionEntryMusicVariant &MusicOptions::ForTrack(_music_id track)
+{
+	switch (track) {
+	case TMUSIC_TOWN:
+		return town;
+	case TMUSIC_CATHEDRAL:
+		return cathedral;
+	case TMUSIC_CATACOMBS:
+		return catacombs;
+	case TMUSIC_CAVES:
+		return caves;
+	case TMUSIC_HELL:
+		return hell;
+	case TMUSIC_NEST:
+		return nest;
+	case TMUSIC_CRYPT:
+		return crypt;
+	default:
+		return menu;
+	}
+}
+
+const OptionEntryMusicVariant &MusicOptions::ForTrack(_music_id track) const
+{
+	return const_cast<MusicOptions *>(this)->ForTrack(track);
 }
 
 OptionEntryResolution::OptionEntryResolution()
@@ -795,6 +884,7 @@ GraphicsOptions::GraphicsOptions()
           })
     , brightness("Brightness Correction", OptionEntryFlags::Invisible, "Brightness Correction", "Brightness correction level.", 0)
     , zoom("Zoom", OptionEntryFlags::None, N_("Zoom"), N_("Zoom on when enabled."), false)
+    , townViewStartIn3D("Start in 3D", OptionEntryFlags::None, N_("Start in 3D"), N_("Start each game in the 3D town view. Applies when starting or loading a game; F4 still switches views during play. Other levels use the original renderer until their 3D version is available."), true)
     , townViewGpuRendering("3D GPU Rendering", OptionEntryFlags::None, N_("3D GPU Rendering"), N_("Use GPU acceleration for the 3D town view when available. Changes apply on the next frame; CPU rendering is used if unavailable."), false)
     , townViewAntialiasing("3D Edge Smoothing", OptionEntryFlags::None, N_("3D Edge Smoothing"), N_("Smooth edges in the 3D town view without resizing the interface. Requires more processing power."), false)
     , perPixelLighting("Per-pixel Lighting", OptionEntryFlags::None, N_("Per-pixel Lighting"), N_("Subtile lighting for smoother light gradients."), DEFAULT_PER_PIXEL_LIGHTING)
@@ -827,6 +917,7 @@ std::vector<OptionEntryBase *> GraphicsOptions::GetEntries()
 		&frameRateControl,
 		&brightness,
 		&zoom,
+		&townViewStartIn3D,
 		&townViewGpuRendering,
 		&townViewAntialiasing,
 		&showFPS,

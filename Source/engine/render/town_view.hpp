@@ -13,8 +13,10 @@ namespace devilution {
 struct Surface;
 struct TownVolumeMesh;
 
-/** Experimental rotatable view of the live Tristram map. Native isometric pose by default. */
+/** Rotatable view of the live Tristram map. */
 bool IsTownViewActive();
+/** Apply the saved startup preference once per new/loaded game session. */
+void InitializeTownViewForGame();
 /** Exact original framing: native drawing and selection remain authoritative. */
 bool IsTownViewNativePose();
 void ToggleTownView();
