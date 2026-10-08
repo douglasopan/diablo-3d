@@ -71,7 +71,7 @@ O diagnóstico CPU com o pacote selecionado percorreu **34 quadros**: 14 tiveram
 
 Os testes exercitaram movimento nas oito orientações, combinações de WASD e setas, comandos e cadência nativos, colisão, suspensão e retomada, descarte de deltas e cliques ordenados após girar a câmera. O estado do gerador de números aleatórios foi preservado.
 
-O diagnóstico produtivo usa o handler real do jogo e comandos nativos, mas substitui os serviços de foco e captura do sistema e roda com janela oculta, GPU desligada e perfil temporário. **Isso não comprova o comportamento do mouse físico, Alt+Tab ou uma janela real.** As regressões de HUD e configurações também não são uma aprovação visual do retículo. As 946 verificações do HUD **não resolvem o novo defeito relatado nas páginas Gameplay 1/2**, que segue em sua frente própria. Não houve execução GPU ou novo benchmark de FPS nesta rodada.
+O diagnóstico produtivo usa o handler real do jogo e comandos nativos, mas substitui os serviços de foco e captura do sistema e roda com janela oculta, GPU desligada e perfil temporário. **Isso não comprova o comportamento do mouse físico, Alt+Tab ou uma janela real.** As regressões de HUD e configurações também não são uma aprovação visual do retículo. As 946 verificações do HUD desta rodada de câmera **não cobriam o defeito das páginas Gameplay 1/2**. Uma entrega separada instalou posteriormente a [correção técnica do HUD](/devlog/hud-paginas-jogabilidade/); a confirmação na partida habitual pelo usuário continua pendente. Não houve execução GPU ou novo benchmark de FPS nesta rodada.
 
 ## Instalação e próxima avaliação
 

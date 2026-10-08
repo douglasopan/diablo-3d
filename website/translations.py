@@ -7,6 +7,15 @@ audit. URLs, filenames, commits and evidence hashes are language independent.
 from __future__ import annotations
 
 TRANSLATIONS: dict[str, str] = {
+    'Jogabilidade sem encobrir o HUD': 'Gameplay settings clear of the HUD',
+    'A paginação das configurações agora respeita os globos e botões do HUD. A correção técnica já está instalada; a confirmação na partida habitual continua com o autor.': 'Settings pagination now respects the HUD globes and buttons. The technical fix is installed; confirmation in the usual play session remains with the author.',
+    'Mouse, WASD e roda': 'Mouse, WASD and the wheel',
+    'Configurações e HUD no mesmo espaço': 'Settings and HUD sharing the screen',
+    'As páginas de Jogabilidade usam o espaço acima dos globos e botões visíveis do HUD. Desenho e paginação compartilham esse limite; a página longa deixa de invadir a interface inferior e de impedir a apresentação da arte HD.': 'Gameplay pages use the space above the visible HUD globes and buttons. Drawing and pagination share this boundary; the long page no longer overlaps the lower interface or prevents the HD artwork from appearing.',
+    'A correção preserva arte, áreas de clique e ações existentes. A comparação nativa CPU com SDL software passou; confirmação na partida habitual, combinações adicionais de painéis e revisão artística continuam pendentes. Esta entrega não acrescenta um benchmark de FPS.': 'The fix preserves existing artwork, click areas and actions. The native CPU comparison with software SDL passed; confirmation in the usual play session, additional panel combinations and artistic review remain pending. This delivery adds no FPS benchmark.',
+    'Conhecer a correção do HUD': 'Read about the HUD fix',
+    'A entrega técnica mais recente é a': 'The latest technical delivery is the',
+    'correção das páginas de Jogabilidade sobre o HUD': 'fix for Gameplay pages overlapping the HUD',
     'Primeira pessoa: mouse, WASD e roda': 'First person: mouse, WASD and the wheel',
     'WASD e setas movem em relação à câmera; a roda faz a transição entre terceira e primeira pessoa. A colisão visual limita a câmera contra a arquitetura, com revisão interativa ainda pendente.': 'WASD and arrow keys move relative to the camera; the wheel transitions between third and first person. Camera collision limits the view against architecture, with interactive review still pending.',
     'Correção do zoom na GPU': 'GPU zoom fix',

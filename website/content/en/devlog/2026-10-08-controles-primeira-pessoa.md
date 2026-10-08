@@ -71,7 +71,7 @@ The CPU diagnostic using the selected package covered **34 frames**: architectur
 
 The tests exercised movement at all eight orientations, WASD and arrow-key combinations, native commands and movement cadence, collision, suspension and resumption, discarded deltas and ordered clicks after turning the camera. The random-number generator's state was preserved.
 
-The production diagnostic uses the game's real handler and native commands, but substitutes the system's focus and capture services and runs with a hidden window, the GPU disabled and a temporary profile. **This does not establish how a physical mouse, Alt+Tab or a real window will behave.** The HUD and settings regressions also do not constitute visual approval of the crosshair. The 946 HUD checks **do not resolve the newly reported defect on Gameplay pages 1/2**, which remains with its own workstream. This round included no GPU run or new FPS benchmark.
+The production diagnostic uses the game's real handler and native commands, but substitutes the system's focus and capture services and runs with a hidden window, the GPU disabled and a temporary profile. **This does not establish how a physical mouse, Alt+Tab or a real window will behave.** The HUD and settings regressions also do not constitute visual approval of the crosshair. The 946 HUD checks in this camera update **did not cover the Gameplay pages 1/2 defect**. A separate update subsequently installed the [technical HUD fix](/devlog/hud-paginas-jogabilidade/); confirmation during the user's usual play session remains pending. This round included no GPU run or new FPS benchmark.
 
 ## Installation and the next review
 
