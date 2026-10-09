@@ -47,6 +47,7 @@
 #include "engine/render/cathedral/cathedral_live.hpp"
 #include "engine/render/cathedral/cathedral_native_palette.hpp"
 #include "engine/render/cathedral/cathedral_native_coverage.hpp"
+#include "engine/render/cathedral_fallback_diagnostic.hpp"
 #include "engine/render/dun_render.hpp"
 #include "engine/render/scrollrt.h"
 #include "engine/render/town_ground_shadow.hpp"
@@ -373,6 +374,125 @@ std::map<CathedralNativeTextureKey, CathedralNativeTextureEntry> CathedralNative
 TownViewCathedralNativeTextureState CathedralNativeTextureState;
 const std::byte *CathedralNativeTextureResource = nullptr;
 uint_fast8_t CathedralNativeTextureMicroLen = 0;
+TownViewCathedralFallbackDiagnostic CathedralFallbackDiagnostic;
+TownViewCathedralFallbackDiagnostic CathedralFallbackLastLogged;
+CathedralFallbackStage CathedralDiagnosticStage = CathedralFallbackStage::None;
+CathedralFallbackStage CathedralDiagnosticGpuRefusalStage = CathedralFallbackStage::None;
+cathedral::NativeTextureBinding CathedralDiagnosticMaterialBinding;
+bool CathedralDiagnosticMaterialBindingValid = false;
+bool CathedralPreparationRefused = false, CathedralDiagnosticGpuAttempted = false;
+bool CathedralDiagnosticForceGeometry = false, CathedralDiagnosticHasLogKey = false;
+bool CathedralDiagnosticHasLogAttempt = false;
+uint32_t CathedralDiagnosticLastLogAttempt = 0;
+
+bool SameCathedralDiagnosticTransition(const TownViewCathedralFallbackDiagnostic &a,
+    const TownViewCathedralFallbackDiagnostic &b) noexcept
+{
+	// Moving focus/counters are evidence, not a new refusal or recovery.
+	return a.reason == b.reason && a.stage == b.stage && a.level == b.level
+	    && a.enabled == b.enabled && a.nativeFallback == b.nativeFallback
+	    && a.levelType == b.levelType && a.setLevel == b.setLevel && a.setLevelId == b.setLevelId
+	    && a.liveEpoch == b.liveEpoch && a.frameFallbackFlags == b.frameFallbackFlags
+	    && a.seedValid == b.seedValid && a.seed == b.seed
+	    && a.materialBindingValid == b.materialBindingValid && a.materialKind == b.materialKind
+	    && a.materialAxis == b.materialAxis && a.materialPiece == b.materialPiece
+	    && a.materialColumn == b.materialColumn && a.materialNativeSlot == b.materialNativeSlot
+	    && a.requestedGpu == b.requestedGpu && a.forceGeometry == b.forceGeometry
+	    && a.gpuFailureKind == b.gpuFailureKind && a.recoveryFailureKind == b.recoveryFailureKind
+	    && a.gpuFailureText == b.gpuFailureText;
+}
+
+void RecordCathedralDiagnostic(CathedralFallbackReason reason, CathedralFallbackStage stage,
+    bool nativeFallback, bool requestedGpu) noexcept
+{
+	TownViewCathedralFallbackDiagnostic next;
+	next.reason = reason; next.stage = stage; next.nativeFallback = nativeFallback && Enabled;
+	next.enabled = Enabled; next.eligible = cathedral::LiveLevelEligible(); next.playerPresent = MyPlayer != nullptr;
+	next.requestedGpu = requestedGpu; next.usedGpu = RendererState.usedGpu;
+	next.gpuAttempted = CathedralDiagnosticGpuAttempted; next.forceGeometry = CathedralDiagnosticForceGeometry;
+	next.level = currlevel; next.levelType = static_cast<int>(leveltype);
+	next.setLevel = setlevel; next.setLevelId = static_cast<int>(setlvlnum);
+	const int levelIndex = static_cast<int>(currlevel);
+	if (levelIndex >= 0 && levelIndex < NUMLEVELS) { next.seed = DungeonSeeds[levelIndex]; next.seedValid = true; }
+	if (MyPlayer != nullptr) { next.focusX = MyPlayer->position.tile.x; next.focusZ = MyPlayer->position.tile.y; }
+	next.tick = static_cast<uint32_t>(SDL_GetTicks()); next.liveEpoch = cathedral::LiveEpoch(); next.frameGeometryRevision = CathedralFrame.geometryRevision;
+	next.frameReady = CathedralFrameReady; next.frameRequiresFallback = CathedralFrame.requiresNativeFallback;
+	next.frameFallbackFlags = CathedralFrame.fallbackReasons; next.frameEpoch = CathedralFrame.gameRevision;
+	next.regionX = CathedralFrame.regionX; next.regionZ = CathedralFrame.regionZ;
+	next.regions = CathedralFrame.regions; next.frameTriangles = CathedralFrame.triangles.size();
+	next.nativeSpecialOverlays = CathedralFrame.nativeSpecialOverlays.size();
+	next.materialBindingValid = stage == CathedralFallbackStage::NativeMaterials && CathedralDiagnosticMaterialBindingValid;
+	if (next.materialBindingValid) {
+		const auto &binding = CathedralDiagnosticMaterialBinding;
+		next.materialKind = static_cast<int>(binding.kind); next.materialAxis = static_cast<int>(binding.axis);
+		next.materialPiece = binding.piece; next.materialColumn = binding.column; next.materialNativeSlot = binding.nativeSlot;
+		next.materialX = binding.x; next.materialZ = binding.z;
+	} else {
+		CathedralDiagnosticMaterialBindingValid = false;
+	}
+	next.pickingValid = PickingValid;
+	next.hostEpoch = CathedralNativeTextureState.epoch; next.hostEntries = CathedralNativeTextureCache.size();
+	next.hostBytes = CathedralNativeTextureState.bytes; next.hostEntryLimit = CathedralNativeTextureMaxEntries;
+	next.hostByteLimit = CathedralNativeTextureMaxBytes; next.hostDecodes = CathedralNativeTextureState.decodes;
+	next.hostHits = CathedralNativeTextureState.hits; next.hostMisses = CathedralNativeTextureState.misses;
+	const auto &gpu = GetTownGpuStatus(); // Borrow strings; never copy them during recovery.
+	next.gpuAvailable = gpu.available; next.gpuFrameSucceeded = gpu.frameSucceeded;
+	next.gpuFailureKind = static_cast<int>(gpu.failureKind); next.recoveryFailureKind = static_cast<int>(GpuRecovery.failureKind());
+	const size_t failureLength = std::min(gpu.failure.size(), next.gpuFailureText.size() - 1);
+	if (failureLength != 0) std::memcpy(next.gpuFailureText.data(), gpu.failure.data(), failureLength);
+	next.gpuFailureTextTruncated = gpu.failure.size() > failureLength;
+	next.gpuTextures = gpu.cachedTextures; next.gpuTextureBytes = gpu.cachedTextureBytes;
+	next.gpuTriangles = gpu.submittedTriangles; next.gpuDrawCalls = gpu.drawCalls;
+	next.gpuOverlayTriangles = gpu.paletteBlendTriangles; next.gpuOverlayCopyBytes = gpu.paletteBlendCopyBytes;
+	next.observations = CathedralFallbackDiagnostic.observations + 1;
+	next.transitions = CathedralFallbackDiagnostic.transitions;
+	next.logLines = CathedralFallbackDiagnostic.logLines; next.logFailures = CathedralFallbackDiagnostic.logFailures;
+	if (SameCathedralDiagnosticTransition(next, CathedralFallbackDiagnostic)) {
+		next.firstFocusX = CathedralFallbackDiagnostic.firstFocusX; next.firstFocusZ = CathedralFallbackDiagnostic.firstFocusZ;
+		next.firstTick = CathedralFallbackDiagnostic.firstTick;
+	} else {
+		++next.transitions; next.firstFocusX = next.focusX; next.firstFocusZ = next.focusZ; next.firstTick = next.tick;
+	}
+	CathedralFallbackDiagnostic = next; // Fixed-size POD; no allocation, text or exception formatting.
+}
+
+void TryLogCathedralDiagnostic() noexcept
+{
+	const auto &d = CathedralFallbackDiagnostic;
+	if (d.reason == CathedralFallbackReason::None) return;
+	if (!d.enabled || d.reason == CathedralFallbackReason::RenderDisabled || d.reason == CathedralFallbackReason::NativePoseReference
+	    || d.reason == CathedralFallbackReason::ContextIneligible
+	    || (d.reason == CathedralFallbackReason::Published3D && (!CathedralDiagnosticHasLogKey || !CathedralFallbackLastLogged.nativeFallback))) {
+		// Intentional native rendering is not a defect. Only actual publication
+		// (never successful preparation) can acknowledge GPU/draw recovery.
+		CathedralFallbackLastLogged = d; CathedralDiagnosticHasLogKey = true;
+		return;
+	}
+	if (CathedralDiagnosticHasLogKey && SameCathedralDiagnosticTransition(d, CathedralFallbackLastLogged)) return;
+	// At most one formatting attempt per second, even if logging itself fails.
+	// A changed classification remains pending; first focus survives moving tiles.
+	if (CathedralDiagnosticHasLogAttempt && d.tick - CathedralDiagnosticLastLogAttempt < 1000) return;
+	CathedralDiagnosticLastLogAttempt = d.tick; CathedralDiagnosticHasLogAttempt = true;
+#if defined(__cpp_exceptions) || defined(_CPPUNWIND)
+	try {
+		Log("Cathedral pilot diagnostic: reason={}, stage={}, native={}, tick={}, firstTick={}, level={}/{}, set={}/{}, seed={}/{}, firstFocus=({},{}), focus=({},{}), epoch={}, frameEpoch={}, ready={}, flags={}, region=({},{})/{}, frameTriangles={}, special={}, material={}/{}/{}/{}/{}/{}@({},{}), host={}/{} entries {}/{}B, hostEpoch={}, GPUrequested={}, attempted={}, used={}, backendKind={}, recoveryKind={}, textures={}, textureBytes={}, triangles={}, draws={}, overlays={}, copy={}B, backendText={}, textTruncated={}",
+			CathedralFallbackReasonName(d.reason), CathedralFallbackStageName(d.stage), d.nativeFallback, d.tick, d.firstTick,
+			d.level, d.levelType, d.setLevel, d.setLevelId, d.seedValid, d.seed, d.firstFocusX, d.firstFocusZ, d.focusX, d.focusZ,
+			d.liveEpoch, d.frameEpoch, d.frameReady, d.frameFallbackFlags, d.regionX, d.regionZ, d.regions, d.frameTriangles, d.nativeSpecialOverlays,
+			d.materialBindingValid, d.materialKind, d.materialPiece, d.materialAxis, d.materialColumn, d.materialNativeSlot, d.materialX, d.materialZ,
+			d.hostEntries, d.hostEntryLimit, d.hostBytes, d.hostByteLimit,
+			d.hostEpoch, d.requestedGpu, d.gpuAttempted, d.usedGpu, d.gpuFailureKind, d.recoveryFailureKind,
+			d.gpuTextures, d.gpuTextureBytes, d.gpuTriangles, d.gpuDrawCalls, d.gpuOverlayTriangles, d.gpuOverlayCopyBytes,
+			d.gpuFailureText.data(), d.gpuFailureTextTruncated);
+		++CathedralFallbackDiagnostic.logLines;
+		CathedralFallbackLastLogged = CathedralFallbackDiagnostic; CathedralDiagnosticHasLogKey = true;
+	} catch (...) {
+		// Logging may allocate; its failure must never obscure or change fallback.
+		++CathedralFallbackDiagnostic.logFailures;
+	}
+#endif
+}
+
 std::unordered_map<uint16_t, Texture> SceneGroundCache;
 std::unordered_map<size_t, NativeSceneArt> SceneArtworkCache;
 struct SceneDetailMaterial {
@@ -2676,6 +2796,9 @@ void PrepareCathedralNativeTextures(const cathedral::PilotFrame &frame)
 	for (const auto &surface : frame.triangles) {
 		const auto &binding = surface.nativeTexture;
 		if (binding.kind == cathedral::NativeTextureKind::Technical) continue;
+		// POD identity is captured before signature validation, decode or budget.
+		CathedralDiagnosticMaterialBinding = binding;
+		CathedralDiagnosticMaterialBindingValid = true;
 		const auto key = NativeTextureKey(binding);
 		if (!selected.insert(key).second) continue;
 		const auto found = CathedralNativeTextureCache.find(key);
@@ -2689,14 +2812,19 @@ void PrepareCathedralNativeTextures(const cathedral::PilotFrame &frame)
 		const size_t oldBytes = found == CathedralNativeTextureCache.end() ? 0
 		    : found->second.texture.pixels.size() + found->second.texture.opacity.size();
 		if ((found == CathedralNativeTextureCache.end() && CathedralNativeTextureCache.size() >= CathedralNativeTextureMaxEntries)
-		    || bytes > CathedralNativeTextureMaxBytes - (CathedralNativeTextureState.bytes - oldBytes))
+		    || bytes > CathedralNativeTextureMaxBytes - (CathedralNativeTextureState.bytes - oldBytes)) {
+			RecordCathedralDiagnostic(CathedralFallbackReason::NativeMaterialBudgetRefused,
+				CathedralFallbackStage::NativeMaterials, true, *GetOptions().Graphics.townViewGpuRendering);
+			CathedralPreparationRefused = true;
 			throw std::length_error("Cathedral native material host-cache budget exceeded");
+		}
 		if (found == CathedralNativeTextureCache.end()) CathedralNativeTextureCache.emplace(key, std::move(entry));
 		else found->second = std::move(entry);
 		CathedralNativeTextureState.bytes = CathedralNativeTextureState.bytes - oldBytes + bytes;
 		++CathedralNativeTextureState.decodes;
 	}
 	CathedralNativeTextureState.entries = CathedralNativeTextureCache.size();
+	CathedralDiagnosticMaterialBindingValid = false;
 	CathedralNativeTextureState.floorMaterials = CathedralNativeTextureState.masonryMaterials = CathedralNativeTextureState.doorMaterials = 0;
 	CathedralNativeTextureState.donorMaterials = 0;
 	for (const auto &[key, entry] : CathedralNativeTextureCache) {
@@ -3426,11 +3554,20 @@ bool IsTownViewActive()
 
 void PrepareTownViewLiveFrame()
 {
+	CathedralDiagnosticStage = CathedralFallbackStage::Context;
+	CathedralPreparationRefused = CathedralDiagnosticGpuAttempted = CathedralDiagnosticForceGeometry = false;
+	CathedralDiagnosticMaterialBindingValid = false;
 	if (!cathedral::LiveLevelEligible() || MyPlayer == nullptr) {
+		if (leveltype == DTYPE_CATHEDRAL || CathedralFrameReady) {
+			RecordCathedralDiagnostic(MyPlayer == nullptr ? CathedralFallbackReason::PlayerUnavailable : CathedralFallbackReason::ContextIneligible,
+				CathedralDiagnosticStage, Enabled, *GetOptions().Graphics.townViewGpuRendering);
+			CathedralPreparationRefused = true;
+		}
 		if (CathedralFrameReady && leveltype != DTYPE_TOWN)
 			InvalidateTownViewFrameForNativeFallback();
 		CathedralFrameReady = false;
 		CathedralFrame = {};
+		if (CathedralPreparationRefused) TryLogCathedralDiagnostic();
 		return;
 	}
 	PickingValid = false;
@@ -3440,12 +3577,16 @@ void PrepareTownViewLiveFrame()
 	CathedralAllocationState.gpuSubmittedBeforeFailure = 0;
 	CathedralAllocationState.gpuDrawCallsBeforeFailure = 0;
 	CathedralAllocationState.cpuRasterizedBeforeFailure = 0;
+	const bool diagnosticRequestedGpu = *GetOptions().Graphics.townViewGpuRendering;
 	try {
 		const Point focus = MyPlayer->position.tile;
+		CathedralDiagnosticStage = CathedralFallbackStage::RefreshLiveFrame;
 		if (cathedral::RefreshLiveFrame(focus.x, focus.y)) {
+			CathedralDiagnosticStage = CathedralFallbackStage::LiveBindings;
 			const auto *snapshot = cathedral::LiveSnapshot();
 			const auto *scene = cathedral::LiveScene();
 			if (snapshot != nullptr && scene != nullptr) {
+				CathedralDiagnosticStage = CathedralFallbackStage::BuildPilotFrame;
 				CathedralFrame = cathedral::BuildPilotFrame(*snapshot, *scene, focus.x, focus.y);
 				CathedralFrameReady = true;
 				for (const auto &special : CathedralFrame.nativeSpecialOverlays) {
@@ -3454,15 +3595,45 @@ void PrepareTownViewLiveFrame()
 						CathedralFrame.fallbackReasons |= static_cast<uint32_t>(cathedral::FrameFallbackReason::UnsupportedNativeSpecial);
 					}
 				}
-				if (!CathedralFrame.requiresNativeFallback)
+				if (!CathedralFrame.requiresNativeFallback) {
+					CathedralDiagnosticStage = CathedralFallbackStage::NativeMaterials;
 					PrepareCathedralNativeTextures(CathedralFrame);
+				} else {
+					RecordCathedralDiagnostic(CathedralFallbackReason::PilotFrameFallback, CathedralDiagnosticStage, true, diagnosticRequestedGpu);
+					CathedralPreparationRefused = true;
+				}
+			} else {
+				RecordCathedralDiagnostic(CathedralFallbackReason::LiveBindingsUnavailable, CathedralDiagnosticStage, true, diagnosticRequestedGpu);
+				CathedralPreparationRefused = true;
 			}
+		} else {
+			// Refresh clears its internals on refusal. Do not invent an origin.
+			RecordCathedralDiagnostic(CathedralFallbackReason::RefreshLiveFrameRefused, CathedralDiagnosticStage, true, diagnosticRequestedGpu);
+			CathedralPreparationRefused = true;
 		}
 	} catch (const std::bad_alloc &) {
 		CathedralAllocationState.failed = true;
+		RecordCathedralDiagnostic(CathedralFallbackReason::PreparationAllocationFailure, CathedralDiagnosticStage, true, diagnosticRequestedGpu);
+		CathedralPreparationRefused = true;
+		CathedralFrameReady = false;
+		CathedralFrame = {};
+	} catch (const std::length_error &) {
+		// Only the explicit cache guard above identifies a budget refusal.
+		if (!CathedralPreparationRefused)
+			RecordCathedralDiagnostic(CathedralFallbackReason::PreparationLengthError, CathedralDiagnosticStage, true, diagnosticRequestedGpu);
+		CathedralPreparationRefused = true;
+		CathedralFrameReady = false;
+		CathedralFrame = {};
+	} catch (const std::invalid_argument &) {
+		RecordCathedralDiagnostic(CathedralDiagnosticStage == CathedralFallbackStage::NativeMaterials
+			? CathedralFallbackReason::NativeMaterialValidationRefused : CathedralFallbackReason::PreparationException,
+			CathedralDiagnosticStage, true, diagnosticRequestedGpu);
+		CathedralPreparationRefused = true;
 		CathedralFrameReady = false;
 		CathedralFrame = {};
 	} catch (...) {
+		RecordCathedralDiagnostic(CathedralFallbackReason::PreparationException, CathedralDiagnosticStage, true, diagnosticRequestedGpu);
+		CathedralPreparationRefused = true;
 		CathedralFrameReady = false;
 		CathedralFrame = {};
 	}
@@ -3481,9 +3652,16 @@ void PrepareTownViewLiveFrame()
 			CathedralAllocationState.failed = true;
 			RendererState.failure.clear();
 		}
+		TryLogCathedralDiagnostic();
 	} else {
+		// A prepared frame is not proof that the draw/backend recovered.
 		CameraRig.Suspend(!Enabled);
 	}
+}
+
+TownViewCathedralFallbackDiagnostic GetTownViewCathedralFallbackDiagnostic() noexcept
+{
+	return CathedralFallbackDiagnostic;
 }
 
 void InvalidateTownViewFrameForNativeFallback()
@@ -3832,6 +4010,11 @@ void ResetTownViewResources()
 
 static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 {
+	CathedralDiagnosticStage = CathedralFallbackStage::Preflight;
+	CathedralDiagnosticGpuRefusalStage = CathedralFallbackStage::None;
+	CathedralDiagnosticGpuAttempted = false;
+	CathedralDiagnosticForceGeometry = forceGeometry;
+	CathedralDiagnosticMaterialBindingValid = false;
 	const bool cathedralWorld = cathedral::LiveLevelEligible() && CathedralFrameReady;
 	const bool forcedCathedralGeometry = forceGeometry && Enabled && cathedralWorld && !CathedralFrame.requiresNativeFallback;
 	const auto worldStart = std::chrono::steady_clock::now();
@@ -3852,10 +4035,23 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 	}
 	if ((!IsTownViewActive() && !forcedCathedralGeometry) || !pDungeonCels || MicroTileLen == 0 || MyPlayer == nullptr) {
 		PickingValid = false;
+		if (leveltype == DTYPE_CATHEDRAL) {
+			if (!Enabled) {
+				RecordCathedralDiagnostic(CathedralFallbackReason::RenderDisabled, CathedralDiagnosticStage, false, RendererState.requestedGpu);
+			} else if (!CathedralPreparationRefused) {
+				const auto reason = MyPlayer == nullptr ? CathedralFallbackReason::PlayerUnavailable
+				    : (!pDungeonCels || MicroTileLen == 0) ? CathedralFallbackReason::NativeResourcesUnavailable
+				    : cathedral::LiveLevelEligible() ? CathedralFallbackReason::PilotNotReady : CathedralFallbackReason::ContextIneligible;
+				RecordCathedralDiagnostic(reason, CathedralDiagnosticStage, true, RendererState.requestedGpu);
+			}
+			TryLogCathedralDiagnostic(); // Preserve the prior preparation refusal.
+		}
 		return false;
 	}
 	if (cathedralWorld && !CathedralNativeTexturesCurrent(CathedralFrame)) {
+		RecordCathedralDiagnostic(CathedralFallbackReason::MaterialBindingsStale, CathedralDiagnosticStage, true, RendererState.requestedGpu);
 		InvalidateTownViewFrameForNativeFallback();
+		TryLogCathedralDiagnostic();
 		return false; // Never publish a frame with missing/stale material bindings.
 	}
 	if (CachedDungeonData != pDungeonCels.get()) {
@@ -3890,9 +4086,15 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 		CachedDungeonData = pDungeonCels.get();
 	}
 	const int height = std::min<int>(gnViewportHeight, fullOut.h());
-	if (fullOut.w() <= 0 || height <= 0)
+	if (fullOut.w() <= 0 || height <= 0) {
+		if (cathedralWorld) {
+			RecordCathedralDiagnostic(CathedralFallbackReason::ViewportUnavailable, CathedralDiagnosticStage, true, RendererState.requestedGpu);
+			TryLogCathedralDiagnostic();
+		}
 		return false;
+	}
 	const Surface logical = fullOut.subregionY(0, height);
+	CathedralDiagnosticStage = CathedralFallbackStage::Camera;
 	ConfigureCamera(logical.w(), logical.h(), forcedCathedralGeometry);
 	ViewCamera.centerX += RasterJitterForDiagnostics[0];
 	ViewCamera.centerY += RasterJitterForDiagnostics[1];
@@ -3903,14 +4105,21 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 		// order, trees, actors and zoom. Rotation exposes the reconstructed volumes.
 		// Cursor selection follows the same native path at this exact pose.
 		PickingValid = false;
+		if (cathedralWorld) {
+			RecordCathedralDiagnostic(CathedralFallbackReason::NativePoseReference, CathedralDiagnosticStage, false, RendererState.requestedGpu);
+			TryLogCathedralDiagnostic(); // Home is an intentional reference, not a failure.
+		}
 		SamplingState = { *GetOptions().Graphics.townViewAntialiasing, 1, logical.w(), logical.h(), false };
 		ClearSurface(logical);
 		return DrawNativeTownViewReference(fullOut, ViewPosition);
 	}
 	if (!ViewCamera.projection.valid) {
 		RendererState.failure = "Invalid town camera frame";
-		if (cathedralWorld)
+		if (cathedralWorld) {
+			RecordCathedralDiagnostic(CathedralFallbackReason::CameraProjectionInvalid, CathedralDiagnosticStage, true, RendererState.requestedGpu);
+			TryLogCathedralDiagnostic();
 			return false;
+		}
 		if (FollowCameraState.active) {
 			// No safe near-plane sphere: fail closed instead of presenting the
 			// native 2D world with first-person input. Picking remains invalid.
@@ -3920,6 +4129,7 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 		}
 		return false;
 	}
+	CathedralDiagnosticStage = CathedralFallbackStage::SamplingBuffers;
 	const Surface out = PrepareSamplingBuffers(logical);
 	ClearSurface(out);
 	if (!cathedralWorld)
@@ -3953,6 +4163,8 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 	if (GpuRecovery.ShouldAttempt(RendererState.requestedGpu, recoveryKey, SDL_GetTicks())) {
 		if (!cathedralWorld)
 			PrepareFrameImportedAlbedo();
+		CathedralDiagnosticStage = CathedralFallbackStage::GpuBegin;
+		CathedralDiagnosticGpuAttempted = true;
 		CaptureGpu = TownGpuBeginFrame(out.w(), out.h(), false,
 		    { ViewCamera.projection.perspective, ViewCamera.projection.nearClip, ViewCamera.projection.farClip });
 		if (CaptureGpu) {
@@ -3974,9 +4186,15 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 				shadow.texelV = view.texelV;
 				shadow.pcfRadius = view.config.pcfRadius;
 			}
+			CathedralDiagnosticStage = CathedralFallbackStage::GpuShadow;
 			CaptureGpuFailed = !TownGpuSetShadow(shadow);
-			if (!CaptureGpuFailed && cathedralWorld)
+			if (cathedralWorld && CaptureGpuFailed)
+				CathedralDiagnosticGpuRefusalStage = CathedralDiagnosticStage;
+			if (!CaptureGpuFailed && cathedralWorld) {
+				CathedralDiagnosticStage = CathedralFallbackStage::GpuPaletteBlend;
 				CaptureGpuFailed = !PrepareCathedralGpuBlend();
+				if (CaptureGpuFailed) CathedralDiagnosticGpuRefusalStage = CathedralDiagnosticStage;
+			}
 			if (!CaptureGpuFailed && !cathedralWorld && ResidentMeshesEnabledForDiagnostics)
 				ConfigureResidentMeshCamera();
 		} else {
@@ -3985,8 +4203,11 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 		}
 	}
 	if (cathedralWorld && RendererState.requestedGpu && !CaptureGpu) {
+		RecordCathedralDiagnostic(CathedralDiagnosticGpuAttempted ? CathedralFallbackReason::GpuBeginRefused : CathedralFallbackReason::GpuRequestDeferred,
+			CathedralFallbackStage::GpuBegin, true, RendererState.requestedGpu);
 		RendererState.failure = GpuFailure.empty() ? "Cathedral hardware GPU request deferred; complete native fallback" : GpuFailure;
 		InvalidateTownViewFrameForNativeFallback();
+		TryLogCathedralDiagnostic();
 		return false;
 	}
 	const auto drawWorld = [&]() {
@@ -4090,11 +4311,15 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 		}
 		RendererState.sceneRecordMilliseconds += std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - recordStart).count();
 	};
+	CathedralDiagnosticStage = CathedralFallbackStage::Submission;
 	drawWorld();
 	if (CaptureGpu) {
 		if (cathedralWorld && CathedralAllocationState.armed == TownViewCathedralAllocationFailurePoint::BeforeReadback)
 			SetTownGpuBeforeReadbackForDiagnostics(InjectCathedralReadbackAllocationFailure);
-		const bool complete = !CaptureGpuFailed && TownGpuEndFrame(GpuFrame)
+		CathedralDiagnosticStage = CathedralFallbackStage::GpuEnd;
+		const bool diagnosticGpuEndSucceeded = !CaptureGpuFailed && TownGpuEndFrame(GpuFrame);
+		CathedralDiagnosticStage = CathedralFallbackStage::OutputValidation;
+		const bool complete = diagnosticGpuEndSucceeded
 		    && GpuFrame.width == out.w() && GpuFrame.height == out.h()
 		    && GpuFrame.indexed.size() == DepthBuffer.size()
 		    && GpuFrame.depth.size() == DepthBuffer.size() && GpuFrame.pickIds.size() == PickBuffer.size()
@@ -4131,9 +4356,16 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 			if (GpuFailure.empty())
 				GpuFailure = "GPU frame validation failed";
 			if (cathedralWorld) {
+				RecordCathedralDiagnostic(CaptureGpuFailed ? CathedralFallbackReason::GpuSubmissionRefused
+					: diagnosticGpuEndSucceeded ? CathedralFallbackReason::GpuOutputRejected : CathedralFallbackReason::GpuEndFrameRefused,
+					CaptureGpuFailed ? (CathedralDiagnosticGpuRefusalStage == CathedralFallbackStage::None
+						? CathedralFallbackStage::Submission : CathedralDiagnosticGpuRefusalStage)
+					: diagnosticGpuEndSucceeded ? CathedralFallbackStage::OutputValidation : CathedralFallbackStage::GpuEnd,
+					true, RendererState.requestedGpu);
 				RendererState.failure = GpuFailure;
 				ClearSurface(out);
 				InvalidateTownViewFrameForNativeFallback();
+				TryLogCathedralDiagnostic();
 				return false; // DrawGame owns the complete native world fallback.
 			}
 			ClearSurface(out);
@@ -4151,6 +4383,7 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 	}
 	if (horizonEnabled)
 		ApplyHorizonAtmosphere(out);
+	CathedralDiagnosticStage = CathedralFallbackStage::Resolve;
 	ResolveSampling(logical, out);
 	PickScreenWidth = gnScreenWidth;
 	PickScreenHeight = gnScreenHeight;
@@ -4167,6 +4400,7 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 	PickingValid = !cathedralWorld || (!CathedralFrame.requiresNativeFallback
 	    && (!RendererState.requestedGpu || RendererState.usedGpu) && cathedral::LiveFrameCurrent());
 	RendererState.worldMilliseconds = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - worldStart).count();
+	CathedralDiagnosticStage = CathedralFallbackStage::SessionTrace;
 	if (!forceGeometry) {
 		// A bounded real-session trace identifies the effective backend/fallback.
 		// World timing deliberately excludes the HUD, SDL presentation and game loop.
@@ -4186,12 +4420,17 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 			lastFailure = RendererState.failure;
 		}
 	}
+	if (cathedralWorld) {
+		RecordCathedralDiagnostic(CathedralFallbackReason::Published3D, CathedralFallbackStage::Published, false, RendererState.requestedGpu);
+		TryLogCathedralDiagnostic(); // Only a complete publication acknowledges recovery.
+	}
 	return true;
 }
 
 static bool DiscardCathedralAllocationFailure(const Surface &fullOut, bool requestedGpu)
 {
 	// Take POD evidence before resetting backend status and host counters.
+	RecordCathedralDiagnostic(CathedralFallbackReason::DrawAllocationFailure, CathedralDiagnosticStage, true, requestedGpu);
 	CathedralAllocationState.failed = true;
 	CathedralAllocationState.gpuSubmittedBeforeFailure = GetTownGpuStatus().submittedTriangles;
 	CathedralAllocationState.gpuDrawCallsBeforeFailure = GetTownGpuStatus().drawCalls;
@@ -4232,6 +4471,7 @@ static bool DiscardCathedralAllocationFailure(const Surface &fullOut, bool reque
 		RendererState.failure.clear();
 	}
 #endif
+	TryLogCathedralDiagnostic(); // Protected formatting after fail-closed cleanup.
 	return false; // DrawGame owns the complete native redraw and input fallback.
 }
 
