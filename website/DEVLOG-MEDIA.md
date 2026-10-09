@@ -40,3 +40,16 @@ The views use the same camera and input scene. They show the native-fragment cle
 The existing bilingual `controles-primeira-pessoa` article, updated on 9 October 2026 and pinned to [`a4a87d20e58781395ed33bda6f9298c71aa589ad`](https://github.com/douglasopan/diablo-3d/commit/a4a87d20e58781395ed33bda6f9298c71aa589ad), keeps `tristram-camera-modes.webp` unchanged as historical camera context. Both alternative texts explicitly state that it does not show the keymapping menu or newer controls. No menu capture, private profile, runtime receipt or new media is copied into the public site; the inventory remains at 46 entries and 20 posts per language.
 
 The 20 indexed menu captures and separate 24-image CPU/GPU offscreen camera gate are reported as finite technical evidence in text. The menu captures omit the final RGB background, and two Portuguese samples were inspected; long native instructions can clip at 640×480. This is not physical input/focus/Alt+Tab validation, a sustained FPS benchmark or full artistic acceptance. Source, installed delivery and media remain separate states.
+
+## Cathedral technical pilot — 9 October 2026
+
+The bilingual `catedral-primeiro-andar-piloto` article documents game source [`c5e8cb7fdcf79ceb6ed368b77bfa2ae55446a91e`](https://github.com/douglasopan/diablo-3d/commit/c5e8cb7fdcf79ceb6ed368b77bfa2ae55446a91e). Two existing sources from the integrator's RX 570 R4 offscreen gate were visually reviewed by the publisher and a second reviewer. Both are published as their original PNG bytes, without conversion, crop, retouching, generated media or new rendering; full framing and 640×480 resolution are retained. Neither contains personal text, account data, credentials or EXIF/textual metadata.
+
+| Public file | Original and published SHA-256 | Role |
+| --- | --- | --- |
+| `cathedral-pilot-gpu-world.png` | `b968c856b767ede24ed0ff17f5c540bdcba3c5fe1851c356dc0b42b3c0f83a6d` | GPU pilot after immediate recovery |
+| `cathedral-pilot-native-reference.png` | `e0549708d229fd4296ad9e4be8012307321d31b5b7cc0ead228a0f570e0a2c96` | Original-renderer fallback reference |
+
+Seven gate PNGs form three distinct byte groups; the publication selects only these two, avoiding duplicates and retaining earlier media. The pilot's checkerboard floor, flat translucent walls, simple-color door and native sprite actors remain visible, including their unfinished appearance. The native reference supports the recovery control; it is not presented as an artistic before/after comparison in the same camera or a screenshot of every injected failure.
+
+The sources precede installation and have partial initialization with staged actors and a stationary scene. They do not depict a game-window session, AI/HUD/save-load review, sustained FPS, final artwork, all floors or a full nine-region count visible in the image. The nine-region extent comes from the pilot contract. The installation at 15:54 Brasília time is supported by the separate installation receipt and pinned public execution guide, not by the screenshots alone. Complete private receipts, raw logs, witness files, MPQ, saves and source models remain unpublished. Metadata and full English overlays are in `evidence.json` and `translations.py`.

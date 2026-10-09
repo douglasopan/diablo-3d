@@ -2,7 +2,7 @@
 
 Site: **[Português](https://douglasopan.github.io/diablo-3d/)** · **[English](https://douglasopan.github.io/diablo-3d/en/)** · [RSS PT-BR](https://douglasopan.github.io/diablo-3d/rss.xml) · [RSS EN](https://douglasopan.github.io/diablo-3d/en/rss.xml)
 
-O objetivo do projeto é reconstruir Diablo 1 inteiro em 3D, incluindo todos os níveis procedurais, personagens, monstros, objetos e efeitos. Tristram é a etapa atual de validação; os demais mapas continuam usando a renderização original. Consulte o [roadmap](ROADMAP.md) para distinguir o estado implementado dos próximos marcos.
+O objetivo do projeto é reconstruir Diablo 1 inteiro em 3D, incluindo todos os níveis procedurais, personagens, monstros, objetos e efeitos. Tristram continua em validação, e o primeiro andar normal da Catedral recebeu um piloto técnico de nove regiões próximas. Os demais andares e níveis de missão conservam a renderização original. Consulte o [roadmap](ROADMAP.md) para distinguir o estado implementado dos próximos marcos.
 
 Os registros são arquivos Markdown versionados em `docs/devlog/`. O gerador em `website/build.py` cria HTML por página, metadados, dados estruturados, sitemap e RSS. Uma publicação em `main` que altere posts ou arquivos do site dispara o workflow dedicado de GitHub Pages. O site funciona sem buscar o conteúdo no navegador. A tag padrão do Google Analytics 4 está no cabeçalho compartilhado de todas as páginas PT-BR/EN e começa a medir no carregamento. Configuração, limites e verificação estão no [README do site](../website/README.md).
 
@@ -76,6 +76,12 @@ python website/serve.py
 Abra `http://127.0.0.1:4173/diablo-3d/` e `http://127.0.0.1:4173/diablo-3d/en/`. O servidor expõe somente `website/dist/`, não a raiz do repositório. Confira desktop, celular, navegação, busca, ampliação das capturas e repetição automática da logomarca no cabeçalho e no destaque inicial nos dois idiomas antes do commit. Confirme a animação com JavaScript desativado e com redução de movimento ativa, mantendo o parallax reduzido neste último caso. Teste também a troca PT/EN numa seção de artigo e a preferência de idioma do navegador. A saída `website/dist/` e as capturas locais de QA não são versionadas.
 
 O workflow `.github/workflows/pages.yml` valida a publicação e envia **somente** `website/dist/` ao Pages. PRs executam build e verificação; o deploy ocorre em `main` ou por execução manual. A configuração do repositório deve usar **Settings → Pages → Source → GitHub Actions**.
+
+## Catedral: primeiro andar com piloto técnico — 9 de outubro de 2026
+
+O novo registro `2026-10-09-catedral-primeiro-andar-piloto.md` e sua tradução integral documentam o commit `c5e8cb7fdcf79ceb6ed368b77bfa2ae55446a91e`, instalado no mesmo launcher às **15:54 de Brasília**. O recorte cobre nove regiões próximas no primeiro andar normal: pisos e paredes geométricos, cores simples e atores nativos. Outros andares e níveis de missão continuam nativos. O gate R4 na RX 570 separa 157 verificações do harness, 188 contextuais e 93 de alocação; quatro falhas exercitaram fallback integral e recuperação imediata. São testes offscreen com inicialização parcial e cenário parado, sem prova de gameplay físico, FPS sustentado ou arte final.
+
+Somente dois PNGs existentes, visualmente revisados e byte-exatos, entram em 640×480: piloto recuperado na GPU e referência nativa de fallback. As legendas distinguem o gate anterior à instalação, sem tratar os quadros como mesma câmera artística ou como imagens de cada falha. A instalação preservou Ogden, Tristram e 48 arquivos originais do perfil; só o recibo esperado do launcher mudou. Início/projeto/tecnologia/roadmap/apoio, destaque, cartões, galeria e feeds acompanham o piloto delimitado. Totais: **21 posts por idioma e 48 capturas**, preservando as 46 anteriores, música/créditos, Analytics, player e o share URL do Patreon. Procedência em [DEVLOG-MEDIA.md](../website/DEVLOG-MEDIA.md#cathedral-technical-pilot--9-october-2026). O guia de execução segue reservado ao principal.
 
 ## Movimento remapeável — 9 de outubro de 2026
 
