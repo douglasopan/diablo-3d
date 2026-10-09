@@ -192,6 +192,7 @@ struct Batch {
 	UINT count;
 	bool preservePicking;
 	bool paletteBlend;
+	D3D11_BOX paletteCopyBox;
 };
 
 struct Target {
@@ -840,6 +841,38 @@ CachedTexture *GetTexture(const TownGpuTexture &input, TownGpuLighting lighting)
 bool Finite(float value) { return std::isfinite(value); }
 bool Finite(TownLightVector value) { return Finite(value.x) && Finite(value.height) && Finite(value.z); }
 
+
+D3D11_BOX PaletteSnapshotBox(const std::array<TownGpuVertex, 3> &vertices)
+{
+	const D3D11_BOX full { 0, 0, 0, static_cast<UINT>(Width), static_cast<UINT>(Height), 1 };
+	// Projected positions are finite before submission. Keep extreme clipping
+	// inputs on the old whole-frame path rather than rely on cancellation in VS.
+	const float reliableRange = 4.0F * static_cast<float>(std::max(Width, Height));
+	for (const TownGpuVertex &vertex : vertices)
+		if (!Finite(vertex.x) || !Finite(vertex.y)
+		    || std::abs(vertex.x) > reliableRange || std::abs(vertex.y) > reliableRange)
+			return full;
+	const double minX = std::min({ vertices[0].x, vertices[1].x, vertices[2].x });
+	const double minY = std::min({ vertices[0].y, vertices[1].y, vertices[2].y });
+	const double maxX = std::max({ vertices[0].x, vertices[1].x, vertices[2].x });
+	const double maxY = std::max({ vertices[0].y, vertices[1].y, vertices[2].y });
+	// Two raster pixels conservatively include the fixed-point edge grid and
+	// float clip-space roundtrip. Clamp in double before converting to UINT.
+	const auto lower = [](double value, int extent) {
+		return static_cast<UINT>(std::clamp(std::floor(value - 2.0), 0.0, static_cast<double>(extent)));
+	};
+	const auto upper = [](double value, int extent) {
+		return static_cast<UINT>(std::clamp(std::ceil(value + 2.0), 0.0, static_cast<double>(extent)));
+	};
+	const D3D11_BOX bounded { lower(minX, Width), lower(minY, Height), 0,
+		upper(maxX, Width), upper(maxY, Height), 1 };
+	// Do not introduce skipped overlays or an empty D3D copy as a new contract.
+	// Fully offscreen/degenerate bounds retain the original complete snapshot.
+	if (bounded.left >= bounded.right || bounded.top >= bounded.bottom)
+		return full;
+	return bounded;
+}
+
 bool ValidOpaqueBlocker(const TownLightOccluder &blocker)
 {
 	const auto bounded = [](TownLightVector value) {
@@ -1124,6 +1157,8 @@ bool TownGpuSubmitProjectedTriangle(const std::array<TownGpuVertex, 3> &vertices
 	if (!MakeConstants(material, *uploaded, constants))
 		return false;
 	if (material.paletteBlend) {
+		// Admission remains the unchanged whole-frame worst-case bound, even
+		// when the issued snapshot region below is smaller. Preserve refusals.
 		const size_t copyBytes = static_cast<size_t>(Width) * Height;
 		if (Status.paletteBlendTriangles >= MaxPaletteBlendTriangles
 		    || Status.paletteBlendTriangles >= MaxPaletteBlendCopyBytes / copyBytes)
@@ -1142,7 +1177,8 @@ bool TownGpuSubmitProjectedTriangle(const std::array<TownGpuVertex, 3> &vertices
 		Batches.back().count += 3;
 	else {
 		GeometryCommands.push_back({ false, Batches.size() });
-		Batches.push_back({ uploaded, constants, first, 3, material.preservePicking, material.paletteBlend });
+		Batches.push_back({ uploaded, constants, first, 3, material.preservePicking, material.paletteBlend,
+		    material.paletteBlend ? PaletteSnapshotBox(vertices) : D3D11_BOX {} });
 	}
 	if (material.paletteBlend) {
 		FramePaletteOverlayStarted = true;
@@ -1227,9 +1263,17 @@ bool TownGpuEndFrame(TownGpuFrame &output)
 			ID3D11ShaderResourceView *emptySnapshot = nullptr;
 			Context->PSSetShaderResources(4, 1, &emptySnapshot);
 			Context->OMSetRenderTargets(0, nullptr, nullptr);
-			Context->CopyResource(PriorIndexedColor.get(), Targets[0].texture.get());
+			// PS reads prior color only at this triangle's covered raster pixels.
+			// Preserve triangle order/one snapshot per draw; only reduce payload.
+			const D3D11_BOX &box = batch.paletteCopyBox;
+			if (box.left == 0 && box.top == 0 && box.right == static_cast<UINT>(Width)
+			    && box.bottom == static_cast<UINT>(Height))
+				Context->CopyResource(PriorIndexedColor.get(), Targets[0].texture.get());
+			else
+				Context->CopySubresourceRegion(PriorIndexedColor.get(), 0, box.left, box.top, 0,
+				    Targets[0].texture.get(), 0, &box);
 			Context->OMSetRenderTargets(3, targets, HardwareDepthView.get());
-			Status.paletteBlendCopyBytes += static_cast<size_t>(Width) * Height;
+			Status.paletteBlendCopyBytes += static_cast<size_t>(box.right - box.left) * (box.bottom - box.top);
 		}
 		if (!BindGeometryConstants(batch.constants))
 			return false;

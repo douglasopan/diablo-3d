@@ -1,6 +1,7 @@
 #pragma once
 
 #include "cathedral_adapter.hpp"
+#include "cathedral_native_texture.hpp"
 #include "engine/render/town_scene.hpp"
 
 namespace devilution::cathedral {
@@ -59,6 +60,10 @@ struct FrameTriangle {
 	uint8_t light;
 	bool transparent;
 	FrameSurfacePolicy policy = FrameSurfacePolicy::Opaque;
+	NativeTextureBinding nativeTexture;
+	// Visual bitmap footprint/UV only. vertices remains the original physical
+	// triangle and must remain the source of collision and geometric picking.
+	std::array<Vertex, 3> textureVertices {};
 };
 
 /** Pure presentation bridge over the accepted live-map adapter. Camera collision

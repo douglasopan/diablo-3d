@@ -14,6 +14,7 @@ namespace devilution {
 struct Surface;
 struct TownVolumeMesh;
 struct TownSceneModel;
+namespace cathedral { struct NativeTextureBinding; }
 
 /** Rotatable view of the live Tristram map. */
 bool IsTownViewActive();
@@ -181,6 +182,26 @@ struct TownViewCathedralState {
 	size_t regions = 0, triangles = 0;
 };
 TownViewCathedralState GetTownViewCathedralState();
+/** Private native-material diagnostics. Counts are cache work, not FPS. */
+struct TownViewCathedralNativeTextureState {
+	uint64_t epoch = 0;
+	size_t entries = 0, bytes = 0, decodes = 0, hits = 0, misses = 0;
+	size_t floorMaterials = 0, masonryMaterials = 0, doorMaterials = 0, donorMaterials = 0;
+};
+TownViewCathedralNativeTextureState GetTownViewCathedralNativeTextureState();
+/** Read-only copy of an already prepared private runtime texture; no decode.
+ * Empty dimensions mean absent/stale/unsupported. No file export is performed. */
+struct TownViewCathedralNativeTextureReference {
+	int width = 0, height = 0;
+	std::vector<uint8_t> pixels, opacity;
+	uint64_t gpuIdentity = 0, epoch = 0;
+	int sourceX = 0, sourceZ = 0, nativeSlot = -1, cropX = 0, cropY = 0;
+	uint16_t requestedPiece = 0, sourcePiece = 0, sourceBlock = 0, secondBlock = 0;
+	uint8_t sourceMicro = 0, sourceColumn = 0;
+	bool repeat = false, approximate = false, horizontalFlip = false;
+};
+TownViewCathedralNativeTextureReference GetTownViewCathedralNativeTextureReference(
+	const cathedral::NativeTextureBinding &binding);
 /** Private Cathedral allocation fault injection. One-shot, GPU-only, default off.
  * BeforeReadback fires in EndFrame after GPU commands, before output allocation.
  * Requires exception-unwinding support in town_view.cpp and town_gpu.cpp. */

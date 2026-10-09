@@ -135,3 +135,27 @@ A execução segue estas dependências, sem declarar prontas opções ainda inex
 5. **Controles reais de qualidade:** expor distância/erro de detalhe, texturas, sombras e orçamento somente quando cada recurso existir e tiver limites/fallback verificados. Comparar qualidade e tempo no hardware do jogador antes de escolher padrões.
 
 O [guia oficial do Godot sobre LOD](https://docs.godotengine.org/en/stable/tutorials/3d/mesh_lod.html) descreve o critério em pixels; o runtime DevilutionX precisa implementar seu próprio transporte e seleção. Abrir a cena no Godot não transfere automaticamente esses recursos para o executável do jogo. Essas técnicas viabilizam mais detalhe com trabalho proporcional ao que aparece, sem prometer desempenho ou qualidade de uma produção AAA por uma única opção.
+
+
+## Catedral: materiais nativos e cópia regional — 9 de outubro
+
+O primeiro andar normal tem um piloto de nove regiões, com pisos CEL/MIN nativos, alvenaria orientada e madeira de CLX. Esses materiais não alteram simulação, colisão, seed ou saves. Repetições/doadores e superfícies sem referência são aproximações; isto não conclui a arte da Catedral.
+
+Cada triângulo transparente conservava um snapshot R8 da tela inteira antes de desenhar. O backend agora emite `CopySubresourceRegion` somente sobre a caixa conservadora do triângulo, com guarda de dois pixels. Coordenadas extremas ou caixa vazia mantêm a cópia completa. Ordem, um snapshot por triângulo, shaders, LUT e ownership de cor/depth/pick foram preservados. A admissão ainda usa o orçamento conservador de tela inteira: 2.048 overlays/512 MiB; o contador público registra o payload regional efetivamente copiado, sem alegar tráfego total do barramento.
+
+O A/B isolado comparou nove buffers completos, 1.334.272 pixels nos três canais, sem diferenças. O A/B da cena nativa antes de adicionar materiais manteve 12 PNGs byte-exatos. A comparação final abaixo acrescenta os materiais; seus pixels devem mudar. Todas as fases usaram a RX 570 real, seed 2588, foco e cenário parados, seis poses/qualidades, cinco warmups e vinte amostras coletadas por caso. Resolução lógica 640×480; AA2x rasteriza em 1280×960. Mediana de vinte valores é a média dos dois centrais; p95 usa nearest-rank. Custos são relógios de parede do renderer, incluindo esperas de GPU/readback; não são timestamp queries ou FPS de gameplay.
+
+| Câmera/qualidade | Antes: mediana/p95 (ms) | Só cópia regional: mediana/p95 (ms) | Materiais + cópia regional: mediana/p95 (ms) |
+| --- | --- | --- | --- |
+| Perto, sem AA | 13,42 / 13,76 | 10,31 / 18,99 | 10,27 / 11,29 |
+| Perto, AA2x | 21,09 / 58,75 | 17,74 / 27,33 | 18,91 / 27,79 |
+| Longe, sem AA | 44,10 / 44,79 | 40,76 / 41,31 | 41,48 / 42,47 |
+| Longe, AA2x | 77,73 / 79,05 | 64,77 / 65,59 | 65,86 / 68,64 |
+| Lateral, sem AA | 39,25 / 40,60 | 38,54 / 39,09 | 38,48 / 39,67 |
+| Lateral, AA2x | 71,44 / 73,47 | 61,80 / 64,24 | 62,01 / 63,44 |
+
+Ao longe/AA2x, o payload de snapshots caiu de 253.132.800 para 820.803 bytes por frame. A versão texturizada aumenta draw calls de 308 para 364 nessa pose; o ganho não elimina stalls de comandos/readback. As 156 chamadas por fase mantiveram GPU, zero rasterização CPU 3D e witness nativo exato. Nas amostras mornas não houve uploads de texels/LUT; o vertex stream projetado permanece. Os quadros de criação de recursos ficaram separados das distribuições mornas. Gameplay, HUD/apresentação e preparação nativa externa não foram cronometrados; há variação entre amostras e custo ainda alto à distância.
+
+O cache host de materiais prepara fora de Draw, com identidade imutável por epoch/piece/role/axis/coluna/porta. O recorte validado tem 72 entradas e 162.304 bytes de pixels+opacity. Limites 512 entradas/8 MiB de payload, sem eviction nesta etapa; ao esgotar, há fallback nativo até reset/novo epoch. Não é garantia de streaming do andar completo. O gate específico passou 168.022 checks sobre 81.152 texels contra rasterizadores nativos, oito publicações forçadas, cold/warm/epoch e cobertura independente. A operação de porta aberta não foi exercitada. Contexto/falhas/retries e Ogden/Tristram passaram gates separados sobre o mesmo build, com 20 PNGs de Tristram byte-exatos.
+
+Instalado pelo mesmo `Iniciar-Tristram.cmd`, build 09/r6, SHA `929a78f6c15d7e642225c11bc035462c5d93009a87786165eddf9d48746be652`. Nenhum master, seleção, textura de Tristram ou preferência foi reduzido/trocado. Evidências privadas em `diagnostics/actor-procedural-integration-20261009/`: `cathedral-palette-snapshot-region-root-r1`, `cathedral-native-texture-root-execution-r1`, `cathedral-native-root-execution-r5`, `cathedral-textures-perf-20261009/textured-comparison-r1.json` e `ogden-textured-regression-comparison-r1.json`. Próxima medição: custo de comandos/readback e preparação real durante gameplay, junto da expansão controlada do cache; não ampliar níveis baseado apenas nesses números.

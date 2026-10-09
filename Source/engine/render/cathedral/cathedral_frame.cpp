@@ -325,6 +325,125 @@ NativeSurfaceRecord SurfaceRecord(const Snapshot &snapshot, const Instance &inst
 	return record;
 }
 
+Vec3 TextureFaceNormal(const FrameTriangle &triangle)
+{
+	const Vec3 a = triangle.vertices[0].position, b = triangle.vertices[1].position, c = triangle.vertices[2].position;
+	const Vec3 ab { b.x - a.x, b.y - a.y, b.z - a.z }, ac { c.x - a.x, c.y - a.y, c.z - a.z };
+	return { ab.y * ac.z - ab.z * ac.y, ab.z * ac.x - ab.x * ac.z, ab.x * ac.y - ab.y * ac.x };
+}
+
+Vec3 TextureFaceCenter(const FrameTriangle &triangle)
+{
+	// Both triangles of an axis-aligned box face have the same bounds center.
+	// Avoid choosing different native pieces for the two halves of one face.
+	Bounds bounds = EmptyBounds();
+	for (const Vertex &vertex : triangle.vertices) Include(bounds, vertex.position);
+	return { (bounds.min.x + bounds.max.x) * 0.5F, (bounds.min.y + bounds.max.y) * 0.5F,
+		(bounds.min.z + bounds.max.z) * 0.5F };
+}
+
+const NativeSurfaceSource &TextureSource(const NativeSurfaceRecord &surface, Vec3 center, Vec3 normal)
+{
+	const bool alongX = std::abs(normal.z) >= std::abs(normal.x);
+	const bool vertical = std::abs(normal.y) < std::max(std::abs(normal.x), std::abs(normal.z));
+	const float facing = alongX ? normal.z : normal.x;
+	const auto score = [&](const NativeSurfaceSource &source) {
+		const float dx = static_cast<float>(source.x) - center.x;
+		const float dz = static_cast<float>(source.z) - center.z;
+		const float depth = alongX ? dz : dx;
+		const float tangent = alongX ? dx : dz;
+		// Prefer a SOL source behind this face, then the closest native plane
+		// and tangent. Caps have no native facing: choose the nearest source.
+		return std::array<float, 3> { vertical && depth * facing > 0 ? 1.0F : 0.0F,
+			vertical ? std::abs(depth) : dx * dx + dz * dz, vertical ? tangent * tangent : 0.0F };
+	};
+	return *std::min_element(surface.sources.begin(), surface.sources.end(), [&](const NativeSurfaceSource &a, const NativeSurfaceSource &b) {
+		const auto aScore = score(a), bScore = score(b);
+		if (aScore != bScore) return aScore < bScore;
+		return a.z != b.z ? a.z < b.z : a.x < b.x;
+	});
+}
+
+NativeTextureAxis TextureCapAxis(const Instance &instance, const NativeSurfaceSource &source, Vec3 center)
+{
+	if (instance.sourceModule == ModuleKind::Wall)
+		return (instance.sourceInstanceId & 1U) == 0 ? NativeTextureAxis::AlongX : NativeTextureAxis::AlongZ;
+	if (instance.module == ModuleKind::DoorFrame)
+		return instance.quarterTurns % 2 == 0 ? NativeTextureAxis::AlongX : NativeTextureAxis::AlongZ;
+	return std::abs(static_cast<float>(source.z) - center.z) >= std::abs(static_cast<float>(source.x) - center.x)
+	    ? NativeTextureAxis::AlongX : NativeTextureAxis::AlongZ;
+}
+
+void BindNativeTexture(FrameTriangle &triangle, const Snapshot &snapshot, const Instance &instance,
+    const NativeSurfaceRecord &surface, const Module &module, size_t first)
+{
+	triangle.textureVertices = triangle.vertices;
+	if (!surface.provenanceResolved || surface.sources.empty()) return;
+	const bool masonry = instance.sourceModule == ModuleKind::Wall
+	    || (instance.sourceModule >= ModuleKind::Corner && instance.sourceModule <= ModuleKind::Junction4)
+	    || instance.module == ModuleKind::DoorFrame;
+	if (instance.module != ModuleKind::Floor && instance.module != ModuleKind::DoorLeaf && !masonry) return;
+	const Vec3 normal = TextureFaceNormal(triangle), center = TextureFaceCenter(triangle);
+	const NativeSurfaceSource &source = TextureSource(surface, center, normal);
+	NativeTextureBinding &binding = triangle.nativeTexture;
+	binding.x = source.x; binding.z = source.z; binding.piece = source.piece;
+	if (instance.module == ModuleKind::Floor) {
+		binding.kind = NativeTextureKind::FloorDiamond;
+		for (size_t corner = 0; corner < 3; ++corner) {
+			const Vertex &local = module.vertices[module.indices[first + corner]];
+			triangle.textureVertices[corner] = { NativeFloorPixelVertex(source.x, source.z, local.u, local.v), local.u, local.v };
+		}
+		return;
+	}
+	if (instance.module == ModuleKind::DoorLeaf) {
+		const auto [ownerX, ownerZ] = Owner(instance);
+		const auto door = std::find_if(snapshot.doors.begin(), snapshot.doors.end(), [&](const Door &value) { return value.x == ownerX && value.z == ownerZ; });
+		if (door == snapshot.doors.end()) return;
+		binding.kind = NativeTextureKind::DoorWood;
+		binding.nativeSlot = door->slot;
+		binding.axis = std::abs(normal.z) >= std::abs(normal.x) ? NativeTextureAxis::AlongX : NativeTextureAxis::AlongZ;
+		// A small closed native CLX patch is a material sample, not a complete
+		// native leaf facade. All faces, including backs and caps, disclose it.
+		binding.approximate = true;
+		const size_t quad = static_cast<size_t>(module.indices[first]) / 4 * 4;
+		const Vec3 a = module.vertices[quad].position, b = module.vertices[quad + 1].position, d = module.vertices[quad + 3].position;
+		const auto edgeLength = [&](Vec3 end) {
+			const float dx = (end.x - a.x) * instance.scale.x, dy = (end.y - a.y) * instance.scale.y, dz = (end.z - a.z) * instance.scale.z;
+			return std::sqrt(dx * dx + dy * dy + dz * dz);
+		};
+		const float width = edgeLength(d), height = edgeLength(b);
+		const float down = b.y != a.y ? -1.0F : 1.0F;
+		for (size_t corner = 0; corner < 3; ++corner) {
+			const Vertex &local = module.vertices[module.indices[first + corner]];
+			triangle.textureVertices[corner].u = local.v * width;
+			triangle.textureVertices[corner].v = down * local.u * height;
+		}
+		return;
+	}
+	binding.kind = NativeTextureKind::Masonry;
+	const bool cap = std::abs(normal.y) >= std::max(std::abs(normal.x), std::abs(normal.z));
+	binding.axis = cap ? TextureCapAxis(instance, source, center)
+	                   : std::abs(normal.z) >= std::abs(normal.x) ? NativeTextureAxis::AlongX : NativeTextureAxis::AlongZ;
+	// Native MIN donor column: Hwall runs along X in column 1; Vwall runs
+	// along Z in column 0. This is separate from the band's shear selector.
+	binding.column = binding.axis == NativeTextureAxis::AlongX ? 1 : 0;
+	const float towardSource = normal.x * (static_cast<float>(source.x) - center.x)
+	    + normal.z * (static_cast<float>(source.z) - center.z);
+	binding.approximate = cap || surface.sources.size() != 1 || towardSource > 0 || instance.module == ModuleKind::DoorFrame;
+	if (instance.sourceModule == ModuleKind::Wall)
+		binding.approximate = binding.approximate || binding.axis != TextureCapAxis(instance, source, center);
+	for (Vertex &vertex : triangle.textureVertices) {
+		const auto uv = NativePlanarTextureUv(vertex.position, binding);
+		vertex.u = uv[0];
+		// A horizontal cap has no vertical extent: use the other world axis
+		// instead of stretching a constant masonry row across the whole cap.
+		vertex.v = cap ? 2.0F * (binding.axis == NativeTextureAxis::AlongX
+			        ? vertex.position.z - static_cast<float>(binding.z)
+			        : vertex.position.x - static_cast<float>(binding.x))
+		               : uv[1];
+	}
+}
+
 void SetFallback(PilotFrame &frame, FrameFallbackReason reason)
 {
 	frame.requiresNativeFallback = true;
@@ -405,6 +524,7 @@ PilotFrame BuildPilotFrame(const Snapshot &snapshot, const Scene &scene, int foc
 					triangle.vertices[corner] = { Transform(instance, local.position), local.u, local.v };
 				}
 				collision.triangles.push_back(CollisionTriangle(triangle));
+				BindNativeTexture(triangle, snapshot, instance, surface, module, first);
 				if (visible) out.triangles.push_back(triangle);
 			}
 		}

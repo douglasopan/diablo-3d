@@ -159,8 +159,9 @@ struct TownGpuStatus {
 	size_t textureEvictions = 0;
 	/** Submitted color-only overlay triangles, limited to 2048 per frame. */
 	size_t paletteBlendTriangles = 0;
-	/** Issued full R8 snapshot payload copies, limited to 512 MiB per frame.
-	 * Counts width*height per triangle, not total memory-bus read/write traffic. */
+	/** Actual issued R8 prior-color snapshot region payload, not memory-bus
+	 * read/write traffic. Admission conservatively retains the full-frame
+	 * width*height per-triangle bound and 512 MiB refusal threshold. */
 	size_t paletteBlendCopyBytes = 0;
 	double frameMilliseconds = 0;
 	double readbackMilliseconds = 0;
