@@ -2,7 +2,7 @@
 title: "Primeira pessoa: mouse, WASD e transição pela roda"
 date: 2026-10-08
 updated: 2026-10-08
-description: "Mouse para olhar, WASD ou setas para mover e roda entre terceira e primeira pessoa; a câmera respeita a arquitetura sem alterar a navegação nativa."
+description: "Mouse, WASD ou setas e transição pela roda entre terceira e primeira pessoa, com proteção visual contra arquitetura testada na CPU; revisão interativa pendente."
 slug: controles-primeira-pessoa
 image: /assets/captures/tristram-camera-modes.webp
 image_alt: "Comparação técnica histórica dos quatro modos de câmera em Tristram, usada como contexto; não mostra os novos controles, a calibração ocular, a transição pela roda ou a colisão visual da câmera."
@@ -11,7 +11,7 @@ order: 18
 status: published
 ---
 
-A primeira pessoa de Tristram agora combina **mouse para olhar, WASD ou setas para caminhar e roda para aproximar da terceira pessoa até a primeira — ou voltar**. A câmera também evita atravessar a arquitetura montada, preservando as regras de movimento do Diablo. O incremento do [commit 3863e4436](https://github.com/douglasopan/diablo-3d/commit/3863e4436a5cb6be09d476e8d382fc4e5bf54b3a) foi instalado no mesmo **Iniciar-Tristram.cmd**, em **8 de outubro de 2026, às 19:31, horário de Brasília**.
+A primeira pessoa de Tristram agora combina **mouse para olhar, WASD ou setas para caminhar e roda para aproximar da terceira pessoa até a primeira — ou voltar**. A proteção visual da câmera passou a considerar a arquitetura montada, preservando as regras de movimento do Diablo; a amostra técnica descrita abaixo não cobre todas as estruturas ou posições. O incremento do [commit 3863e4436](https://github.com/douglasopan/diablo-3d/commit/3863e4436a5cb6be09d476e8d382fc4e5bf54b3a) foi instalado no mesmo **Iniciar-Tristram.cmd**, em **8 de outubro de 2026, às 19:31, horário de Brasília**.
 
 Os controles iniciais de mouse e setas chegaram às **17:30** daquele dia, no [commit a227d4afc](https://github.com/douglasopan/diablo-3d/commit/a227d4afcab5829cfa82ab9bad9e0eac34a2c9c9). A calibração ocular posterior continua registrada abaixo.
 

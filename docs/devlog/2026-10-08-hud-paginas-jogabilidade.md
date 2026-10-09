@@ -1,7 +1,7 @@
 ---
-title: "Jogabilidade: trocar de página preserva o HUD"
+title: "Jogabilidade: correção da sobreposição com o HUD"
 date: 2026-10-08
-description: "A página longa de Jogabilidade invadia os globos e impedia a composição do HUD HD. O menu agora respeita a área visível da interface, com a correção instalada no iniciador habitual."
+description: "Correção técnica instalada para a página de Jogabilidade que invadia os globos do HUD HD; a confirmação na partida habitual permanece pendente."
 slug: hud-paginas-jogabilidade
 image: /assets/captures/hud-hd-offscreen-fullhd.webp
 image_alt: "Composição técnica offscreen histórica do HUD em Full HD, publicada antes da correção das páginas de Jogabilidade; não mostra esta entrega nem comprova a troca de páginas 1→2→1."
@@ -60,6 +60,6 @@ Modelos, texturas, luzes, músicas, saves e preferências habituais foram preser
 
 A próxima conferência é abrir **Esc → Configurações → Jogabilidade**, percorrer as páginas, abrir e fechar os demais painéis e retornar ao jogo pelo iniciador habitual. Combinações adicionais de layout e sessões prolongadas continuam para avaliação.
 
-As imagens enviadas pelo autor não ficaram acessíveis nesta rodada e não foram comparadas. A reprodução técnica própria sustenta a correção do caso exercitado, enquanto a **confirmação do defeito na partida e a aprovação artística pelo usuário permanecem pendentes**.
+As imagens enviadas pelo autor não ficaram acessíveis nesta rodada e não foram comparadas. A reprodução técnica própria sustenta a correção do caso exercitado, enquanto a **confirmação da correção na partida habitual e a aprovação artística pelo usuário permanecem pendentes**.
 
 Não houve execução em GPU física, teste de entrada ou foco físicos, nem medição nova de FPS. Esta entrega corrige a convivência entre menu e HUD; as melhorias de desempenho anteriores continuam registradas em seus próprios artigos.

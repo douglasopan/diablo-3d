@@ -2,7 +2,7 @@
 title: "First person: mouse look, WASD and wheel transitions"
 date: 2026-10-08
 updated: 2026-10-08
-description: "Mouse look, WASD or arrow-key movement and wheel transitions between third and first person; the camera respects architecture while preserving native navigation."
+description: "Mouse look, WASD or arrow keys and wheel transitions between third and first person, with camera protection against architecture tested on the CPU; interactive review pending."
 slug: controles-primeira-pessoa
 image: /assets/captures/tristram-camera-modes.webp
 image_alt: "Historical technical comparison of Tristram's four camera modes, used as context; it does not show the new controls, eye-height calibration, wheel transition or camera collision."
@@ -11,7 +11,7 @@ order: 18
 status: published
 ---
 
-Tristram's first-person view now combines **mouse look, WASD or arrow-key movement and the wheel to move from third person into first person — or back**. The camera also avoids passing through the assembled architecture, while retaining Diablo's movement rules. The update in [commit 3863e4436](https://github.com/douglasopan/diablo-3d/commit/3863e4436a5cb6be09d476e8d382fc4e5bf54b3a) was installed through the same **Iniciar-Tristram.cmd** launcher on **October 8, 2026, at 19:31, Brasília time**.
+Tristram's first-person view now combines **mouse look, WASD or arrow-key movement and the wheel to move from third person into first person — or back**. Camera protection now accounts for the assembled architecture while retaining Diablo's movement rules; the technical sample described below does not cover every structure or position. The update in [commit 3863e4436](https://github.com/douglasopan/diablo-3d/commit/3863e4436a5cb6be09d476e8d382fc4e5bf54b3a) was installed through the same **Iniciar-Tristram.cmd** launcher on **October 8, 2026, at 19:31, Brasília time**.
 
 The initial mouse and arrow-key controls arrived at **17:30** that day, in [commit a227d4afc](https://github.com/douglasopan/diablo-3d/commit/a227d4afcab5829cfa82ab9bad9e0eac34a2c9c9). The later eye-height calibration remains documented below.
 

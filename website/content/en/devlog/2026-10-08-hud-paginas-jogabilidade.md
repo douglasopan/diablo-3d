@@ -1,7 +1,7 @@
 ---
-title: "Gameplay: switching pages preserves the HUD"
+title: "Gameplay: fixing overlap with the HUD"
 date: 2026-10-08
-description: "The long Gameplay page overlapped the orbs and prevented the HD HUD from being composed. The menu now respects the interface's visible area, with the fix installed in the usual launcher."
+description: "An installed technical fix addresses the Gameplay page overlapping the HD HUD orbs; confirmation in the usual play session remains pending."
 slug: hud-paginas-jogabilidade
 image: /assets/captures/hud-hd-offscreen-fullhd.webp
 image_alt: "Historical offscreen technical composition of the HUD in Full HD, published before the Gameplay page fix; it does not show this update or demonstrate switching pages 1→2→1."
@@ -60,6 +60,6 @@ Models, textures, lights, music, saves and the usual preferences were preserved.
 
 The next check is to open **Esc → Settings → Gameplay**, go through the pages, open and close the other panels and return to the game through the usual launcher. Additional layout combinations and extended sessions remain for evaluation.
 
-The images sent by the author were not accessible in this round and were not compared. The project's own technical reproduction supports the fix for the exercised case, while **confirmation in the user's play session and the user's artistic approval remain pending**.
+The images sent by the author were not accessible in this round and were not compared. The project's own technical reproduction supports the fix for the exercised case, while **confirmation of the fix in the user's usual play session and the user's artistic approval remain pending**.
 
 There was no run on a physical GPU, no physical input or focus test, and no new FPS measurement. This update fixes how the menu and HUD coexist; earlier performance improvements remain documented in their own articles.

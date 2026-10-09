@@ -10,6 +10,8 @@ order: 13
 status: published
 ---
 
+**Historical context:** this article describes the work in revision `ae43f0470`. Later deliveries of [resident GPU geometry](/devlog/creditos-e-geometria-gpu/), [camera controls](/devlog/controles-primeira-pessoa/) and [pagination beside the HUD](/devlog/hud-paginas-jogabilidade/) have their own entries. Consult the [roadmap](/roadmap/) for the current state.
+
 Looking at Tristram from ground level changes how we assess the project. A house that works at a distance can reveal a distorted wall up close; a texture that seemed sufficient from the original camera starts to show repetition. The new cameras made this possible and helped guide today's work: preserving the models, understanding the cost of drawing them and improving the experience of playing and collaborating.
 
 **The goal remains all of Diablo 1 in 3D, with every level.** Tristram is the first validation environment. The campaign, rules, collision and saves remain in DevilutionX; the other levels still use the original rendering.
