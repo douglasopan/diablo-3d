@@ -12,7 +12,7 @@ Auditoria local realizada em 07/10/2026, acrescida das cinco comparações conte
 | Imagens classificadas como fontes, texturas ou material isolado e excluídas | 8,641 |
 | Candidatas contextuais de diagnóstico antes da seleção visual | 3,961 |
 | Hashes distintos dessas candidatas contextuais | 1,093 |
-| Imagens selecionadas e visualmente revisadas para o site | 48 |
+| Imagens selecionadas e visualmente revisadas para o site | 51 |
 | Prints do autor incluídos nessa seleção | 4 |
 
 O inventário completo, as folhas de contato e o mapeamento privado das capturas do autor ficam somente na área local de auditoria, fora do repositório. Este documento não expõe nomes de arquivos de outros projetos, dados de conta, conversas privadas ou caminhos pessoais.
@@ -119,3 +119,9 @@ A abertura traseira é uma inferência artística aprovada, pois não há refer�
 ## Piloto técnico da Catedral — 9 de outubro de 2026
 
 Duas capturas do gate RX 570 R4 associado ao commit `c5e8cb7fdcf79ceb6ed368b77bfa2ae55446a91e` foram revisadas e adicionadas: piloto GPU após recuperação e referência nativa de fallback. São PNGs originais byte-exatos, sem conversão, recorte ou retoque, ambos em 640×480. Não constituem gameplay ou comparação artística na mesma câmera; o cenário está parado e parcialmente inicializado, anterior à instalação. Sete saídas formam três grupos por hash; somente duas fontes distintas foram selecionadas. As 46 entradas anteriores permanecem intactas, totalizando **48 capturas**. Procedência e limites em [DEVLOG-MEDIA.md](DEVLOG-MEDIA.md#cathedral-technical-pilot--9-october-2026).
+
+## Cathedral materials — 9 October 2026
+
+Three new original 640×480 technical PNGs join the preceding 48 records, for 51 curated captures. The nearby baseline and material frames preserve the same offscreen pose/seed/AA-off configuration; the forced-geometry frame shows unfinished forms in the original perspective. Native-reference source bytes match the existing `cathedral-pilot-native-reference.png`, which is reused rather than duplicated. All prior records/media remain untouched. Source identity and exact hashes are listed in [DEVLOG-MEDIA.md](DEVLOG-MEDIA.md#cathedral-materials-and-regional-transparency--9-october-2026).
+
+These are stationary, partially initialized tests before installation, without HUD/gameplay or full artistic approval. Native material sampling, repeated/donor textures and caps are approximations. The optimization-only parity and the material before/after comparison are separate; renderer costs are not sustained FPS. No additional game render, generation, Library upload or historical video render was requested by this publication.

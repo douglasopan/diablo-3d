@@ -53,3 +53,16 @@ The bilingual `catedral-primeiro-andar-piloto` article documents game source [`c
 Seven gate PNGs form three distinct byte groups; the publication selects only these two, avoiding duplicates and retaining earlier media. The pilot's checkerboard floor, flat translucent walls, simple-color door and native sprite actors remain visible, including their unfinished appearance. The native reference supports the recovery control; it is not presented as an artistic before/after comparison in the same camera or a screenshot of every injected failure.
 
 The sources precede installation and have partial initialization with staged actors and a stationary scene. They do not depict a game-window session, AI/HUD/save-load review, sustained FPS, final artwork, all floors or a full nine-region count visible in the image. The nine-region extent comes from the pilot contract. The installation at 15:54 Brasília time is supported by the separate installation receipt and pinned public execution guide, not by the screenshots alone. Complete private receipts, raw logs, witness files, MPQ, saves and source models remain unpublished. Metadata and full English overlays are in `evidence.json` and `translations.py`.
+
+## Cathedral materials and regional transparency — 9 October 2026
+
+Selected original PNG bytes from the technical delivery associated with [a783aff4](https://github.com/douglasopan/diablo-3d/commit/a783aff47ff66fc9abb45d0345c604b444957087), all 640×480. These are stationary, partially initialized offscreen tests before installation, without HUD or a physical gameplay session. Nearby baseline/material frames share the same frozen pose and AA-off configuration. The original-perspective frame forces geometry; it must not be presented as the Home/native route. Repeated/donor materials and caps are approximations, with unfinished shapes/arches/details and no integral art approval.
+
+| Public asset | Original SHA-256 | Use |
+| --- | --- | --- |
+| `cathedral-materials-before.png` | `7593fe1d82c7f76eb56c1341f11d2cebda7dddd82fa7d5f7c0331447ed69c794` | Nearby AA-off material baseline |
+| `cathedral-materials-after.png` | `5de2b53ba19cd6abda796e8731c9b5ecc37d115835fcaf4069646ae1a9ffaf81` | Same pose after materials + regional copy |
+| `cathedral-materials-original-perspective.png` | `19c8237ede09b63840182463c2d4c3c8f75319e31f6a061b6e51ad639fed04aa` | Forced geometry in original perspective |
+| `cathedral-pilot-native-reference.png` | `e0549708d229fd4296ad9e4be8012307321d31b5b7cc0ead228a0f570e0a2c96` | Existing byte-identical native reference reused |
+
+No conversion, crop, retouch, image generation, new renderer execution, video re-render or Library upload. No extracted textures/CEL/MIN/CLX, MPQ, saves, model files, raw private logs or complete receipts are published. The native reference is neither a picture of every injected failure nor an artistic approval. Optimization-only parity applies to the separate nine-buffer/12-PNG A/B; before/after material pixels deliberately differ. Renderer timing excludes gameplay/HUD/presentation/external native preparation and does not establish sustained FPS. The previous 48 records and capture assets remain unchanged; three new records yield 51 captures.
