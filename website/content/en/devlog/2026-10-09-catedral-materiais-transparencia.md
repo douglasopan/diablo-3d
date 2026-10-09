@@ -58,3 +58,13 @@ Recovery was checked separately on the same build: **157 harness checks, 188 con
 The three installed executables have the same **6,559,744 bytes**, SHA-256 **929a78f6c15d7e642225c11bc035462c5d93009a87786165eddf9d48746be652**. The **48 original profile files** retained their contents, sizes and timestamps; only the launcher's derived receipt was renewed. There was no reduction or replacement of Tristram masters, selections or textures, payload installation, process termination or new paid operation.
 
 The next step is to test entry, movement, combat, transitions and doors in a play session, review shapes and details, and measure commands, readback and the cache before expanding the levels. Technical captures and renderer times do not replace those tests. The [versioned integration status](https://github.com/douglasopan/diablo-3d/blob/a783aff47ff66fc9abb45d0345c604b444957087/docs/PROJECT-EXECUTION.md) and [roadmap](/roadmap/) keep the pilot separate from the goal of rebuilding **all of Diablo 1 in 3D**.
+
+### Continuity update — October 9, 18:48 Brasília time (UTC−3)
+
+Douglas reported areas where the view returns from 3D to 2D during play, without being able to identify a specific location. Revision [f710f47b](https://github.com/douglasopan/diablo-3d/commit/f710f47b6d5f9e5e1ff05976410c8577ef73e868), installed at **18:48** through the same launcher, adds context logging to investigate this return. **The specific cause has not yet been reproduced or fixed.**
+
+The [continuity diagnostic](https://github.com/douglasopan/diablo-3d/blob/f710f47b6d5f9e5e1ff05976410c8577ef73e868/docs/CATHEDRAL-CONTINUITY.md) records the stage, seed, position, cache and GPU state before refusal. Materials, fallback policies and limits remain the same. Accepted preparation does not announce recovery: recovery is recorded only after the complete 3D drawing has been published.
+
+A partial technical setup passed **121 CPU checks and 196 GPU checks on the RX 570**. Logical and HD images remained byte-exact; picking and depth were checked at one test point. Installation preserved the **49 current profile files**, renewing only the derived receipt. These tests verify the diagnostic; they do not establish a fix for the spontaneous return, full gameplay or sustained FPS.
+
+Wall composition remains a separate investigation: the material still repeats a MIN strip and may use a donor source. Checking its bindings does not establish the complete facade or the pixels of every face. The next step is to collect the new diagnostic and reproduce the observed refusal. **There was no new benchmark; the timings and captures above still refer to revision a783aff4.**
