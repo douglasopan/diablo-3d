@@ -11,7 +11,10 @@
 #include <map>
 #include <memory>
 #include <new>
+#include <span>
 #include <string>
+#include <string_view>
+#include <utility>
 #include <unordered_map>
 #include <vector>
 
@@ -22,6 +25,15 @@
 #endif
 
 #include "control/control.hpp"
+#include "diablo.h"
+#include "game_mode.hpp"
+#include "mods/mod_identity.h"
+#include "nthread.h"
+#include "engine/render/actor_model.hpp"
+#include "engine/render/actor_pose.hpp"
+#include "engine/render/actor_visual_snapshot.hpp"
+#include "engine/render/ogden_idle_pilot.hpp"
+#include "engine/render/ogden_idle_native_clock.hpp"
 #include "engine/assets.hpp"
 #include "engine/clx_sprite.hpp"
 #include "engine/light_tables.hpp"
@@ -1619,17 +1631,17 @@ const SceneMaterials &OpaqueSceneMaterials(size_t index, const TownSceneModel &m
 	return SceneMaterialCache.emplace(index, BuildSceneMaterials(model, art)).first->second;
 }
 
-const Texture &ImportedSceneTexture(size_t index, const TownImportedTexture &source)
+const Texture &ImportedRgbTexture(size_t index, uint32_t width, uint32_t height, std::span<const uint8_t> rgbBytes)
 {
 	const auto found = ImportedTextureCache.find(index);
 	if (found != ImportedTextureCache.end())
 		return found->second;
 	Texture texture;
-	texture.width = static_cast<int>(source.width);
-	texture.height = static_cast<int>(source.height);
-	texture.albedoPixels.resize(static_cast<size_t>(source.width) * source.height);
+	texture.width = static_cast<int>(width);
+	texture.height = static_cast<int>(height);
+	texture.albedoPixels.resize(static_cast<size_t>(width) * height);
 	for (size_t i = 0; i < texture.albedoPixels.size(); ++i) {
-		const uint8_t *rgb = source.rgb.data() + i * 3;
+		const uint8_t *rgb = rgbBytes.data() + i * 3;
 		// Six bits per source channel bound the shared LUT to 262144 colors;
 		// all levels are generated from albedo, before the final game palette.
 		const uint32_t key = (static_cast<uint32_t>(rgb[0] >> 2) << 12)
@@ -1661,6 +1673,247 @@ const Texture &ImportedSceneTexture(size_t index, const TownImportedTexture &sou
 		ImportedAlbedoLightTables.push_back(table);
 	}
 	return ImportedTextureCache.emplace(index, std::move(texture)).first->second;
+}
+
+const Texture &ImportedSceneTexture(size_t index, const TownImportedTexture &source)
+{
+	return ImportedRgbTexture(index, source.width, source.height, source.rgb);
+}
+
+Texture DecodeSprite(ClxSprite sprite);
+Texture ActorGroundShadow(const Texture &texture);
+
+// Private Ogden runtime pilot: opt-in exact package, CPU skin, existing draw path.
+constexpr size_t OgdenImportedTextureKey = std::numeric_limits<size_t>::max();
+constexpr std::string_view OgdenPilotAssetPath = "d3d-actors/ogden-idle-r1.actor";
+constexpr std::string_view OgdenPilotPackageSha256 = "9b7793d3e2187228a206ff139ba9e44e575de2f7ff40a783f4eee3d5b970759d";
+constexpr std::string_view OgdenPilotSelection =
+    "D3DOGDEN1\n"
+    "assetId=tristram.actor.ogden\n"
+    "variant=default\n"
+    "revision=ogden-idle-transport-r1-20261009\n"
+    "sourceSha256=ff6bed48aa22ea8cbd415e1ba5931a397189cb09b5b81acc61e826314f0e306f\n"
+    "packageSha256=9b7793d3e2187228a206ff139ba9e44e575de2f7ff40a783f4eee3d5b970759d\n";
+
+struct OgdenPilotArtwork {
+	bool attempted = false;
+	bool ready = false;
+	ActorModel model;
+	OgdenIdlePilotSample sample;
+	Texture shadow;
+	uint64_t shadowGeneration = std::numeric_limits<uint64_t>::max();
+	uint16_t shadowFrame = std::numeric_limits<uint16_t>::max();
+	uint64_t poseTicks = std::numeric_limits<uint64_t>::max();
+	uint64_t poseGeneration = std::numeric_limits<uint64_t>::max();
+	uint16_t poseProgress = std::numeric_limits<uint16_t>::max();
+	uint16_t retainedProgress = 0;
+	double poseTickHz = 0;
+	bool posePaused = false;
+};
+
+OgdenPilotArtwork OgdenPilot;
+TownViewOgdenPilotState OgdenPilotState;
+bool OgdenGpuSubmissionFailed = false;
+bool FailOgdenGpuSubmissionForDiagnostics = false;
+
+bool EnsureOgdenIdlePilotLoaded()
+{
+	if (OgdenPilot.attempted)
+		return OgdenPilot.ready;
+	OgdenPilot.attempted = true;
+	OgdenPilotState.attempted = true;
+	try {
+		AssetRef selectionRef = FindAsset("d3d-actors/ogden-idle-r1.selection");
+		if (!selectionRef.ok())
+			return false; // No explicit selection: preserve the current actor.
+		if (selectionRef.size() != OgdenPilotSelection.size())
+			return false;
+		AssetHandle selectionHandle = OpenAsset(std::move(selectionRef));
+		std::string selection(OgdenPilotSelection.size(), '\0');
+		if (!selectionHandle.ok() || !selectionHandle.read(selection.data(), selection.size()) || selection != OgdenPilotSelection)
+			return false;
+		AssetRef assetRef = FindAsset(OgdenPilotAssetPath);
+		if (!assetRef.ok())
+			return false;
+		const size_t assetBytes = assetRef.size();
+		if (assetBytes != 13190983U)
+			return false;
+		std::vector<uint8_t> bytes(assetBytes);
+		AssetHandle assetHandle = OpenAsset(std::move(assetRef));
+		if (!assetHandle.ok() || !assetHandle.read(bytes.data(), bytes.size()))
+			return false;
+		if (ModHashToHex(ComputeBytesSha256(std::as_bytes(std::span<const uint8_t>(bytes)))) != OgdenPilotPackageSha256)
+			return false;
+		std::string error;
+		ActorModel model;
+		if (!LoadActorModel(bytes, model, error) || model.assetId != OgdenIdlePilotAssetId
+		    || model.variant != OgdenIdlePilotVariant || model.revision != OgdenIdlePilotRevision
+		    || model.sourceSha256 != OgdenIdlePilotSourceSha256)
+			return false;
+		OgdenPilot.model = std::move(model);
+		OgdenPilot.ready = true;
+		OgdenPilotState.loaded = true;
+		Log("Ogden idle pilot: loaded revision={}, package={}, generic clip loops at its authored duration; native sequence remains authoritative",
+		    OgdenPilot.model.revision, OgdenPilotPackageSha256);
+		return true;
+	} catch (const std::bad_alloc &) {
+		return false;
+	}
+}
+
+void PrepareOgdenIdlePilotTexture()
+{
+	const bool present = std::any_of(Towners.begin(), Towners.end(), [](const Towner &towner) {
+		return towner._ttype == TOWN_TAVERN && towner.anim;
+	});
+	if (!present || !EnsureOgdenIdlePilotLoaded())
+		return;
+	const size_t previousLutSize = ImportedAlbedoLightTables.size();
+	try {
+		ImportedRgbTexture(OgdenImportedTextureKey, OgdenPilot.model.textureWidth,
+		    OgdenPilot.model.textureHeight, OgdenPilot.model.textureRgb);
+	} catch (const std::bad_alloc &) {
+		// Roll back append-only actor colors before any GPU table snapshot.
+		// A failed color-map insertion/table growth must not leave dangling IDs.
+		for (auto it = ImportedAlbedoColors.begin(); it != ImportedAlbedoColors.end();) {
+			if (it->second >= previousLutSize)
+				it = ImportedAlbedoColors.erase(it);
+			else
+				++it;
+		}
+		ImportedAlbedoLightTables.resize(previousLutSize);
+		ImportedTextureCache.erase(OgdenImportedTextureKey);
+		OgdenPilot.ready = false;
+		OgdenPilotState.loaded = false;
+	}
+}
+
+bool DrawOgdenIdlePilot(const Surface &out, const Towner &towner, size_t index)
+{
+	if (towner._ttype != TOWN_TAVERN || !OgdenPilot.ready)
+		return false;
+	bool drawingStarted = false;
+	try {
+		// Source native state is copied, never mutated by the visual adapter.
+		if (towner._tAnimLen != 16 || towner._tAnimDelay != 3 || towner.animOrder.size() != 111
+		    || towner._tAnimFrame >= towner._tAnimLen || towner._tAnimCnt < 0
+		    || towner._tAnimCnt >= towner._tAnimDelay || towner._tAnimFrameCnt >= towner.animOrder.size())
+			return false;
+		ActorVisualInput input;
+		input.kind = ActorVisualKind::Towner;
+		input.nativeIndex = static_cast<uint32_t>(index);
+		input.action = ActorVisualAction::Idle;
+		input.assetId = OgdenPilot.model.assetId;
+		input.variant = OgdenPilot.model.variant;
+		input.revision = OgdenPilot.model.revision;
+		input.sourceSha256 = OgdenPilot.model.sourceSha256;
+		input.authoritativeFootpoint = { static_cast<float>(towner.position.x), 0, static_cast<float>(towner.position.y) };
+		input.nativeDirection = 1; // Native Ogden source direction is SouthWest.
+		input.logicalFrame = input.displayedFrame = towner._tAnimFrame;
+		input.frameCount = towner._tAnimLen;
+		input.ticksPerFrame = static_cast<uint32_t>(towner._tAnimDelay);
+		input.tickCounter = static_cast<uint32_t>(towner._tAnimCnt);
+		input.sequenceIndex = towner._tAnimFrameCnt;
+		input.sequenceLength = static_cast<uint32_t>(towner.animOrder.size());
+		const uint64_t generation = GetOgdenIdleNativeClockGeneration();
+		if (OgdenPilot.poseGeneration != generation)
+			OgdenPilot.retainedProgress = 0;
+		input.paused = PauseMode == 2;
+		if (!input.paused)
+			OgdenPilot.retainedProgress = ProgressToNextGameTick;
+		input.progressToNextTick128 = OgdenPilot.retainedProgress;
+		ActorVisualSnapshot snapshot;
+		std::string error;
+		if (!MakeActorVisualSnapshot(input, snapshot, error))
+			return false;
+		OgdenIdlePilotClock clock;
+		clock.elapsedNativeTicks = GetOgdenIdleNativeTicks();
+		clock.tickHz = sgGameInitInfo.nTickRate;
+		// ProcessTowners is not run during a native pause. Both elapsed ticks and
+		// retained interpolation stay fixed; draw and GPU retries never tick it.
+		clock.holdConfirmed = input.paused;
+		if (OgdenPilot.poseTicks != clock.elapsedNativeTicks || OgdenPilot.poseGeneration != generation
+		    || OgdenPilot.poseProgress != input.progressToNextTick128 || OgdenPilot.poseTickHz != clock.tickHz
+		    || OgdenPilot.posePaused != input.paused || OgdenPilot.sample.pose.positions.empty()) {
+			OgdenIdlePilotSample sample;
+			if (SampleOgdenIdlePilot(OgdenPilot.model, snapshot, clock, sample, error) != OgdenIdlePilotResult::Sampled)
+				return false;
+			OgdenPilot.sample = std::move(sample);
+			OgdenPilot.poseTicks = clock.elapsedNativeTicks;
+			OgdenPilot.poseGeneration = generation;
+			OgdenPilot.poseProgress = input.progressToNextTick128;
+			OgdenPilot.poseTickHz = clock.tickHz;
+			OgdenPilot.posePaused = input.paused;
+		}
+		// Texture/LUT preparation must precede the GPU's frozen material table.
+		const auto texture = ImportedTextureCache.find(OgdenImportedTextureKey);
+		if (texture == ImportedTextureCache.end())
+			return false;
+		const ActorPose &pose = OgdenPilot.sample.pose;
+		if (pose.positions.size() != OgdenPilot.model.vertices.size() || pose.normals.size() != pose.positions.size())
+			return false;
+		if (OgdenPilot.shadowGeneration != generation || OgdenPilot.shadowFrame != towner._tAnimFrame) {
+			Texture shadow = ActorGroundShadow(DecodeSprite(towner.currentSprite()));
+			OgdenPilot.shadow = std::move(shadow);
+			OgdenPilot.shadowGeneration = generation;
+			OgdenPilot.shadowFrame = towner._tAnimFrame;
+		}
+		// All CPU allocations finish before the first pixel/triangle is drawn.
+		drawingStarted = true;
+		if (!OgdenPilot.shadow.pixels.empty()) {
+			const auto onGround = [&](float u, float v) {
+				const float px = (u - 0.5F) * OgdenPilot.shadow.width;
+				const float py = v * OgdenPilot.shadow.height - OgdenPilot.shadow.height + 1;
+				return Vec3 { input.authoritativeFootpoint.x + (2 * py + px) / 64, 0.001F,
+					input.authoritativeFootpoint.z + (2 * py - px) / 64 };
+			};
+			PickRecord shadowPick = PickAt(towner.position);
+			shadowPick.preservePicking = true;
+			DrawQuad(out, { onGround(0,0), onGround(1,0), onGround(1,1), onGround(0,1) }, OgdenPilot.shadow, shadowPick, 0, true);
+		}
+		if (CaptureGpu && FailOgdenGpuSubmissionForDiagnostics)
+			throw std::bad_alloc();
+		const float c = std::cos(snapshot.nativeYawRadians), s = std::sin(snapshot.nativeYawRadians);
+		const auto rotate = [&](ActorVec3 value) { return Vec3 { c * value.x + s * value.z, value.y, -s * value.x + c * value.z }; };
+		const PickRecord pick = PickAt(towner.position, PickKind::Towner, static_cast<int>(index));
+		for (size_t triangle = 0; triangle < OgdenPilot.model.indices.size(); triangle += 3) {
+			std::array<Vertex, 3> vertices;
+			Vec3 normal {};
+			for (size_t corner = 0; corner < 3; ++corner) {
+				const uint32_t vertex = OgdenPilot.model.indices[triangle + corner];
+				const Vec3 point = rotate(pose.positions[vertex]);
+				vertices[corner] = { { point.x + input.authoritativeFootpoint.x, point.y,
+					point.z + input.authoritativeFootpoint.z }, OgdenPilot.model.vertices[vertex].uv.x, OgdenPilot.model.vertices[vertex].uv.y };
+				normal = normal + rotate(pose.normals[vertex]);
+			}
+			const Vec3 face = Cross(vertices[1].position - vertices[0].position, vertices[2].position - vertices[0].position);
+			if (Dot(face, ViewCamera.eye - vertices[0].position) <= 0)
+				continue;
+			const float length = std::sqrt(Dot(normal, normal));
+			if (!(length > 0))
+				continue;
+			normal = normal * (1 / length);
+			const TownSceneNormal authored { normal.x, normal.y, normal.z };
+			DrawTriangle(out, vertices, texture->second, pick, 0, false, &authored);
+			++OgdenPilotState.trianglesVisited;
+		}
+		OgdenPilotState.drawn = true;
+		OgdenPilotState.nativeIndex = static_cast<int>(index);
+		OgdenPilotState.nativeTicks = clock.elapsedNativeTicks;
+		OgdenPilotState.clockGeneration = generation;
+		OgdenPilotState.sampleSeconds = OgdenPilot.sample.sourceSampleSeconds;
+		OgdenPilotState.loopSeconds = OgdenPilot.sample.sourceLoopSeconds;
+		return true;
+	} catch (const std::bad_alloc &) {
+		if (drawingStarted && CaptureGpu) {
+			// The frame owner discards this batch without downgrading to CPU 3D.
+			CaptureGpuFailed = true;
+			OgdenGpuSubmissionFailed = true;
+			PreparedGpuTextures.clear(); // Insertion may have left incomplete codes.
+			return true;
+		}
+		return false; // Preparation failed before any drawing.
+	}
 }
 
 const std::array<Texture, InteriorMaterialCount + FlameBandCount * FlameLightLevels> &CabinInteriorTextures(size_t index, const TownCabinInterior &interior)
@@ -2837,6 +3090,10 @@ void SetTownViewRasterJitterForDiagnostics(float x, float y)
 
 void ResetTownViewResources()
 {
+	OgdenPilot = {};
+	OgdenPilotState = {};
+	OgdenGpuSubmissionFailed = false;
+	FailOgdenGpuSubmissionForDiagnostics = false;
 	ResetFollowCameraHistory(true);
 	ClearGpuSceneResources();
 	HorizonMesh = {};
@@ -2884,6 +3141,9 @@ void ResetTownViewResources()
 bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 {
 	const auto worldStart = std::chrono::steady_clock::now();
+	OgdenPilotState.drawn = false;
+	OgdenPilotState.trianglesVisited = 0;
+	OgdenGpuSubmissionFailed = false;
 	PickingValid = false;
 	RasterSampleFactor = 1;
 	RendererState = {};
@@ -2981,6 +3241,8 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 		{ ViewCamera.projection.centerX, ViewCamera.projection.centerY },
 		out.w(), out.h(), RasterSampleFactor, horizonEnabled, ArchitectureCullingState.requested, *GetOptions().Graphics.zoom
 	};
+	// Both backends need the pilot; prepare before any frozen GPU material table.
+	PrepareOgdenIdlePilotTexture();
 	if (GpuRecovery.ShouldAttempt(RendererState.requestedGpu, recoveryKey, SDL_GetTicks())) {
 		PrepareFrameImportedAlbedo();
 		CaptureGpu = TownGpuBeginFrame(out.w(), out.h(), false,
@@ -3051,6 +3313,8 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 			const Towner &towner = Towners[i];
 			if (!towner.anim)
 				continue;
+			if (DrawOgdenIdlePilot(out, towner, i))
+				continue;
 			if (towner._ttype == TOWN_COW) {
 				const auto sheet = GetTownCowSpriteSheet();
 				const ClxSprite current = towner.currentSprite();
@@ -3108,7 +3372,7 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 	};
 	drawWorld();
 	if (CaptureGpu) {
-		const bool complete = TownGpuEndFrame(GpuFrame) && !CaptureGpuFailed
+		const bool complete = !CaptureGpuFailed && TownGpuEndFrame(GpuFrame)
 		    && GpuFrame.width == out.w() && GpuFrame.height == out.h()
 		    && GpuFrame.indexed.size() == DepthBuffer.size()
 		    && GpuFrame.depth.size() == DepthBuffer.size() && GpuFrame.pickIds.size() == PickBuffer.size()
@@ -3124,6 +3388,22 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 			GpuRecovery.RecordSuccess();
 			GpuFailure.clear();
 		} else {
+			if (OgdenGpuSubmissionFailed) {
+				// Keep the GPU preference and retry hardware on the next frame with
+				// the native actor volume. Never publish a partial image or CPU redraw.
+				ClearGpuSceneResources();
+				OgdenPilot.ready = false;
+				OgdenPilotState.loaded = false;
+				OgdenPilotState.drawn = false;
+				RendererState.requestedGpu = true;
+				GpuFailure = "Ogden GPU submission allocation failed; frame discarded";
+				RendererState.failure = GpuFailure;
+				std::fill(DepthBuffer.begin(), DepthBuffer.end(), std::numeric_limits<float>::infinity());
+				std::fill(PickBuffer.begin(), PickBuffer.end(), PickRecord {});
+				SamplingState = { *GetOptions().Graphics.townViewAntialiasing, 1, logical.w(), logical.h(), false };
+				ClearSurface(logical);
+				return true;
+			}
 			GpuRecovery.RecordFailure(GetTownGpuStatus().failureKind, recoveryKey, SDL_GetTicks());
 			GpuFailure = GetTownGpuStatus().failure;
 			if (GpuFailure.empty())
@@ -3178,6 +3458,16 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 		}
 	}
 	return true;
+}
+
+TownViewOgdenPilotState GetTownViewOgdenPilotState()
+{
+	return OgdenPilotState;
+}
+
+void SetTownViewOgdenGpuSubmissionFailureForDiagnostics(bool enabled)
+{
+	FailOgdenGpuSubmissionForDiagnostics = enabled;
 }
 
 int TownViewArchitectureAt(Point screen)

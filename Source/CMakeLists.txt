@@ -2,6 +2,17 @@ include(Definitions)
 include(functions/devilutionx_library)
 include(functions/genex)
 
+if(MSVC)
+  set_source_files_properties(
+    engine/render/actor_model.cpp
+    engine/render/actor_pose.cpp
+    engine/render/actor_visual_snapshot.cpp
+    engine/render/ogden_idle_pilot.cpp
+    engine/render/ogden_idle_native_clock.cpp
+    engine/render/town_view.cpp
+    PROPERTIES COMPILE_OPTIONS "/EHsc")
+endif()
+
 set(libdevilutionx_SRCS
   appfat.cpp
   automap.cpp
@@ -81,6 +92,11 @@ set(libdevilutionx_SRCS
   engine/sound_position.cpp
   engine/trn.cpp
 
+  engine/render/actor_model.cpp
+  engine/render/actor_pose.cpp
+  engine/render/actor_visual_snapshot.cpp
+  engine/render/ogden_idle_pilot.cpp
+  engine/render/ogden_idle_native_clock.cpp
   engine/render/automap_render.cpp
   engine/render/d3d_logo.cpp
   engine/render/d3d_menu_presentation.cpp

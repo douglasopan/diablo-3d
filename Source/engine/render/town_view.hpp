@@ -86,6 +86,21 @@ struct TownViewRendererState {
 	double sceneRecordMilliseconds = 0;
 };
 TownViewRendererState GetTownViewRendererState();
+/** Read-only evidence for the opt-in Ogden transport pilot; not art acceptance. */
+struct TownViewOgdenPilotState {
+	bool attempted = false;
+	bool loaded = false;
+	bool drawn = false;
+	int nativeIndex = -1;
+	size_t trianglesVisited = 0;
+	uint64_t nativeTicks = 0;
+	uint64_t clockGeneration = 0;
+	float sampleSeconds = 0;
+	double loopSeconds = 0;
+};
+TownViewOgdenPilotState GetTownViewOgdenPilotState();
+/** Simulate one allocation failure after GPU submission; defaults off on reset. */
+void SetTownViewOgdenGpuSubmissionFailureForDiagnostics(bool enabled);
 /** Real assembled world geometry, including interior and every flame pose.
  * Invalid/empty bounds are retained conservatively by the visibility test. */
 struct TownArchitectureBounds {

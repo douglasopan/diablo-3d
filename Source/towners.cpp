@@ -10,6 +10,7 @@
 #include "engine/load_cel.hpp"
 #include "engine/load_file.hpp"
 #include "engine/random.hpp"
+#include "engine/render/ogden_idle_native_clock.hpp"
 #include "game_mode.hpp"
 #include "inv.h"
 #include "minitext.h"
@@ -766,6 +767,7 @@ Towner *GetTowner(_talker_id type)
 
 void InitTowners()
 {
+	ResetOgdenIdleNativeClock();
 	assert(!CowSprites);
 
 	// Load towner data from TSV files
@@ -809,6 +811,7 @@ void InitTowners()
 
 void FreeTownerGFX()
 {
+	ResetOgdenIdleNativeClock();
 	for (Towner &towner : Towners) {
 		towner.ownedAnim = std::nullopt;
 	}
@@ -817,6 +820,8 @@ void FreeTownerGFX()
 
 void ProcessTowners()
 {
+	// Read-only visual clock: one increment per authoritative native tick.
+	AdvanceOgdenIdleNativeClock();
 	// BUGFIX: should be `i < numtowners`, was `i < NUM_TOWNERS`
 	for (auto &towner : Towners) {
 		if (towner._ttype == TOWN_DEADGUY) {
