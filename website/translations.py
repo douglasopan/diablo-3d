@@ -7,6 +7,9 @@ audit. URLs, filenames, commits and evidence hashes are language independent.
 from __future__ import annotations
 
 TRANSLATIONS: dict[str, str] = {
+    'Acompanhe via Discord': 'Follow our progress on Discord',
+    'Comunidades do projeto': 'Project communities',
+    'Reddit — comunidade Diablo 3D': 'Reddit — Diablo 3D community',
     '09/10 · baseline técnica offscreen · a783aff4': 'Oct 9 · offscreen technical baseline · a783aff4',
     '09/10 · materiais aproximados offscreen · a783aff4': 'Oct 9 · offscreen approximated materials · a783aff4',
     '09/10 · geometria forçada offscreen · a783aff4': 'Oct 9 · offscreen forced geometry · a783aff4',
