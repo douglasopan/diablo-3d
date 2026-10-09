@@ -343,6 +343,8 @@ TRANSLATIONS: dict[str, str] = {
     'Ajude a construir<br>Diablo inteiro em 3D.': 'Help build<br>all of Diablo in 3D.',
     'Modelos, revisões e ferramentas exigem investimento. Seu apoio ajuda a manter o desenvolvimento, avançar até a conclusão e explorar novas possibilidades. A etapa atual é Tristram; o objetivo inclui todos os níveis.': 'Models, revisions and tools require investment. Your support helps sustain development, work toward completion and explore new possibilities. The current stage is Tristram; the goal includes every level.',
     'Conversar no Discord': 'Talk on Discord',
+    'Apoiar no Patreon': 'Support on Patreon',
+    'Se preferir apoiar pela plataforma, visite a página de Douglas Pan no Patreon.': 'If you prefer to support through the platform, visit Douglas Pan’s Patreon page.',
     'Escolha como apoiar.': 'Choose how to support.',
     'O contato direto é o caminho preferido para combinar a contribuição.': 'Direct contact is the preferred way to arrange your contribution.',
     'APOIO FINANCEIRO · CONTATO DIRETO': 'FINANCIAL SUPPORT · DIRECT CONTACT',
