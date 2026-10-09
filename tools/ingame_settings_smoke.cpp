@@ -876,6 +876,9 @@ void CheckPersistence(const ConfigFixture &fixture)
 	    "native loaders restore keyboard and gamepad bindings saved during play");
 }
 
+#include "movement_keymapping_settings_checks.hpp"
+#include "movement_keymapping_r2_settings_checks.hpp"
+
 } // namespace
 
 int main()
@@ -939,6 +942,8 @@ int main()
 		CheckChanges();
 		CheckSliders();
 		CheckKeyCapture();
+		CheckMovementKeymapping(fixture);
+		CheckMovementKeymappingR2(fixture);
 		CheckPadCapture();
 		CheckPersistence(fixture);
 		gamemenu_off();

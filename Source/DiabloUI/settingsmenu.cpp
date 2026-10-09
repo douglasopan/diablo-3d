@@ -52,6 +52,8 @@ constexpr size_t IndexPadTimerText = 2;
 
 bool endMenu = false;
 bool backToMain = false;
+bool CapturingKey = false;
+SDL_Keycode CapturedKeyPendingRelease = SDLK_UNKNOWN;
 
 std::vector<std::unique_ptr<UiListItem>> vecDialogItems;
 std::vector<std::unique_ptr<UiItemBase>> vecDialog;
@@ -80,6 +82,8 @@ enum class SpecialMenuEntry : int8_t {
 	UnbindKey = -3,
 	BindPadButton = -4,
 	UnbindPadButton = -5,
+	RestoreMovementKeys = -6,
+	BindKey = -7,
 };
 
 ControllerButtonCombo padEntryCombo {};
@@ -174,7 +178,12 @@ void UpdatePadEntryTimerText()
 
 void UpdateDescription(const OptionEntryBase &option)
 {
-	auto paragraphs = WordWrapString(option.GetDescription(), rectDescription.size.width, GameFont12, 1);
+	std::string description(option.GetDescription());
+	if (option.GetType() == OptionEntryType::Key) {
+		const auto context = static_cast<const KeymapperOptions::Action &>(option).ContextDescription();
+		if (!context.empty()) description = context + "\n" + description;
+	}
+	auto paragraphs = WordWrapString(description, rectDescription.size.width, GameFont12, 1);
 	CopyUtf8(optionDescription, paragraphs, sizeof(optionDescription));
 }
 
@@ -244,6 +253,12 @@ bool ChangeOptionValue(OptionEntryBase *pOption, size_t listIndex)
 	return true;
 }
 
+std::string KeyBindingLabel()
+{
+	const auto value = selectedOption->GetValueDescription();
+	return value.empty() ? std::string(_("Bind key")) : std::string(value);
+}
+
 void ItemSelected(size_t value)
 {
 	auto &vecItem = vecDialogItems[value];
@@ -257,11 +272,26 @@ void ItemSelected(size_t value)
 			GoBackOneMenuLevel();
 			break;
 		case SpecialMenuEntry::UnbindKey: {
+			CapturingKey = false;
+			vecDialogItems[2]->m_text = _("Activate the bound key to change it.");
 			auto *pOptionKey = static_cast<KeymapperOptions::Action *>(selectedOption);
 			pOptionKey->SetValue(SDLK_UNKNOWN);
-			vecDialogItems[IndexKeyOrPadInput]->m_text = selectedOption->GetValueDescription();
+			vecDialogItems[IndexKeyOrPadInput]->m_text = KeyBindingLabel();
+			UpdateDescription(*selectedOption);
 			break;
 		}
+		case SpecialMenuEntry::RestoreMovementKeys: {
+			CapturingKey = false;
+			vecDialogItems[2]->m_text = _("Activate the bound key to change it.");
+			const auto notice = GetOptions().Keymapper.RestoreMovementDefaults();
+			vecDialogItems[IndexKeyOrPadInput]->m_text = KeyBindingLabel();
+			CopyUtf8(optionDescription, WordWrapString(notice, rectDescription.size.width, GameFont12, 1), sizeof(optionDescription));
+			break;
+		}
+		case SpecialMenuEntry::BindKey:
+			CapturingKey = true;
+			vecDialogItems[2]->m_text = _("Press any key to change. Escape cancels.");
+			break;
 		case SpecialMenuEntry::BindPadButton:
 			StartPadEntryTimer();
 			break;
@@ -441,17 +471,37 @@ void UiSettingsMenu()
 			UpdateDescription(*pOptionList);
 		} break;
 		case ShownMenuType::KeyInput: {
+			CapturingKey = false;
+			CapturedKeyPendingRelease = SDLK_UNKNOWN;
 			vecDialogItems.push_back(std::make_unique<UiListItem>(_("Bound key:"), static_cast<int>(SpecialMenuEntry::None), UiFlags::ColorWhitegold | UiFlags::ElementDisabled));
-			vecDialogItems.push_back(std::make_unique<UiListItem>(std::string(selectedOption->GetValueDescription()), static_cast<int>(SpecialMenuEntry::None), UiFlags::ColorUiGold));
+			vecDialogItems.push_back(std::make_unique<UiListItem>(KeyBindingLabel(), static_cast<int>(SpecialMenuEntry::BindKey), UiFlags::ColorUiGold));
 			assert(IndexKeyOrPadInput == vecDialogItems.size() - 1);
 			itemToSelect = IndexKeyOrPadInput;
 			eventHandler = [](SDL_Event &event) {
-				if (SelectedItem != IndexKeyOrPadInput)
+				if ((event.type == SDL_EVENT_KEY_DOWN || event.type == SDL_EVENT_KEY_UP)
+				    && CapturedKeyPendingRelease != SDLK_UNKNOWN && SDLC_EventKey(event) == CapturedKeyPendingRelease) {
+					if (event.type == SDL_EVENT_KEY_UP) CapturedKeyPendingRelease = SDLK_UNKNOWN;
+					return true;
+				}
+				if (!CapturingKey)
 					return false;
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+				if (event.type == SDL_EVENT_KEY_DOWN && event.key.repeat)
+					return true;
+#endif
+				if (event.type == SDL_EVENT_KEY_DOWN && SDLC_EventKey(event) == SDLK_ESCAPE) {
+					CapturingKey = false;
+					CapturedKeyPendingRelease = SDLK_ESCAPE;
+					vecDialogItems[2]->m_text = _("Activate the bound key to change it.");
+					UpdateDescription(*selectedOption);
+					return true;
+				}
 				uint32_t key = SDLK_UNKNOWN;
 				switch (event.type) {
 				case SDL_EVENT_KEY_DOWN: {
 					SDL_Keycode keycode = SDLC_EventKey(event);
+					if (keycode == SDLK_ESCAPE)
+						return false; // Let native BACK cancel instead of treating Escape as a conflict.
 					remap_keyboard_key(&keycode);
 					key = static_cast<uint32_t>(keycode);
 					if (key >= SDLK_A && key <= SDLK_Z) {
@@ -485,14 +535,23 @@ void UiSettingsMenu()
 				if (key == SDLK_UNKNOWN)
 					return false;
 				auto *pOptionKey = static_cast<KeymapperOptions::Action *>(selectedOption);
-				if (!pOptionKey->SetValue(key))
-					return false;
-				vecDialogItems[IndexKeyOrPadInput]->m_text = selectedOption->GetValueDescription();
+				if (!pOptionKey->SetValue(key)) {
+					const auto error = pOptionKey->BindingError(key);
+					CopyUtf8(optionDescription, WordWrapString(error, rectDescription.size.width, GameFont12, 1), sizeof(optionDescription));
+					return true; // Keep capture/navigation active; the rejected key changes nothing.
+				}
+				vecDialogItems[IndexKeyOrPadInput]->m_text = KeyBindingLabel();
+				CapturingKey = false;
+				if (event.type == SDL_EVENT_KEY_DOWN) CapturedKeyPendingRelease = SDLC_EventKey(event);
+				vecDialogItems[2]->m_text = _("Activate the bound key to change it.");
+				UpdateDescription(*selectedOption);
 				return true;
 			};
-			vecDialogItems.push_back(std::make_unique<UiListItem>(_("Press any key to change."), static_cast<int>(SpecialMenuEntry::None), UiFlags::ColorUiSilver | UiFlags::ElementDisabled));
+			vecDialogItems.push_back(std::make_unique<UiListItem>(_("Activate the bound key to change it."), static_cast<int>(SpecialMenuEntry::None), UiFlags::ColorUiSilver | UiFlags::ElementDisabled));
 			vecDialogItems.push_back(std::make_unique<UiListItem>(std::string_view {}, static_cast<int>(SpecialMenuEntry::None), UiFlags::ElementDisabled));
 			vecDialogItems.push_back(std::make_unique<UiListItem>(_("Unbind key"), static_cast<int>(SpecialMenuEntry::UnbindKey), UiFlags::ColorUiGold));
+			if (static_cast<KeymapperOptions::Action *>(selectedOption)->context == KeymapperContext::TownMovement)
+				vecDialogItems.push_back(std::make_unique<UiListItem>(_("Restore movement defaults"), static_cast<int>(SpecialMenuEntry::RestoreMovementKeys), UiFlags::ColorUiGold));
 			UpdateDescription(*selectedOption);
 		} break;
 		case ShownMenuType::PadInput: {

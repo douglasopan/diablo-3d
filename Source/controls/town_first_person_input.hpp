@@ -40,7 +40,7 @@ struct TownFirstPersonInputSnapshot {
 	bool relativeCaptured = false; // Observed platform state, never requested state.
 	bool captureFailed = false; // Failure acknowledgement for the pending change.
 	bool escapePressed = false; // Nonrepeat pulse; native Escape stays available.
-	bool resumeClick = false; // Fresh click inside eligible world, decided by adapter.
+	bool resumeClick = false; // Fresh world click or eligible device-takeover movement DOWN, decided by adapter.
 	uint8_t physicalHeld = 0; // Eight physical keys; adapter filters disallowed modifiers.
 	uint8_t pressed = 0; // Fresh NONREPEAT movement-key downs since preceding Step.
 	uint8_t released = 0; // Physical key ups, including while native UI consumes them.
@@ -87,6 +87,12 @@ struct TownFirstPersonInputResult {
  * Snapshot/Result deltas can be applied through the existing camera rig.
  * No attack, interaction, target, path, collision or ControlMode is changed. */
 TownFirstPersonInputResult StepTownFirstPersonInput(const TownFirstPersonInputState &state,
+    const TownFirstPersonInputSnapshot &input, const TownFirstPersonInputPreferences &preferences);
+
+/** Same per-slot latch, normalization and native direction as FPP, without
+ * acquiring/releasing relative mouse. Third-person adapter owns eligibility,
+ * clears/rearms on focus/UI/mode/binding changes and supplies no look deltas. */
+TownFirstPersonInputResult StepTownCameraMovement(const TownFirstPersonInputState &state,
     const TownFirstPersonInputSnapshot &input, const TownFirstPersonInputPreferences &preferences);
 
 } // namespace devilution

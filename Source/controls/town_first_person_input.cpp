@@ -95,8 +95,6 @@ TownFirstPersonInputResult StepTownFirstPersonInput(const TownFirstPersonInputSt
 	result.nextState.blockedKeys &= TownFirstPersonMovementMask;
 	result.nextState.lastDirectionKeys &= TownFirstPersonArrowMask;
 	const uint8_t physical = input.physicalHeld & TownFirstPersonMovementMask;
-	const uint8_t pressed = input.pressed & TownFirstPersonMovementMask;
-	const uint8_t released = input.released & TownFirstPersonMovementMask;
 	const bool validPose = std::isfinite(input.currentYaw) && std::isfinite(input.currentPitch)
 	    && input.currentPitch >= -PitchLimit && input.currentPitch <= PitchLimit;
 	const bool eligible = input.firstPersonActive && input.inputAllowed && validPose;
@@ -174,6 +172,23 @@ TownFirstPersonInputResult StepTownFirstPersonInput(const TownFirstPersonInputSt
 		ClearHeld(result);
 		result.nextState.phase = Phase::Released;
 		result.nextState.resumeRequired = true;
+		return result;
+	}
+
+	return StepTownCameraMovement(result.nextState, input, preferences);
+}
+
+TownFirstPersonInputResult StepTownCameraMovement(const TownFirstPersonInputState &state,
+    const TownFirstPersonInputSnapshot &input, const TownFirstPersonInputPreferences &preferences)
+{
+	TownFirstPersonInputResult result;
+	result.nextState = state;
+	const uint8_t physical = input.physicalHeld & TownFirstPersonMovementMask;
+	const uint8_t pressed = input.pressed & TownFirstPersonMovementMask;
+	const uint8_t released = input.released & TownFirstPersonMovementMask;
+	if (!std::isfinite(input.currentYaw) || !std::isfinite(input.currentPitch)
+	    || input.currentPitch < -PitchLimit || input.currentPitch > PitchLimit) {
+		ClearHeld(result);
 		return result;
 	}
 

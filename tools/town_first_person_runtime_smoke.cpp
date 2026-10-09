@@ -33,6 +33,8 @@
 #include "town_first_person_click_checks.hpp"
 #include "control/control_chat.hpp"
 #include "controls/town_first_person_input.hpp"
+#include "controls/remap_keyboard.h"
+#include "ingame_settings.h"
 #include "cursor.h"
 #include "cursor_defs.hpp"
 #include "engine/assets.hpp"
@@ -42,6 +44,7 @@
 #include "engine/render/scrollrt.h"
 #include "engine/sound.h"
 #include "game_mode.hpp"
+#include "gamemenu.h"
 #include "gmenu.h"
 #include "headless_mode.hpp"
 #include "init.hpp"
@@ -93,27 +96,28 @@ void Check(bool value, const std::string &message)
 struct PhysicalServices {
     static inline bool Relative = false;
     static inline bool Focus = true;
-    static inline uint8_t Held = 0;
+    static inline std::vector<std::pair<SDL_Keycode, uint8_t>> HeldPhysicalKeys;
     static inline unsigned Flushes = 0;
     static bool SetRelative(bool enabled) { Relative = enabled; return true; }
     static bool GetRelative() { return Relative; }
     static bool HasFocus() { return Focus; }
-    static uint8_t HeldArrows() { return Held; }
+    static uint8_t HeldArrows()
+    {
+        uint8_t held = 0;
+        for (const auto &[key, bit] : HeldPhysicalKeys)
+            if (Bit(key) == bit) held |= bit; // Old physical holds cannot inherit a remap.
+        return held;
+    }
     static void FlushRelative() { ++Flushes; }
     static uint8_t Bit(SDL_Keycode key)
     {
-        switch (key) {
-        case SDLK_UP: return TownFirstPersonArrowUp;
-        case SDLK_DOWN: return TownFirstPersonArrowDown;
-        case SDLK_LEFT: return TownFirstPersonArrowLeft;
-        case SDLK_RIGHT: return TownFirstPersonArrowRight;
-        case SDLK_W: return TownFirstPersonKeyW;
-        case SDLK_A: return TownFirstPersonKeyA;
-        case SDLK_S: return TownFirstPersonKeyS;
-        case SDLK_D: return TownFirstPersonKeyD;
-        default: return 0;
-        }
+        remap_keyboard_key(&key);
+        uint32_t normalized = static_cast<uint32_t>(key);
+        if (normalized >= SDLK_A && normalized <= SDLK_Z) normalized -= 'a' - 'A';
+        const auto *action = GetOptions().Keymapper.findAction(normalized, KeymapperContext::TownMovement);
+        return action != nullptr ? action->movementBit : 0;
     }
+
     static void Observe(const SDL_Event &event)
     {
         if (event.type != SDL_EVENT_KEY_DOWN && event.type != SDL_EVENT_KEY_UP) return;
@@ -122,9 +126,14 @@ struct PhysicalServices {
 #else
         const auto key = event.key.keysym.sym;
 #endif
-        const uint8_t bit = Bit(key);
-        if (event.type == SDL_EVENT_KEY_DOWN) Held |= bit;
-        else Held &= static_cast<uint8_t>(~bit);
+        const auto held = std::find_if(HeldPhysicalKeys.begin(), HeldPhysicalKeys.end(),
+            [key](const auto &entry) { return entry.first == key; });
+        if (event.type == SDL_EVENT_KEY_DOWN) {
+            if (held == HeldPhysicalKeys.end()) HeldPhysicalKeys.emplace_back(key, Bit(key));
+            else if (!event.key.repeat) held->second = Bit(key);
+        } else if (held != HeldPhysicalKeys.end()) {
+            HeldPhysicalKeys.erase(held);
+        }
     }
 };
 
@@ -521,6 +530,8 @@ void Cleanup() noexcept
 
 // Added production dispatcher regression cases, sharing this isolated runner.
 #include "town_follow_input_checks.hpp"
+#include "movement_keymapping_runtime_checks.hpp"
+#include "movement_keymapping_r2_runtime_checks.hpp"
 
 int main(int argc, char **argv)
 {
@@ -545,6 +556,8 @@ int main(int argc, char **argv)
         first_person_root_supplement::RunCpuDeferredClickChecks(api, Check);
         first_person_root_supplement::RunPendingNativeWalkGateChecks(api, Check, [](bool focused) { PhysicalServices::Focus = focused; });
         FollowInputChecks(api);
+        MovementKeymappingRuntimeChecks(api);
+        MovementKeymappingR2RuntimeChecks(api);
         FollowClickChecks(api);
         Check(renderer == nullptr, "no GPU renderer was created during the entire fixture");
         Check((SDL_GetWindowFlags(ghMainWnd) & SDL_WINDOW_HIDDEN) != 0, "dummy window remains hidden at completion");

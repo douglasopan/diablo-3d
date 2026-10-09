@@ -588,6 +588,8 @@ void WasdAliases()
 	    "alias transitions do not mutate the caller's raw state or snapshot");
 }
 
+#include "movement_keymapping_pure_checks.hpp"
+
 } // namespace
 
 int main()
@@ -598,6 +600,7 @@ int main()
 	LookAndInvalidValues();
 	FunctionalContract();
 	WasdAliases();
+	MovementKernelChecks();
 	std::cout << "First-person input checks: " << Checks << ", failures: " << Failures << '\n';
 	return Failures == 0 ? 0 : 1;
 }

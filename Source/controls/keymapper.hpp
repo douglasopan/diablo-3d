@@ -14,7 +14,9 @@
 
 namespace devilution {
 
-void KeymapperPress(SDL_Keycode key);
-void KeymapperRelease(SDL_Keycode key);
+enum class KeymapperContext : uint8_t { Native, TownMovement };
+
+bool KeymapperPress(SDL_Keycode key, KeymapperContext context = KeymapperContext::Native);
+void KeymapperRelease(SDL_Keycode key, KeymapperContext context = KeymapperContext::Native);
 
 } // namespace devilution

@@ -95,6 +95,8 @@ void InitKeymapActions();
 void SetCursorPos(Point position);
 /** Captured first-person input uses the logical world viewport center. */
 bool IsTownFirstPersonInputCaptured();
+/** Eligible keyboard movement in FPP or Third; Third does not capture mouse. */
+bool IsTownCameraMovementInputActive();
 Point GetTownFirstPersonPointer(Point absolute);
 Direction GetTownFirstPersonMoveDirection();
 /** Release capture, owned arrows and only a walk issued by this adapter. */
@@ -113,6 +115,9 @@ struct TownFirstPersonInputServicesForDiagnostics {
 	uint8_t (*heldArrows)() = nullptr;
 	bool (*hasFocus)() = nullptr;
 	void (*flushRelativeMouse)() = nullptr;
+	/** Optional synthetic scancode state. When provided, exercises the same
+	 * owned-scancode/epoch polling loop as SDL, instead of heldArrows slots. */
+	bool (*scancodeHeld)(int) = nullptr;
 };
 void SetTownFirstPersonInputServicesForDiagnostics(const TownFirstPersonInputServicesForDiagnostics *services);
 /** Calls the exact live-session handler and synchronization used by gameplay. */

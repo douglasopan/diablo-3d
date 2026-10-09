@@ -223,6 +223,7 @@ void LoadOptions()
 	LoadIni();
 	DiscoverMods();
 	Options &options = GetOptions();
+	options.Keymapper.ClearMovementBindings();
 	for (OptionCategoryBase *pCategory : options.GetCategories()) {
 		for (OptionEntryBase *pEntry : pCategory->GetEntries()) {
 			pEntry->LoadFromIni(pCategory->GetKey());
@@ -1254,6 +1255,10 @@ KeymapperOptions::KeymapperOptions()
 	keyIDToKeyName.emplace(SDLK_RALT, "RALT");
 
 	keyIDToKeyName.emplace(SDLK_SPACE, "SPACE");
+	keyIDToKeyName.emplace(SDLK_UP, "UP");
+	keyIDToKeyName.emplace(SDLK_DOWN, "DOWN");
+	keyIDToKeyName.emplace(SDLK_LEFT, "LEFT");
+	keyIDToKeyName.emplace(SDLK_RIGHT, "RIGHT");
 
 	keyIDToKeyName.emplace(SDLK_RCTRL, "RCONTROL");
 	keyIDToKeyName.emplace(SDLK_LCTRL, "LCONTROL");
@@ -1307,8 +1312,10 @@ std::vector<OptionEntryBase *> KeymapperOptions::GetEntries()
 	return entries;
 }
 
-KeymapperOptions::Action::Action(std::string_view key, const char *name, const char *description, uint32_t defaultKey, std::function<void()> actionPressed, std::function<void()> actionReleased, std::function<bool()> enable, unsigned index)
+KeymapperOptions::Action::Action(std::string_view key, const char *name, const char *description, uint32_t defaultKey, std::function<void()> actionPressed, std::function<void()> actionReleased, std::function<bool()> enable, unsigned index, KeymapperContext context, uint8_t movementBit)
     : OptionEntryBase(key, OptionEntryFlags::None, name, description)
+    , context(context)
+    , movementBit(movementBit)
     , actionPressed(std::move(actionPressed))
     , actionReleased(std::move(actionReleased))
     , defaultKey(defaultKey)
@@ -1331,15 +1338,19 @@ std::string_view KeymapperOptions::Action::GetName() const
 
 void KeymapperOptions::Action::LoadFromIni(std::string_view category)
 {
+	const auto loadBinding = [this](uint32_t value) {
+		if (!SetValue(value))
+			LogWarn("Keymapper: binding for '{}' was not loaded: {}", key, BindingError(value));
+	};
 	const std::span<const Ini::Value> iniValues = ini->get(category, key);
 	if (iniValues.empty()) {
-		SetValue(defaultKey);
+		loadBinding(defaultKey);
 		return; // Use the default key if no key has been set.
 	}
 
 	const std::string_view iniValue = iniValues.back().value;
 	if (iniValue.empty()) {
-		SetValue(SDLK_UNKNOWN);
+		loadBinding(SDLK_UNKNOWN);
 		return;
 	}
 
@@ -1347,13 +1358,13 @@ void KeymapperOptions::Action::LoadFromIni(std::string_view category)
 	if (keyIt == GetOptions().Keymapper.keyNameToKeyID.end()) {
 		// Use the default key if the key is unknown.
 		Log("Keymapper: unknown key '{}'", iniValue);
-		SetValue(defaultKey);
+		loadBinding(defaultKey);
 		return;
 	}
 
 	// Store the key in action.key and in the map so we can save() the
 	// actions while keeping the same order as they have been added.
-	SetValue(keyIt->second);
+	loadBinding(keyIt->second);
 }
 void KeymapperOptions::Action::SaveToIni(std::string_view category) const
 {
@@ -1381,38 +1392,98 @@ std::string_view KeymapperOptions::Action::GetValueDescription() const
 	return keyNameIt->second;
 }
 
+std::string KeymapperOptions::Action::BindingError(uint32_t value) const
+{
+	const auto &mapper = GetOptions().Keymapper;
+	if (value == SDLK_UNKNOWN)
+		return {};
+	if (mapper.keyIDToKeyName.find(value) == mapper.keyIDToKeyName.end())
+		return std::string(_("This key is unavailable."));
+	const auto reserved = [](const Action &action) {
+		return action.key.starts_with("Town3D") || action.key == "ToggleTown3D"
+		    || action.key.starts_with("PauseGame") || action.key == "Screenshot" || action.key == "OpenConsole";
+	};
+	if (context != KeymapperContext::TownMovement) {
+		const Action *movement = mapper.findAction(value, KeymapperContext::TownMovement);
+		if (reserved(*this) && movement != nullptr)
+			return FormatRuntime(_("Key already used by {}. Unbind it first."), movement->GetName());
+		return {};
+	}
+	if ((value & KeymapperMouseButtonMask) != 0 || value == SDLK_LALT || value == SDLK_RALT
+	    || value == SDLK_LCTRL || value == SDLK_RCTRL || value == SDLK_PAUSE || value == SDLK_PRINTSCREEN)
+		return std::string(_("Choose a keyboard key, not a mouse input or modifier."));
+	const Action *conflict = mapper.findAction(value, context);
+	if (conflict != nullptr && conflict != this)
+		return FormatRuntime(_("Key already used by {}. Unbind it first."), conflict->GetName());
+	const Action *native = mapper.findAction(value);
+	if (native != nullptr && reserved(*native))
+		return FormatRuntime(_("Key reserved for {}. Remap that action first."), native->GetName());
+	return {};
+}
+
+std::string KeymapperOptions::Action::ContextDescription() const
+{
+	if (context != KeymapperContext::TownMovement)
+		return {};
+	const Action *native = GetOptions().Keymapper.findAction(boundKey);
+	if (native != nullptr)
+		return FormatRuntime(_("Outside camera movement, this key still runs {}."), native->GetName());
+	return std::string(_("Only while controlling the first or third person camera. Other shortcuts are preserved."));
+}
+
 bool KeymapperOptions::Action::SetValue(int value)
 {
-	if (value != SDLK_UNKNOWN && GetOptions().Keymapper.keyIDToKeyName.find(value) == GetOptions().Keymapper.keyIDToKeyName.end()) {
-		// Ignore invalid key values
+	if (!BindingError(static_cast<uint32_t>(value)).empty())
 		return false;
-	}
-
-	// Remove old key
-	if (boundKey != SDLK_UNKNOWN) {
-		GetOptions().Keymapper.keyIDToAction.erase(boundKey);
-		boundKey = SDLK_UNKNOWN;
-	}
-
-	// Add new key
+	if (boundKey == static_cast<uint32_t>(value))
+		return true;
+	auto &mapper = GetOptions().Keymapper;
+	auto &bindings = context == KeymapperContext::TownMovement ? mapper.movementKeyIDToAction : mapper.keyIDToAction;
+	if (boundKey != SDLK_UNKNOWN)
+		bindings.erase(boundKey);
+	boundKey = SDLK_UNKNOWN;
 	if (value != SDLK_UNKNOWN) {
-		auto it = GetOptions().Keymapper.keyIDToAction.find(value);
-		if (it != GetOptions().Keymapper.keyIDToAction.end()) {
-			// Warn about overwriting keys.
+		auto it = bindings.find(value);
+		if (it != bindings.end()) {
+			// Native conflict policy stays unchanged. Movement conflicts were
+			// rejected before mutation, with a message in both binding dialogs.
 			Log("Keymapper: key '{}' is already bound to action '{}', overwriting", value, it->second.get().name);
 			it->second.get().boundKey = SDLK_UNKNOWN;
+			it->second.get().NotifyValueChanged();
 		}
-
-		GetOptions().Keymapper.keyIDToAction.insert_or_assign(value, *this);
+		bindings.insert_or_assign(value, *this);
 		boundKey = value;
 	}
-
+	NotifyValueChanged();
 	return true;
 }
 
-void KeymapperOptions::AddAction(std::string_view key, const char *name, const char *description, uint32_t defaultKey, std::function<void()> actionPressed, std::function<void()> actionReleased, std::function<bool()> enable, unsigned index)
+KeymapperOptions::Action &KeymapperOptions::AddAction(std::string_view key, const char *name, const char *description, uint32_t defaultKey, std::function<void()> actionPressed, std::function<void()> actionReleased, std::function<bool()> enable, unsigned index, KeymapperContext context, uint8_t movementBit)
 {
-	actions.emplace_front(key, name, description, defaultKey, std::move(actionPressed), std::move(actionReleased), std::move(enable), index);
+	actions.emplace_front(key, name, description, defaultKey, std::move(actionPressed), std::move(actionReleased), std::move(enable), index, context, movementBit);
+	return actions.front();
+}
+
+void KeymapperOptions::ClearMovementBindings()
+{
+	for (Action &action : actions)
+		if (action.context == KeymapperContext::TownMovement)
+			action.SetValue(SDLK_UNKNOWN);
+}
+
+std::string KeymapperOptions::RestoreMovementDefaults()
+{
+	ClearMovementBindings(); // Batch clear permits swaps and independent aliases.
+	std::string unavailable;
+	for (Action &action : actions) {
+		if (action.context == KeymapperContext::TownMovement && !action.SetValue(action.defaultKey)) {
+			if (!unavailable.empty()) unavailable += ", ";
+			unavailable += action.GetName();
+		}
+	}
+	if (!unavailable.empty())
+		return FormatRuntime(_("Defaults restored except: {}. Reserved native shortcuts were preserved."), unavailable);
+	return std::string(_("Movement defaults restored. Native shortcuts are preserved."));
 }
 
 void KeymapperOptions::CommitActions()
@@ -1420,10 +1491,11 @@ void KeymapperOptions::CommitActions()
 	actions.reverse();
 }
 
-const KeymapperOptions::Action *KeymapperOptions::findAction(uint32_t key) const
+const KeymapperOptions::Action *KeymapperOptions::findAction(uint32_t key, KeymapperContext context) const
 {
-	auto it = keyIDToAction.find(key);
-	if (it == keyIDToAction.end()) return nullptr;
+	const auto &bindings = context == KeymapperContext::TownMovement ? movementKeyIDToAction : keyIDToAction;
+	auto it = bindings.find(key);
+	if (it == bindings.end()) return nullptr;
 	return &it->second.get();
 }
 

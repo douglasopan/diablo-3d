@@ -50,22 +50,23 @@ SDL_Keycode ToAsciiUpper(SDL_Keycode key)
 
 } // namespace
 
-void KeymapperPress(SDL_Keycode key)
+bool KeymapperPress(SDL_Keycode key, KeymapperContext context)
 {
 	key = ToAsciiUpper(key);
-	const KeymapperOptions::Action *action = GetOptions().Keymapper.findAction(static_cast<uint32_t>(key));
-	if (action == nullptr || !action->actionPressed || !action->isEnabled()) return;
+	const KeymapperOptions::Action *action = GetOptions().Keymapper.findAction(static_cast<uint32_t>(key), context);
+	if (action == nullptr || !action->actionPressed || !action->isEnabled()) return false;
 
 	// TODO: This should be handled outside of the keymapper.
-	if (ChatFlag) return;
+	if (ChatFlag) return false;
 
 	action->actionPressed();
+	return true;
 }
 
-void KeymapperRelease(SDL_Keycode key)
+void KeymapperRelease(SDL_Keycode key, KeymapperContext context)
 {
 	key = ToAsciiUpper(key);
-	const KeymapperOptions::Action *action = GetOptions().Keymapper.findAction(static_cast<uint32_t>(key));
+	const KeymapperOptions::Action *action = GetOptions().Keymapper.findAction(static_cast<uint32_t>(key), context);
 	if (action == nullptr || !action->actionReleased || !action->isEnabled()) return;
 
 	// TODO: This should be handled outside of the keymapper.

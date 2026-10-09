@@ -1,6 +1,20 @@
 # Controles de primeira pessoa em Tristram
 
-Atualização: **8 de outubro de 2026**. Mouse para olhar, WASD/setas relativos à câmera, roda entre terceira/primeira pessoa e colisão visual com arquitetura estão implementados, compilados, validados tecnicamente e instalados no iniciador habitual. Continua a frente de [câmeras e horizonte](TRISTRAM-HORIZON-CAMERAS.md) na fila de [PROJECT-EXECUTION.md](PROJECT-EXECUTION.md). A validação interativa do mouse físico continua pendente.
+Atualização: **9 de outubro de 2026**. Mouse para olhar, movimento relativo à câmera com teclas remapeáveis, roda entre terceira/primeira pessoa e colisão visual com arquitetura estão implementados, compilados, validados tecnicamente e instalados no iniciador habitual. Continua a frente de [câmeras e horizonte](TRISTRAM-HORIZON-CAMERAS.md) na fila de [PROJECT-EXECUTION.md](PROJECT-EXECUTION.md). A validação interativa dos dispositivos físicos continua pendente.
+
+## Teclas de movimento remapeáveis — 9 de outubro
+
+No menu principal, **Configurações → Mapeamento de Teclas** oferece oito associações: uma principal e uma alternativa para avançar, recuar e mover para cada lado. Os padrões são W/S/A/D e ↑/↓/←/→. Cada associação pode ser alterada ou desassociada, e **Restaurar teclas de movimento** restaura somente esse grupo. A mesma configuração é usada pelos controles de primeira e terceira pessoa; não modifica a caminhada, colisão ou cadência da simulação nativa.
+
+O grupo de movimento tem contexto próprio. Uma tecla pode coexistir com um atalho comum, como S para magias, sem apagá-lo; a posse vale somente durante o controle elegível da câmera. Atalhos reservados, incluindo câmera, pausa e captura de tela, continuam protegidos. Conflitos entre ações de movimento são recusados com identificação do responsável. Defaults indisponíveis são informados e não removem o atalho reservado. O arquivo INI preserva associações alteradas e alternativas explicitamente vazias.
+
+Pressões são adquiridas depois da classificação nativa do dispositivo. A primeira tecla válida após gamepad já pertence ao contexto correto; solturas e repetições não vazam para atalhos comuns. Scancodes e épocas de posse impedem movimento preso ou a aquisição de uma tecla antiga após mudar bindings, foco, menu ou modo de câmera. As teclas principal e alternativa continuam independentes quando pressionadas juntas.
+
+O principal compilou Release/NONET e executou 5.341 verificações puras, 60.944 de configurações, 3.792 de runtime, 29 de colisão e 946 do HUD. O gate separado de câmera produziu 24 PNGs pelos caminhos CPU/GPU offscreen. O menu principal real passou **3.324 verificações** em português/inglês e 640×480/1920×1080: navegação, captura, conflitos, Escape, repetição/soltura, desassociação e reset completo/parcial. Quatro pares de processos escritor/leitor confirmaram persistência pelo INI, sem regravá-lo na leitura. Duas ações foram efetivamente editadas, com os oito IDs/defaults conferidos; isso não é cobertura humana de todas as combinações.
+
+Instalado às **01:35 de 9 de outubro (Brasília)** pelo mesmo `Iniciar-Tristram.cmd`. SHA-256 `1a037ebe62c0db0048d7538a53796e8b1aa42ec954dcd7863f6090b5b4e27adc`, 6.348.800 bytes, três aliases idênticos e backups. Os **44 arquivos do perfil** preservaram hash/tamanho/data; o preparo posterior mudou somente `runtime-baseline-receipt.json`. Nenhum processo foi encerrado. Recibo privado: `diagnostics/movement-keymapping-20261008/root-review-20261009/installed-20261009T043543Z/receipt.json`.
+
+Os eventos dos testes são sintéticos; input/runtime simulam os serviços físicos SDL. As 20 capturas do menu usam a UI indexada nativa em software, sem o fundo RGB da composição final. Duas amostras PT-BR foram inspecionadas; instruções e descrições nativas longas podem ficar recortadas em 640×480. Não houve teste físico de teclado/mouse/gamepad, foco/Alt+Tab, benchmark de FPS ou aprovação artística integral. Os registros abaixo identificam as entregas anteriores.
 
 ## Estado verificável
 

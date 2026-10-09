@@ -1908,7 +1908,7 @@ void Movement(Player &player)
 	const bool uiMovement = PadMenuNavigatorActive || PadHotspellMenuActive || InGameMenu()
 	    || GetLeftStickOrDPadGameUIHandler() != nullptr;
 	const bool firstPersonMovement = mayOwnWalk && !otherAction && !uiMovement
-	    && IsTownFirstPersonInputCaptured()
+	    && IsTownCameraMovementInputActive()
 	    && !AutomapActive && !DoomFlag && !DropGoldFlag && !IsWithdrawGoldOpen
 	    && !IsChatActive() && !IsLeftPanelOpen() && !IsRightPanelOpen();
 	if (firstPersonMovement) {

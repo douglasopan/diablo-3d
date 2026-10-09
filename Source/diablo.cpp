@@ -7,6 +7,7 @@
 #include <array>
 #include <cstdint>
 #include <string_view>
+#include <vector>
 
 #ifdef USE_SDL3
 #include <SDL3/SDL_events.h>
@@ -186,7 +187,18 @@ bool was_ui_init = false;
 TownFirstPersonInputState FirstPersonInput;
 TownFirstPersonInputServicesForDiagnostics FirstPersonServices;
 bool FirstPersonHasDiagnosticServices = false;
-uint8_t FirstPersonConsumedArrows = 0;
+// Keep physical ownership until the matching UP even across a remap/UI gate.
+struct TownMovementOwnedKey {
+	uint32_t identity;
+	int scancode;
+	const KeymapperOptions::Action *action;
+	uint64_t epoch;
+};
+std::vector<TownMovementOwnedKey> TownMovementOwnedKeys;
+uint64_t TownMovementEpoch = 0;
+TownCameraMode TownMovementLastMode = TownCameraMode::Isometric;
+TownFirstPersonInputState ThirdPersonMovementInput;
+bool ThirdPersonMovementInitialized = false;
 uint32_t FirstPersonConsumedButtons = 0;
 Point FirstPersonSavedPointer;
 bool FirstPersonHasSavedPointer = false;
@@ -210,6 +222,8 @@ size_t FirstPersonDeferredClickCount = 0;
 
 void GameEventHandler(const SDL_Event &event, uint16_t modState);
 bool HasFirstPersonPointerPick();
+bool CanUseTownMovementKeys();
+TownFirstPersonInputResult SyncThirdPersonMovement(uint8_t pressed = 0, uint8_t released = 0);
 void FlushTownFirstPersonClicks();
 TownFirstPersonInputResult SyncTownFirstPersonInput(uint8_t pressed = 0, uint8_t released = 0,
     float mouseX = 0, float mouseY = 0, bool escapePressed = false, bool resumeClick = false);
@@ -821,57 +835,72 @@ bool HasReservedFirstPersonModifiers(uint16_t modifiers)
 #endif
 }
 
+uint32_t NormalizedTownMovementKey(SDL_Keycode code)
+{
+	remap_keyboard_key(&code);
+	uint32_t key = static_cast<uint32_t>(code);
+	if (key >= SDLK_A && key <= SDLK_Z)
+		key -= 'a' - 'A';
+	return key;
+}
+
+const KeymapperOptions::Action *TownMovementAction(SDL_Keycode code)
+{
+	return GetOptions().Keymapper.findAction(NormalizedTownMovementKey(code), KeymapperContext::TownMovement);
+}
+
+uint32_t TownMovementPhysicalIdentity(const SDL_Event &event)
+{
+#ifdef USE_SDL1
+	return static_cast<uint32_t>(SDLC_EventKey(event));
+#else
+	const auto scan = SDLC_EventScancode(event);
+	return scan == SDL_SCANCODE_UNKNOWN ? (1U << 31) | static_cast<uint32_t>(SDLC_EventKey(event)) : static_cast<uint32_t>(scan);
+#endif
+}
+
+bool TownMovementAllowsModifiers(const KeymapperOptions::Action &action)
+{
+	const uint32_t key = GetOptions().Keymapper.KeyForAction(action.key);
+	return key == SDLK_UP || key == SDLK_DOWN || key == SDLK_LEFT || key == SDLK_RIGHT;
+}
+
 uint8_t FirstPersonHeldArrows()
 {
 	uint8_t held = 0;
-	if (HasFirstPersonServices()) {
-		held = FirstPersonServices.heldArrows();
-	} else {
-#ifdef USE_SDL1
-		return 0;
-#else
-		if (HeadlessMode)
-			return 0;
-		const auto *keys = SDL_GetKeyboardState(nullptr);
-		const auto down = [&](SDL_Keycode key) {
-#ifdef USE_SDL3
-			const auto scan = SDL_GetScancodeFromKey(key, nullptr);
-#else
-			const auto scan = SDL_GetScancodeFromKey(key);
-#endif
-			return scan != SDL_SCANCODE_UNKNOWN && keys[scan];
-		};
-		held = (down(SDLK_UP) ? TownFirstPersonArrowUp : 0)
-		    | (down(SDLK_DOWN) ? TownFirstPersonArrowDown : 0)
-		    | (down(SDLK_LEFT) ? TownFirstPersonArrowLeft : 0)
-		    | (down(SDLK_RIGHT) ? TownFirstPersonArrowRight : 0)
-		    | (down(SDLK_W) ? TownFirstPersonKeyW : 0)
-		    | (down(SDLK_A) ? TownFirstPersonKeyA : 0)
-		    | (down(SDLK_S) ? TownFirstPersonKeyS : 0)
-		    | (down(SDLK_D) ? TownFirstPersonKeyD : 0);
-#endif
-	}
 	const uint16_t modifiers = HasFirstPersonServices() ? FirstPersonMovementModifiers : SDL_GetModState();
-	if (HasReservedFirstPersonModifiers(modifiers))
-		held &= TownFirstPersonArrowMask;
-	return held;
-}
-
-uint8_t FirstPersonArrow(SDL_Keycode code)
-{
-	// Keep the same platform remapping as native PressKey/ReleaseKey.
-	remap_keyboard_key(&code);
-	switch (code) {
-	case SDLK_UP: return TownFirstPersonArrowUp;
-	case SDLK_DOWN: return TownFirstPersonArrowDown;
-	case SDLK_LEFT: return TownFirstPersonArrowLeft;
-	case SDLK_RIGHT: return TownFirstPersonArrowRight;
-	case SDLK_W: return TownFirstPersonKeyW;
-	case SDLK_A: return TownFirstPersonKeyA;
-	case SDLK_S: return TownFirstPersonKeyS;
-	case SDLK_D: return TownFirstPersonKeyD;
-	default: return 0;
+	const bool modified = HasReservedFirstPersonModifiers(modifiers);
+	if (HasFirstPersonServices() && FirstPersonServices.scancodeHeld == nullptr) {
+		held = FirstPersonServices.heldArrows(); // Diagnostic bits are binding slots, not keycodes.
+		if (modified) {
+			uint8_t allowed = 0;
+			for (const auto *entry : GetOptions().Keymapper.GetEntries()) {
+				const auto &action = *static_cast<const KeymapperOptions::Action *>(entry);
+				if (action.context == KeymapperContext::TownMovement && TownMovementAllowsModifiers(action))
+					allowed |= action.movementBit;
+			}
+			held &= allowed;
+		}
+		return held;
 	}
+#ifndef USE_SDL1
+	const bool syntheticScancodes = HasFirstPersonServices() && FirstPersonServices.scancodeHeld != nullptr;
+	if (syntheticScancodes || !HeadlessMode) {
+		int keyCount = 0;
+		const auto *keys = syntheticScancodes ? nullptr : SDL_GetKeyboardState(&keyCount);
+		// The event records its actual scancode before any platform/ASCII remap.
+		// Poll that same identity; never pass persisted uppercase letters to SDL.
+		for (const auto &owned : TownMovementOwnedKeys) {
+			if (owned.epoch != TownMovementEpoch || owned.scancode <= 0)
+				continue;
+			const bool physicallyHeld = syntheticScancodes ? FirstPersonServices.scancodeHeld(owned.scancode)
+			                                                  : owned.scancode < keyCount && keys[owned.scancode];
+			if (physicallyHeld && (!modified || TownMovementAllowsModifiers(*owned.action)))
+				held |= owned.action->movementBit;
+		}
+	}
+#endif
+	return held;
 }
 
 bool IsFirstPersonModeActive()
@@ -909,6 +938,68 @@ bool CanUseFollowCameraInput()
 bool CanCaptureFirstPersonInput()
 {
 	return IsFirstPersonModeActive() && CanUseFollowCameraInput() && GetTownViewFollowCameraState().valid;
+}
+
+bool CanUseTownMovementKeys()
+{
+	return IsTownFirstPersonInputCaptured()
+	    || (GetTownViewCameraMode() == TownCameraMode::ThirdPerson && CanUseFollowCameraInput()
+	        && GetTownViewFollowCameraState().valid);
+}
+
+TownFirstPersonInputResult SyncThirdPersonMovement(uint8_t pressed, uint8_t released)
+{
+	TownFirstPersonInputResult result;
+	if (GetTownViewCameraMode() != TownCameraMode::ThirdPerson || !CanUseTownMovementKeys()) {
+		if (ThirdPersonMovementInitialized)
+			StopTownFirstPersonWalk();
+		ThirdPersonMovementInitialized = false;
+		ThirdPersonMovementInput = {};
+		return result;
+	}
+	TownFirstPersonInputSnapshot input;
+	input.physicalHeld = FirstPersonHeldArrows();
+	if (!ThirdPersonMovementInitialized) {
+		ThirdPersonMovementInput = {};
+		ThirdPersonMovementInput.blockedKeys = input.physicalHeld;
+		ThirdPersonMovementInitialized = true;
+	}
+	// A fresh nonrepeat action is proof of a new physical episode after a gate.
+	ThirdPersonMovementInput.blockedKeys &= static_cast<uint8_t>(~pressed);
+	input.pressed = pressed;
+	input.released = released;
+	const auto camera = GetTownViewCameraState();
+	input.currentYaw = camera.yaw;
+	input.currentPitch = camera.pitch;
+	result = StepTownCameraMovement(ThirdPersonMovementInput, input, {});
+	ThirdPersonMovementInput = result.nextState;
+	if (result.stopOwnWalk)
+		StopTownFirstPersonWalk();
+	return result;
+}
+
+void TownMovementActionPressed(uint8_t bit)
+{
+	if (GetTownViewCameraMode() == TownCameraMode::ThirdPerson)
+		SyncThirdPersonMovement(bit);
+	else
+		SyncTownFirstPersonInput(bit);
+}
+
+void TownMovementActionReleased(uint8_t bit)
+{
+	// A platform remap can yield multiple physical keys for one action. An UP
+	// cannot release that slot while another owned physical key still holds it.
+	const uint8_t released = (FirstPersonHeldArrows() & bit) != 0 ? 0 : bit;
+	if (GetTownViewCameraMode() == TownCameraMode::ThirdPerson)
+		SyncThirdPersonMovement(0, released);
+	else
+		SyncTownFirstPersonInput(0, released);
+}
+
+void TownMovementBindingsChanged()
+{
+	SuspendTownFirstPersonInput(); // Preserves old physical UP latches, resets intent.
 }
 
 void AdvanceTownCameraForDraw()
@@ -954,6 +1045,14 @@ void RestoreFirstPersonPointer()
 TownFirstPersonInputResult SyncTownFirstPersonInput(uint8_t pressed, uint8_t released,
     float mouseX, float mouseY, bool escapePressed, bool resumeClick)
 {
+	const auto mode = GetTownViewCameraMode();
+	if (mode != TownMovementLastMode) {
+		++TownMovementEpoch;
+		TownMovementLastMode = mode;
+		ThirdPersonMovementInitialized = false;
+		ThirdPersonMovementInput = {};
+		StopTownFirstPersonWalk();
+	}
 	TownFirstPersonInputSnapshot input;
 	input.firstPersonActive = IsFirstPersonModeActive();
 	input.inputAllowed = CanCaptureFirstPersonInput();
@@ -1026,6 +1125,7 @@ TownFirstPersonInputResult SyncTownFirstPersonInput(uint8_t pressed, uint8_t rel
 		RestoreFirstPersonPointer();
 	if (result.active)
 		MousePosition = FirstPersonPointerCenter();
+	SyncThirdPersonMovement();
 	return result;
 }
 
@@ -1291,13 +1391,16 @@ void GameEventHandler(const SDL_Event &event, uint16_t modState)
 	// Deliver ups before text/menu/controller handlers can consume them. The
 	// latch survives suspension so its matching up cannot invoke a native binding.
 	if (event.type == SDL_EVENT_KEY_UP) {
-		const uint8_t arrow = FirstPersonArrow(SDLC_EventKey(event));
-		const bool consumed = (FirstPersonConsumedArrows & arrow) != 0;
-		FirstPersonConsumedArrows &= ~arrow;
-		if (arrow != 0)
-			SyncTownFirstPersonInput(0, arrow);
-		if (consumed)
+		const uint32_t identity = TownMovementPhysicalIdentity(event);
+		const auto owned = std::find_if(TownMovementOwnedKeys.begin(), TownMovementOwnedKeys.end(),
+		    [identity](const auto &key) { return key.identity == identity; });
+		if (owned != TownMovementOwnedKeys.end()) {
+			const auto episode = *owned;
+			TownMovementOwnedKeys.erase(owned);
+			if (episode.epoch == TownMovementEpoch && episode.action->actionReleased)
+				episode.action->actionReleased(); // Original action, even after remap/UI.
 			return;
+		}
 	}
 	if (event.type == SDL_EVENT_MOUSE_BUTTON_UP) {
 		const Uint8 button = event.button.button;
@@ -1316,28 +1419,15 @@ void GameEventHandler(const SDL_Event &event, uint16_t modState)
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 		repeat = event.key.repeat;
 #endif
-		if (repeat && (FirstPersonConsumedArrows & FirstPersonArrow(SDLC_EventKey(event))) != 0)
-			return; // Owned repeats remain consumed even through UI/modifier changes.
-		if (!repeat)
-			FirstPersonConsumedArrows &= ~FirstPersonArrow(SDLC_EventKey(event));
-	}
-	if (event.type == SDL_EVENT_KEY_DOWN && IsTownFirstPersonInputCaptured()) {
-		const uint8_t arrow = FirstPersonArrow(SDLC_EventKey(event));
-		const bool modifiedWasd = (arrow & TownFirstPersonWasdMask) != 0
-		    && HasReservedFirstPersonModifiers(modState);
-		if (arrow != 0 && !modifiedWasd) {
-			bool repeat = false;
-#if SDL_VERSION_ATLEAST(2, 0, 0)
-			repeat = event.key.repeat;
-#endif
-			if (!repeat) {
-				FirstPersonConsumedArrows |= arrow;
-				SyncTownFirstPersonInput(arrow);
-				return;
-			}
-			// An unowned repeat belongs to its native keydown, including one
-			// received under modifiers. Keep its matching native KEYUP available.
-		}
+		const uint32_t identity = TownMovementPhysicalIdentity(event);
+		const auto owned = std::find_if(TownMovementOwnedKeys.begin(), TownMovementOwnedKeys.end(),
+		    [identity](const auto &key) { return key.identity == identity; });
+		if (repeat && owned != TownMovementOwnedKeys.end())
+			return; // Owned repeat stays consumed through modifiers/UI/remapping.
+		if (!repeat && owned != TownMovementOwnedKeys.end())
+			TownMovementOwnedKeys.erase(owned); // Fresh DOWN replaces a missed external UP.
+
+		// Unowned repeats still belong to the native DOWN, including modified keys.
 	}
 	if (event.type == SDL_EVENT_MOUSE_MOTION && IsTownFirstPersonInputCaptured()) {
 		if (!synchronizedInput.discardMouseDelta) {
@@ -1349,6 +1439,7 @@ void GameEventHandler(const SDL_Event &event, uint16_t modState)
 		return;
 	}
 	[[maybe_unused]] const Options &options = GetOptions();
+	const bool wasNonKeyboardDevice = ControlMode != ControlTypes::KeyboardAndMouse || ControlDevice != ControlTypes::KeyboardAndMouse;
 	StaticVector<ControllerButtonEvent, 4> ctrlEvents = ToControllerButtonEvents(event);
 	for (const ControllerButtonEvent ctrlEvent : ctrlEvents) {
 		GameAction action;
@@ -1385,6 +1476,41 @@ void GameEventHandler(const SDL_Event &event, uint16_t modState)
 	}
 	if (IsWithdrawGoldOpen && HandleGoldWithdrawTextInputEvent(event)) {
 		return;
+	}
+
+	// Native controller translation/DetectInputMethod above must classify this
+	// event before movement eligibility. KBCTRL and gamepad retain their order.
+	if (event.type == SDL_EVENT_KEY_DOWN) {
+		bool repeat = false;
+#if SDL_VERSION_ATLEAST(2, 0, 0)
+		repeat = event.key.repeat;
+#endif
+		const auto *movement = TownMovementAction(SDLC_EventKey(event));
+		const bool modified = HasReservedFirstPersonModifiers(modState);
+		const bool keyboardTakeover = wasNonKeyboardDevice
+		    && ControlMode == ControlTypes::KeyboardAndMouse && ControlDevice == ControlTypes::KeyboardAndMouse;
+		const bool resumeFromDevice = !repeat && keyboardTakeover && movement != nullptr
+		    && (!modified || TownMovementAllowsModifiers(*movement)) && CanCaptureFirstPersonInput();
+		SyncTownFirstPersonInput(0, 0, 0, 0, false, resumeFromDevice);
+		if (resumeFromDevice && IsTownFirstPersonInputCaptured())
+			FirstPersonInput.blockedKeys &= static_cast<uint8_t>(~movement->movementBit);
+		const uint32_t identity = TownMovementPhysicalIdentity(event);
+		const auto *action = TownMovementAction(SDLC_EventKey(event));
+		if (!repeat && action != nullptr && (action->isEnabled() || resumeFromDevice) && (!modified || TownMovementAllowsModifiers(*action))) {
+#ifdef USE_SDL1
+			const int scan = 0;
+#else
+			const int scan = static_cast<int>(SDLC_EventScancode(event));
+#endif
+			TownMovementOwnedKeys.push_back({ identity, scan, action, TownMovementEpoch });
+			if (!action->isEnabled())
+				return; // Failed explicit takeover capture still owns its DOWN/UP; no native S leak.
+			// Use the native action's enable/pressed callback; never a parallel key switch.
+			const SDL_Keycode normalized = static_cast<SDL_Keycode>(NormalizedTownMovementKey(SDLC_EventKey(event)));
+			if (KeymapperPress(normalized, KeymapperContext::TownMovement))
+				return;
+			TownMovementOwnedKeys.pop_back();
+		}
 	}
 
 	switch (event.type) {
@@ -2549,12 +2675,22 @@ Point GetTownFirstPersonPointer(Point absolute)
 Direction GetTownFirstPersonMoveDirection()
 {
 	// Consumed only by native Movement(), once per GameLogic tick.
-	const Direction direction = SyncTownFirstPersonInput().direction;
+	const auto result = SyncTownFirstPersonInput();
+	const Direction direction = GetTownViewCameraMode() == TownCameraMode::ThirdPerson
+	    ? SyncThirdPersonMovement().direction : result.direction;
 	return FirstPersonDeferredClickCount == 0 ? direction : Direction::NoDirection;
+}
+
+bool IsTownCameraMovementInputActive()
+{
+	return CanUseTownMovementKeys();
 }
 
 void SuspendTownFirstPersonInput()
 {
+	++TownMovementEpoch;
+	ThirdPersonMovementInitialized = false;
+	ThirdPersonMovementInput = {};
 	TownFollowWheelNeedsDraw = false;
 	TownCameraHasFrameClock = false;
 	AdvanceTownViewCamera(0);
@@ -2571,7 +2707,7 @@ void SetTownFirstPersonInputServicesForDiagnostics(const TownFirstPersonInputSer
 	FirstPersonServices = services != nullptr ? *services : TownFirstPersonInputServicesForDiagnostics {};
 	FirstPersonHasDiagnosticServices = services != nullptr;
 	FirstPersonInput = {};
-	FirstPersonConsumedArrows = 0;
+	TownMovementOwnedKeys.clear();
 	FirstPersonConsumedButtons = 0;
 	FirstPersonHasSavedPointer = false;
 	FirstPersonMovementModifiers = 0;
@@ -3006,6 +3142,22 @@ void InitKeymapActions()
 		    DebugToggle = !DebugToggle;
 	    });
 #endif
+	// One native Key option per slot keeps both existing binding menus/INI format.
+	// This separate context never evicts S=DisplaySpells or custom native keys.
+	const auto addMovement = [&](std::string_view id, const char *name, uint32_t key, uint8_t bit) {
+		options.Keymapper.AddAction(id, name,
+		    N_("Camera-relative movement in first and third person. Main and alternate keys work independently. Menus and chat keep native controls."),
+		    key, [bit] { TownMovementActionPressed(bit); }, [bit] { TownMovementActionReleased(bit); },
+		    CanUseTownMovementKeys, 0, KeymapperContext::TownMovement, bit).SetValueChangedCallback(TownMovementBindingsChanged);
+	};
+	addMovement("TownMoveForward", N_("Move forward (main)"), 'W', TownFirstPersonKeyW);
+	addMovement("TownMoveForwardAlternate", N_("Move forward (alternate)"), SDLK_UP, TownFirstPersonArrowUp);
+	addMovement("TownMoveBackward", N_("Move backward (main)"), 'S', TownFirstPersonKeyS);
+	addMovement("TownMoveBackwardAlternate", N_("Move backward (alternate)"), SDLK_DOWN, TownFirstPersonArrowDown);
+	addMovement("TownMoveLeft", N_("Strafe left (main)"), 'A', TownFirstPersonKeyA);
+	addMovement("TownMoveLeftAlternate", N_("Strafe left (alternate)"), SDLK_LEFT, TownFirstPersonArrowLeft);
+	addMovement("TownMoveRight", N_("Strafe right (main)"), 'D', TownFirstPersonKeyD);
+	addMovement("TownMoveRightAlternate", N_("Strafe right (alternate)"), SDLK_RIGHT, TownFirstPersonArrowRight);
 	options.Keymapper.CommitActions();
 }
 

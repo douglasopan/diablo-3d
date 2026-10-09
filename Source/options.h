@@ -1,5 +1,7 @@
 #pragma once
 
+#include "controls/keymapper.hpp"
+
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -761,7 +763,7 @@ struct KeymapperOptions : OptionCategoryBase {
 		// The implicit copy constructor would copy that reference instead of referencing the copy.
 		Action(const Action &) = delete;
 
-		Action(std::string_view key, const char *name, const char *description, uint32_t defaultKey, std::function<void()> actionPressed, std::function<void()> actionReleased, std::function<bool()> enable, unsigned index);
+		Action(std::string_view key, const char *name, const char *description, uint32_t defaultKey, std::function<void()> actionPressed, std::function<void()> actionReleased, std::function<bool()> enable, unsigned index, KeymapperContext context = KeymapperContext::Native, uint8_t movementBit = 0);
 
 		[[nodiscard]] std::string_view GetName() const override;
 		[[nodiscard]] OptionEntryType GetType() const override
@@ -775,6 +777,10 @@ struct KeymapperOptions : OptionCategoryBase {
 		[[nodiscard]] std::string_view GetValueDescription() const override;
 
 		bool SetValue(int value);
+		[[nodiscard]] std::string BindingError(uint32_t value) const;
+		[[nodiscard]] std::string ContextDescription() const;
+		const KeymapperContext context;
+		const uint8_t movementBit;
 
 		[[nodiscard]] bool isEnabled() const { return !enable || enable(); }
 
@@ -795,15 +801,17 @@ struct KeymapperOptions : OptionCategoryBase {
 	KeymapperOptions();
 	std::vector<OptionEntryBase *> GetEntries() override;
 
-	void AddAction(
+	Action &AddAction(
 	    std::string_view key, const char *name, const char *description, uint32_t defaultKey,
 	    std::function<void()> actionPressed,
 	    std::function<void()> actionReleased = nullptr,
 	    std::function<bool()> enable = nullptr,
-	    unsigned index = 0);
+	    unsigned index = 0, KeymapperContext context = KeymapperContext::Native, uint8_t movementBit = 0);
 	void CommitActions();
 
-	[[nodiscard]] const Action *findAction(uint32_t key) const;
+	[[nodiscard]] const Action *findAction(uint32_t key, KeymapperContext context = KeymapperContext::Native) const;
+	void ClearMovementBindings();
+	std::string RestoreMovementDefaults();
 
 	std::string_view KeyNameForAction(std::string_view actionName) const;
 	uint32_t KeyForAction(std::string_view actionName) const;
@@ -811,6 +819,7 @@ struct KeymapperOptions : OptionCategoryBase {
 private:
 	std::forward_list<Action> actions;
 	ankerl::unordered_dense::segmented_map<uint32_t, std::reference_wrapper<Action>> keyIDToAction;
+	ankerl::unordered_dense::segmented_map<uint32_t, std::reference_wrapper<Action>> movementKeyIDToAction;
 	ankerl::unordered_dense::segmented_map<uint32_t, std::string> keyIDToKeyName;
 	ankerl::unordered_dense::segmented_map<std::string, uint32_t, StringViewHash, StringViewEquals> keyNameToKeyID;
 };

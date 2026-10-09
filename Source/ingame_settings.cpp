@@ -174,6 +174,12 @@ std::string_view Application()
 std::string EntryDescription(const Entry &entry)
 {
 	std::string text(entry.option->GetDescription());
+	if (entry.option->GetType() == OptionEntryType::Key) {
+		const auto &action = *static_cast<const KeymapperOptions::Action *>(entry.option);
+		const auto context = action.ContextDescription();
+		if (!context.empty())
+			return context + "\n" + std::string(Application()) + "\n" + text;
+	}
 	switch (entry.special) {
 	case Special::MusicVolume: text = _("Adjust music volume or mute music."); break;
 	case Special::SoundVolume: text = _("Adjust sound volume or mute sound."); break;
@@ -410,8 +416,11 @@ void Show(size_t focus)
 		AddRow(count++, Capturing ? (key ? _("Press any key to change.") : _("Press gamepad buttons to change."))
 		                          : (key ? _("Bind key") : _("Bind button combo")),
 		    Selected.option->GetValueDescription(), description, RowHandlers[0]);
-		if (!Capturing)
+		if (!Capturing) {
 			AddRow(count++, key ? _("Unbind key") : _("Unbind button combo"), {}, description, RowHandlers[1]);
+			if (key && static_cast<KeymapperOptions::Action *>(Selected.option)->context == KeymapperContext::TownMovement)
+				AddRow(count++, _("Restore movement defaults"), {}, _("Restore movement bindings. Reserved native shortcuts stay assigned; any unavailable default is reported."), RowHandlers[2]);
+		}
 		AddRow(count++, _("Previous Menu"), {}, Capturing ? _("Cancel input and keep the previous binding.") : std::string_view {}, &PreviousMenu);
 		break;
 	}
@@ -608,6 +617,10 @@ void SelectRow(size_t row, bool activate)
 			CaptureStarted = SDL_GetTicks();
 			PadCombo = ControllerButton_NONE;
 			Notice.clear();
+		} else if (row == 2 && Selected.option->GetType() == OptionEntryType::Key
+		    && static_cast<KeymapperOptions::Action *>(Selected.option)->context == KeymapperContext::TownMovement) {
+			Notice = GetOptions().Keymapper.RestoreMovementDefaults();
+			SavePreferences();
 		} else {
 			if (Selected.option->GetType() == OptionEntryType::Key)
 				static_cast<KeymapperOptions::Action *>(Selected.option)->SetValue(SDLK_UNKNOWN);
@@ -625,13 +638,16 @@ bool FinishKeyCapture(uint32_t key)
 {
 	if (key == SDLK_UNKNOWN)
 		return false;
-	if (static_cast<KeymapperOptions::Action *>(Selected.option)->SetValue(key)) {
+	auto &action = *static_cast<KeymapperOptions::Action *>(Selected.option);
+	if (action.SetValue(key)) {
 		StopCapture();
 		Notice.clear();
 		SavePreferences();
 		Show();
 		return true;
 	}
+	Notice = action.BindingError(key);
+	Show(); // Rejected conflicts never clear the old key or the other action.
 	return false;
 }
 

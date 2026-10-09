@@ -12594,3 +12594,91 @@ msgstr "Alternar modo de câmera de Tristram"
 #: Source/diablo.cpp
 msgid "Cycle and save the Isometric, Free Orbit, Third Person and First Person camera preference. Movement and combat keep their native controls."
 msgstr "Alterna e salva a preferência de câmera entre Isométrica, Órbita Livre, Terceira Pessoa e Primeira Pessoa. Movimento e combate mantêm os controles nativos."
+
+#: Source/options.cpp Source/diablo.cpp Source/ingame_settings.cpp Source/DiabloUI/settingsmenu.cpp
+msgid "Move forward (main)"
+msgstr "Avançar (principal)"
+
+#: Source/options.cpp Source/diablo.cpp Source/ingame_settings.cpp Source/DiabloUI/settingsmenu.cpp
+msgid "Move forward (alternate)"
+msgstr "Avançar (alternativa)"
+
+#: Source/options.cpp Source/diablo.cpp Source/ingame_settings.cpp Source/DiabloUI/settingsmenu.cpp
+msgid "Move backward (main)"
+msgstr "Recuar (principal)"
+
+#: Source/options.cpp Source/diablo.cpp Source/ingame_settings.cpp Source/DiabloUI/settingsmenu.cpp
+msgid "Move backward (alternate)"
+msgstr "Recuar (alternativa)"
+
+#: Source/options.cpp Source/diablo.cpp Source/ingame_settings.cpp Source/DiabloUI/settingsmenu.cpp
+msgid "Strafe left (main)"
+msgstr "Mover para a esquerda (principal)"
+
+#: Source/options.cpp Source/diablo.cpp Source/ingame_settings.cpp Source/DiabloUI/settingsmenu.cpp
+msgid "Strafe left (alternate)"
+msgstr "Mover para a esquerda (alternativa)"
+
+#: Source/options.cpp Source/diablo.cpp Source/ingame_settings.cpp Source/DiabloUI/settingsmenu.cpp
+msgid "Strafe right (main)"
+msgstr "Mover para a direita (principal)"
+
+#: Source/options.cpp Source/diablo.cpp Source/ingame_settings.cpp Source/DiabloUI/settingsmenu.cpp
+msgid "Strafe right (alternate)"
+msgstr "Mover para a direita (alternativa)"
+
+#: Source/options.cpp Source/diablo.cpp Source/ingame_settings.cpp Source/DiabloUI/settingsmenu.cpp
+msgid "Camera-relative movement in first and third person. Main and alternate keys work independently. Menus and chat keep native controls."
+msgstr "Movimento relativo à câmera em primeira e terceira pessoa. As teclas principal e alternativa funcionam de forma independente. Menus e chat mantêm os controles nativos."
+
+#: Source/options.cpp Source/diablo.cpp Source/ingame_settings.cpp Source/DiabloUI/settingsmenu.cpp
+msgid "This key is unavailable."
+msgstr "Esta tecla está indisponível."
+
+#: Source/options.cpp Source/diablo.cpp Source/ingame_settings.cpp Source/DiabloUI/settingsmenu.cpp
+#, c++-format
+msgid "Key already used by {}. Unbind it first."
+msgstr "Tecla já usada por {}. Remova a atribuição primeiro."
+
+#: Source/options.cpp Source/diablo.cpp Source/ingame_settings.cpp Source/DiabloUI/settingsmenu.cpp
+msgid "Choose a keyboard key, not a mouse input or modifier."
+msgstr "Escolha uma tecla do teclado que não seja um modificador."
+
+#: Source/options.cpp Source/diablo.cpp Source/ingame_settings.cpp Source/DiabloUI/settingsmenu.cpp
+#, c++-format
+msgid "Key reserved for {}. Remap that action first."
+msgstr "Tecla reservada para {}. Altere primeiro a tecla dessa ação."
+
+#: Source/options.cpp Source/diablo.cpp Source/ingame_settings.cpp Source/DiabloUI/settingsmenu.cpp
+#, c++-format
+msgid "Outside camera movement, this key still runs {}."
+msgstr "Fora do movimento pela câmera, esta tecla continua acionando {}."
+
+#: Source/options.cpp Source/diablo.cpp Source/ingame_settings.cpp Source/DiabloUI/settingsmenu.cpp
+msgid "Only while controlling the first or third person camera. Other shortcuts are preserved."
+msgstr "Somente ao controlar a câmera em primeira ou terceira pessoa. Os outros atalhos são preservados."
+
+#: Source/options.cpp Source/diablo.cpp Source/ingame_settings.cpp Source/DiabloUI/settingsmenu.cpp
+#, c++-format
+msgid "Defaults restored except: {}. Reserved native shortcuts were preserved."
+msgstr "Padrões restaurados, exceto: {}. Os atalhos nativos reservados foram preservados."
+
+#: Source/options.cpp Source/diablo.cpp Source/ingame_settings.cpp Source/DiabloUI/settingsmenu.cpp
+msgid "Movement defaults restored. Native shortcuts are preserved."
+msgstr "Teclas padrão de movimento restauradas. Os atalhos nativos foram preservados."
+
+#: Source/options.cpp Source/diablo.cpp Source/ingame_settings.cpp Source/DiabloUI/settingsmenu.cpp
+msgid "Restore movement defaults"
+msgstr "Restaurar teclas de movimento"
+
+#: Source/options.cpp Source/diablo.cpp Source/ingame_settings.cpp Source/DiabloUI/settingsmenu.cpp
+msgid "Restore movement bindings. Reserved native shortcuts stay assigned; any unavailable default is reported."
+msgstr "Restaura as teclas de movimento. Os atalhos nativos reservados são preservados; os padrões indisponíveis são informados."
+
+#: Source/options.cpp Source/diablo.cpp Source/ingame_settings.cpp Source/DiabloUI/settingsmenu.cpp
+msgid "Press any key to change. Escape cancels."
+msgstr "Pressione uma tecla para alterar. Esc cancela."
+
+#: Source/options.cpp Source/diablo.cpp Source/ingame_settings.cpp Source/DiabloUI/settingsmenu.cpp
+msgid "Activate the bound key to change it."
+msgstr "Selecione a tecla atribuída para alterá-la."
