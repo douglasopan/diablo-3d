@@ -56,7 +56,9 @@ struct TownGpuTexture {
 	uint64_t lightLutRevision = 0;
 };
 
-enum class TownGpuLighting : uint32_t { Unlit, Shadow, Directional, Interior };
+/** Palette uses exact shade 0..15 with a 256-code, 16-level caller-supplied
+ * native LUT. It does not calculate directional shadows or point lighting. */
+enum class TownGpuLighting : uint32_t { Unlit, Shadow, Directional, Interior, Palette };
 
 struct TownGpuMaterial {
 	TownGpuLighting lighting = TownGpuLighting::Unlit;
@@ -82,6 +84,21 @@ struct TownGpuMaterial {
 	 * have no apertures and are copied during Submit. At most
 	 * TownMaxLightOccluders - 1 are allowed, reserving one for room. */
 	std::span<const TownLightOccluder> blockers;
+	/** Projected color-only native palette overlay, default off. Submit all
+	 * opaque geometry/actors first, then overlays back-to-front. Each triangle
+	 * snapshots prior indexed color and tests opaque hardware depth without
+	 * writing hardware depth, published view depth or picking. Requires a
+	 * frame palette blend table; resident mesh overlays are unsupported. */
+	bool paletteBlend = false;
+};
+
+/** Immutable native blend table at [destination * 256 + source]. Borrowed
+ * bytes are uploaded by SetPaletteBlend, never retained. A warm matching
+ * identity may omit bytes; changed content requires a new revision. */
+struct TownGpuPaletteBlend {
+	uint64_t stableKey = 0;
+	uint64_t revision = 0;
+	std::span<const uint8_t> lookup;
 };
 
 /** Same light-space depth convention as town_shadow: larger is nearer the light. */
@@ -140,6 +157,11 @@ struct TownGpuStatus {
 	size_t uploadedTexelBytes = 0;
 	size_t uploadedLutBytes = 0;
 	size_t textureEvictions = 0;
+	/** Submitted color-only overlay triangles, limited to 2048 per frame. */
+	size_t paletteBlendTriangles = 0;
+	/** Issued full R8 snapshot payload copies, limited to 512 MiB per frame.
+	 * Counts width*height per triangle, not total memory-bus read/write traffic. */
+	size_t paletteBlendCopyBytes = 0;
 	double frameMilliseconds = 0;
 	double readbackMilliseconds = 0;
 };
@@ -149,10 +171,17 @@ bool TownGpuBeginFrame(int width, int height, bool allowWarpForDiagnostics = fal
     const TownGpuProjection &projection = {});
 /** Call after Begin; an empty view disables directional shadows for this frame. */
 bool TownGpuSetShadow(const TownGpuShadow &shadow);
+/** After Begin and before any geometry. Exact 65536-byte table on cache miss;
+ * nonzero stableKey required. One immutable table is bound for the frame.
+ * Capacity/input/device failures invalidate the complete frame. */
+bool TownGpuSetPaletteBlend(const TownGpuPaletteBlend &blend);
 bool TownGpuSubmitProjectedTriangle(const std::array<TownGpuVertex, 3> &vertices,
     const TownGpuTexture &texture, const TownGpuMaterial &material, uint32_t pickId);
 /** Synchronous readback publishes all three outputs together, or clears output on failure. */
 bool TownGpuEndFrame(TownGpuFrame &output);
+/** One-shot diagnostic callback before readback allocation, default null.
+ * Begin/reset clears it. Exception tests require backend C++ unwinding. */
+void SetTownGpuBeforeReadbackForDiagnostics(void (*callback)()) noexcept;
 /** Invalidate device, frame, cached uploads and borrowed outputs before a scene reset. */
 void ResetTownGpuResources();
 const TownGpuStatus &GetTownGpuStatus();

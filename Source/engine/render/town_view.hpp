@@ -165,6 +165,43 @@ void SetTownViewRasterJitterForDiagnostics(float x, float y);
 bool DrawTownView(const Surface &fullOut, bool forceGeometry = false);
 /** Select the frontmost rendered pixel. Entity indices are -1 when there is no entity. */
 bool PickTownView(Point screen, Point &tile, int &townerIndex, int &itemIndex, int &playerIndex);
+/** Native dungeon bindings share the rendered pixel's color/depth ownership. */
+struct TownViewPickResult {
+	Point tile { 0, 0 };
+	int townerIndex = -1, itemIndex = -1, playerIndex = -1;
+	int objectIndex = -1, monsterIndex = -1;
+};
+bool PickTownViewDetailed(Point screen, TownViewPickResult &result);
+/** Memory-only preparation after native missile interpolation, before DrawGame. */
+void PrepareTownViewLiveFrame();
+void InvalidateTownViewFrameForNativeFallback();
+struct TownViewCathedralState {
+	bool eligible = false, ready = false, nativeFallback = false;
+	uint64_t epoch = 0, revision = 0;
+	size_t regions = 0, triangles = 0;
+};
+TownViewCathedralState GetTownViewCathedralState();
+/** Private Cathedral allocation fault injection. One-shot, GPU-only, default off.
+ * BeforeReadback fires in EndFrame after GPU commands, before output allocation.
+ * Requires exception-unwinding support in town_view.cpp and town_gpu.cpp. */
+enum class TownViewCathedralAllocationFailurePoint : uint8_t {
+	None,
+	BeforeOpaque,
+	AfterOpaque,
+	BeforeReadback,
+};
+struct TownViewCathedralAllocationState {
+	TownViewCathedralAllocationFailurePoint armed = TownViewCathedralAllocationFailurePoint::None;
+	TownViewCathedralAllocationFailurePoint injected = TownViewCathedralAllocationFailurePoint::None;
+	/** Authoritative allocation-failure marker even when error text cannot allocate. */
+	bool failed = false;
+	size_t gpuSubmittedBeforeFailure = 0, gpuDrawCallsBeforeFailure = 0;
+	size_t cpuRasterizedBeforeFailure = 0;
+};
+void SetTownViewCathedralAllocationFailureForDiagnostics(TownViewCathedralAllocationFailurePoint point) noexcept;
+TownViewCathedralAllocationState GetTownViewCathedralAllocationState() noexcept;
+/** Private offscreen gate through the actual DrawGame world branch, without UI. */
+bool DrawWorldViewForDiagnostics(const Surface &out, Point viewPosition);
 /** Diagnostic ownership of a visible architectural surface; -1 for other pixels. */
 int TownViewArchitectureAt(Point screen);
 /** Depth of the nearest visible geometric surface, infinity when unavailable. */

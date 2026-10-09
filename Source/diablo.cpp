@@ -57,6 +57,7 @@
 #include "engine/random.hpp"
 #include "engine/render/clx_render.hpp"
 #include "engine/render/town_view.hpp"
+#include "engine/render/cathedral/cathedral_live.hpp"
 #include "engine/sound.h"
 #include "game_mode.hpp"
 #include "gamemenu.h"
@@ -754,7 +755,8 @@ void PressKey(SDL_Keycode vkey, uint16_t modState)
 
 bool CanUseTownCamera()
 {
-	return leveltype == DTYPE_TOWN && MyPlayer != nullptr && !MyPlayerIsDead && MyPlayer->_pmode != PM_DEATH
+	return (leveltype == DTYPE_TOWN || cathedral::LiveLevelEligible())
+	    && MyPlayer != nullptr && !MyPlayerIsDead && MyPlayer->_pmode != PM_DEATH
 	    && PauseMode != 2 && !InGameMenu() && !IsPlayerInStore() && !IsChatActive()
 	    && !QuestLogIsOpen && !HelpFlag && !ChatLogFlag && !qtextflag && !DoomFlag
 	    && !SpellSelectFlag && !DropGoldFlag && !IsWithdrawGoldOpen;
@@ -905,7 +907,7 @@ uint8_t FirstPersonHeldArrows()
 
 bool IsFirstPersonModeActive()
 {
-	return gbRunGame && leveltype == DTYPE_TOWN && IsTownViewActive()
+	return gbRunGame && IsTownViewActive()
 	    && GetTownViewCameraMode() == TownCameraMode::FirstPerson;
 }
 
@@ -3671,6 +3673,7 @@ void SetCursorPos(Point position)
 
 void FreeGameMem()
 {
+	cathedral::InvalidateLiveLevel();
 	SuspendTownFirstPersonInput();
 	ReleaseTownCameraDrag();
 	ResetTownViewResources();
@@ -4415,6 +4418,7 @@ void LoadGameLevelCalculateCursor()
 
 std::expected<void, std::string> LoadGameLevel(bool firstflag, lvl_entry lvldir)
 {
+	cathedral::InvalidateLiveLevel();
 	const _music_id neededTrack = GetLevelMusic(leveltype);
 
 	ClearFloatingNumbers();
@@ -4499,6 +4503,7 @@ std::expected<void, std::string> LoadGameLevel(bool firstflag, lvl_entry lvldir)
 	CompleteProgress();
 
 	LoadGameLevelCalculateCursor();
+	cathedral::MarkLiveLevelLoaded(static_cast<uint8_t>(lvldir));
 	return {};
 }
 

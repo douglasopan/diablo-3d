@@ -28,6 +28,7 @@ namespace devilution {
 namespace {
 
 TownGpuStatus Status;
+void (*BeforeReadbackForDiagnostics)() = nullptr;
 
 #ifdef _WIN32
 using Clock = std::chrono::steady_clock;
@@ -36,6 +37,8 @@ constexpr size_t MaxTextureBytes = 256 * 1024 * 1024;
 // Only the CPU-expanded, per-frame vertex stream consumes this capacity.
 // Reused resident index ranges have their own immutable-cache byte budget.
 constexpr size_t MaxProjectedTriangles = 1024 * 1024;
+constexpr size_t MaxPaletteBlendTriangles = 2048;
+constexpr size_t MaxPaletteBlendCopyBytes = 512 * 1024 * 1024;
 
 template <typename T>
 class ComOwner {
@@ -188,6 +191,7 @@ struct Batch {
 	UINT first;
 	UINT count;
 	bool preservePicking;
+	bool paletteBlend;
 };
 
 struct Target {
@@ -205,11 +209,20 @@ ComOwner<ID3D11Buffer> VertexBuffer;
 ComOwner<ID3D11Buffer> ConstantBuffer;
 ComOwner<ID3D11RasterizerState> Rasterizer;
 ComOwner<ID3D11DepthStencilState> DepthState;
+ComOwner<ID3D11DepthStencilState> PaletteBlendDepthState;
+ComOwner<ID3D11BlendState> PaletteBlendWriteState;
 std::array<ComOwner<ID3D11BlendState>, 2> BlendStates;
 std::array<Target, 3> Targets;
 ComOwner<ID3D11Texture2D> HardwareDepth;
 ComOwner<ID3D11DepthStencilView> HardwareDepthView;
 ComOwner<ID3D11ShaderResourceView> ShadowResource;
+ComOwner<ID3D11Texture2D> PriorIndexedColor;
+ComOwner<ID3D11ShaderResourceView> PriorIndexedColorView;
+ComOwner<ID3D11ShaderResourceView> PaletteBlendResource;
+uint64_t PaletteBlendKey = 0;
+uint64_t PaletteBlendRevision = 0;
+bool FramePaletteBlendReady = false;
+bool FramePaletteOverlayStarted = false;
 std::unordered_map<TextureKey, CachedTexels, TextureKeyHash> TexelCache;
 std::unordered_map<LightLutKey, CachedLightLut, LightLutKeyHash> LightLutCache;
 std::unordered_map<TextureBindingKey, CachedTexture, TextureBindingKeyHash> TextureCache;
@@ -254,6 +267,8 @@ Texture2D<uint> codes : register(t0);
 Texture2D<uint> opacity : register(t1);
 Texture2D<uint> lightLut : register(t2);
 Texture2D<float> shadowDepth : register(t3);
+Texture2D<uint> priorIndexedColor : register(t4);
+Texture2D<uint> paletteBlendLut : register(t5);
 struct Input {
  float2 position : POSITION;
  float depth : TEXCOORD0;
@@ -451,10 +466,16 @@ Pixel PS(Interpolated input) {
   if (flags.x == 1) level = ((uint)(absent ? input.fallback.y : input.shadowParameters.w) & 3) * 4
    + (uint)(directionalShadow(input.world, input.shadowParameters) * 3 + 0.5);
   else if (flags.x == 2) level = (uint)(saturate(input.normalDiffuse.w * (1 - directionalShadow(input.world, input.shadowParameters))) * (flags.y - 1) + 0.5);
+  else if (flags.x == 4) level = (uint)shading.x;
   else level = (uint)(pointAmount(input.world, input.normalDiffuse.xyz) * (flags.y - 1) + 0.5);
   uint lutIndex = min(code, flags.z - 1) * flags.y + min(level, flags.y - 1);
   uint lutWidth = max(1, (uint)shadowScale.z);
   color = lightLut.Load(int3(lutIndex % lutWidth, lutIndex / lutWidth, 0));
+ }
+ if ((flags.w & 16) != 0) {
+  uint destination = priorIndexedColor.Load(int3((int2)input.position.xy, 0));
+  // 256-wide rows are destination codes; source is the column.
+  color = paletteBlendLut.Load(int3(color, destination, 0));
  }
  Pixel output;
  output.color = color;
@@ -565,6 +586,17 @@ bool CreateDevice(bool allowWarp)
 	result = Device->CreateDepthStencilState(&depth, DepthState.put());
 	if (FAILED(result))
 		return Fail("Create depth state", result);
+	depth.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+	result = Device->CreateDepthStencilState(&depth, PaletteBlendDepthState.put());
+	if (FAILED(result))
+		return Fail("Create native palette read-only depth state", result);
+	D3D11_BLEND_DESC paletteWrite {};
+	paletteWrite.IndependentBlendEnable = TRUE;
+	paletteWrite.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+	// Integer render targets use an exact lookup, never DXGI alpha blending.
+	result = Device->CreateBlendState(&paletteWrite, PaletteBlendWriteState.put());
+	if (FAILED(result))
+		return Fail("Create native palette color-only write state", result);
 	for (size_t i = 0; i < BlendStates.size(); ++i) {
 		D3D11_BLEND_DESC blend {};
 		blend.IndependentBlendEnable = TRUE;
@@ -586,6 +618,8 @@ bool CreateTargets(int width, int height)
 		return true;
 	Width = Height = 0;
 	HardwareDepthView.reset();
+	PriorIndexedColorView.reset();
+	PriorIndexedColor.reset();
 	const DXGI_FORMAT formats[] { DXGI_FORMAT_R8_UINT, DXGI_FORMAT_R32_UINT, DXGI_FORMAT_R32_FLOAT };
 	for (size_t i = 0; i < Targets.size(); ++i) {
 		D3D11_TEXTURE2D_DESC description {};
@@ -818,13 +852,15 @@ bool ValidOpaqueBlocker(const TownLightOccluder &blocker)
 
 bool MakeConstants(const TownGpuMaterial &material, const CachedTexture &texture, Constants &output)
 {
-	if (static_cast<uint32_t>(material.lighting) > static_cast<uint32_t>(TownGpuLighting::Interior)
+	if (static_cast<uint32_t>(material.lighting) > static_cast<uint32_t>(TownGpuLighting::Palette)
 	    || !Finite(material.diffuse) || !Finite(material.shadowBias) || !Finite(material.shadowSlopeU) || !Finite(material.shadowSlopeV)
 	    || !std::all_of(material.normal.begin(), material.normal.end(), [](float value) { return Finite(value); })
 	    || material.fallbackPaletteIndex < -1 || material.fallbackPaletteIndex > 255
 	    || (material.fallbackPaletteIndex >= 0 && material.lighting != TownGpuLighting::Shadow && material.lighting != TownGpuLighting::Unlit)
 	    || (material.lighting == TownGpuLighting::Shadow && material.fallbackPaletteIndex >= static_cast<int>(texture.codeCount))
 	    || (material.lighting == TownGpuLighting::Shadow && texture.lightLevels != 16)
+	    || (material.lighting == TownGpuLighting::Palette
+	        && (material.shade < 0 || material.shade > 15 || texture.lightLevels != 16 || texture.codeCount != 256))
 	    || (material.lighting == TownGpuLighting::Interior
 	        && (!Finite(material.interiorRedNormalization) || material.interiorRedNormalization <= 0
 	            || !Finite(material.interiorPointRange) || material.interiorPointRange <= 0)))
@@ -837,7 +873,8 @@ bool MakeConstants(const TownGpuMaterial &material, const CachedTexture &texture
 	output.projection = { FrameProjection.nearClip, FrameProjection.farClip, FrameProjection.perspective ? 1.0F : 0.0F, 0 };
 	output.flags = { static_cast<uint32_t>(material.lighting), texture.lightLevels, texture.codeCount,
 		static_cast<uint32_t>((material.repeat ? 1 : 0) | (material.transparentZero && !texture.hasOpacity ? 2 : 0)
-		    | (texture.hasOpacity ? 4 : 0) | (FrameShadow.resolution > 0 ? 8 : 0)) };
+		    | (texture.hasOpacity ? 4 : 0) | (FrameShadow.resolution > 0 ? 8 : 0) | (material.paletteBlend ? 16 : 0)) };
+	output.shading.x = material.lighting == TownGpuLighting::Palette ? static_cast<float>(material.shade) : 0;
 	output.normal = { 0, 0, 0, material.interiorRedNormalization };
 	output.parameters = { material.interiorPointRange, 0, 0, static_cast<float>(FrameShadow.resolution) };
 	output.shadowRight = { FrameShadow.right[0], FrameShadow.right[1], FrameShadow.right[2], FrameShadow.minU };
@@ -901,9 +938,12 @@ bool Readback(Target &target, std::vector<T> &output)
 
 bool TownGpuBeginFrame(int width, int height, bool allowWarpForDiagnostics, const TownGpuProjection &projection)
 {
+	BeforeReadbackForDiagnostics = nullptr;
 #ifdef _WIN32
 	FrameActive = false;
 	FrameFailed = false;
+	FramePaletteBlendReady = false;
+	FramePaletteOverlayStarted = false;
 	Vertices.clear();
 	Batches.clear();
 	BeginMeshFrame();
@@ -935,6 +975,8 @@ bool TownGpuBeginFrame(int width, int height, bool allowWarpForDiagnostics, cons
 	Status.uploadedTexelBytes = 0;
 	Status.uploadedLutBytes = 0;
 	Status.textureEvictions = 0;
+	Status.paletteBlendTriangles = 0;
+	Status.paletteBlendCopyBytes = 0;
 	UpdateTextureStatus();
 	Status.frameMilliseconds = 0;
 	Status.readbackMilliseconds = 0;
@@ -1007,12 +1049,61 @@ bool TownGpuSetShadow(const TownGpuShadow &shadow)
 #endif
 }
 
+bool TownGpuSetPaletteBlend(const TownGpuPaletteBlend &blend)
+{
+#ifdef _WIN32
+	if (!FrameActive || FrameFailed || !GeometryCommands.empty())
+		return Fail("Palette blend upload must precede GPU geometry submission");
+	if (blend.stableKey == 0 || (!blend.lookup.empty() && blend.lookup.size() != 256 * 256))
+		return Fail("Invalid GPU palette blend identity or 65536-byte lookup");
+	if (!PaletteBlendResource || PaletteBlendKey != blend.stableKey || PaletteBlendRevision != blend.revision) {
+		if (blend.lookup.size() != 256 * 256)
+			return Fail("Missing GPU palette blend payload for uncached identity");
+		ComOwner<ID3D11ShaderResourceView> uploaded;
+		if (!UploadTexture(256, 256, DXGI_FORMAT_R8_UINT, blend.lookup.data(), 256, uploaded))
+			return false;
+		PaletteBlendResource = std::move(uploaded);
+		PaletteBlendKey = blend.stableKey;
+		PaletteBlendRevision = blend.revision;
+		Status.uploadedLutBytes += 256 * 256;
+	}
+	// Lazy, bounded auxiliary resource: at most MaxPixels bytes, independent
+	// of the immutable texture cache, plus one 64 KiB blend table.
+	if (!PriorIndexedColorView) {
+		D3D11_TEXTURE2D_DESC description {};
+		description.Width = Width;
+		description.Height = Height;
+		description.MipLevels = 1;
+		description.ArraySize = 1;
+		description.Format = DXGI_FORMAT_R8_UINT;
+		description.SampleDesc.Count = 1;
+		description.Usage = D3D11_USAGE_DEFAULT;
+		description.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+		HRESULT result = Device->CreateTexture2D(&description, nullptr, PriorIndexedColor.put());
+		if (FAILED(result))
+			return Fail("Create native palette prior-color snapshot", result);
+		result = Device->CreateShaderResourceView(PriorIndexedColor.get(), nullptr, PriorIndexedColorView.put());
+		if (FAILED(result))
+			return Fail("Create native palette prior-color snapshot view", result);
+	}
+	FramePaletteBlendReady = true;
+	return true;
+#else
+	(void)blend;
+	return false;
+#endif
+}
+
 bool TownGpuSubmitProjectedTriangle(const std::array<TownGpuVertex, 3> &vertices,
     const TownGpuTexture &texture, const TownGpuMaterial &material, uint32_t pickId)
 {
 #ifdef _WIN32
 	if (!FrameActive || FrameFailed)
 		return Fail("No valid GPU frame is recording");
+	if (!material.paletteBlend && FramePaletteOverlayStarted)
+		return Fail("Opaque GPU geometry must precede native palette overlays");
+	if (material.paletteBlend && !FramePaletteBlendReady)
+		return Fail("GPU native palette overlay requires a frame blend table");
 	if (Vertices.size() >= MaxProjectedTriangles * 3)
 		return Fail("GPU projected vertex-stream budget exceeded", S_OK, TownGpuFailureKind::Capacity);
 	if (Status.submittedTriangles == std::numeric_limits<size_t>::max())
@@ -1032,6 +1123,12 @@ bool TownGpuSubmitProjectedTriangle(const std::array<TownGpuVertex, 3> &vertices
 	Constants constants {};
 	if (!MakeConstants(material, *uploaded, constants))
 		return false;
+	if (material.paletteBlend) {
+		const size_t copyBytes = static_cast<size_t>(Width) * Height;
+		if (Status.paletteBlendTriangles >= MaxPaletteBlendTriangles
+		    || Status.paletteBlendTriangles >= MaxPaletteBlendCopyBytes / copyBytes)
+			return Fail("GPU native palette overlay triangle/copy budget exceeded", S_OK, TownGpuFailureKind::Capacity);
+	}
 	const UINT first = static_cast<UINT>(Vertices.size());
 	for (const TownGpuVertex &vertex : vertices)
 		Vertices.push_back({ vertex, pickId,
@@ -1039,12 +1136,17 @@ bool TownGpuSubmitProjectedTriangle(const std::array<TownGpuVertex, 3> &vertices
 		    { material.shadowBias, material.shadowSlopeU, material.shadowSlopeV,
 		        static_cast<float>(std::clamp(material.shade, 0, 3) + (material.receivesShadow ? 4 : 0)) },
 		    { static_cast<float>(material.fallbackPaletteIndex), static_cast<float>(std::clamp(material.fallbackShade, 0, 3)) } });
-	if (!GeometryCommands.empty() && !GeometryCommands.back().mesh && !Batches.empty() && Batches.back().texture == uploaded && Batches.back().preservePicking == material.preservePicking
+	if (!material.paletteBlend && !GeometryCommands.empty() && !GeometryCommands.back().mesh && !Batches.empty()
+	    && !Batches.back().paletteBlend && Batches.back().texture == uploaded && Batches.back().preservePicking == material.preservePicking
 	    && std::memcmp(&Batches.back().constants, &constants, sizeof(constants)) == 0)
 		Batches.back().count += 3;
 	else {
 		GeometryCommands.push_back({ false, Batches.size() });
-		Batches.push_back({ uploaded, constants, first, 3, material.preservePicking });
+		Batches.push_back({ uploaded, constants, first, 3, material.preservePicking, material.paletteBlend });
+	}
+	if (material.paletteBlend) {
+		FramePaletteOverlayStarted = true;
+		++Status.paletteBlendTriangles;
 	}
 	++Status.submittedTriangles;
 	return true;
@@ -1119,6 +1221,16 @@ bool TownGpuEndFrame(TownGpuFrame &output)
 			continue;
 		}
 		const Batch &batch = Batches[command.batch];
+		if (batch.paletteBlend) {
+			// Never read/write the same resource at once. Each triangle observes
+			// all preceding overlays, including ones with the same material.
+			ID3D11ShaderResourceView *emptySnapshot = nullptr;
+			Context->PSSetShaderResources(4, 1, &emptySnapshot);
+			Context->OMSetRenderTargets(0, nullptr, nullptr);
+			Context->CopyResource(PriorIndexedColor.get(), Targets[0].texture.get());
+			Context->OMSetRenderTargets(3, targets, HardwareDepthView.get());
+			Status.paletteBlendCopyBytes += static_cast<size_t>(Width) * Height;
+		}
 		if (!BindGeometryConstants(batch.constants))
 			return false;
 		Context->IASetInputLayout(InputLayout.get());
@@ -1127,17 +1239,21 @@ bool TownGpuEndFrame(TownGpuFrame &output)
 		const UINT stride = sizeof(GpuVertex);
 		const UINT offset = 0;
 		Context->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
-		BindGeometryMaterial(*batch.texture, batch.preservePicking);
+		BindGeometryMaterial(*batch.texture, batch.preservePicking, batch.paletteBlend);
 		Context->Draw(batch.count, batch.first);
 		++Status.drawCalls;
 	}
 	MeshStats.commandMilliseconds = std::chrono::duration<double, std::milli>(Clock::now() - commandStart).count();
-	ID3D11ShaderResourceView *emptyResources[4] {};
-	Context->PSSetShaderResources(0, 4, emptyResources);
+	ID3D11ShaderResourceView *emptyResources[6] {};
+	Context->PSSetShaderResources(0, 6, emptyResources);
 	Context->OMSetRenderTargets(0, nullptr, nullptr);
 	for (Target &target : Targets)
 		Context->CopyResource(target.staging.get(), target.texture.get());
 	const auto readbackStart = Clock::now();
+	// One-shot diagnostics only; null in every ordinary frame. The frontend
+	// allocation guard owns abort/retry if this callback throws.
+	if (const auto beforeReadback = std::exchange(BeforeReadbackForDiagnostics, nullptr))
+		beforeReadback();
 	TownGpuFrame complete;
 	complete.width = Width;
 	complete.height = Height;
@@ -1161,11 +1277,19 @@ bool TownGpuEndFrame(TownGpuFrame &output)
 #endif
 }
 
+void SetTownGpuBeforeReadbackForDiagnostics(void (*callback)()) noexcept
+{
+	BeforeReadbackForDiagnostics = callback;
+}
+
 void ResetTownGpuResources()
 {
+	BeforeReadbackForDiagnostics = nullptr;
 #ifdef _WIN32
 	FrameActive = false;
 	FrameFailed = false;
+	FramePaletteBlendReady = false;
+	FramePaletteOverlayStarted = false;
 	Batches.clear();
 	ResetMeshResources();
 	Vertices.clear();
@@ -1180,6 +1304,10 @@ void ResetTownGpuResources()
 	LightLutCache.clear();
 	TextureBytes = 0;
 	ShadowResource.reset();
+	PriorIndexedColorView.reset();
+	PriorIndexedColor.reset();
+	PaletteBlendResource.reset();
+	PaletteBlendKey = PaletteBlendRevision = 0;
 	ShadowKey = ShadowRevision = 0;
 	ShadowResolution = 0;
 	HardwareDepthView.reset();
@@ -1192,6 +1320,8 @@ void ResetTownGpuResources()
 	for (auto &blend : BlendStates)
 		blend.reset();
 	DepthState.reset();
+	PaletteBlendDepthState.reset();
+	PaletteBlendWriteState.reset();
 	Rasterizer.reset();
 	ConstantBuffer.reset();
 	VertexBuffer.reset();

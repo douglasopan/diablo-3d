@@ -1278,10 +1278,26 @@ void CalcFirstTilePosition(Point &position, Displacement &offset)
  */
 void DrawGame(const Surface &fullOut, Point position, Displacement offset, bool forceNative = false)
 {
-	if (!forceNative && IsTownViewActive()) {
+	static bool cathedralViewOwnedInput = false;
+	if (!forceNative) {
+		const bool previouslyActive = IsTownViewActive() || cathedralViewOwnedInput;
 		UpdateMissilesRendererData();
-		if (DrawTownView(fullOut))
+		PrepareTownViewLiveFrame();
+		if (previouslyActive && !IsTownViewActive()) {
+			SuspendTownFirstPersonInput();
+			cathedralViewOwnedInput = false;
+		}
+	}
+	if (!forceNative && IsTownViewActive()) {
+		if (DrawTownView(fullOut)) {
+			cathedralViewOwnedInput = GetTownViewCathedralState().eligible && IsTownViewActive();
 			return;
+		}
+		if (GetTownViewCathedralState().eligible) {
+			SuspendTownFirstPersonInput();
+			InvalidateTownViewFrameForNativeFallback();
+			cathedralViewOwnedInput = false;
+		}
 	}
 
 	// Limit rendering to the view area
@@ -1827,6 +1843,17 @@ bool DrawNativeTownViewReference(const Surface &out, Point viewPosition)
 	Displacement offset {};
 	CalcFirstTilePosition(viewPosition, offset);
 	DrawGame(out, viewPosition, offset, true);
+	return true;
+}
+
+bool DrawWorldViewForDiagnostics(const Surface &out, Point viewPosition)
+{
+	CalcViewportGeometry();
+	if (MyPlayer == nullptr || out.w() < gnScreenWidth || out.h() < gnViewportHeight)
+		return false;
+	Displacement offset {};
+	CalcFirstTilePosition(viewPosition, offset);
+	DrawGame(out, viewPosition, offset, false);
 	return true;
 }
 

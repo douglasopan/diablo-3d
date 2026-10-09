@@ -918,7 +918,15 @@ void CheckCursMove()
 		int townerIndex = -1;
 		int itemIndex = -1;
 		int playerIndex = -1;
-		const bool picked = PickTownView(MousePosition, tile, townerIndex, itemIndex, playerIndex);
+		TownViewPickResult pick;
+		const bool cathedralWorld = GetTownViewCathedralState().eligible;
+		const bool picked = PickTownViewDetailed(MousePosition, pick);
+		if (picked) {
+			tile = pick.tile;
+			townerIndex = pick.townerIndex;
+			itemIndex = pick.itemIndex;
+			playerIndex = pick.playerIndex;
+		}
 		if (picked && CheckMouseHold(tile))
 			return;
 		ResetCursorInfo();
@@ -929,13 +937,31 @@ void CheckCursMove()
 			return;
 		if (pcurs == CURSOR_IDENTIFY)
 			return;
-		if (townerIndex >= 0 && static_cast<size_t>(townerIndex) < Towners.size()) {
+		if (pick.objectIndex >= 0 && pick.objectIndex < MAXOBJECTS && Objects[pick.objectIndex].canInteractWith()
+		    && InDungeonBounds(Objects[pick.objectIndex].position)
+		    && std::abs(dObject[Objects[pick.objectIndex].position.x][Objects[pick.objectIndex].position.y]) == pick.objectIndex + 1) {
+			ObjectUnderCursor = &Objects[pick.objectIndex];
+			cursPosition = ObjectUnderCursor->position;
+		} else if (pick.monsterIndex >= 0 && static_cast<size_t>(pick.monsterIndex) < MaxMonsters
+		    && IsTileLit(Monsters[pick.monsterIndex].position.tile)
+		    && std::abs(dMonster[Monsters[pick.monsterIndex].position.tile.x][Monsters[pick.monsterIndex].position.tile.y]) == pick.monsterIndex + 1
+		    && IsNoneOf(pcurs, CURSOR_HEALOTHER, CURSOR_RESURRECT) && IsValidMonsterForSelection(Monsters[pick.monsterIndex])) {
+			pcursmonst = pick.monsterIndex;
+			cursPosition = Monsters[pick.monsterIndex].position.tile;
+		} else if (townerIndex >= 0 && static_cast<size_t>(townerIndex) < Towners.size()) {
 			pcursmonst = townerIndex;
 			cursPosition = Towners[townerIndex].position;
-		} else if (itemIndex >= 0 && itemIndex < MAXITEMS && !Items[itemIndex].isEmpty()) {
+		} else if (itemIndex >= 0 && itemIndex < MAXITEMS && !Items[itemIndex].isEmpty()
+		    && (!cathedralWorld || (InDungeonBounds(Items[itemIndex].position)
+		        && Items[itemIndex].selectionRegion != SelectionRegion::None
+		        && dItem[Items[itemIndex].position.x][Items[itemIndex].position.y] == itemIndex + 1))) {
 			pcursitem = itemIndex;
 			cursPosition = Items[itemIndex].position;
-		} else if (playerIndex >= 0 && static_cast<size_t>(playerIndex) < Players.size() && &Players[playerIndex] != MyPlayer) {
+		} else if (playerIndex >= 0 && static_cast<size_t>(playerIndex) < Players.size() && &Players[playerIndex] != MyPlayer
+		    && (!cathedralWorld || (Players[playerIndex].plractive && Players[playerIndex].isOnActiveLevel()
+		        && InDungeonBounds(Players[playerIndex].position.tile)
+		        && (std::abs(dPlayer[Players[playerIndex].position.tile.x][Players[playerIndex].position.tile.y]) == playerIndex + 1
+		            || (Players[playerIndex].hasNoLife() && TileContainsDeadPlayer(Players[playerIndex].position.tile)))))) {
 			PlayerUnderCursor = &Players[playerIndex];
 			cursPosition = Players[playerIndex].position.tile;
 		} else {

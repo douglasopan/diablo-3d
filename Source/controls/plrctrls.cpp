@@ -32,6 +32,8 @@
 #include "diablo.h"
 #include "doom.h"
 #include "engine/point.hpp"
+#include "engine/render/town_view.hpp"
+#include "engine/render/cathedral/cathedral_live.hpp"
 #include "engine/points_in_rectangle_range.hpp"
 #include "game_mode.hpp"
 #include "gmenu.h"
@@ -1852,7 +1854,7 @@ void ProcessAutomapMovementGamepad()
 
 bool CanOwnFirstPersonWalk(const Player &player)
 {
-	return &player == MyPlayer && leveltype == DTYPE_TOWN && !MyPlayerIsDead
+	return &player == MyPlayer && (leveltype == DTYPE_TOWN || cathedral::LiveLevelEligible()) && !MyPlayerIsDead
 	    && player._pmode != PM_DEATH && !player.hasNoLife() && !player._pLvlChanging
 	    && player.isOnActiveLevel() && ControlMode == ControlTypes::KeyboardAndMouse
 	    && ControlDevice == ControlTypes::KeyboardAndMouse;

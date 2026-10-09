@@ -9,7 +9,12 @@ if(MSVC)
     engine/render/actor_visual_snapshot.cpp
     engine/render/ogden_idle_pilot.cpp
     engine/render/ogden_idle_native_clock.cpp
+    engine/render/cathedral/cathedral_adapter.cpp
+    engine/render/cathedral/cathedral_frame.cpp
+    engine/render/cathedral/cathedral_live.cpp
+    engine/render/cathedral/native/cathedral_native_capture.cpp
     engine/render/town_view.cpp
+    engine/render/town_gpu.cpp
     PROPERTIES COMPILE_OPTIONS "/EHsc")
 endif()
 
@@ -92,6 +97,10 @@ set(libdevilutionx_SRCS
   engine/sound_position.cpp
   engine/trn.cpp
 
+  engine/render/cathedral/cathedral_adapter.cpp
+  engine/render/cathedral/cathedral_frame.cpp
+  engine/render/cathedral/cathedral_live.cpp
+  engine/render/cathedral/native/cathedral_native_capture.cpp
   engine/render/actor_model.cpp
   engine/render/actor_pose.cpp
   engine/render/actor_visual_snapshot.cpp

@@ -34,11 +34,16 @@
 #include "engine/render/actor_visual_snapshot.hpp"
 #include "engine/render/ogden_idle_pilot.hpp"
 #include "engine/render/ogden_idle_native_clock.hpp"
+#include "dead.h"
 #include "engine/assets.hpp"
 #include "engine/clx_sprite.hpp"
 #include "engine/light_tables.hpp"
 #include "engine/palette.h"
 #include "engine/render/clx_render.hpp"
+#include "engine/render/cathedral/cathedral_frame.hpp"
+#include "engine/render/cathedral/cathedral_live.hpp"
+#include "engine/render/cathedral/cathedral_native_palette.hpp"
+#include "engine/render/cathedral/cathedral_native_coverage.hpp"
 #include "engine/render/dun_render.hpp"
 #include "engine/render/scrollrt.h"
 #include "engine/render/town_ground_shadow.hpp"
@@ -63,13 +68,18 @@
 #include "engine/render/town_presentation.hpp"
 #include "engine/render/ui_overlay_regions.hpp"
 #include "engine/surface.hpp"
+#include "engine/trn.hpp"
 #include "items.h"
 #include "levels/dun_tile_data.hpp"
 #include "levels/tile_properties.hpp"
+#include "lighting.h"
 #include "missiles.h"
+#include "monster.h"
+#include "objects.h"
 #include "options.h"
 #include "player.h"
 #include "utils/log.hpp"
+#include "utils/palette_blending.hpp"
 #include "towners.h"
 #include "utils/ui_fwd.h"
 
@@ -248,7 +258,7 @@ struct VolumeArtwork {
 	mutable std::map<std::array<float, 3>, ResidentMeshArtwork> residentPlacements;
 };
 
-enum class PickKind : uint8_t { Ground, Towner, Item, Player };
+enum class PickKind : uint8_t { Ground, Towner, Item, Player, Object, Monster };
 struct PickRecord {
 	uint16_t tile = std::numeric_limits<uint16_t>::max();
 	int16_t entity = -1;
@@ -259,6 +269,21 @@ struct PickRecord {
 
 bool Enabled = false;
 bool PickingValid = false;
+cathedral::PilotFrame CathedralFrame;
+bool CathedralFrameReady = false;
+bool DrawingCathedral = false;
+bool CathedralPaletteBlend = false;
+const uint8_t *CathedralTranslation = nullptr;
+
+const std::vector<TownSceneModel> &ViewCollisionScene()
+{
+	return cathedral::LiveLevelEligible() ? CathedralFrame.collisionModels : GetTownScene();
+}
+
+uint64_t ViewSceneRevision()
+{
+	return cathedral::LiveLevelEligible() ? cathedral::LiveSceneRevision() : GetTownSceneRevision();
+}
 int PickScreenWidth = 0;
 int PickScreenHeight = 0;
 int PickViewportHeight = 0;
@@ -311,6 +336,17 @@ struct PreparedGpuTexture {
 	uint64_t lastSeen = 0;
 };
 std::unordered_map<uint64_t, PreparedGpuTexture> PreparedGpuTextures;
+struct CathedralGpuPaletteBinding {
+	TextureGpuIdentity identity;
+	cathedral::NativePaletteRevision palette;
+	uint64_t lastPreparedFrame = 0;
+};
+std::unordered_map<const uint8_t *, CathedralGpuPaletteBinding> GpuCathedralLuts;
+std::array<uint8_t, 256 * 256> GpuCathedralBlendLookup {};
+TextureGpuIdentity GpuCathedralBlendIdentity;
+uint64_t GpuCathedralBlendRevision = 0, GpuCathedralBlendEpoch = 0;
+bool GpuCathedralBlendValid = false;
+TownViewCathedralAllocationState CathedralAllocationState;
 std::vector<uint8_t> GpuOrdinaryLut;
 std::vector<uint8_t> GpuImportedLut;
 size_t GpuImportedLutColors = 0;
@@ -535,8 +571,8 @@ void ResetFollowCameraHistory(bool clearIndex = false)
 
 void PrepareCameraCollisionIndex()
 {
-	const auto &scene = GetTownScene();
-	const uint64_t revision = GetTownSceneRevision();
+	const auto &scene = ViewCollisionScene();
+	const uint64_t revision = ViewSceneRevision();
 	if (revision == CameraCollisionSceneRevision)
 		return;
 	std::vector<TownCameraCollisionTriangle> triangles;
@@ -673,7 +709,7 @@ void ResolveFollowCamera(TownCameraFrame &frame, TownCameraPoint anchor)
 	}
 }
 
-void ConfigureCamera(int width, int height)
+void ConfigureCamera(int width, int height, bool diagnosticProjection = false)
 {
 	Vec3 target { static_cast<float>(ViewPosition.x), 0, static_cast<float>(ViewPosition.y) };
 	const bool followsHero = CameraRig.mode() == TownCameraMode::ThirdPerson || CameraRig.mode() == TownCameraMode::FirstPerson;
@@ -697,7 +733,12 @@ void ConfigureCamera(int width, int height)
 		centerX = width / 2.0F;
 		centerY = height / 2.0F;
 	}
-	ViewCamera.projection = BuildTownCameraFrame(CameraRig, { target.x, target.y, target.z }, width, height,
+	// A forced diagnostic may inspect geometry while the live input rig stays
+	// suspended for native transparency/GPU fallback. Only this copy is resumed.
+	TownCameraRig projectionRig = CameraRig;
+	if (diagnosticProjection)
+		projectionRig.Suspend(false);
+	ViewCamera.projection = BuildTownCameraFrame(projectionRig, { target.x, target.y, target.z }, width, height,
 		centerX, centerY, static_cast<float>(zoomFactor));
 	ResolveFollowCamera(ViewCamera.projection, { target.x, target.y, target.z });
 	const TownCameraFrame &frame = ViewCamera.projection;
@@ -745,6 +786,8 @@ void ClearGpuSceneResources()
 {
 	ResetTownGpuResources();
 	PreparedGpuTextures.clear();
+	GpuCathedralLuts.clear();
+	GpuCathedralBlendValid = false;
 	GpuOrdinaryLut.clear();
 	GpuImportedLut.clear();
 	GpuImportedLutColors = 0;
@@ -777,6 +820,26 @@ TownGpuTexture PrepareGpuTexture(const Texture &texture, const InteriorLighting 
 	result.height = texture.height;
 	result.texelCodes = prepared.codes;
 	result.opacity = texture.opacity;
+	if (DrawingCathedral) {
+		// Cache buckets may use the native pointer; immutable GPU identities and
+		// revisions come from exact bytes, never from that address alone.
+		auto &binding = GpuCathedralLuts[CathedralTranslation];
+		if (binding.lastPreparedFrame != GpuFrameNumber) {
+			const auto lut = CathedralTranslation != nullptr
+			    ? cathedral::BuildNativeTranslationLut(std::span<const uint8_t, 256>(CathedralTranslation, 256))
+			    : cathedral::BuildNativeLightLut(LightTables);
+			if (!binding.palette.Update(lut, cathedral::LiveEpoch())) {
+				CaptureGpuFailed = true;
+				return {}; // Invalid epoch/revision cannot publish a stale LUT.
+			}
+			binding.lastPreparedFrame = GpuFrameNumber;
+		}
+		result.lightLutKey = binding.identity.value;
+		result.lightLutRevision = binding.palette.revision();
+		result.lightLut = binding.palette.table();
+		result.lightLevels = 16;
+		return result;
+	}
 	if (texture.emissive)
 		return result;
 	if (interior != nullptr) {
@@ -808,6 +871,23 @@ TownGpuTexture PrepareGpuTexture(const Texture &texture, const InteriorLighting 
 		result.lightLevels = 16;
 	}
 	return result;
+}
+
+bool PrepareCathedralGpuBlend()
+{
+	const uint64_t epoch = cathedral::LiveEpoch();
+	if (!GpuCathedralBlendValid || GpuCathedralBlendEpoch != epoch
+	    || std::memcmp(GpuCathedralBlendLookup.data(), paletteTransparencyLookup, GpuCathedralBlendLookup.size()) != 0) {
+		if (GpuCathedralBlendRevision == std::numeric_limits<uint64_t>::max())
+			return false;
+		std::memcpy(GpuCathedralBlendLookup.data(), paletteTransparencyLookup, GpuCathedralBlendLookup.size());
+		GpuCathedralBlendEpoch = epoch;
+		++GpuCathedralBlendRevision;
+		if (GpuCathedralBlendRevision == 0)
+			++GpuCathedralBlendRevision;
+		GpuCathedralBlendValid = true;
+	}
+	return TownGpuSetPaletteBlend({ GpuCathedralBlendIdentity.value, GpuCathedralBlendRevision, GpuCathedralBlendLookup });
 }
 
 uint32_t GpuPickId(PickRecord pick)
@@ -882,7 +962,10 @@ void Rasterize(const Surface &out, const std::array<TownCameraProjectedVertex, 3
 	if (minX > maxX || minY > maxY)
 		return;
 	const float inverseArea = 1.0F / area;
-	const uint8_t *lightTable = SceneLightTables[std::clamp(shade, 0, 3)].data();
+	const uint8_t *lightTable = DrawingCathedral
+	    ? (CathedralTranslation != nullptr || shade == 0 ? IdentityPalette.data()
+	        : LightTables[std::clamp(shade, 0, static_cast<int>(LightTables.size()) - 1)].data())
+	    : SceneLightTables[std::clamp(shade, 0, 3)].data();
 	const auto worldPosition = [](const TownCameraProjectedVertex &vertex) {
 		return Vec3 { vertex.source.world.x, vertex.source.world.height, vertex.source.world.z };
 	};
@@ -914,18 +997,20 @@ void Rasterize(const Surface &out, const std::array<TownCameraProjectedVertex, 3
 	// the source. Shadowing their absent direct light again crushed the masonry.
 	const bool receivesDirectLight = normal.x * light.x + normal.y * light.height + normal.z * light.z > 0.02F;
 	const float diffuse = std::clamp(normal.x * light.x + normal.y * light.height + normal.z * light.z, 0.0F, 1.0F);
-	const bool receivesShadow = DirectionalShadowsEnabledForDiagnostics && interior == nullptr && !texture.emissive
+	const bool receivesShadow = !DrawingCathedral && DirectionalShadowsEnabledForDiagnostics && interior == nullptr && !texture.emissive
 	    && (hasAlbedo ? diffuse > 0 : receivesDirectLight);
 	if (CaptureGpu) {
 		if (CaptureGpuFailed)
 			return;
 		TownGpuMaterial material;
-		material.lighting = texture.emissive ? TownGpuLighting::Unlit
+		material.lighting = DrawingCathedral ? TownGpuLighting::Palette
+		    : texture.emissive ? TownGpuLighting::Unlit
 		    : interior != nullptr ? TownGpuLighting::Interior
 		    : hasAlbedo ? TownGpuLighting::Directional : TownGpuLighting::Shadow;
 		material.repeat = texture.repeat;
 		material.transparentZero = transparent && !hasAlbedo && texture.opacity.empty();
-		material.preservePicking = pick.preservePicking;
+		material.preservePicking = pick.preservePicking || CathedralPaletteBlend;
+		material.paletteBlend = DrawingCathedral && CathedralPaletteBlend;
 		material.receivesShadow = receivesShadow;
 		material.shade = shade;
 		material.fallbackPaletteIndex = fallback.palette;
@@ -969,8 +1054,12 @@ void Rasterize(const Surface &out, const std::array<TownCameraProjectedVertex, 3
 			const float wa = Edge(b, c, px, py) * inverseArea;
 			const float wb = Edge(c, a, px, py) * inverseArea;
 			const float wc = 1.0F - wa - wb;
-			if (wa < -0.0001F || wb < -0.0001F || wc < -0.0001F)
+			if (DrawingCathedral && CathedralPaletteBlend) {
+				if (!cathedral::NativePaletteTriangleCovers({ cathedral::NativeCoveragePoint { a.x, a.y }, { b.x, b.y }, { c.x, c.y } }, { px, py }))
+					continue;
+			} else if (wa < -0.0001F || wb < -0.0001F || wc < -0.0001F) {
 				continue;
+			}
 			++RendererState.cpuCoveredFragments;
 			float ca = wa, cb = wb, cc = wc;
 			if (ViewCamera.projection.perspective) {
@@ -998,6 +1087,9 @@ void Rasterize(const Surface &out, const std::array<TownCameraProjectedVertex, 3
 			uint32_t albedoColor = 0;
 			if (!texture.sample(u, v, color, &albedoColor) || (transparent && !hasAlbedo && texture.opacity.empty() && color == 0))
 				continue;
+			const uint8_t previousColor = destination[x];
+			if (DrawingCathedral && CathedralTranslation != nullptr)
+				color = CathedralTranslation[color];
 			const Vec3 world = worldA * ca + worldB * cb + worldC * cc;
 			const float shadow = receivesShadow
 			    ? SampleTownShadow(world.x, world.y, world.z, shadowReceiver) : 0;
@@ -1020,6 +1112,11 @@ void Rasterize(const Surface &out, const std::array<TownCameraProjectedVertex, 3
 			} else {
 				destination[x] = shadowLevel == 0 ? lightTable[color]
 				    : SceneShadowTables[std::clamp(shade, 0, 3)][shadowLevel][color];
+			}
+			if (DrawingCathedral && CathedralPaletteBlend) {
+				destination[x] = paletteTransparencyLookup[previousColor][destination[x]];
+				++RendererState.cpuShadedFragments;
+				continue; // Overlay preserves the opaque depth and target owner.
 			}
 			DepthBuffer[index] = depth;
 			++RendererState.cpuShadedFragments;
@@ -2632,7 +2729,7 @@ void DrawPlayerVolume(const Surface &out, Vec3 position, const Player &player, i
 		static_cast<int>(player._pdir), player.AnimInfo.getFrameToUseForRendering(), current, PickKind::Player, entity);
 }
 
-void DrawBillboard(const Surface &out, Vec3 position, Point tile, ClxSprite sprite, PickKind kind, int entity, int lighting = 0)
+void DrawBillboard(const Surface &out, Vec3 position, Point tile, ClxSprite sprite, PickKind kind, int entity, int lighting = 0, bool preservePicking = false)
 {
 	if (!ViewCamera.projection.perspective && (std::abs(position.x - ViewCamera.target.x) > 80 || std::abs(position.z - ViewCamera.target.z) > 80))
 		return;
@@ -2661,8 +2758,232 @@ void DrawBillboard(const Surface &out, Vec3 position, Point tile, ClxSprite spri
 	position.y -= 1.0F / PixelsPerWorldUnit;
 	const Vec3 halfWidth = ViewCamera.right * (width / 2);
 	const Vec3 rise { 0, height, 0 };
+	PickRecord pick = PickAt(tile, kind, entity);
+	pick.preservePicking = preservePicking;
 	DrawQuad(out, { position - halfWidth + rise, position + halfWidth + rise,
-		position + halfWidth, position - halfWidth }, texture, PickAt(tile, kind, entity), lighting, true);
+		position + halfWidth, position - halfWidth }, texture, pick, lighting, true);
+}
+
+bool CathedralTileInFrame(Point tile)
+{
+	return InDungeonBounds(tile) && tile.x >= CathedralFrame.regionX - cathedral::RegionSize
+	    && tile.x < CathedralFrame.regionX + 2 * cathedral::RegionSize
+	    && tile.y >= CathedralFrame.regionZ - cathedral::RegionSize
+	    && tile.y < CathedralFrame.regionZ + 2 * cathedral::RegionSize;
+}
+
+void InjectCathedralAllocationFailure(TownViewCathedralAllocationFailurePoint point)
+{
+#if defined(__cpp_exceptions) || defined(_CPPUNWIND)
+	if (!CaptureGpu || !RendererState.requestedGpu || CathedralAllocationState.armed != point)
+		return;
+	// Diagnostic only: consume before throwing, so same-key recovery is unarmed.
+	CathedralAllocationState.armed = TownViewCathedralAllocationFailurePoint::None;
+	CathedralAllocationState.injected = point;
+	throw std::bad_alloc();
+#else
+	(void)point;
+#endif
+}
+
+void InjectCathedralReadbackAllocationFailure()
+{
+	InjectCathedralAllocationFailure(TownViewCathedralAllocationFailurePoint::BeforeReadback);
+}
+
+void DrawCathedralWorld(const Surface &out)
+{
+	// Existing native sprite bytes and light/TRN tables are sampled by the same
+	// camera, clipping, raster depth and pick transaction as technical geometry.
+	DrawingCathedral = true;
+	CathedralTranslation = nullptr;
+	static std::array<Texture, 16> textures;
+	constexpr std::array<std::array<int, 3>, 16> colors { {
+		{ 77, 87, 99 }, { 148, 158, 171 }, { 168, 184, 196 }, { 179, 179, 179 },
+		{ 204, 153, 179 }, { 204, 128, 179 }, { 224, 158, 71 }, { 212, 79, 33 },
+		{ 64, 184, 122 }, { 59, 143, 235 }, { 179, 51, 179 }, { 145, 107, 191 },
+		{ 191, 196, 204 }, { 186, 156, 71 }, { 115, 173, 189 }, { 186, 125, 199 }
+	} };
+	for (size_t i = 0; i < textures.size(); ++i) {
+		textures[i].width = textures[i].height = 1;
+		const uint8_t color = ClosestSceneColor(static_cast<float>(colors[i][0]),
+			static_cast<float>(colors[i][1]), static_cast<float>(colors[i][2]));
+		if (textures[i].pixels.empty() || textures[i].pixels[0] != color) {
+			textures[i].pixels.assign(1, color);
+			textures[i].gpuIdentity = TextureGpuIdentity {};
+		}
+	}
+	const auto drawSurface = [&](const cathedral::FrameTriangle &surface) {
+		std::array<Vertex, 3> vertices;
+		for (size_t n = 0; n < vertices.size(); ++n) {
+			const auto &vertex = surface.vertices[n];
+			vertices[n] = { { vertex.position.x, vertex.position.y, vertex.position.z }, vertex.u, vertex.v };
+		}
+		const Point tile { surface.pick.x, surface.pick.z };
+		PickRecord pick = PickAt(tile);
+		if (surface.pick.kind == cathedral::PickKind::Object && surface.pick.nativeSlot >= 0
+		    && surface.pick.nativeSlot < MAXOBJECTS && Objects[surface.pick.nativeSlot].canInteractWith()
+		    && std::abs(dObject[tile.x][tile.y]) == surface.pick.nativeSlot + 1)
+			pick = PickAt(tile, PickKind::Object, surface.pick.nativeSlot);
+		DrawTriangle(out, vertices, textures[static_cast<size_t>(surface.module)], pick, surface.light);
+	};
+	const auto drawSpecial = [&](const cathedral::NativeSpecialOverlay &special) {
+		if (!pSpecialCels || special.frameIndex < 0 || static_cast<uint32_t>(special.frameIndex) >= pSpecialCels->numSprites())
+			return; // Normal frames were gated; forced diagnostics remain safe.
+		const Point tile { special.x, special.z };
+		DrawBillboard(out, { static_cast<float>(tile.x), 0, static_cast<float>(tile.y) }, tile,
+			(*pSpecialCels)[special.frameIndex], PickKind::Ground, -1, special.light, CathedralPaletteBlend);
+	};
+	CathedralPaletteBlend = false;
+	InjectCathedralAllocationFailure(TownViewCathedralAllocationFailurePoint::BeforeOpaque);
+	for (const auto &surface : CathedralFrame.triangles)
+		if (surface.policy == cathedral::FrameSurfacePolicy::Opaque)
+			drawSurface(surface);
+	for (const auto &special : CathedralFrame.nativeSpecialOverlays)
+		if (!special.blendActive)
+			drawSpecial(special);
+	for (int i = 0; i < ActiveObjectCount; ++i) {
+		const int slot = ActiveObjects[i];
+		if (slot < 0 || slot >= MAXOBJECTS)
+			continue;
+		const Object &object = Objects[slot];
+		if (!CathedralTileInFrame(object.position) || dLight[object.position.x][object.position.y] >= LightsMax
+		    || !object._oAnimData || object._oAnimFrame == 0 || object._oAnimFrame > object._oAnimData->numSprites()
+		    || object._otype == OBJ_L1LDOOR || object._otype == OBJ_L1RDOOR)
+			continue; // Door frames/leaves already retain their native object binding.
+		const bool selectable = object.canInteractWith() && std::abs(dObject[object.position.x][object.position.y]) == slot + 1;
+		DrawBillboard(out, { static_cast<float>(object.position.x), 0, static_cast<float>(object.position.y) },
+			object.position, object.currentSprite(), selectable ? PickKind::Object : PickKind::Ground,
+			selectable ? slot : -1, object.applyLighting ? dLight[object.position.x][object.position.y] : 0);
+	}
+	for (size_t i = 0; i < ActiveMonsterCount; ++i) {
+		const size_t slot = ActiveMonsters[i];
+		if (slot >= MaxMonsters)
+			continue;
+		const Monster &monster = Monsters[slot];
+		const Point tile = monster.position.tile;
+		if (!CathedralTileInFrame(tile) || !monster.animInfo.sprites || (monster.flags & MFLAG_HIDDEN) != 0
+		    || (!IsTileLit(tile) && !(MyPlayer->_pInfraFlag && !TileHasAny(tile, TileProperties::Solid | TileProperties::BlockMissile))))
+			continue;
+		const ClxSprite sprite = monster.animInfo.currentSprite();
+		Displacement offset = monster.getRenderingOffset(sprite);
+		offset.deltaX += CalculateSpriteTileCenterX(sprite.width());
+		Vec3 position { static_cast<float>(tile.x) + static_cast<float>(2 * offset.deltaY + offset.deltaX) / 64.0F,
+			0, static_cast<float>(tile.y) + static_cast<float>(2 * offset.deltaY - offset.deltaX) / 64.0F };
+		int light = dLight[tile.x][tile.y];
+		if (!IsTileLit(tile) || (MyPlayer->_pInfraFlag && light > 8))
+			CathedralTranslation = GetInfravisionTRN();
+		else if (monster.mode == MonsterMode::Petrified)
+			CathedralTranslation = GetStoneTRN();
+		else if (monster.isUnique())
+			CathedralTranslation = monster.uniqueMonsterTRN.get();
+		const bool selectable = IsTileLit(tile) && !monster.hasNoLife() && !monster.isPlayerMinion()
+		    && std::abs(dMonster[tile.x][tile.y]) == static_cast<int>(slot) + 1;
+		DrawBillboard(out, position, tile, sprite, selectable ? PickKind::Monster : PickKind::Ground,
+			selectable ? static_cast<int>(slot) : -1,
+			CathedralTranslation != nullptr ? 0 : light);
+		CathedralTranslation = nullptr;
+	}
+	for (uint8_t i = 0; i < ActiveItemCount; ++i) {
+		const int slot = ActiveItems[i];
+		if (slot < 0 || slot >= MAXITEMS)
+			continue;
+		const Item &item = Items[slot];
+		if (!CathedralTileInFrame(item.position) || !item.AnimInfo.sprites)
+			continue;
+		const bool selectable = !item.isEmpty() && item.selectionRegion != SelectionRegion::None
+		    && dItem[item.position.x][item.position.y] == slot + 1;
+		DrawBillboard(out, { static_cast<float>(item.position.x), 0, static_cast<float>(item.position.y) },
+			item.position, item.AnimInfo.currentSprite(), selectable ? PickKind::Item : PickKind::Ground,
+			selectable ? slot : -1, dLight[item.position.x][item.position.y]);
+	}
+	for (size_t i = 0; i < Players.size(); ++i) {
+		const Player &player = Players[i];
+		const Point tile = player.position.tile;
+		if (!player.plractive || !player.isOnActiveLevel() || !player.AnimInfo.sprites || !CathedralTileInFrame(tile)
+		    || (&player != MyPlayer && !IsTileLit(tile) && !MyPlayer->_pInfraFlag)
+		    || (FollowCameraState.localPlayerHidden && &player == MyPlayer))
+			continue;
+		if (&player != MyPlayer && (!IsTileLit(tile) || (MyPlayer->_pInfraFlag && dLight[tile.x][tile.y] > 8)))
+			CathedralTranslation = GetInfravisionTRN();
+		const bool selectable = std::abs(dPlayer[tile.x][tile.y]) == static_cast<int>(i) + 1
+		    || (player.hasNoLife() && TileContainsDeadPlayer(tile));
+		DrawBillboard(out, PlayerPosition(player), tile, player.currentSprite(), selectable ? PickKind::Player : PickKind::Ground,
+			selectable ? static_cast<int>(i) : -1,
+			&player == MyPlayer || CathedralTranslation != nullptr ? 0 : std::max(static_cast<int>(dLight[tile.x][tile.y]) - 5, 0));
+		CathedralTranslation = nullptr;
+	}
+	for (const Missile &missile : Missiles) {
+		const Point tile = missile.position.tileForRendering;
+		if (!CathedralTileInFrame(tile) || !missile._miDrawFlag || missile._miDelFlag || !missile._miAnimData
+		    || missile._miAnimFrame <= 0 || static_cast<size_t>(missile._miAnimFrame) > missile._miAnimData->numSprites())
+			continue;
+		const Displacement offset = missile.position.offsetForRendering;
+		if (missile._miUniqTrans != 0) {
+			if (missile._misource < 0 || missile._misource >= MaxMonsters || !Monsters[missile._misource].uniqueMonsterTRN)
+				continue; // Invalid source is never dereferenced or painted as unlit.
+			CathedralTranslation = Monsters[missile._misource].uniqueMonsterTRN.get();
+		}
+		DrawBillboard(out, { static_cast<float>(tile.x) + static_cast<float>(2 * offset.deltaY + offset.deltaX) / 64.0F,
+			0, static_cast<float>(tile.y) + static_cast<float>(2 * offset.deltaY - offset.deltaX) / 64.0F },
+			tile, (*missile._miAnimData)[missile._miAnimFrame - 1], PickKind::Ground, -1,
+			CathedralTranslation == nullptr && missile._miLightFlag ? dLight[tile.x][tile.y] : 0);
+		CathedralTranslation = nullptr;
+	}
+	for (int z = std::max(cathedral::ActiveMin, CathedralFrame.regionZ - cathedral::RegionSize);
+	     z < std::min(cathedral::ActiveMax, CathedralFrame.regionZ + 2 * cathedral::RegionSize); ++z) {
+		for (int x = std::max(cathedral::ActiveMin, CathedralFrame.regionX - cathedral::RegionSize);
+		     x < std::min(cathedral::ActiveMax, CathedralFrame.regionX + 2 * cathedral::RegionSize); ++x) {
+			const uint8_t value = static_cast<uint8_t>(dCorpse[x][z]);
+			const unsigned slot = value & 0x1F;
+			if (slot == 0 || slot > MaxCorpses || dLight[x][z] >= LightsMax || !Corpses[slot - 1].sprites)
+				continue;
+			const Corpse &corpse = Corpses[slot - 1];
+			const auto sprites = corpse.spritesForDirection(static_cast<Direction>((value >> 5) & 7));
+			if (corpse.frame < 0 || static_cast<uint32_t>(corpse.frame) >= sprites.numSprites())
+				continue;
+			if (corpse.translationPaletteIndex > 0 && corpse.translationPaletteIndex <= MaxMonsters)
+				CathedralTranslation = Monsters[corpse.translationPaletteIndex - 1].uniqueMonsterTRN.get();
+			DrawBillboard(out, { static_cast<float>(x), 0, static_cast<float>(z) }, { x, z },
+				sprites[corpse.frame], PickKind::Ground, -1, CathedralTranslation != nullptr ? 0 : dLight[x][z]);
+			CathedralTranslation = nullptr;
+		}
+	}
+	InjectCathedralAllocationFailure(TownViewCathedralAllocationFailurePoint::AfterOpaque);
+	struct OverlayCommand {
+		bool special;
+		size_t index;
+		float depth;
+	};
+	std::vector<OverlayCommand> overlays;
+	for (size_t i = 0; i < CathedralFrame.triangles.size(); ++i) {
+		const auto &surface = CathedralFrame.triangles[i];
+		if (surface.policy != cathedral::FrameSurfacePolicy::NativePaletteBlend)
+			continue;
+		Vec3 center {};
+		for (const auto &vertex : surface.vertices)
+			center = center + Vec3 { vertex.position.x, vertex.position.y, vertex.position.z } * (1.0F / 3);
+		overlays.push_back({ false, i, ToCamera(center).z });
+	}
+	for (size_t i = 0; i < CathedralFrame.nativeSpecialOverlays.size(); ++i) {
+		const auto &special = CathedralFrame.nativeSpecialOverlays[i];
+		if (!special.blendActive || !pSpecialCels || special.frameIndex < 0
+		    || static_cast<uint32_t>(special.frameIndex) >= pSpecialCels->numSprites())
+			continue;
+		const auto sprite = (*pSpecialCels)[special.frameIndex];
+		const Vec3 center { static_cast<float>(special.x), sprite.height() / (2 * PixelsPerWorldUnit), static_cast<float>(special.z) };
+		overlays.push_back({ true, i, ToCamera(center).z });
+	}
+	std::stable_sort(overlays.begin(), overlays.end(), [](const OverlayCommand &a, const OverlayCommand &b) { return a.depth > b.depth; });
+	CathedralPaletteBlend = true;
+	for (const auto &overlay : overlays) {
+		if (overlay.special)
+			drawSpecial(CathedralFrame.nativeSpecialOverlays[overlay.index]);
+		else
+			drawSurface(CathedralFrame.triangles[overlay.index]);
+	}
+	CathedralPaletteBlend = false;
+	DrawingCathedral = false;
 }
 
 Surface PrepareSamplingBuffers(const Surface &logical)
@@ -2752,7 +3073,9 @@ bool CurrentPickingValid()
 	    && PickHorizonEnabled == *GetOptions().Graphics.townViewHorizon
 	    && PickGpuRequested == *GetOptions().Graphics.townViewGpuRendering
 	    && PickFrustumCullingRequested == *GetOptions().Graphics.townViewFrustumCulling
-	    && PickSceneRevision == GetTownSceneRevision()
+	    && PickSceneRevision == ViewSceneRevision()
+	    && (!cathedral::LiveLevelEligible() || (CathedralFrameReady && !CathedralFrame.requiresNativeFallback
+	        && (!PickGpuRequested || RendererState.usedGpu) && cathedral::LiveFrameCurrent()))
 	    && PickScreenWidth == gnScreenWidth && PickScreenHeight == gnScreenHeight
 	    && PickViewportHeight == gnViewportHeight && PickZoom == *GetOptions().Graphics.zoom
 	    && PickLeftPanel == IsLeftPanelOpen() && PickRightPanel == IsRightPanelOpen()
@@ -2843,7 +3166,88 @@ TownViewArchitectureCullingState GetTownViewArchitectureCullingState()
 
 bool IsTownViewActive()
 {
-	return Enabled && leveltype == DTYPE_TOWN;
+	return Enabled && (leveltype == DTYPE_TOWN
+	    || (cathedral::LiveLevelEligible() && CathedralFrameReady && !CathedralFrame.requiresNativeFallback));
+}
+
+void PrepareTownViewLiveFrame()
+{
+	if (!cathedral::LiveLevelEligible() || MyPlayer == nullptr) {
+		if (CathedralFrameReady && leveltype != DTYPE_TOWN)
+			InvalidateTownViewFrameForNativeFallback();
+		CathedralFrameReady = false;
+		CathedralFrame = {};
+		return;
+	}
+	PickingValid = false;
+	CathedralFrameReady = false;
+	CathedralAllocationState.failed = false;
+	CathedralAllocationState.injected = TownViewCathedralAllocationFailurePoint::None;
+	CathedralAllocationState.gpuSubmittedBeforeFailure = 0;
+	CathedralAllocationState.gpuDrawCallsBeforeFailure = 0;
+	CathedralAllocationState.cpuRasterizedBeforeFailure = 0;
+	try {
+		const Point focus = MyPlayer->position.tile;
+		if (cathedral::RefreshLiveFrame(focus.x, focus.y)) {
+			const auto *snapshot = cathedral::LiveSnapshot();
+			const auto *scene = cathedral::LiveScene();
+			if (snapshot != nullptr && scene != nullptr) {
+				CathedralFrame = cathedral::BuildPilotFrame(*snapshot, *scene, focus.x, focus.y);
+				CathedralFrameReady = true;
+				for (const auto &special : CathedralFrame.nativeSpecialOverlays) {
+					if (!pSpecialCels || special.frameIndex < 0 || static_cast<uint32_t>(special.frameIndex) >= pSpecialCels->numSprites()) {
+						CathedralFrame.requiresNativeFallback = true;
+						CathedralFrame.fallbackReasons |= static_cast<uint32_t>(cathedral::FrameFallbackReason::UnsupportedNativeSpecial);
+					}
+				}
+			}
+		}
+	} catch (const std::bad_alloc &) {
+		CathedralAllocationState.failed = true;
+		CathedralFrameReady = false;
+		CathedralFrame = {};
+	} catch (...) {
+		CathedralFrameReady = false;
+		CathedralFrame = {};
+	}
+	if (!CathedralFrameReady || CathedralFrame.requiresNativeFallback) {
+		SamplingSurface.reset();
+		SamplingState = {};
+		DepthBuffer.clear();
+		PickBuffer.clear();
+		ResetFollowCameraHistory(true);
+		CameraRig.Suspend(true);
+		RendererState = {};
+		RendererState.requestedGpu = *GetOptions().Graphics.townViewGpuRendering;
+		try {
+			RendererState.failure = "Private Cathedral pilot R2: incomplete frame or unresolved native surface; complete native fallback";
+		} catch (const std::bad_alloc &) {
+			CathedralAllocationState.failed = true;
+			RendererState.failure.clear();
+		}
+	} else {
+		CameraRig.Suspend(!Enabled);
+	}
+}
+
+void InvalidateTownViewFrameForNativeFallback()
+{
+	PickingValid = false;
+	CathedralFrameReady = false;
+	SamplingSurface.reset();
+	SamplingState = {};
+	DepthBuffer.clear();
+	PickBuffer.clear();
+	EndTownViewCameraDrag();
+	ResetFollowCameraHistory(true);
+	CameraRig.Suspend(true);
+}
+
+TownViewCathedralState GetTownViewCathedralState()
+{
+	return { cathedral::LiveLevelEligible(), CathedralFrameReady,
+		cathedral::LiveLevelEligible() && (!CathedralFrameReady || CathedralFrame.requiresNativeFallback),
+		cathedral::LiveEpoch(), cathedral::LiveSceneRevision(), CathedralFrame.regions, CathedralFrame.triangles.size() };
 }
 
 void InitializeTownViewForGame()
@@ -2875,7 +3279,7 @@ bool IsTownViewNativePose()
 void ToggleTownView()
 {
 	Enabled = !Enabled;
-	CameraRig.Suspend(!Enabled);
+	CameraRig.Suspend(!IsTownViewActive());
 	ResetFollowCameraHistory();
 	EndTownViewCameraDrag();
 	PickingValid = false;
@@ -3094,6 +3498,10 @@ void ResetTownViewResources()
 	OgdenPilotState = {};
 	OgdenGpuSubmissionFailed = false;
 	FailOgdenGpuSubmissionForDiagnostics = false;
+	CathedralAllocationState = {};
+	CathedralFrame = {};
+	CathedralFrameReady = DrawingCathedral = CathedralPaletteBlend = false;
+	CathedralTranslation = nullptr;
 	ResetFollowCameraHistory(true);
 	ClearGpuSceneResources();
 	HorizonMesh = {};
@@ -3138,8 +3546,10 @@ void ResetTownViewResources()
 	PickingValid = false;
 }
 
-bool DrawTownView(const Surface &fullOut, bool forceGeometry)
+static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 {
+	const bool cathedralWorld = cathedral::LiveLevelEligible() && CathedralFrameReady;
+	const bool forcedCathedralGeometry = forceGeometry && Enabled && cathedralWorld && !CathedralFrame.requiresNativeFallback;
 	const auto worldStart = std::chrono::steady_clock::now();
 	OgdenPilotState.drawn = false;
 	OgdenPilotState.trianglesVisited = 0;
@@ -3156,7 +3566,7 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 			ResetTownGpuResources();
 		GpuFailure.clear();
 	}
-	if (!IsTownViewActive() || !pDungeonCels || MicroTileLen == 0 || MyPlayer == nullptr) {
+	if ((!IsTownViewActive() && !forcedCathedralGeometry) || !pDungeonCels || MicroTileLen == 0 || MyPlayer == nullptr) {
 		PickingValid = false;
 		return false;
 	}
@@ -3195,7 +3605,7 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 	if (fullOut.w() <= 0 || height <= 0)
 		return false;
 	const Surface logical = fullOut.subregionY(0, height);
-	ConfigureCamera(logical.w(), logical.h());
+	ConfigureCamera(logical.w(), logical.h(), forcedCathedralGeometry);
 	ViewCamera.centerX += RasterJitterForDiagnostics[0];
 	ViewCamera.centerY += RasterJitterForDiagnostics[1];
 	ViewCamera.projection.centerX = ViewCamera.centerX;
@@ -3211,6 +3621,8 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 	}
 	if (!ViewCamera.projection.valid) {
 		RendererState.failure = "Invalid town camera frame";
+		if (cathedralWorld)
+			return false;
 		if (FollowCameraState.active) {
 			// No safe near-plane sphere: fail closed instead of presenting the
 			// native 2D world with first-person input. Picking remains invalid.
@@ -3222,8 +3634,9 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 	}
 	const Surface out = PrepareSamplingBuffers(logical);
 	ClearSurface(out);
-	PrepareSceneLighting();
-	const bool horizonEnabled = *GetOptions().Graphics.townViewHorizon;
+	if (!cathedralWorld)
+		PrepareSceneLighting();
+	const bool horizonEnabled = !cathedralWorld && *GetOptions().Graphics.townViewHorizon;
 	if (horizonEnabled) {
 		PrepareHorizon();
 		RendererState.horizonTriangles = HorizonMesh.statistics.triangles;
@@ -3233,18 +3646,25 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 	FrameFireTime = CabinFireDiagnosticTime >= 0 ? CabinFireDiagnosticTime : static_cast<double>(SDL_GetTicks()) / 1000;
 	TownShadowConfig shadowConfig;
 	shadowConfig.toLight = { SceneLightingConfig.toLight.x, SceneLightingConfig.toLight.height, SceneLightingConfig.toLight.z };
-	BuildTownShadowMap(GetTownScene(), shadowConfig);
+	if (cathedralWorld)
+		ClearTownShadowMap();
+	else
+		BuildTownShadowMap(GetTownScene(), shadowConfig);
 	++GpuFrameNumber;
 	const TownGpuRecoveryKey recoveryKey {
-		CameraRig.revision(), GetTownSceneRevision(),
+		CameraRig.revision(), ViewSceneRevision(),
 		{ ViewCamera.projection.eye.x, ViewCamera.projection.eye.height, ViewCamera.projection.eye.z },
 		{ ViewCamera.projection.centerX, ViewCamera.projection.centerY },
 		out.w(), out.h(), RasterSampleFactor, horizonEnabled, ArchitectureCullingState.requested, *GetOptions().Graphics.zoom
 	};
 	// Both backends need the pilot; prepare before any frozen GPU material table.
-	PrepareOgdenIdlePilotTexture();
+	if (!cathedralWorld)
+		PrepareOgdenIdlePilotTexture();
+	// The Cathedral path binds native discrete light/TRN LUTs and overlays on
+	// the existing hardware backend. A failed request always returns to native.
 	if (GpuRecovery.ShouldAttempt(RendererState.requestedGpu, recoveryKey, SDL_GetTicks())) {
-		PrepareFrameImportedAlbedo();
+		if (!cathedralWorld)
+			PrepareFrameImportedAlbedo();
 		CaptureGpu = TownGpuBeginFrame(out.w(), out.h(), false,
 		    { ViewCamera.projection.perspective, ViewCamera.projection.nearClip, ViewCamera.projection.farClip });
 		if (CaptureGpu) {
@@ -3267,15 +3687,27 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 				shadow.pcfRadius = view.config.pcfRadius;
 			}
 			CaptureGpuFailed = !TownGpuSetShadow(shadow);
-			if (!CaptureGpuFailed && ResidentMeshesEnabledForDiagnostics)
+			if (!CaptureGpuFailed && cathedralWorld)
+				CaptureGpuFailed = !PrepareCathedralGpuBlend();
+			if (!CaptureGpuFailed && !cathedralWorld && ResidentMeshesEnabledForDiagnostics)
 				ConfigureResidentMeshCamera();
 		} else {
 			GpuRecovery.RecordFailure(GetTownGpuStatus().failureKind, recoveryKey, SDL_GetTicks());
 			GpuFailure = GetTownGpuStatus().failure;
 		}
 	}
+	if (cathedralWorld && RendererState.requestedGpu && !CaptureGpu) {
+		RendererState.failure = GpuFailure.empty() ? "Cathedral hardware GPU request deferred; complete native fallback" : GpuFailure;
+		InvalidateTownViewFrameForNativeFallback();
+		return false;
+	}
 	const auto drawWorld = [&]() {
 		const auto recordStart = std::chrono::steady_clock::now();
+		if (cathedralWorld) {
+			DrawCathedralWorld(out);
+			RendererState.sceneRecordMilliseconds += std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - recordStart).count();
+			return;
+		}
 		if (horizonEnabled)
 			DrawHorizon(out);
 		const Texture &fallback = FallbackGround();
@@ -3372,6 +3804,8 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 	};
 	drawWorld();
 	if (CaptureGpu) {
+		if (cathedralWorld && CathedralAllocationState.armed == TownViewCathedralAllocationFailurePoint::BeforeReadback)
+			SetTownGpuBeforeReadbackForDiagnostics(InjectCathedralReadbackAllocationFailure);
 		const bool complete = !CaptureGpuFailed && TownGpuEndFrame(GpuFrame)
 		    && GpuFrame.width == out.w() && GpuFrame.height == out.h()
 		    && GpuFrame.indexed.size() == DepthBuffer.size()
@@ -3408,6 +3842,12 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 			GpuFailure = GetTownGpuStatus().failure;
 			if (GpuFailure.empty())
 				GpuFailure = "GPU frame validation failed";
+			if (cathedralWorld) {
+				RendererState.failure = GpuFailure;
+				ClearSurface(out);
+				InvalidateTownViewFrameForNativeFallback();
+				return false; // DrawGame owns the complete native world fallback.
+			}
 			ClearSurface(out);
 			std::fill(DepthBuffer.begin(), DepthBuffer.end(), std::numeric_limits<float>::infinity());
 			std::fill(PickBuffer.begin(), PickBuffer.end(), PickRecord {});
@@ -3432,11 +3872,12 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 	PickRightPanel = IsRightPanelOpen();
 	PickGpuRequested = RendererState.requestedGpu;
 	PickFrustumCullingRequested = ArchitectureCullingState.requested;
-	PickSceneRevision = GetTownSceneRevision();
+	PickSceneRevision = ViewSceneRevision();
 	PickCameraRevision = CameraRig.revision();
 	PickFollowProjectionRevision = FollowProjectionRevision;
 	PickHorizonEnabled = *GetOptions().Graphics.townViewHorizon;
-	PickingValid = true;
+	PickingValid = !cathedralWorld || (!CathedralFrame.requiresNativeFallback
+	    && (!RendererState.requestedGpu || RendererState.usedGpu) && cathedral::LiveFrameCurrent());
 	RendererState.worldMilliseconds = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - worldStart).count();
 	if (!forceGeometry) {
 		// A bounded real-session trace identifies the effective backend/fallback.
@@ -3458,6 +3899,94 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 		}
 	}
 	return true;
+}
+
+static bool DiscardCathedralAllocationFailure(const Surface &fullOut, bool requestedGpu)
+{
+	// Take POD evidence before resetting backend status and host counters.
+	CathedralAllocationState.failed = true;
+	CathedralAllocationState.gpuSubmittedBeforeFailure = GetTownGpuStatus().submittedTriangles;
+	CathedralAllocationState.gpuDrawCallsBeforeFailure = GetTownGpuStatus().drawCalls;
+	CathedralAllocationState.cpuRasterizedBeforeFailure = RendererState.cpuRasterizedTriangles;
+	// fullOut is borrowed from the native caller. Never touch the sampled out
+	// after invalidation releases its owner, even if publication already began.
+	const int height = std::max(0, std::min<int>(gnViewportHeight, fullOut.h()));
+	if (fullOut.w() > 0 && height > 0)
+		ClearSurface(fullOut.subregionY(0, height));
+	DrawingCathedral = CathedralPaletteBlend = false;
+	CathedralTranslation = nullptr;
+	// A failed command push may have left incomplete batch indices. Cancel by
+	// reset; calling EndFrame here could execute those invalid commands.
+	ClearGpuSceneResources();
+	// DecodeSprite updates dimensions before both surface allocations finish.
+	// Discard that partially grown scratch and partially prepared host bindings.
+	BillboardTextureCache.clear();
+	SpriteSurface.reset();
+	SpriteCoverageSurface.reset();
+	SpriteSurfaceWidth = SpriteSurfaceHeight = 0;
+	InvalidateTownViewFrameForNativeFallback();
+	ClearUiOverlayRegions();
+#ifndef USE_SDL1
+	ResetTownPresentationResources();
+#endif
+	RasterSampleFactor = 1;
+	RendererState.requestedGpu = requestedGpu;
+	// The graphics preference is untouched. Recovery was reset, so an unarmed
+	// next frame can retry hardware with the same requested camera pose and native scene.
+#if defined(__cpp_exceptions) || defined(_CPPUNWIND)
+	try {
+		GpuFailure = "Cathedral allocation failed; complete native fallback";
+		RendererState.failure = GpuFailure;
+	} catch (const std::bad_alloc &) {
+		// Heap pressure must not throw again while reporting the first failure.
+		// The POD failed marker above remains authoritative without text storage.
+		GpuFailure.clear();
+		RendererState.failure.clear();
+	}
+#endif
+	return false; // DrawGame owns the complete native redraw and input fallback.
+}
+
+bool DrawTownView(const Surface &fullOut, bool forceGeometry)
+{
+	// Preserve the Town/Ogden draw body and failure branches exactly. Only the
+	// native Cathedral transaction gets this recoverable allocation boundary.
+	if (!cathedral::LiveLevelEligible() || !CathedralFrameReady)
+		return DrawTownViewFrame(fullOut, forceGeometry);
+	const bool requestedGpu = *GetOptions().Graphics.townViewGpuRendering;
+	CathedralAllocationState.failed = false;
+	CathedralAllocationState.injected = TownViewCathedralAllocationFailurePoint::None;
+	CathedralAllocationState.gpuSubmittedBeforeFailure = 0;
+	CathedralAllocationState.gpuDrawCallsBeforeFailure = 0;
+	CathedralAllocationState.cpuRasterizedBeforeFailure = 0;
+#if defined(__cpp_exceptions) || defined(_CPPUNWIND)
+	try {
+		return DrawTownViewFrame(fullOut, forceGeometry);
+	} catch (const std::bad_alloc &) {
+		return DiscardCathedralAllocationFailure(fullOut, requestedGpu);
+	}
+#else
+	return DrawTownViewFrame(fullOut, forceGeometry);
+#endif
+}
+
+void SetTownViewCathedralAllocationFailureForDiagnostics(TownViewCathedralAllocationFailurePoint point) noexcept
+{
+	switch (point) {
+	case TownViewCathedralAllocationFailurePoint::BeforeOpaque:
+	case TownViewCathedralAllocationFailurePoint::AfterOpaque:
+	case TownViewCathedralAllocationFailurePoint::BeforeReadback:
+		CathedralAllocationState.armed = point;
+		break;
+	default:
+		CathedralAllocationState.armed = TownViewCathedralAllocationFailurePoint::None;
+		break;
+	}
+}
+
+TownViewCathedralAllocationState GetTownViewCathedralAllocationState() noexcept
+{
+	return CathedralAllocationState;
 }
 
 TownViewOgdenPilotState GetTownViewOgdenPilotState()
@@ -3491,18 +4020,64 @@ bool PickTownView(Point screen, Point &tile, int &townerIndex, int &itemIndex, i
 	townerIndex = -1;
 	itemIndex = -1;
 	playerIndex = -1;
+	TownViewPickResult result;
+	if (!PickTownViewDetailed(screen, result))
+		return false;
+	tile = result.tile;
+	townerIndex = result.townerIndex;
+	itemIndex = result.itemIndex;
+	playerIndex = result.playerIndex;
+	return true;
+}
+
+bool PickTownViewDetailed(Point screen, TownViewPickResult &result)
+{
+	result = {};
 	if (!IsTownViewActive() || !CurrentPickingValid() || CachedDungeonData != pDungeonCels.get()
 		|| screen.x < 0 || screen.y < 0 || screen.x >= ViewCamera.width || screen.y >= ViewCamera.height)
 		return false;
 	const PickRecord &pick = PickBuffer[static_cast<size_t>(screen.y) * ViewCamera.width + screen.x];
 	if (pick.tile == std::numeric_limits<uint16_t>::max())
 		return false;
-	tile = { pick.tile % MAXDUNX, pick.tile / MAXDUNX };
+	result.tile = { pick.tile % MAXDUNX, pick.tile / MAXDUNX };
 	switch (pick.kind) {
 	case PickKind::Ground: break;
-	case PickKind::Towner: townerIndex = pick.entity; break;
-	case PickKind::Item: itemIndex = pick.entity; break;
-	case PickKind::Player: playerIndex = pick.entity; break;
+	case PickKind::Towner: result.townerIndex = pick.entity; break;
+	case PickKind::Item:
+		if (cathedral::LiveLevelEligible() && (pick.entity < 0 || pick.entity >= MAXITEMS
+		        || Items[pick.entity].isEmpty() || Items[pick.entity].position != result.tile
+		        || Items[pick.entity].selectionRegion == SelectionRegion::None
+		        || dItem[result.tile.x][result.tile.y] != pick.entity + 1))
+			return false;
+		result.itemIndex = pick.entity;
+		break;
+	case PickKind::Player:
+		if (cathedral::LiveLevelEligible()) {
+			if (pick.entity < 0 || static_cast<size_t>(pick.entity) >= Players.size())
+				return false;
+			const Player &player = Players[pick.entity];
+			if (!player.plractive || !player.isOnActiveLevel() || player.position.tile != result.tile
+			    || (std::abs(dPlayer[result.tile.x][result.tile.y]) != pick.entity + 1
+			        && !(player.hasNoLife() && TileContainsDeadPlayer(result.tile))))
+				return false;
+		}
+		result.playerIndex = pick.entity;
+		break;
+	case PickKind::Object:
+		if (!cathedral::LiveLevelEligible() || pick.entity < 0 || pick.entity >= MAXOBJECTS
+		    || !Objects[pick.entity].canInteractWith() || Objects[pick.entity].position != result.tile
+		    || std::abs(dObject[result.tile.x][result.tile.y]) != pick.entity + 1)
+			return false;
+		result.objectIndex = pick.entity;
+		break;
+	case PickKind::Monster:
+		if (!cathedral::LiveLevelEligible() || pick.entity < 0 || static_cast<size_t>(pick.entity) >= MaxMonsters
+		    || !IsTileLit(result.tile) || Monsters[pick.entity].hasNoLife() || Monsters[pick.entity].isPlayerMinion()
+		    || std::abs(dMonster[result.tile.x][result.tile.y]) != pick.entity + 1
+		    || (Monsters[pick.entity].flags & MFLAG_HIDDEN) != 0 || Monsters[pick.entity].position.tile != result.tile)
+			return false;
+		result.monsterIndex = pick.entity;
+		break;
 	}
 	return true;
 }

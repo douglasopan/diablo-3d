@@ -327,11 +327,13 @@ bool BindGeometryConstants(const Constants &constants)
 	return true;
 }
 
-void BindGeometryMaterial(const CachedTexture &texture, bool preservePicking)
+void BindGeometryMaterial(const CachedTexture &texture, bool preservePicking, bool paletteBlend = false)
 {
-	ID3D11ShaderResourceView *resources[] { texture.texels->codes.get(), texture.texels->opacity.get(), texture.lut != nullptr ? texture.lut->view.get() : nullptr, ShadowResource.get() };
-	Context->PSSetShaderResources(0, 4, resources);
-	Context->OMSetBlendState(BlendStates[preservePicking ? 1 : 0].get(), nullptr, 0xFFFFFFFFU);
+	ID3D11ShaderResourceView *resources[] { texture.texels->codes.get(), texture.texels->opacity.get(), texture.lut != nullptr ? texture.lut->view.get() : nullptr, ShadowResource.get(),
+		paletteBlend ? PriorIndexedColorView.get() : nullptr, paletteBlend ? PaletteBlendResource.get() : nullptr };
+	Context->PSSetShaderResources(0, 6, resources);
+	Context->OMSetBlendState(paletteBlend ? PaletteBlendWriteState.get() : BlendStates[preservePicking ? 1 : 0].get(), nullptr, 0xFFFFFFFFU);
+	Context->OMSetDepthStencilState(paletteBlend ? PaletteBlendDepthState.get() : DepthState.get(), 0);
 }
 
 bool DrawMeshBatch(const MeshBatch &batch)
@@ -464,8 +466,14 @@ bool TownGpuUploadMesh(const TownGpuMeshUpload &input)
 bool TownGpuSubmitMeshInstance(const TownGpuMeshInstance &instance, const TownGpuTexture &texture, const TownGpuMaterial &material)
 {
 #ifdef _WIN32
-	if (!FrameActive || FrameFailed || !MeshCameraReady)
+	if (!FrameActive || FrameFailed)
 		return Fail("No valid GPU frame/mesh camera is recording");
+	if (material.paletteBlend)
+		return Fail("Native palette overlays require projected triangles; resident mesh overlays are unsupported", S_OK, TownGpuFailureKind::Unsupported);
+	if (!MeshCameraReady)
+		return Fail("No valid GPU frame/mesh camera is recording");
+	if (FramePaletteOverlayStarted)
+		return Fail("Opaque GPU resident geometry must precede native palette overlays");
 	const auto found = MeshCache.find({ instance.identity.stableKey, instance.identity.revision });
 	if (instance.identity.stableKey == 0 || found == MeshCache.end())
 		return Fail("GPU mesh identity is not resident; upload required");

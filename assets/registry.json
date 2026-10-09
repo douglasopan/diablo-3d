@@ -1312,10 +1312,11 @@
       "validationProfile": "actor-animation-360",
       "claimIssue": null,
       "claimOwner": null,
-      "reviewer": null,
+      "reviewer": "Douglas Pan",
       "approvedRevision": null,
       "assetPath": null,
       "notes": [
+        "2026-10-09: Douglas Pan approved the installed Ogden 3D appearance, revision ogden-idle-transport-r1-20261009, package SHA256 9b7793d3e2187228a206ff139ba9e44e575de2f7ff40a783f4eee3d5b970759d. Generic hero-like idle remains pending; visual approval does not approve the full animation-360 contract.",
         "Single native viewing direction feeds an inferred rounded segmented body; unseen anatomy is not approved.",
         "Claim one complete animated character, including clothing and held/attached props, not separate front/back models."
       ],
