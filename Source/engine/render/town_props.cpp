@@ -117,6 +117,27 @@ bool TownPropHiddenByArchitecture(const TownPropGroup &group)
 		if (!InDungeonBounds(tile) || !TownSceneReplacesTile(tile))
 			return false;
 	}
+	// This four-cell native filler is behind the tavern frontage in the
+	// original art. The imported main+wing supplies that masonry; the old
+	// conservative wall bounds end at z61.4 and must not keep this relief.
+	// Exact native layout and external binding avoid hiding legitimate rocks.
+	if (group.referenceFootpoint == Point { 51, 63 } && group.sourceTiles.size() == 4) {
+		constexpr std::array<NativeCell, 4> TavernFiller = { {
+			{ 50, 62, 230 }, { 51, 62, 231 }, { 50, 63, 232 }, { 51, 63, 233 },
+		} };
+		const bool exactNativeLayout = std::all_of(TavernFiller.begin(), TavernFiller.end(), [&](const NativeCell &cell) {
+			const Point tile { cell.x, cell.y };
+			return dPiece[tile.x][tile.y] == cell.piece
+			    && std::find(group.sourceTiles.begin(), group.sourceTiles.end(), tile) != group.sourceTiles.end();
+		});
+		if (exactNativeLayout) {
+			for (const TownSceneModel &model : GetTownScene()) {
+				if (model.externalModel && model.kind == TownSceneKind::Tavern
+				    && model.minTile == Point { 46, 54 } && model.maxTile == Point { 53, 63 })
+					return true;
+			}
+		}
+	}
 	constexpr float Margin = 0.01F;
 	for (const TownSceneModel &model : GetTownScene()) {
 		const TownScenePhysicalBounds &bounds = model.physicalBounds;

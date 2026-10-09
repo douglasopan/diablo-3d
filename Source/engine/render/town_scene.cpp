@@ -1386,6 +1386,12 @@ bool TownSceneReplacesTile(Point tile)
 			// walkable cells. Replace their paint, without suppressing nearby trees.
 			if (piece >= model.nativeArtwork.fringeMinPiece && piece <= model.nativeArtwork.fringeMaxPiece)
 				return true;
+			// Imported tavern masonry also replaces the front paint at y64..65.
+			// Preserve the procedural/failure baseline and unrelated native pieces.
+			if (model.externalModel && model.kind == TownSceneKind::Tavern
+			    && model.minTile == Point { 46, 54 } && model.maxTile == Point { 53, 63 }
+			    && piece >= 377 && piece <= 396)
+				return true;
 		}
 		// The cathedral's architecture is wider than its painted art cells. Its
 		// family filter above replaces masonry without absorbing nearby scenery.
