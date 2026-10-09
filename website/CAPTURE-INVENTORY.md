@@ -12,7 +12,7 @@ Auditoria local realizada em 07/10/2026, acrescida das cinco comparações conte
 | Imagens classificadas como fontes, texturas ou material isolado e excluídas | 8,641 |
 | Candidatas contextuais de diagnóstico antes da seleção visual | 3,961 |
 | Hashes distintos dessas candidatas contextuais | 1,093 |
-| Imagens selecionadas e visualmente revisadas para o site | 44 |
+| Imagens selecionadas e visualmente revisadas para o site | 46 |
 | Prints do autor incluídos nessa seleção | 4 |
 
 O inventário completo, as folhas de contato e o mapeamento privado das capturas do autor ficam somente na área local de auditoria, fora do repositório. Este documento não expõe nomes de arquivos de outros projetos, dados de conta, conversas privadas ou caminhos pessoais.
@@ -36,6 +36,8 @@ As três capturas de 08/10 preservam a resolução e os pixels originais após c
 
 | Asset | Etapa | Categoria |
 | --- | --- | --- |
+| `tavern-cleanup-before.webp` | 09/10 · antes · CPU offscreen · feb9ca77e | Geometria |
+| `tavern-cleanup-after.webp` | 09/10 · depois · CPU offscreen · feb9ca77e | Geometria |
 | `project-credits-main-pt.webp` | 08/10 · UI nativa offscreen · fc9642982 | Ferramentas |
 | `project-credits-submenu-pt.webp` | 08/10 · UI nativa offscreen · fc9642982 | Ferramentas |
 | `project-credits-author-pt.webp` | 08/10 · UI nativa offscreen · fc9642982 | Ferramentas |
@@ -80,6 +82,10 @@ As três capturas de 08/10 preservam a resolução e os pixels originais após c
 | `cabin-rear-fire.webp` | V4 · fogo e duas janelas publicados | Luz |
 | `cabin-fire-orbits.webp` | V4 · fogo e duas janelas publicados | Luz |
 | `cabin-fire-angles.webp` | V4 · fogo e duas janelas publicados | Luz |
+
+## Taverna — 9 de outubro
+
+Duas prévias sanitizadas do replay próprio do integrador foram autorizadas individualmente e conferidas visualmente. Mostram antes/depois da mesma câmera, em órbita zero, com a correção do [commit feb9ca77e](https://github.com/douglasopan/diablo-3d/commit/feb9ca77e73e66c2cc209af51ca9bb9b3504e6c1). São renders CPU offscreen, não capturas da janela do jogo, gameplay, testes de GPU ou aprovação integral da arte. Os dois PNGs foram convertidos para WebP lossless, em 960×720, com igualdade integral dos pixels RGBA, sem corte, retoque, ampliação ou nova geração. Hashes originais e publicados, variantes e classificação ficam em `evidence.json`, com legendas completas em português e inglês. Nenhum perfil, modelo, extração ou recibo privado acompanha as imagens. Os 44 registros anteriores são preservados e a seleção passa a 46; as contagens da auditoria local inicial não representam uma nova varredura.
 
 ## Suporte e créditos — 8 de outubro
 

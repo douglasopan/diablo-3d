@@ -28,3 +28,9 @@ The separate installation receipt `installed-20261008T120858Z` confirms installa
 ## Historical reuse in the Gameplay-page fix article
 
 The bilingual `hud-paginas-jogabilidade` article reuses the existing `hud-hd-offscreen-fullhd.webp` unchanged as historical context. Its alternative text and caption state that the composition predates the Gameplay-page fix and does not show the new page-transition tests. No private diagnostic capture, new media file or evidence-inventory entry is published. The installed correction and its finite CPU/software-SDL tests are documented as text, pinned to game commit `1e28d7b5a5cc90f4c40d9d2dfb59ee61fd71e8b1`.
+
+## Tavern cleanup — 9 October 2026
+
+The bilingual `taverna-sem-residuos` article documents game source [`feb9ca77e73e66c2cc209af51ca9bb9b3504e6c1`](https://github.com/douglasopan/diablo-3d/commit/feb9ca77e73e66c2cc209af51ca9bb9b3504e6c1). Only two sanitized PNGs from the integrator's own CPU offscreen A/B replay were authorized for this publication. `tavern-cleanup-before.webp` and `tavern-cleanup-after.webp` retain their full 960×720 framing and every decoded RGBA pixel. Original and published SHA-256 values, baseline/candidate variants and source classification are in [evidence.json](evidence.json); captions and alternative text have complete English overlays.
+
+The views use the same camera and input scene. They show the native-fragment cleanup, not a regenerated tavern, a game-window or gameplay capture, a GPU test or full artistic acceptance. The installed executable is a separate delivery; the images alone do not prove installation. The broader historical Cathedral-footprint failure remains separate. No other diagnostic image, raw profile, GLB/D3D/MPQ, credential or private receipt is copied. The previous 44 capture records and their media remain unchanged; the curated gallery now contains 46 entries.
