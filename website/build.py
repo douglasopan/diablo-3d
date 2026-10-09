@@ -36,7 +36,7 @@ PREFIX = parsed_base.path.rstrip('/')
 GITHUB = 'https://github.com/douglasopan/diablo-3d'
 SNAPSHOT = 'a4a87d20e58781395ed33bda6f9298c71aa589ad'
 DISCORD = 'https://discord.gg/4YxQ7s69S'
-PATREON = 'https://www.patreon.com/cw/u107414'
+PATREON = 'https://patreon.com/u107414'
 SOUNDTRACK_YOUTUBE_PLAYLIST = 'https://www.youtube.com/playlist?list=PLPiXmw2nj9BM'
 SOUNDTRACK_YOUTUBE = {
     'menu-rock2': 'https://www.youtube.com/watch?v=KWlri7ryuR0',
