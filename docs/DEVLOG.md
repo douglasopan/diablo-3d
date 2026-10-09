@@ -77,6 +77,14 @@ Abra `http://127.0.0.1:4173/diablo-3d/` e `http://127.0.0.1:4173/diablo-3d/en/`.
 
 O workflow `.github/workflows/pages.yml` valida a publicação e envia **somente** `website/dist/` ao Pages. PRs executam build e verificação; o deploy ocorre em `main` ou por execução manual. A configuração do repositório deve usar **Settings → Pages → Source → GitHub Actions**.
 
+## Movimento remapeável — 9 de outubro de 2026
+
+O artigo existente `controles-primeira-pessoa` foi atualizado integralmente em PT/EN, com `updated: 2026-10-09`, para a entrega instalada às **01:35 de Brasília**, código público `a4a87d20e58781395ed33bda6f9298c71aa589ad`. Registra oito associações principal/alternativa, desassociação, reset somente do movimento, contexto isolado com atalhos comuns preservados, proteção de teclas reservadas, persistência INI e correção da primeira tecla após gamepad. O histórico de mouse, altura ocular, roda e colisão mantém as revisões e os limites originais.
+
+Os resultados novos distinguem **5.341 input puro, 60.944 configurações, 3.792 runtime, 29 colisão e 946 HUD**, gate separado de câmera com 24 PNGs CPU/GPU offscreen e **3.324 verificações do menu principal**. Quatro pares escritor/leitor, duas ações efetivamente editadas, oito IDs/defaults e idioma lido do INI não são apresentados como troca de idioma pela interface nem validação de todas as entradas físicas. As 20 capturas indexadas do menu, sem fundo RGB final, continuam privadas; instruções longas podem recortar em 640×480. A instalação preservou 44 arquivos do perfil, com zero processos encerrados. Revisão interativa física, FPS sustentado e aceitação artística continuam pendentes.
+
+Snapshot, destaque, tecnologia, roadmap, metadados e feeds acompanham a atualização. Nenhum novo artigo, mídia ou registro de evidência foi adicionado: **20 posts por idioma, 46 capturas**. Música, créditos, Analytics e play permanecem preservados; o guia de execução continua reservado ao principal. A imagem histórica de câmeras mantém os mesmos bytes e explicita que não mostra o remapeamento. Procedência em [DEVLOG-MEDIA.md](../website/DEVLOG-MEDIA.md#historical-reuse-in-the-movement-remapping-update).
+
 ## Limpeza dos resíduos da taverna — 9 de outubro de 2026
 
 O registro bilíngue `2026-10-09-taverna-sem-residuos.md` documenta a correção do commit `feb9ca77e73e66c2cc209af51ca9bb9b3504e6c1`, instalada no mesmo iniciador às **00:44 de Brasília**. A máscara visual passa a cobrir 20 células da fachada nativa e um grupo exato de pedra de quatro células; seus 1.760 triângulos são ocultados, sem modificar o modelo importado, master, ajuste, iluminação, texturas, SOL ou atores. A reprodução própria do integrador passou 113 verificações por versão, 54 comparações e oito órbitas; os arquivos nativos e de arquitetura comparados permaneceram byte-exatos. Os 44 arquivos do perfil foram preservados, com preparação posterior alterando somente o recibo esperado e nenhum processo encerrado.

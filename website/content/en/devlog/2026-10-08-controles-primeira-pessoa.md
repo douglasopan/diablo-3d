@@ -1,21 +1,33 @@
 ---
-title: "First person: mouse look, WASD and wheel transitions"
+title: "Controls: remappable movement and camera"
 date: 2026-10-08
-updated: 2026-10-08
-description: "Mouse look, WASD or arrow keys and wheel transitions between third and first person, with camera protection against architecture tested on the CPU; interactive review pending."
+updated: 2026-10-09
+description: "First and third person now share eight movement bindings editable in the main menu, with saved preferences. See the controls, tests and interactive review still pending."
 slug: controles-primeira-pessoa
 image: /assets/captures/tristram-camera-modes.webp
-image_alt: "Historical technical comparison of Tristram's four camera modes, used as context; it does not show the new controls, eye-height calibration, wheel transition or camera collision."
+image_alt: "Historical technical comparison of Tristram's four camera modes, used as context; it does not show key remapping, the new controls, eye-height calibration, wheel transition or camera collision."
 category: Protótipo
 order: 18
 status: published
 ---
 
-Tristram's first-person view now combines **mouse look, WASD or arrow-key movement and the wheel to move from third person into first person — or back**. Camera protection now accounts for the assembled architecture while retaining Diablo's movement rules; the technical sample described below does not cover every structure or position. The update in [commit 3863e4436](https://github.com/douglasopan/diablo-3d/commit/3863e4436a5cb6be09d476e8d382fc4e5bf54b3a) was installed through the same **Iniciar-Tristram.cmd** launcher on **October 8, 2026, at 19:31, Brasília time**.
+**October 9 update:** movement in first and third person now lets you choose a primary and an alternate key for each direction through the main menu. All eight bindings can be changed or cleared, and are saved. [Commit a4a87d20e](https://github.com/douglasopan/diablo-3d/commit/a4a87d20e58781395ed33bda6f9298c71aa589ad) was installed in the same **Iniciar-Tristram.cmd** launcher at **01:35, Brasília time**. Interactive review with physical devices remains pending.
+
+In the **October 8 update**, Tristram's first-person view combined **mouse look, WASD or arrow-key movement and the wheel to move from third person into first person — or back**. Camera protection accounted for the assembled architecture while retaining Diablo's movement rules; the technical sample described below does not cover every structure or position. The update in [commit 3863e4436](https://github.com/douglasopan/diablo-3d/commit/3863e4436a5cb6be09d476e8d382fc4e5bf54b3a) was installed through the same **Iniciar-Tristram.cmd** launcher on **October 8, 2026, at 19:31, Brasília time**.
 
 The initial mouse and arrow-key controls arrived at **17:30** that day, in [commit a227d4afc](https://github.com/douglasopan/diablo-3d/commit/a227d4afcab5829cfa82ab9bad9e0eac34a2c9c9). The later eye-height calibration remains documented below.
 
-The camera comparison above was published earlier and serves only as context. **This post contains no new gameplay or crosshair captures.** The implementation and test limits are described in the [documentation for this revision](https://github.com/douglasopan/diablo-3d/blob/3863e4436a5cb6be09d476e8d382fc4e5bf54b3a/docs/TRISTRAM-FIRST-PERSON-INPUT.md).
+The camera comparison above was published earlier and serves only as context. **This post contains no new gameplay, crosshair or keymapping-menu captures.** The implementation and test limits are described in the [documentation for the current revision](https://github.com/douglasopan/diablo-3d/blob/a4a87d20e58781395ed33bda6f9298c71aa589ad/docs/TRISTRAM-FIRST-PERSON-INPUT.md).
+
+## Choosing movement keys
+
+In the **main menu → Settings → Keymapping**, there are four movement directions, each with a primary and an alternate binding. The defaults remain **W/S/A/D and ↑/↓/←/→**. Each binding can be changed or removed; **Restore movement defaults** resets only this group.
+
+The same preferences apply to first and third person. Movement remains relative to the camera and uses the native eight directions, cadence and collision. The primary and alternate keys are independent: holding W and ↑, then releasing only one, keeps forward movement active.
+
+This context preserves the game's common shortcuts: S can remain bound to spells outside camera-relative movement. Keys reserved for the camera, pause and screenshots are protected; a conflict between movement bindings is rejected with identification of the existing binding. If a default is unavailable, the reset reports it without taking the reserved key.
+
+Changes, including an explicitly empty alternate binding, persist in the **INI** preferences file. The first movement key after using a gamepad was also fixed: it now goes through the correct keyboard context. Releases, repeats and stale inputs after a binding, focus, menu or mode change are handled to avoid stuck movement or unintended shortcuts.
 
 ## Entering the mode and moving
 
@@ -23,7 +35,7 @@ In Tristram, **F4** switches between the original view and the 3D prototype. **K
 
 In first person, horizontal mouse movement turns the camera and vertical movement changes its pitch. There is no need to hold the middle mouse button; sensitivity uses the preference already saved. Control becomes active only when the platform confirms relative mouse capture.
 
-| Input | First-person action |
+| Default input | First-person action |
 | --- | --- |
 | W or ↑ / S or ↓ | Move forward / backward relative to the camera. |
 | A or ← / D or → | Strafe left / right. |
@@ -65,7 +77,7 @@ Camera collision uses the triangles of the **assembled architecture**, including
 
 ## What passed the tests
 
-The **Release/NONET x64** build passed. The wheel, WASD and collision update passed **253 camera checks**, **1,239 pure-input checks**, **29 collision checks** and **2,777 production-path checks**, along with regressions of **946 HUD checks** and **59,452 settings checks**. The initial controls installation had passed 673 pure checks and 1,652 production checks.
+The results in this section correspond to the **October 8 updates**. The **Release/NONET x64** build passed. The wheel, WASD and collision update passed **253 camera checks**, **1,239 pure-input checks**, **29 collision checks** and **2,777 production-path checks**, along with regressions of **946 HUD checks** and **59,452 settings checks**. The initial controls installation had passed 673 pure checks and 1,652 production checks.
 
 The CPU diagnostic using the selected package covered **34 frames**: architecture limited the camera in 14, and none lacked a safe eye position. The spatial BVH for 82,086 triangles was built once; entering without advancing time kept the image and palette identical. This sample does not cover every structure or position.
 
@@ -73,12 +85,22 @@ The tests exercised movement at all eight orientations, WASD and arrow-key combi
 
 The production diagnostic uses the game's real handler and native commands, but substitutes the system's focus and capture services and runs with a hidden window, the GPU disabled and a temporary profile. **This does not establish how a physical mouse, Alt+Tab or a real window will behave.** The HUD and settings regressions also do not constitute visual approval of the crosshair. The 946 HUD checks in this camera update **did not cover the Gameplay pages 1/2 defect**. A separate update subsequently installed the [technical HUD fix](/devlog/hud-paginas-jogabilidade/); confirmation during the user's usual play session remains pending. This round included no GPU run or new FPS benchmark.
 
+## Remapping tests and installation
+
+On **October 9**, the Release/NONET build passed **5,341 pure-input checks, 60,944 settings checks, 3,792 runtime checks, 29 collision checks and 946 HUD checks**. A separate camera gate produced **24 offscreen CPU/GPU PNGs**; this finite rendering evidence does not turn simulated input tests into physical-device tests.
+
+The real main menu passed **3,324 checks**, in Portuguese and English, at 640×480 and 1920×1080. The tests exercised conflicts, key capture, releases and repeats, Escape, unbinding and full or partial restoration. **Four writer/reader process pairs** confirmed persistence through the INI without rewriting preferences during reading. Two actions were actually edited; all eight IDs and defaults were checked. The language came from the INI, without testing language switching through the interface.
+
+The **20 indexed-color menu captures** do not include the final RGB background; two PT-BR samples were inspected. Long native instructions and descriptions may be clipped at 640×480. These images remain private. Input and runtime tests substitute SDL's physical services: **physical mouse, keyboard and gamepad behavior, real focus changes and Alt+Tab, sustained FPS and full artistic approval remain outside this validation**.
+
+The **01:35** installation preserved the content, sizes and timestamps of the **44 profile files**. All three aliases received the same executable, with backups and **zero processes terminated**. Subsequent launcher preparation changed only the expected runtime receipt.
+
 ## Installation and the next review
 
-During the **19:31 installation**, the **44 files in the usual profile** retained their bytes, sizes and timestamps; all three aliases received the same executable without terminating processes. Subsequent launcher preparation changed only the expected runtime receipt. The initial controls installation had preserved 41 files. This increment changed no models, textures, lighting or GPU backend.
+During the previous installation on **October 8, at 19:31**, the **44 files in the usual profile** retained their bytes, sizes and timestamps; all three aliases received the same executable without terminating processes. Subsequent launcher preparation changed only the expected runtime receipt. The initial controls installation had preserved 41 files. That increment changed no models, textures, lighting or GPU backend.
 
 After the previous batch of GPU improvements, the author reported that “the game's performance improved a lot!” That feedback is a **subjective assessment of the earlier update**; first-person controls add neither an FPS measurement nor a new benchmark. The [zoom fix and GPU recovery](/devlog/gpu-zoom-recuperacao/) remain documented separately.
 
-The next step is to test through the usual launcher: wheel transitions, WASD and arrow keys, eye height around townspeople, the camera near walls, mouse capture and release, Alt+Tab, interfaces, the crosshair and clicks on NPCs and items. Legacy demo recording/playback and capture in SDL1 remain outside this increment.
+The next step is to test through the usual launcher: change, clear and restore movement bindings in the main menu, restart to check persistence, and walk in first and third person. Review also includes wheel transitions, eye height around townspeople, the camera near walls, mouse capture and release, Alt+Tab, interfaces, the crosshair and clicks on NPCs and items. Legacy demo recording/playback and capture in SDL1 remain outside this increment.
 
-The goal remains **all of Diablo 1 in 3D**. These controls apply to the Tristram prototype; the other levels still use the original rendering. The [queue for this revision](https://github.com/douglasopan/diablo-3d/blob/3863e4436a5cb6be09d476e8d382fc4e5bf54b3a/docs/PROJECT-EXECUTION.md) retains model review and the next dependencies.
+The goal remains **all of Diablo 1 in 3D**. These controls apply to the Tristram prototype; the other levels still use the original rendering. The [current controls documentation](https://github.com/douglasopan/diablo-3d/blob/a4a87d20e58781395ed33bda6f9298c71aa589ad/docs/TRISTRAM-FIRST-PERSON-INPUT.md) distinguishes the installed update from the next reviews.
