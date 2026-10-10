@@ -381,7 +381,8 @@ void BindNativeTexture(FrameTriangle &triangle, const Snapshot &snapshot, const 
 	if (!surface.provenanceResolved || surface.sources.empty()) return;
 	const bool masonry = instance.sourceModule == ModuleKind::Wall
 	    || (instance.sourceModule >= ModuleKind::Corner && instance.sourceModule <= ModuleKind::Junction4)
-	    || instance.module == ModuleKind::DoorFrame;
+	    || instance.module == ModuleKind::DoorFrame
+	    || instance.module == ModuleKind::Pillar || instance.module == ModuleKind::ArchFrame;
 	if (instance.module != ModuleKind::Floor && instance.module != ModuleKind::DoorLeaf && !masonry) return;
 	const Vec3 normal = TextureFaceNormal(triangle), center = TextureFaceCenter(triangle);
 	const NativeSurfaceSource &source = TextureSource(surface, center, normal);

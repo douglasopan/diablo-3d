@@ -16,6 +16,7 @@ if(MSVC)
     engine/render/town_view.cpp
     engine/render/town_camera_visibility.cpp
     engine/render/town_gpu.cpp
+    engine/render/light_render.cpp
     PROPERTIES COMPILE_OPTIONS "/EHsc")
 endif()
 

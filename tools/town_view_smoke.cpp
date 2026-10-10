@@ -73,6 +73,7 @@
 #include "town_resident_mesh_checks.hpp"
 #include "town_gpu_recovery_checks.hpp"
 #include "ingame_menu_visual_checks.hpp"
+#include "item_label_runtime_checks.hpp"
 
 namespace {
 using namespace devilution;
@@ -4689,6 +4690,7 @@ int main(int argc, char **argv)
 {
 	std::cout << std::unitbuf;
 	std::cerr << std::unitbuf;
+	const bool itemLabels = argc == 5 && std::string(argv[4]) == "--item-labels";
 	const bool followCamera = argc == 5 && std::string(argv[4]) == "--follow-camera";
 	const bool ogdenIdle = argc == 5 && std::string(argv[4]) == "--ogden-idle";
 	const bool eyeHeight = (argc == 6 || argc == 7) && std::string(argv[4]) == "--eye-height";
@@ -4711,9 +4713,9 @@ int main(int argc, char **argv)
 	const bool layers = argc == 3 && std::string(argv[1]) == "--presentation-layers";
 	const bool gpuFixtures = argc == 3 && std::string(argv[1]) == "--gpu-fixtures";
 	const bool synthetic = layers || gpuFixtures;
-	if (argc != 4 && !presentation && !quality && !gpu && !gpuRecovery && !camera && !cameraExtra && !architectureCulling && !firstPersonPerformance && !residentMeshes && !residentZoomStress && !ingameMenuVisual && !cabinOpenings && !cabinReview && !editorSnapshot && !editorChecks && !synthetic && !eyeHeight && !followCamera && !ogdenIdle) {
+	if (argc != 4 && !presentation && !quality && !gpu && !gpuRecovery && !camera && !cameraExtra && !architectureCulling && !firstPersonPerformance && !residentMeshes && !residentZoomStress && !ingameMenuVisual && !cabinOpenings && !cabinReview && !editorSnapshot && !editorChecks && !synthetic && !eyeHeight && !followCamera && !ogdenIdle && !itemLabels) {
 		std::cerr << "Usage: town_view_smoke <game-data-directory> <built-assets-directory> <capture-directory> --eye-height 1.1|1.7 [baseline-directory]\n"
-		          << "       town_view_smoke <game-data-directory> <built-assets-directory> <capture-directory> [--ogden-idle|--follow-camera|--presentation|--quality|--gpu|--gpu-recovery|--camera|--camera-extra|--architecture-culling|--first-person-performance|--resident-meshes|--resident-fullhd|--resident-zoom-stress|--ingame-menu-visual|--cabin-openings|--cabin-review|--editor-snapshot|--editor-map-checks]\n"
+		          << "       town_view_smoke <game-data-directory> <built-assets-directory> <capture-directory> [--item-labels|--ogden-idle|--follow-camera|--presentation|--quality|--gpu|--gpu-recovery|--camera|--camera-extra|--architecture-culling|--first-person-performance|--resident-meshes|--resident-fullhd|--resident-zoom-stress|--ingame-menu-visual|--cabin-openings|--cabin-review|--editor-snapshot|--editor-map-checks]\n"
 		          << "       town_view_smoke --presentation-layers <synthetic-capture-directory>\n"
 		          << "       town_view_smoke --gpu-fixtures <synthetic-capture-directory>\n";
 		return 2;
@@ -4733,7 +4735,7 @@ int main(int argc, char **argv)
 	devilution::paths::SetPrefPath(output.string());
 	devilution::paths::SetConfigPath(output.string());
 	SDL_SetMainReady();
-	SDL_setenv("SDL_VIDEODRIVER", "dummy", (eyeHeight || followCamera || ogdenIdle) ? 1 : 0);
+	SDL_setenv("SDL_VIDEODRIVER", "dummy", (eyeHeight || followCamera || ogdenIdle || itemLabels) ? 1 : 0);
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
 		std::cerr << SDL_GetError() << '\n';
 		return 2;
@@ -4749,6 +4751,10 @@ int main(int argc, char **argv)
 #endif
 		} else if (gpuFixtures)
 			RunGpuFixtures(output);
+		else if (itemLabels) {
+			item_label_runtime_checks::Run(output, InitializeTownDiagnostic, Check, NativeSceneState, SavePng);
+			FreeTownerGFX();
+		}
 		else if (ogdenIdle) {
 			ogden_idle_render_gate::Run(output);
 			FreeTownerGFX();

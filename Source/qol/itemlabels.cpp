@@ -10,6 +10,10 @@
 #include "control/control.hpp"
 #include "control/d3d_hud.hpp"
 #include "cursor.h"
+#include "diablo.h"
+#include "doom.h"
+#include "engine/render/town_view.hpp"
+#include "levels/gendung.h"
 #include "engine/point.hpp"
 #include "engine/render/clx_render.hpp"
 #include "engine/render/primitive_render.hpp"
@@ -34,6 +38,31 @@ struct ItemLabel {
 };
 
 std::vector<ItemLabel> labelQueue;
+struct ProjectedItemLabel {
+	int id;
+	Rectangle box;
+	Point tile;
+};
+std::vector<ProjectedItemLabel> projectedLabels;
+uint64_t projectedLabelFrame = 0;
+
+StringOrView ItemLabelText(const Item &item)
+{
+	if (item._itype == ItemType::Gold)
+		return FormatRuntime(_("{:s} gold"), FormatInteger(item._ivalue));
+	return item.getName();
+}
+
+bool ProjectedItemCurrent(int id, Point tile)
+{
+	return id >= 0 && id < MAXITEMS && InDungeonBounds(tile)
+	    && !Items[id].isEmpty() && Items[id].position == tile
+	    && dItem[tile.x][tile.y] == id + 1
+	    && Items[id].selectionRegion != SelectionRegion::None
+	    && (Items[id].AnimInfo.isLastFrame() || Items[id]._iCurs == ICURS_MAGIC_ROCK)
+	    && std::find(ActiveItems, ActiveItems + std::min<size_t>(ActiveItemCount, MAXITEMS), id)
+	        != ActiveItems + std::min<size_t>(ActiveItemCount, MAXITEMS);
+}
 
 bool highlightKeyPressed = false;
 bool isLabelHighlighted = false;
@@ -89,6 +118,8 @@ void HighlightKeyPressed(bool pressed)
 
 bool IsItemLabelHighlighted()
 {
+	if (projectedLabelFrame != 0 || (IsTownViewActive() && !IsTownViewNativePose()))
+		return SelectProjectedItemLabelAt(MousePosition);
 	return isLabelHighlighted;
 }
 
@@ -108,12 +139,7 @@ void AddItemToLabelQueue(int id, Point position)
 		return;
 	Item &item = Items[id];
 
-	StringOrView textOnGround;
-	if (item._itype == ItemType::Gold) {
-		textOnGround = FormatRuntime(_("{:s} gold"), FormatInteger(item._ivalue));
-	} else {
-		textOnGround = item.getName();
-	}
+	StringOrView textOnGround = ItemLabelText(item);
 
 	int nameWidth = GetLineWidth(textOnGround);
 	nameWidth += MarginX * 2;
@@ -145,10 +171,53 @@ bool IsMouseOverGameArea()
 	return true;
 }
 
+bool SelectProjectedItemLabelAt(Point pointer)
+{
+	isLabelHighlighted = false;
+	if (projectedLabelFrame == 0 || projectedLabelFrame != TownViewItemLabelFrameId()
+	    || !IsHighlightingLabelsEnabled() || IsTownFirstPersonInputCaptured()
+	    || IsTownViewCameraDragging() || gmenu_is_active() || PauseMode != 0
+	    || MyPlayerIsDead || LastPlayerAction != PlayerActionType::None
+	    || MyPlayer == nullptr || MyPlayer->_pInvincible || !MyPlayer->HoldItem.isEmpty()
+	    || SpellSelectFlag || pcurs == CURSOR_IDENTIFY || DoomFlag
+	    || pointer.x < 0 || pointer.x >= gnScreenWidth
+	    || pointer.y < 0 || pointer.y >= gnViewportHeight
+	    || (IsRightPanelOpen() && GetRightPanel().contains(pointer))
+	    || (IsLeftPanelOpen() && GetLeftPanel().contains(pointer)) || IsPointOnD3dHud(pointer))
+		return false;
+	// Match native ordering after overlap resolution, including the last hit.
+	for (const ProjectedItemLabel &label : projectedLabels) {
+		if (label.box.contains(pointer) && ProjectedItemCurrent(label.id, label.tile)) {
+			isLabelHighlighted = true;
+			cursPosition = label.tile;
+			pcursitem = label.id;
+		}
+	}
+	return isLabelHighlighted;
+}
+
 void DrawItemNameLabels(const Surface &out)
 {
 	const Surface clippedOut = out.subregionY(0, gnViewportHeight);
 	isLabelHighlighted = false;
+	projectedLabels.clear();
+	projectedLabelFrame = 0;
+	const uint64_t frame = TownViewItemLabelFrameId();
+	if (frame != 0) {
+		// These coordinates already belong to the logical viewport, including AA
+		// and zoom. Only the text box offset remains; never apply native zoom twice.
+		labelQueue.clear();
+		if (IsHighlightingLabelsEnabled()) {
+			for (const TownViewItemLabelAnchor &anchor : GetTownViewItemLabelAnchors()) {
+				if (!ProjectedItemCurrent(anchor.itemIndex, anchor.tile))
+					continue;
+				StringOrView text = ItemLabelText(Items[anchor.itemIndex]);
+				const int width = GetLineWidth(text) + MarginX * 2;
+				labelQueue.push_back({ anchor.itemIndex, width,
+					{ anchor.position.x - width / 2, anchor.position.y - LabelHeight() }, std::move(text) });
+			}
+		}
+	}
 	if (labelQueue.empty())
 		return;
 	UsedX usedX;
@@ -186,10 +255,16 @@ void DrawItemNameLabels(const Surface &out)
 		} while (!canShow);
 	}
 
+	if (frame != 0) {
+		projectedLabelFrame = frame;
+		for (const ItemLabel &label : labelQueue)
+			projectedLabels.push_back({ label.id, { label.pos, { label.width, labelHeight } }, Items[label.id].position });
+		SelectProjectedItemLabelAt(MousePosition);
+	}
 	for (const ItemLabel &label : labelQueue) {
 		const Item &item = Items[label.id];
 
-		if (MousePosition.x >= label.pos.x && MousePosition.x < label.pos.x + label.width
+		if (frame == 0 && MousePosition.x >= label.pos.x && MousePosition.x < label.pos.x + label.width
 		    && MousePosition.y >= label.pos.y && MousePosition.y < label.pos.y + labelHeight) {
 			if (!gmenu_is_active()
 			    && PauseMode == 0

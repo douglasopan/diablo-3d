@@ -1309,7 +1309,7 @@ void FlushTownFirstPersonClicks()
 				MousePosition = click.pointer;
 				Point tile;
 				int towner, item, player;
-				if (PickTownView(MousePosition, tile, towner, item, player)) {
+				if (SelectProjectedItemLabelAt(MousePosition) || PickTownView(MousePosition, tile, towner, item, player)) {
 					CheckCursMove();
 					HandleMouseButtonDown(click.button, click.modifiers);
 				}
@@ -1561,7 +1561,8 @@ void GameEventHandler(const SDL_Event &event, uint16_t modState)
 		    && (event.button.button == SDL_BUTTON_LEFT || event.button.button == SDL_BUTTON_RIGHT)) {
 			Point tile;
 			int towner, item, player;
-			if (TownFollowWheelNeedsDraw || FirstPersonDeferredClickCount != 0 || !PickTownView(MousePosition, tile, towner, item, player)) {
+			if (TownFollowWheelNeedsDraw || FirstPersonDeferredClickCount != 0
+			    || (!SelectProjectedItemLabelAt(MousePosition) && !PickTownView(MousePosition, tile, towner, item, player))) {
 				QueueTownFirstPersonClick(event.button.button, modState, true, true);
 				return;
 			}

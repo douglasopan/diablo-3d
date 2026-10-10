@@ -532,6 +532,7 @@ void Cleanup() noexcept
 #include "town_follow_input_checks.hpp"
 #include "movement_keymapping_runtime_checks.hpp"
 #include "movement_keymapping_r2_runtime_checks.hpp"
+#include "item_label_fpp_native_checks.hpp"
 
 int main(int argc, char **argv)
 {
@@ -559,6 +560,7 @@ int main(int argc, char **argv)
         MovementKeymappingRuntimeChecks(api);
         MovementKeymappingR2RuntimeChecks(api);
         FollowClickChecks(api);
+        ItemLabelFppChecks(api, output);
         Check(renderer == nullptr, "no GPU renderer was created during the entire fixture");
         Check((SDL_GetWindowFlags(ghMainWnd) & SDL_WINDOW_HIDDEN) != 0, "dummy window remains hidden at completion");
         Cleanup();

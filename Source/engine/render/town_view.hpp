@@ -1,8 +1,10 @@
 #pragma once
 
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <string>
+#include <span>
 #include <vector>
 
 #include "engine/point.hpp"
@@ -14,7 +16,10 @@ namespace devilution {
 struct Surface;
 struct TownVolumeMesh;
 struct TownSceneModel;
-namespace cathedral { struct NativeTextureBinding; }
+namespace cathedral {
+struct NativeTextureBinding;
+struct PilotFrame;
+}
 
 /** Rotatable view of the live Tristram map. */
 bool IsTownViewActive();
@@ -215,9 +220,50 @@ struct TownViewCathedralNativeTextureReference {
 	uint16_t requestedPiece = 0, sourcePiece = 0, sourceBlock = 0, secondBlock = 0;
 	uint8_t sourceMicro = 0, sourceColumn = 0;
 	bool repeat = false, approximate = false, horizontalFlip = false;
+	// OriginalUpperColumn is raw artwork for an explicitly bounded visual panel,
+	// not proof of full-cell composition, native3D depth or visibility.
+	bool originalUpperColumn = false;
+	bool originalFullColumn = false;
+	bool lightingBaked = false, perPixelLighting = false;
+	bool nativeOperationsPartitioned = false;
+	uint8_t operationPass = 0; // Raw getter always unpartitioned; lit getter identifies its draw pass.
+	uint32_t operationRevision = 0;
+	uint64_t rawSignature = 0, lightSignature = 0;
+	uint8_t activeMicroTileLength = 0;
+	uint32_t packingRevision = 0;
+	std::array<uint16_t, 16> upperWords {};
+	std::array<uint16_t, 16> sourceWords {};
 };
 TownViewCathedralNativeTextureReference GetTownViewCathedralNativeTextureReference(
 	const cathedral::NativeTextureBinding &binding);
+
+/** Read-only prepared presentation, for comparison with native lighting. */
+TownViewCathedralNativeTextureReference GetTownViewCathedralLitTextureReference(
+	const cathedral::NativeTextureBinding &binding);
+/** Read-only copy of the actual current prepared runtime frame. False leaves
+ * out unchanged; no map/Frame construction, decode, render or export occurs. */
+bool CopyTownViewCathedralFrameForDiagnostics(cathedral::PilotFrame &out);
+
+/** Read-only native cell/material evidence; does not prepare/decode a texture.
+ * Black texels/light are distinct from absent binding. A named macro family
+ * and SOL flags are metadata, not authority to suppress geometry.
+ */
+struct TownViewCathedralCellMaterialDiagnostic {
+	bool current = false, nativeIsFloor = false, nativeWallTransparency = false;
+	bool hasBaseWords = false, hasUpperWords = false, nativeObjectActive = false;
+	bool nativeLightPieceAndObjectRule = false, objectAppliesLighting = false;
+	uint64_t epoch = 0;
+	int sourceX = 0, sourceZ = 0, objectSlot = -1, objectType = -1, nativeLightId = -1;
+	uint16_t piece = 0;
+	uint8_t sol = 0, light = 0, transparencyGroup = 0, rawMega = 0, namedMegaFamily = 0;
+	int8_t signedObjectOccupancy = 0;
+	uint32_t objectAnimationFrame = 0;
+	std::array<uint16_t, 16> sourceWords {};
+	size_t technicalTriangles = 0, boundTriangles = 0, preparedReferences = 0;
+	size_t suppressedTechnicalTriangles = 0, nativePanelTriangles = 0;
+	size_t coveredTexels = 0, coveredIndex0 = 0, coveredIndex255 = 0;
+};
+TownViewCathedralCellMaterialDiagnostic GetTownViewCathedralCellMaterialDiagnostic(int sourceX, int sourceZ);
 /** Private Cathedral allocation fault injection. One-shot, GPU-only, default off.
  * BeforeReadback fires in EndFrame after GPU commands, before output allocation.
  * Requires exception-unwinding support in town_view.cpp and town_gpu.cpp. */
@@ -245,6 +291,17 @@ int TownViewArchitectureAt(Point screen);
 float TownViewDepthAt(Point screen);
 /** Screen position of the tile's ground center, for labels and other world overlays. */
 Point TownViewScreenPosition(Point tile);
+/** Logical UI anchors from the last completed 3D world frame. Labels retain
+ * native through-wall highlighting; they do not depend on a winning pick pixel.
+ * The span is borrowed until the next world draw/resource reset. */
+struct TownViewItemLabelAnchor {
+	int itemIndex;
+	Point position;
+	Point tile;
+};
+std::span<const TownViewItemLabelAnchor> GetTownViewItemLabelAnchors();
+/** Zero when the published world frame is stale, native, or unavailable. */
+uint64_t TownViewItemLabelFrameId();
 /** Diagnostic: cached textures beside native tile decoding, without projection. */
 bool DrawTownViewTileDiagnostic(const Surface &out, Point tile);
 /** Local authoring reference: the same cleaned/fallback floor pixels used by

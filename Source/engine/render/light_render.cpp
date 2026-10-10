@@ -3,7 +3,9 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <span>
+#include <stdexcept>
 #include <vector>
 
 #include "engine/displacement.hpp"
@@ -428,8 +430,8 @@ void RenderCell(uint8_t quad[4], Point position, uint8_t lightLevel, uint8_t *li
 	}
 }
 
-void BuildLightmap(Point tilePosition, Point targetBufferPosition, uint16_t viewportWidth, uint16_t viewportHeight,
-    int rows, int columns, const uint8_t tileLights[MAXDUNX][MAXDUNY], uint_fast8_t microTileLen)
+void BuildLightmapInto(Point tilePosition, Point targetBufferPosition, uint16_t viewportWidth, uint16_t viewportHeight,
+    int rows, int columns, const uint8_t tileLights[MAXDUNX][MAXDUNY], uint_fast8_t microTileLen, std::span<uint8_t> scratch)
 {
 	// Since light may need to bleed up to the top of wall tiles,
 	// expand the buffer space to include the full base diamond of the tallest tile graphics
@@ -437,7 +439,6 @@ void BuildLightmap(Point tilePosition, Point targetBufferPosition, uint16_t view
 	rows += microTileLen + 2;
 
 	const size_t totalPixels = static_cast<size_t>(viewportWidth) * bufferHeight;
-	LightmapBuffer.resize(totalPixels);
 
 	// Since rendering occurs in cells between quads,
 	// expand the rendering space to include tiles outside the viewport
@@ -446,7 +447,7 @@ void BuildLightmap(Point tilePosition, Point targetBufferPosition, uint16_t view
 	rows += 3;
 	columns++;
 
-	uint8_t *lightmap = LightmapBuffer.data();
+	uint8_t *lightmap = scratch.data();
 	memset(lightmap, LightsMax, totalPixels);
 	for (int i = 0; i < rows; i++) {
 		// Seed q3 for the first cell; subsequent cells reuse the previous q1 as q3.
@@ -494,6 +495,16 @@ void BuildLightmap(Point tilePosition, Point targetBufferPosition, uint16_t view
 	}
 }
 
+void BuildLightmap(Point tilePosition, Point targetBufferPosition, uint16_t viewportWidth, uint16_t viewportHeight,
+    int rows, int columns, const uint8_t tileLights[MAXDUNX][MAXDUNY], uint_fast8_t microTileLen)
+{
+	// Keep the native global route's dimensions, allocation and interpolation.
+	const uint16_t bufferHeight = viewportHeight + (TILE_HEIGHT * (microTileLen / 2 + 1));
+	LightmapBuffer.resize(static_cast<size_t>(viewportWidth) * bufferHeight);
+	BuildLightmapInto(tilePosition, targetBufferPosition, viewportWidth, viewportHeight,
+		rows, columns, tileLights, microTileLen, LightmapBuffer);
+}
+
 } // namespace
 
 Lightmap::Lightmap(const uint8_t *outBuffer, uint16_t outPitch,
@@ -522,6 +533,37 @@ Lightmap Lightmap::build(bool perPixelLighting, Point tilePosition, Point target
 		BuildLightmap(tilePosition, targetBufferPosition, viewportWidth, viewportHeight, rows, columns, tileLights, microTileLen);
 	}
 	return Lightmap(outBuffer, outPitch, LightmapBuffer, viewportWidth, lightTables, fullyLitLightTable, fullyDarkLightTable);
+}
+
+Lightmap Lightmap::buildLocal(bool perPixelLighting, Point tilePosition, Point targetBufferPosition,
+    int viewportWidth, int viewportHeight, int rows, int columns,
+    const uint8_t *outBuffer, uint16_t outPitch,
+    std::span<const std::array<uint8_t, LightTableSize>, NumLightingLevels> lightTables,
+    const uint8_t *fullyLitLightTable, const uint8_t *fullyDarkLightTable,
+    const uint8_t tileLights[MAXDUNX][MAXDUNY],
+    uint_fast8_t microTileLen, std::span<uint8_t> scratch)
+{
+	// Validate the new bounded preparation API before writing caller storage.
+	// The existing native build() retains its original contract unchanged.
+	constexpr int MaxPitch = std::numeric_limits<uint16_t>::max();
+	if (viewportWidth <= 0 || viewportWidth > MaxPitch || viewportHeight <= 0
+	    || outBuffer == nullptr || tileLights == nullptr || outPitch < viewportWidth
+	    || rows < 0 || rows > MAXDUNY || columns < 0 || columns > MAXDUNX
+	    || microTileLen > 16)
+		throw std::invalid_argument("Local native lightmap dimensions or inputs invalid");
+	const int margin = TILE_HEIGHT * (microTileLen / 2 + 1);
+	if (viewportHeight > MaxPitch - margin)
+		throw std::invalid_argument("Local native lightmap expanded height invalid");
+	const size_t totalPixels = static_cast<size_t>(viewportWidth) * (viewportHeight + margin);
+	if (scratch.size() < totalPixels)
+		throw std::invalid_argument("Local native lightmap scratch too small");
+	const auto localBuffer = scratch.first(totalPixels);
+	if (perPixelLighting) {
+		BuildLightmapInto(tilePosition, targetBufferPosition, static_cast<uint16_t>(viewportWidth),
+			static_cast<uint16_t>(viewportHeight), rows, columns, tileLights, microTileLen, localBuffer);
+	}
+	return Lightmap(outBuffer, outPitch, localBuffer, static_cast<uint16_t>(viewportWidth),
+		lightTables, fullyLitLightTable, fullyDarkLightTable);
 }
 
 Lightmap Lightmap::bleedUp(bool perPixelLighting, const Lightmap &source, Point targetBufferPosition, std::span<uint8_t> lightmapBuffer)

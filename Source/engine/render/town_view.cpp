@@ -44,11 +44,16 @@
 #include "engine/palette.h"
 #include "engine/render/clx_render.hpp"
 #include "engine/render/cathedral/cathedral_frame.hpp"
+#include "engine/render/cathedral/cathedral_native_wall.hpp"
+#include "engine/render/cathedral/cathedral_native_fence.hpp"
+#include "engine/render/cathedral/cathedral_native_operators.hpp"
+#include "engine/render/cathedral/cathedral_native_visual_policy.hpp"
 #include "engine/render/cathedral/cathedral_live.hpp"
 #include "engine/render/cathedral/cathedral_native_palette.hpp"
 #include "engine/render/cathedral/cathedral_native_coverage.hpp"
 #include "engine/render/cathedral_fallback_diagnostic.hpp"
 #include "engine/render/dun_render.hpp"
+#include "engine/render/light_render.hpp"
 #include "engine/render/scrollrt.h"
 #include "engine/render/town_camera_gameplay.hpp"
 #include "engine/render/town_camera_visibility.hpp"
@@ -84,6 +89,7 @@
 #include "objects.h"
 #include "options.h"
 #include "player.h"
+#include "utils/endian_swap.hpp"
 #include "utils/log.hpp"
 #include "utils/palette_blending.hpp"
 #include "towners.h"
@@ -275,6 +281,9 @@ struct PickRecord {
 
 bool Enabled = false;
 bool PickingValid = false;
+uint64_t ItemLabelFrameId = 0;
+std::array<TownViewItemLabelAnchor, MAXITEMS> ItemLabelAnchors;
+size_t ItemLabelAnchorCount = 0;
 cathedral::PilotFrame CathedralFrame;
 bool CathedralFrameReady = false;
 bool DrawingCathedral = false;
@@ -368,20 +377,117 @@ size_t GpuImportedLutColors = 0;
 std::unordered_map<uint16_t, TileArt> TerrainCache;
 // Dedicated Cathedral namespace. No Town shadow masks, donor heuristics or
 // decoded facades enter this cache. Nodes retain immutable Texture identities.
-using CathedralNativeTextureKey = std::tuple<cathedral::NativeTextureKind, uint16_t, cathedral::NativeTextureAxis, uint8_t, int>;
+using CathedralNativeTextureKey = std::tuple<cathedral::NativeTextureKind, uint16_t, cathedral::NativeTextureAxis, uint8_t, int, cathedral::NativeTextureLayout>;
 struct CathedralNativeTextureEntry {
 	Texture texture;
-	uint64_t signature = 0;
+	uint64_t signature = 0, validatedAt = 0;
 	uint16_t sourcePiece = 0;
 	uint8_t sourceMicro = 0, sourceColumn = 0;
 	uint16_t sourceBlock = 0, secondBlock = 0;
 	int cropX = 0, cropY = 0;
 	bool approximate = false;
 	bool horizontalFlip = false;
+	std::array<uint16_t, 16> upperWords {};
 };
 constexpr size_t CathedralNativeTextureMaxEntries = 512;
 constexpr size_t CathedralNativeTextureMaxBytes = 8 * 1024 * 1024;
+// Raw keys keep their existing 512-entry cap; lit keys add coordinates without
+// multiplying CEL decodes. Only this frame's lit sources are resident (max512).
+// The raw+lit pixel/coverage payload shares the existing 8 MiB byte budget.
+using CathedralNativeLitTextureKey = std::tuple<CathedralNativeTextureKey, int, int, cathedral::NativeTextureOperationPass>;
+struct CathedralNativeLitTextureEntry {
+	Texture texture;
+	uint64_t rawSignature = 0, rawGpuIdentity = 0, lightSignature = 0;
+};
+constexpr size_t CathedralNativeLitTextureMaxEntries = 512;
+constexpr int CathedralNativeLightCanvasWidth = 64, CathedralNativeLightCanvasHeight = 192;
+struct CathedralNativeLightScratch {
+	std::array<uint8_t, CathedralNativeLightCanvasWidth * CathedralNativeLightCanvasHeight> canvas {};
+	// buildLocal accepts MicroTileLen<=16; include its maximum native margin.
+	std::array<uint8_t, CathedralNativeLightCanvasWidth * (CathedralNativeLightCanvasHeight + 32 * 9)> light {};
+	std::array<uint8_t, 64 * 32> bleed {};
+};
+// Metadata is captured from the loaded native tables in the owning draw thread.
+// No receipt, SHA, per-cell approval, RNG, resource load or native write is used.
+std::vector<cathedral::native_cell_art::NativeObjectMetadata> CaptureCathedralNativeLightObjects(const cathedral::Snapshot &snapshot)
+{
+	if (snapshot.gameRevision != cathedral::LiveEpoch() || ActiveObjectCount < 0 || ActiveObjectCount > MAXOBJECTS)
+		throw std::invalid_argument("Cathedral native object metadata epoch/count changed");
+	std::vector<cathedral::native_cell_art::NativeObjectMetadata> result;
+	std::array<bool, MAXOBJECTS> seen {};
+	for (int index = 0; index < ActiveObjectCount; ++index) {
+		const int slot = ActiveObjects[index];
+		if (slot < 0 || slot >= MAXOBJECTS || seen[slot])
+			throw std::invalid_argument("Cathedral native active object list is invalid");
+		seen[slot] = true;
+		const Object &object = Objects[slot];
+		if (object._otype != OBJ_L1LIGHT || object._oDelFlag) continue;
+		const int x = object.position.x, z = object.position.y;
+		if (x < snapshot.minX || x >= snapshot.maxX || z < snapshot.minZ || z >= snapshot.maxZ) continue;
+		const auto &cell = snapshot.At(x, z);
+		if (cell.piece != 269) continue; // Native AddL1Objs predicate, not a MIN encoding heuristic.
+		if (dPiece[x][z] != cell.piece || dObject[x][z] != cell.object
+		    || std::abs(static_cast<int>(cell.object)) != slot + 1
+		    || object._oAnimFrame > static_cast<uint32_t>(std::numeric_limits<int>::max()))
+			throw std::invalid_argument("Cathedral native light footprint differs from the current snapshot");
+		cathedral::native_cell_art::NativeObjectMetadata metadata;
+		metadata.epoch = snapshot.gameRevision; metadata.slot = slot;
+		metadata.sourceX = x; metadata.sourceZ = z; metadata.originX = x; metadata.originZ = z;
+		metadata.nativeType = object._otype; metadata.signedOccupancy = cell.object;
+		metadata.active = true; metadata.authoritativeNativeRecord = true;
+		// AddL1Objs: piece269 -> OBJ_L1LIGHT. AddObjectLight/UpdateObjectLight:
+		// OBJ_L1LIGHT radius5. applyLighting describes sprite shading, not emission.
+		metadata.nativeEmitterRuleMatched = true; metadata.emitterRuleRadius = 5;
+		metadata.appliesLighting = object.applyLighting; metadata.preDraw = object._oPreFlag;
+		metadata.nativeSolid = object._oSolidFlag; metadata.animationFrame = static_cast<int>(object._oAnimFrame);
+		metadata.nativeLightId = object._olid;
+		result.push_back(metadata);
+	}
+	return result;
+}
+
+std::vector<cathedral::native_fence_runtime::NativeMegaWitness> CaptureCathedralKnownFenceMegas(
+    const cathedral::Snapshot &snapshot, const cathedral::PilotFrame &frame)
+{
+	if (snapshot.gameRevision != cathedral::LiveEpoch() || !pMegaTiles)
+		throw std::invalid_argument("Cathedral native fence table is unavailable or stale");
+	std::vector<cathedral::native_fence_runtime::NativeMegaWitness> result;
+	for (const auto &surface : frame.nativeSurfaces) {
+		if (surface.module != cathedral::ModuleKind::Fence || surface.sourceModule != cathedral::ModuleKind::Fence) continue;
+		if (surface.sources.size() != 4) throw std::invalid_argument("Cathedral native fence source count changed");
+		int x = cathedral::GridSize, z = cathedral::GridSize;
+		for (const auto &source : surface.sources) { x = std::min(x, source.x); z = std::min(z, source.z); }
+		if (x < snapshot.minX || x + 1 >= snapshot.maxX || z < snapshot.minZ || z + 1 >= snapshot.maxZ
+		    || (x & 1) != 0 || (z & 1) != 0)
+			throw std::invalid_argument("Cathedral native fence macro origin is invalid");
+		const int megaX = (x - 16) / 2, megaZ = (z - 16) / 2;
+		const uint8_t raw = snapshot.mega[static_cast<size_t>(megaZ) * cathedral::MegaSize + megaX];
+		if (raw != 35 && raw != 36) continue; // Native VFence / HFence; mixed/end variants stay legacy.
+		if (dungeon[megaX][megaZ] != raw) throw std::invalid_argument("Cathedral native fence macro differs from snapshot");
+		const MegaTile &mega = pMegaTiles[raw - 1]; // Same loaded TIL indexing as DRLG_LPass3.
+		const std::array<uint16_t, 4> loaded { Swap16LE(mega.micro1), Swap16LE(mega.micro2), Swap16LE(mega.micro3), Swap16LE(mega.micro4) };
+		cathedral::native_fence_runtime::NativeMegaWitness witness;
+		witness.epoch = snapshot.gameRevision; witness.rawMega = raw; witness.originX = x; witness.originZ = z;
+		for (unsigned child = 0; child < 4; ++child) {
+			if (loaded[child] >= MAXTILES)
+				throw std::invalid_argument("Cathedral native fence TIL child is invalid");
+			witness.zeroBasedNativePieces[child] = loaded[child]; // Exact DRLG_LPass3 assignment, with no inferred decrement.
+			const int childX = x + static_cast<int>(child % 2), childZ = z + static_cast<int>(child / 2);
+			if (snapshot.At(childX, childZ).piece != witness.zeroBasedNativePieces[child]
+			    || dPiece[childX][childZ] != witness.zeroBasedNativePieces[child])
+				throw std::invalid_argument("Cathedral native fence loaded TIL mapping differs from current piece");
+		}
+		witness.loadedNativeTilMappingVerified = true;
+		result.push_back(witness);
+	}
+	return result;
+}
 std::map<CathedralNativeTextureKey, CathedralNativeTextureEntry> CathedralNativeTextureCache;
+std::map<CathedralNativeLitTextureKey, CathedralNativeLitTextureEntry> CathedralNativeLitTextureCache;
+size_t CathedralNativeLitTextureBytes = 0;
+bool CathedralNativeLitTexturesReady = false;
+uint64_t CathedralNativeLitFrameLightSignature = 0;
+uint64_t CathedralNativeLitGameRevision = 0, CathedralNativeLitGeometryRevision = 0, CathedralNativeLitPresentationSignature = 0;
 TownViewCathedralNativeTextureState CathedralNativeTextureState;
 const std::byte *CathedralNativeTextureResource = nullptr;
 uint_fast8_t CathedralNativeTextureMicroLen = 0;
@@ -442,8 +548,10 @@ void RecordCathedralDiagnostic(CathedralFallbackReason reason, CathedralFallback
 		CathedralDiagnosticMaterialBindingValid = false;
 	}
 	next.pickingValid = PickingValid;
-	next.hostEpoch = CathedralNativeTextureState.epoch; next.hostEntries = CathedralNativeTextureCache.size();
-	next.hostBytes = CathedralNativeTextureState.bytes; next.hostEntryLimit = CathedralNativeTextureMaxEntries;
+	next.hostEpoch = CathedralNativeTextureState.epoch;
+	next.hostEntries = CathedralNativeTextureCache.size() + CathedralNativeLitTextureCache.size();
+	next.hostBytes = CathedralNativeTextureState.bytes + CathedralNativeLitTextureBytes;
+	next.hostEntryLimit = CathedralNativeTextureMaxEntries + CathedralNativeLitTextureMaxEntries;
 	next.hostByteLimit = CathedralNativeTextureMaxBytes; next.hostDecodes = CathedralNativeTextureState.decodes;
 	next.hostHits = CathedralNativeTextureState.hits; next.hostMisses = CathedralNativeTextureState.misses;
 	const auto &gpu = GetTownGpuStatus(); // Borrow strings; never copy them during recovery.
@@ -2805,15 +2913,30 @@ Texture DecodeSprite(ClxSprite sprite)
 	return result;
 }
 
+bool CathedralNativeOperationBindingSupported(const cathedral::NativeTextureBinding &binding) noexcept
+{
+	return static_cast<unsigned>(binding.operationPass) <= static_cast<unsigned>(cathedral::NativeTextureOperationPass::PaletteBlend)
+	    && (binding.operationPass == cathedral::NativeTextureOperationPass::Unpartitioned
+	        || (binding.kind == cathedral::NativeTextureKind::Masonry
+	            && binding.layout == cathedral::NativeTextureLayout::OriginalFullColumn));
+}
+
 CathedralNativeTextureKey NativeTextureKey(const cathedral::NativeTextureBinding &binding)
 {
+	if (!CathedralNativeOperationBindingSupported(binding))
+		throw std::invalid_argument("Cathedral native operation pass requires an original full column");
 	return { binding.kind, binding.piece,
 		binding.kind == cathedral::NativeTextureKind::Masonry ? binding.axis : cathedral::NativeTextureAxis::Horizontal, binding.column,
-		binding.kind == cathedral::NativeTextureKind::DoorWood ? binding.nativeSlot : -1 };
+		binding.kind == cathedral::NativeTextureKind::DoorWood ? binding.nativeSlot : -1, binding.layout };
 }
 
 void ResetCathedralNativeTextureCache()
 {
+	CathedralNativeLitTexturesReady = false;
+	CathedralNativeLitTextureCache.clear();
+	CathedralNativeLitTextureBytes = 0;
+	CathedralNativeLitFrameLightSignature = 0;
+	CathedralNativeLitGameRevision = CathedralNativeLitGeometryRevision = CathedralNativeLitPresentationSignature = 0;
 	CathedralNativeTextureCache.clear();
 	CathedralNativeTextureState = {};
 	CathedralNativeTextureResource = nullptr;
@@ -2835,10 +2958,26 @@ uint64_t NativeTextureSignature(const cathedral::NativeTextureBinding &binding)
 {
 	if (binding.piece >= MAXTILES || binding.column > 1)
 		throw std::invalid_argument("Cathedral native material source out of range");
+	if (!CathedralNativeOperationBindingSupported(binding))
+		throw std::invalid_argument("Cathedral native operation pass requires an original full column");
 	uint64_t hash = 14695981039346656037ULL;
 	const auto mix = [&](uint64_t value) {
 		for (unsigned n = 0; n < 8; ++n) { hash ^= (value >> (n * 8)) & 255; hash *= 1099511628211ULL; }
 	};
+	if (binding.layout == cathedral::NativeTextureLayout::OriginalUpperColumn
+	    || binding.layout == cathedral::NativeTextureLayout::OriginalFullColumn) {
+		if (binding.kind != cathedral::NativeTextureKind::Masonry || MicroTileLen != 10
+		    || binding.x < 0 || binding.z < 0 || binding.x >= cathedral::GridSize || binding.z >= cathedral::GridSize
+		    || (binding.axis != cathedral::NativeTextureAxis::AlongX && binding.axis != cathedral::NativeTextureAxis::AlongZ)
+		    || binding.column != (binding.axis == cathedral::NativeTextureAxis::AlongX ? 1 : 0))
+			throw std::invalid_argument("Cathedral upper-column material binding invalid");
+		mix(binding.layout == cathedral::NativeTextureLayout::OriginalFullColumn
+		        ? cathedral::NativeFullColumnPackingRevision : cathedral::NativeUpperColumnPackingRevision);
+		mix(static_cast<uint8_t>(binding.layout));
+		mix(MicroTileLen);
+	} else if (binding.layout != cathedral::NativeTextureLayout::RepeatedBand) {
+		throw std::invalid_argument("Cathedral native material layout unknown");
+	}
 	// Constant-size MIN metadata only. Immutable CEL bytes are never rescanned
 	// on a warm hit; resource loads must renew the native visual epoch.
 	for (uint16_t piece : { binding.piece, uint16_t { 0 }, uint16_t { 4 }, uint16_t { 3 } }) {
@@ -2880,6 +3019,79 @@ Texture DecodeCathedralCoverage(int width, int height, Render render)
 	return texture; // Covered raw indices 0 AND 255 are independent of opacity.
 }
 
+/** Cold raw block scratch without Texture construction or GPU identity churn.
+ * Stats/debug builds may have extra native renderer side effects; they are not
+ * admitted to this bounded raw-oracle path. No native light/TRN/mask is baked.
+ */
+cathedral::wall_composition::RawBlockPatch DecodeCathedralRawCellBlock(
+    const cathedral::wall_composition::RasterOperation &operation)
+{
+#if defined(DUN_RENDER_STATS) || defined(DEBUG_STR) || defined(DEBUG_RENDER_OFFSET_X) || defined(DEBUG_RENDER_OFFSET_Y)
+	throw std::invalid_argument("Cathedral original upper path excludes native stats/debug overlays");
+#else
+	if ((operation.role != cathedral::wall_composition::RasterRole::DrawCellUpper
+	        && operation.role != cathedral::wall_composition::RasterRole::DrawCellBase)
+	    || operation.requiresPreparedFloorSubframe || operation.requiresPreparedFoliageSuffix)
+		throw std::invalid_argument("Cathedral raw cell callback received floor/foliage");
+	const auto checkedScratch = [] {
+#ifdef USE_SDL3
+		SDLSurfaceUniquePtr storage { SDL_CreateSurface(32, 32, SDL_PIXELFORMAT_INDEX8) };
+#else
+		SDLSurfaceUniquePtr storage { SDL_CreateRGBSurfaceWithFormat(0, 32, 32, 8, SDL_PIXELFORMAT_INDEX8) };
+#endif
+		// OwnedSurface(width,height) routes null through NonNull/ErrDlg. This
+		// new cold path checks SDL allocation first so the existing Cathedral
+		// preparation transaction can discard and retry through bad_alloc.
+		if (!storage) throw std::bad_alloc {};
+		return OwnedSurface(std::move(storage));
+	};
+	OwnedSurface paint = checkedScratch(), coverage = checkedScratch();
+	ClearSurface(paint);
+	for (int y = 0; y < 32; ++y) std::memset(coverage.at(0, y), 255, 32);
+	static const auto identityTables = [] {
+		std::array<std::array<uint8_t, LightTableSize>, NumLightingLevels> tables {};
+		for (auto &row : tables)
+			for (size_t code = 0; code < row.size(); ++code) row[code] = static_cast<uint8_t>(code);
+		return tables;
+	}();
+	const std::vector<uint8_t> zeroLights(static_cast<size_t>(paint.pitch()) * 32, 0);
+	const Lightmap paintLight(paint.begin(), zeroLights, paint.pitch(), identityTables,
+		identityTables[0].data(), identityTables.back().data());
+	const Lightmap coverageLight(coverage.begin(), zeroLights, coverage.pitch(), identityTables,
+		identityTables[0].data(), identityTables.back().data());
+	const LevelCelBlock block { operation.source.word };
+	RenderTile(paint, paintLight, { 0, 31 }, pDungeonCels.get(), block, MaskType::Solid, identityTables[0].data());
+	RenderTile(coverage, coverageLight, { 0, 31 }, pDungeonCels.get(), block, MaskType::Solid, identityTables[0].data());
+	cathedral::wall_composition::RawBlockPatch patch;
+	patch.indices.resize(32 * 32); patch.coverage.resize(32 * 32);
+	for (int y = 0; y < 32; ++y)
+		for (int x = 0; x < 32; ++x) {
+			const size_t index = static_cast<size_t>(y) * 32 + x;
+			patch.indices[index] = paint[{ x, y }];
+			patch.coverage[index] = paint[{ x, y }] == coverage[{ x, y }];
+		}
+	return patch;
+#endif
+}
+
+cathedral::wall_composition::SourceCellMetadata CaptureCathedralNativeColumnSource(
+    const cathedral::NativeTextureBinding &binding)
+{
+	if (binding.kind != cathedral::NativeTextureKind::Masonry || binding.layout != cathedral::NativeTextureLayout::OriginalFullColumn
+	    || binding.x < 0 || binding.z < 0 || binding.x >= MAXDUNX || binding.z >= MAXDUNY || binding.piece >= MAXTILES
+	    || binding.column > 1 || MicroTileLen != 10 || dPiece[binding.x][binding.z] != binding.piece)
+		throw std::invalid_argument("Cathedral native operator source differs from its loaded cell");
+	cathedral::wall_composition::SourceCellMetadata source;
+	source.sourceX = binding.x; source.sourceZ = binding.z; source.piece = binding.piece;
+	source.activeMicroTileLength = MicroTileLen;
+	source.sol = static_cast<uint8_t>(SOLData[binding.piece]);
+	source.transparencyGroup = static_cast<uint8_t>(dTransVal[binding.x][binding.z]);
+	source.groupActive = TransList[source.transparencyGroup];
+	for (size_t micro = 0; micro < source.words.size(); ++micro)
+		source.words[micro] = DPieceMicros[binding.piece].mt[micro].data;
+	return source;
+}
+
 CathedralNativeTextureEntry DecodeCathedralNativeMaterial(const cathedral::NativeTextureBinding &binding)
 {
 	using cathedral::NativeTextureKind;
@@ -2906,6 +3118,52 @@ CathedralNativeTextureEntry DecodeCathedralNativeMaterial(const cathedral::Nativ
 				RenderTileFrame(out, light, { column * 32, 31 }, column == 0 ? TileType::LeftTriangle : TileType::RightTriangle,
 					GetDunFrame(pDungeonCels.get(), micros.mt[column].frame()), DunFrameTriangleHeight, MaskType::Solid, table);
 		}); // Exact native DrawFloorTile semantics after SetDungeonMicros.
+	} else if (binding.kind == NativeTextureKind::Masonry
+	    && binding.layout == cathedral::NativeTextureLayout::OriginalFullColumn) {
+		cathedral::wall_composition::SourceCellMetadata source;
+		source.sourceX = binding.x; source.sourceZ = binding.z; source.piece = binding.piece;
+		source.activeMicroTileLength = MicroTileLen;
+		source.sol = static_cast<uint8_t>(SOLData[binding.piece]);
+		source.transparencyGroup = static_cast<uint8_t>(dTransVal[binding.x][binding.z]);
+		source.groupActive = TransList[source.transparencyGroup];
+		for (size_t micro = 0; micro < source.words.size(); ++micro)
+			source.words[micro] = DPieceMicros[binding.piece].mt[micro].data;
+		const auto plan = cathedral::wall_composition::BuildCellPlan(source);
+		if (plan.nativeIsFloor)
+			throw std::invalid_argument("Cathedral raw full column requires its own non-floor source");
+		// Raw coverage and palette indices never flatten the native draw operator.
+		// Known-fence derivative passes partition opacity after native light bake.
+		auto atlas = cathedral::native_cell_art::ComposeFullColumnRawAtlas(source, binding.column, DecodeCathedralRawCellBlock);
+		if (atlas.noPresentWords || atlas.layerOperations.empty())
+			throw std::invalid_argument("Cathedral original full column absent; donor forbidden");
+		entry.texture.width = atlas.descriptor.width; entry.texture.height = atlas.descriptor.height;
+		entry.texture.pixels = std::move(atlas.indices); entry.texture.opacity = std::move(atlas.coverage);
+		entry.texture.repeat = false;
+		entry.sourceMicro = static_cast<uint8_t>(atlas.layerOperations.front().source.micro);
+		entry.sourceBlock = source.words[entry.sourceMicro]; entry.upperWords = source.words;
+		entry.approximate = true; // Native 3D depth/ground fit still requires external evidence.
+	} else if (binding.kind == NativeTextureKind::Masonry
+	    && binding.layout == cathedral::NativeTextureLayout::OriginalUpperColumn) {
+		cathedral::wall_composition::SourceCellMetadata source;
+		source.sourceX = binding.x; source.sourceZ = binding.z; source.piece = binding.piece;
+		source.activeMicroTileLength = MicroTileLen;
+		source.sol = static_cast<uint8_t>(SOLData[binding.piece]);
+		source.transparencyGroup = static_cast<uint8_t>(dTransVal[binding.x][binding.z]);
+		source.groupActive = TransList[source.transparencyGroup];
+		for (size_t micro = 0; micro < source.words.size(); ++micro)
+			source.words[micro] = DPieceMicros[binding.piece].mt[micro].data;
+		const auto plan = cathedral::wall_composition::BuildCellPlan(source);
+		if (plan.nativeIsFloor || plan.nativeWallTransparency)
+			throw std::invalid_argument("Cathedral upper-column path requires opaque non-floor native source");
+		auto atlas = cathedral::wall_composition::ComposeUpperRawAtlas(source, binding.column, DecodeCathedralRawCellBlock);
+		if (atlas.noPresentUpperWords || atlas.layerOperations.empty())
+			throw std::invalid_argument("Cathedral original upper column absent; donor forbidden");
+		entry.texture.width = atlas.descriptor.width; entry.texture.height = atlas.descriptor.height;
+		entry.texture.pixels = std::move(atlas.indices); entry.texture.opacity = std::move(atlas.coverage);
+		entry.texture.repeat = false;
+		entry.sourceMicro = static_cast<uint8_t>(atlas.layerOperations.front().source.micro);
+		entry.sourceBlock = source.words[entry.sourceMicro]; entry.upperWords = source.words;
+		entry.approximate = true; // Existing physical plane is a technical placement, not native3D depth proof.
 	} else if (binding.kind == NativeTextureKind::Masonry) {
 		const auto bandForPiece = [&](uint16_t piece) -> bool {
 			for (int micro = 2 + binding.column; micro < std::min<int>(MicroTileLen, 16); micro += 2) {
@@ -2965,14 +3223,169 @@ CathedralNativeTextureEntry DecodeCathedralNativeMaterial(const cathedral::Nativ
 	} else {
 		throw std::invalid_argument("Cathedral unsupported native material role");
 	}
-	if (entry.texture.opacity.empty() || std::none_of(entry.texture.opacity.begin(), entry.texture.opacity.end(),
-	        [](uint8_t coverage) { return coverage != 0; }))
+	if (entry.texture.opacity.empty() || (binding.layout != cathedral::NativeTextureLayout::OriginalUpperColumn
+	    && binding.layout != cathedral::NativeTextureLayout::OriginalFullColumn
+	    && std::none_of(entry.texture.opacity.begin(), entry.texture.opacity.end(),
+	        [](uint8_t coverage) { return coverage != 0; })))
 		throw std::invalid_argument("Cathedral material has no covered native texels");
 	return entry;
 }
 
+CathedralNativeLitTextureKey NativeLitTextureKey(const cathedral::NativeTextureBinding &binding)
+{
+	return { NativeTextureKey(binding), binding.x, binding.z, binding.operationPass };
+}
+
+void MixCathedralNativeLightHash(uint64_t &hash, uint64_t value)
+{
+	for (unsigned n = 0; n < 8; ++n) { hash ^= (value >> (n * 8)) & 255; hash *= 1099511628211ULL; }
+}
+
+uint64_t CathedralNativeLightPaletteSignature()
+{
+	uint64_t hash = 14695981039346656037ULL;
+	for (const auto &table : LightTables)
+		for (const uint8_t value : table) { hash ^= value; hash *= 1099511628211ULL; }
+	return hash; // One table scan per preparation/completeness call, not per texel.
+}
+
+uint64_t CathedralNativeFrameLightSignature(uint64_t paletteSignature, bool perPixel)
+{
+	uint64_t hash = paletteSignature;
+	MixCathedralNativeLightHash(hash, perPixel);
+	for (int x = 0; x < MAXDUNX; ++x)
+		for (int z = 0; z < MAXDUNY; ++z) {
+			hash ^= dLight[x][z]; hash *= 1099511628211ULL;
+			hash ^= static_cast<uint8_t>(dTransVal[x][z]); hash *= 1099511628211ULL;
+		}
+	for (const bool active : TransList) { hash ^= static_cast<uint8_t>(active); hash *= 1099511628211ULL; }
+	MixCathedralNativeLightHash(hash, cathedral::native_operators::OperationRevision);
+	return hash; // Native light AND operator-context freshness; no native write.
+}
+
+uint64_t CathedralNativeSourceLightSignature(const cathedral::NativeTextureBinding &binding,
+    uint64_t paletteSignature, bool perPixel)
+{
+	uint64_t hash = paletteSignature;
+	MixCathedralNativeLightHash(hash, perPixel);
+	MixCathedralNativeLightHash(hash, MicroTileLen);
+	MixCathedralNativeLightHash(hash, static_cast<uint64_t>(binding.x));
+	MixCathedralNativeLightHash(hash, static_cast<uint64_t>(binding.z));
+	MixCathedralNativeLightHash(hash, static_cast<uint8_t>(binding.operationPass));
+	if (binding.operationPass != cathedral::NativeTextureOperationPass::Unpartitioned) {
+		const auto source = CaptureCathedralNativeColumnSource(binding);
+		MixCathedralNativeLightHash(hash, source.sol);
+		MixCathedralNativeLightHash(hash, source.transparencyGroup);
+		MixCathedralNativeLightHash(hash, source.groupActive);
+		MixCathedralNativeLightHash(hash, cathedral::native_operators::OperationRevision);
+	}
+	const auto mixLight = [&](Point position) {
+		const uint8_t value = dLight[std::clamp(position.x, 0, MAXDUNX - 1)][std::clamp(position.y, 0, MAXDUNY - 1)];
+		MixCathedralNativeLightHash(hash, static_cast<uint64_t>(position.x));
+		MixCathedralNativeLightHash(hash, static_cast<uint64_t>(position.y));
+		MixCathedralNativeLightHash(hash, value);
+	};
+	mixLight({ binding.x, binding.z });
+	if (!perPixel) return hash;
+	// Fingerprint every native light sample read by buildLocal(rows1, columns1),
+	// including its extra margin. This is a conservative dependency traversal,
+	// not a second interpolation or a pixel oracle. The native interpolator runs
+	// only in buildLocal below; samples outside the map match GetLightLevel.
+	Point position { binding.x, binding.z };
+	position += Displacement(Direction::NorthWest) * 2;
+	const int rows = 1 + MicroTileLen + 2 + 3;
+	int columns = 2;
+	for (int row = 0; row < rows; ++row) {
+		mixLight(position + Displacement { 0, 1 });
+		for (int column = 0; column < columns; ++column, position += Direction::East) {
+			mixLight(position); mixLight(position + Displacement { 1, 0 }); mixLight(position + Displacement { 1, 1 });
+		}
+		position += Displacement(Direction::West) * columns;
+		if ((row & 1) != 0) { ++position.x; --columns; }
+		else { ++position.y; ++columns; }
+	}
+	return hash;
+}
+
+[[noreturn]] void RefuseCathedralNativeLightCacheBudget()
+{
+	RecordCathedralDiagnostic(CathedralFallbackReason::NativeMaterialBudgetRefused,
+	    CathedralFallbackStage::NativeMaterials, true, *GetOptions().Graphics.townViewGpuRendering);
+	CathedralPreparationRefused = true;
+	throw std::length_error("Cathedral raw+lit native material host-cache budget exceeded");
+}
+
+Texture BakeCathedralNativeMasonryLight(const cathedral::NativeTextureBinding &binding,
+    const CathedralNativeTextureEntry &raw, bool perPixel, CathedralNativeLightScratch &scratch)
+{
+	if (binding.kind != cathedral::NativeTextureKind::Masonry || binding.column > 1
+	    || binding.x < 0 || binding.z < 0 || binding.x >= MAXDUNX || binding.z >= MAXDUNY
+	    || raw.texture.width != 32 || raw.texture.height <= 0
+	    || raw.texture.pixels.size() != static_cast<size_t>(raw.texture.width) * raw.texture.height
+	    || raw.texture.opacity.size() != raw.texture.pixels.size())
+		throw std::invalid_argument("Cathedral native lit masonry source invalid");
+	const bool repeated = binding.layout == cathedral::NativeTextureLayout::RepeatedBand;
+	if ((repeated && (raw.texture.height != 16 || raw.sourceMicro >= MicroTileLen))
+	    || (!repeated && binding.layout != cathedral::NativeTextureLayout::OriginalFullColumn
+	        && binding.layout != cathedral::NativeTextureLayout::OriginalUpperColumn))
+		throw std::invalid_argument("Cathedral native lit masonry layout invalid");
+	// Same native source anchor used by DrawCell. A scratch surface is only an
+	// address coordinate system for Lightmap; no CEL decode, native build/global
+	// LightmapBuffer, map/light mutation or framebuffer render occurs here.
+	const Point anchor { 0, CathedralNativeLightCanvasHeight - 1 };
+	const auto local = Lightmap::buildLocal(perPixel, { binding.x, binding.z }, anchor,
+	    CathedralNativeLightCanvasWidth, CathedralNativeLightCanvasHeight, 1, 1,
+	    scratch.canvas.data(), CathedralNativeLightCanvasWidth, LightTables,
+	    FullyLitLightTable, FullyDarkLightTable, dLight, MicroTileLen, scratch.light);
+	const auto bleed = Lightmap::bleedUp(perPixel, local, anchor, scratch.bleed);
+	Texture lit;
+	lit.width = raw.texture.width; lit.height = raw.texture.height; lit.repeat = raw.texture.repeat;
+	lit.pixels = raw.texture.pixels;
+	lit.opacity = raw.texture.opacity; // Coverage is independent of every palette index, including 0/255.
+	const uint8_t uniform = std::min<uint8_t>(dLight[binding.x][binding.z], static_cast<uint8_t>(NumLightingLevels - 1));
+	for (int y = 0; y < lit.height; ++y) for (int x = 0; x < lit.width; ++x) {
+		const size_t index = static_cast<size_t>(y) * lit.width + x;
+		if (lit.opacity[index] == 0) continue;
+		const uint8_t rawColor = raw.texture.pixels[index];
+		if (!perPixel) {
+			// Native dispatch: FullyLit bypasses LUT (not LightTables[0]); FullyDark
+			// paints opaque 0; intermediate levels use the actual native LUT.
+			lit.pixels[index] = uniform == 0 ? rawColor : uniform == LightsMax ? 0 : LightTables[uniform][rawColor];
+			continue;
+		}
+		int sourceX = x, sourceY;
+		if (repeated) {
+			// Invert the existing band rectify+flip; keep the selected donor/art
+			// code but sample lighting at its original block anchor in this cell.
+			sourceX = raw.horizontalFlip ? 31 - x : x;
+			const int shear = binding.axis == cathedral::NativeTextureAxis::AlongX ? sourceX / 2 : (31 - sourceX) / 2;
+			sourceY = anchor.y - 32 * (raw.sourceMicro / 2) - 31 + y + shear;
+		} else {
+			const int minY = binding.layout == cathedral::NativeTextureLayout::OriginalFullColumn
+			    ? 1 - lit.height : -31 - lit.height;
+			sourceY = anchor.y + minY + y;
+		}
+		sourceX += static_cast<int>(binding.column) * 32;
+		if (sourceX < 0 || sourceX >= CathedralNativeLightCanvasWidth || sourceY < 0 || sourceY >= CathedralNativeLightCanvasHeight)
+			throw std::invalid_argument("Cathedral native lit source outside local light canvas");
+		const uint8_t level = *bleed.getLightingAt(scratch.canvas.data()
+		    + static_cast<size_t>(sourceY) * CathedralNativeLightCanvasWidth + sourceX);
+		if (level >= NumLightingLevels) throw std::invalid_argument("Cathedral native per-pixel light level out of range");
+		lit.pixels[index] = bleed.adjustColor(rawColor, level);
+	}
+	if (binding.operationPass != cathedral::NativeTextureOperationPass::Unpartitioned) {
+		const auto source = CaptureCathedralNativeColumnSource(binding);
+		const auto operations = cathedral::native_operators::BuildFullColumnOperationMap(source, binding.column);
+		// Only this derivative opacity is filtered. Raw identity pixels/coverage,
+		// native LUT/bleed, UVs and original source anchors remain unchanged.
+		cathedral::native_operators::FilterFullColumnCoverage(operations, lit.opacity, binding.operationPass);
+	}
+	return lit;
+}
+
 void PrepareCathedralNativeTextures(const cathedral::PilotFrame &frame)
 {
+	CathedralNativeLitTexturesReady = false; // Every refusal leaves the presentation incomplete.
 	if (frame.gameRevision == 0 || !pDungeonCels || MicroTileLen < 2)
 		throw std::invalid_argument("Cathedral texture preparation requires a loaded native epoch");
 	if (CathedralNativeTextureState.epoch != frame.gameRevision || CathedralNativeTextureResource != pDungeonCels.get()
@@ -2981,8 +3394,27 @@ void PrepareCathedralNativeTextures(const cathedral::PilotFrame &frame)
 		CathedralNativeTextureState.epoch = frame.gameRevision;
 		CathedralNativeTextureResource = pDungeonCels.get(); CathedralNativeTextureMicroLen = MicroTileLen;
 	}
+	std::map<CathedralNativeLitTextureKey, cathedral::NativeTextureBinding> selectedLit;
+	for (const auto *surfaces : { &frame.triangles, &frame.nativeArtPanels })
+	for (const auto &surface : *surfaces) {
+		if (surface.visualSuppressed || surface.nativeTexture.kind != cathedral::NativeTextureKind::Masonry) continue;
+		const auto key = NativeLitTextureKey(surface.nativeTexture);
+		if (selectedLit.find(key) != selectedLit.end()) continue;
+		CathedralDiagnosticMaterialBinding = surface.nativeTexture; CathedralDiagnosticMaterialBindingValid = true;
+		if (selectedLit.size() >= CathedralNativeLitTextureMaxEntries) RefuseCathedralNativeLightCacheBudget();
+		selectedLit.emplace(key, surface.nativeTexture);
+	}
+	// Remove only inactive lit sources. Warm selected nodes and GPU identities
+	// stay in place; raw material history/selected masters are untouched.
+	for (auto it = CathedralNativeLitTextureCache.begin(); it != CathedralNativeLitTextureCache.end();) {
+		if (selectedLit.find(it->first) != selectedLit.end()) { ++it; continue; }
+		CathedralNativeLitTextureBytes -= it->second.texture.pixels.size() + it->second.texture.opacity.size();
+		it = CathedralNativeLitTextureCache.erase(it);
+	}
 	std::set<CathedralNativeTextureKey> selected;
-	for (const auto &surface : frame.triangles) {
+	for (const auto *surfaces : { &frame.triangles, &frame.nativeArtPanels })
+	for (const auto &surface : *surfaces) {
+		if (surface.visualSuppressed) continue;
 		const auto &binding = surface.nativeTexture;
 		if (binding.kind == cathedral::NativeTextureKind::Technical) continue;
 		// POD identity is captured before signature validation, decode or budget.
@@ -3001,7 +3433,7 @@ void PrepareCathedralNativeTextures(const cathedral::PilotFrame &frame)
 		const size_t oldBytes = found == CathedralNativeTextureCache.end() ? 0
 		    : found->second.texture.pixels.size() + found->second.texture.opacity.size();
 		if ((found == CathedralNativeTextureCache.end() && CathedralNativeTextureCache.size() >= CathedralNativeTextureMaxEntries)
-		    || bytes > CathedralNativeTextureMaxBytes - (CathedralNativeTextureState.bytes - oldBytes)) {
+		    || bytes > CathedralNativeTextureMaxBytes - (CathedralNativeTextureState.bytes - oldBytes + CathedralNativeLitTextureBytes)) {
 			RecordCathedralDiagnostic(CathedralFallbackReason::NativeMaterialBudgetRefused,
 				CathedralFallbackStage::NativeMaterials, true, *GetOptions().Graphics.townViewGpuRendering);
 			CathedralPreparationRefused = true;
@@ -3013,6 +3445,34 @@ void PrepareCathedralNativeTextures(const cathedral::PilotFrame &frame)
 		++CathedralNativeTextureState.decodes;
 	}
 	CathedralNativeTextureState.entries = CathedralNativeTextureCache.size();
+	const bool perPixel = *GetOptions().Graphics.perPixelLighting;
+	const uint64_t paletteSignature = CathedralNativeLightPaletteSignature();
+	const uint64_t frameLightSignature = CathedralNativeFrameLightSignature(paletteSignature, perPixel);
+	CathedralNativeLightScratch scratch;
+	for (const auto &[key, binding] : selectedLit) {
+		CathedralDiagnosticMaterialBinding = binding; CathedralDiagnosticMaterialBindingValid = true;
+		const auto &raw = CathedralNativeTextureCache.at(NativeTextureKey(binding));
+		const uint64_t signature = CathedralNativeSourceLightSignature(binding, paletteSignature, perPixel);
+		auto found = CathedralNativeLitTextureCache.find(key);
+		if (found != CathedralNativeLitTextureCache.end() && found->second.rawSignature == raw.signature
+		    && found->second.rawGpuIdentity == raw.texture.gpuIdentity.value && found->second.lightSignature == signature) continue;
+		const size_t bytes = raw.texture.pixels.size() + raw.texture.opacity.size();
+		const size_t oldBytes = found == CathedralNativeLitTextureCache.end() ? 0
+		    : found->second.texture.pixels.size() + found->second.texture.opacity.size();
+		if ((found == CathedralNativeLitTextureCache.end() && CathedralNativeLitTextureCache.size() >= CathedralNativeLitTextureMaxEntries)
+		    || bytes > CathedralNativeTextureMaxBytes - (CathedralNativeTextureState.bytes + CathedralNativeLitTextureBytes - oldBytes))
+			RefuseCathedralNativeLightCacheBudget();
+		CathedralNativeLitTextureEntry entry;
+		entry.texture = BakeCathedralNativeMasonryLight(binding, raw, perPixel, scratch);
+		entry.rawSignature = raw.signature; entry.rawGpuIdentity = raw.texture.gpuIdentity.value; entry.lightSignature = signature;
+		if (found == CathedralNativeLitTextureCache.end()) CathedralNativeLitTextureCache.emplace(key, std::move(entry));
+		else found->second = std::move(entry);
+		CathedralNativeLitTextureBytes = CathedralNativeLitTextureBytes - oldBytes + bytes;
+	}
+	CathedralNativeLitFrameLightSignature = frameLightSignature;
+	CathedralNativeLitGameRevision = frame.gameRevision; CathedralNativeLitGeometryRevision = frame.geometryRevision;
+	CathedralNativeLitPresentationSignature = frame.presentationSignature;
+	CathedralNativeLitTexturesReady = true;
 	CathedralDiagnosticMaterialBindingValid = false;
 	CathedralNativeTextureState.floorMaterials = CathedralNativeTextureState.masonryMaterials = CathedralNativeTextureState.doorMaterials = 0;
 	CathedralNativeTextureState.donorMaterials = 0;
@@ -3024,13 +3484,36 @@ void PrepareCathedralNativeTextures(const cathedral::PilotFrame &frame)
 	}
 }
 
+uint64_t CathedralNativeRawValidationSerial = 0;
+
 bool CathedralNativeTexturesCurrent(const cathedral::PilotFrame &frame)
 {
+	if (++CathedralNativeRawValidationSerial == 0) ++CathedralNativeRawValidationSerial;
+	const uint64_t validationSerial = CathedralNativeRawValidationSerial;
 	if (CathedralNativeTextureState.epoch != frame.gameRevision || CathedralNativeTextureResource != pDungeonCels.get()
-	    || CathedralNativeTextureMicroLen != MicroTileLen) return false;
-	for (const auto &surface : frame.triangles)
-		if (surface.nativeTexture.kind != cathedral::NativeTextureKind::Technical
-		    && CathedralNativeTextureCache.find(NativeTextureKey(surface.nativeTexture)) == CathedralNativeTextureCache.end()) return false;
+	    || CathedralNativeTextureMicroLen != MicroTileLen || !CathedralNativeLitTexturesReady
+	    || CathedralNativeLitGameRevision != frame.gameRevision || CathedralNativeLitGeometryRevision != frame.geometryRevision
+	    || CathedralNativeLitPresentationSignature != frame.presentationSignature) return false;
+	const bool perPixel = *GetOptions().Graphics.perPixelLighting;
+	const uint64_t paletteSignature = CathedralNativeLightPaletteSignature();
+	if (CathedralNativeLitFrameLightSignature != CathedralNativeFrameLightSignature(paletteSignature, perPixel)) return false;
+	for (const auto *surfaces : { &frame.triangles, &frame.nativeArtPanels })
+	for (const auto &surface : *surfaces) {
+		if (surface.visualSuppressed || surface.nativeTexture.kind == cathedral::NativeTextureKind::Technical) continue;
+		const auto raw = CathedralNativeTextureCache.find(NativeTextureKey(surface.nativeTexture));
+		if (raw == CathedralNativeTextureCache.end()) return false;
+		// Validate each shared raw material once, even when hundreds of triangles use it.
+		if (raw->second.validatedAt != validationSerial) {
+			if (raw->second.signature != NativeTextureSignature(surface.nativeTexture)) return false;
+			raw->second.validatedAt = validationSerial;
+		}
+		if (surface.nativeTexture.kind != cathedral::NativeTextureKind::Masonry) continue;
+		const auto lit = CathedralNativeLitTextureCache.find(NativeLitTextureKey(surface.nativeTexture));
+		if (lit == CathedralNativeLitTextureCache.end() || lit->second.rawSignature != raw->second.signature
+		    || lit->second.rawGpuIdentity != raw->second.texture.gpuIdentity.value) return false;
+		if (surface.nativeTexture.operationPass != cathedral::NativeTextureOperationPass::Unpartitioned
+		    && lit->second.lightSignature != CathedralNativeSourceLightSignature(surface.nativeTexture, paletteSignature, perPixel)) return false;
+	}
 	return true;
 }
 
@@ -3374,12 +3857,15 @@ void DrawCathedralWorld(const Surface &out)
 		}
 	}
 	const auto drawSurface = [&](const cathedral::FrameTriangle &surface) {
+		if (surface.visualSuppressed) return; // No color, depth or pixel pick for hidden art.
 		const Texture *texture = &textures[static_cast<size_t>(surface.module)];
 		const auto *artVertices = &surface.vertices;
 		if (surface.nativeTexture.kind != cathedral::NativeTextureKind::Technical) {
 			// Preparation and the pre-draw completeness gate own every miss.
 			// Draw performs no decode, material construction or identity mutation.
-			texture = &CathedralNativeTextureCache.at(NativeTextureKey(surface.nativeTexture)).texture;
+			texture = surface.nativeTexture.kind == cathedral::NativeTextureKind::Masonry
+			    ? &CathedralNativeLitTextureCache.at(NativeLitTextureKey(surface.nativeTexture)).texture
+			    : &CathedralNativeTextureCache.at(NativeTextureKey(surface.nativeTexture)).texture;
 			artVertices = &surface.textureVertices;
 		}
 		std::array<Vertex, 3> vertices;
@@ -3396,7 +3882,8 @@ void DrawCathedralWorld(const Surface &out)
 		    && surface.pick.nativeSlot < MAXOBJECTS && Objects[surface.pick.nativeSlot].canInteractWith()
 		    && std::abs(dObject[tile.x][tile.y]) == surface.pick.nativeSlot + 1)
 			pick = PickAt(tile, PickKind::Object, surface.pick.nativeSlot);
-		DrawTriangle(out, vertices, *texture, pick, surface.light);
+		const uint8_t shade = surface.nativeTexture.kind == cathedral::NativeTextureKind::Masonry ? 0 : surface.light;
+		DrawTriangle(out, vertices, *texture, pick, shade); // Lit codes use the same identity palette on CPU/GPU.
 	};
 	const auto drawSpecial = [&](const cathedral::NativeSpecialOverlay &special) {
 		if (!pSpecialCels || special.frameIndex < 0 || static_cast<uint32_t>(special.frameIndex) >= pSpecialCels->numSprites())
@@ -3407,7 +3894,8 @@ void DrawCathedralWorld(const Surface &out)
 	};
 	CathedralPaletteBlend = false;
 	InjectCathedralAllocationFailure(TownViewCathedralAllocationFailurePoint::BeforeOpaque);
-	for (const auto &surface : CathedralFrame.triangles)
+	for (const auto *surfaces : { &CathedralFrame.triangles, &CathedralFrame.nativeArtPanels })
+	for (const auto &surface : *surfaces)
 		if (surface.policy == cathedral::FrameSurfacePolicy::Opaque)
 			drawSurface(surface);
 	for (const auto &special : CathedralFrame.nativeSpecialOverlays)
@@ -3523,18 +4011,27 @@ void DrawCathedralWorld(const Surface &out)
 	InjectCathedralAllocationFailure(TownViewCathedralAllocationFailurePoint::AfterOpaque);
 	struct OverlayCommand {
 		bool special;
+		bool nativePanel;
 		size_t index;
 		float depth;
 	};
 	std::vector<OverlayCommand> overlays;
 	for (size_t i = 0; i < CathedralFrame.triangles.size(); ++i) {
 		const auto &surface = CathedralFrame.triangles[i];
-		if (surface.policy != cathedral::FrameSurfacePolicy::NativePaletteBlend)
+		if (surface.visualSuppressed || surface.policy != cathedral::FrameSurfacePolicy::NativePaletteBlend)
 			continue;
 		Vec3 center {};
 		for (const auto &vertex : surface.vertices)
 			center = center + Vec3 { vertex.position.x, vertex.position.y, vertex.position.z } * (1.0F / 3);
-		overlays.push_back({ false, i, ToCamera(center).z });
+		overlays.push_back({ false, false, i, ToCamera(center).z });
+	}
+	for (size_t i = 0; i < CathedralFrame.nativeArtPanels.size(); ++i) {
+		const auto &surface = CathedralFrame.nativeArtPanels[i];
+		if (surface.visualSuppressed || surface.policy != cathedral::FrameSurfacePolicy::NativePaletteBlend) continue;
+		Vec3 center {};
+		for (const auto &vertex : surface.textureVertices)
+			center = center + Vec3 { vertex.position.x, vertex.position.y, vertex.position.z } * (1.0F / 3);
+		overlays.push_back({ false, true, i, ToCamera(center).z });
 	}
 	for (size_t i = 0; i < CathedralFrame.nativeSpecialOverlays.size(); ++i) {
 		const auto &special = CathedralFrame.nativeSpecialOverlays[i];
@@ -3543,13 +4040,15 @@ void DrawCathedralWorld(const Surface &out)
 			continue;
 		const auto sprite = (*pSpecialCels)[special.frameIndex];
 		const Vec3 center { static_cast<float>(special.x), sprite.height() / (2 * PixelsPerWorldUnit), static_cast<float>(special.z) };
-		overlays.push_back({ true, i, ToCamera(center).z });
+		overlays.push_back({ true, false, i, ToCamera(center).z });
 	}
 	std::stable_sort(overlays.begin(), overlays.end(), [](const OverlayCommand &a, const OverlayCommand &b) { return a.depth > b.depth; });
 	CathedralPaletteBlend = true;
 	for (const auto &overlay : overlays) {
 		if (overlay.special)
 			drawSpecial(CathedralFrame.nativeSpecialOverlays[overlay.index]);
+		else if (overlay.nativePanel)
+			drawSurface(CathedralFrame.nativeArtPanels[overlay.index]);
 		else
 			drawSurface(CathedralFrame.triangles[overlay.index]);
 	}
@@ -3787,6 +4286,27 @@ void PrepareTownViewLiveFrame()
 				}
 				if (!CathedralFrame.requiresNativeFallback) {
 					CathedralDiagnosticStage = CathedralFallbackStage::NativeMaterials;
+#if !defined(DUN_RENDER_STATS) && !defined(DEBUG_STR) && !defined(DEBUG_RENDER_OFFSET_X) && !defined(DEBUG_RENDER_OFFSET_Y)
+					// General native data rules, regenerated for this live frame/epoch.
+					// No receipt or seed/cell whitelist is needed in gameplay.
+					const auto fenceMegas = CaptureCathedralKnownFenceMegas(*snapshot, CathedralFrame);
+					const auto fenceUpdates = cathedral::native_fence_runtime::BuildKnownNativeFencePanels(
+					    *snapshot, CathedralFrame, MicroTileLen, fenceMegas);
+					if (fenceUpdates.requiresCompleteNativeFallback)
+						throw std::invalid_argument("Cathedral known fence needs unsupported native mask/blend operator");
+					cathedral::native_fence_runtime::ApplyFencePanels(CathedralFrame, fenceUpdates);
+					const auto lightObjects = CaptureCathedralNativeLightObjects(*snapshot);
+					const auto lightUpdates = cathedral::native_visual_policy::BuildNativeLightSuppression(
+					    *snapshot, CathedralFrame, lightObjects);
+					cathedral::native_visual_policy::ApplySuppression(CathedralFrame, lightUpdates);
+#endif
+#if defined(D3D_CATHEDRAL_FULL_WALL_EXPERIMENT) && !defined(DUN_RENDER_STATS) && !defined(DEBUG_STR) \
+    && !defined(DEBUG_RENDER_OFFSET_X) && !defined(DEBUG_RENDER_OFFSET_Y)
+					// Separate experiment: full bytes include base, but native
+					// ground/depth fit is not established by the measured plane.
+					const auto wallUpdates = cathedral::native_wall_runtime::BuildUpdates(*snapshot, CathedralFrame, MicroTileLen);
+					cathedral::native_wall_runtime::ApplyUpdates(CathedralFrame, wallUpdates);
+#endif
 					PrepareCathedralNativeTextures(CathedralFrame);
 				} else {
 					RecordCathedralDiagnostic(CathedralFallbackReason::PilotFrameFallback, CathedralDiagnosticStage, true, diagnosticRequestedGpu);
@@ -3883,6 +4403,7 @@ TownViewCathedralNativeTextureReference GetTownViewCathedralNativeTextureReferen
 	const cathedral::NativeTextureBinding &binding)
 {
 	TownViewCathedralNativeTextureReference reference;
+	if (!CathedralNativeOperationBindingSupported(binding)) return reference;
 	if (CathedralNativeTextureState.epoch == 0 || CathedralNativeTextureState.epoch != cathedral::LiveEpoch()
 	    || CathedralNativeTextureResource != pDungeonCels.get()) return reference;
 	const auto found = CathedralNativeTextureCache.find(NativeTextureKey(binding));
@@ -3891,6 +4412,7 @@ TownViewCathedralNativeTextureReference GetTownViewCathedralNativeTextureReferen
 	reference.width = entry.texture.width; reference.height = entry.texture.height;
 	reference.pixels = entry.texture.pixels; reference.opacity = entry.texture.opacity;
 	reference.gpuIdentity = entry.texture.gpuIdentity.value; reference.epoch = CathedralNativeTextureState.epoch;
+	reference.rawSignature = entry.signature; // Raw getter stays unpartitioned for every requested pass.
 	reference.sourceX = binding.x; reference.sourceZ = binding.z; reference.nativeSlot = binding.nativeSlot;
 	reference.requestedPiece = binding.piece; reference.sourcePiece = entry.sourcePiece;
 	reference.sourceMicro = entry.sourceMicro; reference.sourceColumn = entry.sourceColumn;
@@ -3898,7 +4420,116 @@ TownViewCathedralNativeTextureReference GetTownViewCathedralNativeTextureReferen
 	reference.cropX = entry.cropX; reference.cropY = entry.cropY;
 	reference.repeat = entry.texture.repeat; reference.approximate = binding.approximate || entry.approximate;
 	reference.horizontalFlip = entry.horizontalFlip;
+	reference.originalUpperColumn = binding.layout == cathedral::NativeTextureLayout::OriginalUpperColumn;
+	reference.originalFullColumn = binding.layout == cathedral::NativeTextureLayout::OriginalFullColumn;
+	if (reference.originalUpperColumn || reference.originalFullColumn) {
+		reference.activeMicroTileLength = static_cast<uint8_t>(CathedralNativeTextureMicroLen);
+		reference.packingRevision = reference.originalFullColumn
+		    ? cathedral::NativeFullColumnPackingRevision : cathedral::NativeUpperColumnPackingRevision;
+		reference.upperWords = entry.upperWords;
+		reference.sourceWords = entry.upperWords;
+	}
 	return reference;
+}
+
+TownViewCathedralNativeTextureReference GetTownViewCathedralLitTextureReference(
+    const cathedral::NativeTextureBinding &binding)
+{
+	if (!CathedralNativeOperationBindingSupported(binding) || binding.kind != cathedral::NativeTextureKind::Masonry || !CathedralFrameReady
+	    || !CathedralNativeTexturesCurrent(CathedralFrame)) return {};
+	const auto found = CathedralNativeLitTextureCache.find(NativeLitTextureKey(binding));
+	if (found == CathedralNativeLitTextureCache.end()) return {};
+	auto reference = GetTownViewCathedralNativeTextureReference(binding);
+	if (reference.width == 0) return {};
+	reference.pixels = found->second.texture.pixels;
+	reference.opacity = found->second.texture.opacity;
+	reference.gpuIdentity = found->second.texture.gpuIdentity.value;
+	reference.lightingBaked = true;
+	reference.perPixelLighting = *GetOptions().Graphics.perPixelLighting;
+	reference.lightSignature = found->second.lightSignature;
+	reference.operationPass = static_cast<uint8_t>(binding.operationPass);
+	reference.nativeOperationsPartitioned = binding.operationPass != cathedral::NativeTextureOperationPass::Unpartitioned;
+	reference.operationRevision = reference.nativeOperationsPartitioned ? cathedral::native_operators::OperationRevision : 0;
+	return reference;
+}
+
+bool CopyTownViewCathedralFrameForDiagnostics(cathedral::PilotFrame &out)
+{
+	if (!CathedralFrameReady || CathedralFrame.requiresNativeFallback || !cathedral::LiveFrameCurrent()
+	    || !CathedralNativeTexturesCurrent(CathedralFrame)) return false;
+	auto copy = CathedralFrame; // Actual prepared production frame, including emitted operation passes.
+	static_assert(noexcept(out = std::move(copy)));
+	out = std::move(copy);
+	return true; // Preparation/linkage witness; caller still proves a successful native/CPU/GPU draw.
+}
+
+TownViewCathedralCellMaterialDiagnostic GetTownViewCathedralCellMaterialDiagnostic(int sourceX, int sourceZ)
+{
+	TownViewCathedralCellMaterialDiagnostic result;
+	result.sourceX = sourceX; result.sourceZ = sourceZ;
+	const auto *snapshot = cathedral::LiveSnapshot();
+	if (!CathedralFrameReady || !cathedral::LiveFrameCurrent() || snapshot == nullptr
+	    || sourceX < snapshot->minX || sourceX >= snapshot->maxX
+	    || sourceZ < snapshot->minZ || sourceZ >= snapshot->maxZ
+	    || snapshot->gameRevision != CathedralFrame.gameRevision || MicroTileLen != 10)
+		return result;
+	const auto &cell = snapshot->At(sourceX, sourceZ);
+	if (cell.piece >= snapshot->micros.size()) return result;
+	result.current = true; result.epoch = snapshot->gameRevision;
+	result.piece = cell.piece; result.sol = cell.properties; result.light = cell.light;
+	result.transparencyGroup = cell.transparency; result.signedObjectOccupancy = cell.object;
+	result.sourceWords = snapshot->micros[cell.piece];
+	result.nativeIsFloor = (cell.properties & (cathedral::wall_composition::SolSolid | cathedral::wall_composition::SolBlockMissile)) == 0;
+	result.nativeWallTransparency = (cell.properties & cathedral::wall_composition::SolTransparent) != 0
+	    && snapshot->activeTransparency[cell.transparency];
+	result.hasBaseWords = result.sourceWords[0] != 0 || result.sourceWords[1] != 0;
+	for (unsigned micro = 2; micro < 10; ++micro) result.hasUpperWords |= result.sourceWords[micro] != 0;
+	result.rawMega = snapshot->mega[static_cast<size_t>((sourceZ - snapshot->minZ) / 2) * cathedral::MegaSize
+	    + (sourceX - snapshot->minX) / 2];
+	result.namedMegaFamily = static_cast<uint8_t>(cathedral::native_cell_art::ReadNamedNativeMegaFamily(result.rawMega));
+	const int slot = std::abs(static_cast<int>(cell.object)) - 1;
+	if (slot >= 0 && slot < MAXOBJECTS) {
+		bool active = false;
+		for (int index = 0; index < ActiveObjectCount && index < MAXOBJECTS; ++index)
+			active |= ActiveObjects[index] == slot;
+		const Object &object = Objects[slot];
+		if (active && !object._oDelFlag && object.position == Point { sourceX, sourceZ }
+		    && dObject[sourceX][sourceZ] == cell.object && std::abs(static_cast<int>(cell.object)) == slot + 1) {
+			result.nativeObjectActive = true; result.objectSlot = slot; result.objectType = object._otype;
+			result.nativeLightId = object._olid; result.objectAppliesLighting = object.applyLighting;
+			result.objectAnimationFrame = object._oAnimFrame;
+			result.nativeLightPieceAndObjectRule = cell.piece == 269 && object._otype == OBJ_L1LIGHT;
+		}
+	}
+	for (const auto &surface : CathedralFrame.nativeSurfaces) {
+		if (std::none_of(surface.sources.begin(), surface.sources.end(), [&](const auto &source) {
+			    return source.x == sourceX && source.z == sourceZ && source.piece == cell.piece;
+		    })) continue;
+		for (const auto &triangle : CathedralFrame.triangles) {
+			if (triangle.instanceId != surface.instanceId) continue;
+			if (triangle.visualSuppressed) { ++result.suppressedTechnicalTriangles; continue; }
+			if (triangle.nativeTexture.kind == cathedral::NativeTextureKind::Technical) ++result.technicalTriangles;
+			else ++result.boundTriangles;
+		}
+	}
+	for (const auto &panel : CathedralFrame.nativeArtPanels)
+		if (!panel.visualSuppressed && panel.nativeTexture.x == sourceX && panel.nativeTexture.z == sourceZ
+		    && panel.nativeTexture.piece == cell.piece) ++result.nativePanelTriangles;
+	// Prepared texel counters are per matching cached reference, not screen
+	// visibility. They do not reinterpret palette index0 as missing coverage.
+	if (CathedralNativeTextureState.epoch == result.epoch && CathedralNativeTextureResource == pDungeonCels.get()
+	    && CathedralNativeTextureMicroLen == MicroTileLen)
+		for (const auto &[key, entry] : CathedralNativeTextureCache) {
+			if (std::get<1>(key) != cell.piece) continue;
+			++result.preparedReferences;
+			for (size_t pixel = 0; pixel < entry.texture.opacity.size(); ++pixel) {
+				if (entry.texture.opacity[pixel] == 0) continue;
+				++result.coveredTexels;
+				result.coveredIndex0 += entry.texture.pixels[pixel] == 0;
+				result.coveredIndex255 += entry.texture.pixels[pixel] == 255;
+			}
+		}
+	return result;
 }
 
 void InitializeTownViewForGame()
@@ -4641,6 +5272,35 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 	PickHorizonEnabled = *GetOptions().Graphics.townViewHorizon;
 	PickingValid = !cathedralWorld || (!CathedralFrame.requiresNativeFallback
 	    && (!RendererState.requestedGpu || RendererState.usedGpu) && cathedral::LiveFrameCurrent());
+	ItemLabelAnchorCount = 0;
+	if (PickingValid && !IsTownViewNativePose()) {
+		// Capture native identity/position in the same completed color/depth frame.
+		// O(MAXITEMS), no framebuffer scan, sprite decoding or simulation RNG.
+		if (++ItemLabelFrameId == 0)
+			++ItemLabelFrameId;
+		for (size_t i = 0; i < std::min<size_t>(ActiveItemCount, MAXITEMS); ++i) {
+			const int slot = ActiveItems[i];
+			if (slot >= MAXITEMS)
+				continue;
+			const Item &item = Items[slot];
+			if (item.isEmpty() || !item.AnimInfo.sprites || !InDungeonBounds(item.position)
+			    || item.selectionRegion == SelectionRegion::None
+			    || dItem[item.position.x][item.position.y] != slot + 1
+			    || (!item.AnimInfo.isLastFrame() && item._iCurs != ICURS_MAGIC_ROCK)
+			    || (cathedralWorld && !CathedralTileInFrame(item.position)))
+				continue;
+			TownCameraProjectedVertex projected;
+			// Native labels sit one tile-height above the item's bottom anchor.
+			if (!ProjectTownCameraPoint(ViewCamera.projection,
+			        { static_cast<float>(item.position.x), TILE_HEIGHT / PixelsPerWorldUnit,
+				        static_cast<float>(item.position.y) }, projected)
+			    || projected.x < 0 || projected.y < 0
+			    || projected.x >= ViewCamera.width || projected.y >= ViewCamera.height)
+				continue;
+			ItemLabelAnchors[ItemLabelAnchorCount++] = { slot,
+				{ static_cast<int>(std::lround(projected.x)), static_cast<int>(std::lround(projected.y)) }, item.position };
+		}
+	}
 	RendererState.worldMilliseconds = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - worldStart).count();
 	CathedralDiagnosticStage = CathedralFallbackStage::SessionTrace;
 	if (!forceGeometry) {
@@ -4850,6 +5510,20 @@ bool PickTownViewDetailed(Point screen, TownViewPickResult &result)
 		break;
 	}
 	return true;
+}
+
+uint64_t TownViewItemLabelFrameId()
+{
+	return IsTownViewActive() && !IsTownViewNativePose() && CurrentPickingValid()
+	        && CachedDungeonData == pDungeonCels.get()
+	    ? ItemLabelFrameId : 0;
+}
+
+std::span<const TownViewItemLabelAnchor> GetTownViewItemLabelAnchors()
+{
+	if (TownViewItemLabelFrameId() == 0)
+		return {};
+	return { ItemLabelAnchors.data(), ItemLabelAnchorCount };
 }
 
 Point TownViewScreenPosition(Point tile)

@@ -17,5 +17,8 @@ void ResetItemlabelHighlighted();
 bool IsHighlightingLabelsEnabled();
 void AddItemToLabelQueue(int id, Point position);
 void DrawItemNameLabels(const Surface &out);
+/** Fresh hit test against the final label boxes of the current 3D frame.
+ * Updates native item selection only for an eligible absolute UI pointer. */
+bool SelectProjectedItemLabelAt(Point pointer);
 
 } // namespace devilution

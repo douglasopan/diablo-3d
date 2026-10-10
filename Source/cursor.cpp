@@ -903,8 +903,15 @@ bool CheckCursorActions(const Point currentTile, bool flipflag)
  */
 void CheckCursMove()
 {
-	if (IsItemLabelHighlighted())
+	if (IsItemLabelHighlighted()) {
+		if (IsTownViewActive() && !IsTownViewNativePose()) {
+			// A label is an item target even over sky/another world surface.
+			// Clear other native hover state, then use the exact pointer again.
+			ResetCursorInfo();
+			SelectProjectedItemLabelAt(MousePosition);
+		}
 		return;
+	}
 
 	if (IsTownViewActive() && IsTownViewCameraDragging()) {
 		ResetCursorInfo();

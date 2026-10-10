@@ -64,6 +64,9 @@ struct FrameTriangle {
 	// Visual bitmap footprint/UV only. vertices remains the original physical
 	// triangle and must remain the source of collision and geometric picking.
 	std::array<Vertex, 3> textureVertices {};
+	// Presentation only: verified native replacement may hide a technical
+	// surface while physical triangles/collision/native provenance remain.
+	bool visualSuppressed = false;
 };
 
 /** Pure presentation bridge over the accepted live-map adapter. Camera collision
@@ -77,6 +80,9 @@ struct FrameTriangle {
  */
 struct PilotFrame {
 	std::vector<FrameTriangle> triangles;
+	// Separate native art panels; never collision or geometric pick authority.
+	// Empty by default. Owner-verified evidence and atomic preparation are required.
+	std::vector<FrameTriangle> nativeArtPanels;
 	std::vector<TownSceneModel> collisionModels;
 	std::vector<NativeSurfaceRecord> nativeSurfaces;
 	std::vector<NativeSpecialOverlay> nativeSpecialOverlays;

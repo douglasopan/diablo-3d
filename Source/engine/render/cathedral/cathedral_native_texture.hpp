@@ -15,6 +15,18 @@ namespace devilution::cathedral {
 
 enum class NativeTextureKind : uint8_t { Technical, FloorDiamond, Masonry, DoorWood };
 enum class NativeTextureAxis : uint8_t { Horizontal, AlongX, AlongZ };
+/** Upper columns keep the original non-repeating MIN footprint. They must not
+ * alias the repeated-band cache used by backs/caps/corners. No layout grants
+ * full facade, depth, collision, mask, lighting or budget authority.
+ */
+enum class NativeTextureLayout : uint8_t { RepeatedBand, OriginalUpperColumn, OriginalFullColumn };
+/** Derivative draw coverage only. Unpartitioned raw material keys/getters retain
+ * original pixels and coverage; explicit full-column passes preserve native
+ * mixed SOL/TransList operations through the existing opaque/blend renderer.
+ */
+enum class NativeTextureOperationPass : uint8_t { Unpartitioned, Solid, PaletteBlend };
+inline constexpr uint32_t NativeUpperColumnPackingRevision = 1;
+inline constexpr uint32_t NativeFullColumnPackingRevision = 1;
 
 /** Native source provenance, independent of the pick tile and palette lighting.
  * An approximate binding repeats a surface family on a face without native art.
@@ -28,6 +40,8 @@ struct NativeTextureBinding {
 	int nativeSlot = -1;
 	uint8_t column = 0; // Preferred MIN source column: AlongX=1, AlongZ=0; not the shear selector.
 	bool approximate = false;
+	NativeTextureLayout layout = NativeTextureLayout::RepeatedBand;
+	NativeTextureOperationPass operationPass = NativeTextureOperationPass::Unpartitioned;
 };
 
 /** Visual inverse of the complete native 64x32 bitmap rectangle in DrawGround.

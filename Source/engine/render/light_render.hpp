@@ -57,6 +57,19 @@ public:
 	    const uint8_t tileLights[MAXDUNX][MAXDUNY],
 	    uint_fast8_t microTileLen);
 
+	/** Native build() interpolation with caller-owned scratch only. Scratch must
+	 * hold viewportWidth * (viewportHeight + TILE_HEIGHT * (microTileLen / 2 + 1))
+	 * bytes and both scratch/outBuffer must outlive the returned Lightmap.
+	 * Per-pixel OFF leaves scratch untouched. No native global buffer is written.
+	 */
+	static Lightmap buildLocal(bool perPixelLighting, Point tilePosition, Point targetBufferPosition,
+	    int viewportWidth, int viewportHeight, int rows, int columns,
+	    const uint8_t *outBuffer, uint16_t outPitch,
+	    std::span<const std::array<uint8_t, LightTableSize>, NumLightingLevels> lightTables,
+	    const uint8_t *fullyLitLightTable, const uint8_t *fullyDarkLightTable,
+	    const uint8_t tileLights[MAXDUNX][MAXDUNY],
+	    uint_fast8_t microTileLen, std::span<uint8_t> scratch);
+
 	static Lightmap bleedUp(bool perPixelLighting, const Lightmap &source, Point targetBufferPosition, std::span<uint8_t> lightmapBuffer);
 
 private:
