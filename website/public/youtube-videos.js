@@ -1,4 +1,4 @@
-/* The local poster and ordinary links work without contacting YouTube. */
+/* Public thumbnails load lazily; players load only after an explicit click. */
 (() => {
   'use strict';
 

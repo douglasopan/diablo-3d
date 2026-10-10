@@ -1,4 +1,4 @@
-"""Public soundtrack and WIP showcase videos with click-to-load players."""
+"""Public devlogs, soundtrack and WIP showcases with click-to-load players."""
 from __future__ import annotations
 
 from html import escape
@@ -8,6 +8,12 @@ from music_credits import credit_text
 YOUTUBE_CHANNEL = 'https://www.youtube.com/channel/UCQrVADTRa7sXr0GIeaq7SqQ'
 YOUTUBE_PLAYLIST = 'https://www.youtube.com/playlist?list=PLPiXmw2nj9BM'
 DISCORD = 'https://discord.gg/4YxQ7s69S'
+DEVLOG_VIDEO_IDS = {
+    'devlog-horizontal': 'HD7cr8aS5z8',
+    'devlog-short': 'kYd_dcP5In0',
+}
+DEVLOG_SUBTITLES = '/assets/subtitles/Diablo3D-devlog-20261009.en.srt'
+DEVLOG_SUBTITLES_SHA256 = '3c53c2c634063c680feb0314058f2b1bc7175ca4a96206e0aefd72ffa8760fa1'
 VIDEO_IDS = {
     'menu-rock2': 'KWlri7ryuR0',
     'menu-alternative': 'YcaFpTO9C6Y',
@@ -38,6 +44,51 @@ def _external_link(label, href, class_name=''):
         f'<a{css} href="{escape(href, quote=True)}" target="_blank" '
         f'rel="noopener noreferrer">{escape(label)} <span aria-hidden="true">↗</span></a>'
     )
+
+
+def _thumbnail(video_id):
+    return (f'<img class="youtube-video-thumbnail" '
+            f'src="https://i.ytimg.com/vi/{video_id}/hqdefault.jpg" alt="" '
+            'width="480" height="360" loading="lazy" decoding="async">')
+
+
+def devlog_section(language, url, featured=False):
+    """Show only published final versions, with their historical context."""
+    if language not in ('pt-BR', 'en'):
+        raise ValueError('Devlog videos support pt-BR and en')
+    english = language == 'en'
+
+    def text(portuguese, translated):
+        return translated if english else portuguese
+
+    cards = []
+    keys = ['devlog-horizontal'] if featured else list(DEVLOG_VIDEO_IDS)
+    for key in keys:
+        video_id = DEVLOG_VIDEO_IDS[key]
+        short = key == 'devlog-short'
+        title = text('Controles, Tristram e Catedral', 'Controls, Tristram and the Cathedral')
+        slot_id = 'youtube-' + key
+        play_label = text('Assistir aqui', 'Watch here')
+        player_title = text('Player do YouTube: ', 'YouTube player: ') + title
+        kind = text('Short vertical · 39 s', 'Vertical Short · 39 s') if short else text('Devlog horizontal · 39 s', 'Horizontal devlog · 39 s')
+        watch_url = 'https://www.youtube.com/shorts/' + video_id if short else 'https://www.youtube.com/watch?v=' + video_id
+        css = 'youtube-showcase-short' if short else 'youtube-showcase-main'
+        cards.append(f'''<article class="youtube-video-card {css}" data-youtube-card>
+<div class="youtube-video-slot" id="{slot_id}" data-youtube-slot><div class="youtube-video-poster">{_thumbnail(video_id)}<span class="youtube-video-mark" aria-hidden="true">D3D · DEVLOG</span>{_player_button(slot_id, video_id, player_title, play_label, title, icon=True)}<span class="youtube-video-poster-title" aria-hidden="true">09/10/2026</span></div></div>
+<div class="youtube-video-copy"><p class="youtube-video-kind">{escape(kind)}</p><h3>{escape(title)}</h3><p>{escape(text('Narração em português · legendas em inglês', 'Portuguese narration · English subtitles'))}</p><p class="youtube-video-credit">{escape(text('Gameplay gravado por Douglas e prévias históricas. A narração registra a preparação anterior à integração de Ogden e do piloto da Catedral; arte, câmera e desempenho seguem em revisão.', 'Gameplay recorded by Douglas and historical previews. The narration records preparation before Ogden and the Cathedral pilot were integrated; artwork, camera behavior and performance remain under review.'))}</p>
+<div class="youtube-video-actions">{_player_button(slot_id, video_id, player_title, play_label, title)}{_external_link(text('Assistir no YouTube', 'Watch on YouTube'), watch_url)}</div><p class="sr-only" data-youtube-status role="status" aria-live="polite"></p></div></article>''')
+    heading = text('O devlog de hoje, em vídeo.', 'Today’s devlog, on video.')
+    subtitle_label = text('Baixar legendas em inglês (.srt)', 'Download English subtitles (.srt)')
+    more_label = text('Ver todos os vídeos', 'View all videos') if featured else text('Ler o devlog e os créditos', 'Read the devlog and credits')
+    more_url = url('/galeria/#videos') if featured else url('/devlog/devlog-em-video/')
+    css = 'youtube-videos-featured' if featured else 'youtube-videos-showcase'
+    return f'''<section class="youtube-videos-section {css}" aria-labelledby="youtube-devlog-heading"><div class="youtube-videos-intro"><p class="eyebrow">DEVLOG · 09/10/2026</p><h2 id="youtube-devlog-heading">{escape(heading)}</h2><p>{escape(text('Controles, HUD, Tristram, Ogden e o primeiro piloto da Catedral. O objetivo continua sendo todo Diablo 1 em 3D.', 'Controls, the HUD, Tristram, Ogden and the first Cathedral pilot. The goal remains all of Diablo 1 in 3D.'))}</p></div><div class="youtube-video-grid">{''.join(cards)}</div><div class="youtube-videos-community actions"><a class="button secondary" href="{escape(more_url, quote=True)}">{escape(more_label)}</a><a href="{escape(url(DEVLOG_SUBTITLES), quote=True)}" download>{escape(subtitle_label)}</a></div></section>'''
+
+
+def all_videos_section(language, url):
+    """Reuse each public collection once in the existing gallery."""
+    return ('<section id="videos">' + devlog_section(language, url)
+            + showcase_section(language, url) + videos_section(language, url) + '</section>')
 
 
 def _player_button(slot_id, video_id, player_title, label, title, *, icon=False, status_message=''):
@@ -93,7 +144,7 @@ def videos_section(language, url, featured=False):
         version = text('Exportação alternativa', 'Alternate export') if key == 'town-third' else text('Regravação / reinterpretação', 'Cover / reinterpretation')
         cards.append(f'''<article class="youtube-video-card" data-youtube-card>
 <div class="youtube-video-slot" id="{slot_id}" data-youtube-slot>
-<div class="youtube-video-poster"><span class="youtube-video-mark" aria-hidden="true">D3D</span>{_player_button(slot_id, video_id, player_title, play_label, title, icon=True)}<span class="youtube-video-poster-title" aria-hidden="true">{escape(title)}</span></div>
+<div class="youtube-video-poster">{_thumbnail(video_id)}<span class="youtube-video-mark" aria-hidden="true">D3D</span>{_player_button(slot_id, video_id, player_title, play_label, title, icon=True)}<span class="youtube-video-poster-title" aria-hidden="true">{escape(title)}</span></div>
 </div>
 <div class="youtube-video-copy"><p class="youtube-video-kind">{escape(version)}</p><h3>{escape(title)}</h3><p class="youtube-video-credit">{escape(credit_text(language))}</p>
 <div class="youtube-video-actions">{_player_button(slot_id, video_id, player_title, play_label, title)}{_external_link(text('Ouvir no YouTube', 'Listen on YouTube'), 'https://www.youtube.com/watch?v=' + video_id)}</div>
@@ -144,7 +195,7 @@ def showcase_section(language, url):
         css = 'youtube-showcase-short' if short else 'youtube-showcase-main'
         cards.append(f'''<article class="youtube-video-card {css}" data-youtube-card>
 <div class="youtube-video-slot" id="{slot_id}" data-youtube-slot>
-<div class="youtube-video-poster"><span class="youtube-video-mark" aria-hidden="true">D3D · WIP</span>{_player_button(slot_id, video_id, player_title, play_label, title, icon=True, status_message=status_message)}<span class="youtube-video-poster-title" aria-hidden="true">Griswold &amp; Ogden</span></div>
+<div class="youtube-video-poster">{_thumbnail(video_id)}<span class="youtube-video-mark" aria-hidden="true">D3D · WIP</span>{_player_button(slot_id, video_id, player_title, play_label, title, icon=True, status_message=status_message)}<span class="youtube-video-poster-title" aria-hidden="true">Griswold &amp; Ogden</span></div>
 </div>
 <div class="youtube-video-copy"><p class="youtube-video-kind">{escape(kind)}</p><h3>{escape(title)}</h3><p class="youtube-video-credit">{escape(explanation)}</p>
 <div class="youtube-video-actions">{_player_button(slot_id, video_id, player_title, play_label, title, status_message=status_message)}{_external_link(text('Assistir no YouTube', 'Watch on YouTube'), watch_url)}</div>

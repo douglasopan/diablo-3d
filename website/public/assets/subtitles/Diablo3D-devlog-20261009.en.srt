@@ -1,0 +1,61 @@
+1
+00:00:00,000 --> 00:00:03,800
+Hi, everyone! A quick
+Diablo 3D update.
+
+2
+00:00:04,060 --> 00:00:07,660
+You can now set movement keys
+in first and third person.
+
+3
+00:00:07,760 --> 00:00:10,780
+We adjusted the menu
+to keep the HUD clear.
+
+4
+00:00:11,100 --> 00:00:13,700
+We're checking these changes
+during gameplay.
+
+5
+00:00:14,120 --> 00:00:16,960
+In Tristram, we're refining
+proportions and colors
+
+6
+00:00:16,960 --> 00:00:19,020
+for a more consistent town.
+
+7
+00:00:19,280 --> 00:00:21,340
+Ogden has an animation preview
+
+8
+00:00:21,400 --> 00:00:23,300
+we're preparing
+to add to the game.
+
+9
+00:00:23,620 --> 00:00:25,800
+We've begun testing
+the Cathedral in 3D,
+
+10
+00:00:25,800 --> 00:00:28,560
+using the original map,
+still outside gameplay.
+
+11
+00:00:28,560 --> 00:00:30,580
+Want to follow our progress?
+
+12
+00:00:30,700 --> 00:00:32,680
+Subscribe and join
+our Discord.
+
+13
+00:00:33,000 --> 00:00:35,540
+The support link is also
+in the description.

@@ -22,7 +22,7 @@ from soundtrack import load_soundtrack
 from music_credits import SOURCE as MUSIC_CREDIT_SOURCE, album_metadata, credit_text, public_soundtrack
 from hud_study import copy_study, gallery as hud_study_gallery, image_source as hud_study_image_source, load_study
 from community import community_invite, YOUTUBE_URL
-from videos import showcase_section, videos_section
+from videos import DEVLOG_SUBTITLES, DEVLOG_SUBTITLES_SHA256, all_videos_section, devlog_section, showcase_section, videos_section
 from social import icon as social_icon, LICENSE as SOCIAL_ICON_LICENSE
 
 ROOT = Path(__file__).resolve().parent
@@ -289,6 +289,11 @@ def load_posts(language=None):
             if slug != 'interfaces-diablo-r2':
                 raise ValueError('The public model showcase belongs to its identified article')
             data['body'] = data['body'].replace(showcase_marker, showcase_section(language, url))
+        devlog_marker = '<div data-devlog-video="final-20261009"></div>'
+        if devlog_marker in data['body']:
+            if slug != 'devlog-em-video':
+                raise ValueError('The final devlog video belongs to its identified article')
+            data['body'] = data['body'].replace(devlog_marker, devlog_section(language, url))
         data['minutes'] = max(1, round(len(re.findall(r'\w+', match_body)) / 200))
         data['path'] = f'/devlog/{slug}/'
         data['file'] = path.name
@@ -390,7 +395,7 @@ def frame(title, description, path, content, image='/assets/banner.webp', articl
     mobile_socials = f'<nav class="header-socials" aria-label="Comunidades do projeto">{social_links}</nav>'
     soundtrack_script = f'<script src="{versioned_asset("/soundtrack.js")}" defer></script>' if music else ''
     community_assets = f'<link rel="stylesheet" href="{versioned_asset("/community.css")}"><script src="{versioned_asset("/community.js")}" defer></script>'
-    video_assets = f'<link rel="stylesheet" href="{versioned_asset("/youtube-videos.css")}"><script src="{versioned_asset("/youtube-videos.js")}" defer></script>' if path in ('/', '/musica/', '/devlog/interfaces-diablo-r2/') else ''
+    video_assets = f'<link rel="stylesheet" href="{versioned_asset("/youtube-videos.css")}"><script src="{versioned_asset("/youtube-videos.js")}" defer></script>' if path in ('/', '/musica/', '/galeria/', '/devlog/devlog-em-video/', '/devlog/interfaces-diablo-r2/') else ''
     article_meta = f'<meta property="article:published_time" content="{article["date"]}"><meta property="article:modified_time" content="{article.get("updated", article["date"])}">' if article else ''
     languages = '<nav class="language-switch" aria-label="Idioma">' + ''.join(f'<a href="{urlsplit(alternate_url(path, lang)).path}" hreflang="{lang}" lang="{lang}" data-language-link="{lang}" aria-label="{label}"' + (' aria-current="true"' if LANG == lang else '') + f'>{short}</a>' for lang, label, short in [('pt-BR', 'Ler em português', 'PT'), ('en', 'Read in English', 'EN')]) + '</nav>'
     alternates = ''.join(f'<link rel="alternate" hreflang="{lang}" href="{alternate_url(path, lang)}">' for lang in ('pt-BR', 'en', 'x-default'))
@@ -409,6 +414,7 @@ def frame(title, description, path, content, image='/assets/banner.webp', articl
 def home(posts):
     return f'''<section class="hero hero-atmospheric atmospheric bleed">{scene(eager=True)}<div class="hero-copy"><p class="eyebrow">DIABLO 3D · DEVLOG ABERTO</p>{logo(True, True, 'project-banner')}<h1>Diablo 1 sob uma nova dimensão.</h1><p class="lede">Reconstruir todo Diablo 1 em 3D, com todos os níveis, preservando a partida e a atmosfera do original. Tristram é o primeiro marco de um trabalho que avança com testes e colaboração.</p><a class="button hero-community" href="{DISCORD}">{social_icon("discord")}<span>Acompanhe via Discord</span></a><div class="actions">{button('Acompanhar o devlog', '/devlog/', True)}{button('Apoiar o projeto', '/apoiar/', True)}</div><div class="status-strip"><span><i aria-hidden="true"></i> Objetivo: jogo completo</span><span>Tristram e materiais no piloto da Catedral</span><span>Protótipo offline · GPU opcional</span></div></div>{art_credit()}</section><figure class="wide-capture evidence-capture"><a href="{url('/galeria/')}">{img('/assets/captures/cabin-interior-final.webp', 'Comparação técnica histórica offscreen da cabana leste no release 63e5e749: renderizador original, modelo antes e depois do interior iluminado.', True)}</a><figcaption><span class="tag">COMPARAÇÃO TÉCNICA OFFSCREEN · 63e5e749</span> Comparação técnica histórica offscreen do release 63e5e749. Não é captura da janela do jogo nem comprova o estado atual da partida ou a aprovação integral do modelo.</figcaption></figure>
 <section class="section-atmosphere atmospheric bleed">{scene('/assets/art/journal-atmosphere.webp')}<div class="atmosphere-content wrap">{section_head('Cada mudança deixa um registro.', 'Capturas, decisões e limites do desenvolvimento.', '/devlog/')}<div class="card-grid">{''.join(card(p) for p in posts[:3])}</div></div>{art_credit()}</section>
+{devlog_section(LANG, url, featured=True)}
 {showcase_section(LANG, url)}
 {videos_section(LANG, url, featured=True)}
 <section class="split"><div class="panel"><p class="eyebrow">UMA PARTIDA, DUAS VISÕES</p><h2>O jogo continua.<br>A câmera muda.</h2><p><kbd>F4</kbd> alterna entre o original e o protótipo na mesma partida. Movimento, colisões, inventário e interação continuam usando a simulação do DevilutionX.</p><p class="notice"><kbd>Home</kbd> retorna ao backend original. Pixels iguais nessa rota comprovam esse retorno; a fidelidade da geometria precisa de comparações com a malha ativa.</p>{button('Entender a tecnologia', '/tecnologia/', True)}</div><div class="panel"><p class="eyebrow">DO PRIMEIRO MARCO AO JOGO COMPLETO</p><h2>A jornada começa<br>em Tristram.</h2><p>Tristram continua em revisão. O piloto técnico de nove regiões próximas no primeiro andar normal da Catedral agora tem materiais nativos; os demais andares, Catacumbas, Cavernas e Inferno ainda exigem implementação.</p><p class="meta">Pisos CEL/MIN, alvenaria orientada e madeira de CLX substituem as cores técnicas do piloto. Repetições, doadores e faces de topo são aproximações; atores, demais andares e níveis de missão permanecem nativos. Formas, portas, gameplay físico, arte final e FPS sustentado ainda precisam de revisão.</p>{button('Ver o roadmap completo', '/roadmap/', True)}</div></section>
@@ -462,7 +468,7 @@ def gallery(evidence):
     items = []
     for entry in evidence:
         items.append(f'''<figure class="gallery-item" data-filter-item data-category="{esc(entry['category'])}" data-search="{esc(entry['title'] + ' ' + entry['caption'])}"><a href="{url(entry['file'])}" data-lightbox data-caption="{esc(entry['title'] + ' — ' + entry['caption'])}">{img(entry['file'], entry['alt'])}<span class="image-open" aria-hidden="true">Ampliar ↗</span></a><figcaption><span class="tag">{esc(entry['stage'])}</span><h2>{esc(entry['title'])}</h2><p>{esc(entry['caption'])}</p></figcaption></figure>''')
-    return intro('GALERIA', 'Do primeiro protótipo<br>ao jogo completo.', 'O destino é todo Diablo 1 em 3D. As evidências mostram Tristram e as etapas técnicas offscreen da Catedral, do piloto inicial aos materiais nativos. As capturas preservam contexto, aproximações e limites; não são sessões de gameplay nem aprovação de formas ou arte final.') + '<p class="notice">As etapas v1 a v4 são registros locais retrospectivos publicados aqui em 07/10/2026. Novos níveis serão documentados quando implementados. As ilustrações de ambientação e os conceitos de interface ficam separados das capturas e comparações técnicas abaixo, identificadas por legenda e procedência.</p>' + filters(sorted(set(e['category'] for e in evidence))) + f'<section class="gallery-grid">{"".join(items)}</section>' + no_results() + f'<p class="meta">{len(evidence)} {translated('capturas selecionadas.')} <a href="{url("/evidence.json")}">Inventário público e proveniência</a>.</p>'
+    return intro('GALERIA', 'Do primeiro protótipo<br>ao jogo completo.', 'O destino é todo Diablo 1 em 3D. Esta galeria reúne os vídeos públicos do projeto e as capturas técnicas de Tristram e da Catedral. Cada registro conserva seu contexto: gameplay gravado, estudos de personagens, trilhas ou testes offscreen. As capturas técnicas não representam sessões de gameplay ou aprovação de arte final.') + '<p class="notice">As etapas v1 a v4 são registros locais retrospectivos publicados aqui em 07/10/2026. Novos níveis serão documentados quando implementados. As ilustrações de ambientação e os conceitos de interface ficam separados das capturas e comparações técnicas abaixo, identificadas por legenda e procedência.</p>' + all_videos_section(LANG, url) + filters(sorted(set(e['category'] for e in evidence))) + f'<section class="gallery-grid">{"".join(items)}</section>' + no_results() + f'<p class="meta">{len(evidence)} {translated('capturas selecionadas.')} <a href="{url("/evidence.json")}">Inventário público e proveniência</a>.</p>'
 
 
 def support():
@@ -544,7 +550,7 @@ def build_locale(posts, evidence, soundtrack, newsletter):
         ('/participar/', 'Participe do Diablo 3D', 'Contribua com modelos, código, testes e documentação. Reserve um objeto, compare com o original e envie para revisão.', participate()),
         ('/apoiar/', 'Apoie o desenvolvimento', 'Ajude a desenvolver todo Diablo 1 em 3D. Apoio financeiro por contato direto e PayPal, ou ajuda com Meshy, outros geradores 3D, ChatGPT e Claude.', support()),
         ('/roadmap/', 'Roadmap do Diablo 3D', 'Todos os níveis de Diablo 1 em 3D: Tristram, Catedral, Catacumbas, Cavernas e Inferno. Etapa atual, próximos marcos e pesquisas futuras.', roadmap()),
-        ('/galeria/', 'Galeria do desenvolvimento', 'Capturas técnicas do Diablo 3D: Tristram e Catedral em etapas offscreen, com materiais nativos, aproximações, procedência e limites; sem gameplay ou arte final.', gallery(evidence)),
+        ('/galeria/', 'Galeria do desenvolvimento', 'Vídeos públicos e capturas do Diablo 3D: devlogs, showcases, trilhas e testes técnicos de Tristram e da Catedral, com contexto, créditos e limites.', gallery(evidence)),
     ]
     for path, title, description, content in pages:
         if path in ('/', '/devlog/', '/musica/'):
@@ -591,6 +597,10 @@ def build():
     allowed = {'.css', '.js', '.png', '.webp', '.svg', '.woff', '.woff2'}
     public_extras = {PUBLIC / soundtrack['background']['public_path'].lstrip('/'), PUBLIC / 'vendor/plyr/LICENSE.txt'}
     public_extras.update(PUBLIC / track['public_path'].lstrip('/') for track in soundtrack['tracks'])
+    subtitles = PUBLIC / DEVLOG_SUBTITLES.lstrip('/')
+    if hashlib.sha256(subtitles.read_bytes()).hexdigest() != DEVLOG_SUBTITLES_SHA256:
+        raise ValueError('The final English subtitle file differs from the reviewed publication')
+    public_extras.add(subtitles)
     for path in PUBLIC.rglob('*'):
         if path.is_symlink() or (path.is_file() and path.suffix.lower() not in allowed and path not in public_extras and not (path.parent == PUBLIC / 'assets/fonts' and path.suffix == '.txt')):
             raise ValueError(f'Unexpected public file: {path.relative_to(PUBLIC)}')

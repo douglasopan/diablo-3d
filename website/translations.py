@@ -7,6 +7,8 @@ audit. URLs, filenames, commits and evidence hashes are language independent.
 from __future__ import annotations
 
 TRANSLATIONS: dict[str, str] = {
+    'O destino é todo Diablo 1 em 3D. Esta galeria reúne os vídeos públicos do projeto e as capturas técnicas de Tristram e da Catedral. Cada registro conserva seu contexto: gameplay gravado, estudos de personagens, trilhas ou testes offscreen. As capturas técnicas não representam sessões de gameplay ou aprovação de arte final.': 'The goal is all of Diablo 1 in 3D. This gallery brings together the project’s public videos and technical captures of Tristram and the Cathedral. Each record keeps its context: recorded gameplay, character studies, soundtrack videos or offscreen tests. Technical captures do not represent gameplay sessions or final artwork approval.',
+    'Vídeos públicos e capturas do Diablo 3D: devlogs, showcases, trilhas e testes técnicos de Tristram e da Catedral, com contexto, créditos e limites.': 'Public Diablo 3D videos and captures: devlogs, showcases, soundtrack videos and technical tests of Tristram and the Cathedral, with context, credits and limitations.',
     'Acompanhe via Discord': 'Follow our progress on Discord',
     'Comunidades do projeto': 'Project communities',
     'Reddit — comunidade Diablo 3D': 'Reddit — Diablo 3D community',

@@ -11,7 +11,7 @@ import build
 from community import DISCORD_URL, YOUTUBE_URL
 from soundtrack import load_soundtrack, safe_file, sha256, validate_mp3
 from music_credits import COMPOSER, PRODUCER, SOURCE, credit_text, public_soundtrack
-from videos import SHOWCASE_VIDEO_IDS, VIDEO_IDS
+from videos import DEVLOG_SUBTITLES, DEVLOG_SUBTITLES_SHA256, DEVLOG_VIDEO_IDS, SHOWCASE_VIDEO_IDS, VIDEO_IDS
 
 
 class Document(HTMLParser):
@@ -134,7 +134,7 @@ def verify():
         study_images = [a for t, a in article.tags if t == 'img' and a.get('src', '').startswith(build.PREFIX + '/assets/studies/hud-r2/')]
         assert len(study_images) == 79 and sum(a.get('loading') == 'lazy' for a in study_images) == 78 and sum(a.get('loading') == 'eager' for a in study_images) == 1, 'All gallery images must load lazily; only the article hero is eager'
     for language in ('', 'en/'):
-        for route, expected_ids in (('index.html', [*SHOWCASE_VIDEO_IDS.values(), VIDEO_IDS['menu-rock2']]), ('musica/index.html', list(VIDEO_IDS.values())), ('devlog/interfaces-diablo-r2/index.html', list(SHOWCASE_VIDEO_IDS.values()))):
+        for route, expected_ids in (('index.html', [DEVLOG_VIDEO_IDS['devlog-horizontal'], *SHOWCASE_VIDEO_IDS.values(), VIDEO_IDS['menu-rock2']]), ('musica/index.html', list(VIDEO_IDS.values())), ('devlog/interfaces-diablo-r2/index.html', list(SHOWCASE_VIDEO_IDS.values())), ('galeria/index.html', [*DEVLOG_VIDEO_IDS.values(), *SHOWCASE_VIDEO_IDS.values(), *VIDEO_IDS.values()]), ('devlog/devlog-em-video/index.html', list(DEVLOG_VIDEO_IDS.values()))):
             video_page = documents[root / (language + route)]
             buttons = [a for t, a in video_page.tags if t == 'button' and 'data-youtube-id' in a]
             assert [a['data-youtube-id'] for a in buttons] == [video_id for video_id in expected_ids for _ in range(2)], 'Each confirmed video needs a working poster play and text trigger'
@@ -142,6 +142,7 @@ def verify():
             assert all(a.get('aria-label') and a.get('type') == 'button' for a in buttons), 'Every play trigger must be keyboard-accessible and labelled'
             assert len([a for a in buttons if 'youtube-video-play' in a.get('class', '').split()]) == len(expected_ids), 'Every poster needs a real play button'
             assert sum(t == 'script' and urlsplit(a.get('src', '')).path == build.PREFIX + '/youtube-videos.js' and 'defer' in a for t, a in video_page.tags) == 1
+        assert sha256(root / DEVLOG_SUBTITLES.lstrip('/')) == DEVLOG_SUBTITLES_SHA256, 'English subtitles must retain the reviewed public video timings and text'
         locale = 'en' if language else 'pt-BR'
         published_manifest = json.loads((root / (language + 'soundtrack.json')).read_text(encoding='utf-8'))
         assert published_manifest == public_soundtrack(soundtrack, locale), 'Published soundtrack credits or validated audio manifest differ'
