@@ -1,5 +1,9 @@
 # D3D website
 
+## Cathedral wall follow-up — 10 October 2026
+
+The existing PT/EN camera/continuity article records local revision `56e112ab…`, installed at 04:26:03 Brasília time: opaque lower Cathedral walls, real door/grate/CLX coverage and openings, and constrained candelabrum-corner suppression. Synthetic checks and native CPU/hardware frames remain distinct, with sampled depth/picking and pending human visual QA explicit. This is a local installation, not a public build or updated installer. The private experimental package remains unchanged. A current alignment paragraph distinguishes the installed camera/horizon/first-floor and earlier tavern/editor work from R2 HUD, first-person interaction and editor candidates; 193 item concepts in 135 images do not become public images or installed meshes/icons. Only the nine initial artworks are public. Historical sections, the strict operator limitation, media and totals are preserved.
+
 ## Community entry and roadmap update — 10 October 2026
 
 The existing home and roadmap have a complete PT/EN update from the owner's bounded requirements snapshot. Both Tristram and the first Cathedral floor remain in development; installed local pilots, private candidates, isolated tests and future features are identified separately. New UI/interaction/equipment requirements do not establish native integration or a public game build. The original camera installation record remains historical, with the same source commit and media.

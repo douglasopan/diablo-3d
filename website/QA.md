@@ -1,5 +1,13 @@
 # Website verification · 2026-10-07
 
+## Cathedral wall follow-up — October 10, 2026
+
+New evidence supplied by the principal justifies updating the existing PT/EN camera/continuity article: local revision `56e112ab…` was installed at 04:26:03 Brasília time. The reviewed private delivery receipt matches SHA `42d4bfc9cca01f6e708e504ad29079092c196ab8c5c681c168932c43416a09bb`. Public prose summarizes opaque lower walls, preserved door/grate/CLX coverage and openings, and restricted candelabrum-corner suppression without exposing diagnostic files or private game data. It distinguishes 141,139 synthetic structural checks from eight native CPU and eight hardware RX 570 frames, full color comparison from sampled depth/picking, and installation from pending physical/visual QA. The earlier strict operator limitation is retained.
+
+The alignment summary identifies integrated cameras/horizon/floor one and earlier tavern/editor work separately from the unintegrated R2 HUD, dependent first-person interactions and candidate move/save/apply editor. The item count is 193 candidate concepts across 135 images, with nine initial public artworks and no final installed mesh/icon from that production. Other floors and expansion/day-night remain future. The locally installed correction is not a public release or installer/package update; the private experimental package is unchanged. Engine Source, the execution guide, assets and foreign Git changes remain with their owners. This publication adds no article, capture, audio or video.
+
+The bilingual build passed with 24 articles per language and 51 captures; the artifact verifier passed all 70 HTML documents, links/fragments, metadata, sitemap and RSS. Local browser review confirmed six matched article sections, the new facts and correct item-devlog link in English. Switching to Portuguese preserved the new wall-update fragment; both languages have no document overflow at the observed 1280 px. Diff whitespace and added-line sensitive-pattern checks passed. Website generation does not execute the engine gates cited in the article.
+
 ## Community entry and current roadmap — October 10, 2026
 
 The owner supplied a new bounded status/requirements snapshot. This update changes the existing home and roadmap in complete PT/EN, preserving the selected art, animation, captures, audio, videos and articles. Tristram and Cathedral floor one are both in development. The two seeds tested by Douglas do not complete a floor, establish final artwork, close the integrator's gates or prove a public downloadable build. Selected architecture/master revisions remain preserved; well LOD restoration by distance is still pending. The October 9 installation link retains its historical local context.

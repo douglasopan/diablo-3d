@@ -2,7 +2,7 @@
 title: "Two gameplay cameras and Cathedral continuity"
 date: 2026-10-09
 updated: 2026-10-10
-description: "Cameras and Cathedral continuity, with an October 10 local update: grates, lighting and native item names in the 3D world. Gameplay and artwork remain under review."
+description: "October 10 local update: opaque Cathedral walls, preserved door and grate openings, and native item names in 3D. Gameplay and artwork remain under review."
 slug: cameras-continuidade-catedral
 image: /assets/banner.webp
 image_alt: "Diablo 3D project identity banner; an illustration, not a capture of this delivery."
@@ -23,7 +23,7 @@ The transparency budget charged a full screen for each layer, even though the GP
 
 Across eight equivalent cases on a Radeon RX 570, the previous version published six GPU frames and refused two; the fix published all eight. The largest case reached **408 layers and 19,556,601 bytes**, without CPU rasterization or WARP. Color, depth and picking were preserved in the common outputs compared. This technical test uses a partially initialized scene and effective 1× AA; it is not a gameplay benchmark or proof that every cause of 2D fallback is resolved.
 
-The pilot remains limited to nine nearby regions on the first normal floor. Physical continuity review, opaque-frame updates, wall composition and final artwork remain pending. Other floors and quest levels retain native presentation.
+The October 9 test used nine nearby regions on the first normal floor. That scope bounds the evidence above; subsequent local corrections are recorded below. Other floors and quest levels retain native presentation, and first-floor artwork remains under review.
 
 ## October 10 update: grates and item names
 
@@ -34,6 +34,22 @@ Native item names and selection now appear in the 3D world. The **Item highlight
 Known RAW35/36 grates use their own columns and the native combination of opaque writing and transparency. The fix removes false visual walls at L1LIGHT supports, preserving objects, collision and commands. Pillars and arches receive masonry material; native lighting is prepared in a cache. Unlit grates may legitimately remain black. Heights, repeated bands, donor materials, doors and general artwork remain approximations.
 
 The item-label gate passed **253 checks across 14 frames**, including three on the GPU. Walls and lighting passed across **12 frames**, six on the RX 570. First-person verification uses three CPU frames and simulated SDL services, without establishing physical input. The strict operator suite remains **UNSUPPORTED** because palette index 255 is absent from the four own columns examined; the known-domain gate passed. The separate synthetic unit covers all 256 values without fabricating that case in the actual scene. These results do not complete gameplay, in-game pickup, final artwork or sustained FPS.
+
+## October 10, 04:26: opaque walls and preserved openings
+
+Local revision **56e112ab…** was installed on **October 10, 04:26:03 Brasília time**, through the same **Iniciar-Tristram.cmd**. Complete lower walls on the first normal Cathedral floor are now opaque in 3D. Doors, grates and CLX sprites retain their actual coverage and openings. The four technical corners around candelabra are suppressed only when piece 269 has a single source corroborated by the **OBJ_L1LIGHT** object; junctions with real walls remain visible.
+
+The previous version reproduced the transparency defect; the new renderer passed the equivalent test. Validation comprises **141,139 synthetic structural checks**, **eight native CPU frames** and **eight Radeon RX 570 frames without WARP**. All colors were compared; depth and picking were sampled every 16 pixels. The tests used the same compiled renderer object included in the installation. This does not establish an exact human pose, complete physical gameplay, final artwork or sustained FPS. Visual review during gameplay remains pending.
+
+Saves, settings, selected models and the usual entry point were preserved. This is a local installation: publication of this correction's code and a downloadable build remains pending. The private experimental package remains at its previous revision, and the public installer is still in preparation. The strict operator-suite limitation described above still applies.
+
+## Current delivery and next integration
+
+Cameras, the horizon and the first normal procedural floor are integrated. The earlier tavern cleanup and earlier editor/inspector were also used. The **new R2 HUD** has been received but has not been integrated, compiled or installed. New first-person interactions depend on it and remain private. The new editor flow for moving, saving and applying changes, including movable collision, is also a candidate; its tests still need to resolve texture-change detection.
+
+The item catalog contains **193 candidate concepts across 135 images**. Only the **nine initial artworks** are published in the [item devlog](/devlog/itens-e-novo-hud/); this count does not represent 193 public images or finished 3D models. No final mesh or icon from this production has been installed. First-person hands and weapons, other levels, an expanded playable surface and a day/night cycle remain future work.
+
+The next sequence remains visual review of the Cathedral correction, R2 HUD integration, and validation of interactions and the editor under the existing contracts.
 
 ## Next steps and video context
 
