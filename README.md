@@ -2,9 +2,9 @@
 
 # Diablo 3D · D3D
 
-A community project to bring **the whole Diablo 1 game into 3D**, including its procedurally generated dungeon levels, built on [DevilutionX](https://github.com/diasurgical/devilutionX). The intended experience lets players switch between original and 3D views in the same running game. **Tristram is the current development stage**: original/3D switching, four camera modes and a provisional horizon are integrated. Models, proportions, orientation, materials and interiors remain under review before the first procedural Cathedral level.
+A community project to bring **the whole Diablo 1 game into 3D**, including its procedurally generated dungeon levels, built on [DevilutionX](https://github.com/diasurgical/devilutionX). The intended experience lets players switch between original and 3D views in the same running game. **Tristram and a pilot of the first normal Cathedral level are available in 3D**. Third-person and first-person gameplay cameras, original/3D switching and a provisional Tristram horizon are integrated. Models, materials, interiors and procedural-wall composition remain under review; the Cathedral pilot covers nine nearby regions and does not complete the other dungeon levels.
 
-**A proposta é o Diablo 1 inteiro em 3D.** Tristram é nosso ponto de partida; depois vêm o primeiro andar procedural da Catedral, os demais ambientes, personagens, monstros e efeitos. Já há quatro modos de câmera e horizonte provisório em Tristram; a qualidade dos modelos continua em revisão. O catálogo colaborativo crescerá com essas etapas para coordenar os modelos que ainda precisam ser criados.
+**A proposta é o Diablo 1 inteiro em 3D.** Tristram e um piloto do primeiro andar normal da Catedral já podem ser testados em 3D. Terceira e primeira pessoa estão integradas, com horizonte provisório em Tristram. Modelos e composição das paredes continuam em revisão; os demais níveis, personagens, monstros e efeitos seguem no plano do jogo completo. O catálogo colaborativo crescerá com essas etapas para coordenar os modelos que ainda precisam ser criados.
 
 **[Architecture and execution guide](docs/PROJECT-EXECUTION.md)** — current stage, dependencies, completion criteria and ongoing work. Contributors and agents should consult this guide and [AGENTS.md](AGENTS.md) before implementing changes.
 
@@ -18,11 +18,11 @@ A community project to bring **the whole Diablo 1 game into 3D**, including its 
 
 ## What works today
 
-- F4 switches between the original rendering and the Tristram prototype without reloading the map.
-- Choose **Isometric, Free Orbit, Third Person or First Person** in the camera settings. Each mode retains its own pose; camera changes keep native movement and combat controls.
-- Orbit through 360°, adjust pitch, zoom and framing. A **provisional external horizon and fog** are integrated; camera collision and terrain continuity still need work.
+- F4 switches between original and 3D rendering without reloading the map in Tristram and the first normal Cathedral level. Other dungeon levels remain native.
+- Choose **Third Person or First Person** in the gameplay camera settings or switch with K. The mouse wheel zooms between them; movement and combat retain the native simulation. Legacy isometric/orbit poses remain available to diagnostics.
+- Look through 360°, adjust pitch and zoom. Tristram architecture obstructing or containing the camera can be hidden locally and restored when clear; trees, props and Cathedral geometry are outside this first visibility implementation. A **provisional external horizon and fog** are integrated; terrain continuity and class-specific eye calibration still need work.
 - Imported building candidates and procedural volumes render together. Their proportions, orientation, silhouettes, doors, windows, ground contact and materials are under active review.
-- Characters have depth. Warrior and cow reconstruction can use eight original views; unseen anatomy for single-view townspeople is inferred.
+- Ogden has an imported, rigged 3D model and an idle prototype. Other actors currently use sprite-derived volumes; warrior and cow reconstruction can use eight original views, while unseen anatomy for single-view townspeople is inferred. The player’s rigged hero is not installed yet.
 - Walking, collisions, inventory and NPC interaction use the existing game simulation.
 - Windows build, headless scene diagnostics and native-view comparison tools are included as source.
 - A [Godot editor](docs/GODOT-EDITOR.md) inspects the actual architecture, model identities and locked native collision, and exports explicitly selected static replacements to a separate game review profile. It is an authoring tool; the game still runs in DevilutionX.
@@ -30,14 +30,14 @@ A community project to bring **the whole Diablo 1 game into 3D**, including its 
 - [Subscribe for project updates](https://douglasopan.github.io/diablo-3d/en/novidades/): optional email signup, language preference and consent, with private responses and a cancellation form. Reading and downloads remain open without signup.
 - The [responsive HD HUD](docs/HUD-IMPLEMENTATION.md) presents the original controls with new RGBA stone, metal, sculptures and resource globes, without adding gameplay actions. Its layout and the main menu layout can be edited in Godot; the game retains native handlers, item/spell icons and bitmap fonts. The approved menu background is included. The HD revision passed technical checks and is installed in the regular launcher; artistic review during play remains pending.
 - In-game settings omit options that cannot apply during play and use responsive pages: eight content rows at 960×540 and eighteen at Full HD, with shared drawing/input geometry.
-- New games prefer the 3D town view. **Start in 3D** is a saved video preference; **F4** switches views during play, and **Home** keeps the native comparison. Other levels still use the original renderer.
+- New games prefer the 3D town view. **Start in 3D** is a saved video preference; **F4** switches views during play, and **Home** restores Third Person for the session without changing the saved camera preference. Only Tristram and the first normal Cathedral pilot support 3D so far.
 - The owner-provided [animated logo](docs/ANIMATED-LOGO.md) contains 240 frames over eight seconds and covers the main, title and Escape menus.
 
-The **current build is an offline prototype in Tristram, with an optional Direct3D 11 GPU renderer on Windows and a CPU fallback**. Toggle GPU rendering and edge smoothing independently through **Esc → Settings → Graphics**; see [the GPU renderer](docs/GPU-RENDERER.md) for its scope and validation. Dungeon levels still use the original renderer and are part of the planned whole-game reconstruction. Visual quality is under active review, particularly model fit, facade direction, openings, interiors, unseen faces, characters and compound scenery. The original GLB, its converted game package and the actual game frame are separate review evidence; the inspector preview does not reproduce game lighting or its palette. [Generation and local model review tools](docs/MESHY-WORKFLOW.md) are available; generated candidates still require fidelity approval.
+The **current build is an offline prototype in Tristram and the first normal Cathedral level, with an optional Direct3D 11 GPU renderer on Windows and a CPU fallback**. Toggle GPU rendering and edge smoothing independently through **Esc → Settings → Graphics**; see [the GPU renderer](docs/GPU-RENDERER.md) for its scope and validation. The Cathedral pilot uses the live map and native materials in nine nearby regions; other dungeon levels remain part of the planned whole-game reconstruction. Visual quality is under active review, particularly model fit, facade direction, openings, interiors, unseen faces, characters and compound scenery. The original GLB, its converted game package and the actual game frame are separate review evidence; the inspector preview does not reproduce game lighting or its palette. [Generation and local model review tools](docs/MESHY-WORKFLOW.md) are available; generated candidates still require fidelity approval.
 
-**Conservative CPU/GPU camera culling has passed native-data comparisons preserving color, depth, picking and offscreen shadows.** A texture-cache fix also prevents the reproduced CPU fallback in Full HD first person. Distance-based mesh LOD remains under development and is not connected to the game yet. We have not established a sustained frame-rate target for the full town or close-up camera modes.
+**Conservative CPU/GPU camera culling has passed native-data comparisons preserving color, depth, picking and offscreen shadows.** A texture-cache fix prevents the reproduced CPU fallback in Full HD first person. Regional transparency admission now also fixes a reproduced Cathedral 3D-to-native fallback: eight stress views stayed on the RX 570, including 408 overlays, while retaining the 2048-overlay/512 MiB budgets. These checks do not establish complete gameplay coverage. Distance-based mesh LOD remains under development and is not connected to the game yet. We have not established a sustained frame-rate target for the full town or close-up camera modes.
 
-**Home currently returns to the original rendering backend.** Identical pixels at that pose verify the original-backend dispatch, not a perfect reconstruction. Forced-mesh comparisons still show differences. Contributors must compare the actual geometry with the native view and inspect rotated views before calling an asset faithful.
+**F4 provides the native-rendering comparison; Home restores Third Person.** Identical original-backend pixels do not prove a perfect 3D reconstruction. Forced-mesh comparisons still show differences. Contributors must compare the actual geometry with the native view and inspect rotated views before calling an asset faithful.
 
 ## Build and play
 
@@ -54,13 +54,12 @@ Supply your own `DIABDAT.MPQ`, or separately obtain supported shareware data. Fo
 
 | Control | Action |
 | --- | --- |
-| F4 | Switch original / 3D in Tristram |
-| K (default, remappable) | Cycle camera modes while the 3D view is active |
-| Graphics → 3D Camera Mode | Choose Isometric / Free Orbit / Third Person / First Person |
+| F4 | Switch original / 3D in Tristram and the first normal Cathedral level |
+| K (default, remappable) | Switch Third Person / First Person while 3D is active |
+| Graphics → 3D Camera Mode | Choose Third Person / First Person |
 | Middle mouse + drag | Orbit or look around and adjust pitch |
-| Mouse wheel | Zoom in Isometric / Free Orbit / Third Person |
-| Shift + middle mouse + drag | Move framing in Isometric / Free Orbit |
-| Home | Restore the native pose and original backend |
+| Mouse wheel | Approach Third Person → First Person; move away to return |
+| Home | Restore Third Person for this session |
 | Click ground / NPC | Native movement / interaction |
 
 Remap the camera shortcut in **Settings → Keymapping**. Existing saved bindings, including an explicitly unbound camera shortcut, remain intact; another action already using K keeps priority over the new default.
@@ -80,7 +79,7 @@ Do not submit game archives, extracted game artwork, saved characters, private c
 ## Next milestones
 
 1. Refine complete Tristram objects and establish a reproducible import and visual-validation pipeline.
-2. Reduce scene-preparation costs through persistent GPU geometry and volume batching; develop distance-based mesh LOD while preserving close-up model quality. Camera culling is validated; persistent meshes and LOD are not connected to the game yet.
+2. Reduce scene-preparation costs through persistent GPU geometry and volume batching; develop distance-based mesh LOD while preserving close-up model quality. Camera culling and resident GPU volumes for perspective props/vegetation are integrated. Persistent geometry for the remaining scene and distance-based LOD still need work.
 3. Extend the implemented **static architecture shadow map** to moving lights, actors, trees and props. Original actor decals and some terrain lighting remain compatibility approximations.
 4. Validate the first procedural Cathedral level from the live map and existing seed, then extend the pipeline through the Cathedral, Catacombs, Caves and Hell, with the characters, monsters, objects and effects required by the full game.
 5. Restore and validate the existing four-player networking in a separate experiment, then investigate a shared town hub and larger sessions.

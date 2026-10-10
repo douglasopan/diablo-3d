@@ -14,6 +14,7 @@ if(MSVC)
     engine/render/cathedral/cathedral_live.cpp
     engine/render/cathedral/native/cathedral_native_capture.cpp
     engine/render/town_view.cpp
+    engine/render/town_camera_visibility.cpp
     engine/render/town_gpu.cpp
     PROPERTIES COMPILE_OPTIONS "/EHsc")
 endif()
@@ -115,6 +116,7 @@ set(libdevilutionx_SRCS
   engine/render/town_view.cpp
   engine/render/town_camera.cpp
   engine/render/town_camera_collision.cpp
+  engine/render/town_camera_visibility.cpp
   engine/render/town_horizon.cpp
   engine/render/town_presentation.cpp
   engine/render/town_gpu.cpp

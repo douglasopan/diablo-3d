@@ -1010,6 +1010,7 @@ bool TownGpuBeginFrame(int width, int height, bool allowWarpForDiagnostics, cons
 	Status.textureEvictions = 0;
 	Status.paletteBlendTriangles = 0;
 	Status.paletteBlendCopyBytes = 0;
+	Status.paletteBlendAdmittedBytes = 0;
 	UpdateTextureStatus();
 	Status.frameMilliseconds = 0;
 	Status.readbackMilliseconds = 0;
@@ -1156,12 +1157,18 @@ bool TownGpuSubmitProjectedTriangle(const std::array<TownGpuVertex, 3> &vertices
 	Constants constants {};
 	if (!MakeConstants(material, *uploaded, constants))
 		return false;
+	D3D11_BOX paletteCopyBox {};
+	size_t paletteCopyBytes = 0;
 	if (material.paletteBlend) {
-		// Admission remains the unchanged whole-frame worst-case bound, even
-		// when the issued snapshot region below is smaller. Preserve refusals.
-		const size_t copyBytes = static_cast<size_t>(Width) * Height;
+		// Admit the same conservative R8 region that EndFrame will copy. The
+		// clamped box is nonempty and bounded by the validated frame dimensions.
+		// This POD-only preflight allocates nothing; subtraction guards the sum.
+		paletteCopyBox = PaletteSnapshotBox(vertices);
+		paletteCopyBytes = static_cast<size_t>(paletteCopyBox.right - paletteCopyBox.left)
+		    * (paletteCopyBox.bottom - paletteCopyBox.top);
 		if (Status.paletteBlendTriangles >= MaxPaletteBlendTriangles
-		    || Status.paletteBlendTriangles >= MaxPaletteBlendCopyBytes / copyBytes)
+		    || paletteCopyBytes > MaxPaletteBlendCopyBytes
+		    || Status.paletteBlendAdmittedBytes > MaxPaletteBlendCopyBytes - paletteCopyBytes)
 			return Fail("GPU native palette overlay triangle/copy budget exceeded", S_OK, TownGpuFailureKind::Capacity);
 	}
 	const UINT first = static_cast<UINT>(Vertices.size());
@@ -1178,11 +1185,12 @@ bool TownGpuSubmitProjectedTriangle(const std::array<TownGpuVertex, 3> &vertices
 	else {
 		GeometryCommands.push_back({ false, Batches.size() });
 		Batches.push_back({ uploaded, constants, first, 3, material.preservePicking, material.paletteBlend,
-		    material.paletteBlend ? PaletteSnapshotBox(vertices) : D3D11_BOX {} });
+		    paletteCopyBox });
 	}
 	if (material.paletteBlend) {
 		FramePaletteOverlayStarted = true;
 		++Status.paletteBlendTriangles;
+		Status.paletteBlendAdmittedBytes += paletteCopyBytes;
 	}
 	++Status.submittedTriangles;
 	return true;

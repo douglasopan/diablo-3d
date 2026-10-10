@@ -160,11 +160,14 @@ struct TownGpuStatus {
 	/** Submitted color-only overlay triangles, limited to 2048 per frame. */
 	size_t paletteBlendTriangles = 0;
 	/** Actual issued R8 prior-color snapshot region payload, not memory-bus
-	 * read/write traffic. Admission conservatively retains the full-frame
-	 * width*height per-triangle bound and 512 MiB refusal threshold. */
+	 * read/write traffic or merely recorded/refused submission payload. */
 	size_t paletteBlendCopyBytes = 0;
 	double frameMilliseconds = 0;
 	double readbackMilliseconds = 0;
+	/** Conservative R8 snapshot payload committed by accepted overlay triangles.
+	 * Sum of their stored clamped copy boxes, bounded to 512 MiB before recording.
+	 * Can exceed actual issued bytes when EndFrame refuses or aborts the frame. */
+	size_t paletteBlendAdmittedBytes = 0;
 };
 
 /** Hardware only by default. WARP fallback requires this explicit diagnostic flag. */

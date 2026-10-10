@@ -188,20 +188,26 @@ void MovementKeymappingR2RuntimeChecks(const ProductionAccess &api)
 			"pause and resume cannot revive an old physical held key without a fresh DOWN");
 		dispatch(SDLK_F22, SDL_SCANCODE_A, false);
 
-		// Actual native camera shortcuts, followed by the same physical historical UP.
+		// Actual shortcuts release held keys; Home now restores gameplay TPP.
 		for (const auto gateKey : { SDLK_HOME, SDLK_F4 }) {
 			enter(mode);
+			const int savedCamera = *GetOptions().Graphics.townViewCameraMode;
 			dispatch(SDLK_W, SDL_SCANCODE_A, true);
 			api.dispatch(FollowKey(gateKey, true), 0);
 			api.dispatch(FollowKey(gateKey, false), 0);
-			Check(!IsTownCameraMovementInputActive() && GetTownFirstPersonMoveDirection() == Direction::NoDirection,
-				"Home/F4 native actions disable camera movement without changing its native bindings");
-			Check(gateKey == SDLK_HOME ? IsTownViewNativePose() : !IsTownViewActive(),
-				"independent Home/native-pose and F4/view-disabled oracles identify the requested gate");
+			Check(GetTownFirstPersonMoveDirection() == Direction::NoDirection,
+				"Home/F4 release old physical movement ownership");
+			Check(gateKey == SDLK_HOME
+			        ? IsTownViewActive() && GetTownViewCameraMode() == TownCameraMode::ThirdPerson
+			            && *GetOptions().Graphics.townViewCameraMode == savedCamera
+			        : !IsTownViewActive() && !IsTownCameraMovementInputActive(),
+				"Home restores TPP without changing saved preference; F4 disables 3D movement");
 			dispatch(SDLK_F22, SDL_SCANCODE_A, false);
 			dispatch(SDLK_S, SDL_SCANCODE_B, true);
-			Check(SpellSelectFlag && GetTownFirstPersonMoveDirection() == Direction::NoDirection,
-				"S retains its native spell action outside the follow-camera context");
+			Check(gateKey == SDLK_HOME
+			        ? !SpellSelectFlag && GetTownFirstPersonMoveDirection() != Direction::NoDirection
+			        : SpellSelectFlag && GetTownFirstPersonMoveDirection() == Direction::NoDirection,
+				"fresh S uses follow movement after Home and native spell action after F4");
 			dispatch(SDLK_S, SDL_SCANCODE_B, false);
 			SpellSelectFlag = false;
 		}

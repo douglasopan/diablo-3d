@@ -57,6 +57,7 @@
 #include "engine/random.hpp"
 #include "engine/render/clx_render.hpp"
 #include "engine/render/town_view.hpp"
+#include "engine/render/town_camera_gameplay.hpp"
 #include "engine/render/cathedral/cathedral_live.hpp"
 #include "engine/sound.h"
 #include "game_mode.hpp"
@@ -1288,7 +1289,7 @@ void FlushTownFirstPersonClicks()
 	for (size_t i = 0; i < count; ++i) {
 		const auto &click = pending[i];
 		if (click.wheelSteps != 0) {
-			if (!CanUseFollowCameraInput())
+			if (!IsTownGameplayCameraMode(GetTownViewCameraMode()) || !CanUseFollowCameraInput())
 				continue; // Drop only this ineligible wheel; matching mouse ups must still run.
 			ZoomTownView(click.wheelSteps);
 			TownFollowWheelNeedsDraw = true;
@@ -1581,8 +1582,7 @@ void GameEventHandler(const SDL_Event &event, uint16_t modState)
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 	case SDL_EVENT_MOUSE_WHEEL:
 		if (CanControlTownCamera() && (modState & SDL_KMOD_CTRL) == 0
-		    && ((GetTownViewCameraMode() != TownCameraMode::ThirdPerson && GetTownViewCameraMode() != TownCameraMode::FirstPerson)
-		        || CanUseFollowCameraInput())) {
+		    && IsTownGameplayCameraMode(GetTownViewCameraMode()) && CanUseFollowCameraInput()) {
 			float steps = static_cast<float>(SDLC_EventWheelIntY(event));
 #if SDL_VERSION_ATLEAST(3, 0, 0)
 			steps = event.wheel.y;
@@ -2638,7 +2638,7 @@ void OptionTownViewCameraModeChanged()
 {
 	SuspendTownFirstPersonInput();
 	ReleaseTownCameraDrag();
-	SetTownViewCameraMode(static_cast<TownCameraMode>(std::clamp(*GetOptions().Graphics.townViewCameraMode, 0, 3)));
+	SetTownViewCameraMode(NormalizeTownGameplayCameraMode(*GetOptions().Graphics.townViewCameraMode));
 	ResetItemlabelHighlighted();
 	RedrawEverything();
 }
@@ -2765,7 +2765,7 @@ void InitKeymapActions()
 	options.Keymapper.AddAction(
 	    "Town3DCameraMode",
 	    N_("Cycle Tristram camera mode"),
-	    N_("Cycle and save the Isometric, Free Orbit, Third Person and First Person camera preference. Movement and combat keep their native controls."),
+	    N_("Switch and save Third Person or First Person. The mouse wheel zooms between them. Movement and combat use native simulation and remappable controls."),
 	    'K',
 	    [] {
 		    SuspendTownFirstPersonInput();
@@ -2901,9 +2901,9 @@ void InitKeymapActions()
 	options.Keymapper.AddAction(
 	    "Town3DResetCamera",
 	    N_("Restore Tristram camera"),
-	    N_("Restore the 3D camera and follow the hero."),
+	    N_("Restore Third Person for the current session without changing the saved camera preference."),
 	    SDLK_HOME,
-	    [] { SuspendTownFirstPersonInput(); ReleaseTownCameraDrag(); ResetTownViewCamera(); RedrawViewport(); },
+	    [] { SuspendTownFirstPersonInput(); ReleaseTownCameraDrag(); ResetTownViewGameplayCamera(); RedrawViewport(); },
 	    nullptr,
 	    [] { return CanControlTownCamera(false); });
 	options.Keymapper.AddAction(

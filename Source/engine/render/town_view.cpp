@@ -50,6 +50,8 @@
 #include "engine/render/cathedral_fallback_diagnostic.hpp"
 #include "engine/render/dun_render.hpp"
 #include "engine/render/scrollrt.h"
+#include "engine/render/town_camera_gameplay.hpp"
+#include "engine/render/town_camera_visibility.hpp"
 #include "engine/render/town_ground_shadow.hpp"
 #include "engine/render/town_gpu.hpp"
 #include "engine/render/town_gpu_mesh.hpp"
@@ -300,6 +302,15 @@ uint64_t PickSceneRevision = 0;
 uint64_t PickCameraRevision = 0;
 bool PickHorizonEnabled = false;
 TownCameraRig CameraRig;
+// Gameplay camera policy is separate from the retained four-mode diagnostics.
+bool GameplayCameraPolicy = false;
+TownCameraVisibilityIndex CameraVisibilityIndex;
+TownViewCameraVisibilityState CameraVisibilityState;
+std::vector<uint8_t> CameraHiddenArchitecture, CameraVisibilityQueryMask;
+uint64_t CameraVisibilitySceneRevision = 0;
+bool CameraVisibilityBuildAttempted = false;
+uint64_t CameraVisibilityRevision = 0, PickCameraVisibilityRevision = 0;
+size_t CameraVisibilityBuilds = 0;
 TownCameraCollisionIndex CameraCollisionIndex;
 uint64_t CameraCollisionSceneRevision = std::numeric_limits<uint64_t>::max();
 uint64_t FollowProjectionRevision = 0, PickFollowProjectionRevision = 0;
@@ -698,17 +709,146 @@ float CameraPointLength(TownCameraPoint point)
 	return std::sqrt(point.x * point.x + point.height * point.height + point.z * point.z);
 }
 
+void ClearCameraVisibilityFrame()
+{
+	if (CameraVisibilityState.active || CameraVisibilityState.valid
+	    || std::any_of(CameraHiddenArchitecture.begin(), CameraHiddenArchitecture.end(), [](uint8_t bit) { return bit != 0; })) {
+		++CameraVisibilityRevision;
+		PickingValid = false;
+	}
+	std::fill(CameraHiddenArchitecture.begin(), CameraHiddenArchitecture.end(), 0);
+	std::fill(CameraVisibilityQueryMask.begin(), CameraVisibilityQueryMask.end(), 0);
+	CameraVisibilityState = {};
+	CameraVisibilityState.revision = CameraVisibilityRevision;
+}
+
 void ResetFollowCameraHistory(bool clearIndex = false)
 {
+	ClearCameraVisibilityFrame();
 	HasSafeCameraEye = false;
 	FollowCameraState = {};
 	CameraFollowFrameSeconds = 0;
 	++FollowProjectionRevision;
 	PickingValid = false;
 	if (clearIndex) {
+		CameraVisibilityIndex.Clear();
+		CameraVisibilityBuildAttempted = false;
+		CameraVisibilitySceneRevision = 0;
+		CameraHiddenArchitecture.clear();
+		CameraVisibilityQueryMask.clear();
 		CameraCollisionIndex.Clear();
 		CameraCollisionSceneRevision = std::numeric_limits<uint64_t>::max();
 	}
+}
+
+bool FollowThroughTownArchitecture()
+{
+	return GameplayCameraPolicy && leveltype == DTYPE_TOWN && !CameraRig.suspended()
+	    && IsTownGameplayCameraMode(CameraRig.mode());
+}
+
+float GameplayEyeHeight()
+{
+	// Reuse the caller-authored ocular calibration; do not infer anatomy from sprites.
+	const auto preferences = CameraRig.preferences();
+	return ConfigureTownGameplayEyeHeight(preferences, preferences.firstPersonEyeHeight).eyeHeight;
+}
+
+bool PrepareCameraVisibilityFrame()
+{
+	if (!FollowThroughTownArchitecture()) {
+		ClearCameraVisibilityFrame();
+		return true;
+	}
+	const auto &scene = GetTownScene();
+	const uint64_t epoch = GetTownSceneRevision();
+	if (!CameraVisibilityBuildAttempted || epoch != CameraVisibilitySceneRevision) {
+		ClearCameraVisibilityFrame();
+		CameraVisibilityIndex.Clear();
+		CameraVisibilityBuildAttempted = true;
+		CameraVisibilitySceneRevision = epoch;
+		++CameraVisibilityBuilds;
+		try {
+			if (scene.size() > TownCameraVisibilityIndex::MaxOwners)
+				throw std::length_error("Camera visibility owner limit");
+			size_t triangleCount = 0;
+			const auto count = [&](const auto &surfaces) {
+				for (const auto &surface : surfaces) {
+					if (surface.surfaceDetail == TownSceneSurfaceDetail::FireCore || surface.surfaceDetail == TownSceneSurfaceDetail::FireTip)
+						continue;
+					if (++triangleCount > TownCameraVisibilityIndex::MaxTriangles)
+						throw std::length_error("Camera visibility triangle limit");
+				}
+			};
+			for (const auto &model : scene) {
+				count(TownSceneExteriorTriangles(model));
+				if (model.cabinInterior)
+					count(model.cabinInterior->interiorTriangles);
+			}
+			std::vector<TownCameraVisibilityTriangle> triangles;
+			triangles.reserve(triangleCount);
+			const auto append = [&](const auto &surfaces, uint32_t owner) {
+				for (const auto &surface : surfaces) {
+					if (surface.surfaceDetail == TownSceneSurfaceDetail::FireCore || surface.surfaceDetail == TownSceneSurfaceDetail::FireTip)
+						continue;
+					TownCameraVisibilityTriangle triangle;
+					triangle.owner = owner;
+					for (size_t i = 0; i < 3; ++i) {
+						const auto &v = surface.vertices[i];
+						triangle.vertices[i] = { v.x, v.height, v.z };
+					}
+					triangles.push_back(triangle);
+				}
+			};
+			for (size_t owner = 0; owner < scene.size(); ++owner) {
+				append(TownSceneExteriorTriangles(scene[owner]), static_cast<uint32_t>(owner));
+				if (scene[owner].cabinInterior)
+					append(scene[owner].cabinInterior->interiorTriangles, static_cast<uint32_t>(owner));
+			}
+			// Full geometry stays immutable; never build from last frame's hidden set.
+			CameraVisibilityIndex.Build(epoch, static_cast<uint32_t>(scene.size()), std::move(triangles));
+			if (CameraVisibilityIndex.buildStatus() == TownCameraVisibilityBuildStatus::AllocationFailure)
+				CameraVisibilityBuildAttempted = false; // Retry transient pressure on a later frame.
+			CameraHiddenArchitecture.assign(scene.size(), 0);
+			CameraVisibilityQueryMask.assign(scene.size(), 0);
+		} catch (const std::bad_alloc &) {
+			CameraVisibilityBuildAttempted = false;
+			CameraVisibilityIndex.Clear();
+			CameraHiddenArchitecture.clear();
+			CameraVisibilityQueryMask.clear();
+		} catch (const std::length_error &) {
+			CameraVisibilityIndex.Clear();
+			CameraHiddenArchitecture.clear();
+			CameraVisibilityQueryMask.clear();
+		}
+	}
+	const auto &frame = ViewCamera.projection;
+	const TownCameraPoint focus = { ViewCamera.target.x, ViewCamera.target.y + FollowCameraState.eyeHeight, ViewCamera.target.z };
+	const auto stats = CameraVisibilityIndex.Query(frame.eye, focus,
+	    TownCameraCollisionRadius(frame) + 0.02F,
+	    CameraRig.mode() == TownCameraMode::ThirdPerson || CameraRig.VisualDistance() > 0.0001F,
+	    epoch, CameraVisibilityQueryMask);
+	if (CameraVisibilityState.active != true || CameraVisibilityState.valid != stats.valid
+	    || CameraVisibilityState.sceneRevision != epoch || CameraHiddenArchitecture != CameraVisibilityQueryMask) {
+		++CameraVisibilityRevision;
+		PickingValid = false;
+	}
+	CameraHiddenArchitecture.swap(CameraVisibilityQueryMask);
+	CameraVisibilityState.active = true;
+	CameraVisibilityState.valid = stats.valid;
+	CameraVisibilityState.budgetExceeded = stats.budgetExceeded;
+	CameraVisibilityState.sceneRevision = epoch;
+	CameraVisibilityState.revision = CameraVisibilityRevision;
+	CameraVisibilityState.owners = scene.size();
+	CameraVisibilityState.hiddenOwners = stats.hiddenOwners;
+	CameraVisibilityState.certifiedComponents = stats.certifiedComponents;
+	CameraVisibilityState.uncertifiedAtEye = stats.containmentUncertified;
+	CameraVisibilityState.ambiguousAtEye = stats.containmentAmbiguous;
+	CameraVisibilityState.nodesVisited = stats.nodesVisited;
+	CameraVisibilityState.trianglesTested = stats.trianglesTested;
+	CameraVisibilityState.bytes = stats.bytes;
+	CameraVisibilityState.cacheBuilds = CameraVisibilityBuilds;
+	return stats.valid;
 }
 
 void PrepareCameraCollisionIndex()
@@ -750,8 +890,46 @@ void ResolveFollowCamera(TownCameraFrame &frame, TownCameraPoint anchor)
 			ResetFollowCameraHistory();
 		return;
 	}
-	PrepareCameraCollisionIndex();
 	const TownViewFollowCameraState previous = FollowCameraState;
+	if (FollowThroughTownArchitecture()) {
+		// Publish the anchor-relative eye each frame. A building must not retain
+		// an old eye while the native hero continues moving on the other side.
+		TownViewFollowCameraState state;
+		state.active = true;
+		state.transition = CameraRig.IsVisualTransitionActive();
+		state.desiredDistance = CameraRig.pose().distance;
+		state.visualDistance = CameraRig.VisualDistance();
+		state.eyeHeight = GameplayEyeHeight();
+		state.radius = TownCameraCollisionRadius(frame);
+		state.desiredEye = frame.eye;
+		state.resolvedEye = frame.eye;
+		// The floor only shortens the boom on its authored eye/focus axis.
+		// Architecture never clamps or recovers a camera from a previous frame.
+		const auto focus = anchor + TownCameraPoint { 0, state.eyeHeight, 0 };
+		const auto outward = state.desiredEye - focus;
+		const float length = CameraPointLength(outward);
+		const float floor = state.radius + 0.002F;
+		state.valid = state.radius > 0 && focus.height >= floor;
+		float allowed = length;
+		if (outward.height < 0 && length > 0)
+			allowed = std::min(allowed, std::max(0.0F, (focus.height - floor) * length / -outward.height));
+		if (length > 0)
+			state.resolvedEye = focus + outward * (allowed / length);
+		state.blocked = allowed < length;
+		state.resolvedDistance = CameraPointLength(state.resolvedEye - focus);
+		state.sceneRevision = GetTownSceneRevision();
+		state.localPlayerHidden = CameraRig.HideLocalPlayer(state.resolvedDistance)
+		    || (previous.localPlayerHidden && state.resolvedDistance < 0.85F);
+		if (!previous.active || CameraPointLength(state.resolvedEye - previous.resolvedEye) > 0.000001F
+		    || previous.localPlayerHidden != state.localPlayerHidden || !previous.valid)
+			++FollowProjectionRevision;
+		FollowCameraState = state;
+		HasSafeCameraEye = false;
+		frame.valid &= state.valid;
+		frame.eye = state.resolvedEye;
+		return;
+	}
+	PrepareCameraCollisionIndex();
 	TownViewFollowCameraState state;
 	state.active = true;
 	state.transition = CameraRig.IsVisualTransitionActive();
@@ -882,6 +1060,11 @@ void ConfigureCamera(int width, int height, bool diagnosticProjection = false)
 		projectionRig.Suspend(false);
 	ViewCamera.projection = BuildTownCameraFrame(projectionRig, { target.x, target.y, target.z }, width, height,
 		centerX, centerY, static_cast<float>(zoomFactor));
+	if (FollowThroughTownArchitecture()) {
+		// Translate only the gameplay frame onto one calibrated eye anchor. The
+		// raw four-mode rig, its visual zoom and Cathedral/legacy fixtures remain.
+		ViewCamera.projection.eye.height += GameplayEyeHeight() - CameraRig.VisualEyeHeight();
+	}
 	ResolveFollowCamera(ViewCamera.projection, { target.x, target.y, target.z });
 	const TownCameraFrame &frame = ViewCamera.projection;
 	const auto vector = [](TownCameraPoint point) { return Vec3 { point.x, point.height, point.z }; };
@@ -2309,6 +2492,12 @@ void DrawScene(const Surface &out)
 	for (size_t index = 0; index < scene.size(); ++index) {
 		const TownSceneModel &model = scene[index];
 		++ArchitectureCullingState.modelsConsidered;
+		// One frozen local mask owns exterior, interior and attached fire together.
+		// Native SOL/tiles, static shadow casters and remote players are untouched.
+		if (CameraVisibilityState.active && CameraVisibilityState.valid
+		    && CameraVisibilityState.sceneRevision == GetTownSceneRevision()
+		    && index < CameraHiddenArchitecture.size() && CameraHiddenArchitecture[index] != 0)
+			continue;
 		if (!IsArchitectureVisible(index, model)) {
 			++ArchitectureCullingState.modelsCulled;
 			continue;
@@ -3452,6 +3641,7 @@ bool CurrentPickingValid()
 	return PickingValid && SamplingState.requested == *GetOptions().Graphics.townViewAntialiasing
 	    && PickCameraRevision == CameraRig.revision()
 	    && PickFollowProjectionRevision == FollowProjectionRevision
+	    && PickCameraVisibilityRevision == CameraVisibilityRevision
 	    && PickHorizonEnabled == *GetOptions().Graphics.townViewHorizon
 	    && PickGpuRequested == *GetOptions().Graphics.townViewGpuRendering
 	    && PickFrustumCullingRequested == *GetOptions().Graphics.townViewFrustumCulling
@@ -3717,11 +3907,9 @@ void InitializeTownViewForGame()
 	CameraRig = TownCameraRig {};
 	ApplyTownViewCameraPreferences();
 	ResetTownViewCamera();
-	// Home remains an exact native comparison. Start just off that pose so the
-	// initial 3D view actually renders geometry and uses its matching picking.
-	if (Enabled)
-		RotateTownView(0.15F);
-	SetTownViewCameraMode(static_cast<TownCameraMode>(std::clamp(*GetOptions().Graphics.townViewCameraMode, 0, 3)));
+	SetTownViewCameraMode(NormalizeTownGameplayCameraMode(*GetOptions().Graphics.townViewCameraMode));
+	GameplayCameraPolicy = true;
+	ResetFollowCameraHistory(true);
 	CameraRig.Suspend(!Enabled);
 }
 
@@ -3782,6 +3970,7 @@ void ZoomTownView(float wheelSteps)
 
 void ResetTownViewCamera()
 {
+	GameplayCameraPolicy = false;
 	ResetFollowCameraHistory();
 	CameraRig.RestoreIsometric();
 	SyncCameraPose();
@@ -3789,11 +3978,24 @@ void ResetTownViewCamera()
 	PickingValid = false;
 }
 
+void ResetTownViewGameplayCamera()
+{
+	TownCameraRig defaults;
+	defaults.SetMode(TownCameraMode::ThirdPerson);
+	CameraRig.SetMode(TownCameraMode::ThirdPerson);
+	CameraRig.SetPose(defaults.pose()); // Preserve other diagnostic/follow poses and preferences.
+	GameplayCameraPolicy = true;
+	ResetFollowCameraHistory();
+	SyncCameraPose();
+	EndTownViewCameraDrag();
+}
+
 TownViewCameraState GetTownViewCameraState()
 {
 	return { CameraYaw, CameraPitch, CameraDistance, CameraPanOffset.x, CameraPanOffset.z,
 		CameraRig.mode(), CameraRig.preferences().verticalFovDegrees,
-		CameraRig.mode() == TownCameraMode::FirstPerson ? CameraRig.preferences().firstPersonEyeHeight : CameraRig.preferences().eyeHeight };
+		FollowThroughTownArchitecture() ? GameplayEyeHeight()
+		    : (CameraRig.mode() == TownCameraMode::FirstPerson ? CameraRig.preferences().firstPersonEyeHeight : CameraRig.preferences().eyeHeight) };
 }
 
 TownCameraMode GetTownViewCameraMode()
@@ -3813,9 +4015,10 @@ void SetTownViewCameraMode(TownCameraMode mode)
 
 void CycleTownViewCameraMode()
 {
-	const int next = (static_cast<int>(CameraRig.mode()) + 1) % 4;
-	GetOptions().Graphics.townViewCameraMode.SetValue(next);
-	SetTownViewCameraMode(static_cast<TownCameraMode>(next));
+	GameplayCameraPolicy = true;
+	const auto next = NextTownGameplayCameraMode(CameraRig.mode());
+	GetOptions().Graphics.townViewCameraMode.SetValue(static_cast<int>(next));
+	SetTownViewCameraMode(next);
 }
 
 void ApplyTownViewCameraPreferences()
@@ -3824,12 +4027,14 @@ void ApplyTownViewCameraPreferences()
 	preferences.verticalFovDegrees = static_cast<float>(std::clamp(*GetOptions().Graphics.townViewCameraFov, 35, 100));
 	preferences.orbitRadiansPerPixel = 0.006F * static_cast<float>(std::clamp(*GetOptions().Graphics.townViewCameraSensitivity, 25, 200)) / 100;
 	CameraRig.SetPreferences(preferences);
+	ClearCameraVisibilityFrame();
 	EndTownViewCameraDrag();
 	PickingValid = false;
 }
 
 void SetTownViewCameraPoseForDiagnostics(TownCameraPose pose)
 {
+	GameplayCameraPolicy = false;
 	ResetFollowCameraHistory();
 	CameraRig.SetPose(pose);
 	SyncCameraPose();
@@ -3845,6 +4050,24 @@ bool AdvanceTownViewCamera(float seconds)
 	if (changed)
 		PickingValid = false;
 	return changed;
+}
+
+TownViewCameraVisibilityState GetTownViewCameraVisibilityState()
+{
+	return CameraVisibilityState;
+}
+
+bool IsTownViewArchitectureHiddenForDiagnostics(size_t owner)
+{
+	return CameraVisibilityState.active && CameraVisibilityState.valid
+	    && CameraVisibilityState.sceneRevision == GetTownSceneRevision()
+	    && owner < CameraHiddenArchitecture.size() && CameraHiddenArchitecture[owner] != 0;
+}
+
+void SetTownViewGameplayCameraPolicyForDiagnostics(bool enabled)
+{
+	GameplayCameraPolicy = enabled;
+	ResetFollowCameraHistory();
 }
 
 TownViewFollowCameraState GetTownViewFollowCameraState()
@@ -4022,6 +4245,8 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 	OgdenPilotState.trianglesVisited = 0;
 	OgdenGpuSubmissionFailed = false;
 	PickingValid = false;
+	if (!FollowThroughTownArchitecture())
+		ClearCameraVisibilityFrame();
 	RasterSampleFactor = 1;
 	RendererState = {};
 	ArchitectureCullingState = {};
@@ -4034,6 +4259,7 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 		GpuFailure.clear();
 	}
 	if ((!IsTownViewActive() && !forcedCathedralGeometry) || !pDungeonCels || MicroTileLen == 0 || MyPlayer == nullptr) {
+		ClearCameraVisibilityFrame();
 		PickingValid = false;
 		if (leveltype == DTYPE_CATHEDRAL) {
 			if (!Enabled) {
@@ -4087,6 +4313,7 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 	}
 	const int height = std::min<int>(gnViewportHeight, fullOut.h());
 	if (fullOut.w() <= 0 || height <= 0) {
+		ClearCameraVisibilityFrame();
 		if (cathedralWorld) {
 			RecordCathedralDiagnostic(CathedralFallbackReason::ViewportUnavailable, CathedralDiagnosticStage, true, RendererState.requestedGpu);
 			TryLogCathedralDiagnostic();
@@ -4114,6 +4341,7 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 		return DrawNativeTownViewReference(fullOut, ViewPosition);
 	}
 	if (!ViewCamera.projection.valid) {
+		ClearCameraVisibilityFrame();
 		RendererState.failure = "Invalid town camera frame";
 		if (cathedralWorld) {
 			RecordCathedralDiagnostic(CathedralFallbackReason::CameraProjectionInvalid, CathedralDiagnosticStage, true, RendererState.requestedGpu);
@@ -4128,6 +4356,19 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 			return true;
 		}
 		return false;
+	}
+	// Compute once before any backend consumes the scene. The same immutable
+	// snapshot is used by both drawWorld calls when a GPU frame replays on CPU.
+	if (!PrepareCameraVisibilityFrame()) {
+		// Reporting memory pressure must not allocate outside the protected path.
+		try {
+			RendererState.failure = "Town camera visibility index/query unavailable";
+		} catch (const std::bad_alloc &) {
+			RendererState.failure.clear();
+		}
+		SamplingState = { *GetOptions().Graphics.townViewAntialiasing, 1, logical.w(), logical.h(), false };
+		ClearSurface(logical);
+		return true; // Empty local frame, never stale IDs or a stuck old camera.
 	}
 	CathedralDiagnosticStage = CathedralFallbackStage::SamplingBuffers;
 	const Surface out = PrepareSamplingBuffers(logical);
@@ -4396,6 +4637,7 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 	PickSceneRevision = ViewSceneRevision();
 	PickCameraRevision = CameraRig.revision();
 	PickFollowProjectionRevision = FollowProjectionRevision;
+	PickCameraVisibilityRevision = CameraVisibilityRevision;
 	PickHorizonEnabled = *GetOptions().Graphics.townViewHorizon;
 	PickingValid = !cathedralWorld || (!CathedralFrame.requiresNativeFallback
 	    && (!RendererState.requestedGpu || RendererState.usedGpu) && cathedral::LiveFrameCurrent());

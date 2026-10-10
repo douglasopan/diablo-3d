@@ -29,7 +29,10 @@ void OrbitTownView(float yawDelta, float pitchDelta);
 void ZoomTownView(float wheelSteps);
 /** Once per eligible world frame; zero pauses visual interpolation. */
 bool AdvanceTownViewCamera(float seconds);
+/** Retained exact native comparison for diagnostics. */
 void ResetTownViewCamera();
+/** Gameplay Home restores third-person follow without persisting a new mode. */
+void ResetTownViewGameplayCamera();
 TownCameraMode GetTownViewCameraMode();
 /** Session mode only; Home does not overwrite the saved startup preference. */
 void SetTownViewCameraMode(TownCameraMode mode);
@@ -60,6 +63,19 @@ struct TownViewFollowCameraState {
 	size_t triangles = 0, bytes = 0, nodesVisited = 0, trianglesTested = 0, cacheBuilds = 0;
 };
 TownViewFollowCameraState GetTownViewFollowCameraState();
+/** Local Tristram architecture mask, frozen for color/depth/picking/replay.
+ * Open imports are contact-only; props/trees/Cathedral are outside this v1. */
+struct TownViewCameraVisibilityState {
+	bool active = false, valid = false, budgetExceeded = false;
+	uint64_t sceneRevision = 0, revision = 0;
+	size_t owners = 0, hiddenOwners = 0, certifiedComponents = 0;
+	size_t uncertifiedAtEye = 0, ambiguousAtEye = 0;
+	size_t nodesVisited = 0, trianglesTested = 0, bytes = 0, cacheBuilds = 0;
+};
+TownViewCameraVisibilityState GetTownViewCameraVisibilityState();
+bool IsTownViewArchitectureHiddenForDiagnostics(size_t owner);
+/** Explicit opt-in for the new policy after a legacy pose fixture disabled it. */
+void SetTownViewGameplayCameraPolicyForDiagnostics(bool enabled);
 /** Effective world sampling; camera, pointer coordinates and UI remain logical. */
 struct TownViewSamplingState {
 	bool requested = false;

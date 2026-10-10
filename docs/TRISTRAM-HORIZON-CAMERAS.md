@@ -1,6 +1,82 @@
 # Horizonte e câmeras de Tristram
 
-Atualização: **8 de outubro de 2026**. Documento responsável pelo pedido novo de horizonte frontal/ocular e liberdade de câmera. Segue a etapa e os contratos de [PROJECT-EXECUTION.md](PROJECT-EXECUTION.md); não substitui sua fila. O pedido explícito antecipa este incremento isolado de atmosfera, sem declarar G1/G2 concluídos. Cabana e revisões selecionadas permanecem congeladas; produção Meshy e Godot pertence à frente de Tristram completa.
+Atualização: **09/10/2026, 21:16 (Brasília)**, com duas vistas de gameplay e ocultação local instaladas no mesmo **Iniciar-Tristram.cmd**, SHA-256 `7896a85320d3cf71c6f9cef357bb7f29640dfd6f7a1b85ba92dbb165c279eb44`. Documento responsável pelo pedido de horizonte frontal/ocular e liberdade de câmera. Segue a etapa e os contratos de [PROJECT-EXECUTION.md](PROJECT-EXECUTION.md); não substitui sua fila. O pedido explícito antecipa este incremento isolado de atmosfera, sem declarar G1/G2 concluídos. Cabana e revisões selecionadas permanecem congeladas; produção Meshy e Godot pertence à frente de Tristram completa.
+
+## Duas vistas e ocultação local — entrega de 9 de outubro
+
+Novo requisito humano: terceira pessoa acompanhando o herói e primeira pessoa,
+ligadas pela roda. O relato de câmera presa em casas reabre o resolver temporal:
+ele pode reter o último olho seguro enquanto a âncora do herói continua andando.
+Essa é uma causa possível comprovada pelo código, ainda sem reprodução física
+do episódio humano. O pacote privado está em
+`diagnostics/camera-follow-visibility-20261009/r1`; segue a reserva congelada
+`adc43b3f…` e não altera os recibos históricos abaixo.
+
+A versão instalada mostra somente os valores persistidos 2/3 no menu e no ciclo K,
+com terceira pessoa como padrão. Preferências antigas/inválidas são normalizadas
+em memória no carregamento, sem autosave. Home de gameplay restaura terceira
+pessoa; `ResetTownViewCamera` conserva a comparação nativa para diagnósticos.
+F4, remapeamentos, ownership de input e gates de painel/modal/foco permanecem.
+Os quatro valores internos e as poses diagnósticas continuam disponíveis.
+
+Em Tristram com a política de gameplay ativa, o frame usa uma âncora ocular
+comum de 1,7 unidades para ambas as vistas, sem interpolar a altura durante o
+zoom. A calibração é provisória: o helper aceita uma altura autorada, mas ainda
+não há tabela por classe nem âncora de cabeça de um herói 3D instalado. O frame
+é deslocado pelo adaptador; as preferências cruas da rig, fixtures legadas e a
+altura/resolução de colisão da Catedral permanecem intactas. O olho acompanha
+a posição interpolada do herói em cada frame e passa através da arquitetura;
+o piso conserva o limite visual da esfera near. Não há varredura temporal que
+retenha um olho antigo nesse caminho.
+
+A máscara é local ao renderer, por `(epoch da cena, índice da instância)`.
+Um BVH da geometria completa inclui exterior e interior, exclui chamas, e nunca
+é reconstruído a partir dos objetos ocultos. Terceira pessoa consulta a cápsula
+olho→âncora; primeira consulta somente a esfera do olho e contenção, sem um raio
+frontal longo. Cada instância oculta deixa de submeter exterior, interior e fogo
+em `DrawScene`, para CPU e GPU. O renderer consulta uma vez antes do desenho e
+congela bits/epoch/revisão no replay GPU→CPU; o picking exige essa mesma revisão.
+Ao sair, o frame seguinte consulta a cena completa e restaura a instância.
+Reset/F4/reload/nível/contexto inativo neutralizam a máscara. Falha de índice ou
+query descarta o quadro local, sem publicar seleção antiga nem reter o olho.
+
+**Limites do v1:** somente arquitetura de Tristram. Árvores, props, resíduos
+nativos e geometria procedural da Catedral não recebem ocultação neste patch.
+Componentes fechados só certificam contenção após costuras exatas, topologia,
+volume e validação limitada de auto-interseção. Imports abertos/inconclusivos
+participam de contato/segmento, mas a ocultação profunda no seu interior não é
+garantida; bounds procedurais não são certificados como a malha importada.
+Estatísticas expõem componentes certificados e candidatos inconclusivos no
+olho. O v1 não conclui o pedido de todos os objetos/classes/ambientes.
+
+Mapa/SOL, movimento/colisão do herói, RNG, saves, rede, visibilidade compartilhada,
+seleções de assets, tiles suprimidos e sombras físicas permanecem nativos.
+O principal aplicou os blocos preservando o diagnóstico da Catedral e compilou
+o novo `.cpp` com `/EHsc`. A instalação foi verificada em `diagnostics/camera-follow-root-integration-20261009-r1/install-preparation-r2/installed-20261010T001552Z-34e91bce3347499fa5f5e0133c2e4422/receipt.json`,
+SHA `136cdca5cae0db7be3099639b228683b28790d02fd209ffa7e198da19b18a1d0`; três aliases idênticos, 50 arquivos atuais
+do perfil preservados e somente o recibo derivado renovado. Nenhuma seleção
+de modelos ou configuração foi alterada pelo instalador.
+
+Cobertura validada pelo principal em fixtures parciais, com limites abaixo: helper puro e negativas; load/menu/callback sem
+reescrever INI; Home/K/roda/F4/remapeamentos; deslocamento incremental e retorno
+em casas/interiores; duas instâncias do mesmo asset; máscara/restauração e
+picking coerentes; cena/epoch inválida; mesmo snapshot em CPU/GPU e replay;
+diagnósticos nativos legados e smoke da Catedral preservados. Medir preparação
+fria/query morna/memória separadamente antes de alegar FPS ou orçamento.
+
+Helpers 51/70, input 3.792, settings 60.944, câmera CPU 232/22 quadros
+e observabilidade Catedral 121 são resultados anteriores reutilizados com
+lineage explícito. O gate GPU R9 atual passou 89 checks/seis quadros: três GPU
+e três controles CPU, incluindo replay e recuperação. As duas diferenças de
+cobertura foram classificadas no contexto exato, sem ampliar a tolerância .001.
+Estas evidências não aprovam arte completa, calibração por classe, todos os
+objetos ou FPS sustentado. Próxima ação: revisar fisicamente na partida e
+continuar a fila de continuidade/materiais da Catedral.
+
+## Contratos e medições históricos
+
+Os quatro modos, alturas e comandos descritos abaixo pertencem às versões
+anteriores. Não substituem as duas vistas e o comportamento de Home atual.
 
 ## Roda, WASD e colisão visual — incremento de 8 de outubro
 
@@ -124,4 +200,4 @@ A revisão das capturas reais mostrou faixas fortes de paleta no céu/fog e rele
 
 O contador fonte `horizonBytes` soma capacidade dos triângulos, cores por triângulo, LUT/fila de profundidade, céu e assinatura de paleta. Exclui descritores/texturas constantes prelit, overhead do alocador e recursos D3D11; não é medição total de memória residente. `cpuPixelVisits`, `cpuCoveredFragments`, `cpuDepthRejected` e `cpuShadedFragments` instrumentam somente o caminho CPU; overdraw/custo de shader GPU e memória completa devem ser medidos no candidato.
 
-Próxima ação: revisão dos modos pelo usuário na partida e medição controlada de desempenho/memória antes de qualquer afirmação de orçamento ou aprovação artística. Abrir pela entrada habitual e usar K, quando associado, ou Esc → Configurações → Gráficos para trocar a câmera; botão central gira a visão, F4 alterna o 3D e Home retorna ao backend original. Não reabrir geração de assets nem etapas concluídas para compensar limitações de câmera/terreno.
+Próxima ação: revisão dos modos pelo usuário na partida e medição controlada de desempenho/memória antes de qualquer afirmação de orçamento ou aprovação artística. Abrir pela entrada habitual e usar K, quando associado, ou Esc → Configurações → Gráficos para trocar a câmera; botão central gira a visão, F4 alterna o 3D e Home restaura terceira pessoa na versão atual; a comparação original fica em F4. Não reabrir geração de assets nem etapas concluídas para compensar limitações de câmera/terreno.

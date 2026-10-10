@@ -12,7 +12,7 @@ O objetivo é o Diablo 1 inteiro em 3D. Tristram é a primeira etapa; o primeiro
 - Escolha uma tarefa delimitada na fila: objetivo, dependência, arquivos, critério de conclusão e evidência. Ao terminar, atualize resultado, limitação e próxima ação no guia. Não criar outro plano concorrente para o mesmo escopo.
 - Não reabrir etapas concluídas sem defeito reproduzido, requisito novo ou dependência alterada. Registre o motivo e o componente afetado.
 - Preserve a simulação, mapa vivo, seed, colisão, interação e saves nativos. O renderizador não deve consumir o RNG da simulação.
-- Home usa o backend original. Fidelidade da reconstrução exige geometria forçada na mesma câmera e revisão em 360°; identidade em Home não prova qualidade das meshes.
+- Por preferência humana, gameplay oferece terceira e primeira pessoa, com terceira como padrão. Home restaura terceira pessoa na sessão; F4 alterna 3D/nativo. Modos legados e `ResetTownViewCamera` permanecem para diagnóstico. Fidelidade da reconstrução exige geometria na mesma câmera e revisão em 360°; comparação nativa não prova qualidade das meshes.
 - Para assets, reutilize IDs e reservas de `assets/registry.json`. Consulte `docs/ASSET-APPROVAL.md` antes de mudar seleção ou promover uma revisão. Aprovação parcial, teste técnico e aceitação integral são estados distintos.
 - Identifique modelo, executável, conversão, aberturas em código e iluminação antes de atribuir uma regressão à arte. Nunca selecionar pelo arquivo mais recente nem regenerar um modelo aprovado para resolver erro de perfil.
 - Novas gerações são candidatos. Preserve a revisão selecionada e só a substitua explicitamente após a validação e aprovação correspondentes ao escopo. Não pedir novamente aprovação que o usuário já forneceu.

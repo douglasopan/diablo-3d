@@ -12592,8 +12592,8 @@ msgid "Cycle Tristram camera mode"
 msgstr "Alternar modo de câmera de Tristram"
 
 #: Source/diablo.cpp
-msgid "Cycle and save the Isometric, Free Orbit, Third Person and First Person camera preference. Movement and combat keep their native controls."
-msgstr "Alterna e salva a preferência de câmera entre Isométrica, Órbita Livre, Terceira Pessoa e Primeira Pessoa. Movimento e combate mantêm os controles nativos."
+msgid "Switch and save Third Person or First Person. The mouse wheel zooms between them. Movement and combat use native simulation and remappable controls."
+msgstr "Alterna e salva Terceira Pessoa ou Primeira Pessoa. A roda do mouse aproxima e afasta entre elas. Movimento e combate usam a simulação nativa e controles remapeáveis."
 
 #: Source/options.cpp Source/diablo.cpp Source/ingame_settings.cpp Source/DiabloUI/settingsmenu.cpp
 msgid "Move forward (main)"
@@ -12682,3 +12682,43 @@ msgstr "Pressione uma tecla para alterar. Esc cancela."
 #: Source/options.cpp Source/diablo.cpp Source/ingame_settings.cpp Source/DiabloUI/settingsmenu.cpp
 msgid "Activate the bound key to change it."
 msgstr "Selecione a tecla atribuída para alterá-la."
+
+#: Source/options.cpp
+msgid "3D Camera Mode"
+msgstr "Modo de câmera 3D"
+
+#: Source/options.cpp
+msgid "Choose Third Person or First Person for the saved gameplay camera. The mouse wheel zooms between them. Home restores Third Person for this session. Movement keys can be remapped; menus and chat keep their native controls."
+msgstr "Escolhe Terceira Pessoa ou Primeira Pessoa como câmera salva para jogar. A roda do mouse aproxima e afasta entre elas. Home restaura Terceira Pessoa nesta sessão. As teclas de movimento podem ser remapeadas; menus e chat mantêm seus controles nativos."
+
+#: Source/options.cpp
+msgid "Third Person"
+msgstr "Terceira Pessoa"
+
+#: Source/options.cpp
+msgid "First Person"
+msgstr "Primeira Pessoa"
+
+#: Source/options.cpp
+msgid "3D Camera Field of View"
+msgstr "Campo de visão da câmera 3D"
+
+#: Source/options.cpp
+msgid "Set the vertical field of view in degrees for Third Person and First Person. Saved changes apply on the next frame."
+msgstr "Define o campo de visão vertical, em graus, para Terceira Pessoa e Primeira Pessoa. A alteração é salva e vale no próximo quadro."
+
+#: Source/options.cpp
+msgid "3D Camera Sensitivity"
+msgstr "Sensibilidade da câmera 3D"
+
+#: Source/options.cpp
+msgid "Set camera look sensitivity as a percentage of the default. Applies to middle mouse look and captured first-person mouse look on the next frame."
+msgstr "Define a sensibilidade da câmera como porcentagem do padrão. Vale no próximo quadro para o giro com o botão central e para o mouse capturado em primeira pessoa."
+
+#: Source/diablo.cpp
+msgid "Restore Tristram camera"
+msgstr "Restaurar câmera de Tristram"
+
+#: Source/diablo.cpp
+msgid "Restore Third Person for the current session without changing the saved camera preference."
+msgstr "Restaura Terceira Pessoa nesta sessão sem alterar a preferência de câmera salva."
