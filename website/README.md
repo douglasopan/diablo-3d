@@ -1,5 +1,13 @@
 # D3D website
 
+## Community entry and roadmap update — 10 October 2026
+
+The existing home and roadmap have a complete PT/EN update from the owner's bounded requirements snapshot. Both Tristram and the first Cathedral floor remain in development; installed local pilots, private candidates, isolated tests and future features are identified separately. New UI/interaction/equipment requirements do not establish native integration or a public game build. The original camera installation record remains historical, with the same source commit and media.
+
+The order is the complete stable 3D game, persistence and resource respawn, research targeting 50–100 players, then original expansion; Diablo 2 is outside scope. Map-editor work remains subject to feasibility and a decision, without priority over completing the game or an end-to-end claim for the 13 models. The entry invites sharing and collaboration on a free community project and links voluntary support to the existing verified public Patreon page. Panvia installation/automatic updates are in preparation, dependent on a validated distributable public package and integration; GitHub/manual options and save/settings/rollback preservation remain planned. No install button is offered yet. English voice generation and heavy encoding remain paused. Totals stay at **24 articles per language, 51 curated captures and nine public videos**.
+
+The existing `cameras-continuidade-catedral` article is updated in both languages for the principal's October 10 local installation at `29097acd`: native item labels/selection, known grate materials, false light-support walls, masonry and native lighting. Historical camera/transparency facts stay attached to their original October 9 version. Offscreen/simulated tests, unresolved physical QA and the strict operator suite's UNSUPPORTED state remain explicit. No new capture or article is added.
+
 Static development journal in Brazilian Portuguese and complete English for the whole of Diablo 1 in 3D, including every level. Tristram remains under review, alongside an installed nine-region technical pilot for the first standard Cathedral floor, now using approximated native materials and regional transparency snapshots. Portuguese pages use the project root; English equivalents use `/en/`. See [the publishing guide](../docs/DEVLOG.md) and [capture provenance](CAPTURE-INVENTORY.md).
 
 - `build.py` reads versioned articles and generates all HTML at build time.
