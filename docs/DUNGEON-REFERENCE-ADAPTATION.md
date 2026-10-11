@@ -1,6 +1,6 @@
 # Dungeon reference adaptation — in progress
 
-Douglas Pan authorized this bounded adaptation on 11 October 2026. The public project remains non-commercial and free of charge. No new game build has been installed or published by this work.
+Douglas Pan authorized this bounded adaptation on 11 October 2026. The public project remains non-commercial and free of charge. The habitual build remains b775; an experimental R3 floor/wall preview was delivered in a separate immutable snapshot/profile. The [2026.10.11-r1 checkpoint](CHECKPOINT-2026-10-11.md) distinguishes that preview, the private R4 candidate and the uncompiled clean C1 base. This publication changes documentation only and publishes no game binary.
 
 ## Attribution and source
 
@@ -35,7 +35,7 @@ No proprietary MPQ, extracted texture atlas, original music or personal save is 
 | Interaction | E for native nearby interaction; held world-left for stationary attack | Our movement, camera, UI, native commands, reach and combat cadence |
 | Renderer | Existing scene and D3D11 pipeline | No transplant of CPU renderer or per-frame reference buffers |
 
-Tristram geometry, reference movement/camera/UI and a compass are outside this immediate adaptation. Other development fronts and the previous final-release candidate remain paused.
+Tristram geometry, reference movement/camera/UI and a compass are outside this immediate adaptation. The separate clean base retains our own camera, input, movement, UI and Town source layers. Complete Cathedral materials, geometry, details and lighting remain the immediate milestone; moving files alone does not complete modularization. Other development fronts and the previous final-release candidate remain paused; HD and Shift/stamina preparations are deferred.
 
 ## Evidence and remaining work
 
@@ -44,8 +44,10 @@ Private candidate checks, not a release claim:
 - Pure floor/wall coordinate and independent coverage tests: **69,638 checks passed**.
 - Actual native loader and CPU floor/wall draw: **32,114 checks passed**, four camera angles per observed Cathedral state. NEW, full save/load, Town reentry and level 1 → 2 → 1 were exercised using a newly created private profile. Native map/occupancy/RNG observations and private save bytes were preserved by presentation.
 - The loader test excludes the hero-selection UI and physical gameplay. Unsupported floor 2 remains outside the current pilot; a successful transition does not claim it renders in 3D.
-- Walls/materials candidate compiled and linked; GPU draw, first-person ceiling imagery, E/held-attack gameplay, doorway/arch fidelity, all dungeon families and browser validation remain pending. No sustained FPS measurement or complete campaign qualification.
+- Separate combined native input fixture R5 passed **40,037 checks** for loaded C1 TP/FP DOWN/UP, native command parsing and interpolation/release guards. The fixture now processes the native join-level completion rather than testing input while the player is still changing levels. It does not qualify E loot/doors, enemies/ranged targets, full held-combat cadence or the focus/UI matrix.
+- Separate native hardware fixture R2 passed four cold/warm TP/FP frames on **Radeon RX 570**, with hardware used, WARP disabled and no CPU raster fallback in those frames. It does not establish sustained gameplay FPS or complete visual acceptance.
+- R4 includes a provisional FP ceiling using floor material; reference common masonry/independent ceiling and complete doorway/arch/stair/detail/lighting adaptation remain pending. Other families and browser changes are unqualified. Fixture hashes, build status and limits are in the dated checkpoint.
 
 A material-specific candidate reused two previously reproduced loader prerequisites: saved ground items may legitimately have zero animation timing; unused corpse slots may refer to artwork freed during a level change. The visual fingerprint accepts that native item state and reads only corpse slots referenced by the live map. It does not modify native item/corpse state or reset the camera.
 
-The next gate is native first-/third-person rendering and interaction on the same candidate. Installation and publication require validation; preparation or pure tests alone are insufficient.
+The next work is complete Cathedral visual adaptation and persistent level/frame/camera/input contracts on the isolated clean candidate, followed by the full functional/visual/performance matrix. Installation and binary publication require validation; preparation, pure tests and isolated hardware frames alone are insufficient. The [code map](CODE-ARCHITECTURE.md) and [audit](CODE-AUDIT.md) describe current owners and gaps.

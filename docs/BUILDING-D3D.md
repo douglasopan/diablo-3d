@@ -4,6 +4,8 @@ This guide covers the D3D Windows prototype. The public repository places `CMake
 
 The public source does not include a compiler, a `.tools` bundle, Diablo game archives, extracted game artwork, player saves or a ready-made player profile. The current script builds a local-only executable with `NONET=ON`; this does not establish multiplayer or voice support. A first build may download source dependencies through CMake. Disabling game networking does not make the initial dependency setup an offline build.
 
+**Build qualification — 11 October 2026, America/Sao_Paulo:** consult the [versioned checkpoint](CHECKPOINT-2026-10-11.md) and [code/lifecycle guide](CODE-ARCHITECTURE.md). Public source, habitual b775, experimental R3 preview, private R4 fixtures and the uncompiled clean C1 checkout are different identities. This guide does not provide unpublished candidate source, private support payloads or HD textures. For a new isolated candidate, use a separate build directory/profile and record source/EXE/asset hashes before running it.
+
 ## Início rápido em português
 
 Instale Git, Visual Studio 2022 ou posterior com desenvolvimento C++ para desktop e Windows SDK, CMake 3.22 ou posterior e Ninja. Abra PowerShell na raiz do clone e execute:
@@ -13,7 +15,7 @@ Instale Git, Visual Studio 2022 ou posterior com desenvolvimento C++ para deskto
 .\Iniciar-Tristram.ps1 -DataDirectory 'C:\caminho\do\seu\Diablo'
 ```
 
-A pasta informada deve conter seu próprio `DIABDAT.MPQ` ou `spawn.mpq`. O iniciador cria um perfil separado em `perfil-tristram`. F4 alterna a visão em Tristram; Home usa o desenho original do jogo. Comparar as malhas exige as capturas de geometria forçada. Os dados extraídos e os diagnósticos ficam locais.
+A pasta informada deve conter seu próprio `DIABDAT.MPQ` ou `spawn.mpq`. O iniciador cria um perfil separado em `perfil-tristram`. No checkpoint habitual, F4 alterna 3D/nativo em Tristram e no piloto válido do primeiro andar normal da Catedral; Home restaura terceira pessoa na sessão. Comparar as malhas exige as capturas de geometria forçada. Os dados extraídos e os diagnósticos ficam locais.
 
 ## Prerequisites
 
@@ -75,7 +77,7 @@ The executable can also be launched directly with explicit data, save and config
 
 Use `--spawn` instead of `--diablo` for a shareware-only directory. Prefer the launcher for its initial window settings and separate profile. Save and close an already running game before starting a newly built executable.
 
-F4 changes the view only in Tristram. The Home pose deliberately dispatches to the actual original renderer and its cursor rules. A rotated camera renders reconstructed 3D meshes. Home pixel identity therefore confirms correct original-backend reuse; it does not prove that the mesh reconstruction is identical.
+For the habitual checkpoint, F4 changes 3D/native view in Tristram and the valid first-normal-Cathedral pilot; Home restores Third Person for the session. The legacy `ResetTownViewCamera` API still supplies an isometric diagnostic pose, and older smoke references may call it “Home.” Reusing native-renderer pixels in a diagnostic confirms that backend, not reconstructed-mesh fidelity. Inspect the forced-geometry and rotated captures separately.
 
 ## Local validation
 
@@ -87,7 +89,7 @@ The smoke tool takes exactly three positional directories: game data, built engi
 
 Use a separate shareware-only input directory when testing `spawn.mpq`; a directory containing the retail archive selects retail. Report the edition and commit tested. Generated images can contain proprietary artwork, so do not commit archive extracts or diagnostic asset dumps.
 
-The diagnostic checks state preservation, resource reloads, selection, closed and oriented volumes, depth, ground contact and fixed camera fixtures. It emits original-backend references, Home/backend-reuse references and forced-geometry captures separately. Passing mechanical checks is not an approval of artistic fidelity. Inspect rotated views for wrong silhouettes, texture projection, clipping, unseen faces and actor occlusion.
+The diagnostic checks state preservation, resource reloads, selection, closed and oriented volumes, depth, ground contact and fixed camera fixtures. It emits original-backend references, legacy isometric/backend-reuse references and forced-geometry captures separately. Passing mechanical checks is not an approval of artistic fidelity. Inspect rotated views for wrong silhouettes, texture projection, clipping, unseen faces and actor occlusion. The newer private native loader/input/hardware fixtures in the checkpoint are separate executables, not additional public smoke/CTest targets.
 
 The optional image-analysis tools need Python, Pillow and NumPy. A local environment can be prepared with:
 
