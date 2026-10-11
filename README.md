@@ -6,7 +6,7 @@ A community project led by **Douglas Pan** to bring **the whole Diablo 1 game in
 
 **A proposta é o Diablo 1 inteiro em 3D.** Tristram e um piloto do primeiro andar normal da Catedral já podem ser testados em 3D. Terceira e primeira pessoa estão integradas, com horizonte provisório em Tristram. Modelos e composição das paredes continuam em revisão; os demais níveis, personagens, monstros e efeitos seguem no plano do jogo completo. O catálogo colaborativo crescerá com essas etapas para coordenar os modelos que ainda precisam ser criados.
 
-**Pause decision — 10 October 2026 (Brasília):** owner-led game development is **on hold** while Douglas prioritizes **THEPAN.ART and website work**. Source, local builds, assets and private candidates are preserved. This checkpoint publishes documentation only; it does not promote a gameplay build.
+**Pause decision — 10 October 2026 (Brasília):** owner-led game development is **on hold** while Douglas prioritizes **THEPAN.ART and website work**. Source, local builds, assets and private candidates are preserved. A limited owner-authorized exception on 11 October studies and adapts dungeon presentation plus E-interaction/click-attack in a separate candidate; other fronts and the previous release remain on hold. This checkpoint publishes documentation only; it does not promote a gameplay build.
 
 **Desenvolvimento em espera:** a prioridade atual é THEPAN.ART/sites. O fechamento de uma partida não retoma automaticamente o jogo. O estado abaixo distingue versões instaladas, testes técnicos e propostas pendentes.
 
@@ -130,6 +130,12 @@ The agreed order is **complete and stabilize Diablo 3D → expanded multiplayer/
 The historical import pipeline uses a [Tristram light profile](docs/TRISTRAM-LIGHTING.md), calibrated against the original cabin. The optional east-cabin review contains a timber floor, physical windows and candle sources; this describes preserved review work, not an imported cabin active under Meshy OFF. Future buildings follow the [openings and fire-light standard](docs/BUILDING-OPENINGS.md).
 
 The next recorded visual request removes the gray/opaque background and centers navigation in **ESC/Settings**, while preserving aligned Graphics/Audio values and the **approved inventory transparency**. It remains backlog during the pause. Significant delivered milestones belong in the devlog; a small visual adjustment is not a new loot or gameplay system.
+
+## Dungeon reference study and adaptation
+
+Thank you to **plopsDOTio / plops.io**, author of [Diablo First Person](https://forge.plops.io/t/diablo-first-person-devilutionx-mod-for-windows), for publishing its source and dungeon reconstruction work. The author's [announcement](https://www.reddit.com/r/Diablo1/comments/1x1wtjz/diablo_1_in_first_person_original_automap_butcher/) identifies an independent DevilutionX mod inspired by Drelvak's video; we do not have Drelvak's unpublished code.
+
+**Adaptation is in progress in an isolated candidate, not an installed release.** We are adapting dungeon materials and geometry to our existing scene/GPU pipeline, preserving our Tristram, camera, movement and UI. The first floor/material lifecycle tests passed; this does not qualify the whole campaign, performance or browser build. [Scope, attribution, source pins and validation limits](docs/DUNGEON-REFERENCE-ADAPTATION.md).
 
 ## Project identity and upstream
 

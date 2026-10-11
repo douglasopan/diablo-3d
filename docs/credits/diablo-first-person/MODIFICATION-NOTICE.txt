@@ -1,0 +1,36 @@
+Diablo First Person 0.2.0 — visual polish candidate for Windows
+
+THIS IS MODIFIED SOFTWARE.
+Based on DevilutionX 1.6.0-dev, upstream commit bf574c9b74f1d718b0bcee15d648b20a8bfc927c.
+https://github.com/diasurgical/devilutionX
+
+Added an independent first-person software renderer, original sprite projection,
+terrain decoding, input and interaction integration, camera math tests,
+developer smoke checks, Windows launcher and build helper.
+
+Inspiration: Drelvak, “I Made Diablo First Person”
+https://www.youtube.com/watch?v=xkpLG9keQF0
+This is not the creator's unpublished mod source.
+
+Read LICENSE.md, FIRST_PERSON.md and THIRD-PARTY-NOTICES before distribution.
+Distribute this modified engine free of charge for non-commercial purposes.
+No Diablo game archive or personal save is included in public release archives.
+Supply your own original DIABDAT.MPQ through the launcher.
+
+Static library dependency notices are preserved in THIRD-PARTY-NOTICES.
+The accompanying third-party source archive includes libsmackerdec and
+SDL_audiolib sources used for this build. The main source archive contains
+the CMake dependency recipes and build helper, allowing the engine to be
+rebuilt and relinked with changes to those libraries.
+
+Reconstructed first-person surfaces, staggered masonry, stone ceilings,
+transparent arches, straight and enclosed spiral stair geometry,
+Tristram building/roof meshes and original indexed-palette sprites.
+Eleven camera/geometry tests, main-map and four quest-sublevel render checks,
+and native action, persistence and stair-transition checks are included.
+The full campaign playthrough, every quest branch/seed, Hellfire and multiplayer
+remain unverified. See FIRST_PERSON.md for controls and validation scope.
+
+Target selection rejects intervening walls while retaining own-cell door/counter interactions. Three visibility regression checks were added; the isolated action setup updates native light and vision after repositioning.
+
+0.3.0 controls and navigation pass: camera-relative step blending, native wall sliding, movement priority during held combat, raw relative mouse capture recovery, optional vertical look (F8) and view leveling (X), world-click pointer recapture, camera-facing top-down maps with explored-cell exit routes and Cathedral guidance, hinged door geometry/state prompts, native-velocity arrow geometry, directional projectile frame adjustment, native-animation weapon view models, solid sarcophagus bodies/lids/interiors, and full viewport geometry beside the HUD. Five movement regressions extend the suite to nineteen tests. Native diagnostics add held-attack mouse input, open-door traversal, map captures and object review.
