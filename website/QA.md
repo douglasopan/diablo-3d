@@ -1,5 +1,13 @@
 # Website verification · 2026-10-07
 
+## AI transparency and human direction — October 11, 2026
+
+Read the actual [Zanezooked comment](https://www.reddit.com/r/Diablo1/comments/1x0m0pt/comment/pewfj68/) and Douglas's existing response using the in-app browser. The correction names Douglas, states AI use on entry, explains the first/third-person and native-simulation choices, labels generated ambient artwork, and details Codex/site-copy/model/music/narration provenance without reattributing upstream work. Human responsibility is distinguished from incomplete artistic review, technical tests and actual playtesting. Music stays optional, with the documented Vanilla path and website pause/mute controls. No Reddit post or account action was performed.
+
+The project, technology and roadmap identify the documented October 10 Windows b775 checkpoint, broader game-development pause, Meshy OFF for 14 known bindings, native Ogden sprite, load/reentry and performance limits, and local-only browser R12. Earlier import evidence remains dated history. The technology page separates integrated controls from the requested M, I/Tab, Q, J, E and stationary click/hold layout pending an identified validated build. A public installer, completed game or unverified control policy is not implied.
+
+Local authoring checks ran 37 tests: 36 passed and one environment-dependent test skipped. The bilingual build and artifact verifier passed: 68 indexable pages, 70 HTML files, 24 articles per language and the same 51 captures. All links/fragments, metadata, sitemap and RSS passed; the new visible English nodes have no untranslated Portuguese copy. The existing validated public Patreon share URL is preserved, supported by the October 9 restoration/share publication receipt; no fiscal fields or account settings were reopened. Production byte and responsive browser checks are recorded in the private delivery packet after deployment.
+
 ## Search discovery — October 10, 2026
 
 The new search-discovery requirement reopens only site metadata and the localized home introduction/description. The production baseline was audited at its actual GitHub Pages project prefix: eight PT/EN content pages returned HTTP 200, exact self-canonicals, language alternates and `index, follow`; sitemap and project robots returned HTTP 200. The sitemap has 68 unique paired URLs, with both `noindex` 404 pages excluded. The origin robots URL returned 404. Public repository metadata and README already point to the actual production site. This identifies no public crawling block and does not establish Google indexing or ranking.

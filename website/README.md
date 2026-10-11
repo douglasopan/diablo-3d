@@ -1,5 +1,13 @@
 # D3D website
 
+## AI disclosure and direction — 11 October 2026
+
+The home, project and technology pages now state Douglas Pan's responsibility and AI use prominently, including Codex for project code/tools, AI-authored copy/translations, generated concepts and atmospheric illustrations, Meshy candidates, and AI-assisted musical reinterpretations. The project page explains the camera and interface choices, inherited DevilutionX/Blizzard provenance, the authorized synthetic narration, optional music and incomplete human/artistic review. It does not describe inherited game code/art/music as newly authored by the project. Ambient labels explicitly identify AI generation on every page; a shared footer links the disclosure.
+
+The documented Windows b775 checkpoint is identified by date, local status and limitations. Its 14 known Meshy bindings are OFF; earlier imported models and Ogden's rig remain historical, while current Ogden uses the native sprite. Browser R12 is local only. Current integrated controls are separated from the requested M, I/Tab, Q, J, E and stationary click/hold layout pending an identified validated build. Historical articles, media and capture provenance remain intact; source availability does not become a public installer or complete game.
+
+This is a response to the actual [Zanezooked comment](https://www.reddit.com/r/Diablo1/comments/1x0m0pt/comment/pewfj68/), read along with Douglas's existing response. No new Reddit response, account change, media generation or engine change belongs to this correction. Publication contains only the existing static site. Private comment receipts and publication evidence stay outside the artifact.
+
 ## Search discovery — 10 October 2026
 
 The bounded search-discovery update uses **Diablo3D** consistently in HTML, Open Graph and Twitter titles, the existing WebSite node (with `Diablo 3D` and `D3D` aliases), and the localized home introduction/description. The visual home heading remains unchanged. This records the project's identity without claiming that the full game is ready. Public canonical routes and PT/EN alternates remain stable.
