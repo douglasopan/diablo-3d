@@ -1,5 +1,11 @@
 # Website verification · 2026-10-07
 
+## Search discovery — October 10, 2026
+
+The new search-discovery requirement reopens only site metadata and the localized home introduction/description. The production baseline was audited at its actual GitHub Pages project prefix: eight PT/EN content pages returned HTTP 200, exact self-canonicals, language alternates and `index, follow`; sitemap and project robots returned HTTP 200. The sitemap has 68 unique paired URLs, with both `noindex` 404 pages excluded. The origin robots URL returned 404. Public repository metadata and README already point to the actual production site. This identifies no public crawling block and does not establish Google indexing or ranking.
+
+The publisher now puts the exact **Diablo3D** name in page/social titles, existing WebSite identity/aliases and localized home copy. The visual heading, routes, article facts/order, media, fonts, controls and counts remain intact: 24 articles per language, 51 captures and nine videos. The local build and artifact verification passed for 70 HTML documents, including exact self-canonicals, indexing policy and sitemap equality; authoring tests ran 37 cases successfully with one environment skip. Search Console verification remains an account step, using only the exact URL-prefix property; no DNS/domain change or ownership permission is part of the source patch. Private HTTP receipts and the prepared form screenshot remain outside the publication artifact.
+
 ## Cathedral wall follow-up — October 10, 2026
 
 New evidence supplied by the principal justifies updating the existing PT/EN camera/continuity article: local revision `56e112ab…` was installed at 04:26:03 Brasília time. The reviewed private delivery receipt matches SHA `42d4bfc9cca01f6e708e504ad29079092c196ab8c5c681c168932c43416a09bb`. Public prose summarizes opaque lower walls, preserved door/grate/CLX coverage and openings, and restricted candelabrum-corner suppression without exposing diagnostic files or private game data. It distinguishes 141,139 synthetic structural checks from eight native CPU and eight hardware RX 570 frames, full color comparison from sampled depth/picking, and installation from pending physical/visual QA. The earlier strict operator limitation is retained.

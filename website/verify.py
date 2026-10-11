@@ -39,6 +39,7 @@ def verify():
     documents = {p: Document(p.read_text(encoding='utf-8')) for p in files if p.suffix == '.html'}
     assert len(documents) >= 9, 'Expected the complete website and article pages'
     analytics = build.load_analytics()
+    indexable_urls = set()
     for path, document in documents.items():
         assert document.h1 == 1, f'{path}: exactly one h1 required'
         language = 'en' if path.relative_to(root).parts[0] == 'en' else 'pt-BR'
@@ -53,6 +54,12 @@ def verify():
             logical = logical[3:]
         if logical.endswith('/index.html'):
             logical = logical[:-10]
+        canonical = build.alternate_url(logical, language)
+        assert [a.get('href') for t, a in document.tags if t == 'link' and a.get('rel') == 'canonical'] == [canonical], f'{path}: canonical must identify this exact language and route'
+        expected_robots = 'noindex, follow' if logical == '/404.html' else 'index, follow'
+        assert [a.get('content') for t, a in document.tags if t == 'meta' and a.get('name') == 'robots'] == [expected_robots], f'{path}: incorrect indexing policy'
+        if logical != '/404.html':
+            indexable_urls.add(canonical)
         for locale in ('pt-BR', 'en', 'x-default'):
             assert alternates[locale] == build.alternate_url(logical, locale), f'{path}: incorrect alternate page'
         raw = path.read_text(encoding='utf-8')
@@ -107,6 +114,7 @@ def verify():
     locations = [element.text for element in sitemap.getroot().iter() if element.tag.endswith('loc')]
     assert len(locations) == len(documents) - 2, 'Sitemap must include both languages and omit both 404 pages'
     assert len(locations) == len(set(locations)), 'Duplicate sitemap URLs'
+    assert set(locations) == indexable_urls, 'Sitemap must match the exact canonical URLs of every indexable page'
     for location in locations:
         assert location.startswith(build.BASE + '/')
     posts = build.load_posts()
