@@ -2,7 +2,7 @@
 
 # Diablo 3D · D3D
 
-A Vibecoded community project led by **Douglas Pan** to bring **the whole Diablo 1 game into 3D**, including its procedurally generated dungeon levels, built on [DevilutionX](https://github.com/diasurgical/devilutionX). The native simulation remains responsible for maps, seeds, combat, collision, items and saves. The visual layer adds 3D rendering and gameplay cameras while retaining original-view comparison. Tristram and a pilot of nine nearby regions in the first normal Cathedral level exist; reconstruction, loading/reentry and performance still need work.
+A Vibecoded community project led by **Douglas Pan** to bring **almost the whole Diablo 1 game into 3D**, including its procedurally generated dungeon levels, built on [DevilutionX](https://github.com/diasurgical/devilutionX). The native simulation remains responsible for maps, seeds, combat, collision, items and saves. The visual layer adds 3D rendering and gameplay cameras while retaining original-view comparison. Tristram and a pilot of nine nearby regions in the first normal Cathedral level exist; reconstruction, loading/reentry and performance still need work.
 
 **A proposta é o Diablo 1 inteiro em 3D.** Tristram e um piloto do primeiro andar normal da Catedral já podem ser testados em 3D. Terceira e primeira pessoa estão integradas, com horizonte provisório em Tristram. Modelos e composição das paredes continuam em revisão; os demais níveis, personagens, monstros e efeitos seguem no plano do jogo completo. O catálogo colaborativo crescerá com essas etapas para coordenar os modelos que ainda precisam ser criados.
 
