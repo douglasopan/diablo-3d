@@ -1,0 +1,17 @@
+{
+  "version": "v0.1.0-early-access.r17",
+  "archive": {
+    "url": "https://github.com/douglasopan/diablo-3d/releases/download/v0.1.0-early-access.r17/Diablo3D-Windows-x86_64-R17.zip",
+    "sha256": "57b600786a8cda6debb52137199af3480c0770cd7353f439be79d6b905161676",
+    "bytes": 189483255
+  },
+  "sourceArchive": {
+    "url": "https://github.com/douglasopan/diablo-3d/releases/download/v0.1.0-early-access.r17/Diablo3D-R17-corresponding-source.tar.gz",
+    "sha256": "7a29d178edaa4d283b4e34fc2159fcb8338c56157846734d01962c0d12fe0903",
+    "bytes": 49386009
+  },
+  "entrypoint": "Iniciar-Diablo3D.cmd",
+  "profileLocation": "%LOCALAPPDATA%/Diablo3D/profile",
+  "requiredExternalData": "User-owned DIABDAT.MPQ; not distributed",
+  "releaseUrl": "https://github.com/douglasopan/diablo-3d/releases/tag/v0.1.0-early-access.r17"
+}
