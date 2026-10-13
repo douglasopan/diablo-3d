@@ -83,6 +83,9 @@ main > .actions + section, main > .notice + section { margin-top: 48px; }
 }
 .music-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; font-size: .68rem; line-height: 1.4; }
 .music-heading > span:first-child { color: var(--gold-light); }
+.music-close { flex: 0 0 32px; min-height: 32px; padding: 0; border: 0; border-radius: 2px; color: var(--gold-light); background: transparent; font-size: 1.4rem; line-height: 1; }
+.music-close:hover { background: var(--surface-raised); color: var(--ink); }
+.music-open { position: fixed; right: 20px; bottom: max(16px, env(safe-area-inset-bottom)); z-index: 35; width: 44px; height: 44px; border: 1px solid #706046; border-radius: 50%; background: #151710; color: var(--gold-light); box-shadow: 0 4px 24px #0008; font-size: 1.5rem; }
 #music-status { color: var(--muted); text-align: right; font-size: .62rem; }
 .music-player audio { width: 100%; height: 40px; margin-top: 6px; }
 .music-credit { display: block; margin-top: 4px; font-size: .62rem; line-height: 1.5; color: var(--muted); }
@@ -133,6 +136,33 @@ main > .actions + section, main > .notice + section { margin-top: 48px; }
 
 .hero { display: grid; grid-template-columns: 1fr 1.07fr; align-items: center; gap: 64px; padding-block: 16px 36px; }
 .hero-copy { min-width: 0; }
+.hero-invitations { display: flex; flex-direction: column; align-items: center; gap: 12px; margin: 26px 0 22px; }
+.hero-invitations .button { width: min(340px, 100%); min-height: 54px; justify-content: center; gap: 12px; }
+.hero-invitations .social-icon { width: 24px; height: 24px; flex: 0 0 24px; }
+.hero-explore { display: inline-flex; align-items: center; gap: 12px; font-size: .85rem; text-decoration: none; }
+.hero-author { margin-top: 16px; }
+.game-story { max-width: 820px; margin-inline: auto; padding-block: 18px; text-align: center; }
+.game-story .lede { margin-inline: auto; }
+.section-lede { max-width: 720px; color: var(--muted); font-size: 1.08rem; }
+.model-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 44px 32px; margin: 38px 0 26px; }
+.model-piece { min-width: 0; }
+.model-visual { position: relative; display: block; border-bottom: 1px solid var(--line); background: radial-gradient(ellipse at 50% 70%, #3a2c1f 0, #191a15 48%, transparent 78%); }
+.model-visual img { width: 100%; height: 390px; object-fit: contain; }
+.model-piece h3 { font-size: 2rem; margin-bottom: 9px; }
+.model-piece figcaption p { margin-bottom: 7px; }
+.model-piece .meta { font-size: .72rem; }
+.model-note { max-width: 780px; color: var(--muted); font-size: .78rem; }
+.model-opening { margin-top: 14px; color: var(--gold-light); }
+.model-opening summary { cursor: pointer; padding: 8px 0; }
+.model-opening img { width: 100%; height: auto; margin-top: 12px; }
+.creator-story { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; padding-block: 28px; border-top: 1px solid var(--line); }
+@media (max-width: 680px) {
+  .model-grid, .creator-story { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+  .model-visual img { height: 300px; }
+  .model-piece h3 { font-size: 1.8rem; }
+  .hero-invitations { gap: 10px; }
+  .hero-invitations .button { width: min(340px, 100%); }
+}
 .hero h1 { font-size: clamp(2.8rem, 4.7vw, 4.3rem); }
 .hero .lede { max-width: 520px; }
 .project-banner { width: 100%; max-width: 550px; height: auto; margin-bottom: 26px; border-radius: 3px; }

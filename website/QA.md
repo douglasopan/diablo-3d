@@ -1,5 +1,11 @@
 # Website verification · 2026-10-07
 
+## First Person SEO and local-preview devlog — October 12, 2026
+
+The bounded candidate uses six source paths: build.py, translations.py, website README/QA and one matched Portuguese/English article. It was prepared outside the shared checkout while awaiting the principal’s exact path reservation and Git window. The latest private delivery receipt verifies R3 `4fe0f467cd56` as local review with 231 frozen files and 111,564 technical checks; the devlog does not reinterpret those checks as complete physical gameplay, full-game coverage or sustained FPS. Its controls were checked against the delivered profile rather than the requested M/Q/J layout.
+
+Local build and artifact verification passed with 70 indexable pages, 72 HTML documents, 25 complete articles per language and the same 51 captures. The existing 37 authoring tests ran with 36 passes and one environment dependency skip. No game test/build/runtime or private media publication belongs to this site task. Panvia was inspected in the browser: its exact canonical resolves to the requested listing, “Em breve” is visible and it states that no mod installation package is published. The CTA preserves that distinction with an adjacent notice. Private receipts retain the candidate, source hashes, HTTP/translation audit and browser proofs; published-byte and CI checks follow deployment.
+
 ## AI transparency and human direction — October 11, 2026
 
 Read the actual [Zanezooked comment](https://www.reddit.com/r/Diablo1/comments/1x0m0pt/comment/pewfj68/) and Douglas's existing response using the in-app browser. The correction names Douglas, states AI use on entry, explains the first/third-person and native-simulation choices, labels generated ambient artwork, and details Codex/site-copy/model/music/narration provenance without reattributing upstream work. Human responsibility is distinguished from incomplete artistic review, technical tests and actual playtesting. Music stays optional, with the documented Vanilla path and website pause/mute controls. No Reddit post or account action was performed.
@@ -136,3 +142,10 @@ The final central-document review identified another stale state: decorative hor
 The versioned roadmap link is pinned to the principal's published central-document commit `a1ceed7e6adfdeb1c3e4b65e559ba50929198914`. The engine delivery remains separately pinned to `7e4a6c3b`; central documents were neither edited nor staged by this publisher.
 
 The build contains 68 route pages, 24 articles per language and the same 51 captures. Artifact verification passed for all 70 HTML documents, including metadata, local URLs/fragments, RSS and sitemap. The authoring suite ran 37 tests: 36 passed, one Node-dependent test skipped, zero failures. Central implementation documents remain with the principal; only the website and the bilingual devlog sources belong to this delivery.
+
+
+## Human presentation and music panel — 12 October 2026
+
+Douglas requested a less technical game presentation, reuse of existing 3D model images, removal of the discouraging introductory sentence, and a close control for ambient music. The home now leads with exploration, six model figures, Douglas’s voice, the journal and voluntary support. Seven raster previews preserve the existing model/image masters; no GLB, original game data or private HD pack is distributed. Houses/NPCs remain labelled model studies, with AI use and credits accessible. The stone coffin has closed/open views. Shared navigation is shorter; technical pages remain in the footer.
+
+Douglas confirmed download availability on Panvia and explicitly requested publication. The coming-soon notice is removed, with the exact project page retained. The gold Discord button includes its icon directly below the gold download button. The music × pauses audio and closes its panel; the preference persists across navigation, and a small music-note button reopens the paused panel. Both languages are authored. Existing article evidence and bounded R3 claims remain version-specific.

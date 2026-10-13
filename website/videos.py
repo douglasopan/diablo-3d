@@ -182,13 +182,13 @@ def showcase_section(language, url):
         slot_id = f'youtube-showcase-{key}'
         play_label = text('Assistir aqui', 'Watch here')
         player_title = text('Player do YouTube: ', 'YouTube player: ') + title
-        kind = text('Short vertical · 28 s · WIP', 'Vertical Short · 28 s · WIP') if short else text('Vídeo principal horizontal · 28 s · WIP', 'Main horizontal video · 28 s · WIP')
+        kind = text('Short · 28 s', 'Short · 28 s') if short else text('Modelos 3D · 28 s', '3D models · 28 s')
         explanation = text(
             'Os mesmos dois modelos, em formato vertical.',
             'The same two models, in a vertical format.',
         ) if short else text(
-            'Griswold e Ogden em giro de 360° para revisão visual.',
-            'Griswold and Ogden in a 360° turntable for visual review.',
+            'Griswold e Ogden vistos de todos os lados.',
+            'Griswold and Ogden from every angle.',
         )
         status_message = text('Player aberto. Use os controles do vídeo para reprodução e volume.', 'Player opened. Use the video controls for playback and volume.')
         watch_url = 'https://www.youtube.com/shorts/' + video_id if short else 'https://www.youtube.com/watch?v=' + video_id
@@ -206,7 +206,7 @@ def showcase_section(language, url):
         _external_link(text('Participar no Discord', 'Join the Discord'), DISCORD, 'button secondary'),
     ))
     return f'''<section class="youtube-videos-section youtube-videos-showcase" aria-labelledby="youtube-showcase-heading">
-<div class="youtube-videos-intro"><p class="eyebrow">{escape(text('MODELOS EM DESENVOLVIMENTO · WIP', 'MODELS IN DEVELOPMENT · WIP'))}</p><h2 id="youtube-showcase-heading">{escape(text('Griswold e Ogden em 360°', 'Griswold and Ogden in 360°'))}</h2><p>{escape(text('Uma prévia de 28 segundos dos dois modelos em desenvolvimento, com um vídeo principal horizontal e um Short dos mesmos personagens.', 'A 28-second preview of the two models in development, with a main horizontal video and a Short of the same characters.'))}</p><p>{escape(text('São estudos visuais em revisão. Os vídeos não mostram gameplay nem comprovam integração no jogo ou aprovação artística.', 'These are visual studies under review. The videos do not show gameplay or establish in-game integration or artistic approval.'))}</p><p class="youtube-videos-note">{escape(text('Clique no play ou em “Assistir aqui” para reproduzir neste card. O player só carrega após esse clique.', 'Click play or “Watch here” to play in this card. The player loads only after that click.'))} <a href="{escape(url('/devlog/'), quote=True)}">{escape(text('Acompanhar o devlog', 'Follow the devlog'))}</a>.</p></div>
+<div class="youtube-videos-intro"><p class="eyebrow">{escape(text('ROSTOS DE TRISTRAM', 'FACES OF TRISTRAM'))}</p><h2 id="youtube-showcase-heading">{escape(text('Griswold e Ogden em 360°', 'Griswold and Ogden in 360°'))}</h2><p>{escape(text('Dois rostos conhecidos, agora vistos de todos os lados. Assista à prévia dos modelos em 28 segundos.', 'Two familiar faces, now seen from every angle. Watch this 28-second model preview.'))}</p><p>{escape(text('Modelos em desenvolvimento, apresentados fora do jogo.', 'Models in development, shown outside the game.'))}</p><p class="youtube-videos-note">{escape(text('Clique no play para assistir aqui.', 'Press play to watch here.'))} <a href="{escape(url('/devlog/'), quote=True)}">{escape(text('Acompanhar o devlog', 'Follow the devlog'))}</a>.</p></div>
 <div class="youtube-video-grid">{''.join(cards)}</div>
 <div class="youtube-videos-community actions">{actions}</div>
 </section>'''
