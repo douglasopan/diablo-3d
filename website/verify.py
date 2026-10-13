@@ -142,7 +142,9 @@ def verify():
         study_images = [a for t, a in article.tags if t == 'img' and a.get('src', '').startswith(build.PREFIX + '/assets/studies/hud-r2/')]
         assert len(study_images) == 79 and sum(a.get('loading') == 'lazy' for a in study_images) == 78 and sum(a.get('loading') == 'eager' for a in study_images) == 1, 'All gallery images must load lazily; only the article hero is eager'
     for language in ('', 'en/'):
-        for route, expected_ids in (('index.html', [DEVLOG_VIDEO_IDS['devlog-horizontal'], *SHOWCASE_VIDEO_IDS.values(), VIDEO_IDS['menu-rock2']]), ('musica/index.html', list(VIDEO_IDS.values())), ('devlog/interfaces-diablo-r2/index.html', list(SHOWCASE_VIDEO_IDS.values())), ('galeria/index.html', [*DEVLOG_VIDEO_IDS.values(), *SHOWCASE_VIDEO_IDS.values(), *VIDEO_IDS.values()]), ('devlog/devlog-em-video/index.html', list(DEVLOG_VIDEO_IDS.values()))):
+        # The game-focused home features the model videos; music and the full journal
+        # videos remain in their own libraries and retain all accessible play triggers.
+        for route, expected_ids in (('index.html', list(SHOWCASE_VIDEO_IDS.values())), ('musica/index.html', list(VIDEO_IDS.values())), ('devlog/interfaces-diablo-r2/index.html', list(SHOWCASE_VIDEO_IDS.values())), ('galeria/index.html', [*DEVLOG_VIDEO_IDS.values(), *SHOWCASE_VIDEO_IDS.values(), *VIDEO_IDS.values()]), ('devlog/devlog-em-video/index.html', list(DEVLOG_VIDEO_IDS.values()))):
             video_page = documents[root / (language + route)]
             buttons = [a for t, a in video_page.tags if t == 'button' and 'data-youtube-id' in a]
             assert [a['data-youtube-id'] for a in buttons] == [video_id for video_id in expected_ids for _ in range(2)], 'Each confirmed video needs a working poster play and text trigger'

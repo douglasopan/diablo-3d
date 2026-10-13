@@ -1,5 +1,11 @@
 # D3D website
 
+## First Person SEO, Panvia and current devlog — 12 October 2026
+
+The site now describes Diablo 1 First Person and Third Person features naturally in page titles, descriptions, the technology heading and useful controls content. The owner-requested visual home H1 is retained. Home, status panels and the new complete PT/EN devlog point to the exact public Panvia listing with “Download and testing on Panvia” and an adjacent early-access-coming-soon notice. Browser inspection confirmed the listing and exact canonical, and that no Diablo3D Panvia installation package was published; the Panvia application installer is a different download. No new ranking, account, online-save or achievement availability is claimed.
+
+The new record identifies the October 12 R3 local preview `4fe0f467cd56`, its bounded tests, native sprites, sarcophagus animation, current controls and incomplete floor coverage. b775 remains a distinct habitual installation and R12 a local browser experiment. Historical HD H6 was partial/private; no DamnationX pack, original game data, private art or binary is deployed. AI disclosure, upstream credits and the independent plopsDOTio reference remain explicit. One article per language is added; the other articles, 51 captures, nine videos, fonts, logo, parallax, music and support links are preserved.
+
 ## AI disclosure and direction — 11 October 2026
 
 The home, project and technology pages now state Douglas Pan's responsibility and AI use prominently, including Codex for project code/tools, AI-authored copy/translations, generated concepts and atmospheric illustrations, Meshy candidates, and AI-assisted musical reinterpretations. The project page explains the camera and interface choices, inherited DevilutionX/Blizzard provenance, the authorized synthetic narration, optional music and incomplete human/artistic review. It does not describe inherited game code/art/music as newly authored by the project. Ambient labels explicitly identify AI generation on every page; a shared footer links the disclosure.
@@ -116,3 +122,10 @@ The home page and R2 article additionally feature the public Griswold/Ogden hori
 The shared PT/EN frame contains one optional Discord/YouTube invitation and a footer launcher. It can open automatically after 15 visible seconds or 45% scrolling, once per session, while avoiding focused editing controls and another open dialog. Automatic opening uses a nonmodal panel and preserves page interaction and focus; manual opening uses a native modal dialog. Closing with Escape, either close button or a destination records a 30-day local dismissal shared across languages; session storage provides a fallback. Automatic invitations stay disabled if writable session storage is unavailable. There is no subscription verification or additional tracking.
 
 Optional email signup is linked from the home page, devlog, music library and footer. Public respondent URLs alone are stored in `newsletter.json`; owner/editor links and response data must remain private. The site links to the real Google Forms submission and confirmation flow instead of simulating a stored signup. Cancellation requests are private and processed manually before future mailings. See [NEWSLETTER.md](NEWSLETTER.md) for the operator procedure. Reading the site and downloading audio never require signup.
+
+
+## Human presentation and music panel — 12 October 2026
+
+Douglas requested a less technical game presentation, reuse of existing 3D model images, removal of the discouraging introductory sentence, and a close control for ambient music. The home now leads with exploration, six model figures, Douglas’s voice, the journal and voluntary support. Seven raster previews preserve the existing model/image masters; no GLB, original game data or private HD pack is distributed. Houses/NPCs remain labelled model studies, with AI use and credits accessible. The stone coffin has closed/open views. Shared navigation is shorter; technical pages remain in the footer.
+
+Douglas confirmed download availability on Panvia and explicitly requested publication. The coming-soon notice is removed, with the exact project page retained. The gold Discord button includes its icon directly below the gold download button. The music × pauses audio and closes its panel; the preference persists across navigation, and a small music-note button reopens the paused panel. Both languages are authored. Existing article evidence and bounded R3 claims remain version-specific.

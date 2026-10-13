@@ -4,6 +4,9 @@
 
   const audio = document.getElementById('background-music');
   const status = document.getElementById('music-status');
+  const panel = document.getElementById('music-player');
+  const close = document.getElementById('music-close');
+  const open = document.getElementById('music-open');
   if (!audio || !status) return;
   const english = document.documentElement.lang === 'en';
   const text = (pt, en) => english ? en : pt;
@@ -17,12 +20,14 @@
         seconds: Number.isFinite(state.seconds) && state.seconds >= 0 ? state.seconds : 0,
         volume: Number.isFinite(state.volume) ? Math.max(0, Math.min(1, state.volume)) : 0.25,
         muted: state.muted === true,
+        dismissed: state.dismissed === true,
       };
     } catch { return null; /* Playback works without storage. */ }
   };
   const saved = readState();
   const volume = saved?.volume ?? 0.25;
   let pendingPosition = saved?.seconds ?? null;
+  let dismissed = saved?.dismissed === true;
   audio.volume = volume;
   audio.muted = saved?.muted === true;
 
@@ -60,6 +65,7 @@
         seconds: pendingPosition ?? audio.currentTime,
         volume: audio.volume,
         muted: audio.muted,
+        dismissed,
       }));
     } catch { /* Private browsing may disable storage. */ }
   };
@@ -68,6 +74,28 @@
       ? text('Pausada', 'Paused')
       : text('Tocando', 'Playing');
   };
+  const updateVisibility = () => {
+    if (!panel || !close || !open) return;
+    panel.hidden = dismissed;
+    close.hidden = false;
+    open.hidden = !dismissed;
+    open.setAttribute('aria-expanded', String(!dismissed));
+  };
+  close?.addEventListener('click', () => {
+    dismissed = true;
+    audio.pause();
+    updateVisibility();
+    persist();
+    open?.focus();
+  });
+  open?.addEventListener('click', () => {
+    dismissed = false;
+    updateVisibility();
+    updateStatus();
+    persist();
+    close?.focus();
+  });
+  updateVisibility();
   const restorePosition = () => {
     if (pendingPosition !== null && !audio.seeking && audio.readyState > 0 && Number.isFinite(audio.duration) && audio.duration > 0) {
       try {
@@ -117,10 +145,12 @@
     const latest = readState();
     if (!latest) return;
     pendingPosition = latest.seconds;
+    dismissed = latest.dismissed;
+    updateVisibility();
     audio.volume = latest.volume;
     audio.muted = latest.muted;
     restorePosition();
-    if (latest.playing) {
+    if (latest.playing && !dismissed) {
       attemptPlay();
     } else {
       audio.pause();
@@ -129,7 +159,7 @@
   });
 
   restorePosition();
-  if (!saved || saved.playing === true) {
+  if (!dismissed && (!saved || saved.playing === true)) {
     attemptPlay();
   } else {
     updateStatus();
