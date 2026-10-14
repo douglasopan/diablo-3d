@@ -783,6 +783,7 @@ if(CPACK AND (APPLE OR BUILD_ASSETS_MPQ OR SRC_DIST))
 endif()
 
 resolve_target_link_dependencies()
+include("${CMAKE_CURRENT_SOURCE_DIR}/CMake/ScenePreparation.cmake")
 
 if(UWP_LIB)
   get_target_property(_linked_objects libdevilutionx LINKED_OBJECTS)

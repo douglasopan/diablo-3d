@@ -1,0 +1,17 @@
+[
+  {
+    "object": "cabin-east.d3dvis",
+    "publicOwnTextureSource": "assets/d3d-models/player-cabin-user-r1.d3d",
+    "rgbSha256": "f1632924fb7087c656f26102f248f2e19b9c0bb9ccf1e7e321492ebf20e04c62"
+  },
+  {
+    "object": "cathedral.d3dvis",
+    "publicOwnTextureSource": "assets/d3d-models/church-user-r1.d3d",
+    "rgbSha256": "db0a2088672e37e6036ddffdd4cb218688b8ef04dfc6994b72276d30293f1300"
+  },
+  {
+    "object": "house-pepin.d3dvis",
+    "publicOwnTextureSource": "assets/d3d-models/healer-house-user-r1.d3d",
+    "rgbSha256": "57b3422cac6a8ab892e286979c410cdebd1b5d010c37234a226c1e9dc29d9dc1"
+  }
+]

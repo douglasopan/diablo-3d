@@ -1,0 +1,19 @@
+# Complete selected Tristram distribution
+
+The local3 Tristram scene previously remained in a private runtime snapshot because its static archive and palette contained decoded original Diablo artwork. A user-owned MPQ was required by the game, but the previous launcher did not reconstruct those files from it. The FULL3 download therefore omitted the selected persistent scene and did not satisfy the request to distribute the complete local3 checkpoint.
+
+The new package includes an internal preparation executable, the 14 selected architecture prefabs, the three own Warrior packets, the R17 resources, the unchanged local3 game executable, libraries, defaults, notices and bilingual instructions. Original static artwork and palette bytes are not distributed. On first launch, the preparation executable reads the user's retail `DIABDAT.MPQ` and creates them in a local staging directory.
+
+Preparation uses the selected architecture, not an unverified fallback. The generated complete baseline must match SHA256 `d463e0dee0f022f7b5ecbf9912a787215fa8608fcab7077fbf8cf2fc591198ff`. Twenty byte edits describing the selected cardinal exits are then applied with checked preconditions. The resulting archive must match `01fdec4c0c2279ed1f467056731fb1c056633a7e10d595279632c9f7102c53df`. Every one of the 19 selected runtime files is checked for exact size and hash before installation.
+
+The real native loader then validates 14 architecture objects, 25,743 fixed objects and 1,349 textures with architecture fallback disabled. The original paired WorldPatch is applied: 13 cells, four objects and four routes. The manifest, transforms, UVs, materials, object identities and native patch remain those of the selected cardinal R2 snapshot. The original game executable remains `0f4d9290c0589cbee3eb6c22791f373d4a1b67dd618b97e3bfb5a86637f9bd6c`, native source `24080e8900d695f9c88f9d3ad417917499d8103f`.
+
+The three embedded architecture RGB textures are byte-identical to the already-public own player-cabin, church and healer-house resources from R17. Their provenance proof is in `assets/own-tristram-local3/texture-provenance.json`. The other architecture prefabs contain no embedded RGB payload. Neither private D3DSTAT1 archives nor the original palette are Git/release files.
+
+Preparation creates no SDL video/audio device, game window, physical input, gameplay loop or saves. It does not modify the original MPQ or the human map/editor workspace. Existing settings and persistent data are preserved. A changed scene or different original MPQ is refused rather than silently replacing a manually modified profile. Incompatible retail data cannot pass the frozen baseline check.
+
+Run `Iniciar-Diablo3D.cmd`, select `DIABDAT.MPQ`, and wait for first-run preparation. No external Python, compiler, converter or private download is required. Saves and settings use `%LOCALAPPDATA%/Diablo3D-local3-Tristram/profile`. K switches first/third person, Home restores third person, and F4 switches 3D/native. Warrior Light with Short Sword/Buckler is supported in Town and Cathedral 1. Performance remains unfinished; preparation/loader checks are not new physical-input gameplay or sustained-FPS measurements.
+
+For contributors: configure the normal source with the established Windows dependency/build flags and `-DD3D_BUILD_SCENE_PREPARER=ON`, then build target `prepare_tristram`. The preparation-only adapter replaces the architecture storage object only in this target; the game target and production C++ remain unchanged. The optional CMake target is supplied for reproduction and was not rebuilt during the shared CPU reservation; the shipped helper was compiled from the frozen normal objects plus its two documented preparation translation units.
+
+[Portuguese instructions](TRISTRAM-PUBLIC-PACKAGE.pt-BR.md)

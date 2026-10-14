@@ -1,0 +1,208 @@
+{
+  "format": "d3d.public-tristram-preparation",
+  "version": 1,
+  "baselineSha256": "d463e0dee0f022f7b5ecbf9912a787215fa8608fcab7077fbf8cf2fc591198ff",
+  "baselineBytes": 43730452,
+  "targetSha256": "01fdec4c0c2279ed1f467056731fb1c056633a7e10d595279632c9f7102c53df",
+  "changes": [
+    {
+      "offset": 10358212,
+      "before": 227,
+      "after": 0
+    },
+    {
+      "offset": 10361492,
+      "before": 229,
+      "after": 0
+    },
+    {
+      "offset": 12052683,
+      "before": 55,
+      "after": 21
+    },
+    {
+      "offset": 12052684,
+      "before": 3,
+      "after": 0
+    },
+    {
+      "offset": 12052711,
+      "before": 27,
+      "after": 0
+    },
+    {
+      "offset": 12052712,
+      "before": 4,
+      "after": 0
+    },
+    {
+      "offset": 12052733,
+      "before": 2,
+      "after": 0
+    },
+    {
+      "offset": 12551310,
+      "before": 230,
+      "after": 0
+    },
+    {
+      "offset": 12604973,
+      "before": 232,
+      "after": 0
+    },
+    {
+      "offset": 12605132,
+      "before": 231,
+      "after": 0
+    },
+    {
+      "offset": 12647930,
+      "before": 233,
+      "after": 0
+    },
+    {
+      "offset": 17411365,
+      "before": 226,
+      "after": 0
+    },
+    {
+      "offset": 17452599,
+      "before": 228,
+      "after": 0
+    },
+    {
+      "offset": 17464984,
+      "before": 230,
+      "after": 0
+    },
+    {
+      "offset": 17505176,
+      "before": 232,
+      "after": 0
+    },
+    {
+      "offset": 17505337,
+      "before": 231,
+      "after": 0
+    },
+    {
+      "offset": 17517640,
+      "before": 233,
+      "after": 0
+    },
+    {
+      "offset": 41909178,
+      "before": 3,
+      "after": 1
+    },
+    {
+      "offset": 42866237,
+      "before": 3,
+      "after": 1
+    },
+    {
+      "offset": 42995837,
+      "before": 3,
+      "after": 1
+    }
+  ],
+  "runtimeFiles": [
+    {
+      "path": "d3d-scenes/objects/cabin-east.d3dvis",
+      "bytes": 3582449,
+      "sha256": "32a271f62746e802cdff2a143600c456dd13343aa770c1e04193337b087d1f3c"
+    },
+    {
+      "path": "d3d-scenes/objects/cabin-west.d3dvis",
+      "bytes": 146250,
+      "sha256": "5ecea08cd73b761a5b0629acd2d50c86911f38233f80f7ca12a6999250c24e59"
+    },
+    {
+      "path": "d3d-scenes/objects/catacombs-entrance.d3dvis",
+      "bytes": 41354,
+      "sha256": "8974ab93321d03bc1e97b8f751873166fddf3c60534f5bddbb5f9210a1be2e0d"
+    },
+    {
+      "path": "d3d-scenes/objects/cathedral.d3dvis",
+      "bytes": 4132868,
+      "sha256": "7b8eaa8485499374423282c0c6e3e0f19fc96e3b85dd469713d9a6224ed95e02"
+    },
+    {
+      "path": "d3d-scenes/objects/house-adria.d3dvis",
+      "bytes": 10154,
+      "sha256": "305b0e98655ab4c7912b58a8136707318eaeaadc4c9b914dc1bb22ca4a3d04e0"
+    },
+    {
+      "path": "d3d-scenes/objects/house-gillian.d3dvis",
+      "bytes": 22218,
+      "sha256": "8e5ed3def0339a3b31f46eb059a66bdc69d2dd2ea134ab51f836739fdc1f8dc2"
+    },
+    {
+      "path": "d3d-scenes/objects/house-north.d3dvis",
+      "bytes": 22218,
+      "sha256": "24bd7abc5b437d4ec50dcdd56600828d6e845abc1534e7be68f53a9aa533cf57"
+    },
+    {
+      "path": "d3d-scenes/objects/house-pepin.d3dvis",
+      "bytes": 3352647,
+      "sha256": "b1d87d88539cfc52148a5b614c6db9ae836be18097bfcfadbb469fddfd1b6bf2"
+    },
+    {
+      "path": "d3d-scenes/objects/house-southeast.d3dvis",
+      "bytes": 22218,
+      "sha256": "91c59f2b383abfab856ee3980cdd877449eaa3d2d54c8a48df70239c1b3ddff3"
+    },
+    {
+      "path": "d3d-scenes/objects/smithy-forge.d3dvis",
+      "bytes": 30954,
+      "sha256": "f2b54569ecff7a482a241d8e318abc1902d78abd702247dfe54fff157d34c526"
+    },
+    {
+      "path": "d3d-scenes/objects/smithy-house.d3dvis",
+      "bytes": 22218,
+      "sha256": "9c33377d474325b86d1c6f498143843daa40c41787ce3177f7118ed9dff02896"
+    },
+    {
+      "path": "d3d-scenes/objects/tavern-main.d3dvis",
+      "bytes": 22218,
+      "sha256": "87b3b46ef1b7ee20f4ce2c755336d84cd13a2ac5ca0e4498eaf0717f6a6c8b2e"
+    },
+    {
+      "path": "d3d-scenes/objects/tavern-wing.d3dvis",
+      "bytes": 22218,
+      "sha256": "e8a053c3a4c316ccfbe586be2d42a01900263e85e5f8bf1a467279df8b7f330b"
+    },
+    {
+      "path": "d3d-scenes/objects/well.d3dvis",
+      "bytes": 20138,
+      "sha256": "3a03c7192461073d49a0bf6bd565ccb459cf981468ab92dad763e57c52a34c7c"
+    },
+    {
+      "path": "d3d-scenes/static/palette.rgb",
+      "bytes": 768,
+      "sha256": "309c7e286070937d8420041effd13d993cb674dd39480693ba9e34ee516a4391"
+    },
+    {
+      "path": "d3d-scenes/static/tristram-baseline.d3dvis",
+      "bytes": 43730452,
+      "sha256": "d463e0dee0f022f7b5ecbf9912a787215fa8608fcab7077fbf8cf2fc591198ff"
+    },
+    {
+      "path": "d3d-scenes/static/tristram.d3dvis",
+      "bytes": 43730452,
+      "sha256": "01fdec4c0c2279ed1f467056731fb1c056633a7e10d595279632c9f7102c53df"
+    },
+    {
+      "path": "d3d-scenes/tristram.ini",
+      "bytes": 4548,
+      "sha256": "4bebc72a12b89fbcbc9231229fb2763120c9dd12829b1629a0173a747ed5da2b"
+    },
+    {
+      "path": "d3d-scenes/world-patches/tristram.ini",
+      "bytes": 1066,
+      "sha256": "889ae9c48ac49ef5d13cc10dfc0ff9357ee701a7b8216c04d69f79b1f22bc235"
+    }
+  ],
+  "originalBitmapBytesDistributed": false,
+  "sceneRevision": "cardinal-exits-r1"
+}
