@@ -772,5 +772,27 @@
     "duplicate_sources": [],
     "width": 1600,
     "height": 1000
+  },
+  {
+    "file": "/assets/captures/local3-warrior-tp-hud.webp",
+    "title": "Warrior e HUD na local3",
+    "alt": "Warrior 3D com espada e escudo em Tristram e painel de personagem aberto.",
+    "caption": "Captura automatizada do checkpoint local3 24080e8, na montagem privada com runtimes selados. Não é gameplay físico nem comprova instalação pública desses recursos; acabamento e desempenho continuam em revisão.",
+    "category": "Personagens",
+    "stage": "local3",
+    "source": "Checkpoint local3 24080e8 / final hardware gate / Town-TP-body-rigids-actual-present-composite.png",
+    "sha256": "6dd28a4cec8e39353b67c6619f01e1f84fc6d02f2ddb49a873ae54fb182f025c",
+    "duplicate_sources": []
+  },
+  {
+    "file": "/assets/captures/local3-warrior-fp.webp",
+    "title": "Olhos e braços do mesmo Warrior",
+    "alt": "Braços e mãos do Warrior segurando espada e broquel em primeira pessoa.",
+    "caption": "Captura automatizada do checkpoint local3 24080e8, na montagem privada com runtimes selados. Não é gameplay físico nem comprova instalação pública desses recursos; acabamento e desempenho continuam em revisão.",
+    "category": "Personagens",
+    "stage": "local3",
+    "source": "Checkpoint local3 24080e8 / final hardware gate / Town-FP-ON-post-atmosphere.png",
+    "sha256": "a9760b3f3c4f56b00f6b22852b6175118e335bec45dd90ffc4ebddadcccb6632",
+    "duplicate_sources": []
   }
 ]

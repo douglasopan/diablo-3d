@@ -1153,3 +1153,9 @@ EVIDENCE_EN: dict[str, dict[str, str]] = {
         'caption': 'The four-angle turn records the front and new rear opening of the cabin, with fire in the same room. The rear view is an approved artistic inference, with no original reference for that face. These are screenshots of the actual scene, preserving the supplied colors.',
     },
 }
+
+# Exact local3 checkpoint captures; complete English metadata.
+EVIDENCE_EN.update({'/assets/captures/local3-warrior-tp-hud.webp': {'title': 'Warrior and HUD in local3', 'alt': '3D Warrior with sword and shield in Tristram and an open character panel.', 'caption': 'Automated capture of local3 checkpoint 24080e8, from the private setup with sealed runtimes. It is not physical-input gameplay or proof of public installation of these resources; finish and performance remain under review.'}, '/assets/captures/local3-warrior-fp.webp': {'title': 'Eyes and arms from the same Warrior', 'alt': 'Warrior arms and hands holding a sword and buckler in first person.', 'caption': 'Automated capture of local3 checkpoint 24080e8, from the private setup with sealed runtimes. It is not physical-input gameplay or proof of public installation of these resources; finish and performance remain under review.'}})
+
+# Checkpoint download invitation.
+TRANSLATIONS['Checkpoint local3 · download'] = 'Local3 checkpoint · download'

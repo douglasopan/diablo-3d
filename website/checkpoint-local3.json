@@ -1,0 +1,19 @@
+{
+  "version": "2026.10.14-local3",
+  "sourceCommit": "24080e8900d695f9c88f9d3ad417917499d8103f",
+  "executableSha256": "0f4d9290c0589cbee3eb6c22791f373d4a1b67dd618b97e3bfb5a86637f9bd6c",
+  "originalBinaryZipSha256": "d897b2623af520ba0d6d19ffe445f1d085f7916a7e5292674094221edd55eed6",
+  "checkpointScope": "Exact existing local3; no WIP performance patches",
+  "privatePayloadsPublished": false,
+  "publicArchiveScope": "Technical executable package; matching private runtime/assets not included",
+  "correspondingSourceFiles": 1214,
+  "completeInstaller": false,
+  "releaseUrl": "https://github.com/douglasopan/diablo-3d/releases/tag/v0.1.0-checkpoint.local3",
+  "functionalChecks": {
+    "warriorCPU": 2301,
+    "thirdPersonCommands": 158,
+    "hud": 29263,
+    "diagnostics": 8272,
+    "rx570": 33393
+  }
+}
