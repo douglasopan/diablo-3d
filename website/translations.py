@@ -926,6 +926,16 @@ TRANSLATIONS.update({
 })
 
 
+TRANSLATIONS.update({
+    'O Warrior em 3D': 'The Warrior in 3D',
+    'O Guerreiro com espada e escudo, em uma prévia de Tristram.': 'The Warrior with a sword and shield in a Tristram preview.',
+    'Espada e broquel em primeira pessoa': 'Sword and buckler in First Person',
+    'Os equipamentos vistos pelos olhos do Guerreiro, no mesmo teste.': 'Equipment seen through the Warrior’s eyes in the same test.',
+    'Captura automatizada da montagem local3. Acabamento e desempenho em revisão.': 'Automated capture of the local3 setup. Art and performance under review.',
+    'Os renders de modelos mostram as peças fora do jogo. Casas e personagens são estudos em desenvolvimento; os vídeos mostram suas vistas em 360°. As capturas do Warrior e de seus equipamentos vêm da montagem local3 de testes. A R17 pública mantém heróis em sprites.': 'Model renders show the pieces outside the game. Houses and characters are studies in development; the videos show their 360° views. The Warrior and equipment captures come from the local3 test setup. The public R17 uses sprite heroes.',
+})
+
+
 def translate_text(value: str) -> str:
     """Translate one complete string, preserving its surrounding whitespace."""
     if value in TRANSLATIONS:
