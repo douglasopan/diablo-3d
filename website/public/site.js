@@ -357,6 +357,21 @@
     initFilters();
     initLightbox();
     initCopyButtons();
+    const downloadDialog = document.getElementById('download-dialog');
+    const downloadOpener = document.querySelector('[data-download-open]');
+    if (downloadDialog && downloadOpener && typeof downloadDialog.showModal === 'function') {
+      downloadOpener.addEventListener('click', (event) => {
+        event.preventDefault();
+        downloadDialog.showModal();
+      });
+      downloadDialog.querySelector('[data-download-close]').addEventListener('click', () => downloadDialog.close());
+      downloadDialog.addEventListener('close', () => downloadOpener.focus({ preventScroll: true }));
+      downloadDialog.addEventListener('click', (event) => {
+        if (event.target !== downloadDialog) return;
+        const box = downloadDialog.getBoundingClientRect();
+        if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) downloadDialog.close();
+      });
+    }
     document.documentElement.classList.add('js');
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });

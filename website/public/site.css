@@ -692,3 +692,10 @@ kbd { display: inline-block; padding: 6px 10px; border: 1px solid #79796e; borde
   .card:hover .card-media img { transform: none; }
   .parallax-scene img { transform: none !important; will-change: auto !important; }
 }
+
+#download-dialog { position: fixed; inset: 0; margin: auto; width: min(560px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); padding: 48px 24px 28px; border: 1px solid var(--gold); border-radius: var(--radius); color: var(--ink); background: var(--surface); }
+#download-dialog::backdrop { background: rgb(0 0 0 / .8); }
+#download-dialog h2 { margin: 0 0 24px; }
+.download-options { display: grid; gap: 16px; }
+.download-options .button { display: block; width: 100%; white-space: normal; text-align: center; }
+.download-options span { display: block; margin-top: 8px; font-size: .85em; }

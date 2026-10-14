@@ -936,6 +936,14 @@ TRANSLATIONS.update({
 })
 
 
+TRANSLATIONS.update({
+    'Escolha como baixar': 'Choose how to download',
+    'Baixar pelo GitHub Releases': 'Download from GitHub Releases',
+    'Baixar pelo Panvia Launcher': 'Download from Panvia Launcher',
+    '(mantém sua versão do jogo atualizada automaticamente)': '(keeps your game version auto updated)',
+    'Fechar': 'Close',
+})
+
 def translate_text(value: str) -> str:
     """Translate one complete string, preserving its surrounding whitespace."""
     if value in TRANSLATIONS:

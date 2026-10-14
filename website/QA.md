@@ -154,3 +154,7 @@ Douglas confirmed download availability on Panvia and explicitly requested publi
 ## Model showcase — 14 October 2026
 
 The #modelos showcase adds the Warrior in third person and the Short Sword/Buckler in first person, reusing the two raster captures already authorized and published with checkpoint c4446ff6. The new assets/models aliases are byte-identical to those captures. Captions and the shared note distinguish automated local3 renderer tests from external model renders, physical gameplay and the public R17 sprite heroes. Both languages retain the full model silhouettes, accessible lightbox and existing open-coffin view. The historical private Tripo Warrior bind still is excluded because the plan/licence record was not confirmed. No new render, model generation, GLB distribution, game runtime/build, release metadata or suspended devlog was touched.
+
+## 2026-10-14 — Download único na página inicial
+
+Requisito de Douglas: substituir os dois botões de download por um único Download, abrindo um diálogo com GitHub Releases e Panvia Launcher (texto de atualização automática solicitado pelo responsável). Removido também o CTA de download repetido na faixa de apoio. Links diretos no diálogo; /download/ permanece como fallback sem JavaScript. PT/EN, abertura, fechar ×, Escape e retorno de foco verificados no navegador. Build e verificador de URLs/fragmentos/metadados passaram. Nenhuma alteração em releases, runtime ou assets do jogo.
