@@ -33,7 +33,6 @@ namespace {
 struct MessageEntry {
 	std::string text;
 	uint32_t duration; // Duration in milliseconds
-	bool blocksInput = true;
 };
 
 std::deque<MessageEntry> DiabloMessages;
@@ -125,11 +124,7 @@ const char *const MsgStrings[] = {
 
 void InitDiabloMsg(diablo_message e, uint32_t duration /*= 3500*/)
 {
-	const auto text = LanguageTranslate(MsgStrings[e]);
-	if (c_find_if(DiabloMessages, [&text](const MessageEntry &entry) { return entry.text == text; }) != DiabloMessages.end()) return;
-	const bool shrine = (e >= EMSG_SHRINE_MYSTERIOUS && e <= EMSG_SHRINE_TAINTED2) || (e >= EMSG_SHRINE_OILY && e <= EMSG_SHRINE_MURPHYS);
-	DiabloMessages.push_back({std::string(text), duration, !shrine});
-	if (DiabloMessages.size() == 1) InitDiabloMsg();
+	InitDiabloMsg(LanguageTranslate(MsgStrings[e]), duration);
 }
 
 void InitDiabloMsg(std::string_view msg, uint32_t duration /*= 3500*/)
@@ -147,11 +142,6 @@ void InitDiabloMsg(std::string_view msg, uint32_t duration /*= 3500*/)
 bool IsDiabloMsgAvailable()
 {
 	return !DiabloMessages.empty();
-}
-
-bool IsDiabloMsgBlockingInput()
-{
-	return !DiabloMessages.empty() && DiabloMessages.front().blocksInput;
 }
 
 void CancelCurrentDiabloMsg()

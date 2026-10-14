@@ -93,9 +93,4 @@ void scrollrt_draw_game_screen();
  */
 void DrawAndBlit();
 
-/** Shared HUD seam: after lower-HUD foreground is sealed, before finalizing UI. */
-void DrawD3dHudFloatingPanels(const Surface &out);
-/** Modal UI keeps its native input priority and draws above all movable windows. */
-void DrawD3dHudModalOverlays(const Surface &out);
-
 } // namespace devilution

@@ -43,8 +43,7 @@ int FinishedQuestOffset;
 int QuestLogMouseToEntry()
 {
 	Rectangle innerArea = InnerPanel;
-	const Point origin = GetPanelPosition(UiPanels::Quest);
-	innerArea.position += Displacement(origin.x, origin.y);
+	innerArea.position += Displacement(GetLeftPanel().position.x, GetLeftPanel().position.y);
 	if (!innerArea.contains(MousePosition) || (EncounteredQuestCount == 0))
 		return -1;
 	const int y = MousePosition.y - innerArea.position.y;

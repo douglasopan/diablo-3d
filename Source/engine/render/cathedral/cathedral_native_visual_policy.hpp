@@ -170,11 +170,10 @@ inline void RequireFrame(const PilotFrame &frame)
 inline void RequireSnapshot(const Snapshot &snapshot, const PilotFrame &frame)
 {
 	RequireFrame(frame);
-	Require(snapshot.gameRevision == frame.gameRevision
-	        && SupportsRetailLevel(snapshot.level, snapshot.levelType, snapshot.hellfire, snapshot.setLevel, snapshot.setLevelId)
-	        && snapshot.originalCathedral
+	Require(snapshot.gameRevision == frame.gameRevision && snapshot.level == 1 && snapshot.levelType == 1
+	        && snapshot.originalCathedral && !snapshot.hellfire && !snapshot.setLevel && snapshot.setLevelId == 0
 	        && snapshot.minX == ActiveMin && snapshot.minZ == ActiveMin && snapshot.maxX == ActiveMax && snapshot.maxZ == ActiveMax,
-	    "Native visual suppression requires a supported retail L1 snapshot/epoch");
+	    "Native visual suppression requires this normal Cathedral1 snapshot/epoch");
 }
 
 inline void RequireOriginalWall(const NativeSurfaceRecord &record)

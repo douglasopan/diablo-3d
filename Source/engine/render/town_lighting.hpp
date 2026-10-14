@@ -104,22 +104,6 @@ TownLightingSample SampleTownLighting(TownLightVector normal, TownLightVector po
 float TownPointLightVisibility(TownLightVector light, TownLightVector receiver,
 	std::span<const TownLightOccluder> occluders);
 
-/** Bounded optional sprite irradiance field. Unlike the interior diffuse
- * sampler, a billboard has no physical surface normal: illumination depends
- * on world position, source radius and shell visibility, never on camera yaw.
- * Invalid inputs fail closed. Sources <= 8, shells <= 32, apertures <= 8 each.
- * This validation permits callers to reject a field before recording a frame. */
-bool ValidateTownSpritePointLighting(std::span<const TownPointLight> lights,
-	std::span<const TownLightOccluder> occluders);
-TownLightColor SampleTownSpritePointLighting(TownLightVector position,
-	std::span<const TownPointLight> lights, std::span<const TownLightOccluder> occluders = {});
-
-/** Add point RGB irradiance using the existing shaded color's linear Rec.709
- * luminance. Input/output are ARGB8888 sRGB; alpha is preserved exactly. Zero
- * irradiance and malformed irradiance return the original bytes unchanged.
- * Indexed palette/depth/pick data are deliberately outside this color helper. */
-uint32_t TintTownSpritePointArgb(uint32_t argb, TownLightColor pointIrradiance);
-
 /** Keep unlit base color, light factors, and self-emission separate. Result is
  * linear RGB and may exceed 1; clamp/tone-map only when encoding to a palette. */
 TownLightColor ComposeTownLitColor(TownLightColor baseLinear, const TownLightingSample &lighting,

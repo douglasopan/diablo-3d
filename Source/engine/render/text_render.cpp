@@ -9,8 +9,6 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
-#include <cstring>
-#include <limits>
 #include <optional>
 #include <string_view>
 #include <utility>
@@ -19,9 +17,6 @@
 #include <ankerl/unordered_dense.h>
 
 #include "DiabloUI/ui_flags.hpp"
-#include "control/d3d_hud_skin.hpp"
-#include "control/d3d_hud_theme.hpp"
-#include "engine/palette.h"
 #include "engine/clx_sprite.hpp"
 #include "engine/load_cel.hpp"
 #include "engine/load_clx.hpp"
@@ -83,9 +78,6 @@ struct FontStack {
 };
 
 ankerl::unordered_dense::map<uint32_t, OwnedFontStack> Fonts;
-ankerl::unordered_dense::map<uint32_t, OwnedFontStack> ThemedFonts;
-bool UseHudThemeText = false;
-uint64_t FontThemeRevision = 0;
 
 std::array<int, 6> FontSizes = { 12, 24, 30, 42, 46, 22 };
 constexpr std::array<int, 6> LineHeights = { 12, 26, 38, 42, 50, 22 };
@@ -195,33 +187,18 @@ uint32_t GetFontId(GameFontTables size, uint16_t row)
 
 FontStack LoadFont(GameFontTables size, text_color color, uint16_t row)
 {
-	if (FontThemeRevision != GetD3dHudThemeRevision()) {
-		ThemedFonts.clear(); FontThemeRevision = GetD3dHudThemeRevision();
-	}
 	if (ColorTranslations[color] != nullptr && !ColorTranslationsData[color]) {
 		ColorTranslationsData[color].emplace();
 		LoadFileInMem(ColorTranslations[color], *ColorTranslationsData[color]);
 	}
 
 	const uint32_t fontId = GetFontId(size, row);
-	auto &cache = UseHudThemeText ? ThemedFonts : Fonts;
-	auto hotFont = cache.find(fontId);
-	if (hotFont != cache.end()) {
+	auto hotFont = Fonts.find(fontId);
+	if (hotFont != Fonts.end()) {
 		return FontStack(hotFont->second);
 	}
 
-	OwnedFontStack &font = cache[fontId];
-	const auto load = [](const char *resource) -> OptionalOwnedClxSpriteList {
-		if (UseHudThemeText) {
-			const auto bytes = GetD3dHudThemeFontBytes(resource);
-			if (!bytes.empty()) {
-				auto copy = std::make_unique<uint8_t[]>(bytes.size());
-				std::memcpy(copy.get(), bytes.data(), bytes.size());
-				return OwnedClxSpriteList { std::move(copy) };
-			}
-		}
-		return LoadOptionalClx(resource);
-	};
+	OwnedFontStack &font = Fonts[fontId];
 	char path[32];
 
 	// Load language-specific glyphs:
@@ -230,12 +207,12 @@ FontStack LoadFont(GameFontTables size, text_color color, uint16_t row)
 	if (lang == "zh" || lang == "ja" || lang == "ko"
 	    || (lang == "tr" && row == 0)) {
 		GetFontPath(languageCode, size, row, ".clx", &path[0]);
-		font.overrideFont = load(path);
+		font.overrideFont = LoadOptionalClx(path);
 	}
 
 	// Load the base glyphs:
 	GetFontPath(size, row, ".clx", &path[0]);
-	font.baseFont = load(path);
+	font.baseFont = LoadOptionalClx(path);
 
 #ifndef UNPACKED_MPQS
 	if (!font.baseFont.has_value()) {
@@ -294,41 +271,7 @@ void DrawFont(const Surface &out, Point position, ClxSprite glyph, text_color co
 	if (outline) {
 		ClxDrawOutlineSkipColorZero(out, 0, { position.x, position.y + glyph.height() - 1 }, glyph);
 	}
-	std::optional<D3dHudThemeRgb> tint;
-	if (UseHudThemeText) {
-		if (color == ColorUiSilver || color == ColorUiSilverDark) tint = GetD3dHudThemeColor(D3dHudThemeColorRole::MutedText);
-		else if (color == ColorGold || color == ColorUiGold || color == ColorUiGoldDark || color == ColorYellow || color == ColorWhitegold) tint = GetD3dHudThemeColor(D3dHudThemeColorRole::AccentText);
-		else if (color == ColorWhite || color == ColorInGameDialogWhite || color == ColorButtonface) tint = GetD3dHudThemeColor(D3dHudThemeColorRole::Text);
-		else if (color == ColorButtonpushed) tint = GetD3dHudThemeColor(D3dHudThemeColorRole::Highlight);
-	}
-	if (tint) {
-		static std::array<std::optional<std::array<uint8_t, 256>>, 19> translations;
-		static std::array<SDL_Color, 256> palette;
-		static uint64_t revision = std::numeric_limits<uint64_t>::max();
-		if (revision != GetD3dHudThemeRevision() || std::memcmp(palette.data(), logical_palette.data(), sizeof(palette)) != 0) {
-			translations = {}; palette = logical_palette; revision = GetD3dHudThemeRevision();
-		}
-		if (!translations[color]) {
-		translations[color].emplace();
-		auto &translation = *translations[color];
-		for (size_t i = 0; i < translation.size(); ++i) {
-			const uint8_t native = ColorTranslationsData[color] ? (*ColorTranslationsData[color])[i] : static_cast<uint8_t>(i);
-			if (native <= 1) { translation[i] = native; continue; }
-			const auto source = logical_palette[native];
-			const int value = std::max({ source.r, source.g, source.b });
-			const int r = value * tint->r / 255, g = value * tint->g / 255, b = value * tint->b / 255;
-			int distance = std::numeric_limits<int>::max(); uint8_t best = native;
-			for (size_t index = 2; index < logical_palette.size(); ++index) {
-				const auto p = logical_palette[index];
-				const int dr = r - p.r, dg = g - p.g, db = b - p.b;
-				const int delta = dr * dr + dg * dg + db * db;
-				if (delta < distance) { distance = delta; best = static_cast<uint8_t>(index); }
-			}
-			translation[i] = best;
-		}
-		}
-		RenderClxSpriteWithTRN(out, glyph, position, translations[color]->data());
-	} else if (ColorTranslationsData[color]) {
+	if (ColorTranslationsData[color]) {
 		RenderClxSpriteWithTRN(out, glyph, position, ColorTranslationsData[color]->data());
 	} else {
 		RenderClxSprite(out, glyph, position);
@@ -675,13 +618,6 @@ uint32_t DoDrawString(const Surface &out, std::string_view text, Rectangle rect,
 
 } // namespace
 
-ScopedD3dHudThemeText::ScopedD3dHudThemeText(bool enable)
-    : previous_(UseHudThemeText)
-{
-	UseHudThemeText = enable;
-}
-ScopedD3dHudThemeText::~ScopedD3dHudThemeText() { UseHudThemeText = previous_; }
-
 void LoadSmallSelectionSpinner()
 {
 	pSPentSpn2Cels = LoadCel("data\\pentspn2", 12);
@@ -690,7 +626,6 @@ void LoadSmallSelectionSpinner()
 void UnloadFonts()
 {
 	Fonts.clear();
-	ThemedFonts.clear();
 }
 
 int GetLineWidth(std::string_view text, GameFontTables size, int spacing, int *charactersInLine)

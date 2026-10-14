@@ -82,24 +82,6 @@ uint8_t AnimationInfo::getAnimationProgress() const
 	return static_cast<uint8_t>(animationFraction);
 }
 
-AnimationRenderPhase AnimationInfo::sampleRenderPhase(uint8_t interpolation128) const
-{
-	AnimationRenderPhaseInput input;
-	input.frameCount = numberOfFrames;
-	input.currentFrame = currentFrame;
-	input.ticksPerFrame = ticksPerFrame;
-	input.tickCounter = tickCounterOfCurrentFrame;
-	input.distributedFrames = relevantFramesForDistributing_;
-	if (relevantFramesForDistributing_ > 0 && currentFrame < relevantFramesForDistributing_) {
-		input.previousSkippedFrames = skippedFramesFromPreviousAnimation_;
-		input.elapsedTicks128 = ticksSinceSequenceStarted_;
-		input.tickModifier = tickModifier_;
-	}
-	input.interpolation128 = interpolation128;
-	input.petrified = isPetrified;
-	return SampleAnimationRenderPhase(input);
-}
-
 void AnimationInfo::setNewAnimation(OptionalClxSpriteList celSprite, int8_t numberOfFrames, int8_t ticksPerFrame, AnimationDistributionFlags flags /*= AnimationDistributionFlags::None*/, int8_t numSkippedFrames /*= 0*/, int8_t distributeFramesBeforeFrame /*= 0*/, uint8_t previewShownGameTickFragments /*= 0*/)
 {
 	if ((flags & AnimationDistributionFlags::RepeatedAction) == AnimationDistributionFlags::RepeatedAction && distributeFramesBeforeFrame != 0 && this->numberOfFrames == numberOfFrames && currentFrame + 1 >= distributeFramesBeforeFrame && currentFrame != this->numberOfFrames - 1) {

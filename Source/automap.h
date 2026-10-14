@@ -152,8 +152,6 @@ Rectangle GetD3dMinimapBounds();
 bool IsD3dMinimapPoint(Point point);
 /** Consumes only the native map's close button, preserving its other controls. */
 bool HandleD3dMinimapClose(Point point);
-/** Per-pixel resize on all four edges; Ctrl body moves/resets the same saved module. */
-bool HandleD3dMinimapCustomizationDown(Point point, uint8_t button, uint16_t modifiers);
 void DrawD3dMinimapHeader(const Surface &out);
 
 /**

@@ -1,4 +1,3 @@
-#include "control/d3d_floating_panels.hpp"
 /**
  * @file player.cpp
  *
@@ -49,7 +48,6 @@
 #include "objects.h"
 #include "options.h"
 #include "player.h"
-#include "engine/render/player_actor_native_hooks.hpp"
 #include "qol/autopickup.h"
 #include "qol/stash.h"
 #include "spells.h"
@@ -2302,7 +2300,6 @@ void SetPlrAnims(Player &player)
  */
 void CreatePlayer(Player &player, HeroClass c)
 {
-	const NativePlayerActorActivationScope actorActivation(player);
 	player = {};
 	SetRndSeed(SDL_GetTicks());
 
@@ -2482,7 +2479,6 @@ void AddPlrMonstExper(int lvl, unsigned exp, char pmask)
 
 void InitPlayer(Player &player, bool firstTime)
 {
-	const NativePlayerActorActivationScope actorActivation(player);
 	if (firstTime) {
 		player._pRSplType = SpellType::Invalid;
 		player._pRSpell = SpellID::Invalid;
@@ -2686,7 +2682,6 @@ StartPlayerKill(Player &player, DeathReason deathReason)
 	if (player.hasNoLife() && player._pmode == PM_DEATH) {
 		return;
 	}
-	const NativePlayerActorDeathScope actorDeath(player);
 
 	if (&player == MyPlayer) {
 		NetSendCmdParam1(true, CMD_PLRDEAD, static_cast<uint16_t>(deathReason));
@@ -3151,10 +3146,10 @@ void CheckPlrSpell(bool isShiftHeld, SpellID spellID, SpellType spellType)
 		if (IsPointOnD3dHud(MousePosition))
 			return;
 
-		if (!IsTownFirstPersonInputCaptured() && (
-		    (!IsD3dHudSelected() && IsLeftPanelOpen() && GetLeftPanel().contains(MousePosition))      // inside left panel
-		    || (IsD3dHudSelected() ? IsD3dFloatingPanelPoint(MousePosition) : IsRightPanelOpen() && GetRightPanel().contains(MousePosition)) // inside right panel
-		)) {
+		if (
+		    (IsLeftPanelOpen() && GetLeftPanel().contains(MousePosition))      // inside left panel
+		    || (IsRightPanelOpen() && GetRightPanel().contains(MousePosition)) // inside right panel
+		) {
 			if (spellID != SpellID::Healing
 			    && spellID != SpellID::Identify
 			    && spellID != SpellID::ItemRepair

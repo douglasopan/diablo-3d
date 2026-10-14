@@ -11,6 +11,7 @@
 #endif
 
 #include "DiabloUI/diabloui.h"
+#include "DiabloUI/third_party_notices.hpp"
 #include "DiabloUI/ui_flags.hpp"
 #include "DiabloUI/ui_item.h"
 #include "controls/input.h"
@@ -78,14 +79,25 @@ void UiTitleDialog()
 
 		if (CustomTitleLogo) {
 			vecTitleScreen.push_back(std::make_unique<UiImageAnimatedClx>(
-			    CustomTitleLogo->sprites(), MakeSdlRect(0, uiPosition.y + 182, 0, 0), UiFlags::AlignCenter, &*CustomTitleLogo, SDL_GetTicks()));
+			    CustomTitleLogo->sprites(), MakeSdlRect(0, uiPosition.y + 148, 0, 0), UiFlags::AlignCenter, &*CustomTitleLogo, SDL_GetTicks()));
 		} else {
 			vecTitleScreen.push_back(std::make_unique<UiImageAnimatedClx>(
-			    *DiabloTitleLogo, MakeSdlRect(0, uiPosition.y + 182, 0, 0), UiFlags::AlignCenter));
+			    *DiabloTitleLogo, MakeSdlRect(0, uiPosition.y + 148, 0, 0), UiFlags::AlignCenter));
 		}
 
 		const SDL_Rect rect = MakeSdlRect(uiPosition.x, uiPosition.y + 410, 640, 26);
 		vecTitleScreen.push_back(std::make_unique<UiArtText>(_("Copyright © 1996-2001 Blizzard Entertainment").data(), rect, UiFlags::AlignCenter | UiFlags::FontSize24 | UiFlags::ColorUiSilver));
+	}
+
+	// Preserve the inherited title art and Blizzard notice; show library notices
+	// above the inherited Blizzard and Smacker rows. License files are relative
+	// to the installed executable. The 216px custom logo ends at row 364.
+	int noticeY = uiPosition.y + 366;
+	for (const char *notice : ThirdPartyCopyrightFooter) {
+		vecTitleScreen.push_back(std::make_unique<UiArtText>(notice,
+		    MakeSdlRect(uiPosition.x, noticeY, 640, 14),
+		    UiFlags::AlignCenter | UiFlags::FontSize12 | UiFlags::ColorUiSilver, 0, 14));
+		noticeY += 14;
 	}
 
 	bool endMenu = false;

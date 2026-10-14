@@ -125,13 +125,6 @@ void SetTownFirstPersonInputServicesForDiagnostics(const TownFirstPersonInputSer
 /** Calls the exact live-session handler and synchronization used by gameplay. */
 void DispatchGameEventForDiagnostics(const SDL_Event &event, uint16_t modState);
 void SyncFirstPersonInputForDiagnostics();
-/** Raw adapter state only: no eligibility checks, SDL queries or input dispatch. */
-struct TownViewInputStateDiagnostic {
-	int firstPersonPhase = 0, thirdPersonPhase = 0;
-	uint8_t firstPersonKeys = 0, thirdPersonKeys = 0;
-	bool leftDown = false, active = false;
-};
-TownViewInputStateDiagnostic GetTownViewInputStateForDiagnostics() noexcept;
 /** Calls the normal visual-clock/advance gate without drawing; returned seconds
  * are the actual elapsed clock admitted to AdvanceTownViewCamera. */
 float AdvanceTownCameraForDrawForDiagnostics();
@@ -171,12 +164,3 @@ extern bool DebugDisableNetworkTimeout;
 extern GameLogicStep gGameLogicStep;
 
 } // namespace devilution
-
-namespace devilution {
-bool IsDungeon3DActionContextForRepeat();
-bool CanRepeatDungeon3DWorldAction();
-/** Refreshes standing attack aim from the current rendered frame. No command,
- * movement or damage is issued; callers retain native action/cadence guards. */
-bool RefreshDungeon3DStandingAttackTarget();
-bool RefreshDungeon3DStandingSpellTarget();
-}

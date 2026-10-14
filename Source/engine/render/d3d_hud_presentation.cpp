@@ -4,7 +4,6 @@
 #include "control/d3d_hud.hpp"
 #include "control/d3d_hud_geometry.hpp"
 #include "control/d3d_hud_skin.hpp"
-#include "control/d3d_hud_theme.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -115,7 +114,6 @@ std::vector<SDL_Rect> Footprints;
 SDL_Renderer *Owner = nullptr;
 bool AssetsReady = false;
 int CachedBrightness = -1;
-uint64_t CachedThemeRevision = 0;
 std::array<uint8_t, 256> BrightnessLut {};
 SDLTextureUniquePtr ChassisTexture;
 SDLTextureUniquePtr ButtonTexture;
@@ -135,8 +133,6 @@ int ForegroundTextureWidth = 0, ForegroundTextureHeight = 0;
 int CursorWidth = 0, CursorHeight = 0;
 std::vector<uint32_t> BaseColors;
 std::vector<uint32_t> ForegroundColors;
-std::vector<uint32_t> AuthoredForegroundColors;
-std::vector<uint8_t> AuthoredForegroundMask;
 std::vector<uint32_t> CursorColors;
 
 bool IsIndexed(const Surface &source)
@@ -205,10 +201,7 @@ std::vector<SDL_Rect> CurrentFootprints()
 {
 	std::vector<SDL_Rect> result;
 	result.reserve(6);
-	for (size_t i = 0; i < GetD3dHudGeometry().elements.size(); ++i) {
-		if (i >= 11 && !IsChatAvailable()) continue;
-		result.push_back(MakeSdlRect(GetD3dHudGeometry().elements[i]));
-	}
+	result.push_back(MakeSdlRect(GetD3dHudFrameRect()));
 	result.push_back(MakeSdlRect(GetD3dHudOrbRect(false)));
 	result.push_back(MakeSdlRect(GetD3dHudOrbRect(true)));
 	if (IsChatAvailable()) {
@@ -216,7 +209,9 @@ std::vector<SDL_Rect> CurrentFootprints()
 		result.push_back(MakeSdlRect(GetD3dHudPanelButtonRect(7)));
 	}
 	if (*GetOptions().Gameplay.experienceBar && !ChatFlag) {
-		result.push_back(MakeSdlRect(GetD3dHudExperienceRect()));
+		const Rectangle &panel = GetMainPanel();
+		result.push_back({ panel.position.x + panel.size.width / 2 - 155,
+		    panel.position.y + panel.size.height - 11, 313, 9 });
 	}
 	return result;
 }
@@ -281,8 +276,6 @@ void ResetTextures()
 	EmptyOrbSize = 0;
 	BaseColors.clear();
 	ForegroundColors.clear();
-	AuthoredForegroundColors.clear();
-	AuthoredForegroundMask.clear();
 	CursorColors.clear();
 }
 
@@ -391,10 +384,9 @@ SDLTextureUniquePtr LoadTexture(SDL_Renderer *renderer, D3dHudSkinPart part, boo
 bool EnsureAssets(SDL_Renderer *renderer)
 {
 	const int brightness = *GetOptions().Graphics.brightness;
-	if (Owner != renderer || CachedBrightness != brightness || CachedThemeRevision != GetD3dHudThemeRevision()) {
+	if (Owner != renderer || CachedBrightness != brightness) {
 		ResetTextures();
 		Owner = renderer;
-		CachedThemeRevision = GetD3dHudThemeRevision();
 		CachedBrightness = brightness;
 		std::array<SDL_Color, 256> gray {};
 		std::array<SDL_Color, 256> mapped {};
@@ -628,23 +620,10 @@ bool DrawNineSlice(SDL_Renderer *renderer, SDL_Texture *texture, const Slice &sl
 
 bool SetShade(SDL_Texture *texture, uint8_t shade)
 {
-	const auto highlight = shade != 255 ? GetD3dHudThemeColor(D3dHudThemeColorRole::Highlight) : std::nullopt;
-	const uint8_t r = highlight ? static_cast<uint8_t>(highlight->r * shade / 255) : shade;
-	const uint8_t g = highlight ? static_cast<uint8_t>(highlight->g * shade / 255) : shade;
-	const uint8_t b = highlight ? static_cast<uint8_t>(highlight->b * shade / 255) : shade;
 #ifdef USE_SDL3
-	return SDL_SetTextureColorMod(texture, r, g, b);
+	return SDL_SetTextureColorMod(texture, shade, shade, shade);
 #else
-	return SDL_SetTextureColorMod(texture, r, g, b) >= 0;
-#endif
-}
-
-bool SetAlpha(SDL_Texture *texture, uint8_t alpha)
-{
-#ifdef USE_SDL3
-	return SDL_SetTextureAlphaMod(texture, alpha);
-#else
-	return SDL_SetTextureAlphaMod(texture, alpha) >= 0;
+	return SDL_SetTextureColorMod(texture, shade, shade, shade) >= 0;
 #endif
 }
 
@@ -676,13 +655,8 @@ bool DrawOrb(SDL_Renderer *renderer, bool mana)
 
 bool DrawSkin(SDL_Renderer *renderer)
 {
-	// The common setting affects backgrounds only. Foreground values, glyphs
-	// and items retain their readable opacity and their existing input owners.
-	const uint8_t alpha = GetD3dHudBackgroundOpacity();
-	if (!SetAlpha(ButtonTexture.get(), alpha) || !SetAlpha(InsetTexture.get(), alpha)
-	    || !SetAlpha(OrbFrameTexture.get(), alpha) || !SetAlpha(BeltTintTexture.get(), alpha)) return false;
-	if (!DrawNineSlice(renderer, InsetTexture.get(), Inset, Recipe.info)
-	    || !DrawOrb(renderer, false) || !DrawOrb(renderer, true)
+	if (!DrawNineSlice(renderer, ChassisTexture.get(), Chassis, Recipe.chassis)
+	    || !DrawNineSlice(renderer, InsetTexture.get(), Inset, Recipe.info)
 	    || !DrawNineSlice(renderer, InsetTexture.get(), Inset, Recipe.spell))
 		return false;
 	for (int i = 0; i < 8; ++i) {
@@ -707,7 +681,7 @@ bool DrawSkin(SDL_Renderer *renderer)
 		    || !DrawNineSlice(renderer, ButtonTexture.get(), Button, rect))
 			return false;
 	}
-	return true;
+	return DrawOrb(renderer, false) && DrawOrb(renderer, true);
 }
 
 bool CursorBoundsFit(Rectangle bounds)
@@ -812,8 +786,6 @@ void BeginD3dHudPresentationFrame(const Surface &base)
 		std::memset(Foreground->at(0, y), TransparentColor, base.w());
 	}
 	ForegroundMask.assign(static_cast<size_t>(base.w()) * base.h(), 0);
-	AuthoredForegroundColors.resize(ForegroundMask.size());
-	AuthoredForegroundMask.assign(ForegroundMask.size(), 0);
 	Footprints = CurrentFootprints();
 	FrameSource = base.surface;
 	CapturedRegion = base.region;
@@ -835,6 +807,7 @@ bool HasD3dHudPresentationDeferredFrame()
 
 void SealD3dHudPresentationForeground(const Surface &source)
 {
+	SealD3dPanelPresentationFrame(source);
 	if (!IsD3dHudPresentationCapturing(source)) {
 		FrameValid = false;
 		return;
@@ -911,7 +884,7 @@ bool RecoverD3dHudPresentationFrame(const Surface &source)
 	++Counters.recoveries;
 	if (CursorUpdated && Cursor && BeforeRecoveryCursor != nullptr)
 		BeforeRecoveryCursor(source);
-	// Spaces between independent modules remain transparent in CPU recovery.
+	DrawD3dHudSkinIndexedPlate(source, Recipe.chassis, false, D3dHudSkinPart::Chassis, Recipe.designScaleX, Recipe.designScaleY);
 	DrawD3dHudSkinIndexedPlate(source, Recipe.info, false, D3dHudSkinPart::Inset, Recipe.designScaleX, Recipe.designScaleY);
 	DrawD3dHudSkinIndexedPlate(source, Recipe.spell, false, D3dHudSkinPart::Inset, Recipe.designScaleX, Recipe.designScaleY);
 	for (int i = 0; i < 8; ++i) {
@@ -964,7 +937,6 @@ void RecordD3dHudForeground(const Surface &source, Rectangle target, uint8_t key
 			if (color != key) {
 				destination[x - clipped.x] = color;
 				ForegroundMask[static_cast<size_t>(y) * Foreground->w() + x] = 1;
-				AuthoredForegroundMask[static_cast<size_t>(y) * Foreground->w() + x] = 0;
 				left = std::min(left, x);
 				right = x + 1;
 			}
@@ -981,31 +953,7 @@ void ClearD3dHudForeground(Rectangle target)
 	for (int y = clipped.y; y < clipped.y + clipped.h; ++y) {
 		std::memset(Foreground->at(clipped.x, y), TransparentColor, clipped.w);
 		std::memset(ForegroundMask.data() + static_cast<size_t>(y) * Foreground->w() + clipped.x, 0, clipped.w);
-		std::memset(AuthoredForegroundMask.data() + static_cast<size_t>(y) * Foreground->w() + clipped.x, 0, clipped.w);
 	}
-}
-
-void RecordD3dHudRgbaForeground(int width, int height, std::span<const uint32_t> pixels, Rectangle target)
-{
-	if (!RecipeReady || ForegroundSealed || width <= 0 || height <= 0
-	    || pixels.size() != static_cast<size_t>(width) * height
-	    || target.size.width <= 0 || target.size.height <= 0) return;
-	SDL_Rect clipped;
-	if (!Clip(target, Foreground->w(), Foreground->h(), clipped)) return;
-	for (int y = clipped.y; y < clipped.y + clipped.h; ++y) {
-		const int sy = (y - target.position.y) * height / target.size.height;
-		for (int x = clipped.x; x < clipped.x + clipped.w; ++x) {
-			const int sx = (x - target.position.x) * width / target.size.width;
-			const uint32_t color = pixels[static_cast<size_t>(sy) * width + sx];
-			if ((color >> 24) == 0) continue;
-			const size_t i = static_cast<size_t>(y) * Foreground->w() + x;
-			// RGB coverage must have an actual indexed recovery pixel beneath it.
-			if (ForegroundMask[i] == 0) continue;
-			AuthoredForegroundColors[i] = color;
-			AuthoredForegroundMask[i] = ForegroundMask[i] = 1;
-		}
-	}
-	IncludeBounds(ForegroundBounds, clipped);
 }
 
 void RecordD3dHudButtonState(int button, bool pressed)
@@ -1031,7 +979,9 @@ void RecordD3dHudExperienceBar()
 	if (!RecipeReady || ForegroundSealed)
 		return;
 	DrawXPBar(*Foreground);
-	const Rectangle bar = GetD3dHudExperienceRect();
+	const Rectangle &panel = GetMainPanel();
+	const Rectangle bar { { panel.position.x + panel.size.width / 2 - 155,
+		panel.position.y + panel.size.height - 11 }, { 313, 9 } };
 	SDL_Rect clipped;
 	if (!Clip(bar, Foreground->w(), Foreground->h(), clipped))
 		return;
@@ -1218,12 +1168,6 @@ bool PrepareD3dHudPresentation(SDL_Renderer *renderer, SDL_Surface *indexedUi,
 	IncludeBounds(foregroundUpload, UploadedForegroundBounds);
 	if (foregroundUpload.w > 0 && foregroundUpload.h > 0) {
 		ConvertIndexed(*Foreground, foregroundUpload, colors, true, ForegroundColors, &ForegroundMask);
-		for (int y = 0; y < foregroundUpload.h; ++y)
-			for (int x = 0; x < foregroundUpload.w; ++x) {
-				const size_t source = static_cast<size_t>(y + foregroundUpload.y) * Foreground->w() + x + foregroundUpload.x;
-				if (AuthoredForegroundMask[source])
-					ForegroundColors[static_cast<size_t>(y) * foregroundUpload.w + x] = AuthoredForegroundColors[source];
-			}
 		// A failed SDL upload may have written part of the region. Retain the
 		// union until a successful upload has cleared all previous coverage.
 		UploadedForegroundBounds = foregroundUpload;
@@ -1350,7 +1294,7 @@ namespace devilution {
 void BeginD3dHudPresentationFrame(const Surface &source) { BeginD3dPanelPresentationFrame(source); }
 bool IsD3dHudPresentationCapturing(const Surface &) { return false; }
 bool HasD3dHudPresentationDeferredFrame() { return false; }
-void SealD3dHudPresentationForeground(const Surface & /*source*/) { }
+void SealD3dHudPresentationForeground(const Surface &source) { SealD3dPanelPresentationFrame(source); }
 void FinalizeD3dHudPresentationFrame(const Surface &source) { FinalizeD3dPanelPresentationFrame(source); }
 void SetD3dHudRecoveryCursorCallbacks(void (*before)(const Surface &), void (*after)(const Surface &)) { SetD3dPanelRecoveryCursorCallbacks(before, after); }
 bool IsD3dHudPresentationRecoveryPixel(Point point) { return IsD3dPanelPresentationRecoveryPixel(point); }
@@ -1358,7 +1302,6 @@ void BlitD3dHudPresentationCapturedCursor(const Surface &) { }
 bool RecoverD3dHudPresentationFrame(const Surface &) { return false; }
 bool PrepareD3dHudPresentation(SDL_Renderer *, SDL_Surface *, SDL_Palette *, bool, bool) { return false; }
 void RecordD3dHudForeground(const Surface &, Rectangle, uint8_t) { }
-void RecordD3dHudRgbaForeground(int, int, std::span<const uint32_t>, Rectangle) { }
 void ClearD3dHudForeground(Rectangle) { }
 void RecordD3dHudButtonState(int, bool) { }
 void RecordD3dHudBeltTint(int, uint8_t) { }

@@ -4,7 +4,6 @@
  * Implementation of functions for minifying player data structure.
  */
 #include "pack.h"
-#include "engine/render/player_actor_native_hooks.hpp"
 
 #include <cstdint>
 #include <format>
@@ -350,7 +349,6 @@ void UnPackItem(const ItemPack &packedItem, const Player &player, Item &item, bo
 
 void UnPackPlayer(const PlayerPack &packed, Player &player)
 {
-	const NativePlayerActorActivationScope actorActivation(player);
 	const Point position { packed.px, packed.py };
 
 	player = {};
@@ -467,7 +465,6 @@ bool UnPackNetItem(const Player &player, const ItemNetPack &packedItem, Item &it
 
 bool UnPackNetPlayer(const PlayerNetPack &packed, Player &player)
 {
-	NativePlayerActorActivationScope actorActivation(player, false);
 	CopyUtf8(player._pName, std::string_view(packed.pName, PlayerNameLength), sizeof(player._pName));
 
 	ValidateField(packed.pClass, packed.pClass < GetNumPlayerClasses());
@@ -612,7 +609,6 @@ bool UnPackNetPlayer(const PlayerNetPack &packed, Player &player)
 	ValidateFields(player._pMaxHPBase, player.calculateBaseLife(), player._pMaxHPBase <= player.calculateBaseLife());
 	ValidateFields(player._pMaxManaBase, player.calculateBaseMana(), player._pMaxManaBase <= player.calculateBaseMana());
 
-	actorActivation.Complete();
 	return true;
 }
 

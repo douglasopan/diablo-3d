@@ -8,8 +8,6 @@
 
 #include "DiabloUI/hero/hero_portrait.hpp"
 #include "engine/assets.hpp"
-#include "engine/hd_sprite_pack.hpp"
-#include <vector>
 #include "engine/palette.h"
 #include "utils/display.h"
 #include "utils/log.hpp"
@@ -19,8 +17,6 @@
 
 namespace devilution {
 namespace {
-struct RgbaSpriteFrame { SDL_Surface *surface=nullptr; void *sourcePixels=nullptr; int sourceWidth=0,sourceHeight=0; Point at; int width=0,height=0,scale=1; std::vector<uint32_t> colors; };
-std::vector<RgbaSpriteFrame> RgbaSprites;
 bool Active = false;
 int Fade = 0;
 constexpr size_t MaxPortraitPixels = 216 * 100;
@@ -90,44 +86,11 @@ bool EnsureBackground(SDL_Renderer *target)
 
 void BeginD3dMainMenuUiFrame()
 {
-	RgbaSprites.clear();
 	Portrait.portrait = nullptr;
 	Portrait.surface = nullptr;
 	Portrait.pixels = nullptr;
 	Portrait.rect = {};
 	Portrait.rejected = false;
-}
-
-void RecordD3dMainMenuSpriteRgba(const Surface &out, ClxSprite sprite, Point bottomLeft)
-{
-	if(sprite.hdFrameId()==0 || RgbaSprites.size()>=4) return;
-	auto rgba=LoadHdSpriteRgba(sprite); if(!rgba || rgba->empty()) return;
-	RgbaSpriteFrame record; record.surface=out.surface; record.sourcePixels=out.surface->pixels;
-	record.sourceWidth=out.surface->w;record.sourceHeight=out.surface->h;
-	record.width=sprite.width();record.height=sprite.height();record.scale=sprite.hdScale();
-	record.at=bottomLeft+Displacement{out.region.x,out.region.y-record.height+1};
-	record.colors=std::move(*rgba);RgbaSprites.push_back(std::move(record));
-}
-bool CompositeD3dMainMenuSpriteRgba(SDL_Surface *surface, std::span<uint32_t> rgba, int fade)
-{
-	if(!surface || surface->w<=0 || surface->h<=0 || rgba.size()!=static_cast<size_t>(surface->w)*surface->h) return false;
-	for(const auto &sprite:RgbaSprites) {
-		if(sprite.surface!=surface || sprite.sourcePixels!=surface->pixels || sprite.sourceWidth!=surface->w || sprite.sourceHeight!=surface->h) continue;
-		for(int y=0;y<sprite.height;++y) for(int x=0;x<sprite.width;++x) {
-			const int dx=sprite.at.x+x,dy=sprite.at.y+y;
-			if(dx<0||dy<0||dx>=surface->w||dy>=surface->h) continue;
-			const uint32_t src=sprite.colors[static_cast<size_t>(y*sprite.scale+sprite.scale/2)*sprite.width*sprite.scale+x*sprite.scale+sprite.scale/2];
-			const int alpha=src>>24; if(alpha==0) continue;
-			auto *dst=reinterpret_cast<uint8_t *>(&rgba[static_cast<size_t>(dy)*surface->w+dx]);
-			const int outAlpha=alpha+dst[3]*(255-alpha)/255;
-			for(int channel=0;channel<3;++channel) {
-				const int color=((src>>(16-channel*8))&255)*std::clamp(fade,0,256)/256;
-				dst[channel]=static_cast<uint8_t>((color*alpha+dst[channel]*dst[3]*(255-alpha)/255)/std::max(1,outAlpha));
-			}
-			dst[3]=static_cast<uint8_t>(outAlpha);
-		}
-	}
-	return !RgbaSprites.empty();
 }
 
 void RecordD3dMainMenuPortrait(const Surface &out, const HeroPortrait &portrait, const SDL_Rect &rect)
@@ -258,7 +221,7 @@ bool RenderD3dMainMenu(SDL_Renderer *target, SDL_Surface *ui)
 #ifdef USE_SDL1
 	return false;
 #else
-	if ((!Active && RgbaSprites.empty()) || target == nullptr || ui == nullptr || (Active && !EnsureBackground(target)) || SDLC_SURFACE_BITSPERPIXEL(ui) != 8
+	if (!Active || target == nullptr || ui == nullptr || !EnsureBackground(target) || SDLC_SURFACE_BITSPERPIXEL(ui) != 8
 	    || ui->pixels == nullptr || ui->w <= 0 || ui->h <= 0 || ui->w > 8192 || ui->h > 8192 || ui->pitch < ui->w) return false;
 	const size_t pixelCount = static_cast<size_t>(ui->w) * ui->h;
 	if (!Overlay || OverlayWidth != ui->w || OverlayHeight != ui->h || !Pixels) {
@@ -274,7 +237,7 @@ bool RenderD3dMainMenu(SDL_Renderer *target, SDL_Surface *ui)
 		OverlayWidth = ui->w; OverlayHeight = ui->h;
 	}
 	std::array<uint32_t, 256> colors {};
-	for (size_t i = Active ? 1 : 0; i < colors.size(); ++i)
+	for (size_t i = 1; i < colors.size(); ++i)
 		colors[i] = RgbaColor(system_palette[i]);
 	for (int y = 0; y < ui->h; ++y) {
 		const auto *row = static_cast<const uint8_t *>(ui->pixels) + static_cast<size_t>(y) * ui->pitch;
@@ -282,19 +245,18 @@ bool RenderD3dMainMenu(SDL_Renderer *target, SDL_Surface *ui)
 			Pixels[static_cast<size_t>(y) * ui->w + x] = colors[row[x]];
 	}
 	CompositeD3dMainMenuPortrait(ui, { Pixels.get(), pixelCount }, Fade);
-	CompositeD3dMainMenuSpriteRgba(ui, { Pixels.get(), pixelCount }, Fade);
 	const float scale = std::max(static_cast<float>(gnScreenWidth) / ImageWidth, static_cast<float>(gnScreenHeight) / ImageHeight);
 	const float width = ImageWidth * scale, height = ImageHeight * scale;
-	if(Active) SDL_SetTextureAlphaMod(Background.get(), static_cast<Uint8>(Fade * 255 / 256));
+	SDL_SetTextureAlphaMod(Background.get(), static_cast<Uint8>(Fade * 255 / 256));
 #ifdef USE_SDL3
 	const SDL_FRect rect { (gnScreenWidth - width) / 2, (gnScreenHeight - height) / 2, width, height };
 	if (!SDL_UpdateTexture(Overlay.get(), nullptr, Pixels.get(), ui->w * 4)
-	    || (Active && !SDL_RenderTexture(target, Background.get(), nullptr, &rect))
+	    || !SDL_RenderTexture(target, Background.get(), nullptr, &rect)
 	    || !SDL_RenderTexture(target, Overlay.get(), nullptr, nullptr)) return false;
 #else
 	const SDL_Rect rect { static_cast<int>((gnScreenWidth - width) / 2), static_cast<int>((gnScreenHeight - height) / 2), static_cast<int>(width), static_cast<int>(height) };
 	if (SDL_UpdateTexture(Overlay.get(), nullptr, Pixels.get(), ui->w * 4) < 0
-	    || (Active && SDL_RenderCopy(target, Background.get(), nullptr, &rect) < 0)
+	    || SDL_RenderCopy(target, Background.get(), nullptr, &rect) < 0
 	    || SDL_RenderCopy(target, Overlay.get(), nullptr, nullptr) < 0) return false;
 #endif
 	return true;

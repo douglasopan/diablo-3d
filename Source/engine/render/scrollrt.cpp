@@ -11,6 +11,11 @@
 #include <cstddef>
 #include <cstdint>
 
+#ifdef __EMSCRIPTEN__
+#include <chrono>
+#include <emscripten.h>
+#endif
+
 #ifdef USE_SDL3
 #include <SDL3/SDL_keyboard.h>
 #include <SDL3/SDL_rect.h>
@@ -24,9 +29,7 @@
 #include "DiabloUI/ui_flags.hpp"
 #include "automap.h"
 #include "control/d3d_hud.hpp"
-#include "control/d3d_floating_panels.hpp"
 #include "engine/render/d3d_hud_presentation.hpp"
-#include "engine/render/d3d_panel_presentation.hpp"
 #include "controls/control_mode.hpp"
 #include "controls/plrctrls.h"
 #include "cursor.h"
@@ -1434,43 +1437,6 @@ void DrawGame(const Surface &fullOut, Point position, Displacement offset, bool 
  * @param out Buffer to render to
  * @param startPosition Center of view in dPiece coordinates
  */
-void DrawViewModalOverlays(const Surface &out)
-{
-	if (ShowUniqueItemInfoBox) {
-		DrawUniqueInfo(out);
-	}
-	if (qtextflag) {
-		DrawQText(out);
-	}
-	if (SpellSelectFlag) {
-		DrawSpellList(out);
-	}
-	if (DropGoldFlag) {
-		DrawGoldSplit(out);
-	}
-	DrawGoldWithdraw(out);
-	if (HelpFlag) {
-		DrawHelp(out);
-	}
-	if (ChatLogFlag) {
-		DrawChatLog(out);
-	}
-	if (MyPlayerIsDead) {
-		RedBack(out);
-		DrawDeathText(out);
-	} else if (PauseMode != 0) {
-		gmenu_draw_pause(out);
-	}
-	if (IsDiabloMsgAvailable()) {
-		DrawDiabloMsg(out.subregionY(0, out.h() - GetMainPanel().size.height));
-	}
-
-	DrawControllerModifierHints(out);
-	DrawPlrMsg(out);
-	gmenu_draw(out);
-	doom_draw(out);
-}
-
 void DrawView(const Surface &out, Point startPosition)
 {
 #ifdef _DEBUG
@@ -1478,7 +1444,6 @@ void DrawView(const Surface &out, Point startPosition)
 #endif
 	Displacement offset = {};
 	CalcFirstTilePosition(startPosition, offset);
-	BeginD3dHudAuxiliaryFrame();
 	ClearUiOverlayRegions();
 	DrawGame(out, startPosition, offset);
 	// Freeze resource fill with the same totals used by every HUD layer in
@@ -1506,7 +1471,11 @@ void DrawView(const Surface &out, Point startPosition)
 		const auto renderer = GetTownViewRendererState();
 		if (!IsTownViewNativePose()) {
 			DrawString(out.subregionY(0, gnViewportHeight), renderer.usedGpu
+#ifdef __EMSCRIPTEN__
+					? "3D na GPU | WebGL2"
+#else
 					? "3D na GPU | Direct3D 11"
+#endif
 					: renderer.requestedGpu ? "GPU indisponivel | 3D na CPU | Opcoes de video"
 					                       : "3D na CPU | Opcoes de video",
 			    Point { 8, 76 }, { .flags = UiFlags::ColorWhite });
@@ -1594,13 +1563,8 @@ void DrawView(const Surface &out, Point startPosition)
 	DrawMonsterHealthBar(out);
 	DrawFloatingNumbers(out, startPosition, offset);
 
-	if (!IsD3dHudSelected() && IsPlayerInStore() && !qtextflag)
+	if (IsPlayerInStore() && !qtextflag)
 		DrawSText(out);
-    if (IsD3dHudSelected()) {
-        ScopedD3dHudThemeText themeText;
-        DrawDurIcon(out);
-        DrawLevelButton(out);
-    } else {
 	if (invflag) {
 		DrawInv(out);
 	} else if (SpellbookFlag) {
@@ -1620,14 +1584,44 @@ void DrawView(const Surface &out, Point startPosition)
 	} else if (IsVisualStoreOpen) {
 		DrawVisualStore(out);
 	}
-    }
 
-	if (!IsD3dHudSelected()) DrawViewModalOverlays(out);
+	if (ShowUniqueItemInfoBox) {
+		DrawUniqueInfo(out);
+	}
+	if (qtextflag) {
+		DrawQText(out);
+	}
+	if (SpellSelectFlag) {
+		DrawSpellList(out);
+	}
+	if (DropGoldFlag) {
+		DrawGoldSplit(out);
+	}
+	DrawGoldWithdraw(out);
+	if (HelpFlag) {
+		DrawHelp(out);
+	}
+	if (ChatLogFlag) {
+		DrawChatLog(out);
+	}
+	if (MyPlayerIsDead) {
+		RedBack(out);
+		DrawDeathText(out);
+	} else if (PauseMode != 0) {
+		gmenu_draw_pause(out);
+	}
+	if (IsDiabloMsgAvailable()) {
+		DrawDiabloMsg(out.subregionY(0, out.h() - GetMainPanel().size.height));
+	}
+
+	DrawControllerModifierHints(out);
+	DrawPlrMsg(out);
+	gmenu_draw(out);
+	doom_draw(out);
 	// All earlier DrawView writes are ordinary UI. InfoBox and flask drawing
 	// below belong to the HUD and must not count as overlapping windows.
 	SetD3dHudPresentationNativeUiCapture(false);
 	SetD3dHudPresentationUiCoverage({});
-	ScopedD3dHudThemeText themeText(IsD3dHudSelected());
 	DrawInfoBox(out);
 	DrawLifeFlaskUpper(out);
 	DrawManaFlaskUpper(out);
@@ -1750,36 +1744,6 @@ void OptionShowFPSChanged()
 const auto OptionChangeHandlerShowFPS = (GetOptions().Graphics.showFPS.SetValueChangedCallback(OptionShowFPSChanged), true);
 
 } // namespace
-
-void DrawD3dHudModalOverlays(const Surface &out)
-{
-	if (!IsD3dHudSelected()) return;
-	SetD3dHudPresentationNativeUiCapture(true);
-	if (IsPlayerInStore() && !qtextflag) DrawSText(out);
-	DrawViewModalOverlays(out);
-	SetD3dHudPresentationNativeUiCapture(false);
-}
-
-void DrawD3dHudFloatingPanels(const Surface &out)
-{
-	if (!IsD3dHudSelected()) return;
-	SetD3dHudPresentationNativeUiCapture(true);
-	ScopedD3dHudThemeText themeText;
-        for (UiPanels panel : GetD3dFloatingPanelDrawOrder()) {
-            switch (panel) {
-            case UiPanels::Inventory: if (invflag) DrawInv(out); break;
-            case UiPanels::Spell: if (SpellbookFlag) DrawSpellBook(out); break;
-            case UiPanels::Character: if (CharFlag) DrawChr(out); break;
-            case UiPanels::Quest: if (QuestLogIsOpen) DrawQuestLog(out); break;
-            case UiPanels::Stash:
-                if (IsStashOpen) DrawStash(out);
-                else if (IsVisualStoreOpen) DrawVisualStore(out);
-                break;
-            default: break;
-            }
-        }
-	SetD3dHudPresentationNativeUiCapture(false);
-}
 
 Displacement GetOffsetForWalking(const AnimationInfo &animationInfo, const Direction dir, bool cameraMode /*= false*/)
 {
@@ -2074,6 +2038,49 @@ void DrawAndBlit()
 	if (!gbRunGame || HeadlessMode) {
 		return;
 	}
+#ifdef __EMSCRIPTEN__
+	using DiagnosticClock = std::chrono::steady_clock;
+	const bool diagnosticCapture = EM_ASM_INT({ return !!Module.d3dFrameDiagnostics; }) != 0;
+	const auto diagnosticFrameStart = diagnosticCapture ? DiagnosticClock::now() : DiagnosticClock::time_point {};
+	static uint64_t diagnosticSequence = 0;
+	const double diagnosticFrameSequence = diagnosticCapture ? static_cast<double>(++diagnosticSequence) : 0;
+	struct DiagnosticFrameScope {
+		double sequence;
+		bool completed = false;
+		~DiagnosticFrameScope()
+		{
+			if (sequence == 0) return;
+			EM_ASM({
+				const active = Module.d3dActiveFrameTiming;
+				if (active && active.sequence === $0) {
+					if (!$1) Module.d3dLastFrameTiming = ({ sequence: $0, completedDrawAndBlit: false, pureGpuMilliseconds: null });
+					Module.d3dActiveFrameTiming = null;
+				}
+			}, sequence, completed);
+		}
+	} diagnosticScope { diagnosticFrameSequence };
+	if (diagnosticCapture) {
+		const auto diagnosticCamera = GetTownViewCameraState();
+		const Point diagnosticPlayer = MyPlayer != nullptr ? Point { MyPlayer->position.tile.x, MyPlayer->position.tile.y } : Point { -1, -1 };
+		EM_ASM({
+			const gpu = Module.d3dLastGpuFrame;
+			Module.d3dActiveFrameTiming = ({
+				sequence: $0, gpuSerialBefore: gpu ? gpu.serial : null,
+				renderPresentCount: 0, renderPresent: null,
+				poseAtEntry: {
+					viewX: $1, viewY: $2, playerTileX: $3, playerTileY: $4, playerPresent: !!$5,
+					currlevel: $6, leveltype: $7, zoom: !!$8, townViewActive: !!$9,
+					cameraMode: $10, yaw: $11, pitch: $12, distance: $13,
+					panX: $14, panZ: $15, verticalFovDegrees: arguments[16], eyeHeight: arguments[17]
+				}
+			});
+		}, diagnosticFrameSequence, ViewPosition.x, ViewPosition.y, diagnosticPlayer.x, diagnosticPlayer.y,
+		    MyPlayer != nullptr, currlevel, static_cast<int>(leveltype), *GetOptions().Graphics.zoom, IsTownViewActive(),
+		    static_cast<int>(diagnosticCamera.mode), diagnosticCamera.yaw, diagnosticCamera.pitch,
+		    diagnosticCamera.distance, diagnosticCamera.offsetX, diagnosticCamera.offsetZ,
+		    diagnosticCamera.verticalFovDegrees, diagnosticCamera.eyeHeight);
+	}
+#endif
 	static bool previousHud = IsD3dHudEnabled();
 	const bool currentHud = IsD3dHudEnabled();
 	if (previousHud != currentHud) {
@@ -2112,9 +2119,13 @@ void DrawAndBlit()
 	nthread_UpdateProgressToNextGameTick();
 
 	this_sdl_thread::yield();
+#ifdef __EMSCRIPTEN__
+	const auto diagnosticWorldStart = diagnosticCapture ? DiagnosticClock::now() : DiagnosticClock::time_point {};
+#endif
 	DrawView(out, ViewPosition);
-	{
-	ScopedD3dHudThemeText themeText(IsD3dHudSelected());
+#ifdef __EMSCRIPTEN__
+	const auto diagnosticWorldEnd = diagnosticCapture ? DiagnosticClock::now() : DiagnosticClock::time_point {};
+#endif
 	if (drawCtrlPan) {
 		DrawMainPanel(out);
 	}
@@ -2126,11 +2137,11 @@ void DrawAndBlit()
 
 		DrawSpell(out);
 	}
-	if (drawBelt) {
-		DrawInvBelt(out);
-	}
 	if (drawControlButtons) {
 		DrawMainPanelButtons(out);
+	}
+	if (drawBelt) {
+		DrawInvBelt(out);
 	}
 	if (drawChatInput) {
 		DrawChatBox(out);
@@ -2146,11 +2157,6 @@ void DrawAndBlit()
 		    (HasAnyOf(InspectPlayer->_pIFlags, ItemSpecialEffect::NoMana) || MyPlayer->hasNoMana()) ? 0 : MyPlayer->_pMana >> 6,
 		    HasAnyOf(InspectPlayer->_pIFlags, ItemSpecialEffect::NoMana) ? 0 : MyPlayer->_pMaxMana >> 6);
 	SealD3dHudPresentationForeground(out);
-	}
-	DrawD3dHudFloatingPanels(out);
-	// Seal panel contents after every floating window, before modal overlays.
-	SealD3dPanelPresentationFrame(out);
-	DrawD3dHudModalOverlays(out);
 	SetD3dHudPresentationNativeUiCapture(true);
 	if (*GetOptions().Gameplay.floatingInfoBox)
 		DrawFloatingInfoBox(out);
@@ -2160,9 +2166,6 @@ void DrawAndBlit()
 	SetD3dHudPresentationNativeUiCapture(false);
 
 	DrawCursor(out);
-	// Late Lua/FPS writes may materialize a scaled panel. Its recovery must
-	// preserve the cursor that has already been drawn in this frame.
-	FinalizeD3dPanelPresentationFrame(out);
 
 	SetD3dHudPresentationNativeUiCapture(true);
 	DrawFPS(out);
@@ -2186,7 +2189,66 @@ void DrawAndBlit()
 		}
 	}
 
+#ifdef __EMSCRIPTEN__
+	const auto diagnosticBeforePresent = diagnosticCapture ? DiagnosticClock::now() : DiagnosticClock::time_point {};
+#endif
 	RenderPresent(true);
+#ifdef __EMSCRIPTEN__
+	if (diagnosticCapture) {
+		const auto diagnosticReturned = DiagnosticClock::now();
+		const auto diagnosticCamera = GetTownViewCameraState();
+		const Point diagnosticPlayer = MyPlayer != nullptr ? Point { MyPlayer->position.tile.x, MyPlayer->position.tile.y } : Point { -1, -1 };
+		const auto diagnosticMs = [](auto delta) { return std::chrono::duration<double, std::milli>(delta).count(); };
+		EM_ASM({
+			const active = Module.d3dActiveFrameTiming;
+			if (!active || active.sequence !== $0) return;
+			const gpu = Module.d3dLastGpuFrame;
+			const freshGpu = !!gpu && Number.isFinite(gpu.serial) && gpu.serial !== active.gpuSerialBefore;
+			const presentation = active.renderPresentCount === 1 ? active.renderPresent : null;
+			Module.d3dLastFrameTiming = ({
+				sequence: $0, completedDrawAndBlit: true,
+				clock: 'std::chrono::steady_clock', logicalWidth: $6, logicalHeight: $7,
+				poseAtEntry: active.poseAtEntry,
+				poseAtReturn: {
+					viewX: $8, viewY: $9, playerTileX: $10, playerTileY: $11, playerPresent: !!$12,
+					currlevel: $13, leveltype: $14, zoom: !!$15, townViewActive: !!arguments[16],
+					cameraMode: arguments[17], yaw: arguments[18], pitch: arguments[19], distance: arguments[20],
+					panX: arguments[21], panZ: arguments[22], verticalFovDegrees: arguments[23], eyeHeight: arguments[24]
+				},
+				totalFrameMilliseconds: $1, beforeDrawViewMilliseconds: $2,
+				drawViewMilliseconds: $3, afterDrawViewMilliseconds: $4,
+				beforeRenderPresentMilliseconds: $5,
+				renderPresentCount: active.renderPresentCount, renderPresent: presentation,
+				gpuFrameFresh: freshGpu, gpuSerialBefore: active.gpuSerialBefore,
+				gpuSerial: freshGpu ? gpu.serial : null,
+				backendFrameMilliseconds: freshGpu ? gpu.frameMilliseconds : null,
+				backendCommandMilliseconds: freshGpu ? gpu.commandMilliseconds : null,
+				backendReadbackMilliseconds: freshGpu ? gpu.readbackMilliseconds : null,
+				backendRecordSetupAndOverheadMilliseconds: freshGpu
+					? Math.max(0, gpu.frameMilliseconds - gpu.commandMilliseconds - gpu.readbackMilliseconds) : null,
+				backendRasterWidth: freshGpu ? gpu.width : null, backendRasterHeight: freshGpu ? gpu.height : null,
+				backendDraws: freshGpu ? gpu.draws : null, backendTriangles: freshGpu ? gpu.submittedTriangles : null,
+				pureGpuMilliseconds: null,
+				phases: {
+					total: 'DrawAndBlit entry to return after RenderPresent, includes browser yield and limiter',
+					world: 'DrawView inclusive CPU preparation, recording, backend submission/readback and output composition',
+					backendFrame: 'BeginFrame to completed readbacks; inclusive CPU record/setup and command work',
+					backendCommand: 'CPU/driver GL command phase, not GPU execution time',
+					backendReadback: 'synchronous readbacks and CPU output conversion',
+					sdlPresent: 'SDL presentation call duration, not scanout or GPU completion'
+				}
+			});
+		}, diagnosticFrameSequence, diagnosticMs(diagnosticReturned - diagnosticFrameStart),
+		    diagnosticMs(diagnosticWorldStart - diagnosticFrameStart), diagnosticMs(diagnosticWorldEnd - diagnosticWorldStart),
+		    diagnosticMs(diagnosticBeforePresent - diagnosticWorldEnd), diagnosticMs(diagnosticBeforePresent - diagnosticFrameStart),
+		    gnScreenWidth, gnScreenHeight, ViewPosition.x, ViewPosition.y, diagnosticPlayer.x, diagnosticPlayer.y,
+		    MyPlayer != nullptr, currlevel, static_cast<int>(leveltype), *GetOptions().Graphics.zoom, IsTownViewActive(),
+		    static_cast<int>(diagnosticCamera.mode), diagnosticCamera.yaw, diagnosticCamera.pitch,
+		    diagnosticCamera.distance, diagnosticCamera.offsetX, diagnosticCamera.offsetZ,
+		    diagnosticCamera.verticalFovDegrees, diagnosticCamera.eyeHeight);
+		diagnosticScope.completed = true;
+	}
+#endif
 }
 
 } // namespace devilution

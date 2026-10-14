@@ -2,13 +2,11 @@
 
 #ifndef USE_SDL1
 #include <array>
-#include <algorithm>
 #include <cstdint>
 #include <cstring>
 #include <string>
 
 #include "engine/render/ui_overlay_regions.hpp"
-#include "engine/palette.h"
 #include "engine/surface.hpp"
 #include "utils/sdl_ptrs.h"
 
@@ -20,7 +18,6 @@ SDLSurfaceUniquePtr WorldColors;
 SDLSurfaceUniquePtr UiColors;
 SDLTextureUniquePtr WorldTexture;
 SDLTextureUniquePtr UiTexture;
-int WorldScale = 2;
 bool CachedLinearFilter = true;
 
 SDLSurfaceUniquePtr CreateColors(int width, int height)
@@ -96,19 +93,18 @@ bool RenderTownPresentationLayers(SDL_Renderer *renderer, SDL_Surface *logicalOu
 	if (renderer == nullptr || logicalOutput == nullptr || palette == nullptr || palette->ncolors < 256
 	    || logicalOutput->w <= 0 || logicalOutput->h <= 0 || logicalOutput->w > 8192 || logicalOutput->h > 8192
 	    || overlay.source == nullptr || overlay.sourceRegion.w != logicalOutput->w || overlay.sourceRegion.h != logicalOutput->h
-	    || highResolutionWorld.surface == nullptr || (SDLC_SURFACE_BITSPERPIXEL(highResolutionWorld.surface) != 8 && SDLC_SURFACE_BITSPERPIXEL(highResolutionWorld.surface) != 32)
+	    || highResolutionWorld.surface == nullptr || SDLC_SURFACE_BITSPERPIXEL(highResolutionWorld.surface) != 8
 	    || highResolutionWorld.region.x < 0 || highResolutionWorld.region.y < 0
 	    || highResolutionWorld.w() > highResolutionWorld.surface->w - highResolutionWorld.region.x
 	    || highResolutionWorld.h() > highResolutionWorld.surface->h - highResolutionWorld.region.y
-	    || (highResolutionWorld.w() != logicalOutput->w && highResolutionWorld.w() != logicalOutput->w * 2) || highResolutionWorld.h() <= 0
-	    || highResolutionWorld.h() % (highResolutionWorld.w()/logicalOutput->w) != 0 || highResolutionWorld.h() > logicalOutput->h * (highResolutionWorld.w()/logicalOutput->w)
+	    || highResolutionWorld.w() != logicalOutput->w * 2 || highResolutionWorld.h() <= 0
+	    || highResolutionWorld.h() % 2 != 0 || highResolutionWorld.h() > logicalOutput->h * 2
 	    || static_cast<uint64_t>(highResolutionWorld.w()) * highResolutionWorld.h() > 4 * 1024 * 1024
 	    || SDL_MUSTLOCK(highResolutionWorld.surface) || SDL_MUSTLOCK(logicalOutput))
 		return false;
 	if (!Prepare(renderer, highResolutionWorld.w(), highResolutionWorld.h(), logicalOutput->w, logicalOutput->h, linearFilter))
 		return false;
 
-	WorldScale=highResolutionWorld.w()/logicalOutput->w;
 	// Use the active game palette, including fades/gamma, rather than the scratch
 	// allocation's palette. All world pixels are opaque, including index zero.
 	std::array<uint32_t, 256> colors;
@@ -116,19 +112,11 @@ bool RenderTownPresentationLayers(SDL_Renderer *renderer, SDL_Surface *logicalOu
 		const SDL_Color color = palette->colors[i];
 		colors[i] = 0xFF000000U | (static_cast<uint32_t>(color.r) << 16) | (static_cast<uint32_t>(color.g) << 8) | color.b;
 	}
-    // RGB frames retain unfaded colors. Palette fades can present repeatedly
-    // without rebuilding world geometry; follow the current fade here.
-    std::array<SDL_Color,256> toned;ApplyGlobalBrightness(toned.data(),logical_palette.data());
-    uint64_t reference=0,active=0;for(unsigned i=0;i<256;++i){reference+=toned[i].r+toned[i].g+toned[i].b;active+=palette->colors[i].r+palette->colors[i].g+palette->colors[i].b;}
-    const float fade=reference==0?0:std::min(1.0F,float(active)/float(reference));
 	for (int y = 0; y < highResolutionWorld.h(); ++y) {
 		const uint8_t *source = highResolutionWorld.at(0, y);
 		auto *destination = reinterpret_cast<uint32_t *>(static_cast<uint8_t *>(WorldColors->pixels) + y * WorldColors->pitch);
-		if(SDLC_SURFACE_BITSPERPIXEL(highResolutionWorld.surface)==32) {
-			const auto *pixels=static_cast<const uint8_t *>(highResolutionWorld.surface->pixels)+(highResolutionWorld.region.y+y)*highResolutionWorld.surface->pitch+highResolutionWorld.region.x*4;
-			std::memcpy(destination,pixels,static_cast<size_t>(highResolutionWorld.w())*4);
-			if(fade<1)for(int x=0;x<highResolutionWorld.w();++x){const uint32_t original=destination[x];uint32_t color=0xFF000000U;for(unsigned shift:{0U,8U,16U})color|=uint32_t(float((original>>shift)&255)*fade+.5F)<<shift;destination[x]=color;}
-		} else for (int x = 0; x < highResolutionWorld.w(); ++x) destination[x]=colors[source[x]];
+		for (int x = 0; x < highResolutionWorld.w(); ++x)
+			destination[x] = colors[source[x]];
 	}
 	std::memset(UiColors->pixels, 0, static_cast<size_t>(UiColors->pitch) * UiColors->h);
 #ifdef USE_SDL3
@@ -175,14 +163,14 @@ bool RenderTownPresentationLayers(SDL_Renderer *renderer, SDL_Surface *logicalOu
 	if (!SDL_UpdateTexture(WorldTexture.get(), nullptr, WorldColors->pixels, WorldColors->pitch)
 	    || !SDL_UpdateTexture(UiTexture.get(), nullptr, UiColors->pixels, UiColors->pitch))
 		return false;
-	const SDL_FRect destination { 0, 0, static_cast<float>(logicalOutput->w), static_cast<float>(highResolutionWorld.h() / WorldScale) };
+	const SDL_FRect destination { 0, 0, static_cast<float>(logicalOutput->w), static_cast<float>(highResolutionWorld.h() / 2) };
 	return SDL_RenderTexture(renderer, WorldTexture.get(), nullptr, &destination)
 	    && SDL_RenderTexture(renderer, UiTexture.get(), nullptr, nullptr);
 #else
 	if (SDL_UpdateTexture(WorldTexture.get(), nullptr, WorldColors->pixels, WorldColors->pitch) < 0
 	    || SDL_UpdateTexture(UiTexture.get(), nullptr, UiColors->pixels, UiColors->pitch) < 0)
 		return false;
-	const SDL_Rect destination { 0, 0, logicalOutput->w, highResolutionWorld.h() / WorldScale };
+	const SDL_Rect destination { 0, 0, logicalOutput->w, highResolutionWorld.h() / 2 };
 	return SDL_RenderCopy(renderer, WorldTexture.get(), nullptr, &destination) >= 0
 	    && SDL_RenderCopy(renderer, UiTexture.get(), nullptr, nullptr) >= 0;
 #endif
@@ -193,11 +181,11 @@ bool RestoreTownPresentationWorldRegions(SDL_Renderer *renderer,
 {
 	if (renderer == nullptr || renderer != CachedRenderer
 	    || !WorldTexture || !WorldColors || !UiColors
-	    || WorldColors->w != UiColors->w * WorldScale
-	    || WorldColors->h <= 0 || WorldColors->h % WorldScale != 0)
+	    || WorldColors->w != UiColors->w * 2
+	    || WorldColors->h <= 0 || WorldColors->h % 2 != 0)
 		return false;
 	const SDL_Rect bounds { 0, 0, UiColors->w, UiColors->h };
-	const int worldHeight = WorldColors->h / WorldScale;
+	const int worldHeight = WorldColors->h / 2;
 	// Validate every region before issuing the first draw command.
 	for (const SDL_Rect &footprint : footprints) {
 		SDL_Rect clipped;
@@ -215,15 +203,15 @@ bool RestoreTownPresentationWorldRegions(SDL_Renderer *renderer,
 #ifdef USE_SDL3
 		if (!SDL_GetRectIntersection(&bounds, &footprint, &clipped))
 			continue;
-		const SDL_FRect source { static_cast<float>(clipped.x * WorldScale), static_cast<float>(clipped.y * WorldScale),
-			static_cast<float>(clipped.w * WorldScale), static_cast<float>(clipped.h * WorldScale) };
+		const SDL_FRect source { static_cast<float>(clipped.x * 2), static_cast<float>(clipped.y * 2),
+			static_cast<float>(clipped.w * 2), static_cast<float>(clipped.h * 2) };
 		const SDL_FRect destination { static_cast<float>(clipped.x), static_cast<float>(clipped.y),
 			static_cast<float>(clipped.w), static_cast<float>(clipped.h) };
 		if (!SDL_RenderTexture(renderer, WorldTexture.get(), &source, &destination))
 #else
 		if (SDL_IntersectRect(&bounds, &footprint, &clipped) == SDL_FALSE)
 			continue;
-		const SDL_Rect source { clipped.x * WorldScale, clipped.y * WorldScale, clipped.w * WorldScale, clipped.h * WorldScale };
+		const SDL_Rect source { clipped.x * 2, clipped.y * 2, clipped.w * 2, clipped.h * 2 };
 		if (SDL_RenderCopy(renderer, WorldTexture.get(), &source, &clipped) < 0)
 #endif
 			return false;

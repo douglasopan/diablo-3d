@@ -64,8 +64,8 @@ uint64_t PresentationSignature(const Snapshot &s)
 }
 void ValidateSnapshot(const Snapshot &s)
 {
-	Require(SupportsRetailLevel(s.level, s.levelType, s.hellfire, s.setLevel, s.setLevelId),
-	    "Frame requires retail Cathedral floors 1..4 or Skeleton King L1 map");
+	Require(s.level == 1 && !s.hellfire && s.levelType == 1 && !s.setLevel && s.setLevelId == 0,
+	    "Frame requires retail Cathedral level 1");
 	Require(s.gameRevision != 0 && s.minX == ActiveMin && s.minZ == ActiveMin && s.maxX == ActiveMax && s.maxZ == ActiveMax,
 	    "Frame snapshot active bounds or epoch invalid");
 	Require(s.micros.size() <= 1379, "Frame snapshot micros count invalid");
@@ -383,20 +383,16 @@ void BindNativeTexture(FrameTriangle &triangle, const Snapshot &snapshot, const 
 	    || (instance.sourceModule >= ModuleKind::Corner && instance.sourceModule <= ModuleKind::Junction4)
 	    || instance.module == ModuleKind::DoorFrame
 	    || instance.module == ModuleKind::Pillar || instance.module == ModuleKind::ArchFrame;
-	const bool stairs = instance.module == ModuleKind::StairsUp || instance.module == ModuleKind::StairsDown;
-	if (instance.module != ModuleKind::Floor && instance.module != ModuleKind::DoorLeaf && !masonry && !stairs) return;
+	if (instance.module != ModuleKind::Floor && instance.module != ModuleKind::DoorLeaf && !masonry) return;
 	const Vec3 normal = TextureFaceNormal(triangle), center = TextureFaceCenter(triangle);
 	const NativeSurfaceSource &source = TextureSource(surface, center, normal);
 	NativeTextureBinding &binding = triangle.nativeTexture;
 	binding.x = source.x; binding.z = source.z; binding.piece = source.piece;
 	if (instance.module == ModuleKind::Floor) {
 		binding.kind = NativeTextureKind::FloorDiamond;
-		binding.layout = NativeTextureLayout::RectifiedFloor;
-		// Square native material follows the existing physical floor quad.
-		// Collision, pick binding and original vertices remain unchanged.
-		for (Vertex &vertex : triangle.textureVertices) {
-			vertex.u = vertex.position.x - static_cast<float>(source.x) + 0.5F;
-			vertex.v = vertex.position.z - static_cast<float>(source.z) + 0.5F;
+		for (size_t corner = 0; corner < 3; ++corner) {
+			const Vertex &local = module.vertices[module.indices[first + corner]];
+			triangle.textureVertices[corner] = { NativeFloorPixelVertex(source.x, source.z, local.u, local.v), local.u, local.v };
 		}
 		return;
 	}
@@ -437,28 +433,6 @@ void BindNativeTexture(FrameTriangle &triangle, const Snapshot &snapshot, const 
 	binding.approximate = cap || surface.sources.size() != 1 || towardSource > 0 || instance.module == ModuleKind::DoorFrame;
 	if (instance.sourceModule == ModuleKind::Wall)
 		binding.approximate = binding.approximate || binding.axis != TextureCapAxis(instance, source, center);
-	// Only a verified single-source, primary opaque wall gets the solid-face
-	// reconstruction. Doors, grates, arches, pillars, caps and fragments keep
-	// their existing coverage/material paths; no aperture is filled here.
-	if (instance.sourceModule == ModuleKind::Wall && !binding.approximate
-	    && instance.module == ModuleKind::Wall && (source.properties & Solid) != 0
-	    && snapshot.At(source.x, source.z).special == 0 && snapshot.At(source.x, source.z).object == 0)
-		binding.layout = NativeTextureLayout::RectifiedWall;
-	// Repeated cutout bands are not appropriate backing for solid walls. Use
-	// native stone courses on every structural face, including backs and caps.
-	// BlockLight + Solid and every source's lack of special/object art guard
-	// this replacement: grates, arches, door frames and light stands keep their
-	// actual coverage. Stairs receive only an approximate masonry material.
-	const bool structural = (instance.sourceModule >= ModuleKind::Wall && instance.sourceModule <= ModuleKind::Junction4)
-	    || instance.module == ModuleKind::WallFragment || instance.module == ModuleKind::JoinFragment;
-	const bool opaqueSources = std::all_of(surface.sources.begin(), surface.sources.end(), [&](const auto &s) {
-		return (s.properties & (Solid | BlockLight)) == (Solid | BlockLight)
-		    && snapshot.At(s.x,s.z).special == 0 && snapshot.At(s.x,s.z).object == 0;
-	});
-	if ((structural && opaqueSources) || stairs) {
-		binding.layout = NativeTextureLayout::SolidMasonry;
-		binding.approximate = true;
-	}
 	for (Vertex &vertex : triangle.textureVertices) {
 		const auto uv = NativePlanarTextureUv(vertex.position, binding);
 		vertex.u = uv[0];
@@ -467,8 +441,7 @@ void BindNativeTexture(FrameTriangle &triangle, const Snapshot &snapshot, const 
 		vertex.v = cap ? 2.0F * (binding.axis == NativeTextureAxis::AlongX
 			        ? vertex.position.z - static_cast<float>(binding.z)
 			        : vertex.position.x - static_cast<float>(binding.x))
-		               : (binding.layout == NativeTextureLayout::RectifiedWall || binding.layout == NativeTextureLayout::SolidMasonry)
-		                   ? 1.0F - vertex.position.y / 2.8F : uv[1];
+		               : uv[1];
 	}
 }
 

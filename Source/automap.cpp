@@ -1,4 +1,3 @@
-#include "control/d3d_floating_panels.hpp"
 /**
  * @file automap.cpp
  *
@@ -10,9 +9,6 @@
 #include <cstdint>
 
 #include "control/control.hpp"
-#include "control/d3d_hud_geometry.hpp"
-#include "controls/control_mode.hpp"
-#include "controls/plrctrls.h"
 #include "engine/load_file.hpp"
 #include "engine/palette.h"
 #include "engine/render/automap_render.hpp"
@@ -48,12 +44,15 @@ bool MinimapRightPanel = false;
 void RefreshMinimapGeometry()
 {
 	const bool leftOpen = IsLeftPanelOpen(), rightOpen = IsRightPanelOpen();
+	if (MinimapScreenWidth == gnScreenWidth && MinimapScreenHeight == gnScreenHeight && MinimapScale > 0
+	    && MinimapLeftPanel == leftOpen && MinimapRightPanel == rightOpen)
+		return;
 	const int width = std::max<int>(1, gnScreenWidth), height = std::max<int>(1, gnScreenHeight);
 	const int padding = std::min(8, std::max(0, width / 32));
-	const int outerWidth = std::min(std::max(1, width - 2 * padding), std::clamp(width / 4, 240, 640));
+	const int outerWidth = std::min(std::max(1, width - 2 * padding), std::clamp(width / 5, 160, 320));
 	const int outerHeight = std::min(std::max(1, height - 2 * padding), outerWidth / 2 + 28);
 	MinimapBounds = { { width - padding - outerWidth, padding }, { outerWidth, outerHeight } };
-	if (rightOpen && !IsD3dHudSelected()) {
+	if (rightOpen) {
 		const int freeLeft = leftOpen ? GetLeftPanel().position.x + GetLeftPanel().size.width + padding : padding;
 		const int freeRight = GetRightPanel().position.x - padding;
 		if (freeRight - freeLeft >= outerWidth)
@@ -61,14 +60,10 @@ void RefreshMinimapGeometry()
 		// At 640 pixels two native panels occupy the entire width. Their
 		// actionable controls take priority; MAP/Tab can still close the map.
 	}
-	// Retain a legacy saved Map position as the default; new full rectangles
-	// use the existing normalized profile layout and keep all other modules independent.
-	MinimapBounds=ResolveD3dFloatingPanelArea(UiPanels::Map,MinimapBounds);
-	MinimapBounds=ResolveD3dHudCustomizedRect(D3dHudMinimapElement,MinimapBounds);
-	const int inset = std::min(4, std::max(0, (MinimapBounds.size.width - 1) / 2));
-	const int header = std::min(24, std::max(0, MinimapBounds.size.height - 1));
+	const int inset = std::min(4, std::max(0, (outerWidth - 1) / 2));
+	const int header = std::min(24, std::max(0, outerHeight - 1));
 	MinimapRect = { { MinimapBounds.position.x + inset, MinimapBounds.position.y + header },
-		{ std::max(1, MinimapBounds.size.width - 2 * inset), std::max(1, MinimapBounds.size.height - header - inset) } };
+		{ std::max(1, outerWidth - 2 * inset), std::max(1, outerHeight - header - inset) } };
 	const int factor = std::clamp(height / 480, 1, 8);
 	const int oldFactor = std::clamp(MinimapScreenHeight / 480, 1, 8);
 	MinimapScale = std::clamp(MinimapScale > 0 ? MinimapScale * factor / oldFactor : 25 * factor, 25, 200);
@@ -1355,7 +1350,7 @@ void SearchAutomapItem(const Surface &out, const Displacement &myPlayerOffset, i
 
 			screen += GetAutomapScreen();
 
-			if (mapType != AutomapType::Minimap && !IsD3dHudSelected() && CanPanelsCoverView()) {
+			if (mapType != AutomapType::Minimap && CanPanelsCoverView()) {
 				if (IsRightPanelOpen())
 					screen.x -= gnScreenWidth / 4;
 				if (IsLeftPanelOpen())
@@ -1408,7 +1403,7 @@ void DrawAutomapPlr(const Surface &out, const Displacement &myPlayerOffset, cons
 
 	base += GetAutomapScreen();
 
-	if (GetAutomapType() != AutomapType::Minimap && !IsD3dHudSelected() && CanPanelsCoverView()) {
+	if (GetAutomapType() != AutomapType::Minimap && CanPanelsCoverView()) {
 		if (IsRightPanelOpen())
 			base.x -= gnScreenWidth / 4;
 		if (IsLeftPanelOpen())
@@ -1752,75 +1747,25 @@ Rectangle GetD3dMinimapBounds()
 	return MinimapBounds;
 }
 
-Rectangle MapModeButton()
-{
-	if(GetAutomapType()!=AutomapType::Minimap) return {{gnScreenWidth-112,8},{104,22}};
-	const auto bounds=GetD3dMinimapBounds();
-	return {bounds.position+Displacement{bounds.size.width-108,0},{84,22}};
-}
-
 bool IsD3dMinimapPoint(Point point)
 {
-	return AutomapActive && (MapModeButton().contains(point)
-	    || (GetAutomapType()==AutomapType::Minimap && GetD3dMinimapBounds().contains(point)));
-}
-
-bool HandleD3dMinimapCustomizationDown(Point point, uint8_t button, uint16_t modifiers)
-{
-	if (!IsD3dHudLayoutActive() || !IsD3dMinimapPoint(point) || GetAutomapType() != AutomapType::Minimap
-		|| InGameMenu() || ControlDevice != ControlTypes::KeyboardAndMouse
-		|| (MyPlayer && !MyPlayer->HoldItem.isEmpty())) return false;
-	const bool ctrl = (modifiers & SDL_KMOD_CTRL) != 0;
-	if (ctrl && button == SDL_BUTTON_RIGHT) {
-		if ((modifiers & SDL_KMOD_SHIFT) != 0) { ResetAllD3dHudCustomizations(); ResetD3dFloatingPanelLayout(); }
-		else ResetD3dHudCustomization(D3dHudMinimapElement);
-		return true;
-	}
-	if (button != SDL_BUTTON_LEFT) return false;
-	// Ordinary header buttons retain their actions. Ctrl explicitly edits the
-	// edge even where a corner overlaps X or the Classic/Window button.
-	if (!ctrl && (MapModeButton().contains(point) || MinimapCloseRect().contains(point))) return false;
-	const auto bounds = GetD3dMinimapBounds();
-	const uint8_t edges = GetD3dHudResizeEdges(bounds, point);
-	if (edges != D3dHudResizeNone) {
-		BeginD3dHudEdgeCustomization(D3dHudMinimapElement, bounds, point, edges);
-		return true;
-	}
-	if (ctrl) {
-		BeginD3dHudCustomization(D3dHudMinimapElement, bounds, point, (modifiers & SDL_KMOD_SHIFT) != 0);
-		return true;
-	}
-	return false;
+	return AutomapActive && GetAutomapType() == AutomapType::Minimap && GetD3dMinimapBounds().contains(point);
 }
 
 bool HandleD3dMinimapClose(Point point)
 {
-	if (!IsD3dMinimapPoint(point)) return false;
-	if(MapModeButton().contains(point)) {
-		EndD3dFloatingPanelDrag();
-		SetAutomapType(GetAutomapType()==AutomapType::Minimap?AutomapType::Opaque:AutomapType::Minimap);
-		return true;
-	}
-	if(GetAutomapType()!=AutomapType::Minimap) return false;
-	if(MinimapCloseRect().contains(point)) {AutomapActive=false;return true;}
-	const auto bounds=GetD3dMinimapBounds();
-	if(point.y<bounds.position.y+24 && (!MyPlayer || MyPlayer->HoldItem.isEmpty())) {
-		BeginD3dHudCustomization(D3dHudMinimapElement,bounds,point,false);return true;
-	}
-	return false;
+	if (!IsD3dMinimapPoint(point) || !MinimapCloseRect().contains(point)) return false;
+	AutomapActive = false;
+	return true;
 }
 
 void DrawD3dMinimapHeader(const Surface &out)
 {
-	const Rectangle mode=MapModeButton();
-	DrawD3dFloatingPanelFrame(out,mode);
-	DrawString(out,GetAutomapType()==AutomapType::Minimap?_("Classic"):_("Window"),mode,
-	    {.flags=UiFlags::ColorGold|UiFlags::AlignCenter|UiFlags::VerticalCenter});
 	if (GetAutomapType() != AutomapType::Minimap) return;
 	const Rectangle bounds = GetD3dMinimapBounds();
 	const Rectangle close = MinimapCloseRect();
 	if (bounds.size.height >= 20 && bounds.size.width >= 40) {
-		DrawString(out, _("Map"), { bounds.position + Displacement { 6, 3 }, { bounds.size.width - close.size.width - 104, 16 } },
+		DrawString(out, _("Map"), { bounds.position + Displacement { 6, 3 }, { bounds.size.width - close.size.width - 12, 16 } },
 		    { .flags = UiFlags::ColorGold | UiFlags::KerningFitSpacing });
 		DrawString(out, "X", close, { .flags = UiFlags::ColorGold | UiFlags::AlignCenter | UiFlags::VerticalCenter });
 	}
@@ -1896,10 +1841,7 @@ void DrawAutomap(const Surface &out)
 
 	const int scale = std::max(25, (GetAutomapType() == AutomapType::Minimap) ? MinimapScale : AutoMapScale);
 	const int d = std::max(1, (scale * 64) / 100);
-	// Isometric tiles are twice as wide as their vertical row spacing.
-	// A freely resized tall Minimap must enumerate its full height too.
-	const int mapWidth = GetAutomapType() == AutomapType::Minimap
-	    ? std::max(MinimapRect.size.width, 2 * MinimapRect.size.height) : gnScreenWidth;
+	const int mapWidth = GetAutomapType() == AutomapType::Minimap ? MinimapRect.size.width : gnScreenWidth;
 	int cells = (2 * (mapWidth / 2 / d)) + 1;
 	if (((mapWidth / 2) % d) != 0)
 		cells++;
@@ -1910,8 +1852,8 @@ void DrawAutomap(const Surface &out)
 
 	if (GetAutomapType() == AutomapType::Minimap) {
 		DrawD3dPanelBackplate(out, GetD3dMinimapBounds());
+		DrawD3dMinimapHeader(out);
 	}
-	DrawD3dMinimapHeader(out);
 
 	Point screen = {};
 
@@ -1937,7 +1879,7 @@ void DrawAutomap(const Surface &out)
 	screen.x += scale * myPlayerOffset.deltaX / 100 / 2;
 	screen.y += scale * myPlayerOffset.deltaY / 100 / 2;
 
-	if (GetAutomapType() != AutomapType::Minimap && !IsD3dHudSelected() && CanPanelsCoverView()) {
+	if (GetAutomapType() != AutomapType::Minimap && CanPanelsCoverView()) {
 		if (IsRightPanelOpen()) {
 			screen.x -= gnScreenWidth / 4;
 		}

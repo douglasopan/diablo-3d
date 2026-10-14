@@ -1,11 +1,9 @@
-#include "control/d3d_floating_panels.hpp"
 /**
  * @file items.cpp
  *
  * Implementation of item functionality.
  */
 #include "items.h"
-#include "engine/render/player_actor_native_hooks.hpp"
 
 #include <algorithm>
 #include <array>
@@ -1735,22 +1733,22 @@ void PrintItemOil(char iDidx)
 
 Point DrawUniqueInfoWindow(const Surface &out)
 {
-	const bool isInStash = IsStashOpen && IsD3dPanelBodyPoint(UiPanels::Stash, MousePosition);
+	const bool isInStash = IsStashOpen && GetLeftPanel().contains(MousePosition);
 	int panelX, panelY;
 	if (isInStash) {
 		ClxDraw(out, GetPanelPosition(UiPanels::Stash, { 24 + SidePanelSize.width, 327 }), (*pSTextBoxCels)[0]);
-		panelX = GetPanelArea(UiPanels::Stash).position.x + SidePanelSize.width + 27;
-		panelY = GetPanelArea(UiPanels::Stash).position.y + 28;
+		panelX = GetLeftPanel().position.x + SidePanelSize.width + 27;
+		panelY = GetLeftPanel().position.y + 28;
 	} else {
 		ClxDraw(out, GetPanelPosition(UiPanels::Inventory, { 24 - SidePanelSize.width, 327 }), (*pSTextBoxCels)[0]);
-		panelX = GetPanelArea(UiPanels::Inventory).position.x - SidePanelSize.width + 27;
-		panelY = GetPanelArea(UiPanels::Inventory).position.y + 28;
+		panelX = GetRightPanel().position.x - SidePanelSize.width + 27;
+		panelY = GetRightPanel().position.y + 28;
 	}
 
-	const Point rightInfoPos = GetPanelArea(UiPanels::Inventory).position - Displacement { SidePanelSize.width, 0 };
-	const Point leftInfoPos = GetPanelArea(UiPanels::Stash).position + Displacement { SidePanelSize.width, 0 };
+	const Point rightInfoPos = GetRightPanel().position - Displacement { SidePanelSize.width, 0 };
+	const Point leftInfoPos = GetLeftPanel().position + Displacement { SidePanelSize.width, 0 };
 
-	const bool isInfoOverlapping = IsLeftPanelOpen() && IsRightPanelOpen() && GetPanelArea(UiPanels::Stash).contains(rightInfoPos);
+	const bool isInfoOverlapping = IsLeftPanelOpen() && IsRightPanelOpen() && GetLeftPanel().contains(rightInfoPos);
 	const int fadeLevel = isInfoOverlapping ? 3 : 1;
 
 	for (int i = 0; i < fadeLevel; ++i) {
@@ -2793,7 +2791,6 @@ void CalcPlrAuricBonus(Player &player)
 
 void CalcPlrItemVals(Player &player, bool loadgfx)
 {
-	const NativePlayerActorEquipmentScope actorEquipment(player);
 	int minDamage = 0;
 	int maxDamage = 0;
 	int ac = 0;
@@ -2905,7 +2902,6 @@ void CalcPlrItemVals(Player &player, bool loadgfx)
 
 void CalcPlrInv(Player &player, bool loadgfx)
 {
-	const NativePlayerActorEquipmentScope actorEquipment(player);
 	// Determine the players current stats, this updates the statFlag on all equipped items that became unusable after
 	//  a change in equipment.
 	CalcSelfItems(player);

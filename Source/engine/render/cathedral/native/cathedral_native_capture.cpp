@@ -18,8 +18,8 @@ Snapshot CaptureSnapshot(CaptureMetadata metadata)
 	static_assert(GridSize == MAXDUNX && GridSize == MAXDUNY);
 	if (metadata.gameRevision == 0)
 		throw std::invalid_argument("Native snapshot requires a nonzero level epoch");
-	if (!SupportsRetailLevel(currlevel, leveltype, gbIsHellfire, setlevel, setlevel ? setlvlnum : SL_NONE))
-		throw std::invalid_argument("Native snapshot requires a supported retail Cathedral context");
+	if (leveltype != DTYPE_CATHEDRAL || setlevel)
+		throw std::invalid_argument("Native snapshot requires regular Cathedral context");
 	if (dminPosition.x != ActiveMin || dminPosition.y != ActiveMin
 	    || dmaxPosition.x != ActiveMax || dmaxPosition.y != ActiveMax)
 		throw std::invalid_argument("Native Cathedral active bounds outside pilot contract");
@@ -40,8 +40,7 @@ Snapshot CaptureSnapshot(CaptureMetadata metadata)
 	result.setLevel = setlevel;
 	// setlevel is the active discriminant; the engine preserves the raw enum
 	// after quest returns/saves. Normalize only this inactive DTO field.
-	static_assert(SL_SKELKING == SkeletonKingSetLevelId);
-	result.setLevelId = setlevel ? setlvlnum : SL_NONE;
+	result.setLevelId = SL_NONE;
 	result.minX = dminPosition.x;
 	result.minZ = dminPosition.y;
 	result.maxX = dmaxPosition.x;

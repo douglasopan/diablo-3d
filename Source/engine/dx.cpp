@@ -18,6 +18,7 @@
 #endif
 
 #ifdef __EMSCRIPTEN__
+#include <chrono>
 #include <emscripten.h>
 #endif
 
@@ -299,13 +300,43 @@ void RenderPresent([[maybe_unused]] bool allowTownLayers)
 {
 	if (HeadlessMode)
 		return;
+#ifdef __EMSCRIPTEN__
+	using DiagnosticClock = std::chrono::steady_clock;
+	const double diagnosticSequence = EM_ASM_DOUBLE({ return Module.d3dActiveFrameTiming ? Module.d3dActiveFrameTiming.sequence : 0; });
+	const bool diagnosticCapture = diagnosticSequence != 0;
+	const auto diagnosticStart = diagnosticCapture ? DiagnosticClock::now() : DiagnosticClock::time_point {};
+	double diagnosticPreparationMs = 0, diagnosticSdlMs = 0, diagnosticYieldMs = 0, diagnosticLimiterMs = 0;
+	int diagnosticRoute = 0;
+	const auto diagnosticMs = [](auto delta) { return std::chrono::duration<double, std::milli>(delta).count(); };
+	const auto diagnosticFinish = [&]() {
+		if (!diagnosticCapture) return;
+		const double total = diagnosticMs(DiagnosticClock::now() - diagnosticStart);
+		EM_ASM({
+			const active = Module.d3dActiveFrameTiming;
+			if (!active || active.sequence !== $0) return;
+			++active.renderPresentCount;
+			active.renderPresent = ({
+				sequence: $0, totalMilliseconds: $1, preparationMilliseconds: $2,
+				sdlCallMilliseconds: $3, browserYieldMilliseconds: $4, limiterMilliseconds: $5,
+				route: $6 === 1 ? 'SDL_RenderPresent' : $6 === 2 ? 'UpdateOutputSurface' : $6 === 3 ? 'SDL_Flip' : 'inactive',
+				presented: $6 !== 0, allowTownLayers: !!$7,
+				pureGpuMilliseconds: null
+			});
+		}, diagnosticSequence, total, diagnosticPreparationMs, diagnosticSdlMs,
+		    diagnosticYieldMs, diagnosticLimiterMs, diagnosticRoute, allowTownLayers);
+	};
+#endif
 
 	SDL_Surface *surface = GetOutputSurface();
 
 	if (!gbActive) {
 #ifdef __EMSCRIPTEN__
 		// Just yield to browser when inactive instead of blocking
+		const auto diagnosticYieldStart = diagnosticCapture ? DiagnosticClock::now() : DiagnosticClock::time_point {};
+		if (diagnosticCapture) diagnosticPreparationMs = diagnosticMs(diagnosticYieldStart - diagnosticStart);
 		emscripten_sleep(1);
+		if (diagnosticCapture) diagnosticYieldMs = diagnosticMs(DiagnosticClock::now() - diagnosticYieldStart);
+		diagnosticFinish();
 #else
 		LimitFrameRate();
 #endif
@@ -356,7 +387,7 @@ void RenderPresent([[maybe_unused]] bool allowTownLayers)
 		if (SDL_RenderCopy(renderer, texture.get(), nullptr, nullptr) <= -1) ErrSdl();
 #endif
 
-		if ((IsD3dMainMenuActive() || !gbRunGame) && !RenderD3dMainMenu(renderer, PalSurface)) {
+		if (IsD3dMainMenuActive() && !RenderD3dMainMenu(renderer, PalSurface)) {
 			// Keep all native controls visible if an optional layer fails midway.
 			SetD3dMainMenuActive(false);
 #ifdef USE_SDL3
@@ -416,16 +447,34 @@ void RenderPresent([[maybe_unused]] bool allowTownLayers)
 		if (ControlMode == ControlTypes::VirtualGamepad) {
 			RenderVirtualGamepad(renderer);
 		}
+#ifdef __EMSCRIPTEN__
+		const auto diagnosticSdlStart = diagnosticCapture ? DiagnosticClock::now() : DiagnosticClock::time_point {};
+		if (diagnosticCapture) diagnosticPreparationMs = diagnosticMs(diagnosticSdlStart - diagnosticStart);
+#endif
 		SDL_RenderPresent(renderer);
+#ifdef __EMSCRIPTEN__
+		if (diagnosticCapture) {
+			diagnosticSdlMs = diagnosticMs(DiagnosticClock::now() - diagnosticSdlStart);
+			diagnosticRoute = 1;
+		}
+#endif
 
 #ifdef __EMSCRIPTEN__
 		// TODO: Refactor to use emscripten_set_main_loop or requestAnimationFrame instead.
 		// For now, yield to browser to allow rendering via ASYNCIFY sleep.
+		const auto diagnosticYieldStart = diagnosticCapture ? DiagnosticClock::now() : DiagnosticClock::time_point {};
 		emscripten_sleep(1);
+		if (diagnosticCapture) diagnosticYieldMs = diagnosticMs(DiagnosticClock::now() - diagnosticYieldStart);
 #endif
 
 		if (*GetOptions().Graphics.frameRateControl != FrameRateControl::VerticalSync) {
+#ifdef __EMSCRIPTEN__
+			const auto diagnosticLimiterStart = diagnosticCapture ? DiagnosticClock::now() : DiagnosticClock::time_point {};
+#endif
 			LimitFrameRate();
+#ifdef __EMSCRIPTEN__
+			if (diagnosticCapture) diagnosticLimiterMs = diagnosticMs(DiagnosticClock::now() - diagnosticLimiterStart);
+#endif
 		}
 	} else {
 		recoverDeferredHud();
@@ -433,20 +482,55 @@ void RenderPresent([[maybe_unused]] bool allowTownLayers)
 			RenderVirtualGamepad(surface);
 		}
 
+#ifdef __EMSCRIPTEN__
+		const auto diagnosticSdlStart = diagnosticCapture ? DiagnosticClock::now() : DiagnosticClock::time_point {};
+		if (diagnosticCapture) diagnosticPreparationMs = diagnosticMs(diagnosticSdlStart - diagnosticStart);
+#endif
 		UpdateOutputSurface();
+#ifdef __EMSCRIPTEN__
+		if (diagnosticCapture) {
+			diagnosticSdlMs = diagnosticMs(DiagnosticClock::now() - diagnosticSdlStart);
+			diagnosticRoute = 2;
+		}
+#endif
 
 		if (RenderDirectlyToOutputSurface)
 			PalSurface = GetOutputSurface();
+#ifdef __EMSCRIPTEN__
+		const auto diagnosticLimiterStart = diagnosticCapture ? DiagnosticClock::now() : DiagnosticClock::time_point {};
+#endif
 		LimitFrameRate();
+#ifdef __EMSCRIPTEN__
+		if (diagnosticCapture) diagnosticLimiterMs = diagnosticMs(DiagnosticClock::now() - diagnosticLimiterStart);
+#endif
 	}
 #else
 	recoverDeferredHud();
+#ifdef __EMSCRIPTEN__
+	const auto diagnosticSdlStart = diagnosticCapture ? DiagnosticClock::now() : DiagnosticClock::time_point {};
+	if (diagnosticCapture) diagnosticPreparationMs = diagnosticMs(diagnosticSdlStart - diagnosticStart);
+#endif
 	if (SDL_Flip(surface) <= -1) {
 		ErrSdl();
 	}
+#ifdef __EMSCRIPTEN__
+	if (diagnosticCapture) {
+		diagnosticSdlMs = diagnosticMs(DiagnosticClock::now() - diagnosticSdlStart);
+		diagnosticRoute = 3;
+	}
+#endif
 	if (RenderDirectlyToOutputSurface)
 		PalSurface = GetOutputSurface();
+#ifdef __EMSCRIPTEN__
+	const auto diagnosticLimiterStart = diagnosticCapture ? DiagnosticClock::now() : DiagnosticClock::time_point {};
+#endif
 	LimitFrameRate();
+#ifdef __EMSCRIPTEN__
+	if (diagnosticCapture) diagnosticLimiterMs = diagnosticMs(DiagnosticClock::now() - diagnosticLimiterStart);
+#endif
+#endif
+#ifdef __EMSCRIPTEN__
+	diagnosticFinish();
 #endif
 }
 

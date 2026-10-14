@@ -4,7 +4,6 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
-#include <climits>
 #include <memory>
 #include <new>
 #include <optional>
@@ -87,7 +86,6 @@ OptionalOwnedClxSpriteList ArtLogo;
 OptionalOwnedClxSpriteList DifficultyIndicator;
 
 std::array<OptionalOwnedClxSpriteList, 3> ArtFocus;
-std::array<std::array<SDL_Color,256>,3> ArtFocusPalettes;
 
 OptionalOwnedClxSpriteList ArtBackgroundWidescreen;
 OptionalOwnedClxSpriteList ArtBackground;
@@ -695,9 +693,9 @@ void LoadUiGFX()
 		}
 	}
 	DifficultyIndicator = LoadPcx("ui_art\\r1_gry", /*transparentColor=*/0);
-	ArtFocus[FOCUS_SMALL] = LoadPcxSpriteList("ui_art\\focus16", /*numFrames=*/8, /*transparentColor=*/250, ArtFocusPalettes[FOCUS_SMALL].data());
-	ArtFocus[FOCUS_MED] = LoadPcxSpriteList("ui_art\\focus", /*numFrames=*/8, /*transparentColor=*/250, ArtFocusPalettes[FOCUS_MED].data());
-	ArtFocus[FOCUS_BIG] = LoadPcxSpriteList("ui_art\\focus42", /*numFrames=*/8, /*transparentColor=*/250, ArtFocusPalettes[FOCUS_BIG].data());
+	ArtFocus[FOCUS_SMALL] = LoadPcxSpriteList("ui_art\\focus16", /*numFrames=*/8, /*transparentColor=*/250);
+	ArtFocus[FOCUS_MED] = LoadPcxSpriteList("ui_art\\focus", /*numFrames=*/8, /*transparentColor=*/250);
+	ArtFocus[FOCUS_BIG] = LoadPcxSpriteList("ui_art\\focus42", /*numFrames=*/8, /*transparentColor=*/250);
 
 	ArtCursor = LoadPcx("ui_art\\cursor", /*transparentColor=*/0);
 
@@ -825,7 +823,13 @@ bool UiLoadBlackBackground()
 
 void UiLoadMenuBackground(const char *fallbackArt)
 {
-	SetD3dMainMenuActive(false);
+	if (SetD3dMainMenuActive(true)) {
+		ArtBackground = std::nullopt;
+		ArtBackgroundWidescreen = std::nullopt;
+		UiLoadDefaultPalette();
+		UiOnBackgroundChange();
+		return;
+	}
 	if (fallbackArt != nullptr)
 		LoadBackgroundArt(fallbackArt);
 	else
@@ -900,23 +904,11 @@ void DrawSelector(const SDL_Rect &rect)
 	// TODO FOCUS_MED appears higher than the box
 	const int y = rect.y + ((rect.h - static_cast<int>(sprite.height())) / 2);
 
-	const size_t focusSize = rect.h >= 42 ? FOCUS_BIG : rect.h >= 30 ? FOCUS_MED : FOCUS_SMALL;
-	std::array<uint8_t,256> translation {};
-	for (size_t source=0;source<256;++source) {
-		const auto color=ArtFocusPalettes[focusSize][source];
-		int best=INT_MAX;
-		for (size_t target=0;target<256;++target) {
-			const auto candidate=logical_palette[target];
-			const int r=int(color.r)-candidate.r, g=int(color.g)-candidate.g, b=int(color.b)-candidate.b;
-			const int distance=r*r+g*g+b*b;
-			if(distance<best) {best=distance;translation[source]=static_cast<uint8_t>(target);}
-		}
-	}
 	const Surface &out = Surface(DiabloUiSurface());
 	MarkD3dMainMenuNativeSprite(out, sprite, { rect.x, y });
-	RenderClxSpriteWithTRN(out, sprite, { rect.x, y }, translation.data());
+	RenderClxSprite(out, sprite, { rect.x, y });
 	MarkD3dMainMenuNativeSprite(out, sprite, { rect.x + rect.w - sprite.width(), y });
-	RenderClxSpriteWithTRN(out, sprite, { rect.x + rect.w - sprite.width(), y }, translation.data());
+	RenderClxSprite(out, sprite, { rect.x + rect.w - sprite.width(), y });
 }
 
 void UiClearScreen()

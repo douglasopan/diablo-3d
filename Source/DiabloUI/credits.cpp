@@ -20,6 +20,7 @@
 
 #include "DiabloUI/credits_lines.h"
 #include "DiabloUI/diabloui.h"
+#include "DiabloUI/third_party_notices.hpp"
 #include "DiabloUI/support_lines.h"
 #include "DiabloUI/ui_flags.hpp"
 #include "controls/input.h"
@@ -56,7 +57,8 @@ constexpr std::array<const char *, 3> ProjectLinks {
 	"https://douglasopan.github.io/diablo-3d/",
 	"https://discord.gg/4YxQ7s69S",
 };
-constexpr int ProjectCreditsBack = ProjectLinks.size();
+constexpr int ProjectCreditsNotices = ProjectLinks.size();
+constexpr int ProjectCreditsBack = ProjectCreditsNotices + 1;
 int ProjectCreditsAction = -1;
 
 void ProjectCreditsSelect(size_t value)
@@ -255,9 +257,9 @@ void UiDiablo3DCreditsDialog()
 
 		const int width = std::min(720, gnScreenWidth - 64);
 		const int x = (gnScreenWidth - width) / 2;
-		constexpr int LineHeight = 20;
-		constexpr int RowHeight = 32;
-		constexpr int ParagraphGap = 6;
+		int LineHeight = 20;
+		int RowHeight = 32;
+		int ParagraphGap = 6;
 		const std::array<std::string, 4> paragraphs {
 			WordWrapString(_("Goal: rebuild the whole Diablo 1 in 3D. Tristram is the first stage."), width, GameFont12, 1),
 			WordWrapString(_("Based on Diablo and DevilutionX, preserving the original authors, contributors, licenses, and credits."), width, GameFont12, 1),
@@ -267,14 +269,31 @@ void UiDiablo3DCreditsDialog()
 		const std::string error = linkFailed
 		    ? WordWrapString(_("Could not open a browser. Use the addresses shown above."), width, GameFont12, 1)
 		    : std::string {};
-		auto textHeight = [](const std::string &text) {
+		auto textHeight = [&](const std::string &text) {
 			return (1 + static_cast<int>(std::count(text.begin(), text.end(), '\n'))) * LineHeight;
 		};
-		int height = 40 + 8 + 36 + 12 + 4 + RowHeight * (ProjectCreditsBack + 1);
-		for (const auto &paragraph : paragraphs)
-			height += textHeight(paragraph) + ParagraphGap;
-		if (linkFailed)
-			height += 8 + textHeight(error);
+		auto dialogHeight = [&] {
+			int height = 40 + 8 + 36 + 12 + 4 + RowHeight * (ProjectCreditsBack + 1);
+			for (const auto &paragraph : paragraphs)
+				height += textHeight(paragraph) + ParagraphGap;
+			if (linkFailed)
+				height += 8 + textHeight(error);
+			return height;
+		};
+		int height = dialogHeight();
+		// Keep the accepted layout when it fits; compact only overflowing content.
+		if (height > gnScreenHeight) {
+			LineHeight = 18;
+			RowHeight = 28;
+			ParagraphGap = 4;
+			height = dialogHeight();
+		}
+		if (height > gnScreenHeight) {
+			LineHeight = 16;
+			RowHeight = 24;
+			ParagraphGap = 2;
+			height = dialogHeight();
+		}
 		int y = std::max(0, (gnScreenHeight - height) / 2);
 		auto addText = [&](const char *text, int textBoxHeight, UiFlags font, UiFlags color) {
 			dialog.push_back(std::make_unique<UiArtText>(text,
@@ -292,6 +311,7 @@ void UiDiablo3DCreditsDialog()
 		y += 4;
 		for (const char *url : ProjectLinks)
 			links.push_back(std::make_unique<UiListItem>(std::string_view { url }));
+		links.push_back(std::make_unique<UiListItem>(_("Third-Party Notices")));
 		links.push_back(std::make_unique<UiListItem>(_("Back")));
 		dialog.push_back(std::make_unique<UiList>(links, links.size(), x, y, width, RowHeight,
 		    UiFlags::FontSize12 | UiFlags::ColorUiGold | UiFlags::AlignCenter, 1));
@@ -314,6 +334,13 @@ void UiDiablo3DCreditsDialog()
 
 		if (ProjectCreditsAction == ProjectCreditsBack)
 			return;
+		if (ProjectCreditsAction == ProjectCreditsNotices) {
+			// A separate page leaves the inherited credit dialog/text unchanged.
+			ArtBackgroundWidescreen = LoadOptionalClx("ui_art\\creditsw.clx");
+			LoadBackgroundArt("ui_art\\credits");
+			TextDialog(ThirdPartyNoticeLines.data(), ThirdPartyNoticeLines.size());
+			continue;
+		}
 		linkFailed = !OpenProjectLink(ProjectLinks[ProjectCreditsAction]);
 	}
 }

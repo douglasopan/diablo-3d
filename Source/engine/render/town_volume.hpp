@@ -5,8 +5,6 @@
 #include <span>
 #include <vector>
 
-#include "engine/render/town_prop_stencils.hpp"
-
 namespace devilution {
 
 /** Caller-owned, decoded native sprite. Opacity is explicit: black is a color. */
@@ -60,20 +58,6 @@ TownVolumeMesh BuildTownActorVolume(const TownVolumeSprite &sprite, int pixelSte
  * fitted to the painted row width and full silhouette height, without actor
  * anatomy or shadow masking. Uses the same native-ray frame/UVs as ActorVolume. */
 TownVolumeMesh BuildTownPropVolume(const TownVolumeSprite &sprite, int pixelStep = 4);
-
-/** Physical, grounded kit for the explicitly identified native prop layouts.
- * Local +height is vertical: callers MUST use physicalFrame=true, with no
- * native-ray depth/height shear. Unknown layout/kind or malformed paint refuses
- * with an empty mesh. Source pixels supply palette colors without a floor plate.
- * The fixed scale uses the measured native Warrior idle height 1.875 world units;
- * it never follows the current actor pose or consumes simulation randomness. */
-TownVolumeMesh BuildTownPhysicalPropVolume(const TownVolumeSprite &sprite,
-    town_prop_stencils::Kind kind, uint16_t nativeLayout, uint32_t placementSeed = 0);
-
-/** Closed rotational reconstruction of the native C1 light stand. Its sampled
- * silhouette supplies radius/height and its paint supplies each ring's color.
- * No simulation state, random numbers, collision or camera-facing cards. */
-TownVolumeMesh BuildCathedralLightStandVolume(const TownVolumeSprite &sprite);
 
 /** Real tapered tubes, branch forks and optional closed foliage clusters fitted
  * to native sprite extents. Each tube is closed, including its end caps; forks

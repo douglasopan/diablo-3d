@@ -4,15 +4,9 @@
 #include <array>
 #include <cmath>
 #include <optional>
-#include <fstream>
-#include <sstream>
-#include <string>
 
-#include "automap.h"
 #include "control/d3d_hud_layout.hpp"
 #include "engine/render/d3d_ui_layout.hpp"
-#include "utils/file_util.h"
-#include "utils/paths.h"
 
 namespace devilution {
 namespace {
@@ -20,129 +14,6 @@ namespace {
 SDL_Renderer *BoundRenderer = nullptr;
 bool HasRendererBinding = false;
 std::optional<D3dHudGeometry> CachedGeometry;
-
-struct SavedHudRect { int x, y, width, height; };
-std::array<std::optional<SavedHudRect>, D3dHudEditableElementCount> HudOverrides;
-std::string HudProfile;
-bool HudProfileLoaded = false;
-uint64_t HudCustomizationGeneration = 0;
-struct HudGesture { size_t element; Rectangle original; Point start; uint8_t edges; D3dHudGeometryContext viewport; std::optional<SavedHudRect> previous; };
-std::optional<HudGesture> HudDrag;
-constexpr int HudNormalizedUnits = 10000;
-constexpr std::array<const char *, D3dHudEditableElementCount> HudElementNames {
-	"Health", "Mana", "Belt", "Spell", "Info", "Character", "Inventory", "Spells",
-	"Quests", "Map", "Menu", "Chat", "Friendly", "Experience", "Level", "Durability", "Clock", "Minimap"
-};
-
-void LoadHudOverrides()
-{
-	const std::string profile = paths::PrefPath();
-	if (HudProfileLoaded && profile == HudProfile) return;
-	HudProfileLoaded = true; HudProfile = profile; HudOverrides = {}; HudDrag.reset(); ++HudCustomizationGeneration;
-	uintmax_t fileSize = 0;
-	if (!GetFileSize((profile + "hud-elements.layout").c_str(), &fileSize) || fileSize > 8192) return;
-	std::ifstream input(profile + "hud-elements.layout", std::ios::binary);
-	if (!input) return;
-	std::string header;
-	if (!std::getline(input, header)) return;
-	if (!header.empty() && header.back() == '\r') header.pop_back();
-	if (header != "D3DHUDLAYOUT1") return;
-	std::array<std::optional<SavedHudRect>, D3dHudEditableElementCount> candidate;
-	std::string line; size_t bytes = header.size(), rows = 0;
-	while (std::getline(input, line)) {
-		bytes += line.size() + 1;
-		if (bytes > 8192 || ++rows > D3dHudEditableElementCount) return;
-		std::istringstream row(line); std::string name, tail; SavedHudRect rect;
-		if (!(row >> name >> rect.x >> rect.y >> rect.width >> rect.height) || row >> tail) return;
-		const auto found = std::find(HudElementNames.begin(), HudElementNames.end(), name);
-		if (found == HudElementNames.end()) return;
-		const size_t slot = static_cast<size_t>(found - HudElementNames.begin());
-		if (candidate[slot] || rect.x < 0 || rect.y < 0 || rect.width <= 0 || rect.height <= 0
-		    || rect.x > HudNormalizedUnits || rect.y > HudNormalizedUnits
-		    || rect.width > HudNormalizedUnits || rect.height > HudNormalizedUnits
-		    || rect.x + rect.width > HudNormalizedUnits || rect.y + rect.height > HudNormalizedUnits) return;
-		candidate[slot] = rect;
-	}
-	if (input.bad()) return;
-	HudOverrides = candidate; // Whole-file acceptance; malformed files stay untouched.
-}
-
-void SaveHudOverrides()
-{
-	if (!HudProfileLoaded) return;
-	std::ostringstream serialized;
-	serialized << "D3DHUDLAYOUT1\n";
-	for (size_t i = 0; i < HudOverrides.size(); ++i) if (HudOverrides[i]) {
-		const auto &rect = *HudOverrides[i];
-		serialized << HudElementNames[i] << ' ' << rect.x << ' ' << rect.y << ' ' << rect.width << ' ' << rect.height << '\n';
-	}
-	const std::string path = HudProfile + "hud-elements.layout", temporary = path + ".tmp";
-	std::ofstream output(temporary, std::ios::binary | std::ios::trunc);
-	output << serialized.str(); output.close();
-	if (!output) return;
-	if (FileExists(path.c_str())) CopyFileOverwrite(path.c_str(), (path + ".bak").c_str());
-	CopyFileOverwrite(temporary.c_str(), path.c_str());
-	RemoveFile(temporary.c_str());
-}
-
-Rectangle ClampHudElement(size_t id, Rectangle rect, const D3dHudGeometryContext &context)
-{
-	constexpr std::array<Size, D3dHudEditableElementCount> minimum {{
-		{64,82},{64,82},{192,24},{32,32},{180,64},{50,20},{50,20},{50,20},
-		{50,20},{50,20},{50,20},{32,24},{32,24},{160,9},{100,40},{100,24},{64,12},{160,72}
-	}};
-	auto size = minimum[std::min(id, minimum.size() - 1)];
-	if (id == 4) {
-		const auto metrics = ResolveD3dHudGeometry(context).metrics;
-		size.height = std::max(size.height, static_cast<int>(std::ceil(5 * metrics.infoPhysicalLinePitch + 2 * metrics.infoPhysicalInset)));
-	}
-	const int logicalMinWidth = id == D3dHudMinimapElement ? 160 : 1;
-	const int logicalMinHeight = id == D3dHudMinimapElement ? 72 : 1;
-	const int minWidth = std::min(context.logicalWidth, std::max(logicalMinWidth, static_cast<int>(std::ceil(size.width / std::max(0.001F, context.outputScaleX)))));
-	const int minHeight = std::min(context.logicalHeight, std::max(logicalMinHeight, static_cast<int>(std::ceil(size.height / std::max(0.001F, context.outputScaleY)))));
-	const Size limits { std::max(1, context.logicalWidth), std::max(1, context.logicalHeight) };
-	rect.size.width = std::clamp(rect.size.width, std::max(1,minWidth), limits.width);
-	rect.size.height = std::clamp(rect.size.height, std::max(1,minHeight), limits.height);
-	rect.position.x = std::clamp(rect.position.x, 0, limits.width - rect.size.width);
-	rect.position.y = std::clamp(rect.position.y, 0, limits.height - rect.size.height);
-	return rect;
-}
-
-Rectangle ApplyHudOverride(size_t id, Rectangle standard, const D3dHudGeometryContext &context)
-{
-	if (id >= HudOverrides.size() || !HudOverrides[id]) return standard;
-	const auto &saved = *HudOverrides[id];
-	if (id == D3dHudClockElement || id == D3dHudMinimapElement) {
-		const Point position { saved.x * context.logicalWidth / HudNormalizedUnits, saved.y * context.logicalHeight / HudNormalizedUnits };
-		return ClampHudElement(id, { position,
-			{ (saved.x + saved.width) * context.logicalWidth / HudNormalizedUnits - position.x,
-			  (saved.y + saved.height) * context.logicalHeight / HudNormalizedUnits - position.y } }, context);
-	}
-	return ClampHudElement(id, { { saved.x * context.logicalWidth / HudNormalizedUnits, saved.y * context.logicalHeight / HudNormalizedUnits },
-		{ saved.width * context.logicalWidth / HudNormalizedUnits, saved.height * context.logicalHeight / HudNormalizedUnits } }, context);
-}
-
-void StoreHudOverride(size_t id, Rectangle rect, const D3dHudGeometryContext &context)
-{
-	rect = ClampHudElement(id, rect, context);
-	if (id == D3dHudClockElement || id == D3dHudMinimapElement) {
-		// New auxiliary records store normalized edge differences. Ceil maps each
-		// logical pixel back exactly and keeps the opposite resize edge fixed.
-		const auto edge = [](int pixel, int extent) {
-			return std::clamp(static_cast<int>((int64_t(pixel) * HudNormalizedUnits + std::max(1, extent) - 1) / std::max(1, extent)), 0, HudNormalizedUnits);
-		};
-		const int left = edge(rect.position.x, context.logicalWidth), top = edge(rect.position.y, context.logicalHeight);
-		HudOverrides[id] = SavedHudRect { left, top,
-			std::max(1, edge(rect.position.x + rect.size.width, context.logicalWidth) - left),
-			std::max(1, edge(rect.position.y + rect.size.height, context.logicalHeight) - top) };
-		++HudCustomizationGeneration;
-		return;
-	}
-	const auto units = [](int pixel, int extent) { return std::clamp(pixel * HudNormalizedUnits / std::max(1, extent), 0, HudNormalizedUnits); };
-	HudOverrides[id] = SavedHudRect { units(rect.position.x, context.logicalWidth), units(rect.position.y, context.logicalHeight),
-		std::max(1, units(rect.size.width, context.logicalWidth)), std::max(1, units(rect.size.height, context.logicalHeight)) };
-	++HudCustomizationGeneration;
-}
 
 // Physical FullHD pixels, bottom-centred in the renderer's content viewport.
 // The order is the existing 13-node v1 contract, never a new control/preset.
@@ -325,10 +196,7 @@ D3dHudGeometryContext CaptureD3dHudGeometryContext(SDL_Renderer *target)
 
 D3dHudGeometryContext GetD3dHudGeometryContext()
 {
-	LoadHudOverrides();
-	auto context = CaptureD3dHudGeometryContext(HasRendererBinding ? BoundRenderer : renderer);
-	context.customizationGeneration = HudCustomizationGeneration;
-	return context;
+	return CaptureD3dHudGeometryContext(HasRendererBinding ? BoundRenderer : renderer);
 }
 
 D3dHudGeometry ResolveD3dHudGeometry(const D3dHudGeometryContext &context)
@@ -427,12 +295,7 @@ D3dHudGeometry ResolveD3dHudGeometry(const D3dHudGeometryContext &context)
 const D3dHudGeometry &GetD3dHudGeometry()
 {
 	const auto context = GetD3dHudGeometryContext();
-	if (!CachedGeometry || !(CachedGeometry->context == context)) {
-		CachedGeometry = ResolveD3dHudGeometry(context);
-		for (size_t i = 0; i < CachedGeometry->elements.size(); ++i)
-			CachedGeometry->elements[i] = ApplyHudOverride(i, CachedGeometry->elements[i], context);
-		for (int i = 0; i < 8; ++i) CachedGeometry->beltSlots[i] = D3dHudBeltSlotRect(CachedGeometry->elements[2], i);
-	}
+	if (!CachedGeometry || !(CachedGeometry->context == context)) CachedGeometry = ResolveD3dHudGeometry(context);
 	return *CachedGeometry;
 }
 
@@ -449,104 +312,6 @@ int GetD3dHudDesignPixelsX(int pixels)
 int GetD3dHudDesignPixelsY(int pixels)
 {
 	return std::max(1, static_cast<int>(std::lround(pixels * GetD3dHudMetrics().designScaleY)));
-}
-
-Rectangle ResolveD3dHudCustomizedRect(size_t element, Rectangle standard)
-{
-	const auto context = GetD3dHudGeometryContext();
-	return ApplyHudOverride(element, standard, context);
-}
-
-uint8_t GetD3dHudResizeEdges(Rectangle area, Point pointer, int grip)
-{
-	if (!area.contains(pointer) || grip <= 0) return D3dHudResizeNone;
-	grip = std::min({ grip, std::max(1, area.size.width / 2), std::max(1, area.size.height / 2) });
-	uint8_t edges = D3dHudResizeNone;
-	if (pointer.x < area.position.x + grip) edges |= D3dHudResizeLeft;
-	else if (pointer.x >= area.position.x + area.size.width - grip) edges |= D3dHudResizeRight;
-	if (pointer.y < area.position.y + grip) edges |= D3dHudResizeTop;
-	else if (pointer.y >= area.position.y + area.size.height - grip) edges |= D3dHudResizeBottom;
-	return edges;
-}
-
-void BeginD3dHudEdgeCustomization(size_t element, Rectangle area, Point pointer, uint8_t edges)
-{
-	LoadHudOverrides();
-	// A repeated DOWN cancels rather than adopting the first preview as a
-	// new origin. Its caller already owns the UI pair, including the UP.
-	if (HudDrag) { CancelD3dHudCustomization(); return; }
-	const auto context = GetD3dHudGeometryContext();
-	if (element < HudOverrides.size()) HudDrag = HudGesture { element, ClampHudElement(element, area, context), pointer,
-		static_cast<uint8_t>(edges & 15), context, HudOverrides[element] };
-}
-
-void BeginD3dHudCustomization(size_t element, Rectangle area, Point pointer, bool resize)
-{
-	BeginD3dHudEdgeCustomization(element, area, pointer,
-		resize ? D3dHudResizeRight | D3dHudResizeBottom : D3dHudResizeNone);
-}
-
-bool UpdateD3dHudCustomization(Point pointer)
-{
-	LoadHudOverrides();
-	if (!HudDrag) return false;
-	if (HudDrag->element == D3dHudMinimapElement
-	    && (!AutomapActive || GetAutomapType() != AutomapType::Minimap)) {
-		CancelD3dHudCustomization(); return false;
-	}
-	Rectangle rect = HudDrag->original;
-	const Displacement delta = pointer - HudDrag->start;
-	const auto context = GetD3dHudGeometryContext();
-	auto originalViewport = HudDrag->viewport;
-	originalViewport.layoutGeneration = context.layoutGeneration;
-	originalViewport.customizationGeneration = context.customizationGeneration;
-	if (!(originalViewport == context)) {
-		CancelD3dHudCustomization();
-		return false; // A new viewport/DPI cannot reuse an old physical gesture.
-	}
-	if (HudDrag->edges != D3dHudResizeNone) {
-		const Size minimum = ClampHudElement(HudDrag->element, { { 0, 0 }, { 1, 1 } }, context).size;
-		int left = rect.position.x, top = rect.position.y;
-		int right = left + rect.size.width, bottom = top + rect.size.height;
-		if ((HudDrag->edges & D3dHudResizeLeft) != 0)
-			left = std::clamp(left + delta.deltaX, 0, right - minimum.width);
-		else if ((HudDrag->edges & D3dHudResizeRight) != 0)
-			right = std::clamp(right + delta.deltaX, left + minimum.width, context.logicalWidth);
-		if ((HudDrag->edges & D3dHudResizeTop) != 0)
-			top = std::clamp(top + delta.deltaY, 0, bottom - minimum.height);
-		else if ((HudDrag->edges & D3dHudResizeBottom) != 0)
-			bottom = std::clamp(bottom + delta.deltaY, top + minimum.height, context.logicalHeight);
-		rect = { { left, top }, { right - left, bottom - top } };
-	} else rect.position += delta;
-	StoreHudOverride(HudDrag->element, rect, context);
-	return true;
-}
-
-bool EndD3dHudCustomization()
-{
-	if (!HudDrag) return false;
-	SaveHudOverrides(); HudDrag.reset(); return true;
-}
-
-void CancelD3dHudCustomization()
-{
-	if (HudDrag) { HudOverrides[HudDrag->element] = HudDrag->previous; ++HudCustomizationGeneration; HudDrag.reset(); }
-}
-void ResetD3dHudCustomization(size_t element)
-{
-	LoadHudOverrides();
-	if (element >= HudOverrides.size()) return;
-	CancelD3dHudCustomization();
-	HudOverrides[element].reset(); ++HudCustomizationGeneration; SaveHudOverrides();
-}
-void ResetAllD3dHudCustomizations()
-{
-	LoadHudOverrides(); HudOverrides = {}; HudDrag.reset(); ++HudCustomizationGeneration; SaveHudOverrides();
-}
-bool HasD3dHudCustomization()
-{
-	LoadHudOverrides();
-	return std::any_of(HudOverrides.begin(), HudOverrides.end(), [](const auto &rect) { return rect.has_value(); });
 }
 
 } // namespace devilution

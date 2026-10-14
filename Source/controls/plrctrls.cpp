@@ -1,4 +1,3 @@
-#include "control/d3d_floating_panels.hpp"
 #include "controls/plrctrls.h"
 
 #include <algorithm>
@@ -48,7 +47,6 @@
 #include "minitext.h"
 #include "missiles.h"
 #include "panels/quest_log.hpp"
-#include "panels/spell_book.hpp"
 #include "panels/spell_icons.hpp"
 #include "panels/spell_list.hpp"
 #include "panels/ui_panels.hpp"
@@ -99,30 +97,6 @@ Point VisualStoreSlot = { 0, 0 };
 int PreviousInventoryColumn = -1;
 bool BeltReturnsToStash = false;
 bool BeltReturnsToVisualStore = false;
-
-bool IsBeltControllerSlot(int slot)
-{
-	return slot >= SLOTXY_BELT_FIRST && slot <= SLOTXY_BELT_LAST;
-}
-
-Point InventoryPointerToVisual(int slot, Point point)
-{
-	// Belt rectangles are already physical, shared with their HUD renderer.
-	return IsBeltControllerSlot(slot) ? point : D3dPanelPointerToVisual(UiPanels::Inventory, point);
-}
-
-void SetInventoryControllerPointer(Point nativePoint)
-{
-	if (!IsBeltControllerSlot(Slot))
-		FocusD3dFloatingPanel(UiPanels::Inventory);
-	SetCursorPos(InventoryPointerToVisual(Slot, nativePoint));
-}
-
-void SetStashControllerPointer(Point nativePoint)
-{
-	FocusD3dFloatingPanel(UiPanels::Stash);
-	SetCursorPos(D3dPanelPointerToVisual(UiPanels::Stash, nativePoint));
-}
 // Only a directional request issued by the first-person keyboard hook owns a
 // later stop. Mouse, interaction and controller requests must keep their paths.
 bool FppWalkOwned = false;
@@ -604,13 +578,12 @@ void AttrIncBtnSnap(AxisDirection dir)
 		return;
 
 	// first, find our cursor location
-	const Point nativePointer = MapD3dWindowPointer(MousePosition);
 	int slot = 0;
 	Rectangle button;
 	for (int i = 0; i < 4; i++) {
 		button = CharPanelButtonRect[i];
 		button.position = GetPanelPosition(UiPanels::Character, button.position);
-		if (button.contains(nativePointer)) {
+		if (button.contains(MousePosition)) {
 			slot = i;
 			break;
 		}
@@ -627,8 +600,7 @@ void AttrIncBtnSnap(AxisDirection dir)
 	// move cursor to our new location
 	button = CharPanelButtonRect[slot];
 	button.position = GetPanelPosition(UiPanels::Character, button.position);
-	FocusD3dFloatingPanel(UiPanels::Character);
-	SetCursorPos(D3dPanelPointerToVisual(UiPanels::Character, button.Center()));
+	SetCursorPos(button.Center());
 }
 
 Point InvGetEquipSlotCoord(const inv_body_loc invSlot)
@@ -813,12 +785,12 @@ void ResetInvCursorPosition()
 		mousePos = InvGetEquipSlotCoordFromInvSlot((inv_xy_slot)Slot);
 	}
 
-	SetInventoryControllerPointer(mousePos);
+	SetCursorPos(mousePos);
 }
 
 int FindClosestInventorySlot(
     Point mousePos, const Item &heldItem,
-    tl::function_ref<int(Point, int)> distanceFunction = [](Point mousePos, int slot) { return mousePos.ManhattanDistance(InventoryPointerToVisual(slot, GetSlotCoord(slot))); })
+    tl::function_ref<int(Point, int)> distanceFunction = [](Point mousePos, int slot) { return mousePos.ManhattanDistance(GetSlotCoord(slot)); })
 {
 	int shortestDistance = std::numeric_limits<int>::max();
 	int bestSlot = 0;
@@ -865,7 +837,7 @@ Point FindClosestStashSlot(Point mousePos)
 	Point bestSlot = {};
 
 	for (const Point point : PointsInRectangle(Rectangle { { 0, 0 }, Size { 10, 10 } })) {
-		const int distance = mousePos.ManhattanDistance(D3dPanelPointerToVisual(UiPanels::Stash, GetStashSlotCoord(point)));
+		const int distance = mousePos.ManhattanDistance(GetStashSlotCoord(point));
 		if (distance < shortestDistance) {
 			shortestDistance = distance;
 			bestSlot = point;
@@ -904,12 +876,7 @@ void LiftInventoryItem()
 		if (itemUnderCursor > 0)
 			jumpSlot = FindFirstSlotOnItem(itemUnderCursor);
 	}
-	if (IsBeltControllerSlot(inventorySlot)) {
-		CheckInvItem();
-	} else {
-		ScopedD3dWindowPointer windowPointer;
-		CheckInvItem();
-	}
+	CheckInvItem();
 
 	if (inventorySlot >= SLOTXY_INV_FIRST && inventorySlot <= SLOTXY_INV_LAST) {
 		Point mousePos = GetSlotCoord(jumpSlot);
@@ -917,7 +884,7 @@ void LiftInventoryItem()
 		const Size newCursorSizeInCells = MyPlayer->HoldItem.isEmpty() ? GetItemSizeOnSlot(jumpSlot) : GetInventorySize(MyPlayer->HoldItem);
 		mousePos.x += ((newCursorSizeInCells.width - 1) * InventorySlotSizeInPixels.width) / 2;
 		mousePos.y += ((newCursorSizeInCells.height - 1) * InventorySlotSizeInPixels.height) / 2;
-		SetInventoryControllerPointer(mousePos);
+		SetCursorPos(mousePos);
 	}
 }
 
@@ -942,10 +909,7 @@ void LiftStashItem()
 	}(stashSlot, cursorSizeInCells);
 
 	const Point jumpSlot = itemUnderCursor == StashStruct::EmptyCell ? stashSlot : FindFirstStashSlotOnItem(itemUnderCursor);
-	{
-		ScopedD3dWindowPointer windowPointer;
-		CheckStashItem(MousePosition);
-	}
+	CheckStashItem(MousePosition);
 
 	Point mousePos = GetStashSlotCoord(jumpSlot);
 	ActiveStashSlot = jumpSlot;
@@ -954,7 +918,7 @@ void LiftStashItem()
 	mousePos.x += ((cursorSizeInCells.width) * InventorySlotSizeInPixels.width) / 2;
 	mousePos.y += ((cursorSizeInCells.height) * InventorySlotSizeInPixels.height) / 2;
 
-	SetStashControllerPointer(mousePos);
+	SetCursorPos(mousePos);
 }
 
 /**
@@ -1037,7 +1001,7 @@ void VisualStoreMove(AxisDirection dir)
 					const Point slotPos = GetVisualStoreSlotCoord(VisualStoreSlot);
 					mousePos = slotPos + Displacement { itemSize.width * INV_SLOT_HALF_SIZE_PX, itemSize.height * INV_SLOT_HALF_SIZE_PX };
 				}
-				SetStashControllerPointer(mousePos);
+				SetCursorPos(mousePos);
 				BeltReturnsToVisualStore = false;
 				return;
 			}
@@ -1065,14 +1029,11 @@ void VisualStoreMove(AxisDirection dir)
 				const Point invSlotCoord = GetSlotCoord(Slot);
 				const Point vsSlotPos = GetVisualStoreSlotCoord({ VisualStoreGridWidth - itemSize.width, 0 });
 				// Calculate the Y offset from the inventory slot to preserve vertical position
-				const Point invVisual = InventoryPointerToVisual(Slot, invSlotCoord);
-				const Point storeVisual = D3dPanelPointerToVisual(UiPanels::Stash, vsSlotPos);
-				const float cellHeight = InventorySlotSizeInPixels.height * GetD3dWindowScale(UiPanels::Stash);
-				int targetY = std::clamp(static_cast<int>((invVisual.y - storeVisual.y) / cellHeight), 0, VisualStoreGridHeight - 1);
+				int targetY = std::clamp(static_cast<int>((invSlotCoord.y - vsSlotPos.y) / InventorySlotSizeInPixels.height), 0, VisualStoreGridHeight - 1);
 				VisualStoreSlot = { VisualStoreGridWidth - 1, targetY };
 				const Point slotPos = GetVisualStoreSlotCoord(VisualStoreSlot);
 				// Account for held item size when positioning cursor
-				SetStashControllerPointer(slotPos + Displacement { itemSize.width * INV_SLOT_HALF_SIZE_PX, itemSize.height * INV_SLOT_HALF_SIZE_PX });
+				SetCursorPos(slotPos + Displacement { itemSize.width * INV_SLOT_HALF_SIZE_PX, itemSize.height * INV_SLOT_HALF_SIZE_PX });
 				return;
 			}
 		}
@@ -1126,10 +1087,10 @@ void VisualStoreMove(AxisDirection dir)
 			// Grid
 			if (!GridMove(VisualStoreSlot, dir, gridSize, movingItemSize, isHoldingItem, getCellId)) {
 				// Transition to inventory with smart positioning (similar to stash)
-				const Point vsSlotCoord = D3dPanelPointerToVisual(UiPanels::Stash, GetVisualStoreSlotCoord(VisualStoreSlot));
-				const Point rightPanelCoord = { GetPanelArea(UiPanels::Inventory).position.x, vsSlotCoord.y };
+				const Point vsSlotCoord = GetVisualStoreSlotCoord(VisualStoreSlot);
+				const Point rightPanelCoord = { GetRightPanel().position.x, vsSlotCoord.y };
 				Slot = FindClosestInventorySlot(rightPanelCoord, MyPlayer->HoldItem, [](Point mousePos, int slot) {
-					const Point slotPos = InventoryPointerToVisual(slot, GetSlotCoord(slot));
+					const Point slotPos = GetSlotCoord(slot);
 					// Exaggerate the vertical difference so that moving from the top rows of the
 					//  visual store is more likely to land on a body slot
 					return (std::abs(mousePos.y - slotPos.y) * 3) + std::abs(mousePos.x - slotPos.x);
@@ -1256,7 +1217,7 @@ void VisualStoreMove(AxisDirection dir)
 		mousePos = GetVisualStoreSlotCoord(displayPos) + Displacement { (itemSize.width * INV_SLOT_HALF_SIZE_PX), (itemSize.height * INV_SLOT_HALF_SIZE_PX) };
 	}
 
-	SetStashControllerPointer(mousePos);
+	SetCursorPos(mousePos);
 }
 
 /**
@@ -1499,11 +1460,11 @@ void InventoryMove(AxisDirection dir)
 		mousePos.y += ((itemSize.height - 1) * InventorySlotSizeInPixels.height) / 2;
 	}
 
-	if (InventoryPointerToVisual(Slot, mousePos) == MousePosition) {
+	if (mousePos == MousePosition) {
 		return; // Avoid wobbling when scaled
 	}
 
-	SetInventoryControllerPointer(mousePos);
+	SetCursorPos(mousePos);
 }
 
 /**
@@ -1525,7 +1486,7 @@ void CheckInventoryMove(AxisDirection dir)
  * @brief Try to clean the inventory related cursor states.
  * @return True if it is safe to close the inventory
  */
-bool BlurInventory(bool closeInventory = true)
+bool BlurInventory()
 {
 	if (!MyPlayer->HoldItem.isEmpty()) {
 		if (!TryDropItem()) {
@@ -1534,11 +1495,10 @@ bool BlurInventory(bool closeInventory = true)
 		}
 	}
 
-	if (closeInventory)
-		CloseInventory();
+	CloseInventory();
 	if (pcurs > CURSOR_HAND)
 		NewCursor(CURSOR_HAND);
-	if (closeInventory && CharFlag)
+	if (CharFlag)
 		FocusOnCharInfo();
 
 	return true;
@@ -1554,11 +1514,11 @@ void StashMove(AxisDirection dir)
 	const Item &holdItem = MyPlayer->HoldItem;
 	if (Slot < 0 && ActiveStashSlot == InvalidStashPoint) {
 		const int invSlot = FindClosestInventorySlot(MousePosition, holdItem);
-		const Point invSlotCoord = InventoryPointerToVisual(invSlot, GetSlotCoord(invSlot));
+		const Point invSlotCoord = GetSlotCoord(invSlot);
 		const int invDistance = MousePosition.ManhattanDistance(invSlotCoord);
 
 		const Point stashSlot = FindClosestStashSlot(MousePosition);
-		const Point stashSlotCoord = D3dPanelPointerToVisual(UiPanels::Stash, GetStashSlotCoord(stashSlot));
+		const Point stashSlotCoord = GetStashSlotCoord(stashSlot);
 		const int stashDistance = MousePosition.ManhattanDistance(stashSlotCoord);
 
 		if (invDistance < stashDistance) {
@@ -1602,7 +1562,7 @@ void StashMove(AxisDirection dir)
 				FocusOnVisualStore();
 				dir.x = AxisDirectionX_NONE;
 			} else {
-				const Point slotCoord = InventoryPointerToVisual(Slot, GetSlotCoord(Slot));
+				const Point slotCoord = GetSlotCoord(Slot);
 				InvalidateInventorySlot();
 				ActiveStashSlot = FindClosestStashSlot(slotCoord) - Displacement { itemSize.width - 1, 0 };
 				dir.x = AxisDirectionX_NONE;
@@ -1634,10 +1594,10 @@ void StashMove(AxisDirection dir)
 		GridMove(ActiveStashSlot, dir, gridSize, movingItemSize, isHoldingItem, getCellId);
 	} else if (dir.x == AxisDirectionX_RIGHT) {
 		if (!GridMove(ActiveStashSlot, dir, gridSize, movingItemSize, isHoldingItem, getCellId)) {
-			const Point stashSlotCoord = D3dPanelPointerToVisual(UiPanels::Stash, GetStashSlotCoord(ActiveStashSlot));
-			const Point rightPanelCoord = { GetPanelArea(UiPanels::Inventory).position.x, stashSlotCoord.y };
+			const Point stashSlotCoord = GetStashSlotCoord(ActiveStashSlot);
+			const Point rightPanelCoord = { GetRightPanel().position.x, stashSlotCoord.y };
 			Slot = FindClosestInventorySlot(rightPanelCoord, holdItem, [](Point mousePos, int slot) {
-				const Point slotPos = InventoryPointerToVisual(slot, GetSlotCoord(slot));
+				const Point slotPos = GetSlotCoord(slot);
 				// Exaggerate the vertical difference so that moving from the top 6 rows of the
 				//  stash is more likely to land on a body slot. The value 3 was found by trial and
 				//  error, this allows moving from the top row of the stash to the head while
@@ -1683,7 +1643,7 @@ void StashMove(AxisDirection dir)
 		}
 
 		mousePos += Displacement { itemSize.width * INV_SLOT_HALF_SIZE_PX, itemSize.height * INV_SLOT_HALF_SIZE_PX };
-		SetStashControllerPointer(mousePos);
+		SetCursorPos(mousePos);
 		return;
 	}
 
@@ -1839,41 +1799,10 @@ void StoreMove(AxisDirection moveDir)
 
 using HandleLeftStickOrDPadFn = void (*)(devilution::AxisDirection);
 
-void ReadOnlyPanelMove(AxisDirection /*direction*/)
-{
-	// A focused read-only HUD window still owns the directional input. A null
-	// handler would allow Movement to forward the same stick motion to the world.
-}
-
 HandleLeftStickOrDPadFn GetLeftStickOrDPadGameUIHandler()
 {
 	if (SpellSelectFlag) {
 		return &HotSpellMove;
-	}
-	if (IsD3dHudSelected()) {
-		const auto order = GetD3dFloatingPanelDrawOrder();
-		for (auto it = order.end(); it != order.begin();) {
-			switch (*--it) {
-			case UiPanels::Character:
-				if (CharFlag)
-					return MyPlayer->_pStatPts > 0 ? &AttrIncBtnSnap : &ReadOnlyPanelMove;
-				break;
-			case UiPanels::Quest:
-				if (QuestLogIsOpen) return &QuestLogMove;
-				break;
-			case UiPanels::Spell:
-				if (SpellbookFlag) return &SpellBookMove;
-				break;
-			case UiPanels::Inventory:
-				if (invflag) return IsStashOpen ? &StashMove : IsVisualStoreOpen ? &VisualStoreMove : &CheckInventoryMove;
-				break;
-			case UiPanels::Stash:
-				if (IsStashOpen) return &StashMove;
-				if (IsVisualStoreOpen) return &VisualStoreMove;
-				break;
-			default: break;
-			}
-		}
 	}
 	if (IsStashOpen) {
 		return &StashMove;
@@ -2200,7 +2129,7 @@ void FocusOnVisualStore()
 	const Point slotPos = GetVisualStoreSlotCoord(VisualStoreSlot);
 	// Account for held item size when positioning cursor
 	Size itemSize = MyPlayer->HoldItem.isEmpty() ? Size { 1, 1 } : GetInventorySize(MyPlayer->HoldItem);
-	SetStashControllerPointer(slotPos + Displacement { itemSize.width * INV_SLOT_HALF_SIZE_PX, itemSize.height * INV_SLOT_HALF_SIZE_PX });
+	SetCursorPos(slotPos + Displacement { itemSize.width * INV_SLOT_HALF_SIZE_PX, itemSize.height * INV_SLOT_HALF_SIZE_PX });
 }
 
 void DetectInputMethod(const SDL_Event &event, const ControllerButtonEvent &gamepadEvent)
@@ -2304,26 +2233,19 @@ void ProcessGameAction(const GameAction &action)
 	case GameActionType_TOGGLE_CHARACTER_INFO:
 		ToggleCharPanel();
 		if (CharFlag) {
-			FocusD3dFloatingPanel(UiPanels::Character);
 			SpellSelectFlag = false;
 			if (pcurs == CURSOR_DISARM)
 				NewCursor(CURSOR_HAND);
 			FocusOnCharInfo();
-			if (IsD3dHudSelected() && MyPlayer->_pStatPts <= 0)
-				SetCursorPos(D3dPanelPointerToVisual(UiPanels::Character, GetPanelArea(UiPanels::Character).Center()));
 		}
 		break;
 	case GameActionType_TOGGLE_QUEST_LOG:
 		if (!QuestLogIsOpen) {
 			StartQuestlog();
-			if (!IsD3dHudSelected()) CloseCharPanel();
+			CloseCharPanel();
 			CloseGoldWithdraw();
 			CloseStash();
 			SpellSelectFlag = false;
-			if (IsD3dHudSelected()) {
-				FocusD3dFloatingPanel(UiPanels::Quest);
-				SetCursorPos(D3dPanelPointerToVisual(UiPanels::Quest, GetPanelPosition(UiPanels::Quest, { 160, 100 })));
-			}
 		} else {
 			QuestLogIsOpen = false;
 		}
@@ -2332,7 +2254,7 @@ void ProcessGameAction(const GameAction &action)
 		if (invflag) {
 			BlurInventory();
 		} else {
-			if (!IsD3dHudSelected()) SpellbookFlag = false;
+			SpellbookFlag = false;
 			SpellSelectFlag = false;
 			invflag = true;
 			if (pcurs == CURSOR_DISARM)
@@ -2341,18 +2263,10 @@ void ProcessGameAction(const GameAction &action)
 		}
 		break;
 	case GameActionType_TOGGLE_SPELL_BOOK:
-		if (BlurInventory(!IsD3dHudSelected())) {
-			if (!IsD3dHudSelected()) CloseInventory();
+		if (BlurInventory()) {
+			CloseInventory();
 			SpellSelectFlag = false;
 			SpellbookFlag = !SpellbookFlag;
-			if (IsD3dHudSelected()) {
-				if (SpellbookFlag) {
-					FocusD3dFloatingPanel(UiPanels::Spell);
-					SetCursorPos(D3dPanelPointerToVisual(UiPanels::Spell, GetPanelPosition(UiPanels::Spell, { 29, 37 })));
-				} else if (invflag) {
-					FocusOnInventory();
-				}
-			}
 		}
 		break;
 	}
@@ -2402,7 +2316,6 @@ void InvalidateInventorySlot()
  */
 void FocusOnInventory()
 {
-	FocusD3dFloatingPanel(UiPanels::Inventory);
 	Slot = SLOTXY_INV_FIRST;
 	ResetInvCursorPosition();
 }
@@ -2502,30 +2415,6 @@ void PerformPrimaryAction()
 		SetSpell();
 		return;
 	}
-	if (IsD3dHudSelected()) {
-		const auto panel = D3dFloatingPanelAt(MousePosition, true);
-		if (IsD3dFloatingPanelPoint(MousePosition) && !panel)
-			return;
-		if (panel == UiPanels::Quest) {
-			QuestlogEnter();
-			return;
-		}
-		if (panel == UiPanels::Spell) {
-			ScopedD3dWindowPointer windowPointer;
-			CheckSBook();
-			return;
-		}
-		if (panel == UiPanels::Character) {
-			ScopedD3dWindowPointer windowPointer;
-			if (!CharPanelButtonActive && MyPlayer->_pStatPts > 0) {
-				CheckChrBtns();
-				if (CharPanelButtonActive) ReleaseChrBtns(false);
-			}
-			return;
-		}
-		if (panel == UiPanels::Stash && !invflag)
-			return;
-	}
 
 	if (invflag) { // inventory is open
 		if (pcurs > CURSOR_HAND && pcurs < CURSOR_FIRSTITEM) {
@@ -2533,12 +2422,11 @@ void PerformPrimaryAction()
 				return;
 			TryIconCurs();
 			NewCursor(CURSOR_HAND);
-		} else if (IsD3dPanelBodyPoint(UiPanels::Inventory, MousePosition) || IsPointOnD3dHud(MousePosition)) {
+		} else if (GetRightPanel().contains(MousePosition) || IsPointOnD3dHud(MousePosition)) {
 			LiftInventoryItem();
-		} else if (IsStashOpen && IsD3dPanelBodyPoint(UiPanels::Stash, MousePosition)) {
+		} else if (IsStashOpen && GetLeftPanel().contains(MousePosition)) {
 			LiftStashItem();
-		} else if (IsVisualStoreOpen && IsD3dPanelBodyPoint(UiPanels::Stash, MousePosition)) {
-			ScopedD3dWindowPointer windowPointer;
+		} else if (IsVisualStoreOpen && GetLeftPanel().contains(MousePosition)) {
 			if (!MyPlayer->HoldItem.isEmpty()) {
 				CheckVisualStorePaste(MousePosition);
 			} else if (pcursstorebtn != -1) {
@@ -2564,8 +2452,7 @@ void PerformPrimaryAction()
 void PerformPrimaryActionRelease()
 {
 	// Handle button release events for visual store buttons
-	if (IsVisualStoreOpen && IsD3dPanelBodyPoint(UiPanels::Stash, MousePosition)) {
-		ScopedD3dWindowPointer windowPointer;
+	if (IsVisualStoreOpen && GetLeftPanel().contains(MousePosition)) {
 		CheckVisualStoreButtonRelease(MousePosition);
 	}
 }
@@ -2641,13 +2528,8 @@ void PerformSpellAction()
 		return;
 	}
 
-	if (QuestLogIsOpen && (!IsD3dHudSelected() || D3dFloatingPanelAt(MousePosition) == UiPanels::Quest))
+	if (QuestLogIsOpen)
 		return;
-	if (IsD3dHudSelected() && IsD3dFloatingPanelPoint(MousePosition)) {
-		const auto panel = D3dFloatingPanelAt(MousePosition, true);
-		if ((panel != UiPanels::Inventory && panel != UiPanels::Stash) || !invflag)
-			return;
-	}
 
 	if (invflag) {
 		if (!MyPlayer->HoldItem.isEmpty())
@@ -2657,16 +2539,10 @@ void PerformSpellAction()
 			NewCursor(CURSOR_HAND);
 		} else if (pcursinvitem != -1) {
 			const int itemId = GetItemIdOnSlot(Slot);
-			if (IsD3dHudSelected() && IsD3dPanelBodyPoint(UiPanels::Inventory, MousePosition)) {
-				ScopedD3dWindowPointer windowPointer;
-				CheckInvItem(true, false);
-			} else {
-				CheckInvItem(true, false);
-			}
+			CheckInvItem(true, false);
 			if (itemId != GetItemIdOnSlot(Slot))
 				ResetInvCursorPosition();
 		} else if (pcursstashitem != StashStruct::EmptyCell) {
-			ScopedD3dWindowPointer windowPointer;
 			CheckStashItem(MousePosition, true, false);
 		}
 		return;
@@ -2740,7 +2616,6 @@ void CtrlUseStashItem()
 	}
 
 	if (item.isEquipment()) {
-		ScopedD3dWindowPointer windowPointer;
 		CheckStashItem(MousePosition, true, false); // Auto-equip if it's equipment
 	} else {
 		UseStashItem(pcursstashitem);
@@ -2751,13 +2626,6 @@ void CtrlUseStashItem()
 void PerformSecondaryAction()
 {
 	Player &myPlayer = *MyPlayer;
-	std::optional<ScopedD3dWindowPointer> windowPointer;
-	if (IsD3dHudSelected() && IsD3dFloatingPanelPoint(MousePosition)) {
-		const auto panel = D3dFloatingPanelAt(MousePosition, true);
-		if ((panel != UiPanels::Inventory && panel != UiPanels::Stash) || !invflag)
-			return;
-		windowPointer.emplace();
-	}
 	if (invflag) {
 		if (pcurs > CURSOR_HAND && pcurs < CURSOR_FIRSTITEM) {
 			TryIconCurs();
@@ -2769,7 +2637,7 @@ void PerformSecondaryAction()
 				TransferItemToStash(myPlayer, pcursinvitem);
 			}
 		} else if (IsVisualStoreOpen) {
-			if (!myPlayer.HoldItem.isEmpty() && IsD3dPanelBodyPoint(UiPanels::Stash, MousePosition)) {
+			if (!myPlayer.HoldItem.isEmpty() && GetLeftPanel().contains(MousePosition)) {
 				CheckVisualStorePaste(MousePosition);
 			} else if (pcursinvitem >= INVITEM_INV_FIRST && pcursinvitem <= INVITEM_INV_LAST) {
 				SellItemToVisualStore(pcursinvitem - INVITEM_INV_FIRST);
@@ -2780,12 +2648,6 @@ void PerformSecondaryAction()
 		return;
 	}
 
-	PerformSecondaryWorldAction();
-}
-
-void PerformSecondaryWorldAction()
-{
-	Player &myPlayer = *MyPlayer;
 	if (!MyPlayer->HoldItem.isEmpty() && !TryDropItem())
 		return;
 	if (pcurs > CURSOR_HAND)

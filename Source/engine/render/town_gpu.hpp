@@ -22,10 +22,6 @@ struct TownGpuVertex {
 	float v;
 	std::array<float, 3> world;
 	float clipW = 1;
-	/** Optional linear COLOR0. Clip this with UV/world before projection. White
-	 * retains the legacy stream; nonwhite uses a bounded parallel GPU SRV. Alpha
-	 * is published in RGBA only; opacity/index/depth/picking coverage is unchanged. */
-	std::array<float, 4> authoredColor { 1, 1, 1, 1 };
 };
 
 /** Frame-wide projection; vertices must already be clipped to near/far.
@@ -40,9 +36,7 @@ struct TownGpuProjection {
 /** Borrowed inputs are uploaded during Submit, never retained by the backend.
  * Payload spans may be omitted for resident identities; cache misses require
  * their payload. Always supply dimensions/lightLevels. Revisions are immutable
- * content contracts. Legacy warm hits stay O(1). Optional RGB-paired supplied
- * bytes are checked against content fingerprints; omit spans on warm hits to
- * avoid rescanning. No span is retained after Submit. */
+ * content contracts, so warm hits do not rescan texels or LUT values. */
 struct TownGpuTexture {
 	/** Identity/revision of texelCodes and opacity only. */
 	uint64_t stableKey = 0;
@@ -50,8 +44,6 @@ struct TownGpuTexture {
 	int width = 0;
 	int height = 0;
 	std::span<const uint32_t> texelCodes;
-	/** Optional original palette codes for RGB lighting of native prelit masonry. */
-	std::span<const uint8_t> unlitCodes;
 	std::span<const uint8_t> opacity;
 	/** Palette output at [texelCode * lightLevels + level]. */
 	std::span<const uint8_t> lightLut;
@@ -62,18 +54,10 @@ struct TownGpuTexture {
 	 * Global LUT growth must not change the revision of unchanged texels. */
 	uint64_t lightLutKey = 0;
 	uint64_t lightLutRevision = 0;
-	/** Optional ARGB8888 sRGB pair, exactly one entry per indexed lightLut.
-	 * Shares its immutable identity/revision/layout. Set enabled on warm hits
-	 * when omitting both LUT spans; a nonempty span also enables it. */
-	std::span<const uint32_t> rgbaLightLut;
-	bool rgbaLightLutEnabled = false;
 };
 
-/** Palette uses exact shade 0..15 with a 16-level caller-supplied native LUT.
- * Legacy requires 256 codes; an explicit RGB pair may have a larger source
- * code domain while indexed output still uses its paired uint8 LUT. It does
- * not calculate directional shadows. Optional sprite point RGB is a separate
- * frame field; it leaves the indexed shade/LUT result untouched. */
+/** Palette uses exact shade 0..15 with a 256-code, 16-level caller-supplied
+ * native LUT. It does not calculate directional shadows or point lighting. */
 enum class TownGpuLighting : uint32_t { Unlit, Shadow, Directional, Interior, Palette };
 
 struct TownGpuMaterial {
@@ -106,25 +90,6 @@ struct TownGpuMaterial {
 	 * writing hardware depth, published view depth or picking. Requires a
 	 * frame palette blend table; resident mesh overlays are unsupported. */
 	bool paletteBlend = false;
-	/** Palette RGB samples the native light grid by default. False retains the
-	 * exact supplied shade/TRN row, without disabling frame smooth lighting. */
-	bool nativeLighting = true;
-	/** Optional frame sprite point field, applied to published RGB only after
-	 * native shade and COLOR0. Indexed color, coverage, alpha, depth and picking
-	 * remain unchanged. Default off; requires smooth RGB or a paired RGB LUT. */
-	bool receivesSpritePointLight = false;
-	/** Interior diffuse lighting may opt into the validated frame field's full
-	 * shell/aperture visibility. Source lights, normals, indexed LUT and diffuse
-	 * math still come from this material; no RGB output is required. False keeps
-	 * the legacy single room plus opaque blockers. Caller must match the field
-	 * to this room before opting in. */
-	bool useFramePointLightVisibility = false;
-	/** Projected-only final first-person visual pass. It preserves published
-	 * world depth/picking, resets hardware depth once for viewmodel self-occlusion,
-	 * and publishes an explicit coverage mask without changing RGBA alpha.
-	 * Submit after world/native palette overlays; later world draws are refused.
-	 * Cannot be combined with paletteBlend or used by resident meshes. */
-	bool viewModel = false;
 };
 
 /** Immutable native blend table at [destination * 256 + source]. Borrowed
@@ -156,17 +121,10 @@ struct TownGpuFrame {
 	int width = 0;
 	int height = 0;
 	std::vector<uint8_t> indexed;
-	/** ARGB8888 continuous visual color. Viewmodels may overlay this color while
-	 * depth/picks remain those of the world behind them. */
-	std::vector<uint32_t> rgba;
 	/** Zero denotes no pick record; the caller owns the frame's ID-to-record table. */
 	std::vector<uint32_t> pickIds;
 	/** Unnormalized camera depth, infinity for untouched pixels. */
 	std::vector<float> depth;
-	/** 0/1 coverage of emitted viewmodel fragments, width*height bytes. Zero in
-	 * ordinary frames. Atmosphere must skip 1 before AA color/ownership resolve;
-	 * this mask is independent of authored/palette alpha and gameplay ownership. */
-	std::vector<uint8_t> viewModelMask;
 };
 
 /** Capacity is a bounded workload/resource limit, distinct from invalid input
@@ -210,44 +168,12 @@ struct TownGpuStatus {
 	 * Sum of their stored clamped copy boxes, bounded to 512 MiB before recording.
 	 * Can exceed actual issued bytes when EndFrame refuses or aborts the frame. */
 	size_t paletteBlendAdmittedBytes = 0;
-	/** Parallel linear COLOR0 stream, only when nonwhite projected vertices are
-	 * recorded; bounded to 48 MiB. The legacy projected stream remains 80 B. */
-	size_t uploadedAuthoredColorBytes = 0;
-	/** Appended source ABI: full recompile required. Actual DXGI numeric ID and
-	 * first numeric HRESULT of this recording; unknown stays false. Session
-	 * first-error registry survives backend resource resets. */
-	uint32_t vendorId = 0, deviceId = 0;
-	int32_t failureCode = 0;
-	bool failureCodeKnown = false;
 };
 
 /** Hardware only by default. WARP fallback requires this explicit diagnostic flag. */
 bool TownGpuBeginFrame(int width, int height, bool allowWarpForDiagnostics = false,
     const TownGpuProjection &projection = {});
-/** Nonzero only while a successful frame is recording. Every successful Begin
- * uses a new token, including after resource reset; reset/failure/end return 0.
- * This is not the resettable cache TTL serial. */
-uint64_t GetTownGpuRecordingFrame();
-/** Abandon recording without readback/publication; retain immutable caches/token. */
-void TownGpuDiscardFrame();
-/** Validate/upload the exact immutable texture payload and pin its resources
- * for the active frame without submitting geometry or changing material/pass
- * state. Only after success may the caller omit resident payload spans while
- * preserving identities, revisions, layout and rgbaLightLutEnabled. Prepare
- * again after a new recording token, owner/revision or lighting mode. Changed
- * supplied contents/layout still pass through the complete GetTexture guards.
- * Failure invalidates the frame; borrowed spans are not retained. */
-bool TownGpuPrepareTexture(const TownGpuTexture &texture, TownGpuLighting lighting);
 /** Call after Begin; an empty view disables directional shadows for this frame. */
-/** Optional RGB palette and native visual light field after Begin, before geometry. */
-bool TownGpuSetSmoothLighting(std::span<const uint32_t> palette, std::span<const float> nativeLight, int fieldWidth, int fieldHeight);
-/** Optional world-space RGB irradiance for opted-in sprites/entities. Call
- * after Begin and before any geometry. Copies <=8 lights and <=32 shells with
- * <=8 apertures each; borrowed spans are never retained. Empty inputs disable
- * the field. Begin/reset disable it; invalid input invalidates the whole frame.
- * This field does not replace the separate diffuse interior-lighting material. */
-bool TownGpuSetSpritePointLighting(std::span<const TownPointLight> lights,
-    std::span<const TownLightOccluder> occluders = {});
 bool TownGpuSetShadow(const TownGpuShadow &shadow);
 /** After Begin and before any geometry. Exact 65536-byte table on cache miss;
  * nonzero stableKey required. One immutable table is bound for the frame.
@@ -255,8 +181,7 @@ bool TownGpuSetShadow(const TownGpuShadow &shadow);
 bool TownGpuSetPaletteBlend(const TownGpuPaletteBlend &blend);
 bool TownGpuSubmitProjectedTriangle(const std::array<TownGpuVertex, 3> &vertices,
     const TownGpuTexture &texture, const TownGpuMaterial &material, uint32_t pickId);
-/** Synchronous readback publishes complete color/ownership/depth/mask together,
- * or clears output on failure. */
+/** Synchronous readback publishes all three outputs together, or clears output on failure. */
 bool TownGpuEndFrame(TownGpuFrame &output);
 /** One-shot diagnostic callback before readback allocation, default null.
  * Begin/reset clears it. Exception tests require backend C++ unwinding. */

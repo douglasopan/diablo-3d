@@ -44,7 +44,6 @@
 #include "controls/remap_keyboard.h"
 #include "controls/town_first_person_input.hpp"
 #include "diablo.h"
-#include "engine/render/player_actor_lifecycle.hpp"
 #include "diablo_msg.hpp"
 #include "discord/discord.h"
 #include "doom.h"
@@ -93,7 +92,6 @@
 #include "nthread.h"
 #include "objects.h"
 #include "options.h"
-#include "engine/render/d3d_local_diagnostics.hpp"
 #include "panels/console.hpp"
 #include "panels/info_box.hpp"
 #include "panels/partypanel.hpp"
@@ -210,8 +208,6 @@ uint32_t FirstPersonConsumedButtons = 0;
 uint32_t UiPointerOwnedButtons = 0;
 uint32_t UiPointerNativeReleaseButtons = 0;
 bool FirstPersonPanelNeedsWorldClick = false;
-bool FirstPersonLookOverPanels = false;
-uint8_t FirstPersonLastPanelMask = 0;
 bool FirstPersonUiMovementAllowed = false;
 Point FirstPersonSavedPointer;
 bool FirstPersonHasSavedPointer = false;
@@ -236,9 +232,6 @@ size_t FirstPersonDeferredClickCount = 0;
 void GameEventHandler(const SDL_Event &event, uint16_t modState);
 bool HasFirstPersonPointerPick();
 bool CanUseTownMovementKeys();
-bool CanDispatchDeferredTownWorldMouse();
-bool Dungeon3DActionContext();
-bool CanUseDungeon3DWorldAction();
 TownFirstPersonInputResult SyncTownCameraMovement(uint8_t pressed = 0, uint8_t released = 0);
 void FlushTownFirstPersonClicks();
 TownFirstPersonInputResult SyncTownFirstPersonInput(uint8_t pressed = 0, uint8_t released = 0,
@@ -306,69 +299,17 @@ bool ProcessInput()
 		FinishSimulatedMouseClicks(MousePosition);
 #endif
 		CheckCursMove();
-		const bool standingAttackHeld = Dungeon3DActionContext() && CanUseDungeon3DWorldAction()
-		    && (sgbMouseDown == CLICK_LEFT || sgbMouseDown == CLICK_RIGHT);
-		if (IsTownFirstPersonInputCaptured() && !HasFirstPersonPointerPick() && !standingAttackHeld)
+		if (IsTownFirstPersonInputCaptured() && !HasFirstPersonPointerPick())
 			LastPlayerAction = PlayerActionType::None;
 		plrctrls_after_check_curs_move();
-		if (!Dungeon3DActionContext()) RepeatPlayerAction();
+		RepeatPlayerAction();
 	}
 
 	return true;
-}
-
-bool Dungeon3DActionContext()
-{
-	return cathedral::SupportsRetailLevel(currlevel, leveltype, gbIsHellfire, setlevel, setlevel ? setlvlnum : SL_NONE)
-	    && IsTownViewEnabled() && IsTownGameplayCameraMode(GetTownViewCameraMode());
-}
-
-bool CanUseDungeon3DWorldAction()
-{
-	return Dungeon3DActionContext() && CanDispatchDeferredTownWorldMouse()
-	    && IsTownViewActive() && GetTownViewFollowCameraState().valid;
-}
-
-bool DispatchDungeonStandingAttack()
-{
-	if (!RefreshDungeon3DStandingAttackTarget()) return false;
-	// Pixel depth/pick ownership is our renderer's; commands, damage and cadence
-	// remain native. Loot and ordinary ground never dispatch movement here.
-	CancelTownFirstPersonWalk();
-	if (LastPlayerAction == PlayerActionType::AttackMonsterTarget) {
-		NetSendCmdParam1(true,CMD_RATTACKID,pcursmonst);
-	} else {
-		NetSendCmdLoc(MyPlayerId,true,MyPlayer->UsesRangedWeapon()?CMD_RATTACKXY:CMD_SATTACKXY,cursPosition);
-	}
-	return true;
-}
-
-void DungeonInteractPressed()
-{
-	if (!CanUseDungeon3DWorldAction()) return;
-	TownViewPickResult pick;
-	const Point pointer=IsTownFirstPersonInputCaptured()?GetTownFirstPersonPointer(MousePosition):MousePosition;
-	if (!PickTownViewDetailed(pointer,pick) || !InDungeonBounds(pick.tile)
-	    || MyPlayer->position.future.WalkingDistance(pick.tile)>=2
-	    || !LineClearMissile(MyPlayer->position.tile,pick.tile)) return;
-	CheckCursMove();
-	// E never attacks a monster: native loot/doors/triggers only, within reach.
-	if (pick.monsterIndex>=0 || pick.playerIndex>=0) return;
-	pcursmonst=-1;PlayerUnderCursor=nullptr;
-	cursPosition=pick.tile;
-	pcursitem = pick.itemIndex;
-	ObjectUnderCursor = pick.objectIndex >= 0 && pick.objectIndex < MAXOBJECTS ? &Objects[pick.objectIndex] : nullptr;
-	LastPlayerAction=PlayerActionType::None;
-	PerformSecondaryWorldAction();
 }
 
 void LeftMouseCmd(bool bShift)
 {
-	if (Dungeon3DActionContext()) {
-		LastPlayerAction=PlayerActionType::None;
-		DispatchDungeonStandingAttack();
-		return; // Refused/stale frame must not fall through to native click-walk.
-	}
 	bool bNear;
 
 	assert(!IsPointOnD3dHud(MousePosition));
@@ -454,27 +395,15 @@ bool TryOpenDungeonWithMouse()
 	return true;
 }
 
-bool HasHudModalPointerOwner()
-{
-	return InGameMenu() || SpellSelectFlag || DropGoldFlag || IsWithdrawGoldOpen || DoomFlag;
-}
-
 void LeftMouseDown(uint16_t modState, bool cancelOwnedWalk = true)
 {
-	std::optional<ScopedD3dWindowPointer> windowPointer;
-	if (!HasHudModalPointerOwner()) windowPointer.emplace();
-	// Gold input is a keyboard/text modal. A click on a window behind it
-	// cannot become a walk, item action or header operation.
-	if (DropGoldFlag || IsWithdrawGoldOpen) return;
 	if (cancelOwnedWalk)
 		CancelTownFirstPersonWalk();
 	if (IsTownFirstPersonInputCaptured()) {
 		MousePosition = GetTownFirstPersonPointer(MousePosition);
 		ResetItemlabelHighlighted();
 		CheckCursMove();
-		TownViewPickResult standingAim;
-		if (!HasFirstPersonPointerPick() && (!CanUseDungeon3DWorldAction()
-		        || !PickTownViewStandingAttack(MousePosition, standingAim))) {
+		if (!HasFirstPersonPointerPick()) {
 			LastPlayerAction = PlayerActionType::None;
 			return;
 		}
@@ -515,42 +444,37 @@ void LeftMouseDown(uint16_t modState, bool cancelOwnedWalk = true)
 
 	const bool isShiftHeld = (modState & SDL_KMOD_SHIFT) != 0;
 	const bool isCtrlHeld = (modState & SDL_KMOD_CTRL) != 0;
-	if (IsTownFirstPersonInputCaptured() && CanUseDungeon3DWorldAction()) {
-		DispatchDungeonStandingAttack();
-		return;
-	}
 
-	if (!IsTownFirstPersonInputCaptured() && !IsD3dFloatingPanelPoint(MousePosition)
-	    && (!IsD3dHudLayoutActive() || GetD3dHudElementAt(MousePosition) == 14)
-	    && (GetD3dHudLevelButtonRect().contains(MousePosition) || GetD3dHudLevelLabelRect().contains(MousePosition))) { CheckLevelButton(); return; }
-	const bool floatingBody = !ChatFlag && D3dFloatingPanelAt(MousePosition, true).has_value();
+	const bool floatingBody = !ChatFlag && IsD3dFloatingPanelPoint(MousePosition)
+	    && ((IsLeftPanelOpen() && GetLeftPanel().contains(MousePosition))
+	        || (IsRightPanelOpen() && GetRightPanel().contains(MousePosition)));
 	// The foreground native body wins an overlap with the compatibility HUD.
 	// Rechecking only the enclosing HUD would steal bag cells/spellbook tabs.
 	// Chat keeps its native talk/recipient surface in front of that bottom strip.
 	if (floatingBody || !IsPointOnD3dHud(MousePosition)) {
 		if (!gmenu_is_active() && !TryIconCurs()) {
-			if (QuestLogIsOpen && IsD3dPanelBodyPoint(UiPanels::Quest, MousePosition)) {
+			if (QuestLogIsOpen && GetLeftPanel().contains(MousePosition)) {
 				QuestlogESC();
 			} else if (qtextflag) {
 				qtextflag = false;
 				stream_stop();
-			} else if (CharFlag && IsD3dPanelBodyPoint(UiPanels::Character, MousePosition)) {
+			} else if (CharFlag && GetLeftPanel().contains(MousePosition)) {
 				CheckChrBtns();
-			} else if (invflag && IsD3dPanelBodyPoint(UiPanels::Inventory, MousePosition)) {
+			} else if (invflag && GetRightPanel().contains(MousePosition)) {
 				if (!DropGoldFlag)
 					CheckInvItem(isShiftHeld, isCtrlHeld);
-			} else if (IsStashOpen && IsD3dPanelBodyPoint(UiPanels::Stash, MousePosition)) {
+			} else if (IsStashOpen && GetLeftPanel().contains(MousePosition)) {
 				if (!IsWithdrawGoldOpen)
 					CheckStashItem(MousePosition, isShiftHeld, isCtrlHeld);
 				CheckStashButtonPress(MousePosition);
-			} else if (IsVisualStoreOpen && IsD3dPanelBodyPoint(UiPanels::Stash, MousePosition)) {
+			} else if (IsVisualStoreOpen && GetLeftPanel().contains(MousePosition)) {
 				if (!MyPlayer->HoldItem.isEmpty()) {
 					CheckVisualStorePaste(MousePosition);
 				} else {
 					CheckVisualStoreItem(MousePosition, isCtrlHeld, isShiftHeld);
 				}
 				CheckVisualStoreButtonPress(MousePosition);
-			} else if (SpellbookFlag && IsD3dPanelBodyPoint(UiPanels::Spell, MousePosition)) {
+			} else if (SpellbookFlag && GetRightPanel().contains(MousePosition)) {
 				CheckSBook();
 			} else if (!MyPlayer->HoldItem.isEmpty()) {
 				if (!TryOpenDungeonWithMouse()) {
@@ -568,14 +492,6 @@ void LeftMouseDown(uint16_t modState, bool cancelOwnedWalk = true)
 			}
 		}
 	} else {
-		if (IsD3dHudLayoutActive()) {
-			const auto owner = GetD3dHudElementAt(MousePosition);
-			if (owner == 2) {
-				if (!DropGoldFlag && !IsWithdrawGoldOpen && !gmenu_is_active()) CheckInvScrn(isShiftHeld, isCtrlHeld);
-			} else if (owner && (*owner == 3 || (*owner >= 5 && *owner <= 12))) CheckMainPanelButton();
-			if (pcurs > CURSOR_HAND && pcurs < CURSOR_FIRSTITEM) NewCursor(CURSOR_HAND);
-			return;
-		}
 		if (!ChatFlag && !DropGoldFlag && !IsWithdrawGoldOpen && !gmenu_is_active())
 			CheckInvScrn(isShiftHeld, isCtrlHeld);
 		CheckMainPanelButton();
@@ -587,8 +503,6 @@ void LeftMouseDown(uint16_t modState, bool cancelOwnedWalk = true)
 
 void LeftMouseUp(uint16_t modState)
 {
-	std::optional<ScopedD3dWindowPointer> windowPointer;
-	if (!HasHudModalPointerOwner()) windowPointer.emplace();
 	gmenu_left_mouse(false);
 	CheckMuteButtonUp();
 	if (MainPanelButtonDown)
@@ -607,18 +521,13 @@ void LeftMouseUp(uint16_t modState)
 
 void RightMouseDown(bool isShiftHeld, bool cancelOwnedWalk = true)
 {
-	std::optional<ScopedD3dWindowPointer> windowPointer;
-	if (!HasHudModalPointerOwner()) windowPointer.emplace();
-	if (DropGoldFlag || IsWithdrawGoldOpen) return;
 	if (cancelOwnedWalk)
 		CancelTownFirstPersonWalk();
 	if (IsTownFirstPersonInputCaptured()) {
 		MousePosition = GetTownFirstPersonPointer(MousePosition);
 		ResetItemlabelHighlighted();
 		CheckCursMove();
-		TownViewPickResult standingAim;
-		if (!HasFirstPersonPointerPick() && (!CanUseDungeon3DWorldAction()
-		        || !PickTownViewStandingAttack(MousePosition, standingAim))) {
+		if (!HasFirstPersonPointerPick()) {
 			LastPlayerAction = PlayerActionType::None;
 			return;
 		}
@@ -645,20 +554,20 @@ void RightMouseDown(bool isShiftHeld, bool cancelOwnedWalk = true)
 		SetSpell();
 		return;
 	}
-	if (!IsTownFirstPersonInputCaptured() && SpellbookFlag && IsD3dPanelBodyPoint(UiPanels::Spell, MousePosition))
+	if (SpellbookFlag && GetRightPanel().contains(MousePosition))
 		return;
 	if (TryIconCurs())
 		return;
-	if (!IsTownFirstPersonInputCaptured() && pcursinvitem != -1 && UseInvItem(pcursinvitem))
+	if (pcursinvitem != -1 && UseInvItem(pcursinvitem))
 		return;
-	if (!IsTownFirstPersonInputCaptured() && pcursstashitem != StashStruct::EmptyCell && UseStashItem(pcursstashitem))
+	if (pcursstashitem != StashStruct::EmptyCell && UseStashItem(pcursstashitem))
 		return;
 	if (DidRightClickPartyPortrait())
 		return;
 	if (pcurs == CURSOR_HAND) {
 		if (IsPointOnD3dHud(MousePosition))
 			return;
-		if (!Dungeon3DActionContext() || RefreshDungeon3DStandingSpellTarget()) CheckPlrSpell(isShiftHeld);
+		CheckPlrSpell(isShiftHeld);
 	} else if (pcurs > CURSOR_HAND && pcurs < CURSOR_FIRSTITEM) {
 		NewCursor(CURSOR_HAND);
 	}
@@ -878,8 +787,8 @@ bool CanControlTownCamera(bool requireWorldPointer = true)
 	if (MousePosition.x < 0 || MousePosition.x >= gnScreenWidth || MousePosition.y < 0 || MousePosition.y >= gnViewportHeight
 	    || IsPointOnD3dHud(MousePosition)
 	    || IsD3dFloatingPanelPoint(MousePosition) || IsD3dMinimapPoint(MousePosition)
-	    || (IsLeftPanelOpen() && GetPanelArea(UiPanels::Character).contains(MousePosition))
-	    || (IsRightPanelOpen() && GetPanelArea(UiPanels::Inventory).contains(MousePosition)))
+	    || (IsLeftPanelOpen() && GetLeftPanel().contains(MousePosition))
+	    || (IsRightPanelOpen() && GetRightPanel().contains(MousePosition)))
 		return false;
 	return true;
 }
@@ -1025,13 +934,11 @@ bool IsFirstPersonModeActive()
 	    && GetTownViewCameraMode() == TownCameraMode::FirstPerson;
 }
 
-uint8_t FreeCursorTownPanelMask()
+bool HasFreeCursorTownPanel()
 {
-	return (CharFlag ? 1 : 0) | (QuestLogIsOpen ? 2 : 0) | (invflag ? 4 : 0)
-	    | (SpellbookFlag ? 8 : 0) | (AutomapActive ? 16 : 0);
+	return CharFlag || QuestLogIsOpen || invflag || SpellbookFlag
+	    || (AutomapActive && GetAutomapType() == AutomapType::Minimap);
 }
-
-bool HasFreeCursorTownPanel() { return FreeCursorTownPanelMask() != 0; }
 
 bool IsNativeFreeCursorNavigationKey(SDL_Keycode key)
 {
@@ -1056,7 +963,8 @@ bool CanUseFollowCameraInput()
 	    || ControlMode != ControlTypes::KeyboardAndMouse || ControlDevice != ControlTypes::KeyboardAndMouse
 	    || pcurs != CURSOR_HAND || !MyPlayer->HoldItem.isEmpty() || sgnTimeoutCurs != CURSOR_NONE
 	    || demo::IsRunning() || demo::IsRecording() || movie_playing || IsTownViewCameraDragging()
-	    || IsDiabloMsgBlockingInput() || IsInGameSettingsOpen() || PadMenuNavigatorActive || PadHotspellMenuActive
+	    || (AutomapActive && GetAutomapType() != AutomapType::Minimap)
+	    || IsDiabloMsgAvailable() || IsInGameSettingsOpen() || PadMenuNavigatorActive || PadHotspellMenuActive
 	    || gnScreenWidth <= 0 || gnViewportHeight <= 0)
 		return false;
 #ifdef _DEBUG
@@ -1070,8 +978,7 @@ bool CanUseFollowCameraInput()
 bool CanDispatchDeferredTownWorldMouse()
 {
 	// Free-cursor panels preserve WASD, but cannot replay a queued world DOWN.
-	const bool worldLook = FirstPersonLookOverPanels && IsTownFirstPersonInputCaptured();
-	return CanUseFollowCameraInput() && (!HasFreeCursorTownPanel() || worldLook) && UiPointerOwnedButtons == 0;
+	return CanUseFollowCameraInput() && !HasFreeCursorTownPanel() && UiPointerOwnedButtons == 0;
 }
 
 bool CanUseTownCameraWheel()
@@ -1084,7 +991,7 @@ bool CanCaptureFirstPersonInput()
 {
 	// A native world mouse action must finish before capture. Nontextual panels
 	// release only look; their separate UI DOWN/UP never sets sgbMouseDown.
-	return IsFirstPersonModeActive() && CanUseFollowCameraInput() && (!HasFreeCursorTownPanel() || FirstPersonLookOverPanels)
+	return IsFirstPersonModeActive() && CanUseFollowCameraInput() && !HasFreeCursorTownPanel()
 	    && UiPointerOwnedButtons == 0 && GetTownViewFollowCameraState().valid
 	    && (FirstPersonInput.phase == TownFirstPersonCapturePhase::Captured || sgbMouseDown == CLICK_NONE);
 }
@@ -1198,28 +1105,21 @@ TownFirstPersonInputResult SyncTownFirstPersonInput(uint8_t pressed, uint8_t rel
     float mouseX, float mouseY, bool escapePressed, bool resumeClick)
 {
 	const auto mode = GetTownViewCameraMode();
-	const uint8_t panels = FreeCursorTownPanelMask();
-	if (panels != FirstPersonLastPanelMask) {
-		FirstPersonLastPanelMask = panels;
-		FirstPersonLookOverPanels = false;
-	}
 	if (mode != TownMovementLastMode) {
 		++TownMovementEpoch;
 		TownMovementLastMode = mode;
 		TownCameraMovementInitialized = false;
 		TownCameraMovementInput = {};
 		FirstPersonPanelNeedsWorldClick = false;
-		FirstPersonLookOverPanels = false;
 		FirstPersonUiMovementAllowed = false;
 		StopTownFirstPersonWalk();
 	}
-	if (!CanUseFollowCameraInput()) {
+	if (!CanUseFollowCameraInput())
 		FirstPersonUiMovementAllowed = false;
-		FirstPersonLookOverPanels = false;
-	} else if (IsFirstPersonModeActive() && ((HasFreeCursorTownPanel() && !FirstPersonLookOverPanels) || UiPointerOwnedButtons != 0)
+	else if (IsFirstPersonModeActive() && (HasFreeCursorTownPanel() || UiPointerOwnedButtons != 0)
 	    && FirstPersonInput.phase == TownFirstPersonCapturePhase::Captured && FirstPersonRelativeMouse())
 		FirstPersonUiMovementAllowed = true;
-	if (HasFreeCursorTownPanel() && !FirstPersonLookOverPanels && IsFirstPersonModeActive())
+	if (HasFreeCursorTownPanel() && IsFirstPersonModeActive())
 		FirstPersonPanelNeedsWorldClick = true;
 	TownFirstPersonInputSnapshot input;
 	input.firstPersonActive = IsFirstPersonModeActive();
@@ -1325,17 +1225,12 @@ bool ConsumeFirstPersonMouseDown(Uint8 button)
 		FirstPersonConsumedButtons |= mask;
 		return true;
 	}
-	if ((button != SDL_BUTTON_LEFT && button != SDL_BUTTON_RIGHT) || !CanControlTownCamera())
+	if ((button != SDL_BUTTON_LEFT && button != SDL_BUTTON_RIGHT) || !CanControlTownCamera()
+	    || !CanCaptureFirstPersonInput())
 		return false;
-	SyncTownFirstPersonInput(); // Observe a freshly opened map/panel before overriding its look gate.
-	const bool previousLook = FirstPersonLookOverPanels;
-	FirstPersonLookOverPanels = true;
-	if (!CanCaptureFirstPersonInput()) { FirstPersonLookOverPanels = previousLook; return false; }
 	const TownFirstPersonInputResult result = SyncTownFirstPersonInput(0, 0, 0, 0, false, true);
-	if (!result.consumeResumeClick) {
-		FirstPersonLookOverPanels = previousLook;
+	if (!result.consumeResumeClick)
 		return false;
-	}
 	if (IsTownFirstPersonInputCaptured())
 		FirstPersonPanelNeedsWorldClick = false;
 	FirstPersonConsumedButtons |= mask;
@@ -1360,21 +1255,9 @@ void HandleMouseButtonDown(Uint8 button, uint16_t modState)
 	FirstPersonConsumedButtons &= ~firstPersonMask;
 	UiPointerOwnedButtons &= ~firstPersonMask;
 	UiPointerNativeReleaseButtons &= ~firstPersonMask;
-	if (HasHudModalPointerOwner() && sgbMouseDown == CLICK_NONE) {
-		const Point physical = MousePosition;
-		CancelD3dHudCustomization(); CancelD3dFloatingPanelDrag();
-		SuspendTownFirstPersonInput(); MousePosition = physical;
-		UiPointerOwnedButtons |= firstPersonMask;
-		if (button == SDL_BUTTON_LEFT) {
-			UiPointerNativeReleaseButtons |= firstPersonMask;
-			LeftMouseDown(modState, false);
-		} else if (button == SDL_BUTTON_RIGHT) RightMouseDown((modState & SDL_KMOD_SHIFT) != 0, false);
-		return; // Modal handlers receive physical coordinates, before headers or world ownership.
-	}
-	const bool clock = !IsTownFirstPersonInputCaptured() && IsD3dHudClockPoint(MousePosition);
-	const bool floatingPanel = !clock && !IsTownFirstPersonInputCaptured() && IsD3dFloatingPanelPoint(MousePosition);
-	const bool minimap = !clock && !IsTownFirstPersonInputCaptured() && !floatingPanel && IsD3dMinimapPoint(MousePosition);
-	const bool hud = !IsTownFirstPersonInputCaptured() && !floatingPanel && !minimap && IsPointOnD3dHud(MousePosition);
+	const bool floatingPanel = IsD3dFloatingPanelPoint(MousePosition);
+	const bool minimap = !floatingPanel && IsD3dMinimapPoint(MousePosition);
+	const bool hud = !floatingPanel && !minimap && IsPointOnD3dHud(MousePosition);
 	if ((floatingPanel || minimap || hud) && sgbMouseDown == CLICK_NONE) {
 		// UI owns this physical pair before any relative-capture/world path.
 		// Its pointer latch never becomes a native repeated world action.
@@ -1382,33 +1265,24 @@ void HandleMouseButtonDown(Uint8 button, uint16_t modState)
 		UiPointerOwnedButtons |= firstPersonMask;
 		if (IsFirstPersonModeActive())
 			FirstPersonPanelNeedsWorldClick = true;
-		FirstPersonLookOverPanels = false;
 		SyncTownFirstPersonInput();
 		MousePosition = uiPointer; // Releasing relative mode restores its saved pointer.
 		CheckCursMove();
 		if (minimap) {
-			if (HandleD3dMinimapCustomizationDown(MousePosition, button, modState)) { RedrawEverything(); return; }
-			if ((modState & SDL_KMOD_CTRL) != 0 && MyPlayer && !MyPlayer->HoldItem.isEmpty()) return;
 			if (button == SDL_BUTTON_LEFT)
 				HandleD3dMinimapClose(MousePosition);
 			return;
 		}
-		if (hud && HandleD3dHudCustomizationDown(MousePosition, button, modState)) {
-			RedrawEverything(); return; // Ctrl edit gestures never activate buttons, items or the world.
-		}
-		// A refused edit (for example an equipped cursor) still owns its pair.
-		// Ctrl over a lower module must never fall through to its native action.
-		if (hud && (modState & SDL_KMOD_CTRL) != 0) return;
-		if (clock) return; // Informational late overlay owns its pair; no item/cast/world action.
 		if (button == SDL_BUTTON_LEFT && floatingPanel && HandleD3dFloatingPanelClose(MousePosition))
 			return; // Header/X consumes DOWN even if closing changes the hit region.
-		const bool body = IsD3dFloatingPanelBodyPoint(MousePosition);
+		const bool body = (IsLeftPanelOpen() && GetLeftPanel().contains(MousePosition))
+		    || (IsRightPanelOpen() && GetRightPanel().contains(MousePosition));
 		if (floatingPanel && !body)
 			return; // Right/middle clicks on a header cannot cast or drag the world.
 		if (button == SDL_BUTTON_LEFT) {
 			UiPointerNativeReleaseButtons |= firstPersonMask;
 			LeftMouseDown(modState, false);
-		} else if (button == SDL_BUTTON_RIGHT && (hud || (invflag && IsD3dPanelBodyPoint(UiPanels::Inventory, MousePosition)))) {
+		} else if (button == SDL_BUTTON_RIGHT && (hud || (invflag && GetRightPanel().contains(MousePosition)))) {
 			RightMouseDown((modState & SDL_KMOD_SHIFT) != 0, false);
 		}
 		return;
@@ -1456,19 +1330,6 @@ void HandleMouseButtonDown(Uint8 button, uint16_t modState)
 
 void HandleMouseButtonUp(Uint8 button, uint16_t modState)
 {
-	if (HasHudModalPointerOwner() || !IsD3dHudLayoutActive()) {
-		CancelD3dHudCustomization(); CancelD3dFloatingPanelDrag();
-	}
-	if (button == SDL_BUTTON_LEFT) UpdateD3dHudCustomization(MousePosition);
-	if (button == SDL_BUTTON_LEFT && EndD3dHudCustomization()) {
-		const uint32_t mask = 1U << (button - 1);
-		UiPointerOwnedButtons &= ~mask; UiPointerNativeReleaseButtons &= ~mask;
-		RedrawEverything(); return;
-	}
-	if (button == SDL_BUTTON_LEFT) {
-		UpdateD3dFloatingPanelDrag(MousePosition);
-		EndD3dFloatingPanelDrag();
-	}
 	const uint32_t firstPersonMask = button > 0 && button <= 31 ? 1U << (button - 1) : 0;
 	if ((UiPointerOwnedButtons & firstPersonMask) != 0) {
 		const bool nativeRelease = (UiPointerNativeReleaseButtons & firstPersonMask) != 0;
@@ -1571,10 +1432,7 @@ void FlushTownFirstPersonClicks()
 			FirstPersonConsumedButtons &= ~pendingButtonMask;
 			continue;
 		}
-		const bool panelResumeGesture = click.absoluteClick && IsFirstPersonModeActive()
-		    && !IsTownFirstPersonInputCaptured() && HasFreeCursorTownPanel()
-		    && CanUseFollowCameraInput() && UiPointerOwnedButtons == 0;
-		if (click.down && !CanDispatchDeferredTownWorldMouse() && !panelResumeGesture)
+		if (click.down && !CanDispatchDeferredTownWorldMouse())
 			continue; // Keep its consumed-UP latch; do not requeue it behind a later draw.
 		if (click.absoluteClick && click.down) {
 			if (lookedSinceDraw) {
@@ -1612,11 +1470,8 @@ void FlushTownFirstPersonClicks()
 			RedrawViewport();
 			return;
 		}
-		TownViewPickResult standingAim;
-		if (click.down && !HasFirstPersonPointerPick()
-		    && (click.button != SDL_BUTTON_LEFT || !CanUseDungeon3DWorldAction()
-		        || !PickTownViewStandingAttack(FirstPersonPointerCenter(), standingAim)))
-			continue; // Targeted actions still require a pick; fresh FP LMB may swing.
+		if (click.down && !HasFirstPersonPointerPick())
+			continue; // Fresh sky/no-target: keep its up consumed, apply later look.
 		if (click.down)
 			HandleMouseButtonDown(click.button, click.modifiers);
 		else
@@ -1653,28 +1508,21 @@ void GameEventHandler(const SDL_Event &event, uint16_t modState)
 		~SyncAfterEvent() { SyncTownFirstPersonInput(); }
 	} syncAfterEvent;
 #if SDL_VERSION_ATLEAST(3, 0, 0)
-	if (event.type == SDL_EVENT_WINDOW_RESIZED || event.type == SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED) {
-		CancelD3dHudCustomization(); CancelD3dFloatingPanelDrag();
+	if (event.type == SDL_EVENT_WINDOW_RESIZED || event.type == SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED)
 		SuspendTownFirstPersonInput();
-	}
 	if (event.type == SDL_EVENT_WINDOW_FOCUS_LOST) {
-		CancelD3dHudCustomization(); CancelD3dFloatingPanelDrag();
 		SuspendTownFirstPersonInput();
 		ReleaseTownCameraDrag();
 	}
 #elif SDL_VERSION_ATLEAST(2, 0, 0)
-	if (event.type == SDL_WINDOWEVENT && (event.window.event == SDL_WINDOWEVENT_RESIZED || event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)) {
-		CancelD3dHudCustomization(); CancelD3dFloatingPanelDrag();
+	if (event.type == SDL_WINDOWEVENT && (event.window.event == SDL_WINDOWEVENT_RESIZED || event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED))
 		SuspendTownFirstPersonInput();
-	}
 	if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_FOCUS_LOST) {
-		CancelD3dHudCustomization(); CancelD3dFloatingPanelDrag();
 		SuspendTownFirstPersonInput();
 		ReleaseTownCameraDrag();
 	}
 #endif
 	if (event.type == SDL_EVENT_KEY_DOWN && SDLC_EventKey(event) == SDLK_ESCAPE) {
-		CancelD3dHudCustomization(); CancelD3dFloatingPanelDrag();
 		if (HasFreeCursorTownPanel() && CanUseFollowCameraInput())
 			SyncTownFirstPersonInput(0, 0, 0, 0, true);
 		else
@@ -1836,11 +1684,9 @@ void GameEventHandler(const SDL_Event &event, uint16_t modState)
 		ReleaseKey(SDLC_EventKey(event));
 		return;
 	case SDL_EVENT_MOUSE_MOTION:
-		if (HasHudModalPointerOwner() || !IsD3dHudLayoutActive()) { CancelD3dHudCustomization(); CancelD3dFloatingPanelDrag(); }
 		if (ControlMode == ControlTypes::KeyboardAndMouse && invflag)
 			InvalidateInventorySlot();
 		MousePosition = GetTownFirstPersonPointer({ SDLC_EventMotionIntX(event), SDLC_EventMotionIntY(event) });
-		if(UpdateD3dHudCustomization(MousePosition) || UpdateD3dFloatingPanelDrag(MousePosition)) { RedrawEverything(); return; }
 		if (IsTownViewCameraDragging()) {
 			if (!CanControlTownCamera(false))
 				ReleaseTownCameraDrag();
@@ -2211,14 +2057,6 @@ void DiabloParseFlags(int argc, char **argv)
 			printInConsole(PROJECT_VERSION);
 			printNewlineInConsole();
 			diablo_quit(0);
-		} else if (arg == "--gpu-required" || arg == "--cpu-render-diagnostic") {
-			const auto mode = arg == "--gpu-required" ? d3d_local_diagnostics::Mode::GpuRequired : d3d_local_diagnostics::Mode::CpuDiagnosticExplicit;
-			if (!d3d_local_diagnostics::SetSessionMode(mode)) { printInConsole("Conflicting render session modes"); diablo_quit(64); }
-		} else if (arg == "--d3d-local-diagnostics") {
-			d3d_local_diagnostics::EnableSessionDiagnostics();
-		} else if (arg == "--d3d-diagnostics-dir") {
-			if (i + 1 == argc) { PrintFlagRequiresArgument("--d3d-diagnostics-dir"); diablo_quit(64); }
-			if (!d3d_local_diagnostics::SetSessionDirectory(argv[++i])) { printInConsole("Invalid diagnostic directory"); diablo_quit(64); }
 		} else if (arg == "--data-dir") {
 			if (i + 1 == argc) {
 				PrintFlagRequiresArgument("--data-dir");
@@ -2337,7 +2175,6 @@ void DiabloParseFlags(int argc, char **argv)
 	if (recordNumber != -1)
 		demo::InitRecording(recordNumber, createDemoReference);
 #endif
-	if (!d3d_local_diagnostics::FinalizeSessionArguments()) { printInConsole("Explicit render consent required"); diablo_quit(64); }
 }
 
 void DiabloInitScreen()
@@ -2658,8 +2495,6 @@ void GameLogic()
 	if (!ProcessInput()) {
 		return;
 	}
-	// Native simulation cadence, never render-interpolation cadence.
-	if (Dungeon3DActionContext()) RepeatPlayerAction();
 	if (gbProcessPlayers) {
 		gGameLogicStep = GameLogicStep::ProcessPlayers;
 		ProcessPlayers();
@@ -2781,8 +2616,7 @@ void InventoryKeyPressed()
 	if (IsPlayerInStore())
 		return;
 	invflag = !invflag;
-	if (invflag) FocusD3dFloatingPanel(UiPanels::Inventory);
-	if (!IsLeftPanelOpen() && !IsD3dHudSelected() && CanPanelsCoverView()) {
+	if (!IsLeftPanelOpen() && CanPanelsCoverView()) {
 		if (!invflag) { // We closed the inventory
 			if (MousePosition.x < 480 && MousePosition.y < GetMainPanel().position.y) {
 				SetCursorPos(MousePosition + Displacement { 160, 0 });
@@ -2793,7 +2627,7 @@ void InventoryKeyPressed()
 			}
 		}
 	}
-	if (!IsD3dHudSelected()) SpellbookFlag = false;
+	SpellbookFlag = false;
 	CloseGoldWithdraw();
 	CloseStash();
 	CloseVisualStore();
@@ -2803,7 +2637,7 @@ void CharacterSheetKeyPressed()
 {
 	if (IsPlayerInStore())
 		return;
-	if (!IsRightPanelOpen() && !IsD3dHudSelected() && CanPanelsCoverView()) {
+	if (!IsRightPanelOpen() && CanPanelsCoverView()) {
 		if (CharFlag) { // We are closing the character sheet
 			if (MousePosition.x > 160 && MousePosition.y < GetMainPanel().position.y) {
 				SetCursorPos(MousePosition - Displacement { 160, 0 });
@@ -2831,7 +2665,7 @@ void QuestLogKeyPressed()
 	} else {
 		QuestLogIsOpen = false;
 	}
-	if (!IsRightPanelOpen() && !IsD3dHudSelected() && CanPanelsCoverView()) {
+	if (!IsRightPanelOpen() && CanPanelsCoverView()) {
 		if (!QuestLogIsOpen) { // We closed the quest log
 			if (MousePosition.x > 160 && MousePosition.y < GetMainPanel().position.y) {
 				SetCursorPos(MousePosition - Displacement { 160, 0 });
@@ -2842,7 +2676,7 @@ void QuestLogKeyPressed()
 			}
 		}
 	}
-	if (!IsD3dHudSelected()) CloseCharPanel();
+	CloseCharPanel();
 	CloseGoldWithdraw();
 	CloseStash();
 	CloseVisualStore();
@@ -2869,8 +2703,7 @@ void SpellBookKeyPressed()
 	if (IsPlayerInStore())
 		return;
 	SpellbookFlag = !SpellbookFlag;
-	if (SpellbookFlag) FocusD3dFloatingPanel(UiPanels::Spell);
-	if (!IsLeftPanelOpen() && !IsD3dHudSelected() && CanPanelsCoverView()) {
+	if (!IsLeftPanelOpen() && CanPanelsCoverView()) {
 		if (!SpellbookFlag) { // We closed the inventory
 			if (MousePosition.x < 480 && MousePosition.y < GetMainPanel().position.y) {
 				SetCursorPos(MousePosition + Displacement { 160, 0 });
@@ -2881,7 +2714,7 @@ void SpellBookKeyPressed()
 			}
 		}
 	}
-	if (!IsD3dHudSelected()) CloseInventory();
+	CloseInventory();
 	CloseVisualStore();
 }
 
@@ -2984,12 +2817,6 @@ bool IsTownFirstPersonInputCaptured()
 	    && CanCaptureFirstPersonInput() && FirstPersonRelativeMouse();
 }
 
-TownViewInputStateDiagnostic GetTownViewInputStateForDiagnostics() noexcept
-{
-	return { static_cast<int>(FirstPersonInput.phase), static_cast<int>(TownCameraMovementInput.phase),
-		FirstPersonInput.heldKeys, TownCameraMovementInput.heldKeys, sgbMouseDown == CLICK_LEFT, gbActive };
-}
-
 Point GetTownFirstPersonPointer(Point absolute)
 {
 	return IsTownFirstPersonInputCaptured() ? FirstPersonPointerCenter() : absolute;
@@ -3008,40 +2835,8 @@ bool IsTownCameraMovementInputActive()
 	return CanUseTownMovementKeys();
 }
 
-bool IsDungeon3DActionContextForRepeat() { return Dungeon3DActionContext(); }
-bool CanRepeatDungeon3DWorldAction() { return CanUseDungeon3DWorldAction(); }
-
-bool RefreshDungeon3DStandingAttackTarget()
-{
-	if (!CanUseDungeon3DWorldAction()) return false;
-	TownViewPickResult pick;
-	const Point pointer = IsTownFirstPersonInputCaptured() ? GetTownFirstPersonPointer(MousePosition) : MousePosition;
-	if (!PickTownViewStandingAttack(pointer, pick) || !InDungeonBounds(pick.tile)
-	    || !LineClearMissile(MyPlayer->position.tile, pick.tile)) return false;
-	cursPosition = pick.tile;
-	pcursmonst = MyPlayer->UsesRangedWeapon() ? pick.monsterIndex : -1;
-	LastPlayerAction = pcursmonst >= 0 ? PlayerActionType::AttackMonsterTarget : PlayerActionType::Attack;
-	return true;
-}
-
-bool RefreshDungeon3DStandingSpellTarget()
-{
-	if (!CanUseDungeon3DWorldAction()) return false;
-	TownViewPickResult pick;
-	const Point pointer = IsTownFirstPersonInputCaptured() ? GetTownFirstPersonPointer(MousePosition) : MousePosition;
-	if (!PickTownViewStandingAttack(pointer, pick) || !InDungeonBounds(pick.tile)
-	    || !LineClearMissile(MyPlayer->position.tile, pick.tile)) return false;
-	cursPosition = pick.tile;
-	pcursmonst = pick.monsterIndex;
-	PlayerUnderCursor = pick.playerIndex >= 0 && static_cast<size_t>(pick.playerIndex) < Players.size() ? &Players[pick.playerIndex] : nullptr;
-	LastPlayerAction = PlayerUnderCursor != nullptr ? PlayerActionType::SpellPlayerTarget
-	    : pcursmonst >= 0 ? PlayerActionType::SpellMonsterTarget : PlayerActionType::Spell;
-	return true;
-}
-
 void SuspendTownFirstPersonInput()
 {
-	FirstPersonLookOverPanels = false;
 	++TownMovementEpoch;
 	TownCameraMovementInitialized = false;
 	TownCameraMovementInput = {};
@@ -3076,8 +2871,6 @@ void SetTownFirstPersonInputServicesForDiagnostics(const TownFirstPersonInputSer
 	UiPointerOwnedButtons = UiPointerNativeReleaseButtons = 0;
 	FirstPersonPanelNeedsWorldClick = false;
 	FirstPersonUiMovementAllowed = false;
-	FirstPersonLookOverPanels = false;
-	FirstPersonLastPanelMask = 0;
 	FirstPersonHasSavedPointer = false;
 	FirstPersonMovementModifiers = 0;
 }
@@ -3524,10 +3317,6 @@ void InitKeymapActions()
 		    key, [bit] { TownMovementActionPressed(bit); }, [bit] { TownMovementActionReleased(bit); },
 		    CanUseTownMovementKeys, 0, KeymapperContext::TownMovement, bit).SetValueChangedCallback(TownMovementBindingsChanged);
 	};
-	options.Keymapper.AddAction("DungeonInteract", N_("Interact in 3D dungeons"),
-	    N_("Pick up nearby items, operate doors and use native entrances; does not attack monsters."),
-	    'E', DungeonInteractPressed, nullptr, CanUseDungeon3DWorldAction,
-	    0, KeymapperContext::TownMovement, 0);
 	addMovement("TownMoveForward", N_("Move forward (main)"), 'W', TownFirstPersonKeyW);
 	addMovement("TownMoveForwardAlternate", N_("Move forward (alternate)"), SDLK_UP, TownFirstPersonArrowUp);
 	addMovement("TownMoveBackward", N_("Move backward (main)"), 'S', TownFirstPersonKeyS);
@@ -4049,7 +3838,6 @@ void SetCursorPos(Point position)
 
 void FreeGameMem()
 {
-	NativePlayerActorLifecycle().InvalidateLevel();
 	cathedral::InvalidateLiveLevel();
 	SuspendTownFirstPersonInput();
 	ReleaseTownCameraDrag();
@@ -4798,7 +4586,6 @@ void LoadGameLevelCalculateCursor()
 
 std::expected<void, std::string> LoadGameLevel(bool firstflag, lvl_entry lvldir)
 {
-	NativePlayerActorLifecycle().BeginLevel();
 	cathedral::InvalidateLiveLevel();
 	const _music_id neededTrack = GetLevelMusic(leveltype);
 
@@ -4885,15 +4672,6 @@ std::expected<void, std::string> LoadGameLevel(bool firstflag, lvl_entry lvldir)
 
 	LoadGameLevelCalculateCursor();
 	cathedral::MarkLiveLevelLoaded(static_cast<uint8_t>(lvldir));
-	if (NativePlayerActorLifecycle().CompleteLevel({
-		leveltype == DTYPE_TOWN ? WarriorWorldKind::Town
-		    : leveltype == DTYPE_CATHEDRAL ? WarriorWorldKind::Cathedral : WarriorWorldKind::Other,
-		currlevel, setlevel, gbIsHellfire, gbIsSpawn })) {
-		for (std::size_t slot = 0; slot < Players.size(); ++slot) {
-			if (Players[slot].plractive)
-				NativePlayerActorLifecycle().Activate(Players[slot], static_cast<std::uint32_t>(slot));
-		}
-	}
 	return {};
 }
 

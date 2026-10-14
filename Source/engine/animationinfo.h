@@ -9,7 +9,6 @@
 #include <type_traits>
 
 #include "engine/clx_sprite.hpp"
-#include "engine/animation_render_phase.hpp"
 
 namespace devilution {
 
@@ -82,10 +81,6 @@ public:
 	 * @brief Calculates the progress of the current animation as a fraction (see baseValueFraction)
 	 */
 	[[nodiscard]] uint8_t getAnimationProgress() const;
-
-	// Explicit interpolation allows the 3D adapter to retain its last sample
-	// during pause without reading a separate wall clock or changing animation.
-	[[nodiscard]] AnimationRenderPhase sampleRenderPhase(uint8_t interpolation128) const;
 
 	/**
 	 * @brief Sets the new Animation with all relevant information for rendering

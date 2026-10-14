@@ -1,247 +1,100 @@
-// File Manager functionality
-(function() {
-	const modal = document.getElementById('fileManagerModal');
-	const fileManagerBtn = document.getElementById('fileManagerBtn');
-	const closeModalBtn = document.getElementById('closeModal');
-	const dropZone = document.getElementById('dropZone');
-	const fileInput = document.getElementById('fileInput');
-	const browseBtn = document.getElementById('browseBtn');
-	const resetSettingsBtn = document.getElementById('resetSettingsBtn');
-	const mpqFilesList = document.getElementById('mpqFilesList');
-
-	// Open/close modal
-	fileManagerBtn.addEventListener('click', () => {
-		modal.classList.add('show');
-		refreshFileList();
-	});
-
-	closeModalBtn.addEventListener('click', () => {
-		modal.classList.remove('show');
-	});
-
-	modal.addEventListener('click', (e) => {
-		if (e.target === modal) {
-			modal.classList.remove('show');
-		}
-	});
-
-	// Browse button
-	browseBtn.addEventListener('click', () => {
-		fileInput.click();
-	});
-
-	// Drag and drop
-	dropZone.addEventListener('click', () => {
-		fileInput.click();
-	});
-
-	dropZone.addEventListener('dragover', (e) => {
-		e.preventDefault();
-		dropZone.classList.add('dragover');
-	});
-
-	dropZone.addEventListener('dragleave', () => {
-		dropZone.classList.remove('dragover');
-	});
-
-	dropZone.addEventListener('drop', (e) => {
-		e.preventDefault();
-		dropZone.classList.remove('dragover');
-		handleFiles(e.dataTransfer.files);
-	});
-
-	fileInput.addEventListener('change', (e) => {
-		handleFiles(e.target.files);
-	});
-
-	// Handle file upload
-	function handleFiles(files) {
-		if (!files || files.length === 0) return;
-
-		// Wait for Module and FS to be ready
-		if (typeof Module === 'undefined' || typeof FS === 'undefined') {
-			alert('Game is still loading. Please wait and try again.');
-			return;
-		}
-
-		const mpqFiles = Array.from(files).filter(f =>
-			f.name.toLowerCase().endsWith('.mpq')
-		);
-
-		if (mpqFiles.length === 0) {
-			alert('Please select MPQ files only.');
-			return;
-		}
-
-		let processed = 0;
-		mpqFiles.forEach(file => {
-			const reader = new FileReader();
-			reader.onload = function(e) {
-				try {
-					const data = new Uint8Array(e.target.result);
-					// Upload to the devilution subdirectory where the game searches
-					const path = '/libsdl/diasurgical/devilution/' + file.name; // Might want to make this dynamic later, since source mods might rename the paths
-
-					// Create directory if it doesn't exist
-					try {
-						FS.mkdir('/libsdl/diasurgical/devilution');
-					} catch (e) {
-						// Directory might already exist, ignore
-					}
-
-					// Write file to IDBFS-backed directory
-					FS.writeFile(path, data);
-					console.log('Uploaded:', file.name, '(' + formatBytes(file.size) + ')');
-
-					processed++;
-					if (processed === mpqFiles.length) {
-						// Sync to IndexedDB
-						FS.syncfs(false, function(err) {
-							if (err) {
-								console.error('Error syncing files:', err);
-								alert('Error saving files. Check console.');
-							} else {
-								alert('Files uploaded successfully! Reloading game...');
-								setTimeout(() => location.reload(), 500);
-							}
-						});
-					}
-				} catch (err) {
-					console.error('Error writing file:', err);
-					alert('Error uploading file: ' + file.name);
-				}
-			};
-			reader.readAsArrayBuffer(file);
-		});
-	}
-
-	// Refresh file list
-	function refreshFileList() {
-		if (typeof Module === 'undefined' || typeof FS === 'undefined') {
-			mpqFilesList.innerHTML = '<p class="info-text">Game is loading...</p>';
-			return;
-		}
-
-		try {
-			// Check if devilution directory exists
-			try {
-				FS.stat('/libsdl/diasurgical/devilution');
-			} catch (e) {
-				// Directory doesn't exist yet
-				mpqFilesList.innerHTML = '<p class="info-text">No MPQ files found.</p>';
-				return;
-			}
-
-			const files = FS.readdir('/libsdl/diasurgical/devilution');
-			const mpqFiles = files.filter(f =>
-				f.toLowerCase().endsWith('.mpq') && f !== '.' && f !== '..'
-			);
-
-			if (mpqFiles.length === 0) {
-				mpqFilesList.innerHTML = '<p class="info-text">No MPQ files found.</p>';
-				return;
-			}
-
-			mpqFilesList.innerHTML = '';
-			mpqFiles.forEach(filename => {
-				const path = '/libsdl/diasurgical/devilution/' + filename;
-				const stat = FS.stat(path);
-
-				const item = document.createElement('div');
-				item.className = 'file-item';
-
-				const nameSpan = document.createElement('span');
-				nameSpan.className = 'file-item-name';
-				nameSpan.textContent = filename;
-
-				const sizeSpan = document.createElement('span');
-				sizeSpan.className = 'file-item-size';
-				sizeSpan.textContent = formatBytes(stat.size);
-
-				const deleteBtn = document.createElement('button');
-				deleteBtn.className = 'btn btn-delete';
-				deleteBtn.textContent = 'Delete';
-				deleteBtn.addEventListener('click', () => window.deleteFile(filename));
-
-				item.appendChild(nameSpan);
-				item.appendChild(sizeSpan);
-				item.appendChild(deleteBtn);
-				mpqFilesList.appendChild(item);
-			});
-		} catch (err) {
-			console.error('Error reading files:', err);
-			mpqFilesList.innerHTML = '<p class="info-text">Error reading files.</p>';
-		}
-	}
-
-	// Delete file
-	window.deleteFile = function(filename) {
-		if (!confirm('Delete ' + filename + '? This will reload the game.')) {
-			return;
-		}
-
-		try {
-			const path = '/libsdl/diasurgical/devilution/' + filename;
-			FS.unlink(path);
-
-			// Sync deletion to IndexedDB
-			FS.syncfs(false, function(err) {
-				if (err) {
-					console.error('Error syncing deletion:', err);
-					alert('Error deleting file. Check console.');
-				} else {
-					alert('File deleted! Reloading game...');
-					setTimeout(() => location.reload(), 500);
-				}
-			});
-		} catch (err) {
-			console.error('Error deleting file:', err);
-			alert('Error deleting file: ' + filename);
-		}
-	};
-
-	// Reset settings
-	resetSettingsBtn.addEventListener('click', () => {
-		if (!confirm('Reset game settings? This will delete diablo.ini but keep your saves. The game will reload.')) {
-			return;
-		}
-
-		try {
-			const iniPath = '/libsdl/diasurgical/devilution/diablo.ini';
-
-			// Check if file exists
-			try {
-				FS.stat(iniPath);
-				// File exists, delete it
-				FS.unlink(iniPath);
-				console.log('Deleted diablo.ini');
-			} catch (e) {
-				// File doesn't exist, that's fine
-				console.log('diablo.ini not found (already reset)');
-			}
-
-			// Sync to IndexedDB
-			FS.syncfs(false, function(err) {
-				if (err) {
-					console.error('Error syncing settings reset:', err);
-					alert('Error resetting settings. Check console.');
-				} else {
-					alert('Settings reset! Reloading game...');
-					setTimeout(() => location.reload(), 500);
-				}
-			});
-		} catch (err) {
-			console.error('Error resetting settings:', err);
-			alert('Error resetting settings.');
-		}
-	});
-
-	// Helper function
-	function formatBytes(bytes) {
-		if (bytes === 0) return '0 Bytes';
-		const k = 1024;
-		const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-		const i = Math.floor(Math.log(bytes) / Math.log(k));
-		return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
-	}
+/* Private shell adapter: all filesystem mutations belong to d3dBrowserStorage. */
+(function () {
+  'use strict';
+  function attachFileManager(options) {
+    var doc = options.document, win = options.window;
+    var ids = ['fileManagerModal', 'fileManagerBtn', 'closeModal', 'dropZone', 'fileInput', 'browseBtn', 'resetSettingsBtn', 'mpqFilesList'];
+    var nodes = Object.create(null);
+    ids.forEach(function (id) { nodes[id] = doc.getElementById(id); });
+    if (ids.some(function (id) { return !nodes[id]; })) return { attached: false };
+    var statuses = [doc.getElementById('fileManagerStatus'), doc.getElementById('fileManagerModalStatus')].filter(function (node) { return !!node; });
+    var start = doc.getElementById('startGameBtn');
+    var busy = false, started = false, storageReady = false, hasBase = false, persistenceFailed = false;
+    function message(text) { if (statuses.length) statuses.forEach(function (node) { node.textContent = text; }); else if (options.showMessage) options.showMessage(text); }
+    function api() {
+      var storage = options.getModule() && options.getModule()['d3dBrowserStorage'];
+      if (!storage) throw new Error('O jogo ainda está preparando o armazenamento local.');
+      return storage;
+    }
+    function setBusy(value) {
+      busy = value;
+      nodes.fileInput.disabled = value || started || !storageReady;
+      nodes.browseBtn.disabled = value || started || !storageReady;
+      nodes.resetSettingsBtn.disabled = value || started || !storageReady;
+      if (start) start.disabled = value || started || !storageReady || !hasBase || persistenceFailed;
+    }
+    function observeState(state) {
+      if (!state) return;
+      storageReady = !!state.ready;
+      started = started || !!state.started;
+      hasBase = !!state.hasBase;
+      persistenceFailed = !!state.persistenceFailed;
+      setBusy(busy);
+    }
+    function observeError(error) {
+      if (error.code === 'PERSIST_FAILED' || error.code === 'PERSISTENCE_NOT_CONFIRMED') persistenceFailed = true;
+      if (error.code === 'RESTORE_FAILED' || error.code === 'STORAGE_INIT_FAILED' || error.code === 'DIRECTORY_CONFLICT') storageReady = false;
+      setBusy(busy);
+    }
+    function label(text) { var element = doc.createElement('p'); element.className = 'info-text'; element.textContent = text; nodes.mpqFilesList.appendChild(element); }
+    async function refresh() {
+      nodes.mpqFilesList.textContent = '';
+      try {
+        var files = await api().listFiles();
+        hasBase = files.some(function (file) { return (file.name.toLowerCase() === 'diabdat.mpq' || file.name === 'spawn.mpq') && file.size > 0; });
+        setBusy(busy);
+        if (!files.length) label('Selecione DIABDAT.MPQ ou SPAWN.MPQ para iniciar.');
+        files.forEach(function (file) {
+          var row = doc.createElement('div'); row.className = 'file-item';
+          var name = doc.createElement('span'); name.className = 'file-item-name'; name.textContent = file.name;
+          var size = doc.createElement('span'); size.className = 'file-item-size'; size.textContent = (file.size / 1048576).toFixed(1) + ' MiB';
+          var button = doc.createElement('button'); button.className = 'btn btn-delete'; button.textContent = 'Remover'; button.disabled = busy || started || !storageReady;
+          button.addEventListener('click', function () {
+            if (!options.confirm('Remover ' + file.name + ' deste navegador?')) return;
+            perform(function (storage) { return storage.removeGameFile(file.name); }, 'Arquivo removido do navegador.');
+          });
+          row.appendChild(name); row.appendChild(size); row.appendChild(button); nodes.mpqFilesList.appendChild(row);
+        });
+      } catch (_) { hasBase = false; setBusy(busy); label('O armazenamento ainda não está disponível.'); }
+    }
+    async function perform(operation, success) {
+      if (busy) return;
+      setBusy(true);
+      try { await operation(api()); message(success); }
+      catch (error) {
+        observeError(error);
+        message(error.message + (error.imported && error.imported.length
+          ? (error.persisted ? ' Importados e confirmados: ' : ' Ainda sem confirmação de salvamento: ') + error.imported.join(', ') + '.' : ''));
+      } finally { nodes.fileInput.value = ''; setBusy(false); await refresh(); }
+    }
+    nodes.fileManagerBtn.addEventListener('click', function () { nodes.fileManagerModal.classList.add('show'); refresh(); });
+    nodes.closeModal.addEventListener('click', function () { nodes.fileManagerModal.classList.remove('show'); });
+    nodes.fileManagerModal.addEventListener('click', function (event) { if (event.target === nodes.fileManagerModal) nodes.fileManagerModal.classList.remove('show'); });
+    nodes.browseBtn.addEventListener('click', function (event) { event.stopPropagation(); if (!busy && !started) nodes.fileInput.click(); });
+    nodes.dropZone.addEventListener('click', function (event) { if (event.target !== nodes.fileInput && !busy && !started) nodes.fileInput.click(); });
+    nodes.dropZone.addEventListener('dragover', function (event) { event.preventDefault(); nodes.dropZone.classList.add('dragover'); });
+    nodes.dropZone.addEventListener('dragleave', function () { nodes.dropZone.classList.remove('dragover'); });
+    nodes.dropZone.addEventListener('drop', function (event) {
+      event.preventDefault(); nodes.dropZone.classList.remove('dragover');
+      if (!started) perform(function (storage) { return storage.importGameFiles(event.dataTransfer.files); }, 'Arquivos salvos neste navegador. Clique em Iniciar jogo.');
+    });
+    nodes.fileInput.addEventListener('change', function (event) {
+      perform(function (storage) { return storage.importGameFiles(event.target.files); }, 'Arquivos salvos neste navegador. Clique em Iniciar jogo.');
+    });
+    nodes.resetSettingsBtn.addEventListener('click', function () {
+      if (!options.confirm('Redefinir diablo.ini? Seus personagens e saves serão mantidos.')) return;
+      perform(function (storage) { return storage.resetSettings(); }, 'Configurações redefinidas. Seus saves foram preservados.');
+    });
+    if (start) start.addEventListener('click', function () { perform(function (storage) { return storage.startGame(); }, 'Diablo 3D iniciado.'); });
+    win.addEventListener('d3d-storage-ready', function (event) { observeState(event.detail); message('Armazenamento local pronto.'); refresh(); });
+    win.addEventListener('d3d-storage-status', function (event) { if (event.detail) { observeState(event.detail.state); if (event.detail.phase === 'running') { started = true; setBusy(busy); } } });
+    win.addEventListener('d3d-storage-error', function (event) { if (event.detail) { observeError(event.detail); message(event.detail.message); } });
+    setBusy(false);
+    // The shell may attach after ready has already resolved. Restore its state
+    // without forcing start enabled and then obtain a fresh file list.
+    try { api().ready.then(function (state) { observeState(state); refresh(); }, function (error) { observeError(error); message(error.message); }); } catch (_) { /* preRun not reached yet; events will provide ready */ }
+    return { attached: true, refresh: refresh };
+  }
+  if (typeof module === 'object' && module.exports) { module.exports = { attachFileManager: attachFileManager }; return; }
+  attachFileManager({ document: document, window: window, getModule: function () { return typeof Module === 'undefined' ? null : Module; }, confirm: function (text) { return window.confirm(text); }, showMessage: function (text) { window.alert(text); } });
 })();

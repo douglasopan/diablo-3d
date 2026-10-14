@@ -8,7 +8,6 @@
 #include <string_view>
 
 #include "control/control.hpp"
-#include "automap.h"
 #include "control/control_flasks.hpp"
 #include "control/control_panel.hpp"
 #include "control/d3d_floating_panels.hpp"
@@ -16,9 +15,7 @@
 #include "control/d3d_hud_skin.hpp"
 #include "controls/control_mode.hpp"
 #include "controls/game_controls.h"
-#include "controls/plrctrls.h"
 #include "engine/palette.h"
-#include "engine/hd_sprite_pack.hpp"
 #include "engine/render/d3d_hud_presentation.hpp"
 #include "engine/render/d3d_ui_layout.hpp"
 #include "engine/render/primitive_render.hpp"
@@ -37,8 +34,6 @@ namespace devilution {
 extern Rectangle LevelButtonRect;
 
 namespace {
-
-bool ClockDrawnInLastFrame = false;
 
 Rectangle LayoutRect(size_t index)
 {
@@ -95,14 +90,68 @@ void BlitScaled(const Surface &out, const Surface &source, Rectangle target, boo
 	}
 }
 
+bool Intersects(Rectangle a, Rectangle b)
+{
+	return a.position.x < b.position.x + b.size.width && b.position.x < a.position.x + a.size.width
+	    && a.position.y < b.position.y + b.size.height && b.position.y < a.position.y + a.size.height;
+}
+
+// Auxiliary native controls have no authored INI entries. Reserve a nearby free
+// rectangle so the default HUD never hides them or consumes their mouse input.
+Rectangle ReserveAuxiliaryRect(Rectangle preferred, Rectangle extra = {})
+{
+	const int width = GetScreenWidth(), height = GetScreenHeight();
+	preferred.size.width = std::min(preferred.size.width, width);
+	preferred.size.height = std::min(preferred.size.height, height);
+	std::array<Rectangle, D3dHudLayoutEntries.size() + 4> occupied;
+	size_t count = 0;
+	for (size_t i = 0; i < D3dHudLayoutEntries.size(); ++i) {
+		if (i >= 11 && !IsChatAvailable()) continue;
+		occupied[count++] = LayoutRect(i);
+	}
+	occupied[count++] = GetD3dHudFrameRect();
+	if (IsLeftPanelOpen()) occupied[count++] = IsD3dHudSelected() ? GetD3dFloatingPanelBounds(UiPanels::Character) : GetLeftPanel();
+	if (IsRightPanelOpen()) occupied[count++] = IsD3dHudSelected() ? GetD3dFloatingPanelBounds(UiPanels::Inventory) : GetRightPanel();
+	if (extra.size.width > 0 && extra.size.height > 0) occupied[count++] = extra;
+	const int gap = DesignPixelsY(8);
+	Rectangle result = preferred;
+	int bestDistance = std::numeric_limits<int>::max();
+	const auto consider = [&](Rectangle candidate) {
+		candidate.position.x = std::clamp(candidate.position.x, 0, width - candidate.size.width);
+		candidate.position.y = std::clamp(candidate.position.y, 0, height - candidate.size.height);
+		for (size_t i = 0; i < count; ++i)
+			if (Intersects(candidate, occupied[i])) return;
+		const int distance = std::abs(candidate.position.x - preferred.position.x) + std::abs(candidate.position.y - preferred.position.y);
+		if (distance < bestDistance) {
+			bestDistance = distance;
+			result = candidate;
+		}
+	};
+	consider(preferred);
+	for (size_t i = 0; i < count; ++i) {
+		Rectangle candidate = preferred;
+		candidate.position.x = occupied[i].position.x - gap - candidate.size.width;
+		consider(candidate);
+		candidate.position.x = occupied[i].position.x + occupied[i].size.width + gap;
+		consider(candidate);
+		candidate = preferred;
+		candidate.position.y = occupied[i].position.y - gap - candidate.size.height;
+		consider(candidate);
+		candidate.position.y = occupied[i].position.y + occupied[i].size.height + gap;
+		consider(candidate);
+	}
+	// Arbitrarily overlapping authored controls can leave no free area; clamp
+	// that fallback as well. Default compact/wide layouts have a reserved result.
+	result.position.x = std::clamp(result.position.x, 0, width - result.size.width);
+	result.position.y = std::clamp(result.position.y, 0, height - result.size.height);
+	return result;
+}
+
 Rectangle LevelGroupRect()
 {
-	// Auxiliary defaults belong to the base layout. Opening/moving a panel or
-	// another module must never repack this module's independent saved position.
-	const auto standard = ResolveD3dHudGeometry(GetD3dHudGeometryContext());
-	const Rectangle orb = standard.elements[0];
+	const Rectangle orb = GetD3dHudOrbRect(false);
 	const Size size { DesignPixelsX(120), DesignPixelsY(45) };
-	return ResolveD3dHudCustomizedRect(14, { { orb.Center().x - size.width / 2, orb.position.y - DesignPixelsY(8) - size.height }, size });
+	return ReserveAuxiliaryRect({ { orb.Center().x - size.width / 2, orb.position.y - DesignPixelsY(8) - size.height }, size });
 }
 
 } // namespace
@@ -121,18 +170,20 @@ bool IsD3dHudLayoutActive()
 	return IsD3dHudSelected() && !ChatFlag;
 }
 
-uint8_t GetD3dHudBackgroundOpacity()
-{
-	const int transparency = std::clamp(*GetOptions().Graphics.hudTransparency, 0, 100);
-	return static_cast<uint8_t>((255 * (100 - transparency) + 50) / 100);
-}
-
 bool IsD3dHudEnabled()
 {
-    // Floating panels retain their own presentation and hit priority. Their
-    // visibility never repacks or replaces independently customized modules.
-    return !ChatFlag && ControlMode != ControlTypes::VirtualGamepad
-        && !PadMenuNavigatorActive && !PadHotspellMenuActive;
+	// This gate controls RGB presentation, not the selected CPU geometry/skin.
+	if (IsChatAvailable()) {
+		for (size_t index : { size_t { 11 }, size_t { 12 } }) {
+			const Rectangle button = LayoutRect(index);
+			if ((IsLeftPanelOpen() && Intersects(button, GetLeftPanel()))
+			    || (IsRightPanelOpen() && Intersects(button, GetRightPanel())))
+				return false;
+		}
+	}
+	return !ChatFlag && ControlMode != ControlTypes::VirtualGamepad
+	    && !PadMenuNavigatorActive && !PadHotspellMenuActive
+	    && !(CanPanelsCoverView() && (IsLeftPanelOpen() || IsRightPanelOpen()));
 }
 
 Rectangle GetD3dHudPanelButtonRect(int button)
@@ -206,7 +257,7 @@ Rectangle GetD3dHudLevelButtonRect()
 		return rect;
 	}
 	const Rectangle group = LevelGroupRect();
-	const Size size { std::max(1, group.size.width * 41 / 120), std::max(1, group.size.height * 22 / 45) };
+	const Size size { DesignPixelsX(41), DesignPixelsY(22) };
 	return { group.position + Displacement { (group.size.width - size.width) / 2, group.size.height - size.height }, size };
 }
 
@@ -223,96 +274,12 @@ Rectangle GetD3dHudDurabilityRect()
 {
 	const Size size { DesignPixelsX(152), DesignPixelsY(32) };
 	int right = 0, top = GetScreenHeight();
-	const auto standard = ResolveD3dHudGeometry(GetD3dHudGeometryContext());
 	for (int i = 0; i < (IsChatAvailable() ? TotalMpMainPanelButtons : TotalSpMainPanelButtons); ++i) {
-		constexpr std::array<size_t, 8> indices { 5, 8, 9, 10, 6, 7, 11, 12 };
-		const Rectangle button = standard.elements[indices[i]];
+		const Rectangle button = GetD3dHudPanelButtonRect(i);
 		right = std::max(right, button.position.x + button.size.width);
 		top = std::min(top, button.position.y);
 	}
-	return ResolveD3dHudCustomizedRect(15, { { std::max(0,right - size.width), std::max(0,top - DesignPixelsY(8) - size.height) }, size });
-}
-
-Rectangle GetD3dHudExperienceRect()
-{
-	const auto &panel = GetMainPanel();
-	return ResolveD3dHudCustomizedRect(13, { { panel.position.x + panel.size.width / 2 - 155, panel.position.y + panel.size.height - 11 }, {313,9} });
-}
-
-Rectangle GetD3dHudClockRect()
-{
-	return ResolveD3dHudCustomizedRect(D3dHudClockElement,
-		{ { std::max<int>(0, gnScreenWidth - 76), 6 }, { 76, 16 } });
-}
-
-bool IsD3dHudClockPoint(Point point)
-{
-	return ClockDrawnInLastFrame && !IsD3dWindowPointerTransformed()
-		&& IsD3dHudLayoutActive() && GetD3dHudClockRect().contains(point);
-}
-
-void BeginD3dHudAuxiliaryFrame() { ClockDrawnInLastFrame = false; }
-
-void DrawD3dHudClock(const Surface &out, std::string_view text)
-{
-	if (text.empty()) return;
-	// Preserve the existing late Lua hook and native UI capture/recovery order.
-	// Time comes from Lua, never from a new gameplay clock or timer.
-	OwnedSurface glyphs(76, 16);
-	SDL_FillRect(glyphs.surface, nullptr, 1);
-	DrawString(glyphs, text.substr(0, 64), { 0, 0 });
-	DrawD3dHudContent(out, glyphs, GetD3dHudClockRect());
-	ClockDrawnInLastFrame = true;
-}
-
-std::optional<size_t> GetD3dHudElementAt(Point point)
-{
-	if (!IsD3dHudLayoutActive()) return std::nullopt;
-	// The existing Lua callback paints last, above panels and Map.
-	if (IsD3dHudClockPoint(point)) return D3dHudClockElement;
-	if (D3dFloatingPanelAt(point) || IsD3dMinimapPoint(point)) return std::nullopt;
-	// Top-to-bottom native foreground order. Values belong to their orb;
-	// every other decorative module is one complete interactive container.
-	for (bool mana : {true,false}) {
-		if ((mana ? *GetOptions().Gameplay.showManaValues : *GetOptions().Gameplay.showHealthValues)
-		    && GetD3dHudValueRect(mana).contains(point)) return mana ? 1 : 0;
-	}
-	constexpr std::array<size_t,16> order {13,12,11,7,6,10,9,8,5,2,3,1,0,4,14,15};
-	for (size_t id : order) {
-		if (id >= 11 && id <= 12 && !IsChatAvailable()) continue;
-		if (id == 13 && !*GetOptions().Gameplay.experienceBar) continue;
-		if (id == 14 && (!MyPlayer || MyPlayer->_pStatPts == 0 || CharFlag || SpellSelectFlag)) continue;
-		if (id == 15) {
-			bool visible = false;
-			if (MyPlayer) for (int slot : {INVLOC_HEAD,INVLOC_CHEST,INVLOC_HAND_LEFT,INVLOC_HAND_RIGHT}) {
-				const Item &item = MyPlayer->InvBody[slot];
-				visible |= !item.isEmpty() && item._iDurability <= 5;
-			}
-			if (!visible) continue;
-		}
-		const Rectangle area = id < 13 ? LayoutRect(id) : id == 13 ? GetD3dHudExperienceRect()
-		    : id == 14 ? LevelGroupRect() : GetD3dHudDurabilityRect();
-		if (area.contains(point)) return id;
-	}
-	return std::nullopt;
-}
-
-bool HandleD3dHudCustomizationDown(Point point, uint8_t button, uint16_t modifiers)
-{
-	if (!IsD3dHudLayoutActive() || InGameMenu() || ControlDevice != ControlTypes::KeyboardAndMouse
-	    || (modifiers & SDL_KMOD_CTRL) == 0 || (MyPlayer && !MyPlayer->HoldItem.isEmpty())) return false;
-	const auto id = GetD3dHudElementAt(point);
-	if (!id) return false;
-	const Rectangle area = *id < 13 ? LayoutRect(*id) : *id == 13 ? GetD3dHudExperienceRect()
-	    : *id == 14 ? LevelGroupRect() : *id == D3dHudClockElement ? GetD3dHudClockRect() : GetD3dHudDurabilityRect();
-	if (button == SDL_BUTTON_RIGHT) {
-		if ((modifiers & SDL_KMOD_SHIFT) != 0) { ResetAllD3dHudCustomizations(); ResetD3dFloatingPanelLayout(); }
-		else ResetD3dHudCustomization(*id);
-		return true;
-	}
-	if (button != SDL_BUTTON_LEFT) return false;
-	BeginD3dHudCustomization(*id, area, point, (modifiers & SDL_KMOD_SHIFT) != 0);
-	return true;
+	return ReserveAuxiliaryRect({ { right - size.width, top - DesignPixelsY(8) - size.height }, size }, LevelGroupRect());
 }
 
 Rectangle GetD3dHudValueRect(bool mana)
@@ -333,7 +300,17 @@ Rectangle GetD3dHudValueRect(bool mana)
 bool IsPointOnD3dHud(Point point)
 {
 	if (!IsD3dHudLayoutActive()) return GetMainPanel().contains(point);
-	return GetD3dHudElementAt(point).has_value();
+	if (GetD3dHudFrameRect().contains(point) || GetD3dHudBeltRect().contains(point) || GetD3dHudSpellRect().contains(point)
+	    || GetD3dHudOrbRect(false).contains(point) || GetD3dHudOrbRect(true).contains(point)) return true;
+	for (int i = 0; i < (IsChatAvailable() ? TotalMpMainPanelButtons : TotalSpMainPanelButtons); ++i)
+		if (GetD3dHudPanelButtonRect(i).contains(point)) return true;
+	for (bool mana : { false, true }) {
+		if (mana ? !*GetOptions().Gameplay.showManaValues : !*GetOptions().Gameplay.showHealthValues) continue;
+		if (GetD3dHudValueRect(mana).contains(point)) return true;
+	}
+	if (*GetOptions().Gameplay.experienceBar
+	    && Rectangle { { GetScreenWidth() / 2 - 155, GetScreenHeight() - 11 }, { 313, 9 } }.contains(point)) return true;
+	return false;
 }
 
 void DrawD3dHudPlate(const Surface &out, Rectangle rect, bool pressed)
@@ -345,7 +322,7 @@ void DrawD3dHudPlate(const Surface &out, Rectangle rect, bool pressed)
 void DrawD3dHudBackground(const Surface &out)
 {
 	if (IsD3dHudPresentationCapturing(out)) return;
-	// Modular controls leave the spaces between them transparent and interactive.
+	DrawD3dHudSkinIndexedPlate(out, GetD3dHudFrameRect(), false, D3dHudSkinPart::Chassis);
 	DrawD3dHudPlate(out, GetD3dHudInfoRect());
 	DrawD3dHudPlate(out, GetD3dHudSpellRect());
 }
@@ -385,24 +362,6 @@ void DrawD3dHudBeltItem(const Surface &out, const Surface &nativeItem, Rectangle
 	DrawD3dHudContent(out, nativeItem, compact ? ContainContent(inside, nativeItem.w(), nativeItem.h()) : inside);
 }
 
-bool DrawD3dHudBeltHdItem(const Surface &out, ClxSprite sprite, Rectangle slot)
-{
-	auto pixels = LoadHdSpritePixels(sprite);
-	if (!pixels || pixels->pixels.empty()) return false;
-	OwnedSurface image(pixels->width, pixels->height);
-	for (int y = 0; y < pixels->height; ++y)
-		for (int x = 0; x < pixels->width; ++x) {
-			const size_t i = static_cast<size_t>(y) * pixels->width + x;
-			*image.at(x, y) = pixels->opacity[i] ? pixels->pixels[i] : 1;
-		}
-	const Rectangle inside = GetD3dHudBeltInteriorRect(slot);
-	const Rectangle target = ContainContent(inside, image.w(), image.h());
-	DrawD3dHudContent(out, image, target);
-	auto rgba = LoadHdSpriteRgba(sprite);
-	if (rgba && !rgba->empty()) RecordD3dHudRgbaForeground(image.w(), image.h(), *rgba, target);
-	return true;
-}
-
 void DrawD3dHudSpellIcon(const Surface &out, Rectangle rect, SpellID spell, SpellType type)
 {
 	OwnedSurface icon(SPLICONLENGTH, SPLICONLENGTH);
@@ -414,18 +373,7 @@ void DrawD3dHudSpellIcon(const Surface &out, Rectangle rect, SpellID spell, Spel
 		if (rect.size.width > 2 * insetX && rect.size.height > 2 * insetY) rect = rect.inset({ insetX, insetY });
 		rect = ContainContent(rect, icon.w(), icon.h());
 	}
-	auto hd = LoadLargeSpellIconHdPixels(spell);
-	if (hd && !hd->pixels.empty()) {
-		OwnedSurface image(hd->width, hd->height);
-		for (int y = 0; y < hd->height; ++y)
-			for (int x = 0; x < hd->width; ++x) {
-				const size_t i = static_cast<size_t>(y) * hd->width + x;
-				*image.at(x, y) = hd->opacity[i] ? hd->pixels[i] : 1;
-			}
-		DrawD3dHudContent(out, image, rect);
-		auto rgba = LoadLargeSpellIconRgba(spell);
-		if (rgba && !rgba->empty()) RecordD3dHudRgbaForeground(image.w(), image.h(), *rgba, rect);
-	} else DrawD3dHudContent(out, icon, rect);
+	DrawD3dHudContent(out, icon, rect);
 }
 
 void DrawD3dHudFlask(const Surface &out, bool mana)

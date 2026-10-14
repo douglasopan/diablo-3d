@@ -43,7 +43,6 @@ struct D3dHudGeometryContext {
 	float outputOriginX = 0, outputOriginY = 0;
 	float viewportWidth = 1, viewportHeight = 1;
 	uint64_t layoutGeneration = 0;
-	uint64_t customizationGeneration = 0;
 	bool hasHudOverride = false;
 	bool integerScale = false;
 	bool valid = false;
@@ -82,27 +81,5 @@ const D3dHudGeometry &GetD3dHudGeometry();
 const D3dHudMetrics &GetD3dHudMetrics();
 int GetD3dHudDesignPixelsX(int pixels);
 int GetD3dHudDesignPixelsY(int pixels);
-
-/** Profile-owned visual overrides. IDs0..12 are the existing authored nodes;
- * 13 is XP, 14 is the level group, 15 durability, 16 Clock, 17 Minimap window.
-+ * Existing IDs and normalized layout records retain their meaning. */
-inline constexpr size_t D3dHudEditableElementCount = 18;
-inline constexpr size_t D3dHudClockElement = 16;
-inline constexpr size_t D3dHudMinimapElement = 17;
-enum D3dHudResizeEdge : uint8_t {
-    D3dHudResizeNone = 0, D3dHudResizeLeft = 1, D3dHudResizeRight = 2,
-    D3dHudResizeTop = 4, D3dHudResizeBottom = 8,
-};
-Rectangle ResolveD3dHudCustomizedRect(size_t element, Rectangle standard);
-void BeginD3dHudCustomization(size_t element, Rectangle area, Point pointer, bool resize);
-/** Shared per-pixel edge gesture. Opposite edges remain anchored at clamp limits. */
-uint8_t GetD3dHudResizeEdges(Rectangle area, Point pointer, int grip = 5);
-void BeginD3dHudEdgeCustomization(size_t element, Rectangle area, Point pointer, uint8_t edges);
-bool UpdateD3dHudCustomization(Point pointer);
-bool EndD3dHudCustomization();
-void CancelD3dHudCustomization();
-void ResetD3dHudCustomization(size_t element);
-void ResetAllD3dHudCustomizations();
-bool HasD3dHudCustomization();
 
 } // namespace devilution

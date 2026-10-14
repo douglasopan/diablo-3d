@@ -2,27 +2,11 @@ include(Definitions)
 include(functions/devilutionx_library)
 include(functions/genex)
 
-# The authenticated mesh parser owns this header-only hashing dependency.
-set_property(SOURCE engine/render/town_model_v2.cpp APPEND PROPERTY
-  INCLUDE_DIRECTORIES ${PROJECT_SOURCE_DIR}/3rdParty/PicoSHA2)
-set_property(SOURCE engine/render/player_actor_resources.cpp APPEND PROPERTY
-  INCLUDE_DIRECTORIES ${PROJECT_SOURCE_DIR}/3rdParty/PicoSHA2)
-
 if(MSVC)
   set_source_files_properties(
     engine/render/actor_model.cpp
     engine/render/actor_pose.cpp
-    engine/render/actor_player_geometry.cpp
-    engine/render/actor_player_frame.cpp
-    engine/render/actor_attachment_resource.cpp
-    engine/render/town_model_v2.cpp
     engine/render/actor_visual_snapshot.cpp
-    engine/render/player_actor_capture.cpp
-    engine/render/player_actor_presentation.cpp
-    engine/render/player_actor_material.cpp
-    engine/render/player_actor_resources.cpp
-    engine/render/player_actor_runtime.cpp
-    engine/render/player_actor_first_person.cpp
     engine/render/ogden_idle_pilot.cpp
     engine/render/ogden_idle_native_clock.cpp
     engine/render/cathedral/cathedral_adapter.cpp
@@ -30,19 +14,11 @@ if(MSVC)
     engine/render/cathedral/cathedral_live.cpp
     engine/render/cathedral/native/cathedral_native_capture.cpp
     engine/render/town_view.cpp
-    engine/render/town_visual_scene.cpp
-    engine/render/town_visual_objects.cpp
-    engine/render/town_scene_logic.cpp
     engine/render/town_camera_visibility.cpp
     engine/render/town_gpu.cpp
-    engine/render/d3d_local_diagnostics.cpp
     engine/render/light_render.cpp
     engine/render/d3d_hud_presentation.cpp
     engine/render/d3d_panel_presentation.cpp
-    control/d3d_hud_theme.cpp
-    control/d3d_hud_skin.cpp
-    control/d3d_hud_geometry.cpp
-    control/d3d_floating_panels.cpp
     PROPERTIES COMPILE_OPTIONS "/EHsc")
 endif()
 
@@ -132,18 +108,7 @@ set(libdevilutionx_SRCS
   engine/render/cathedral/native/cathedral_native_capture.cpp
   engine/render/actor_model.cpp
   engine/render/actor_pose.cpp
-  engine/render/actor_player_geometry.cpp
-  engine/render/actor_player_frame.cpp
-  engine/render/actor_attachment_resource.cpp
-  engine/render/town_model_v2.cpp
   engine/render/actor_visual_snapshot.cpp
-  engine/render/player_actor_capture.cpp
-  engine/render/player_actor_lifecycle.cpp
-  engine/render/player_actor_presentation.cpp
-  engine/render/player_actor_material.cpp
-  engine/render/player_actor_resources.cpp
-  engine/render/player_actor_runtime.cpp
-  engine/render/player_actor_first_person.cpp
   engine/render/ogden_idle_pilot.cpp
   engine/render/ogden_idle_native_clock.cpp
   engine/render/automap_render.cpp
@@ -160,12 +125,8 @@ set(libdevilutionx_SRCS
   engine/render/town_horizon.cpp
   engine/render/town_presentation.cpp
   engine/render/town_gpu.cpp
-  engine/render/d3d_local_diagnostics.cpp
   engine/render/ui_overlay_regions.cpp
   engine/render/town_scene.cpp
-  engine/render/town_visual_scene.cpp
-  engine/render/town_visual_objects.cpp
-  engine/render/town_scene_logic.cpp
   engine/render/town_scene_projection.cpp
   engine/render/town_shadow.cpp
   engine/render/town_model_import.cpp
@@ -263,6 +224,11 @@ set(libdevilutionx_SRCS
 # Apply some optimizations to them even in Debug mode to get reasonable performance.
 #
 # They also perform better with -O2 rather than -O3 even in Release mode.
+if(EMSCRIPTEN)
+  list(REMOVE_ITEM libdevilutionx_SRCS engine/render/town_gpu.cpp)
+  list(APPEND libdevilutionx_SRCS engine/render/town_gpu_webgl2.cpp)
+endif()
+
 set(_optimize_in_debug_srcs
   engine/render/clx_render.cpp
   engine/render/dun_render.cpp
@@ -295,7 +261,6 @@ target_link_dependencies(libdevilutionx_mod_identity PUBLIC
 
 add_devilutionx_object_library(libdevilutionx_assets
   engine/assets.cpp
-  engine/hd_sprite_pack.cpp
 )
 target_link_dependencies(libdevilutionx_assets PUBLIC
   DevilutionX::SDL
@@ -356,7 +321,6 @@ add_devilutionx_object_library(libdevilutionx_control
   control/d3d_hud.cpp
   control/d3d_hud_geometry.cpp
   control/d3d_hud_skin.cpp
-  control/d3d_hud_theme.cpp
   control/d3d_floating_panels.cpp
 )
 target_link_dependencies(libdevilutionx_control
@@ -1306,11 +1270,3 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     target_link_libraries(libdevilutionx PUBLIC c++fs)
   endif()
 endif()
-
-# Set by the build owner from the frozen Source closure, not session arguments.
-# Empty/invalid identity refuses diagnostics admission at runtime.
-set(D3D_SOURCE_CLOSURE_SHA256 "" CACHE STRING "Frozen diagnostics Source closure SHA256")
-set_property(SOURCE engine/render/d3d_local_diagnostics.cpp APPEND PROPERTY
-  INCLUDE_DIRECTORIES ${PROJECT_SOURCE_DIR}/3rdParty/PicoSHA2)
-set_property(SOURCE engine/render/d3d_local_diagnostics.cpp APPEND PROPERTY
-  COMPILE_DEFINITIONS D3D_SOURCE_CLOSURE_SHA256="${D3D_SOURCE_CLOSURE_SHA256}")

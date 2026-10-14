@@ -118,6 +118,11 @@ struct TownGpuMeshStats {
 	size_t reusedInstances = 0;
 	size_t evictions = 0;
 	size_t projectedUploadBytes = 0;
+#ifdef __EMSCRIPTEN__
+	/** Recording-only command counts, not completed draws or a GPU timer. */
+	size_t recordedProjectedBatches = 0;
+	size_t recordedMeshBatches = 0;
+#endif
 	double uploadMilliseconds = 0;
 	/** CPU time issuing/uploading all commands; excludes synchronous readback.
 	 * It is not an elapsed GPU timestamp or final presentation/FPS measurement. */

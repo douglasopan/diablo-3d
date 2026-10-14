@@ -2,23 +2,17 @@
 
 #include "control/d3d_hud.hpp"
 #include "control/d3d_hud_geometry.hpp"
-#include "control/d3d_hud_theme.hpp"
 
 #include <algorithm>
 #include <array>
 #include <cmath>
 #include <cstring>
 #include <limits>
-#include <fstream>
-#include <map>
 #include <utility>
 
 #include "engine/assets.hpp"
 #include "engine/palette.h"
 #include "engine/surface.hpp"
-#include "options.h"
-#include "utils/log.hpp"
-#include "utils/paths.h"
 #include "utils/png.h"
 #include "utils/sdl_ptrs.h"
 
@@ -40,7 +34,6 @@ constexpr std::array<const char *, 6> Paths {
 constexpr size_t PartCount = static_cast<size_t>(D3dHudSkinPart::Count);
 std::array<D3dHudSkinImage, PartCount> Images;
 bool Loaded = false;
-std::map<std::string, std::vector<uint8_t>, std::less<>> ThemeFonts;
 D3dHudSkinCounters Counters;
 std::array<SDL_Color, 256> QuantizedPalette;
 std::array<uint8_t, 32 * 32 * 32> QuantizedColors;
@@ -53,50 +46,12 @@ bool Fits(const D3dHudSkinImage &image, const SDL_Rect &source)
 	    && source.x + source.w <= image.width && source.y + source.h <= image.height;
 }
 
-std::expected<std::vector<uint8_t>, std::string> ReadThemeBytes(std::string_view path, size_t limit)
+std::expected<D3dHudSkinImage, std::string> ReadImage(const char *path)
 {
-	auto ref = FindAsset(path);
-	if (!ref.ok() || ref.size() == 0 || ref.size() > limit)
-		return std::unexpected(std::string("HUD theme resource missing or exceeds byte limit: ") + std::string(path));
-	std::vector<uint8_t> bytes(ref.size());
-	auto handle = OpenAsset(std::move(ref));
-	if (!handle.ok() || !handle.read(bytes.data(), bytes.size()))
-		return std::unexpected(std::string("Cannot read HUD theme resource: ") + std::string(path));
-	return bytes;
-}
-
-std::expected<size_t, std::string> PngPixelCount(std::span<const uint8_t> header)
-{
-	if (header.size() < 24) return std::unexpected("Truncated HUD PNG header");
-	constexpr std::array<uint8_t, 16> expected { 137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82 };
-	if (!std::equal(expected.begin(), expected.end(), header.begin()))
-		return std::unexpected("HUD image must be a PNG with an IHDR header");
-	const auto be32 = [&header](size_t offset) { return (static_cast<uint32_t>(header[offset]) << 24)
-		| (static_cast<uint32_t>(header[offset+1]) << 16) | (static_cast<uint32_t>(header[offset+2]) << 8) | header[offset+3]; };
-	if (be32(16) == 0 || be32(20) == 0 || be32(16) > 4096 || be32(20) > 4096)
-		return std::unexpected("HUD PNG dimensions exceed 4096 or are zero");
-	return static_cast<size_t>(be32(16)) * be32(20);
-}
-
-std::expected<D3dHudSkinImage, std::string> ReadImage(const char *path, size_t pixelBudget = 4096 * 4096)
-{
-	// Header validation and the real libpng decoder observe the same immutable
-	// bytes. A changing loose theme file cannot bypass the preallocation bounds.
-	auto bytes = ReadThemeBytes(path, 16 * 1024 * 1024);
-	if (!bytes) return std::unexpected(bytes.error());
-	auto pixels = PngPixelCount(*bytes);
-	if (!pixels) return std::unexpected(pixels.error());
-	if (*pixels > pixelBudget) return std::unexpected("HUD PNG decoded staging exceeds 256 MiB");
+	if (!FindAsset(path).ok())
+		return std::unexpected(std::string("Required R1 HUD asset is missing: ") + path);
 	++Counters.pngDecodes;
-#ifdef USE_SDL3
-	auto *stream = SDL_IOFromConstMem(bytes->data(), bytes->size());
-	SDLSurfaceUniquePtr source { stream ? IMG_LoadPNG_IO(stream) : nullptr };
-	if (stream) SDL_CloseIO(stream);
-#else
-	auto *stream = SDL_RWFromConstMem(bytes->data(), static_cast<int>(bytes->size()));
-	SDLSurfaceUniquePtr source { stream ? IMG_LoadPNG_RW(stream) : nullptr };
-	if (stream) SDL_RWclose(stream);
-#endif
+	SDLSurfaceUniquePtr source { LoadPNG(path) };
 	if (!source || source->w <= 0 || source->h <= 0 || source->w > 4096 || source->h > 4096)
 		return std::unexpected(std::string("Required R1 HUD asset cannot be decoded: ") + path);
 #ifdef USE_SDL3
@@ -115,16 +70,6 @@ std::expected<D3dHudSkinImage, std::string> ReadImage(const char *path, size_t p
 		std::memcpy(image.pixels.data() + static_cast<size_t>(y) * image.width,
 		    static_cast<const uint8_t *>(colors->pixels) + y * colors->pitch, static_cast<size_t>(image.width) * 4);
 	return image;
-}
-
-void TintThemeImage(D3dHudSkinImage &image, D3dHudThemeColorRole role)
-{
-	const auto tint = GetD3dHudThemeColor(role);
-	if (!tint) return;
-	for (uint32_t &pixel : image.pixels) {
-		const unsigned value = std::max({ (pixel >> 16) & 255U, (pixel >> 8) & 255U, pixel & 255U });
-		pixel = (pixel & 0xFF000000U) | ((value * tint->r / 255) << 16) | ((value * tint->g / 255) << 8) | (value * tint->b / 255);
-	}
 }
 
 void DeriveLiquid(size_t index)
@@ -198,17 +143,11 @@ uint8_t Quantize(unsigned r, unsigned g, unsigned b)
 	return QuantizedColors[((r >> 3) * 32 + (g >> 3)) * 32 + (b >> 3)];
 }
 
-void PaintPixel(const Surface &out, int x, int y, uint32_t color, uint8_t shade, uint8_t opacity = 255)
+void PaintPixel(const Surface &out, int x, int y, uint32_t color, uint8_t shade)
 {
-	const unsigned alpha = MergeD3dHudThemeOpacity(static_cast<uint8_t>(color >> 24), opacity);
+	const unsigned alpha = color >> 24;
 	if (alpha == 0)
 		return;
-	if (shade != 255) {
-		if (auto tint = GetD3dHudThemeColor(D3dHudThemeColorRole::Highlight)) {
-			color = (color & 0xFF000000U) | ((((color >> 16) & 255U) * tint->r / 255) << 16)
-			    | ((((color >> 8) & 255U) * tint->g / 255) << 8) | ((color & 255U) * tint->b / 255);
-		}
-	}
 	const auto &background = logical_palette[*out.at(x, y)];
 	const unsigned r = (((color >> 16) & 255U) * shade / 255 * alpha + background.r * (255 - alpha) + 127) / 255;
 	const unsigned g = (((color >> 8) & 255U) * shade / 255 * alpha + background.g * (255 - alpha) + 127) / 255;
@@ -221,7 +160,7 @@ void PaintPixel(const Surface &out, int x, int y, uint32_t color, uint8_t shade,
 }
 
 void PaintImage(const Surface &out, const D3dHudSkinImage &image, SDL_Rect source,
-    D3dHudSkinFloatRect destination, uint8_t shade = 255, bool flip = false, uint8_t opacity = 255)
+    D3dHudSkinFloatRect destination, uint8_t shade = 255, bool flip = false)
 {
 	if (!Loaded || destination.w <= 0 || destination.h <= 0 || !Fits(image, source))
 		return;
@@ -235,7 +174,7 @@ void PaintImage(const Surface &out, const D3dHudSkinImage &image, SDL_Rect sourc
 			int sx = std::clamp(static_cast<int>((x + 0.5F - destination.x) * source.w / destination.w), 0, source.w - 1);
 			if (flip)
 				sx = source.w - 1 - sx;
-			PaintPixel(out, x, y, image.pixels[static_cast<size_t>(sy) * image.width + source.x + sx], shade, opacity);
+			PaintPixel(out, x, y, image.pixels[static_cast<size_t>(sy) * image.width + source.x + sx], shade);
 		}
 	}
 }
@@ -248,56 +187,7 @@ std::expected<void, std::string> LoadD3dHudSkin()
 		return {};
 	std::array<D3dHudSkinImage, PartCount> decoded;
 	const std::array<SDL_Rect, 6> sources { Chassis.source, Button.source, Inset.source, OrbFrameSource, LiquidSources[0], LiquidSources[1] };
-	ThemeFonts.clear();
-	ResetD3dHudTheme();
-	if (*GetOptions().Graphics.importedHudTheme) {
-		const std::string file = paths::PrefPath() + "hud-theme.ini";
-		std::ifstream input(file, std::ios::binary | std::ios::ate);
-		if (input && input.tellg() >= 0 && input.tellg() <= static_cast<std::streamoff>(D3dHudThemeMaxIniBytes)) {
-			std::string ini(static_cast<size_t>(input.tellg()), '\0'); input.seekg(0); input.read(ini.data(), ini.size());
-			std::map<std::string, D3dHudSkinImage, std::less<>> stagedImages;
-			std::map<std::string, std::vector<uint8_t>, std::less<>> stagedFonts;
-			size_t stagedPngPixels = 0, stagedFontBytes = 0;
-			const auto probe = [&](std::string_view path, D3dHudThemeResourceKind kind, std::string_view native) -> std::expected<D3dHudThemeResourceInfo, std::string> {
-				if (kind == D3dHudThemeResourceKind::Png) {
-					const auto existing = stagedImages.find(path);
-					if (existing != stagedImages.end()) return D3dHudThemeResourceInfo { kind, FindAsset(path).size(), existing->second.width, existing->second.height };
-					auto image = ReadImage(std::string(path).c_str(), (256 * 1024 * 1024 / 4) - stagedPngPixels);
-					if (!image) return std::unexpected(image.error());
-					stagedPngPixels += image->pixels.size();
-					D3dHudThemeResourceInfo info { kind, FindAsset(path).size(), image->width, image->height };
-					stagedImages.emplace(path, std::move(*image)); return info;
-				}
-				const auto fontRef = FindAsset(path);
-				if (!fontRef.ok() || fontRef.size() > 16 * 1024 * 1024 - stagedFontBytes)
-					return std::unexpected("HUD font staging exceeds 16 MiB");
-				auto bytes = ReadThemeBytes(path, 4 * 1024 * 1024);
-				auto original = ReadThemeBytes(native, 4 * 1024 * 1024);
-				if (!bytes) return std::unexpected(bytes.error());
-				if (!original) return std::unexpected(original.error());
-				auto info = ValidateD3dHudThemeFontClxBytes(*bytes);
-				auto metrics = ValidateD3dHudThemeFontClxBytes(*original);
-				if (!info) return std::unexpected(info.error());
-				if (!metrics || info->glyphMetrics != metrics->glyphMetrics)
-					return std::unexpected("HUD theme font must preserve all 256 native glyph dimensions");
-				info->preservesNativeFontMetrics = true;
-				stagedFontBytes += bytes->size();
-				stagedFonts.emplace(native, std::move(*bytes)); return info;
-			};
-			auto accepted = input ? ImportD3dHudThemeIni(ini, probe) : std::expected<void, std::string>(std::unexpected("Cannot read complete HUD theme manifest"));
-			if (accepted) {
-				for (size_t i = 0; i < Paths.size(); ++i) {
-					const auto &path = GetD3dHudTheme().images[i];
-					const bool reused = std::find(GetD3dHudTheme().images.begin() + i + 1, GetD3dHudTheme().images.end(), path) != GetD3dHudTheme().images.end();
-					if (reused) decoded[i] = stagedImages.at(path);
-					else { decoded[i] = std::move(stagedImages.at(path)); stagedImages.erase(path); }
-				}
-				ThemeFonts = std::move(stagedFonts);
-			} else LogWarn("HUD theme rejected; complete default selected: {}", accepted.error());
-		} else LogWarn("HUD theme manifest missing or exceeds 64 KiB; complete default selected: {}", file);
-	}
 	for (size_t i = 0; i < Paths.size(); ++i) {
-		if (!decoded[i].pixels.empty()) continue;
 		auto image = ReadImage(Paths[i]);
 		if (!image)
 			return std::unexpected(image.error());
@@ -306,12 +196,6 @@ std::expected<void, std::string> LoadD3dHudSkin()
 		decoded[i] = std::move(*image);
 	}
 	Images = std::move(decoded);
-	TintThemeImage(Images[0], D3dHudThemeColorRole::Plate);
-	TintThemeImage(Images[1], D3dHudThemeColorRole::Border);
-	TintThemeImage(Images[2], D3dHudThemeColorRole::Plate);
-	TintThemeImage(Images[3], D3dHudThemeColorRole::Border);
-	TintThemeImage(Images[4], D3dHudThemeColorRole::Life);
-	TintThemeImage(Images[5], D3dHudThemeColorRole::Mana);
 	DeriveLiquid(0);
 	DeriveLiquid(1);
 	Images[static_cast<size_t>(D3dHudSkinPart::BeltTint)] = { 1, 1, { 0x20FFFFFFU } };
@@ -322,19 +206,11 @@ std::expected<void, std::string> LoadD3dHudSkin()
 void FreeD3dHudSkin()
 {
 	Images = {};
-	ThemeFonts.clear(); ResetD3dHudTheme();
 	Loaded = false;
 	QuantizerReady = false;
 }
 
 bool IsD3dHudSkinLoaded() { return Loaded; }
-
-std::span<const uint8_t> GetD3dHudThemeFontBytes(std::string_view nativeResource)
-{
-	std::string key(nativeResource); std::replace(key.begin(), key.end(), '\\', '/');
-	const auto found = ThemeFonts.find(key);
-	return found == ThemeFonts.end() ? std::span<const uint8_t>() : std::span<const uint8_t>(found->second);
-}
 
 const D3dHudSkinImage &GetD3dHudSkinImage(D3dHudSkinPart part)
 {
@@ -395,7 +271,7 @@ void DrawD3dHudSkinIndexedPlateShade(const Surface &out, Rectangle rect, D3dHudS
 	for (size_t y = 0; y < 3; ++y) {
 		for (size_t x = 0; x < 3; ++x)
 			PaintImage(out, image, { sx[x], sy[y], sx[x + 1] - sx[x], sy[y + 1] - sy[y] },
-			    { dx[x], dy[y], dx[x + 1] - dx[x], dy[y + 1] - dy[y] }, shade, false, GetD3dHudBackgroundOpacity());
+			    { dx[x], dy[y], dx[x + 1] - dx[x], dy[y + 1] - dy[y] }, shade);
 	}
 }
 
@@ -417,7 +293,7 @@ void DrawD3dHudSkinIndexedOrb(const Surface &out, Rectangle rect, bool mana, int
 		PaintImage(out, liquid, { 0, firstRow, liquid.width, liquid.height - firstRow },
 		    { globe.x, globe.y + offset, globe.w, globe.h - offset });
 	}
-	PaintImage(out, GetD3dHudSkinImage(D3dHudSkinPart::OrbFrame), OrbFrameSource, frame, 255, mana, GetD3dHudBackgroundOpacity());
+	PaintImage(out, GetD3dHudSkinImage(D3dHudSkinPart::OrbFrame), OrbFrameSource, frame, 255, mana);
 }
 
 void DrawD3dHudSkinIndexedTint(const Surface &out, Rectangle rect, uint8_t paletteIndex)
@@ -430,7 +306,7 @@ void DrawD3dHudSkinIndexedTint(const Surface &out, Rectangle rect, uint8_t palet
 	const uint32_t tint = 0x20000000U | (static_cast<uint32_t>(color.r) << 16) | (static_cast<uint32_t>(color.g) << 8) | color.b;
 	for (int y = std::max(0, rect.position.y); y < std::min(out.h(), rect.position.y + rect.size.height); ++y) {
 		for (int x = std::max(0, rect.position.x); x < std::min(out.w(), rect.position.x + rect.size.width); ++x)
-			PaintPixel(out, x, y, tint, 255, GetD3dHudBackgroundOpacity());
+			PaintPixel(out, x, y, tint, 255);
 	}
 }
 

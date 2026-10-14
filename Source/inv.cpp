@@ -314,7 +314,7 @@ int FindTargetSlotUnderItemCursor(Point cursorPosition, Size itemSize)
 		if (GetD3dHudBeltSlotRect(r - SLOTXY_BELT_FIRST).contains(cursorPosition))
 			return r;
 	}
-	Displacement panelOffset = Point { 0, 0 } - GetPanelArea(UiPanels::Inventory).position;
+	Displacement panelOffset = Point { 0, 0 } - GetRightPanel().position;
 	for (int r = SLOTXY_EQUIPPED_FIRST; r <= SLOTXY_EQUIPPED_LAST; r++) {
 		if (InvRect[r].contains(cursorPosition + panelOffset))
 			return r;
@@ -637,18 +637,13 @@ inv_body_loc MapSlotToInvBodyLoc(inv_xy_slot slot)
 
 std::optional<inv_xy_slot> FindSlotUnderCursor(Point cursorPosition)
 {
-	const bool inventoryOwns = IsD3dHudLayoutActive() && IsD3dPanelBodyPoint(UiPanels::Inventory, cursorPosition);
-	if (IsD3dHudLayoutActive() && !inventoryOwns && GetD3dHudElementAt(cursorPosition) != 2) return {};
-	if (!inventoryOwns) {
 	for (std::underlying_type_t<inv_xy_slot> r = SLOTXY_BELT_FIRST; r != NUM_XY_SLOTS; r++) {
 		if (GetD3dHudBeltSlotRect(r - SLOTXY_BELT_FIRST).contains(cursorPosition)) {
 			return static_cast<inv_xy_slot>(r);
 		}
 	}
-	}
-	if (IsD3dHudLayoutActive() && !inventoryOwns) return {};
 
-	auto testPosition = static_cast<Point>(cursorPosition - GetPanelArea(UiPanels::Inventory).position);
+	auto testPosition = static_cast<Point>(cursorPosition - GetRightPanel().position);
 	for (std::underlying_type_t<inv_xy_slot> r = SLOTXY_EQUIPPED_FIRST; r != SLOTXY_BELT_FIRST; r++) {
 		// check which body/inventory rectangle the mouse is in, if any
 		if (InvRect[r].contains(testPosition)) {
@@ -1273,8 +1268,8 @@ void DrawInv(const Surface &out)
 			if (slot == INVLOC_HAND_LEFT) {
 				if (myPlayer.GetItemLocation(myPlayer.InvBody[slot]) == ILOC_TWOHAND) {
 					drawSlotBack(out, GetPanelPosition(UiPanels::Inventory, slotPos[INVLOC_HAND_RIGHT]), { slotSize[INVLOC_HAND_RIGHT].width * InventorySlotSizeInPixels.width, slotSize[INVLOC_HAND_RIGHT].height * InventorySlotSizeInPixels.height }, myPlayer.InvBody[slot]._iMagical);
-					const int dstX = GetPanelArea(UiPanels::Inventory).position.x + slotPos[INVLOC_HAND_RIGHT].x + (frameSize.width == InventorySlotSizeInPixels.width ? INV_SLOT_HALF_SIZE_PX : 0) - 1;
-					const int dstY = GetPanelArea(UiPanels::Inventory).position.y + slotPos[INVLOC_HAND_RIGHT].y;
+					const int dstX = GetRightPanel().position.x + slotPos[INVLOC_HAND_RIGHT].x + (frameSize.width == InventorySlotSizeInPixels.width ? INV_SLOT_HALF_SIZE_PX : 0) - 1;
+					const int dstY = GetRightPanel().position.y + slotPos[INVLOC_HAND_RIGHT].y;
 					ClxDrawBlended(out, { dstX, dstY }, sprite);
 				}
 			}
@@ -1376,7 +1371,7 @@ void DrawInvBelt(const Surface &out)
 		    && (ControlMode == ControlTypes::KeyboardAndMouse || invflag))
 			ClxDrawOutline(itemOut, GetOutlineColor(myPlayer.SpdList[i], true), position, sprite);
 		DrawItem(myPlayer.SpdList[i], itemOut, position, sprite);
-		if (customHud && (!myPlayer.SpdList[i]._iStatFlag || !DrawD3dHudBeltHdItem(out, sprite, slot)))
+		if (customHud)
 			DrawD3dHudBeltItem(out, itemOut, slot);
 		if (customHud || (myPlayer.SpdList[i].isUsable() && myPlayer.SpdList[i]._itype != ItemType::Gold))
 			drawHotkey(i, slot);
@@ -1726,7 +1721,6 @@ void CheckInvItem(bool isShiftHeld, bool isCtrlHeld)
 
 void CheckInvScrn(bool isShiftHeld, bool isCtrlHeld)
 {
-	if (IsD3dHudLayoutActive() && GetD3dHudElementAt(MousePosition) != 2) return;
 	for (int i = 0; i < MaxBeltItems; i++) {
 		if (GetD3dHudBeltSlotRect(i).contains(MousePosition)) {
 			CheckInvItem(isShiftHeld, isCtrlHeld);

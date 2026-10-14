@@ -46,8 +46,6 @@ bool PrepareD3dHudPresentation(SDL_Renderer *renderer, SDL_Surface *indexedUi,
  * transparent; index 0 stays opaque. Source is never registered as UI coverage.
  */
 void RecordD3dHudForeground(const Surface &source, Rectangle target, uint8_t key = 1);
-/** Authored ARGB foreground, layered over its indexed recovery proxy. */
-void RecordD3dHudRgbaForeground(int width, int height, std::span<const uint32_t> pixels, Rectangle target);
 
 /** Explicitly replace a previously recorded contribution, such as InfoBox text. */
 void ClearD3dHudForeground(Rectangle target);

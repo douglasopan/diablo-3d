@@ -269,6 +269,12 @@ if(DEVILUTIONX_DISABLE_EXCEPTIONS)
   endif()
 endif()
 
+if(EMSCRIPTEN)
+  # Import/render failures use native C++ catch paths. Enable catching at both
+  # compilation and link time; Emscripten disables JS exception catching by default.
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fexceptions> -sDISABLE_EXCEPTION_CATCHING=0)
+endif()
+
 # Remove unused symbols in non-debug mode.
 # This is useful even with LTO (-84 KiB with MinSizeRel).
 #
@@ -357,6 +363,13 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # for clang-tidy
 set(CMAKE_THREAD_PREFER_PTHREAD ON)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
+if(EMSCRIPTEN)
+  # FindThreads adds -pthread for Emscripten even when libc has thread stubs.
+  # Our web SdlThread adapter is synchronous; do not require SharedArrayBuffer.
+  set_property(TARGET Threads::Threads PROPERTY INTERFACE_COMPILE_OPTIONS "")
+  set_property(TARGET Threads::Threads PROPERTY INTERFACE_LINK_OPTIONS "")
+  set_property(TARGET Threads::Threads PROPERTY INTERFACE_LINK_LIBRARIES "")
+endif()
 
 # Dependencies must be included after Platforms.
 include(Dependencies)
@@ -371,7 +384,71 @@ endif()
 
 add_subdirectory(Source)
 
+option(BUILD_TOWN_VIEW_SMOKE "Build the offscreen Tristram 3D diagnostic" OFF)
+if(BUILD_TOWN_VIEW_SMOKE)
+  add_executable(town_lighting_smoke tools/town_lighting_smoke.cpp)
+  target_link_dependencies(town_lighting_smoke PRIVATE libdevilutionx)
+  add_executable(town_first_person_input_smoke tools/town_first_person_input_smoke.cpp)
+  add_executable(town_camera_collision_smoke tools/town_camera_collision_smoke.cpp)
+  target_link_dependencies(town_camera_collision_smoke PRIVATE libdevilutionx)
+  target_link_dependencies(town_first_person_input_smoke PRIVATE libdevilutionx)
+  add_executable(town_first_person_runtime_smoke tools/town_first_person_runtime_smoke.cpp)
+  target_link_dependencies(town_first_person_runtime_smoke PRIVATE libdevilutionx)
+  add_executable(town_view_smoke tools/town_view_smoke.cpp)
+  target_link_dependencies(town_view_smoke PRIVATE libdevilutionx)
+  add_executable(music_selection_smoke tools/music_selection_smoke.cpp)
+  target_link_dependencies(music_selection_smoke PRIVATE libdevilutionx)
+  add_executable(music_playback_smoke tools/music_playback_smoke.cpp)
+  target_link_dependencies(music_playback_smoke PRIVATE libdevilutionx)
+  add_executable(menu_presentation_smoke tools/menu_presentation_smoke.cpp)
+  target_link_dependencies(menu_presentation_smoke PRIVATE libdevilutionx)
+  add_executable(project_credits_smoke tools/project_credits_smoke.cpp)
+  target_link_dependencies(project_credits_smoke PRIVATE libdevilutionx)
+  add_executable(hud_runtime_smoke tools/hud_runtime_smoke.cpp)
+  target_link_dependencies(hud_runtime_smoke PRIVATE libdevilutionx)
+  add_executable(language_selection_smoke tools/language_selection_smoke.cpp)
+  target_link_dependencies(language_selection_smoke PRIVATE libdevilutionx)
+  add_executable(ingame_settings_smoke tools/ingame_settings_smoke.cpp)
+  target_link_dependencies(ingame_settings_smoke PRIVATE libdevilutionx)
+  if(MSVC)
+    target_compile_options(town_lighting_smoke PRIVATE /EHsc)
+    target_compile_options(town_first_person_input_smoke PRIVATE /EHsc)
+    target_compile_options(town_camera_collision_smoke PRIVATE /EHsc)
+    target_compile_options(town_first_person_runtime_smoke PRIVATE /EHsc)
+    target_compile_options(town_view_smoke PRIVATE /EHsc)
+    target_compile_options(music_selection_smoke PRIVATE /EHsc)
+    target_compile_options(music_playback_smoke PRIVATE /EHsc)
+    target_compile_options(menu_presentation_smoke PRIVATE /EHsc)
+    target_compile_options(project_credits_smoke PRIVATE /EHsc)
+    target_compile_options(hud_runtime_smoke PRIVATE /EHsc)
+    target_compile_options(language_selection_smoke PRIVATE /EHsc)
+    target_compile_options(ingame_settings_smoke PRIVATE /EHsc)
+    target_link_options(town_view_smoke PRIVATE "/MAP:${CMAKE_CURRENT_BINARY_DIR}/town_view_smoke.map")
+  endif()
+endif()
+
 set(BIN_TARGET devilutionx)
+option(BUILD_DIABLO_LOGO_TOOL "Build the local animated Diablo 3D logo asset tool" OFF)
+if(BUILD_DIABLO_LOGO_TOOL)
+  add_executable(diablo_logo_build tools/diablo_logo_build.cpp)
+  if(NOT DEVILUTIONX_SCREENSHOT_FORMAT STREQUAL DEVILUTIONX_SCREENSHOT_FORMAT_PCX)
+    target_sources(diablo_logo_build PRIVATE Source/utils/surface_to_pcx.cpp)
+  endif()
+  target_link_dependencies(diablo_logo_build PRIVATE libdevilutionx)
+  if(MSVC)
+    target_compile_options(diablo_logo_build PRIVATE /EHsc)
+  endif()
+endif()
+
+option(BUILD_ANIMATED_LOGO_SMOKE "Build the headless custom animated logo diagnostic" OFF)
+if(BUILD_ANIMATED_LOGO_SMOKE)
+  add_executable(animated_logo_smoke tools/animated_logo_smoke.cpp)
+  target_link_dependencies(animated_logo_smoke PRIVATE libdevilutionx)
+  if(MSVC)
+    target_compile_options(animated_logo_smoke PRIVATE /EHsc)
+  endif()
+endif()
+
 if(NINTENDO_3DS)
   set(BIN_TARGET ${BIN_TARGET}.elf)
 elseif(TARGET_PLATFORM STREQUAL "dos")
@@ -397,6 +474,11 @@ else()
         COMMAND $<$<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>>:${CMAKE_STRIP}>
         ARGS $<TARGET_FILE:${BIN_TARGET}>)
     endif()
+endif()
+
+set(TRISTRAM_EXECUTABLE_NAME "" CACHE STRING "Optional executable name for the local Tristram prototype")
+if(WIN32 AND NOT UWP_LIB AND TRISTRAM_EXECUTABLE_NAME)
+  set_target_properties(${BIN_TARGET} PROPERTIES OUTPUT_NAME "${TRISTRAM_EXECUTABLE_NAME}")
 endif()
 
 if(TARGET_PLATFORM STREQUAL "dos")
@@ -426,12 +508,16 @@ if(EMSCRIPTEN)
     -sFORCE_FILESYSTEM=1
     -sALLOW_MEMORY_GROWTH=1
     -sASYNCIFY
+    -sMIN_WEBGL_VERSION=2
+    -sMAX_WEBGL_VERSION=2
+    -sDISABLE_EXCEPTION_CATCHING=0
+    "-sEXPORTED_RUNTIME_METHODS=['FS']"
     -lidbfs.js
     --shell-file ${CMAKE_CURRENT_SOURCE_DIR}/Packaging/emscripten/index.html
   )
 
   add_dependencies(${BIN_TARGET} hellfire_copied_assets)
-  # Add JavaScript to load MPQ files from the server directory at runtime
+  # Restore local archives/saves and await an explicit browser start.
   target_link_options(${BIN_TARGET} PRIVATE --pre-js ${CMAKE_CURRENT_SOURCE_DIR}/Packaging/emscripten/emscripten_pre.js)
 endif()
 
@@ -782,14 +868,8 @@ if(CPACK AND (APPLE OR BUILD_ASSETS_MPQ OR SRC_DIST))
   include(CPack)
 endif()
 
+resolve_target_link_dependencies()
 if(UWP_LIB)
   get_target_property(_linked_objects libdevilutionx LINKED_OBJECTS)
   target_sources(libdevilutionx PRIVATE ${_linked_objects})
-endif()
-
-# Private Release symbols; final Source identity is supplied after freeze.
-option(D3D_PRIVATE_SYMBOLS "Private Release symbols and frozen Source identity" OFF)
-include("${CMAKE_CURRENT_SOURCE_DIR}/CMake/D3DPrivateSymbols.cmake")
-if(D3D_PRIVATE_SYMBOLS)
-  d3d_enable_private_symbols(${BIN_TARGET})
 endif()

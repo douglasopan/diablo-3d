@@ -4,7 +4,6 @@
  * Implementation of save game functionality.
  */
 #include "loadsave.h"
-#include "engine/render/player_actor_native_hooks.hpp"
 
 #include <climits>
 #include <cstddef>
@@ -394,7 +393,6 @@ void LoadAndValidateItemData(LoadHelper &file, Item &item)
 
 void LoadPlayer(LoadHelper &file, Player &player)
 {
-	const NativePlayerActorActivationScope actorActivation(player);
 	player._pmode = static_cast<PLR_MODE>(file.NextLE<int32_t>());
 
 	for (size_t i = 0; i < PlayerWalkPathSizeForSaveGame; ++i) {

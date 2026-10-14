@@ -59,22 +59,6 @@ public:
 		return LoadLE16(&data_[4]);
 	}
 
-	// Extended replacement header: logical dimensions remain native. The HD
-	// texture is separate, so simulation clocks and existing frame selectors stay
-	// unchanged and a 3x bitmap does not turn its actor into a 3x giant.
-	[[nodiscard]] constexpr uint64_t hdFrameId() const
-	{
-		if ((LoadLE16(data_) != 20 && LoadLE16(data_) != 276) || LoadLE32(data_ + 16) != 0x48443344) return 0;
-		return LoadLE32(data_ + 8) | (static_cast<uint64_t>(LoadLE32(data_ + 12)) << 32);
-	}
-	[[nodiscard]] constexpr int hdScale() const { return hdFrameId() == 0 ? 1 : LoadLE16(data_ + 6); }
-	// A translation belongs to the owned sprite, not to the shared file frame.
-	// Different monster variants can therefore share an atlas without sharing TRN.
-	[[nodiscard]] constexpr const uint8_t *hdTranslation() const
-	{
-		return hdFrameId() != 0 && LoadLE16(data_) == 276 ? data_ + 20 : nullptr;
-	}
-
 	/**
 	 * @brief The raw pixel data (CL2 frame data).
 	 *

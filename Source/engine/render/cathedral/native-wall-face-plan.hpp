@@ -206,7 +206,7 @@ inline void CheckVertices(const std::array<Vertex, 3> &vertices)
 
 inline void ValidateSnapshot(const Snapshot &s)
 {
-	Require(SupportsRetailLevel(s.level, s.levelType, s.hellfire, s.setLevel, s.setLevelId), "Wall face plan requires supported retail L1 map");
+	Require(s.level == 1 && !s.hellfire && s.levelType == 1 && !s.setLevel && s.setLevelId == 0, "Wall face plan requires retail Cathedral1");
 	Require(s.gameRevision != 0 && s.minX == ActiveMin && s.minZ == ActiveMin && s.maxX == ActiveMax && s.maxZ == ActiveMax, "Wall face plan invalid epoch/active bounds");
 	Require(s.micros.size() <= 1379, "Wall face plan invalid MIN table size");
 	for (const auto &c : s.cells) Require(c.piece < 1379 && c.light <= 15 && c.object != -128, "Wall face plan invalid native cell");

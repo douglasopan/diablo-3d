@@ -17,7 +17,6 @@
 #endif
 
 #include "mpq/mpq_common.hpp"
-#include "engine/hd_sprite_pack.hpp"
 #include "utils/log.hpp"
 #include "utils/str_cat.hpp"
 
@@ -38,9 +37,6 @@ namespace devilution {
 
 OptionalOwnedClxSpriteList LoadPcxSpriteList(const char *filename, int numFramesOrFrameHeight, std::optional<uint8_t> transparentColor, SDL_Color *outPalette, bool logError)
 {
-	auto hd = LoadHdSpriteReplacement(filename, outPalette);
-	if (!hd) { if (logError) LogError("{}", hd.error()); return std::nullopt; }
-	if (*hd) return std::move(**hd).list();
 	char path[MaxMpqPathSize];
 	char *pathEnd = BufCopy(path, filename, DEVILUTIONX_PCX_EXT);
 	*pathEnd = '\0';

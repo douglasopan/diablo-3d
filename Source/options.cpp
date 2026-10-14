@@ -233,7 +233,6 @@ void LoadOptions()
 
 	// Preserve persisted IDs 2/3; migrate legacy diagnostic/unknown choices in memory.
 	// Normal SaveOptions calls persist this preference; loading never writes the INI.
-	options.Gameplay.storeUi.SetValue(StoreUi::VisualGrid);
 	const int gameplayCamera = static_cast<int>(NormalizeTownGameplayCameraMode(*options.Graphics.townViewCameraMode));
 	if (*options.Graphics.townViewCameraMode != gameplayCamera)
 		options.Graphics.townViewCameraMode.SetValue(gameplayCamera);
@@ -667,12 +666,7 @@ OptionEntryResolution::OptionEntryResolution()
 }
 void OptionEntryResolution::LoadFromIni(std::string_view category)
 {
-	// New desktop profiles start at 720p; explicit existing dimensions win.
-#ifdef _WIN32
-	size_ = { ini->getInt(category, "Width", 1280), ini->getInt(category, "Height", 720) };
-#else
 	size_ = { ini->getInt(category, "Width", DEFAULT_WIDTH), ini->getInt(category, "Height", DEFAULT_HEIGHT) };
-#endif
 }
 void OptionEntryResolution::SaveToIni(std::string_view category) const
 {
@@ -917,7 +911,12 @@ GraphicsOptions::GraphicsOptions()
     , brightness("Brightness Correction", OptionEntryFlags::Invisible, "Brightness Correction", "Brightness correction level.", 0)
     , zoom("Zoom", OptionEntryFlags::None, N_("Zoom"), N_("Zoom on when enabled."), false)
     , townViewStartIn3D("Start in 3D", OptionEntryFlags::None, N_("Start in 3D"), N_("Start each game in the 3D town view. Applies when starting or loading a game; F4 still switches views during play. Other levels use the original renderer until their 3D version is available."), true)
-    , townViewGpuRendering("3D GPU Rendering", OptionEntryFlags::None, N_("3D GPU Rendering"), N_("Use GPU acceleration for the 3D town view when available. Changes apply on the next frame; CPU rendering is used if unavailable."), true)
+    , townViewGpuRendering("3D GPU Rendering", OptionEntryFlags::None, N_("3D GPU Rendering"), N_("Use GPU acceleration for the 3D town view when available. Changes apply on the next frame; CPU rendering is used if unavailable."),
+#ifdef __EMSCRIPTEN__
+          true)
+#else
+          false)
+#endif
     , townViewFrustumCulling("3D Frustum Culling", OptionEntryFlags::None, N_("3D Frustum Culling"), N_("Skip buildings outside the 3D camera view without reducing model detail. Shadows remain active. Saved changes apply on the next frame."), true)
     , townViewAntialiasing("3D Edge Smoothing", OptionEntryFlags::None, N_("3D Edge Smoothing"), N_("Smooth edges in the 3D town view without resizing the interface. Requires more processing power."), false)
     , townViewCameraMode("3D Camera Mode", OptionEntryFlags::None, N_("3D Camera Mode"), N_("Choose Third Person or First Person for the saved gameplay camera. The mouse wheel zooms between them. Home restores Third Person for this session. Movement keys can be remapped; menus and chat keep their native controls."), 2,
@@ -928,12 +927,6 @@ GraphicsOptions::GraphicsOptions()
     , townViewCameraFov("3D Camera Field of View", OptionEntryFlags::None, N_("3D Camera Field of View"), N_("Set the vertical field of view in degrees for Third Person and First Person. Saved changes apply on the next frame."), 60, { 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100 })
     , townViewCameraSensitivity("3D Camera Sensitivity", OptionEntryFlags::None, N_("3D Camera Sensitivity"), N_("Set camera look sensitivity as a percentage of the default. Applies to middle mouse look and captured first-person mouse look on the next frame."), 100, { 25, 50, 75, 100, 125, 150, 175, 200 })
     , townViewHorizon("3D Horizon and Fog", OptionEntryFlags::None, N_("3D Horizon and Fog"), N_("Show decorative distant scenery and distance fog around the 3D town. Saved changes apply on the next frame. The horizon is visual only and adds no walkable terrain, collision or interactions."), true)
-    , townViewTimeOfDay("3D Town Time of Day", OptionEntryFlags::None, N_("3D Town Time of Day"), N_("Choose daylight, evening or night in Tristram. Saved changes apply immediately to the 3D world, without changing menus or dungeon lighting."), 1, {
-              { 0, N_("Day") }, { 1, N_("Evening") }, { 2, N_("Night") },
-          })
-    , smooth3dLighting("Smooth 3D Lighting", OptionEntryFlags::None, N_("Smooth 3D Lighting"), N_("Use continuous 3D light gradients and RGB world colors. Applies immediately without changing the original 2D view or menus."), true)
-    , hudTransparency("HUD Transparency", OptionEntryFlags::None, N_("HUD Transparency"), N_("Set one background transparency percentage for HUD modules and all floating panels. Text, item icons and gameplay controls stay readable. Applies immediately."), 30, {0,10,20,30,40,50,60,70,80,90,100})
-    , importedHudTheme("Imported HUD Theme", OptionEntryFlags::None, N_("Imported HUD Theme"), N_("Load this profile's validated hud-theme.ini images, fonts and colors when starting or loading a game. Invalid themes preserve the built-in visual theme and your layout."), false)
     , perPixelLighting("Per-pixel Lighting", OptionEntryFlags::None, N_("Per-pixel Lighting"), N_("Subtile lighting for smoother light gradients."), DEFAULT_PER_PIXEL_LIGHTING)
     , colorCycling("Color Cycling", OptionEntryFlags::None, N_("Color Cycling"), N_("Color cycling effect used for water, lava, and acid animation."), true)
     , alternateNestArt("Alternate nest art", OptionEntryFlags::OnlyHellfire | OptionEntryFlags::CantChangeInGame, N_("Alternate nest art"), N_("The game will use an alternative palette for Hellfire’s nest tileset."), false)
@@ -972,10 +965,6 @@ std::vector<OptionEntryBase *> GraphicsOptions::GetEntries()
 		&townViewCameraFov,
 		&townViewCameraSensitivity,
 		&townViewHorizon,
-		&townViewTimeOfDay,
-		&smooth3dLighting,
-		&hudTransparency,
-		&importedHudTheme,
 		&showFPS,
 		&perPixelLighting,
 		&colorCycling,
@@ -992,44 +981,46 @@ std::vector<OptionEntryBase *> GraphicsOptions::GetEntries()
 GameplayOptions::GameplayOptions()
     : OptionCategoryBase("Game", N_("Gameplay"), N_("Gameplay Settings"))
     , tickRate("Speed", OptionEntryFlags::Invisible, "Speed", "Gameplay ticks per second.", 20)
-    , runInTown("Run in Town", OptionEntryFlags::CantChangeInMultiPlayer, N_("Run in Town"), N_("Enable jogging/fast walking in town for Diablo and Hellfire. This option was introduced in the expansion."), true)
-    , grabInput("Grab Input", OptionEntryFlags::None, N_("Grab Input"), N_("When enabled mouse is locked to the game window."), true)
+    , runInTown("Run in Town", OptionEntryFlags::CantChangeInMultiPlayer, N_("Run in Town"), N_("Enable jogging/fast walking in town for Diablo and Hellfire. This option was introduced in the expansion."), false)
+    , grabInput("Grab Input", OptionEntryFlags::None, N_("Grab Input"), N_("When enabled mouse is locked to the game window."), false)
     , pauseOnFocusLoss("Pause Game When Window Loses Focus", OptionEntryFlags::None, N_("Pause Game When Window Loses Focus"), N_("When enabled, the game will pause when focus is lost."), true)
-    , theoQuest("Theo Quest", OptionEntryFlags::CantChangeInGame | OptionEntryFlags::OnlyHellfire, N_("Theo Quest"), N_("Enable Little Girl quest."), true)
-    , cowQuest("Cow Quest", OptionEntryFlags::CantChangeInGame | OptionEntryFlags::OnlyHellfire, N_("Cow Quest"), N_("Enable Jersey's quest. Lester the farmer is replaced by the Complete Nut."), true)
+    , theoQuest("Theo Quest", OptionEntryFlags::CantChangeInGame | OptionEntryFlags::OnlyHellfire, N_("Theo Quest"), N_("Enable Little Girl quest."), false)
+    , cowQuest("Cow Quest", OptionEntryFlags::CantChangeInGame | OptionEntryFlags::OnlyHellfire, N_("Cow Quest"), N_("Enable Jersey's quest. Lester the farmer is replaced by the Complete Nut."), false)
     , friendlyFire("Friendly Fire", OptionEntryFlags::CantChangeInMultiPlayer, N_("Friendly Fire"), N_("Allow arrow/spell damage between players in multiplayer even when the friendly mode is on."), true)
-    , multiplayerFullQuests("MultiplayerFullQuests", OptionEntryFlags::CantChangeInMultiPlayer, N_("Full quests in Multiplayer"), N_("Enables the full/uncut singleplayer version of quests."), true)
-    , testBard("Test Bard", OptionEntryFlags::CantChangeInGame | OptionEntryFlags::OnlyHellfire, N_("Test Bard"), N_("Force the Bard character type to appear in the hero selection menu."), true)
-    , testBarbarian("Test Barbarian", OptionEntryFlags::CantChangeInGame | OptionEntryFlags::OnlyHellfire, N_("Test Barbarian"), N_("Force the Barbarian character type to appear in the hero selection menu."), true)
-    , experienceBar("Experience Bar", OptionEntryFlags::None, N_("Experience Bar"), N_("Experience Bar is added to the UI at the bottom of the screen."), true)
-    , showHealthValues("Show health values", OptionEntryFlags::None, N_("Show health values"), N_("Displays current / max health value on health globe."), true)
-    , showManaValues("Show mana values", OptionEntryFlags::None, N_("Show mana values"), N_("Displays current / max mana value on mana globe."), true)
-    , showMultiplayerPartyInfo("Show Multiplayer Party Information", OptionEntryFlags::CantChangeInMultiPlayer, N_("Show Party Information"), N_("Displays the health and mana of all connected multiplayer party members."), true)
-    , enemyHealthBar("Enemy Health Bar", OptionEntryFlags::None, N_("Enemy Health Bar"), N_("Enemy Health Bar is displayed at the top of the screen."), true)
-    , floatingInfoBox("Floating Item Info Box", OptionEntryFlags::None, N_("Floating Item Info Box"), N_("Displays item info in a floating box when hovering over an item."), true)
-    , autoGoldPickup("Auto Gold Pickup", OptionEntryFlags::None, N_("Auto Gold Pickup"), N_("Gold is automatically collected when in close proximity to the player."), true)
-    , autoElixirPickup("Auto Elixir Pickup", OptionEntryFlags::None, N_("Auto Elixir Pickup"), N_("Elixirs are automatically collected when in close proximity to the player."), true)
-    , autoOilPickup("Auto Oil Pickup", OptionEntryFlags::OnlyHellfire, N_("Auto Oil Pickup"), N_("Oils are automatically collected when in close proximity to the player."), true)
-    , autoPickupInTown("Auto Pickup in Town", OptionEntryFlags::None, N_("Auto Pickup in Town"), N_("Automatically pickup items in town."), true)
+    , multiplayerFullQuests("MultiplayerFullQuests", OptionEntryFlags::CantChangeInMultiPlayer, N_("Full quests in Multiplayer"), N_("Enables the full/uncut singleplayer version of quests."), false)
+    , testBard("Test Bard", OptionEntryFlags::CantChangeInGame | OptionEntryFlags::OnlyHellfire, N_("Test Bard"), N_("Force the Bard character type to appear in the hero selection menu."), false)
+    , testBarbarian("Test Barbarian", OptionEntryFlags::CantChangeInGame | OptionEntryFlags::OnlyHellfire, N_("Test Barbarian"), N_("Force the Barbarian character type to appear in the hero selection menu."), false)
+    , experienceBar("Experience Bar", OptionEntryFlags::None, N_("Experience Bar"), N_("Experience Bar is added to the UI at the bottom of the screen."), false)
+    , showHealthValues("Show health values", OptionEntryFlags::None, N_("Show health values"), N_("Displays current / max health value on health globe."), false)
+    , showManaValues("Show mana values", OptionEntryFlags::None, N_("Show mana values"), N_("Displays current / max mana value on mana globe."), false)
+    , showMultiplayerPartyInfo("Show Multiplayer Party Information", OptionEntryFlags::CantChangeInMultiPlayer, N_("Show Party Information"), N_("Displays the health and mana of all connected multiplayer party members."), false)
+    , enemyHealthBar("Enemy Health Bar", OptionEntryFlags::None, N_("Enemy Health Bar"), N_("Enemy Health Bar is displayed at the top of the screen."), false)
+    , floatingInfoBox("Floating Item Info Box", OptionEntryFlags::None, N_("Floating Item Info Box"), N_("Displays item info in a floating box when hovering over an item."), false)
+    , autoGoldPickup("Auto Gold Pickup", OptionEntryFlags::None, N_("Auto Gold Pickup"), N_("Gold is automatically collected when in close proximity to the player."), false)
+    , autoElixirPickup("Auto Elixir Pickup", OptionEntryFlags::None, N_("Auto Elixir Pickup"), N_("Elixirs are automatically collected when in close proximity to the player."), false)
+    , autoOilPickup("Auto Oil Pickup", OptionEntryFlags::OnlyHellfire, N_("Auto Oil Pickup"), N_("Oils are automatically collected when in close proximity to the player."), false)
+    , autoPickupInTown("Auto Pickup in Town", OptionEntryFlags::None, N_("Auto Pickup in Town"), N_("Automatically pickup items in town."), false)
     , autoEquipWeapons("Auto Equip Weapons", OptionEntryFlags::None, N_("Auto Equip Weapons"), N_("Weapons will be automatically equipped on pickup or purchase if enabled."), true)
-    , autoEquipArmor("Auto Equip Armor", OptionEntryFlags::None, N_("Auto Equip Armor"), N_("Armor will be automatically equipped on pickup or purchase if enabled."), true)
-    , autoEquipHelms("Auto Equip Helms", OptionEntryFlags::None, N_("Auto Equip Helms"), N_("Helms will be automatically equipped on pickup or purchase if enabled."), true)
-    , autoEquipShields("Auto Equip Shields", OptionEntryFlags::None, N_("Auto Equip Shields"), N_("Shields will be automatically equipped on pickup or purchase if enabled."), true)
-    , autoEquipJewelry("Auto Equip Jewelry", OptionEntryFlags::None, N_("Auto Equip Jewelry"), N_("Jewelry will be automatically equipped on pickup or purchase if enabled."), true)
+    , autoEquipArmor("Auto Equip Armor", OptionEntryFlags::None, N_("Auto Equip Armor"), N_("Armor will be automatically equipped on pickup or purchase if enabled."), false)
+    , autoEquipHelms("Auto Equip Helms", OptionEntryFlags::None, N_("Auto Equip Helms"), N_("Helms will be automatically equipped on pickup or purchase if enabled."), false)
+    , autoEquipShields("Auto Equip Shields", OptionEntryFlags::None, N_("Auto Equip Shields"), N_("Shields will be automatically equipped on pickup or purchase if enabled."), false)
+    , autoEquipJewelry("Auto Equip Jewelry", OptionEntryFlags::None, N_("Auto Equip Jewelry"), N_("Jewelry will be automatically equipped on pickup or purchase if enabled."), false)
     , randomizeQuests("Randomize Quests", OptionEntryFlags::CantChangeInGame, N_("Randomize Quests"), N_("Randomly selecting available quests for new games."), true)
-    , showMonsterType("Show Monster Type", OptionEntryFlags::None, N_("Show Monster Type"), N_("Hovering over a monster will display the type of monster in the description box in the UI."), true)
-    , showItemLabels("Show Item Labels", OptionEntryFlags::None, N_("Show Item Labels"), N_("Show labels for items on the ground when enabled."), true)
-    , autoRefillBelt("Auto Refill Belt", OptionEntryFlags::None, N_("Auto Refill Belt"), N_("Refill belt from inventory when belt item is consumed."), true)
-    , disableCripplingShrines("Disable Crippling Shrines", OptionEntryFlags::None, N_("Disable Crippling Shrines"), N_("When enabled Cauldrons, Fascinating Shrines, Goat Shrines, Ornate Shrines, Sacred Shrines and Murphy's Shrines are not able to be clicked on and labeled as disabled."), true)
-    , quickCast("Quick Cast", OptionEntryFlags::None, N_("Quick Cast"), N_("Spell hotkeys instantly cast the spell, rather than switching the readied spell."), true)
-    , numHealPotionPickup("Heal Potion Pickup", OptionEntryFlags::None, N_("Heal Potion Pickup"), N_("Number of Healing potions to pick up automatically."), 8, { 0, 1, 2, 4, 8, 16 })
-    , numFullHealPotionPickup("Full Heal Potion Pickup", OptionEntryFlags::None, N_("Full Heal Potion Pickup"), N_("Number of Full Healing potions to pick up automatically."), 8, { 0, 1, 2, 4, 8, 16 })
-    , numManaPotionPickup("Mana Potion Pickup", OptionEntryFlags::None, N_("Mana Potion Pickup"), N_("Number of Mana potions to pick up automatically."), 8, { 0, 1, 2, 4, 8, 16 })
-    , numFullManaPotionPickup("Full Mana Potion Pickup", OptionEntryFlags::None, N_("Full Mana Potion Pickup"), N_("Number of Full Mana potions to pick up automatically."), 8, { 0, 1, 2, 4, 8, 16 })
-    , numRejuPotionPickup("Rejuvenation Potion Pickup", OptionEntryFlags::None, N_("Rejuvenation Potion Pickup"), N_("Number of Rejuvenation potions to pick up automatically."), 8, { 0, 1, 2, 4, 8, 16 })
-    , numFullRejuPotionPickup("Full Rejuvenation Potion Pickup", OptionEntryFlags::None, N_("Full Rejuvenation Potion Pickup"), N_("Number of Full Rejuvenation potions to pick up automatically."), 8, { 0, 1, 2, 4, 8, 16 })
-    , storeUi("Store UI", OptionEntryFlags::None, N_("Store UI"), N_("User interface for stores"), StoreUi::VisualGrid,
+    , showMonsterType("Show Monster Type", OptionEntryFlags::None, N_("Show Monster Type"), N_("Hovering over a monster will display the type of monster in the description box in the UI."), false)
+    , showItemLabels("Show Item Labels", OptionEntryFlags::None, N_("Show Item Labels"), N_("Show labels for items on the ground when enabled."), false)
+    , autoRefillBelt("Auto Refill Belt", OptionEntryFlags::None, N_("Auto Refill Belt"), N_("Refill belt from inventory when belt item is consumed."), false)
+    , disableCripplingShrines("Disable Crippling Shrines", OptionEntryFlags::None, N_("Disable Crippling Shrines"), N_("When enabled Cauldrons, Fascinating Shrines, Goat Shrines, Ornate Shrines, Sacred Shrines and Murphy's Shrines are not able to be clicked on and labeled as disabled."), false)
+    , quickCast("Quick Cast", OptionEntryFlags::None, N_("Quick Cast"), N_("Spell hotkeys instantly cast the spell, rather than switching the readied spell."), false)
+    , numHealPotionPickup("Heal Potion Pickup", OptionEntryFlags::None, N_("Heal Potion Pickup"), N_("Number of Healing potions to pick up automatically."), 0, { 0, 1, 2, 4, 8, 16 })
+    , numFullHealPotionPickup("Full Heal Potion Pickup", OptionEntryFlags::None, N_("Full Heal Potion Pickup"), N_("Number of Full Healing potions to pick up automatically."), 0, { 0, 1, 2, 4, 8, 16 })
+    , numManaPotionPickup("Mana Potion Pickup", OptionEntryFlags::None, N_("Mana Potion Pickup"), N_("Number of Mana potions to pick up automatically."), 0, { 0, 1, 2, 4, 8, 16 })
+    , numFullManaPotionPickup("Full Mana Potion Pickup", OptionEntryFlags::None, N_("Full Mana Potion Pickup"), N_("Number of Full Mana potions to pick up automatically."), 0, { 0, 1, 2, 4, 8, 16 })
+    , numRejuPotionPickup("Rejuvenation Potion Pickup", OptionEntryFlags::None, N_("Rejuvenation Potion Pickup"), N_("Number of Rejuvenation potions to pick up automatically."), 0, { 0, 1, 2, 4, 8, 16 })
+    , numFullRejuPotionPickup("Full Rejuvenation Potion Pickup", OptionEntryFlags::None, N_("Full Rejuvenation Potion Pickup"), N_("Number of Full Rejuvenation potions to pick up automatically."), 0, { 0, 1, 2, 4, 8, 16 })
+    , storeUi("Store UI", OptionEntryFlags::None, N_("Store UI"), N_("User interface for stores"), StoreUi::Text,
           {
+              { StoreUi::Text, N_("Text-only list") },
+              { StoreUi::ListWithItemGraphics, N_("List with item graphics") },
               { StoreUi::VisualGrid, N_("Visual grid") },
           })
     , skipLoadingScreenThresholdMs("Skip loading screen threshold, ms", OptionEntryFlags::Invisible, "", "", 0)
@@ -1888,7 +1879,7 @@ ModOptions::ModEntry::ModEntry(std::string_view name, const ModManifest &manifes
     : name(name)
     , displayName(manifest.name.empty() ? std::string(name) : manifest.name)
     , description(BuildModDescription(manifest))
-    , enabled(this->name, OptionEntryFlags::RecreateUI, this->displayName.c_str(), this->description.c_str(), true)
+    , enabled(this->name, OptionEntryFlags::RecreateUI, this->displayName.c_str(), this->description.c_str(), false)
 {
 }
 

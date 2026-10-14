@@ -3,7 +3,6 @@
 #include <sol/sol.hpp>
 
 #include "DiabloUI/ui_flags.hpp"
-#include "control/d3d_hud.hpp"
 #include "engine/dx.h"
 #include "engine/render/text_render.hpp"
 #include "lua/metadoc.hpp"
@@ -17,9 +16,6 @@ sol::table LuaRenderModule(sol::state_view &lua)
 	LuaSetDocFn(table, "string", "(text: string, x: integer, y: integer)",
 	    "Renders a string at the given coordinates",
 	    [](std::string_view text, int x, int y) { DrawString(GlobalBackBuffer(), text, { x, y }); });
-	LuaSetDocFn(table, "hud_clock", "(text: string)",
-	    "Renders the existing clock using the profile-owned HUD layout",
-	    [](std::string_view text) { DrawD3dHudClock(GlobalBackBuffer(), text); });
 	LuaSetDocFn(table, "screen_width", "()",
 	    "Returns the screen width", []() { return gnScreenWidth; });
 	LuaSetDocFn(table, "screen_height", "()",

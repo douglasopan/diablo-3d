@@ -13,7 +13,6 @@
 #include "control/d3d_hud_skin.hpp"
 #include "cursor.h"
 #include "engine/palette.h"
-#include "engine/hd_sprite_pack.hpp"
 #include "engine/render/town_presentation.hpp"
 #include "engine/render/town_view.hpp"
 #include "engine/render/ui_overlay_regions.hpp"
@@ -24,17 +23,16 @@ namespace devilution {
 namespace {
 
 constexpr uint8_t ContentKey = 1;
+constexpr unsigned BackplateOpacity = 184;
 constexpr size_t MaxPanels = 8;
 constexpr size_t MaxPixels = 16 * 1024 * 1024;
 
 struct PanelRecipe {
 	SDL_Rect bounds;
-	SDL_Rect destination {};
 	std::vector<uint8_t> backdrop;
 	std::vector<uint8_t> contents;
 	std::vector<uint8_t> opacity;
 	bool sealed = false;
-	std::vector<uint32_t> authoredItemColors;
 };
 
 SDL_Surface *Source = nullptr;
@@ -145,7 +143,7 @@ uint32_t ArtPixel(const PanelRecipe &panel, int x, int y, bool bright)
 	const int sy = slice.source.y + SliceCoordinate(y, panel.bounds.h, slice.source.h,
 	    slice.sourceMargins[1], slice.sourceMargins[3], slice.logicalMargins[1], slice.logicalMargins[3]);
 	const uint32_t color = image.pixels[static_cast<size_t>(sy) * image.width + sx];
-	uint32_t result = (((color >> 24) * GetD3dHudBackgroundOpacity() + 127) / 255) << 24;
+	uint32_t result = (((color >> 24) * BackplateOpacity + 127) / 255) << 24;
 	for (unsigned shift : { 0U, 8U, 16U }) {
 		const uint8_t channel = static_cast<uint8_t>(color >> shift);
 		result |= static_cast<uint32_t>(bright ? ArtBrightness[channel] : channel) << shift;
@@ -181,13 +179,12 @@ void BuildQuantizer(const std::array<SDL_Color, 256> &palette)
 
 void PaintCpu(const Surface &out, const PanelRecipe &panel, const std::array<SDL_Color, 256> &palette)
 {
-	MarkUiOverlayRect(out, panel.destination.x, panel.destination.y, panel.destination.w, panel.destination.h);
-	for (int y = 0; y < panel.destination.h; ++y) {
-		for (int x = 0; x < panel.destination.w; ++x) {
-			const int sx=x*panel.bounds.w/panel.destination.w,sy=y*panel.bounds.h/panel.destination.h;
-			const size_t local = static_cast<size_t>(sy) * panel.bounds.w + sx;
-			const Point point { panel.destination.x + x, panel.destination.y + y };
-			const uint32_t color = Over(ArtPixel(panel, sx, sy, false), PaletteColor(out[point], palette));
+	MarkUiOverlayRect(out, panel.bounds.x, panel.bounds.y, panel.bounds.w, panel.bounds.h);
+	for (int y = 0; y < panel.bounds.h; ++y) {
+		for (int x = 0; x < panel.bounds.w; ++x) {
+			const size_t local = static_cast<size_t>(y) * panel.bounds.w + x;
+			const Point point { panel.bounds.x + x, panel.bounds.y + y };
+			const uint32_t color = Over(ArtPixel(panel, x, y, false), PaletteColor(out[point], palette));
 			out[point] = Quantized[((((color >> 16) & 255U) >> 3) * 32 + (((color >> 8) & 255U) >> 3)) * 32 + ((color & 255U) >> 3)];
 			if (panel.sealed && panel.opacity[local] != 0) out[point] = panel.contents[local];
 		}
@@ -250,67 +247,32 @@ void SealD3dPanelBackplate(const Surface &out)
 			uint8_t &pixel = frame[{ panel.bounds.x + x, panel.bounds.y + y }];
 			panel.contents[i] = pixel;
 			panel.opacity[i] = pixel != ContentKey;
-			if (Materialized || pixel == ContentKey) pixel = panel.backdrop[i];
+			if (pixel == ContentKey) pixel = panel.backdrop[i];
 		}
 	}
 	panel.sealed = true; OpenPanel.reset();
-	if (Materialized) {
-		// A previous window may have forced indexed recovery. Capture this
-		// complete native tail too, restore its scratch, then scale it once.
-		BuildQuantizer(FramePalette);
-		Painting = true; PaintCpu(frame, panel, FramePalette); Painting = false;
-	}
 }
 
-void RecordD3dPanelItemRgba(const Surface &out, Point position, ClxSprite sprite)
-{
-	if (!Valid || !OpenPanel || Materialized || Recovering || Painting || !Matches(out) || sprite.hdFrameId() == 0) return;
-	auto rgba = LoadHdSpriteRgba(sprite);
-	if (!rgba || rgba->empty()) return;
-	auto &panel = Panels[*OpenPanel];
-	if (panel.authoredItemColors.empty()) {
-		try { panel.authoredItemColors.resize(static_cast<size_t>(panel.bounds.w) * panel.bounds.h); }
-		catch (const std::bad_alloc &) { return; }
-	}
-	++Counters.rgbItemRecords;
-	const int scale = sprite.hdScale(), width = sprite.width(), height = sprite.height();
-	for (int y = 0; y < height; ++y) {
-		const int py = position.y - height + 1 + y - panel.bounds.y;
-		if (py < 0 || py >= panel.bounds.h) continue;
-		for (int x = 0; x < width; ++x) {
-			const int px = position.x + x - panel.bounds.x;
-			if (px < 0 || px >= panel.bounds.w) continue;
-			const uint32_t color = (*rgba)[static_cast<size_t>(y * scale + scale / 2) * width * scale + x * scale + scale / 2];
-			if ((color >> 24) != 0) {
-				panel.authoredItemColors[static_cast<size_t>(py) * panel.bounds.w + px] = color;
-				++Counters.rgbItemPixels;
-			}
-		}
-	}
-}
-
-void DrawD3dPanelBackplate(const Surface &out, Rectangle bounds, Rectangle destination)
+void DrawD3dPanelBackplate(const Surface &out, Rectangle bounds)
 {
 	SealD3dPanelBackplate(out);
 	const int left = std::max(0, bounds.position.x), top = std::max(0, bounds.position.y);
 	const int right = static_cast<int>(std::min<int64_t>(out.w(), static_cast<int64_t>(bounds.position.x) + bounds.size.width));
 	const int bottom = static_cast<int>(std::min<int64_t>(out.h(), static_cast<int64_t>(bounds.position.y) + bounds.size.height));
 	if (right <= left || bottom <= top || !IsD3dHudSkinLoaded()) return;
-	PanelRecipe panel { { left, top, right - left, bottom - top }, {}, {}, {}, {}, false };
-	panel.destination=destination.size.width>0 ? SDL_Rect{destination.position.x,destination.position.y,destination.size.width,destination.size.height}:panel.bounds;
-	if(panel.destination.x<0 || panel.destination.y<0 || panel.destination.w<=0 || panel.destination.h<=0 || int64_t(panel.destination.x)+panel.destination.w>out.w() || int64_t(panel.destination.y)+panel.destination.h>out.h()) panel.destination=panel.bounds;
+	PanelRecipe panel { { left, top, right - left, bottom - top }, {}, {}, {}, false };
 	// Chat, controller navigation and virtual controls keep their existing
 	// native HUD geometry. Paint the same R1 art now, before that native tail,
 	// instead of restoring a world rectangle over its later controls.
 	if (!IsD3dHudEnabled()) ++Counters.compatibilityDeclines;
 	if (!RecorderMatches()) ++Counters.recorderDeclines;
-	if (!IsD3dHudEnabled() || !Matches(out) || !RecorderMatches() || Sealed || Panels.size() >= MaxPanels) {
+	if (!IsD3dHudEnabled() || !Matches(out) || !RecorderMatches() || Sealed || Materialized || Panels.size() >= MaxPanels) {
 		PaintImmediately(out, panel); return;
 	}
 	const SDL_Rect frameBounds { left + out.region.x - SourceRegion.x, top + out.region.y - SourceRegion.y, right - left, bottom - top };
 	// Unknown earlier UI is never erased by a world restoration. Use CPU R1
 	// for this frame before that UI becomes the new panel's backdrop.
-	if (!Materialized && panel.destination.w==panel.bounds.w && std::any_of(EarlierUi.begin(), EarlierUi.end(), [&](SDL_Rect region) { return Intersects(region, frameBounds); })) {
+	if (std::any_of(EarlierUi.begin(), EarlierUi.end(), [&](SDL_Rect region) { return Intersects(region, frameBounds); })) {
 		PaintImmediately(out, panel); return;
 	}
 	try {
@@ -330,7 +292,6 @@ void DrawD3dPanelBackplate(const Surface &out, Rectangle bounds, Rectangle desti
 	}
 	panel.bounds.x += out.region.x - SourceRegion.x;
 	panel.bounds.y += out.region.y - SourceRegion.y;
-	panel.destination.x+=out.region.x-SourceRegion.x;panel.destination.y+=out.region.y-SourceRegion.y;
 	Panels.push_back(std::move(panel)); OpenPanel = Panels.size() - 1; ++Counters.recipes;
 }
 
@@ -401,7 +362,7 @@ void SetD3dPanelRecoveryCursorCallbacks(void (*before)(const Surface &), void (*
 bool IsD3dPanelPresentationRecoveryPixel(Point point)
 {
 	if (!Recovering) return false;
-	for (const auto &panel : Panels) if (MakeRectangle(panel.bounds).contains(point) || MakeRectangle(panel.destination).contains(point)) return true;
+	for (const auto &panel : Panels) if (MakeRectangle(panel.bounds).contains(point)) return true;
 	return false;
 }
 bool IsD3dPanelPresentationRecovering() { return Recovering; }
@@ -419,7 +380,7 @@ void RecordD3dPanelNativeUiRect(const SDL_Rect &region)
 		return; // Opacity comes from the key scratch, never this bbox.
 	}
 	for (const auto &panel : Panels) {
-		if (Intersects(region, panel.bounds) || Intersects(region, panel.destination)) { RecoverD3dPanelPresentationFrame(FrameSurface()); return; }
+		if (Intersects(region, panel.bounds)) { RecoverD3dPanelPresentationFrame(FrameSurface()); return; }
 	}
 	if (EarlierUi.size() >= 4096) { RecoverD3dPanelPresentationFrame(FrameSurface()); Materialized = true; return; }
 	try { EarlierUi.push_back(region); } catch (const std::bad_alloc &) { RecoverD3dPanelPresentationFrame(FrameSurface()); Materialized = true; }
@@ -437,7 +398,6 @@ bool RecoverD3dPanelPresentationFrame(const Surface &out)
 	for (const auto &panel : Panels)
 		for (int y = 0; y < panel.bounds.h; ++y)
 			std::memcpy(frame.at(panel.bounds.x, panel.bounds.y + y), World.data() + static_cast<size_t>(panel.bounds.y + y) * frame.w() + panel.bounds.x, panel.bounds.w);
-	for(const auto &panel:Panels) for(int y=0;y<panel.destination.h;++y) std::memcpy(frame.at(panel.destination.x,panel.destination.y+y),World.data()+static_cast<size_t>(panel.destination.y+y)*frame.w()+panel.destination.x,panel.destination.w);
 	for (const auto &panel : Panels) PaintCpu(frame, panel, FramePalette);
 	if (CursorDrawn && AfterCursor != nullptr) AfterCursor(frame);
 	if (CursorDrawn)
@@ -468,15 +428,12 @@ bool PrepareD3dPanelPresentation(SDL_Renderer *renderer, SDL_Surface *source, SD
 		Composite.assign(World.size(), 0); WorldColors.resize(World.size());
 		for (size_t i = 0; i < World.size(); ++i) WorldColors[i] = PaletteColor(World[i], FrameSystemPalette);
 		for (const auto &panel : Panels) {
-			for (int y = 0; y < panel.destination.h; ++y) {
-				for (int x = 0; x < panel.destination.w; ++x) {
-					const int sx=x*panel.bounds.w/panel.destination.w,sy=y*panel.bounds.h/panel.destination.h;
-					const size_t local = static_cast<size_t>(sy) * panel.bounds.w + sx;
-					const size_t index = static_cast<size_t>(panel.destination.y + y) * SourceRegion.w + panel.destination.x + x;
-					Composite[index] = Over(ArtPixel(panel, sx, sy, true), Composite[index]);
+			for (int y = 0; y < panel.bounds.h; ++y) {
+				for (int x = 0; x < panel.bounds.w; ++x) {
+					const size_t local = static_cast<size_t>(y) * panel.bounds.w + x;
+					const size_t index = static_cast<size_t>(panel.bounds.y + y) * SourceRegion.w + panel.bounds.x + x;
+					Composite[index] = Over(ArtPixel(panel, x, y, true), Composite[index]);
 					if (panel.opacity[local]) Composite[index] = PaletteColor(panel.contents[local], FrameSystemPalette);
-					if (!panel.authoredItemColors.empty() && (panel.authoredItemColors[local] >> 24) != 0)
-						Composite[index] = Over(panel.authoredItemColors[local], Composite[index]);
 				}
 			}
 		}
@@ -531,17 +488,17 @@ D3dHudPresentationResult RenderD3dPanelPresentation(SDL_Renderer *renderer, SDL_
 	Prepared = false;
 	++Counters.drawAttempts;
 	if (Inject(D3dPanelPresentationFault::BeforeDraw)) return D3dHudPresentationResult::Inactive;
-	std::array<SDL_Rect, MaxPanels*2> regions {};
-	for (size_t i = 0; i < Panels.size(); ++i) {regions[i*2]=Panels[i].bounds;regions[i*2+1]=Panels[i].destination;}
+	std::array<SDL_Rect, MaxPanels> regions {};
+	for (size_t i = 0; i < Panels.size(); ++i) regions[i] = Panels[i].bounds;
 	if (townLayersPresented) {
-		if (!RestoreTownPresentationWorldRegions(renderer, std::span<const SDL_Rect> { regions.data(), Panels.size()*2 })) return D3dHudPresentationResult::Failed;
+		if (!RestoreTownPresentationWorldRegions(renderer, std::span<const SDL_Rect> { regions.data(), Panels.size() })) return D3dHudPresentationResult::Failed;
 	} else {
 		for (const auto &panel : Panels) {
 #ifdef USE_SDL3
-			const SDL_FRect bounds { static_cast<float>(panel.destination.x), static_cast<float>(panel.destination.y), static_cast<float>(panel.destination.w), static_cast<float>(panel.destination.h) };
+			const SDL_FRect bounds { static_cast<float>(panel.bounds.x), static_cast<float>(panel.bounds.y), static_cast<float>(panel.bounds.w), static_cast<float>(panel.bounds.h) };
 			if (!SDL_RenderTexture(renderer, WorldTexture.get(), &bounds, &bounds)) return D3dHudPresentationResult::Failed;
 #else
-			if (SDL_RenderCopy(renderer, WorldTexture.get(), &panel.destination, &panel.destination) < 0) return D3dHudPresentationResult::Failed;
+			if (SDL_RenderCopy(renderer, WorldTexture.get(), &panel.bounds, &panel.bounds) < 0) return D3dHudPresentationResult::Failed;
 #endif
 		}
 	}

@@ -66,32 +66,6 @@ const Rectangle &GetRightPanel()
 {
 	return RightPanel;
 }
-Rectangle GetPanelArea(UiPanels panel)
-{
-	Rectangle area;
-	switch (panel) {
-	case UiPanels::Quest:
-	case UiPanels::Character:
-	case UiPanels::Stash:
-		area = LeftPanel;
-		break;
-	case UiPanels::Spell:
-	case UiPanels::Inventory:
-		area = RightPanel;
-		break;
-	default:
-		return MainPanel;
-	}
-	if (IsD3dHudSelected()) {
-		// These defaults depend only on the legacy bases, never another open
-		// window's saved position. Profile overrides remain per identity.
-		if (panel == UiPanels::Quest)
-			area.position += Displacement { 40, 40 };
-		else if (panel == UiPanels::Spell)
-			area.position += Displacement { -40, 40 };
-	}
-	return ResolveD3dFloatingPanelArea(panel, area);
-}
 bool IsLeftPanelOpen()
 {
 	return CharFlag || QuestLogIsOpen || IsStashOpen || IsVisualStoreOpen;
@@ -260,7 +234,7 @@ bool IsLevelUpButtonVisible()
 	if (IsPlayerInStore() || IsStashOpen || IsVisualStoreOpen) {
 		return false;
 	}
-	if (QuestLogIsOpen && GetPanelArea(UiPanels::Quest).contains(GetMainPanel().position + Displacement { 0, -74 })) {
+	if (QuestLogIsOpen && GetLeftPanel().contains(GetMainPanel().position + Displacement { 0, -74 })) {
 		return false;
 	}
 
@@ -315,7 +289,7 @@ void FocusOnCharInfo()
 {
 	const Player &myPlayer = *MyPlayer;
 
-	if ((!IsD3dHudSelected() && invflag) || myPlayer._pStatPts <= 0)
+	if (invflag || myPlayer._pStatPts <= 0)
 		return;
 
 	// Find the first incrementable stat.
@@ -328,15 +302,12 @@ void FocusOnCharInfo()
 	if (stat == -1)
 		return;
 
-	const Point target = GetPanelPosition(UiPanels::Character, CharPanelButtonRect[stat].Center());
-	FocusD3dFloatingPanel(UiPanels::Character);
-	SetCursorPos(D3dPanelPointerToVisual(UiPanels::Character, target));
+	SetCursorPos(CharPanelButtonRect[stat].Center());
 }
 
 void OpenCharPanel()
 {
-	if (!IsD3dHudSelected())
-		QuestLogIsOpen = false;
+	QuestLogIsOpen = false;
 	CloseGoldWithdraw();
 	CloseStash();
 	CloseVisualStore();
@@ -368,7 +339,20 @@ void ToggleCharPanel()
 Point GetPanelPosition(UiPanels panel, Point offset)
 {
 	const Displacement displacement { offset.x, offset.y };
-	return GetPanelArea(panel).position + displacement;
+
+	switch (panel) {
+	case UiPanels::Main:
+		return GetMainPanel().position + displacement;
+	case UiPanels::Quest:
+	case UiPanels::Character:
+	case UiPanels::Stash:
+		return GetLeftPanel().position + displacement;
+	case UiPanels::Spell:
+	case UiPanels::Inventory:
+		return GetRightPanel().position + displacement;
+	default:
+		return GetMainPanel().position + displacement;
+	}
 }
 
 void DrawPanelBox(const Surface &out, SDL_Rect srcRect, Point targetPosition)
@@ -550,30 +534,17 @@ void CheckMainPanelButton()
 {
 	const int totalButtons = IsChatAvailable() ? TotalMpMainPanelButtons : TotalSpMainPanelButtons;
 
-	if (IsD3dHudSelected()) {
-		// Last painted utility wins an editable overlap. Level Up has its own
-		// dispatcher and must never latch every ordinary HUD button.
-		const auto owner = GetD3dHudElementAt(MousePosition);
-		for (int i = totalButtons - 1; i >= 0; --i) {
-			constexpr std::array<size_t,8> ids {5,8,9,10,6,7,11,12};
-			if ((!IsD3dHudLayoutActive() || owner == ids[i]) && GetD3dHudPanelButtonRect(i).contains(MousePosition)) {
-				SetMainPanelButtonDown(i);
-				return;
-			}
-		}
-	} else {
-		for (int i = 0; i < totalButtons; i++) {
-			const Rectangle button = GetD3dHudPanelButtonRect(i);
+	for (int i = 0; i < totalButtons; i++) {
+		const Rectangle button = GetD3dHudPanelButtonRect(i);
 
-			if (button.contains(MousePosition) || GetD3dHudLevelLabelRect().contains(MousePosition)) {
-				SetMainPanelButtonDown(i);
-			}
+		if (button.contains(MousePosition)) {
+			SetMainPanelButtonDown(i);
 		}
 	}
 
 	const Rectangle spellSelectButton = GetD3dHudSpellRect();
 
-	if (!SpellSelectFlag && (!IsD3dHudLayoutActive() || GetD3dHudElementAt(MousePosition) == 3) && spellSelectButton.contains(MousePosition)) {
+	if (!SpellSelectFlag && spellSelectButton.contains(MousePosition)) {
 		if ((SDL_GetModState() & SDL_KMOD_SHIFT) != 0) {
 			Player &myPlayer = *MyPlayer;
 			myPlayer._pRSpell = SpellID::Invalid;
@@ -590,14 +561,14 @@ void CheckMainPanelButtonDead()
 {
 	const Rectangle menuButton = GetD3dHudPanelButtonRect(PanelButtonMainmenu);
 
-	if ((!IsD3dHudLayoutActive() || GetD3dHudElementAt(MousePosition) == 10) && menuButton.contains(MousePosition)) {
+	if (menuButton.contains(MousePosition)) {
 		SetMainPanelButtonDown(PanelButtonMainmenu);
 		return;
 	}
 
 	const Rectangle chatButton = GetD3dHudPanelButtonRect(PanelButtonSendmsg);
 
-	if ((!IsD3dHudLayoutActive() || GetD3dHudElementAt(MousePosition) == 11) && chatButton.contains(MousePosition)) {
+	if (chatButton.contains(MousePosition)) {
 		SetMainPanelButtonDown(PanelButtonSendmsg);
 	}
 }
@@ -650,8 +621,7 @@ void CheckMainPanelButtonUp()
 			ToggleCharPanel();
 			break;
 		case PanelButtonQlog:
-			if (!IsD3dHudSelected())
-				CloseCharPanel();
+			CloseCharPanel();
 			CloseGoldWithdraw();
 			CloseStash();
 			CloseVisualStore();
@@ -682,8 +652,7 @@ void CheckMainPanelButtonUp()
 			gamemenuOff = false;
 			break;
 		case PanelButtonInventory:
-			if (!IsD3dHudSelected())
-				SpellbookFlag = false;
+			SpellbookFlag = false;
 			invflag = !invflag;
 			CloseGoldWithdraw();
 			CloseStash();
@@ -691,8 +660,7 @@ void CheckMainPanelButtonUp()
 			CloseGoldDrop();
 			break;
 		case PanelButtonSpellbook:
-			if (!IsD3dHudSelected())
-				CloseInventory();
+			CloseInventory();
 			CloseGoldDrop();
 			SpellbookFlag = !SpellbookFlag;
 			break;
@@ -742,7 +710,7 @@ void CheckLevelButton()
 
 	const Rectangle button = GetD3dHudLevelButtonRect();
 
-	if (!LevelButtonDown && (button.contains(MousePosition) || GetD3dHudLevelLabelRect().contains(MousePosition)))
+	if (!LevelButtonDown && button.contains(MousePosition))
 		LevelButtonDown = true;
 }
 
@@ -750,7 +718,7 @@ void CheckLevelButtonUp()
 {
 	const Rectangle button = GetD3dHudLevelButtonRect();
 
-	if (button.contains(MousePosition) || GetD3dHudLevelLabelRect().contains(MousePosition)) {
+	if (button.contains(MousePosition)) {
 		OpenCharPanel();
 	}
 	LevelButtonDown = false;

@@ -3,7 +3,6 @@
 #include <array>
 #include <cstdint>
 #include <expected>
-#include <span>
 #include <string>
 #include <vector>
 
@@ -52,8 +51,6 @@ struct D3dHudSkinOrbPlacement {
 std::expected<void, std::string> LoadD3dHudSkin();
 void FreeD3dHudSkin();
 bool IsD3dHudSkinLoaded();
-/** Immutable, already validated bytes, staged with the complete selected theme. */
-std::span<const uint8_t> GetD3dHudThemeFontBytes(std::string_view nativeResource);
 const D3dHudSkinImage &GetD3dHudSkinImage(D3dHudSkinPart part);
 const D3dHudSkinSlice &GetD3dHudSkinSlice(D3dHudSkinPart part);
 SDL_Rect GetD3dHudSkinOrbFrameSource();

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "engine/rectangle.hpp"
-#include "engine/clx_sprite.hpp"
 #include "engine/render/d3d_hud_presentation.hpp"
 #include "utils/sdl_compat.h"
 
@@ -14,9 +13,7 @@ void BeginD3dPanelPresentationFrame(const Surface &world);
 /** Begin a native content scratch. Index 1 is transparent; index 0 is opaque.
  * Compatibility HUD modes paint the same R1 art immediately, without scratch.
  */
-void DrawD3dPanelBackplate(const Surface &out, Rectangle bounds, Rectangle destination = {});
-/** Record only an open panel's item artwork; native pixels remain recovery data. */
-void RecordD3dPanelItemRgba(const Surface &out, Point position, ClxSprite sprite);
+void DrawD3dPanelBackplate(const Surface &out, Rectangle bounds);
 /** Close this panel after its native contents, including every early return. */
 void SealD3dPanelBackplate(const Surface &out);
 /** Close all panels before the late UI/cursor phase. */
@@ -49,7 +46,6 @@ void ResetD3dPanelPresentationResources();
 
 enum class D3dPanelPresentationFault { None, BeforeTextureAllocation, BeforeUpload, BeforeDraw, AfterWorldRestore };
 struct D3dPanelPresentationCounters {
-	uint64_t rgbItemRecords = 0, rgbItemPixels = 0;
 	uint64_t frames = 0, recipes = 0, recoveries = 0, outsideContentDeclines = 0;
 	uint64_t compatibilityDeclines = 0, recorderDeclines = 0;
 	uint64_t preparations = 0, allocationAttempts = 0, uploadAttempts = 0, drawAttempts = 0, injectedFailures = 0;

@@ -4,7 +4,6 @@
 
 #include "engine/load_file.hpp"
 #include "engine/random.hpp"
-#include "engine/render/town_scene_logic.hpp"
 #include "engine/world_tile.hpp"
 #include "game_mode.hpp"
 #include "levels/drlg_l1.h"
@@ -244,9 +243,6 @@ void DrlgTPass3()
 		FillTile(60, 70, 71);
 	}
 
-	// Optional authored native/visual pair. The validator stages the whole
-	// delta first; a missing or rejected asset keeps this native town intact.
-	(void)LoadApplyTownSceneLogicPatch();
 	InitTownPieces();
 }
 

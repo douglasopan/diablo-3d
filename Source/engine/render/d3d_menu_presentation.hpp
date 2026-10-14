@@ -21,8 +21,6 @@ void ResetD3dMainMenuResources();
 // fallback must already be complete before Record is called. Later native
 // sprites supply their CLX coverage even when they write the same index.
 void BeginD3dMainMenuUiFrame();
-void RecordD3dMainMenuSpriteRgba(const Surface &out, ClxSprite sprite, Point bottomLeft);
-bool CompositeD3dMainMenuSpriteRgba(SDL_Surface *surface, std::span<uint32_t> rgba, int fade);
 void RecordD3dMainMenuPortrait(const Surface &out, const HeroPortrait &portrait, const SDL_Rect &rect);
 void MarkD3dMainMenuNativeSprite(const Surface &out, ClxSprite sprite, Point topLeft);
 void RejectD3dMainMenuPortraitOverlap(const Surface &out, const SDL_Rect &rect);
