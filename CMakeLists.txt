@@ -782,6 +782,8 @@ if(CPACK AND (APPLE OR BUILD_ASSETS_MPQ OR SRC_DIST))
   include(CPack)
 endif()
 
+resolve_target_link_dependencies()
+
 if(UWP_LIB)
   get_target_property(_linked_objects libdevilutionx LINKED_OBJECTS)
   target_sources(libdevilutionx PRIVATE ${_linked_objects})
