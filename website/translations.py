@@ -944,6 +944,10 @@ TRANSLATIONS.update({
     'Fechar': 'Close',
 })
 
+TRANSLATIONS.update({
+    'Extraia todo o conteúdo do ZIP em uma nova pasta. Dentro da pasta extraída, abra Iniciar-Diablo3D.cmd para iniciar o jogo. Quando solicitado, selecione o DIABDAT.MPQ da sua instalação original de Diablo.': 'Extract the entire ZIP into a new folder. Inside the extracted folder, open Iniciar-Diablo3D.cmd to start the game. When prompted, choose DIABDAT.MPQ from your original Diablo installation.',
+})
+
 def translate_text(value: str) -> str:
     """Translate one complete string, preserving its surrounding whitespace."""
     if value in TRANSLATIONS:

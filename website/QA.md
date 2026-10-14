@@ -158,3 +158,7 @@ The #modelos showcase adds the Warrior in third person and the Short Sword/Buckl
 ## 2026-10-14 — Download único na página inicial
 
 Requisito de Douglas: substituir os dois botões de download por um único Download, abrindo um diálogo com GitHub Releases e Panvia Launcher (texto de atualização automática solicitado pelo responsável). Removido também o CTA de download repetido na faixa de apoio. Links diretos no diálogo; /download/ permanece como fallback sem JavaScript. PT/EN, abertura, fechar ×, Escape e retorno de foco verificados no navegador. Build e verificador de URLs/fragmentos/metadados passaram. Nenhuma alteração em releases, runtime ou assets do jogo.
+
+## 2026-10-14 — Arquivo de início junto ao download
+
+Novo requisito humano: indicar explicitamente Iniciar-Diablo3D.cmd na pasta extraída. Nome conferido no ZIP FULL4 público, que contém um único .cmd. Instruções PT/EN na página de download e no diálogo da home preservam seleção do DIABDAT.MPQ original. Não altera pacote, runtime ou qualificações de gameplay.
