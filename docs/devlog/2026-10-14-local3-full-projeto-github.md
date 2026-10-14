@@ -10,6 +10,8 @@ order: 27
 status: published
 ---
 
+**Atualização:** [Tristram selecionada agora incluída por preparação automática a partir do MPQ](/devlog/tristram-completa-mpq-warrior/). Use [o download atual](/download/).
+
 ## Um download com os arquivos de execução
 
 O primeiro ZIP da local3 era um checkpoint técnico e dependia de arquivos da montagem local. Preservamos esse registro e publicamos **local3 FULL**, com executável, bibliotecas, recursos públicos R17, os três packets próprios do Warrior e Clock.

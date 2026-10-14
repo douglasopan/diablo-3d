@@ -1,18 +1,21 @@
 {
-  "version": "v0.1.0-preview.local3-full3",
+  "version": "v0.1.0-preview.local3-tristram.full4",
   "archive": {
-    "url": "https://github.com/douglasopan/diablo-3d/releases/download/v0.1.0-preview.local3-full3/Diablo3D-Windows-local3-full3.zip",
-    "sha256": "73c3ba21ff341442261dca3a2b26c2e785cb10100899349c4207415245a16c16",
-    "bytes": 199874024
+    "url": "https://github.com/douglasopan/diablo-3d/releases/download/v0.1.0-preview.local3-tristram.full4/Diablo3D-Windows-local3-Tristram-full4.zip",
+    "sha256": "bfb0b4bcd39637cd775a928462edb72f903cf6824fceb4434ab00d9cc21f3264",
+    "bytes": 217684454
   },
   "sourceArchive": {
-    "url": "https://github.com/douglasopan/diablo-3d/releases/download/v0.1.0-preview.local3-full3/Diablo3D-local3-full3-corresponding-source.tar.gz",
-    "sha256": "ac671caeba5ee444cf1cde393e4b0a62cac7d4350cabd512ed5fd778142d2b95",
-    "bytes": 262400300
+    "url": "https://github.com/douglasopan/diablo-3d/releases/download/v0.1.0-preview.local3-tristram.full4/Diablo3D-local3-Tristram-full4-corresponding-source.tar.gz",
+    "sha256": "fca44f7372cb409899be91f710378309808b4f83f8938ccc933cf8713f2b3cf9",
+    "bytes": 279618731
   },
   "entrypoint": "Iniciar-Diablo3D.cmd",
-  "profileLocation": "%LOCALAPPDATA%/Diablo3D-local3-full/profile",
-  "requiredExternalData": "User-owned DIABDAT.MPQ only; not distributed",
-  "releaseUrl": "https://github.com/douglasopan/diablo-3d/releases/tag/v0.1.0-preview.local3-full3",
-  "publicAssemblyGameplayGate": "not run"
+  "profileLocation": "%LOCALAPPDATA%/Diablo3D-local3-Tristram/profile",
+  "requiredExternalData": "Original compatible retail DIABDAT.MPQ only",
+  "releaseUrl": "https://github.com/douglasopan/diablo-3d/releases/tag/v0.1.0-preview.local3-tristram.full4",
+  "selectedSceneRevision": "cardinal-exits-r1",
+  "runtimeFilesRecreatedExactly": 19,
+  "nativeLoaderGate": "PASS",
+  "manualGameplayGate": "not run"
 }

@@ -2,7 +2,7 @@
 
 # Diablo 3D · D3D
 
-**Latest Windows preview: [local3 FULL](https://github.com/douglasopan/diablo-3d/releases/tag/v0.1.0-preview.local3-full3).** Extract the ZIP and run `Iniciar-Diablo3D.cmd`; provide only `DIABDAT.MPQ` from your original copy. Executable, libraries, public R17 resources and own Warrior packets are bundled. Archive and fresh profile checks passed; manual gameplay qualification of this public assembly and performance remain pending.
+**Latest Windows preview: [local3 FULL](https://github.com/douglasopan/diablo-3d/releases/tag/v0.1.0-preview.local3-tristram.full4).** Extract the ZIP and run `Iniciar-Diablo3D.cmd`; provide only `DIABDAT.MPQ` from your original copy. Executable, libraries, public R17 resources and own Warrior packets are bundled. The selected Tristram scene is prepared automatically from your MPQ and verified against all 19 frozen runtime hashes; real scene/WorldPatch loading passed without fallback. Performance and manual gameplay testing remain pending. [English installation details](docs/TRISTRAM-PUBLIC-PACKAGE.en.md) / [Português](docs/TRISTRAM-PUBLIC-PACKAGE.pt-BR.md).
 
 Code, authoring tools, Godot editor, documentation, concepts and selected Warrior resources are public here. Unfinished local code is preserved separately in [the workspace snapshot](https://github.com/douglasopan/diablo-3d/tree/snapshot/workspace-20261014). See [publication scope](docs/PUBLIC-PROJECT-20261014.md).
 
