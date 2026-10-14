@@ -1,17 +1,18 @@
 {
-  "version": "v0.1.0-early-access.r17",
+  "version": "v0.1.0-preview.local3-full3",
   "archive": {
-    "url": "https://github.com/douglasopan/diablo-3d/releases/download/v0.1.0-early-access.r17/Diablo3D-Windows-x86_64-R17.zip",
-    "sha256": "57b600786a8cda6debb52137199af3480c0770cd7353f439be79d6b905161676",
-    "bytes": 189483255
+    "url": "https://github.com/douglasopan/diablo-3d/releases/download/v0.1.0-preview.local3-full3/Diablo3D-Windows-local3-full3.zip",
+    "sha256": "73c3ba21ff341442261dca3a2b26c2e785cb10100899349c4207415245a16c16",
+    "bytes": 199874024
   },
   "sourceArchive": {
-    "url": "https://github.com/douglasopan/diablo-3d/releases/download/v0.1.0-early-access.r17/Diablo3D-R17-corresponding-source.tar.gz",
-    "sha256": "7a29d178edaa4d283b4e34fc2159fcb8338c56157846734d01962c0d12fe0903",
-    "bytes": 49386009
+    "url": "https://github.com/douglasopan/diablo-3d/releases/download/v0.1.0-preview.local3-full3/Diablo3D-local3-full3-corresponding-source.tar.gz",
+    "sha256": "ac671caeba5ee444cf1cde393e4b0a62cac7d4350cabd512ed5fd778142d2b95",
+    "bytes": 262400300
   },
   "entrypoint": "Iniciar-Diablo3D.cmd",
-  "profileLocation": "%LOCALAPPDATA%/Diablo3D/profile",
-  "requiredExternalData": "User-owned DIABDAT.MPQ; not distributed",
-  "releaseUrl": "https://github.com/douglasopan/diablo-3d/releases/tag/v0.1.0-early-access.r17"
+  "profileLocation": "%LOCALAPPDATA%/Diablo3D-local3-full/profile",
+  "requiredExternalData": "User-owned DIABDAT.MPQ only; not distributed",
+  "releaseUrl": "https://github.com/douglasopan/diablo-3d/releases/tag/v0.1.0-preview.local3-full3",
+  "publicAssemblyGameplayGate": "not run"
 }

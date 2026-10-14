@@ -10,6 +10,8 @@ order: 26
 status: published
 ---
 
+**Update:** the complete local3 FULL package is now available; see [the download](/download/) and [publication record](/devlog/local3-full-projeto-github/). The technical checkpoint below remains historical.
+
 ## Preserving this point before moving forward
 
 We preserved **local3, dated October 14, 2026**, before continuing the next fixes. The executable, corresponding source and hashes identify the delivered build. The scene and private resources used in the test setup are also frozen locally; they are not part of the public download.

@@ -10,6 +10,8 @@ order: 26
 status: published
 ---
 
+**Atualização:** o pacote completo local3 FULL foi publicado; veja [o novo download](/download/) e [o registro da publicação](/devlog/local3-full-projeto-github/). O checkpoint técnico abaixo permanece histórico.
+
 ## Fechamos este ponto para continuar com segurança
 
 Preservamos a **local3, de 14 de outubro de 2026**, antes de continuar as próximas correções. O executável, a fonte correspondente e seus hashes identificam o que foi entregue. A cena e os recursos privados da montagem de teste também ficam congelados localmente; eles não vão para o download público.

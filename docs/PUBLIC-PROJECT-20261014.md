@@ -5,6 +5,6 @@ Source, CMake, dependências declaradas, traduções, ferramentas de autoria, ed
 
 Ferramentas e documentos em desenvolvimento foram preservados do workspace local; sua presença não comprova aceitação artística ou integração no executável. A simulação e os saves permanecem nativos.
 
-Os downloads estão em https://github.com/douglasopan/diablo-3d/releases . O checkpoint local3 original é um pacote técnico incompleto. O pacote completo com recursos próprios está em preparação e será identificado separadamente. Não confundir fonte publicada com instalação jogável verificada.
+Os downloads estão em https://github.com/douglasopan/diablo-3d/releases . O checkpoint local3 original é um pacote técnico incompleto. O pacote completo com recursos próprios foi publicado em https://github.com/douglasopan/diablo-3d/releases/tag/v0.1.0-preview.local3-full3. Não confundir fonte publicada com instalação jogável verificada.
 
 Não estão incluídos DIABDAT.MPQ, saves, credenciais, caches, dumps e extrações proprietárias. Recursos grandes publicados são distribuídos nos anexos das releases, não como blobs Git. O usuário fornece DIABDAT.MPQ de sua cópia original.

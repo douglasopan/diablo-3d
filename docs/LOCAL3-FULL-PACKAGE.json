@@ -1,0 +1,18 @@
+{
+  "version": "v0.1.0-preview.local3-full3",
+  "archive": {
+    "url": "https://github.com/douglasopan/diablo-3d/releases/download/v0.1.0-preview.local3-full3/Diablo3D-Windows-local3-full3.zip",
+    "sha256": "73c3ba21ff341442261dca3a2b26c2e785cb10100899349c4207415245a16c16",
+    "bytes": 199874024
+  },
+  "sourceArchive": {
+    "url": "https://github.com/douglasopan/diablo-3d/releases/download/v0.1.0-preview.local3-full3/Diablo3D-local3-full3-corresponding-source.tar.gz",
+    "sha256": "ac671caeba5ee444cf1cde393e4b0a62cac7d4350cabd512ed5fd778142d2b95",
+    "bytes": 262400300
+  },
+  "entrypoint": "Iniciar-Diablo3D.cmd",
+  "profileLocation": "%LOCALAPPDATA%/Diablo3D-local3-full/profile",
+  "requiredExternalData": "User-owned DIABDAT.MPQ only; not distributed",
+  "releaseUrl": "https://github.com/douglasopan/diablo-3d/releases/tag/v0.1.0-preview.local3-full3",
+  "publicAssemblyGameplayGate": "not run"
+}

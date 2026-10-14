@@ -1159,3 +1159,5 @@ EVIDENCE_EN.update({'/assets/captures/local3-warrior-tp-hud.webp': {'title': 'Wa
 
 # Checkpoint download invitation.
 TRANSLATIONS['Checkpoint local3 · download'] = 'Local3 checkpoint · download'
+
+TRANSLATIONS['Build completa local3 · download'] = 'Complete local3 build · download'

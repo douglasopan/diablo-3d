@@ -2,6 +2,10 @@
 
 # Diablo 3D · D3D
 
+**Latest Windows preview: [local3 FULL](https://github.com/douglasopan/diablo-3d/releases/tag/v0.1.0-preview.local3-full3).** Extract the ZIP and run `Iniciar-Diablo3D.cmd`; provide only `DIABDAT.MPQ` from your original copy. Executable, libraries, public R17 resources and own Warrior packets are bundled. Archive and fresh profile checks passed; manual gameplay qualification of this public assembly and performance remain pending.
+
+Code, authoring tools, Godot editor, documentation, concepts and selected Warrior resources are public here. Unfinished local code is preserved separately in [the workspace snapshot](https://github.com/douglasopan/diablo-3d/tree/snapshot/workspace-20261014). See [publication scope](docs/PUBLIC-PROJECT-20261014.md).
+
 A Vibecoded community project led by **Douglas Pan** to bring **almost the whole Diablo 1 game into 3D**, including its procedurally generated dungeon levels, built on [DevilutionX](https://github.com/diasurgical/devilutionX). The native simulation remains responsible for maps, seeds, combat, collision, items and saves. The visual layer adds 3D rendering and gameplay cameras while retaining original-view comparison. Tristram and a pilot of nine nearby regions in the first normal Cathedral level exist; reconstruction, loading/reentry and performance still need work.
 
 **[Architecture and execution guide](docs/PROJECT-EXECUTION.md)** — current stage, dependencies, completion criteria and ongoing work. Contributors and agents should consult this guide and [AGENTS.md](AGENTS.md) before implementing changes.
