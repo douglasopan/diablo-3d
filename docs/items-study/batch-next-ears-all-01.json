@@ -1,0 +1,201 @@
+{
+  "format": "d3d.item-concept-art",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "batchId": "2026-10-08-next-ears-all-01",
+  "catalogSha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d",
+  "scope": "Three actual class-appearance cursors plus explicit indirect base family. No redundant fourth generation.",
+  "generationTool": "built-in image_gen.imagegen",
+  "generationCalls": 3,
+  "postProcessing": "none; generated PNG bytes copied unchanged",
+  "originalGameImagesIncluded": false,
+  "visualApproval": false,
+  "runtimeInstalled": false,
+  "summary": {
+    "linkedProductionUnits": 4,
+    "newPNGs": 3,
+    "sharedProposals": 1,
+    "modelsGenerated": 0,
+    "runtimeIconsGenerated": 0
+  },
+  "entries": [
+    {
+      "productionId": "item.design.dynamic.ear-sorcerer",
+      "conceptId": "item.design.dynamic.ear-sorcerer.concept.r1",
+      "revision": "r1",
+      "kind": "turnaround",
+      "status": "candidate",
+      "image": "assets/concept-art/items/r1/ear-sorcerer-r1.png",
+      "sha256": "4c46494c44d0e4c1bf478c5d75c8d4ae34d1a42f27dfe65321fe8cb71fec2412",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate small trophy object modeling sheet.\nSubject: ONE EAR TROPHY SORCERER, item.design.dynamic.ear-sorcerer, cursor19. PRIVATE original sprite only silhouette/proportion/local-color reference. Reconstruct the small isolated ear-shaped old trophy with a narrow upright oval outline, deeply folded dark ochre-brown leathery surface/cartilage, dark inner fold, slightly tapered lower lobe, tiny dull silver-gray hook/earring dangling at the lower lobe. Preserve original dry muted brown and silver palette. This is a restrained old game item, not fresh injury. No blood drops, wound detail, flesh cross-section or body/head; the rear attachment surface remains dry and unobtrusive. Tiny dark reddish source region treated as dry discoloration, no gore.\nFive distinct views of SAME complete object: FRONT visible ear folds, true thin SIDE thickness, BACK true smooth convex reverse of cartilage (not a repeated concave front), full-size THREE-QUARTER and separate small new HD INVENTORY preview. Same size, earring attachment and outer silhouette throughout, reverse correctly mirrors asymmetry. No combined oblique/thumbnail. Hidden rear and depth conservative inference.\nRealistic worn dry leather-like organic material and dull metal, opaque charcoal-gray backdrop, neutral soft WHITE studio light. Labels only EAR TROPHY - SORCERER / FRONT / SIDE / BACK / 3-4 / ICON. No hands, character, scenery, chains or added skulls, magic, glow or watermark. Never paste, trace or display source pixels; ICON newly rendered HD from this same candidate.",
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 19,
+        "sha256": "f4bb03f5c7177166d0a635c6f0623538eda153c06ae56f8519933764f0cce82c"
+      },
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-preview"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "notes": "Outer silhouette, source local colors, class-specific metal fitting/no fitting and true convex rear visually inspected. Rear contour, thickness, organic material and exact fitting construction inferred; small red source region treated as dry discoloration. Three-quarter weakly oblique. Native class bits/name metadata remain unchanged. New HD thumbnail is a candidate preview, not runtime art."
+    },
+    {
+      "productionId": "item.design.dynamic.ear-warrior",
+      "conceptId": "item.design.dynamic.ear-warrior.concept.r1",
+      "revision": "r1",
+      "kind": "turnaround",
+      "status": "candidate",
+      "image": "assets/concept-art/items/r1/ear-warrior-r1.png",
+      "sha256": "caa88246fbe331fea3ce77c12d5efbec1593a22a9b0ea35f51190d15a909f16f",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate small trophy modeling sheet.\nSubject: ONE EAR TROPHY WARRIOR, item.design.dynamic.ear-warrior, cursor20. PRIVATE sprite only silhouette/proportion/local-color reference. Preserve the original fairly broad upright oval ear-shaped old trophy: dry golden-ochre/brown leathery cartilage, rounded outer rim, dark inner folds, broad simple lower lobe. NO earring or metal jewelry in this warrior variant. Restrained old game item; no fresh blood, wound detail, exposed flesh cross-section, head or body. Small dark reddish pixels near lower/back treated as old dry discoloration, no gore.\nFive distinct separated views of the SAME complete object: FRONT folded concave face, SIDE thin thickness, BACK true convex outer reverse with simple subtle cartilage contour rather than repeated concave folds, large THREE-QUARTER and fifth separate small new HD INVENTORY thumbnail. Exact same outer silhouette/shape/material, opposite face mirrors asymmetry. No combined oblique/thumbnail. Hidden rear and depth conservative inference.\nRealistic dry weathered organic leather-like material, opaque charcoal-gray background, neutral soft WHITE studio illumination. Labels only EAR TROPHY - WARRIOR / FRONT / SIDE / BACK / 3-4 / ICON. No earring, hands, character, scenery, added skulls, chains, magic, glow or watermark. Never paste, trace or display source pixels; thumbnail freshly rendered HD from this candidate.",
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 20,
+        "sha256": "5bf904d63ccb8f5c5a09b9948fa2ecf4c4ff7e66139ba39a3d682f65de856713"
+      },
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-preview"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "notes": "Outer silhouette, source local colors, class-specific metal fitting/no fitting and true convex rear visually inspected. Rear contour, thickness, organic material and exact fitting construction inferred; small red source region treated as dry discoloration. Three-quarter weakly oblique. Native class bits/name metadata remain unchanged. New HD thumbnail is a candidate preview, not runtime art."
+    },
+    {
+      "productionId": "item.design.dynamic.ear-rogue",
+      "conceptId": "item.design.dynamic.ear-rogue.concept.r1",
+      "revision": "r1",
+      "kind": "turnaround",
+      "status": "candidate",
+      "image": "assets/concept-art/items/r1/ear-rogue-r1.png",
+      "sha256": "a490301fa38b25ec29ede7942beeec03c09822b24b3d4bf0c1f072c1cf8ac46b",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate small trophy modeling sheet.\nSubject: ONE EAR TROPHY ROGUE, item.design.dynamic.ear-rogue, cursor21. PRIVATE sprite only silhouette/proportion/local-color reference. Preserve its slightly tilted elongated oval ear-shaped old trophy, muted dark ochre/olive brown dry leathery cartilage, rounded rim and dark folded inner surface, small GOLD-colored metal stud/ring at lower lobe (tiny visible yellow region), subtly tapered lower end. Keep its source shape distinct from Warrior's broad upright variant and Sorcerer's silver earring variant. No fresh blood, wound detail, exposed flesh cross-section, head or body; small dark reddish source area is dry discoloration only, no gore.\nFive separate whole-object views of SAME trophy: FRONT concave folded face, SIDE thin thickness, BACK true convex smooth outer reverse rather than copied inner folds, large THREE-QUARTER and separate small fresh HD INVENTORY thumbnail. All agree on outer shape, gold fitting attachment and material; opposite face mirrors asymmetry. Do not merge oblique and thumbnail. Depth/rear and metal fitting construction conservative inference.\nRealistic old dry organic leather-like material and dull gold, opaque charcoal-gray background, soft neutral WHITE studio light. Labels only EAR TROPHY - ROGUE / FRONT / SIDE / BACK / 3-4 / ICON. No hands, character, scenery, added jewelry beyond small source fitting, skulls, chains, magic, glow or watermark. Never copy/paste/trace/display private source pixels; ICON newly rendered HD from this same candidate.",
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 21,
+        "sha256": "8dee84e24cde3137be15563770cadb701ab748afcc36c6bc4951695ff3c803b5"
+      },
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-preview"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "notes": "Outer silhouette, source local colors, class-specific metal fitting/no fitting and true convex rear visually inspected. Rear contour, thickness, organic material and exact fitting construction inferred; small red source region treated as dry discoloration. Three-quarter weakly oblique. Native class bits/name metadata remain unchanged. New HD thumbnail is a candidate preview, not runtime art."
+    },
+    {
+      "productionId": "item.design.base.ear",
+      "conceptId": "item.design.base.ear.concept.r1",
+      "revision": "r1",
+      "kind": "family-sheet",
+      "status": "candidate",
+      "image": "assets/concept-art/items/r1/ear-warrior-r1.png",
+      "sha256": "caa88246fbe331fea3ce77c12d5efbec1593a22a9b0ea35f51190d15a909f16f",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate small trophy modeling sheet.\nSubject: ONE EAR TROPHY WARRIOR, item.design.dynamic.ear-warrior, cursor20. PRIVATE sprite only silhouette/proportion/local-color reference. Preserve the original fairly broad upright oval ear-shaped old trophy: dry golden-ochre/brown leathery cartilage, rounded outer rim, dark inner folds, broad simple lower lobe. NO earring or metal jewelry in this warrior variant. Restrained old game item; no fresh blood, wound detail, exposed flesh cross-section, head or body. Small dark reddish pixels near lower/back treated as old dry discoloration, no gore.\nFive distinct separated views of the SAME complete object: FRONT folded concave face, SIDE thin thickness, BACK true convex outer reverse with simple subtle cartilage contour rather than repeated concave folds, large THREE-QUARTER and fifth separate small new HD INVENTORY thumbnail. Exact same outer silhouette/shape/material, opposite face mirrors asymmetry. No combined oblique/thumbnail. Hidden rear and depth conservative inference.\nRealistic dry weathered organic leather-like material, opaque charcoal-gray background, neutral soft WHITE studio illumination. Labels only EAR TROPHY - WARRIOR / FRONT / SIDE / BACK / 3-4 / ICON. No earring, hands, character, scenery, added skulls, chains, magic, glow or watermark. Never paste, trace or display source pixels; thumbnail freshly rendered HD from this candidate.",
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "availability": "inferred-concept",
+        "notes": "Base Ear has no direct cursor. Preview uses warrior20 solely as explicit representative; actual class variants19/20/21 are linked separately."
+      },
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-preview"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "notes": "Explicit family reuse of three class studies. No fourth image generated; shared master/variant strategy pending review. Hero name and level are native metadata, not new meshes.",
+      "indirectFamilyReference": true,
+      "reusedFromProductionId": "item.design.dynamic.ear-warrior",
+      "generationCalls": 0,
+      "reuseProposal": true,
+      "identityGate": "Base Ear is a family, not a fourth graphic. Native class bits determine sorcerer19, warrior20 or rogue21. Do not force representative warrior appearance onto all trophies.",
+      "referenceStudies": [
+        {
+          "productionId": "item.design.dynamic.ear-sorcerer",
+          "conceptId": "item.design.dynamic.ear-sorcerer.concept.r1",
+          "image": "assets/concept-art/items/r1/ear-sorcerer-r1.png",
+          "sha256": "4c46494c44d0e4c1bf478c5d75c8d4ae34d1a42f27dfe65321fe8cb71fec2412",
+          "cursorId": 19,
+          "role": "native-class-variant-proposal"
+        },
+        {
+          "productionId": "item.design.dynamic.ear-warrior",
+          "conceptId": "item.design.dynamic.ear-warrior.concept.r1",
+          "image": "assets/concept-art/items/r1/ear-warrior-r1.png",
+          "sha256": "caa88246fbe331fea3ce77c12d5efbec1593a22a9b0ea35f51190d15a909f16f",
+          "cursorId": 20,
+          "role": "native-class-variant-proposal"
+        },
+        {
+          "productionId": "item.design.dynamic.ear-rogue",
+          "conceptId": "item.design.dynamic.ear-rogue.concept.r1",
+          "image": "assets/concept-art/items/r1/ear-rogue-r1.png",
+          "sha256": "a490301fa38b25ec29ede7942beeec03c09822b24b3d4bf0c1f072c1cf8ac46b",
+          "cursorId": 21,
+          "role": "native-class-variant-proposal"
+        }
+      ]
+    }
+  ]
+}

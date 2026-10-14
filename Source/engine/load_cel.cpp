@@ -11,6 +11,7 @@
 #endif
 
 #include "appfat.h"
+#include "engine/hd_sprite_pack.hpp"
 #include "mpq/mpq_common.hpp"
 #include "utils/status_macros.hpp"
 #include "utils/str_cat.hpp"
@@ -26,6 +27,9 @@ namespace devilution {
 
 std::expected<OwnedClxSpriteListOrSheet, std::string> LoadCelListOrSheetWithStatus(const char *pszName, PointerOrValue<uint16_t> widthOrWidths)
 {
+	auto hd = LoadHdSpriteReplacement(pszName);
+	if (!hd) return std::unexpected(hd.error());
+	if (*hd) return std::move(**hd);
 	char path[MaxMpqPathSize];
 	*BufCopy(path, pszName, DEVILUTIONX_CEL_EXT) = '\0';
 #ifdef UNPACKED_MPQS

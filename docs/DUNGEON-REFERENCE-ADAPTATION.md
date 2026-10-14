@@ -1,6 +1,6 @@
 # Dungeon reference adaptation — in progress
 
-Douglas Pan authorized this bounded adaptation on 11 October 2026. The public project remains non-commercial and free of charge. The habitual build remains b775; an experimental R3 floor/wall preview was delivered in a separate immutable snapshot/profile. The [2026.10.11-r1 checkpoint](CHECKPOINT-2026-10-11.md) distinguishes that preview, the private R4 candidate and the uncompiled clean C1 base. This publication changes documentation only and publishes no game binary.
+Douglas Pan authorized this bounded adaptation on 11 October 2026. The public project remains non-commercial and free of charge. The habitual build remains b775; the R3 preview is preserved. The [2026.10.11-r2 checkpoint](CHECKPOINT-2026-10-11.md) distinguishes those builds, the private R4 candidate and the freshly compiled clean C1 review **4391a5 / R26**, delivered separately for local testing. This document publishes no game binary.
 
 ## Attribution and source
 
@@ -37,7 +37,17 @@ No proprietary MPQ, extracted texture atlas, original music or personal save is 
 
 Tristram geometry, reference movement/camera/UI and a compass are outside this immediate adaptation. The separate clean base retains our own camera, input, movement, UI and Town source layers. Complete Cathedral materials, geometry, details and lighting remain the immediate milestone; moving files alone does not complete modularization. Other development fronts and the previous final-release candidate remain paused; HD and Shift/stamina preparations are deferred.
 
-## Evidence and remaining work
+## Current clean review — R26
+
+The clean candidate is compiled and sealed with its Source/build closure. Its separate review launcher verifies 228 payload files and uses a new Speed 32 / FOV 80 / Zoom 1 profile with the synthetic NativeLoadGate hero. Habitual b775, preview R3, human saves and selected support assets were preserved. Meshy stays OFF; no new model generation, HD pack, stamina or broad engine cleanup entered this increment.
+
+Common masonry, covered floor boundaries, textured stairs and an independent stone FP ceiling are implemented in this candidate. The native C1 light stand uses a closed 480-triangle volumetric proxy, with false surrounding corner geometry suppressed at its verified owner cell. Original flame pixels/animation are retained; coverage anchoring and uniform scale keep the flame above the bowl and below the ceiling, and body/flame share native visibility. This is bounded reconstruction, not final approved asset quality.
+
+**245,750 checks passed** in R26: real native NEW/load/reentry/1→2→1, save/load, composed map marks, first-refusal recovery, actual native held/released combat ticks in both cameras, native E loot transfer in TP, inventory and injected focus recovery, and RX 570 hardware world frames. Normal EXE gameplay/physical input, doors/triggers/ranged targets and sustained FPS still need review. Capture comparisons are bounded witnesses, not pixel-equivalence or human visual approval.
+
+The reference creates artificial walls in void cells. The observed far zero-piece cell (44,46) is outside native visibility and the nine-region pilot; leaving it unrendered preserves our admission/exploration contract. Do not copy that artificial far wall by revealing unexplored cells. Our camera, native lighting and simulation remain the authorities. Original reference source and attribution are unchanged; private camera-matched comparison copies are marked modifications.
+
+## Historical evidence and remaining work
 
 Private candidate checks, not a release claim:
 
@@ -50,4 +60,4 @@ Private candidate checks, not a release claim:
 
 A material-specific candidate reused two previously reproduced loader prerequisites: saved ground items may legitimately have zero animation timing; unused corpse slots may refer to artwork freed during a level change. The visual fingerprint accepts that native item state and reads only corpse slots referenced by the live map. It does not modify native item/corpse state or reset the camera.
 
-The next work is complete Cathedral visual adaptation and persistent level/frame/camera/input contracts on the isolated clean candidate, followed by the full functional/visual/performance matrix. Installation and binary publication require validation; preparation, pure tests and isolated hardware frames alone are insufficient. The [code map](CODE-ARCHITECTURE.md) and [audit](CODE-AUDIT.md) describe current owners and gaps.
+The earlier R3/R4 evidence above is preserved with its original limits; it does not describe the final R26 closure. The next work is review of the delivered normal candidate and remaining functional/visual/performance matrix, fixing reproduced defects in the same Cathedral queue. Broader installation/public release requires further validation; isolated hardware frames do not establish gameplay FPS. The [code map](CODE-ARCHITECTURE.md), [checkpoint](CHECKPOINT-2026-10-11.md) and [audit](CODE-AUDIT.md) describe owners, identities and remaining gaps.

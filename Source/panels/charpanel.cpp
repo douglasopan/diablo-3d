@@ -9,8 +9,12 @@
 #include <function_ref.hpp>
 
 #include "control/control.hpp"
+#include "control/d3d_floating_panels.hpp"
+#include "control/d3d_hud.hpp"
 #include "engine/load_clx.hpp"
 #include "engine/render/clx_render.hpp"
+#include "engine/render/d3d_panel_presentation.hpp"
+#include "engine/render/primitive_render.hpp"
 #include "engine/render/text_render.hpp"
 #include "panels/ui_panels.hpp"
 #include "player.h"
@@ -271,6 +275,22 @@ void DrawStatButtons(const Surface &out)
 
 std::expected<void, std::string> LoadCharPanel()
 {
+	const bool isSmallFontTall = IsSmallFontTall();
+	const int attributeHeadersY = isSmallFontTall ? 112 : 114;
+	for (const unsigned i : AttributeHeaderEntryIndices)
+		panelEntries[i].position.y = attributeHeadersY;
+	panelEntries[GoldHeaderEntryIndex].position.y = isSmallFontTall ? 105 : 106;
+
+	if (IsD3dHudSelected()) {
+		// Cache only the original static labels. Key 1 skips background pixels,
+		// while palette index 0 in their native black shadows remains opaque.
+		const OwnedSurface labels(SidePanelSize);
+		FillRect(labels, 0, 0, labels.w(), labels.h(), 1);
+		for (const auto &entry : panelEntries)
+			DrawShadowString(labels, entry);
+		Panel = SurfaceToClx(labels, 1, uint8_t { 1 });
+		return {};
+	}
 	ASSIGN_OR_RETURN(OptionalOwnedClxSpriteList background, LoadClxWithStatus("data\\charbg.clx"));
 	const OwnedSurface out((*background)[0].width(), (*background)[0].height());
 	RenderClxSprite(out, (*background)[0], { 0, 0 });
@@ -280,13 +300,6 @@ std::expected<void, std::string> LoadCharPanel()
 		ASSIGN_OR_RETURN(OwnedClxSpriteList boxLeft, LoadClxWithStatus("data\\boxleftend.clx"));
 		ASSIGN_OR_RETURN(OwnedClxSpriteList boxMiddle, LoadClxWithStatus("data\\boxmiddle.clx"));
 		ASSIGN_OR_RETURN(OwnedClxSpriteList boxRight, LoadClxWithStatus("data\\boxrightend.clx"));
-
-		const bool isSmallFontTall = IsSmallFontTall();
-		const int attributeHeadersY = isSmallFontTall ? 112 : 114;
-		for (const unsigned i : AttributeHeaderEntryIndices) {
-			panelEntries[i].position.y = attributeHeadersY;
-		}
-		panelEntries[GoldHeaderEntryIndex].position.y = isSmallFontTall ? 105 : 106;
 
 		for (auto &entry : panelEntries) {
 			if (entry.statDisplayFunc) {
@@ -308,6 +321,15 @@ void FreeCharPanel()
 void DrawChr(const Surface &out)
 {
 	const Point pos = GetPanelPosition(UiPanels::Character, { 0, 0 });
+	const bool floating = IsD3dHudSelected();
+	if (floating) {
+		DrawD3dFloatingPanelBody(out, UiPanels::Character);
+		DrawD3dFloatingPanelHeader(out, UiPanels::Character);
+		for (const auto &entry : panelEntries) {
+			if (entry.statDisplayFunc)
+				DrawD3dFloatingPanelFrame(out, { entry.position + Displacement { pos.x, pos.y }, { entry.length, PanelFieldHeight } });
+		}
+	}
 	RenderClxSprite(out, (*Panel)[0], pos);
 	for (auto &entry : panelEntries) {
 		if (entry.statDisplayFunc) {
@@ -320,6 +342,8 @@ void DrawChr(const Surface &out)
 		}
 	}
 	DrawStatButtons(out);
+	if (floating)
+		SealD3dPanelBackplate(out);
 }
 
 } // namespace devilution

@@ -1,0 +1,253 @@
+{
+  "format": "d3d.item-concept-art",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "scope": "Restoration batch: four individual physical-bottle candidates only. Global coverage, queue and selected revisions are not changed here.",
+  "catalogSha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d",
+  "generationTool": "built-in image_gen.imagegen",
+  "generationCalls": 4,
+  "postProcessing": "none; original generated PNG bytes copied unchanged after confirming each destination absent",
+  "originalGameImagesIncluded": false,
+  "visualApproval": false,
+  "runtimeInstalled": false,
+  "variantPolicy": "Não letra nem gera cada magia, capa ou rótulo individual. Estes registros cobrem somente os quatro frascos físicos nomeados.",
+  "summary": {
+    "conceptCandidatesInThisFile": 4,
+    "modelsGenerated": 0,
+    "runtimeIconsGenerated": 0
+  },
+  "entries": [
+    {
+      "productionId": "item.design.base.potion-of-full-healing",
+      "conceptId": "item.design.base.potion-of-full-healing.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-thumbnail"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "postProcessing": "none; original generated PNG bytes copied unchanged",
+      "image": "assets/concept-art/items/r1/potion-of-full-healing-r1.png",
+      "sha256": "f53279716428badc53a05b01e42fafba747eeeb81c85ef5d17376b5863049b6c",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "byteCount": 1863717,
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate modeling reference, not a runtime icon.\nInput image is ONLY the private original silhouette/color reference of Potion of Full Healing, item.design.base.potion-of-full-healing, ICURS_POTION_OF_FULL_HEALING 35. Reconstruct one coherent physical object from this image; do not substitute the tall rectangular regular Healing potion design.\nCreate a clean realistic HD turnaround board of the exact SAME squat ROUND-BELLIED glass bottle in FRONT, SIDE, BACK and THREE-QUARTER views plus a small NEW HD rendered inventory-composition thumbnail. Plain charcoal-gray backdrop and neutral soft studio light, whole objects widely spaced, restrained realistic material wear. Labels only POTION OF FULL HEALING / FRONT / SIDE / BACK / 3-4 / ICON.\nPreserve the reference's broad bulbous red-filled lower body, sloping shoulders to a short narrow dark neck, protruding dark burgundy stopper, pale dull-metal lip and ochre-gold loops/bands around the neck with a short hanging cord on one side. The body is squat and rounded, not square, not a tall rectangular flask. The red liquid is rich dark ruby with a physically flat fill surface and ordinary glass reflections; not glowing or magical. For the candidate infer clear slightly smoky glass, opaque burgundy cork and worn golden/ochre cord as plausible materials; their exact construction, unseen rear and thickness are inferred. Keep one consistent fill height, stopper shape, band count, knot/cord attachment, glass thickness and belly proportions across all views. BACK is the opposite face, so the side cord moves naturally to the opposite projected side rather than being a second bottle.\nThe ICON must be newly rendered HD from the SAME proposed bottle, never pasted original sprite pixels. No character/hand, label text on bottle, runes, spell lettering, ornate metal cage, extra gems, neon, scenery, large floor shadow or alternate variants. This physical bottle does not represent individual spell or label variants. Keep reference silhouette and colors more important than generic fantasy-potion styling.",
+      "referenceHash": "9e870842aef1fd7de57fca8e7ab269d530acebe15c1aefbc1fd1efc0f644caad",
+      "reference": {
+        "cursorId": 35,
+        "sha256": "9e870842aef1fd7de57fca8e7ab269d530acebe15c1aefbc1fd1efc0f644caad",
+        "availability": "local-private",
+        "notes": "Fonte mostra ventre amplo arredondado, líquido vermelho, pescoço curto, topo escuro avermelhado e voltas/faixas ocres com detalhe pendente lateral. Referência 6x inspecionada antes da chamada; pixels originais não foram incorporados à prancha."
+      },
+      "sourceViewCount": 1,
+      "variantScope": "Conceito do frasco físico ligado ao item; não cria nem letra magias, rótulos ou variantes individuais.",
+      "inferredAreas": [
+        "Vidro fumê, cortiça burgundy, aro metálico e corda trançada são leituras de material; metal, aro lateral e contas finais detalhadas não são comprovados pelo sprite.",
+        "Verso, espessura, volume esférico e fixação da corda são reconstruções."
+      ],
+      "coherenceReview": {
+        "status": "pending-review",
+        "coherentAcrossViewsVerified": false,
+        "observed": "Ventre arredondado, líquido rubi, stopper escuro, faixa/corda ocre e thumbnail HD novo presentes; não foi reutilizado o frasco retangular de Healing.",
+        "pendingIssues": [
+          "SIDE mostra uma projeção da corda muito próxima de FRONT; confirmar a rotação de 90° e a posição real da fixação.",
+          "BACK mostra trecho pendente aparentemente mais curto; reconciliar comprimento/ocultação, aro e contas entre vistas antes de modelar.",
+          "Revisar o grau de ornamentação inferida do aro/contas em relação à pequena referência original."
+        ]
+      },
+      "notes": "Conceito candidato individual. Verso/espessura e construção fina inferidos; rever os gates registrados antes do master 3D. Thumbnail novo HD é preview, não ícone runtime."
+    },
+    {
+      "productionId": "item.design.base.potion-of-full-mana",
+      "conceptId": "item.design.base.potion-of-full-mana.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-thumbnail"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "postProcessing": "none; original generated PNG bytes copied unchanged",
+      "image": "assets/concept-art/items/r1/potion-of-full-mana-r1.png",
+      "sha256": "ea1a4bb9f79ce69df83aa4cf3cfc870f2b85b315132e937c9cf156cadaa6ffcc",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "byteCount": 1806256,
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate physical-item modeling reference, not a runtime icon.\nInput image is the PRIVATE original ICURS_POTION_OF_FULL_MANA 0 for item.design.base.potion-of-full-mana. Use the actual visible silhouette and palette independently, not the regular Mana potion or a generic flask.\nCreate a clean realistic HD sheet of ONE SAME squat round-bellied glass bottle in FRONT, true SIDE, BACK and THREE-QUARTER views, plus a smaller NEW HD rendered inventory thumbnail of this same concept. Whole objects separated on charcoal-gray background, neutral soft studio illumination, restrained real glass/cord/stopper detail. Only labels POTION OF FULL MANA / FRONT / SIDE / BACK / 3-4 / ICON.\nPreserve the source's broad low rounded bulb, tapered shoulders to a short narrow dark neck, dark burgundy protruding stopper, pale metallic lip and ochre-gold neck loops with one short side cord. Most of the belly contains saturated deep COBALT BLUE liquid, ordinary glass highlights and a level horizontal fill surface; no magical emission. Bottle outline is rounded and squat, not square or tall. Clear slightly smoky glass, dark burgundy cork and gold/ochre cord/neck bands are proposed material interpretations; exact band construction, back and wall thickness are inferred.\nKeep identical proportions, band/cord arrangement, knot position, stopper, fill height and material identity across all views. Rotate one bottle for the views: the side shows its attachment from a genuine 90-degree orientation, and the back naturally reverses the projected side of the cord while retaining the same length and knots. Thumbnail is newly rendered realistic HD of this same object, never original source pixels.\nNo labels/runes/spell letters on the bottle, extra ornaments/gems, ornate metal cage, glow, neon, characters/hands, scenery, alternate designs, source pixel-art inset or invented individual magic variants. Keep the reference's silhouette, cobalt content and burgundy/ochre neck colors.",
+      "referenceHash": "3cbf7cdba5b172bfffc493719c8a0c139896ad55f8cf47a01ce1f127af33f161",
+      "reference": {
+        "cursorId": 0,
+        "sha256": "3cbf7cdba5b172bfffc493719c8a0c139896ad55f8cf47a01ce1f127af33f161",
+        "availability": "local-private",
+        "notes": "Fonte mostra ventre amplo arredondado, líquido azul-cobalto, pescoço curto, topo escuro avermelhado e voltas/faixas ocres com pendente lateral. Referência 6x inspecionada antes da chamada; pixels originais não foram incorporados à prancha."
+      },
+      "sourceViewCount": 1,
+      "variantScope": "Conceito do frasco físico ligado ao item; não cria nem letra magias, rótulos ou variantes individuais.",
+      "inferredAreas": [
+        "Vidro fumê, stopper de cortiça, corda e argola dourada são propostas a partir da cor, não identificação recuperada de materiais.",
+        "Parede de vidro, verso, profundidade, nó, argola e desgaste fino são reconstruções."
+      ],
+      "coherenceReview": {
+        "status": "pending-review",
+        "coherentAcrossViewsVerified": false,
+        "observed": "Silhueta arredondada e conteúdo cobalto preservados; SIDE desloca a fixação para o centro e BACK para o lado oposto, com thumbnail HD novo.",
+        "pendingIssues": [
+          "Reconciliar topologia e comprimento da corda/argola e número de voltas, inclusive no thumbnail, num volume único antes de modelar.",
+          "Comparar os reflexos azuis intensos com uma iluminação neutra real; a imagem não demonstra material não emissivo ou shader PBR.",
+          "Confirmar proporções, apoio e legibilidade na célula lógica nativa, sem alterar footprint."
+        ]
+      },
+      "notes": "Conceito candidato individual. Verso/espessura e construção fina inferidos; rever os gates registrados antes do master 3D. Thumbnail novo HD é preview, não ícone runtime."
+    },
+    {
+      "productionId": "item.design.base.potion-of-rejuvenation",
+      "conceptId": "item.design.base.potion-of-rejuvenation.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-thumbnail"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "postProcessing": "none; original generated PNG bytes copied unchanged",
+      "image": "assets/concept-art/items/r1/potion-of-rejuvenation-r1.png",
+      "sha256": "ff2ee6867576175de30fbfb02947c9bfacb8e0af4b3d47e4c74b4ce199a6cfb2",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "byteCount": 2072664,
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate modeling turnaround, not a runtime icon.\nInput image is the PRIVATE original ICURS_POTION_OF_REJUVENATION 37 for item.design.base.potion-of-rejuvenation. Use its real silhouette and colors, not a generic purple rejuvenation potion.\nProduce one clean realistic HD concept board of the exact SAME rectangular glass vial in FRONT, true SIDE, BACK and THREE-QUARTER views plus a small NEW HD inventory-composition thumbnail. Whole object visible in every view, separated on plain charcoal-gray background, neutral soft studio light. Only labels POTION OF REJUVENATION / FRONT / SIDE / BACK / 3-4 / ICON.\nSource identity: a compact flat-faced RECTANGULAR bottle with a body slightly taller than wide, modest rounded corners, almost square broad face, short angular/sloping shoulders to a low broad neck; small protruding dark burgundy/red-brown stopper and ochre-gold neck loops with a hanging cord down one side. Lower body contains distinctly YELLOW-OLIVE/chartreuse liquid, with pale silvery/gray glass highlights. Preserve the clear rectangular outline and olive-yellow content; no purple, magenta, pink or blue substitution. Candidate material interpretation is slightly smoky clear glass, yellow-olive liquid with ordinary refraction and flat level fill, red-brown cork and worn ochre cord/neck bands. Back, depth, knot/attachment and exact band construction are inferred. No glowing liquid.\nAll views are rotations of the same vial: FRONT and BACK same face dimensions; SIDE exposes plausible consistent shallow depth, not another wide front; side cord moves according to rotation with unchanged length/knots. Keep stopper/neck/fill height and band count coherent. The thumbnail is a newly rendered HD image of this same rectangular concept, never source pixel-art.\nNo lettering or spell labels on the vial, extra emblems/runes, gems, cagework, hands, scenery, alternate bottles or invented individual magic variants. Fine realistic wear only; no dramatic painted shadows or colored lighting. Preserve native silhouette and palette above generic fantasy conventions.",
+      "referenceHash": "7ed733faf685436ba4bd494268ec314c1fab833c078ef37cac0eaeb8d57272e2",
+      "reference": {
+        "cursorId": 37,
+        "sha256": "7ed733faf685436ba4bd494268ec314c1fab833c078ef37cac0eaeb8d57272e2",
+        "availability": "local-private",
+        "notes": "Fonte tem corpo retangular de frente quase quadrada, ombros curtos, stopper avermelhado, faixas ocres e líquido amarelo-oliva; não roxo. Referência 6x inspecionada antes da chamada; pixels originais não foram incorporados à prancha."
+      },
+      "sourceViewCount": 1,
+      "variantScope": "Conceito do frasco físico ligado ao item; não cria nem letra magias, rótulos ou variantes individuais.",
+      "inferredAreas": [
+        "Profundidade, verso, espessura, cantos arredondados, alça/nós e desgaste são reconstruções.",
+        "Vidro transparente, cortiça, corda e líquido amarelo-oliva são interpretações de material e conteúdo visual, sem identificação química."
+      ],
+      "coherenceReview": {
+        "status": "pending-review",
+        "coherentAcrossViewsVerified": false,
+        "observed": "Corpo retangular, perfil estreito, conteúdo amarelo-oliva, verso simples e thumbnail HD novo presentes. O padrão cromático foi lido da fonte.",
+        "pendingIssues": [
+          "Confirmar profundidade e raios de canto, continuidade da corda/nós e altura do conteúdo entre todas as vistas.",
+          "Revisar construção das faixas metálicas/corda e stopper em relação à fonte; microdetalhes são propostos.",
+          "Confirmar contraste do amarelo-oliva e legibilidade do thumbnail no tamanho lógico nativo."
+        ]
+      },
+      "notes": "Conceito candidato individual. Verso/espessura e construção fina inferidos; rever os gates registrados antes do master 3D. Thumbnail novo HD é preview, não ícone runtime."
+    },
+    {
+      "productionId": "item.design.base.potion-of-full-rejuvenation",
+      "conceptId": "item.design.base.potion-of-full-rejuvenation.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-thumbnail"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "postProcessing": "none; original generated PNG bytes copied unchanged",
+      "image": "assets/concept-art/items/r1/potion-of-full-rejuvenation-r1.png",
+      "sha256": "c4ed9ee2264bac66e4fc7717d193908c2a1338275c25a4876f9b60f12beedb0a",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "byteCount": 1832519,
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate physical-item modeling reference, not a runtime icon.\nInput image is the PRIVATE original ICURS_POTION_OF_FULL_REJUVENATION 33 for item.design.base.potion-of-full-rejuvenation. Reconstruct its own silhouette and palette, not the rounded Full Healing/Full Mana bottle and not the rectangular regular Rejuvenation bottle.\nMake a clean realistic HD board of ONE SAME small pear/teardrop-bellied flask with a distinctly LONG SLENDER NECK in FRONT, SIDE, BACK and THREE-QUARTER views plus a small NEW HD inventory-composition thumbnail. Whole object visible, separated on plain charcoal-gray backdrop, neutral soft studio illumination. Labels only POTION OF FULL REJUVENATION / FRONT / SIDE / BACK / 3-4 / ICON.\nPreserve the reference: narrow elongated smoky-gray glass neck above a modest tapered pear-shaped yellow-olive filled bulb, small rounded base, short ochre/gold wrap or bands near the upper neck with one hanging side cord, and a PALE GRAY rounded/faceted oval top feature. The top is gray/silvery, NOT the dark red cork used by other potions. Retain the slight organic/canted character of the neck rather than making a wide straight cylindrical bottle. Yellow-olive/chartreuse liquid and gray glass highlights are visible in the source; no purple/magenta/blue content. Use ordinary refraction, a level liquid surface and real non-emissive material. The exact pale-gray closure and neck-band construction are ambiguous: for this candidate propose a small worn pale-pewter oval stopper, ochre cord and smoky glass without claiming those are recovered facts. Back surfaces, thickness and fine cap details are inferred.\nAll five depictions must rotate the same object, with identical pear/neck proportions, gray stopper, collar/cord geometry, knot count and fill height. If the neck has a slight lean, BACK must show the opposite projected lean naturally. SIDE must be a real profile, with the same small bulb volume. Thumbnail is newly rendered detailed HD of this same flask; no original sprite pixels.\nNo red stopper, generic wide round full-potion bottle, square flask, extra cagework/runes/gems, spell lettering, labels on the glass, hands/characters, alternate variants, glowing liquid, colored illumination or scenery. No individually lettered magic or oil-label variants in this physical concept.",
+      "referenceHash": "145d32e37fdb4d24940ebc39723fd4f5c2d2901f17370e924dabf4e4c010eac8",
+      "reference": {
+        "cursorId": 33,
+        "sha256": "145d32e37fdb4d24940ebc39723fd4f5c2d2901f17370e924dabf4e4c010eac8",
+        "availability": "local-private",
+        "notes": "Fonte mostra corpo pequeno em pera/gota, pescoço comprido estreito, líquido amarelo-oliva, voltas ocres e uma forma cinza-clara oval no topo. Referência 6x inspecionada antes da chamada; pixels originais não foram incorporados à prancha."
+      },
+      "sourceViewCount": 1,
+      "variantScope": "Conceito do frasco físico ligado ao item; não cria nem letra magias, rótulos ou variantes individuais.",
+      "inferredAreas": [
+        "A forma cinza ambígua do topo foi interpretada como stopper oval de metal facetado; não comprova material, facetas, dimensões finas nem mecanismo de fechamento.",
+        "Verso, espessura, base de apoio, ramos da corda e pesos/contas finais são reconstruções."
+      ],
+      "coherenceReview": {
+        "status": "pending-review",
+        "coherentAcrossViewsVerified": false,
+        "observed": "Frasco em pera com pescoço longo, conteúdo amarelo-oliva e topo cinza, distinto dos full-potions arredondados de tampa vermelha; thumbnail HD novo.",
+        "pendingIssues": [
+          "Revisar tamanho/forma da tampa facetada e a leitura da forma cinza original antes do master.",
+          "A fonte sugere leve organicidade/inclinação do pescoço; a proposta é mais vertical e precisa de comparação de silhueta.",
+          "Reconciliar quantidade/comprimento dos dois trechos pendentes inferidos e seus nós entre vistas e thumbnail."
+        ]
+      },
+      "notes": "Conceito candidato individual. Verso/espessura e construção fina inferidos; rever os gates registrados antes do master 3D. Thumbnail novo HD é preview, não ícone runtime."
+    }
+  ]
+}

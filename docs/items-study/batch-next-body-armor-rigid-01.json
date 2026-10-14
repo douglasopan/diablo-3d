@@ -1,0 +1,418 @@
+{
+  "format": "d3d.item-concept-art",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "scope": "Sete identidades e seis gráficos de armadura rígida; estudos candidatos com limites de vistas explicitados.",
+  "catalogSha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d",
+  "generationTool": "built-in image_gen.imagegen",
+  "generationCalls": 6,
+  "originalGameImagesIncluded": false,
+  "visualApproval": false,
+  "runtimeInstalled": false,
+  "postProcessing": "none; original generated PNG bytes copied unchanged",
+  "summary": {
+    "conceptCandidatesInThisFile": 7,
+    "newImages": 6,
+    "familyReuses": 1,
+    "modelsGenerated": 0,
+    "runtimeIconsGenerated": 0
+  },
+  "entries": [
+    {
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-thumbnail"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "postProcessing": "none; original generated PNG bytes copied unchanged",
+      "productionId": "item.design.base.breast-plate",
+      "conceptId": "item.design.base.breast-plate.concept.r1",
+      "image": "assets/concept-art/items/r1/breast-plate-r1.png",
+      "sha256": "2f3a8be55743e455011b1148e5b0d0b0d693797119872cf1f30a23717b76bfff",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "byteCount": 2119717,
+      "prompt": "Use case: stylized-concept. Diablo 3D candidate physical armor study derived ONLY from attached private ICURS 153, item.design.base.breast-plate. Do not design from its name. Compact sleeveless dark gunmetal breastplate only, rounded upper chest with open neck, slim dull ochre-gold edging along neck and outer shoulders, vertical pale-silver center ridge broadening into a transverse pale silver band across mid-chest (T/cross-shaped structural relief), small bright ochre patch at upper center, black side panels, short silver-gray lower waist flare divided at center and edged ochre. Preserve this simple compact silhouette. No sleeves, helmet, legs or extra large pauldrons.\nClean realistic HD sheet with EXACTLY FIVE distinct complete separated depictions: four large FRONT, SIDE, BACK, 3-4 views in a row, plus a fifth smaller NEW HD inventory preview labeled ICON beneath/right. Do not combine 3-4 and ICON. Fit every source piece entirely in every view. Neutral soft studio light, charcoal-gray background, restrained candidate metal/leather/cloth textures, no painted floor shadow. EMPTY item pieces invisibly supported, no person, body, head, mannequin, stand, hands or flesh. SIDE true depth; BACK is the opposite face of SAME armor with corresponding parts correctly rotated and no invented crest. Preserve exact silhouette, open spaces, segment counts, gold/silver/red/black blocks and construction across all views and thumbnail. Hidden back panels, thickness, fasteners and material readings are cautious inferences. The small ICON must be newly painted realistic HD of same set, never source pixels or pasted sprite. No scene, magic powers, runes, labels on the object, added weapons, class redesign or rig. Art study only; articulation, class fitting and rigid/flexible mounting remain existing character contract gates.",
+      "referenceHash": "3e33ae374df788d0430b0d6ec38e5e52f3538885a439be7a1ab3b21addaa34b9",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 153,
+        "sha256": "3e33ae374df788d0430b0d6ec38e5e52f3538885a439be7a1ab3b21addaa34b9",
+        "notes": "Referência nativa 6x inspecionada antes da chamada. Fonte privada usada apenas para silhueta/cores; pixels não incorporados."
+      },
+      "sourceViewCount": 1,
+      "queueGroupId": "remaining-body-armor-base-design-rigid-01",
+      "inferredAreas": [
+        "Verso, espessura, construção e materiais propostos a partir de uma vista; não constituem geometria histórica recuperada."
+      ],
+      "coherenceReview": {
+        "status": "pending-review",
+        "coherentAcrossViewsVerified": false,
+        "observed": "Cinco representações; torso compacto, relevo prateado em T/cruz, áreas negras e bordas ocres preservados.",
+        "pendingIssues": [
+          "SIDE e quarta vista estão oblíquas próximas de perfis; confirmar seção do torso e orlas.",
+          "Patch ocre, rebites, couro lateral e verso liso são inferidos; não interpretar a cruz estrutural como emblema/poder."
+        ]
+      },
+      "notes": "Candidato sem aprovação. Thumbnail HD de estudo não é ícone runtime. Master/material, chão, rig/encaixe e legibilidade na grade lógica de 28px continuam pendentes."
+    },
+    {
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "concept-sheet",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-thumbnail"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "postProcessing": "none; original generated PNG bytes copied unchanged",
+      "productionId": "item.design.base.chain-mail",
+      "conceptId": "item.design.base.chain-mail.concept.r1",
+      "image": "assets/concept-art/items/r1/chain-mail-r1.png",
+      "sha256": "171ff2178c62dc0e60f3a3b6fa0f3014d320289da76fcad79b82f53fc325130b",
+      "dimensions": [
+        1774,
+        887
+      ],
+      "byteCount": 2591032,
+      "prompt": "Use case: stylized-concept. Diablo 3D candidate physical armor study derived ONLY from attached private ICURS 111, item.design.base.chain-mail. Do not design from its name. Dark steel-gray short-sleeved chainmail hauberk, visible irregular tiny pale ring highlights, ochre-gold collar trim and small ochre shoulder tabs, gold-edged sleeve ends, dark belt and rectangular ochre buckle, knee-length split skirt with ochre edging and subtle brown-red lining in center slit. Preserve textile-like linked dark metal and native shape; do not replace with broad plates.\nClean realistic HD sheet with EXACTLY FIVE distinct complete separated depictions: four large FRONT, SIDE, BACK, 3-4 views in a row, plus a fifth smaller NEW HD inventory preview labeled ICON beneath/right. Do not combine 3-4 and ICON. Fit every source piece entirely in every view. Neutral soft studio light, charcoal-gray background, restrained candidate metal/leather/cloth textures, no painted floor shadow. EMPTY item pieces invisibly supported, no person, body, head, mannequin, stand, hands or flesh. SIDE true depth; BACK is the opposite face of SAME armor with corresponding parts correctly rotated and no invented crest. Preserve exact silhouette, open spaces, segment counts, gold/silver/red/black blocks and construction across all views and thumbnail. Hidden back panels, thickness, fasteners and material readings are cautious inferences. The small ICON must be newly painted realistic HD of same set, never source pixels or pasted sprite. No scene, magic powers, runes, labels on the object, added weapons, class redesign or rig. Art study only; articulation, class fitting and rigid/flexible mounting remain existing character contract gates.",
+      "referenceHash": "8c59a7e443d19f169788aa06382f3ce46b6ce5c989ecf345cd03fc03bfb0204f",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 111,
+        "sha256": "8c59a7e443d19f169788aa06382f3ce46b6ce5c989ecf345cd03fc03bfb0204f",
+        "notes": "Referência nativa 6x inspecionada antes da chamada. Fonte privada usada apenas para silhueta/cores; pixels não incorporados."
+      },
+      "sourceViewCount": 1,
+      "queueGroupId": "remaining-body-armor-base-design-rigid-01",
+      "inferredAreas": [
+        "Verso, espessura, construção e materiais propostos a partir de uma vista; não constituem geometria histórica recuperada."
+      ],
+      "coherenceReview": {
+        "status": "incomplete-study",
+        "coherentAcrossViewsVerified": false,
+        "observed": "Paleta cinza/preta, mangas curtas, guarnições ocres, cinturão e saia fendida preservados; preview HD novo.",
+        "pendingIssues": [
+          "A quarta vista foi rotulada SIDE e repete o perfil oposto; não há 3-4 dedicada, portanto estudo incompleto.",
+          "Anéis ficaram muito definidos e brilho intenso; validar densidade/espessura/LOD e tecido flexível, sem modelar cada anel por padrão."
+        ]
+      },
+      "notes": "Candidato sem aprovação. Thumbnail HD de estudo não é ícone runtime. Master/material, chão, rig/encaixe e legibilidade na grade lógica de 28px continuam pendentes."
+    },
+    {
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-thumbnail"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "postProcessing": "none; original generated PNG bytes copied unchanged",
+      "productionId": "item.design.base.field-plate",
+      "conceptId": "item.design.base.field-plate.concept.r1",
+      "image": "assets/concept-art/items/r1/field-plate-r1.png",
+      "sha256": "87c76c5fadfc876cae6bf19b6e41dcefd8d8b4fec65efc68888b1d9cdd6c43fb",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "byteCount": 2154941,
+      "prompt": "Use case: stylized-concept. Diablo 3D candidate physical armor study derived ONLY from attached private ICURS 103, item.design.base.field-plate. Do not design from its name. Dark graphite steel torso and paired shoulders, bright silver center chest strip, gold/ochre angular border structure and conspicuous two gold ring/loop-like details high on chest near shoulders, short segmented shoulder/sleeve ends. Narrow dark belly outlined in ochre, paired dark-silver hip/thigh flaps, and a hanging center patch of small gray chainmail rings. Pale highlights and ochre borders only, no fantasy glow or extra engraving. Preserve the native rings and short compact armor set; no helmet, boots or full new legs.\nClean realistic HD sheet with EXACTLY FIVE distinct complete separated depictions: four large FRONT, SIDE, BACK, 3-4 views in a row, plus a fifth smaller NEW HD inventory preview labeled ICON beneath/right. Do not combine 3-4 and ICON. Fit every source piece entirely in every view. Neutral soft studio light, charcoal-gray background, restrained candidate metal/leather/cloth textures, no painted floor shadow. EMPTY item pieces invisibly supported, no person, body, head, mannequin, stand, hands or flesh. SIDE true depth; BACK is the opposite face of SAME armor with corresponding parts correctly rotated and no invented crest. Preserve exact silhouette, open spaces, segment counts, gold/silver/red/black blocks and construction across all views and thumbnail. Hidden back panels, thickness, fasteners and material readings are cautious inferences. The small ICON must be newly painted realistic HD of same set, never source pixels or pasted sprite. No scene, magic powers, runes, labels on the object, added weapons, class redesign or rig. Art study only; articulation, class fitting and rigid/flexible mounting remain existing character contract gates.",
+      "referenceHash": "e771030a0bdb936f131dd0e15c0c67192cc82b50a970cc3a49f6a8b14138a89f",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 103,
+        "sha256": "e771030a0bdb936f131dd0e15c0c67192cc82b50a970cc3a49f6a8b14138a89f",
+        "notes": "Referência nativa 6x inspecionada antes da chamada. Fonte privada usada apenas para silhueta/cores; pixels não incorporados."
+      },
+      "sourceViewCount": 1,
+      "queueGroupId": "remaining-body-armor-base-design-rigid-01",
+      "inferredAreas": [
+        "Verso, espessura, construção e materiais propostos a partir de uma vista; não constituem geometria histórica recuperada."
+      ],
+      "coherenceReview": {
+        "status": "pending-review",
+        "coherentAcrossViewsVerified": false,
+        "observed": "Cinco vistas; placas escuras, faixa prateada, dois círculos ocres, hip flaps e mail central preservados.",
+        "pendingIssues": [
+          "Aros, pontas e construção dorsal ficaram definidos por inferência; confirmar correspondência das partes entre frente/verso.",
+          "Confirmar abertura do pescoço, placas do quadril, escala/folgas com rig; Plate Mail compartilha exatamente este cursor, sem redesign pelo nome."
+        ]
+      },
+      "notes": "Candidato sem aprovação. Thumbnail HD de estudo não é ícone runtime. Master/material, chão, rig/encaixe e legibilidade na grade lógica de 28px continuam pendentes."
+    },
+    {
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "concept-sheet",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-thumbnail"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "postProcessing": "none; original generated PNG bytes copied unchanged",
+      "productionId": "item.design.base.full-plate-mail",
+      "conceptId": "item.design.base.full-plate-mail.concept.r1",
+      "image": "assets/concept-art/items/r1/full-plate-mail-r1.png",
+      "sha256": "897a9ce159405e2ad118338d89bf6c11e26c47d4cc053485aea2578dcd5364cf",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "byteCount": 2407356,
+      "prompt": "Use case: stylized-concept. Diablo 3D candidate physical armor study derived ONLY from attached private ICURS 151, item.design.base.full-plate-mail. Do not design from its name. Silver-gray plate armor SET from the source: rounded paired large shoulder plates with pointed outer layered flanges, tall pointed collar/upper chest projections, broad pale upper chest and darker rounded steel belly, short paired overlapping hip/thigh plates and central black chainmail patch. Paired empty elbow/forearm plates hang at the sides. Critically, the source also includes TWO SEPARATE silver shin/greave pieces below the torso, with a clear GAP; preserve them as detached matched inventory-set pieces in EVERY view and thumbnail, not new body parts. Mostly steel silver/gray, tiny dull ochre fastener touches only. No helmet, hands, skin, feet or added gold filigree. Keep torso and greave layout source-related, not complete character silhouette.\nClean realistic HD sheet with EXACTLY FIVE distinct complete separated depictions: four large FRONT, SIDE, BACK, 3-4 views in a row, plus a fifth smaller NEW HD inventory preview labeled ICON beneath/right. Do not combine 3-4 and ICON. Fit every source piece entirely in every view. Neutral soft studio light, charcoal-gray background, restrained candidate metal/leather/cloth textures, no painted floor shadow. EMPTY item pieces invisibly supported, no person, body, head, mannequin, stand, hands or flesh. SIDE true depth; BACK is the opposite face of SAME armor with corresponding parts correctly rotated and no invented crest. Preserve exact silhouette, open spaces, segment counts, gold/silver/red/black blocks and construction across all views and thumbnail. Hidden back panels, thickness, fasteners and material readings are cautious inferences. The small ICON must be newly painted realistic HD of same set, never source pixels or pasted sprite. No scene, magic powers, runes, labels on the object, added weapons, class redesign or rig. Art study only; articulation, class fitting and rigid/flexible mounting remain existing character contract gates.",
+      "referenceHash": "261a3d1128b93c734e742037b6b607f428c4e7b1f5d81c350546a233f852cbbe",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 151,
+        "sha256": "261a3d1128b93c734e742037b6b607f428c4e7b1f5d81c350546a233f852cbbe",
+        "notes": "Referência nativa 6x inspecionada antes da chamada. Fonte privada usada apenas para silhueta/cores; pixels não incorporados."
+      },
+      "sourceViewCount": 1,
+      "queueGroupId": "remaining-body-armor-base-design-rigid-01",
+      "inferredAreas": [
+        "Verso, espessura, construção e materiais propostos a partir de uma vista; não constituem geometria histórica recuperada."
+      ],
+      "coherenceReview": {
+        "status": "incomplete-study",
+        "coherentAcrossViewsVerified": false,
+        "observed": "Set prateado com ombreiras, antebraços separados, placas de quadril e grevas destacadas abaixo; thumbnail HD inclui grevas.",
+        "pendingIssues": [
+          "O inset ICON encobre parte da quarta vista inferior, impedindo verificar as duas grevas; estudo incompleto para modelagem.",
+          "SIDE mostra uma greva por oclusão plausível, mas quantidade/pares/pose precisam ser reconciliados em uma prancha futura.",
+          "Verso/fechos e articulação são inferidos; não fundir set a um corpo nem criar pés/mãos."
+        ]
+      },
+      "notes": "Candidato sem aprovação. Thumbnail HD de estudo não é ícone runtime. Master/material, chão, rig/encaixe e legibilidade na grade lógica de 28px continuam pendentes."
+    },
+    {
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "concept-sheet",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-thumbnail"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "postProcessing": "none; original generated PNG bytes copied unchanged",
+      "productionId": "item.design.base.gothic-plate",
+      "conceptId": "item.design.base.gothic-plate.concept.r1",
+      "image": "assets/concept-art/items/r1/gothic-plate-r1.png",
+      "sha256": "421cacb124a179b65ba5f5b35b3c8d037664799fb19b45abeff1dea164dcc944",
+      "dimensions": [
+        1774,
+        887
+      ],
+      "byteCount": 2335308,
+      "prompt": "Use case: stylized-concept. Diablo 3D candidate physical armor study derived ONLY from attached private ICURS 152, item.design.base.gothic-plate. Do not design from its name. Very dark steel/black torso with pale silver center-upper chest, high pointed collar edges and large thin outward-projecting gold/ochre shoulder flanges/spikes and layered wing-like pointed shoulder trims. Narrow black waist, ochre trim and paired elongated pointed dark hip/thigh side plates, central hanging gray chainmail patch. Preserve angular gold-edged silhouette and source gaps. No helmet, feet, limbs, fantasy aura or generic full plate redesign; restrained silver highlights and gold/ochre edge geometry.\nClean realistic HD sheet with EXACTLY FIVE distinct complete separated depictions: four large FRONT, SIDE, BACK, 3-4 views in a row, plus a fifth smaller NEW HD inventory preview labeled ICON beneath/right. Do not combine 3-4 and ICON. Fit every source piece entirely in every view. Neutral soft studio light, charcoal-gray background, restrained candidate metal/leather/cloth textures, no painted floor shadow. EMPTY item pieces invisibly supported, no person, body, head, mannequin, stand, hands or flesh. SIDE true depth; BACK is the opposite face of SAME armor with corresponding parts correctly rotated and no invented crest. Preserve exact silhouette, open spaces, segment counts, gold/silver/red/black blocks and construction across all views and thumbnail. Hidden back panels, thickness, fasteners and material readings are cautious inferences. The small ICON must be newly painted realistic HD of same set, never source pixels or pasted sprite. No scene, magic powers, runes, labels on the object, added weapons, class redesign or rig. Art study only; articulation, class fitting and rigid/flexible mounting remain existing character contract gates.",
+      "referenceHash": "276d993d51e7b02c0a068376119d9ddec38d051a5e4e6bde7c246449c2b49762",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 152,
+        "sha256": "276d993d51e7b02c0a068376119d9ddec38d051a5e4e6bde7c246449c2b49762",
+        "notes": "Referência nativa 6x inspecionada antes da chamada. Fonte privada usada apenas para silhueta/cores; pixels não incorporados."
+      },
+      "sourceViewCount": 1,
+      "queueGroupId": "remaining-body-armor-base-design-rigid-01",
+      "inferredAreas": [
+        "Verso, espessura, construção e materiais propostos a partir de uma vista; não constituem geometria histórica recuperada."
+      ],
+      "coherenceReview": {
+        "status": "incomplete-study",
+        "coherentAcrossViewsVerified": false,
+        "observed": "Paleta negra/prateada e ouro, ombros angulares, placas inferiores pontudas e mail central preservados.",
+        "pendingIssues": [
+          "BACK repete muito da placa frontal/aros e quarta vista é quase perfil; não demonstra um verso e 3-4 confiáveis, estudo incompleto.",
+          "Aros de peito, ornamentação, espessura e pontas podem exceder a fonte; revisar fidelidade antes de master/encaixe."
+        ]
+      },
+      "notes": "Candidato sem aprovação. Thumbnail HD de estudo não é ícone runtime. Master/material, chão, rig/encaixe e legibilidade na grade lógica de 28px continuam pendentes."
+    },
+    {
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "concept-sheet",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-thumbnail"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "postProcessing": "none; original generated PNG bytes copied unchanged",
+      "productionId": "item.design.base.ring-mail",
+      "conceptId": "item.design.base.ring-mail.concept.r1",
+      "image": "assets/concept-art/items/r1/ring-mail-r1.png",
+      "sha256": "44bd4ddf95fdf58db1faf775ee01a8136d89e6039dfef5bca8e92da6020f7dd1",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "byteCount": 2425947,
+      "prompt": "Use case: stylized-concept. Diablo 3D candidate physical armor study derived ONLY from attached private ICURS 154, item.design.base.ring-mail. Do not design from its name. A compact sleeveless dark armor/tunic with wide rounded black/graphite upper yoke edged ochre, LARGE sparse ochre ring shapes distributed on that upper yoke, warm rusty red-brown side/body cloth or leather panels, a dark center waist/yoke band also with large ochre rings and trim, flared short split skirt divided into black/graphite and red-brown panels with ochre edges and additional sparse large ring motifs. NOT a generic silver interlocking chainmail hauberk; preserve actual red/black/gold color blocking and big ring placements. No sleeves, helmet or legs.\nClean realistic HD sheet with EXACTLY FIVE distinct complete separated depictions: four large FRONT, SIDE, BACK, 3-4 views in a row, plus a fifth smaller NEW HD inventory preview labeled ICON beneath/right. Do not combine 3-4 and ICON. Fit every source piece entirely in every view. Neutral soft studio light, charcoal-gray background, restrained candidate metal/leather/cloth textures, no painted floor shadow. EMPTY item pieces invisibly supported, no person, body, head, mannequin, stand, hands or flesh. SIDE true depth; BACK is the opposite face of SAME armor with corresponding parts correctly rotated and no invented crest. Preserve exact silhouette, open spaces, segment counts, gold/silver/red/black blocks and construction across all views and thumbnail. Hidden back panels, thickness, fasteners and material readings are cautious inferences. The small ICON must be newly painted realistic HD of same set, never source pixels or pasted sprite. No scene, magic powers, runes, labels on the object, added weapons, class redesign or rig. Art study only; articulation, class fitting and rigid/flexible mounting remain existing character contract gates.",
+      "referenceHash": "53a608f776115f540d35065b3d1ec1e64362d373844452214c2b261deca7048c",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 154,
+        "sha256": "53a608f776115f540d35065b3d1ec1e64362d373844452214c2b261deca7048c",
+        "notes": "Referência nativa 6x inspecionada antes da chamada. Fonte privada usada apenas para silhueta/cores; pixels não incorporados."
+      },
+      "sourceViewCount": 1,
+      "queueGroupId": "remaining-body-armor-base-design-rigid-01",
+      "inferredAreas": [
+        "Verso, espessura, construção e materiais propostos a partir de uma vista; não constituem geometria histórica recuperada."
+      ],
+      "coherenceReview": {
+        "status": "incomplete-study",
+        "coherentAcrossViewsVerified": false,
+        "observed": "Grandes anéis ocres sobre painéis negros, áreas castanhas e saia split preservados; thumbnail HD novo.",
+        "pendingIssues": [
+          "Quarta vista próxima de outro perfil, sem 3-4 informativa; estudo incompleto.",
+          "Número/disposição de anéis no verso, studs adicionais e tecido castanho são inferidos; reconciliar topologia/cor antes de master."
+        ]
+      },
+      "notes": "Candidato sem aprovação. Thumbnail HD de estudo não é ícone runtime. Master/material, chão, rig/encaixe e legibilidade na grade lógica de 28px continuam pendentes."
+    },
+    {
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "family-sheet",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-thumbnail"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "postProcessing": "none; original generated PNG bytes copied unchanged",
+      "productionId": "item.design.base.plate-mail",
+      "conceptId": "item.design.base.plate-mail.concept.r1",
+      "image": "assets/concept-art/items/r1/field-plate-r1.png",
+      "sha256": "87c76c5fadfc876cae6bf19b6e41dcefd8d8b4fec65efc68888b1d9cdd6c43fb",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "byteCount": 2154941,
+      "prompt": "Use case: stylized-concept. Diablo 3D candidate physical armor study derived ONLY from attached private ICURS 103, item.design.base.field-plate. Do not design from its name. Dark graphite steel torso and paired shoulders, bright silver center chest strip, gold/ochre angular border structure and conspicuous two gold ring/loop-like details high on chest near shoulders, short segmented shoulder/sleeve ends. Narrow dark belly outlined in ochre, paired dark-silver hip/thigh flaps, and a hanging center patch of small gray chainmail rings. Pale highlights and ochre borders only, no fantasy glow or extra engraving. Preserve the native rings and short compact armor set; no helmet, boots or full new legs.\nClean realistic HD sheet with EXACTLY FIVE distinct complete separated depictions: four large FRONT, SIDE, BACK, 3-4 views in a row, plus a fifth smaller NEW HD inventory preview labeled ICON beneath/right. Do not combine 3-4 and ICON. Fit every source piece entirely in every view. Neutral soft studio light, charcoal-gray background, restrained candidate metal/leather/cloth textures, no painted floor shadow. EMPTY item pieces invisibly supported, no person, body, head, mannequin, stand, hands or flesh. SIDE true depth; BACK is the opposite face of SAME armor with corresponding parts correctly rotated and no invented crest. Preserve exact silhouette, open spaces, segment counts, gold/silver/red/black blocks and construction across all views and thumbnail. Hidden back panels, thickness, fasteners and material readings are cautious inferences. The small ICON must be newly painted realistic HD of same set, never source pixels or pasted sprite. No scene, magic powers, runes, labels on the object, added weapons, class redesign or rig. Art study only; articulation, class fitting and rigid/flexible mounting remain existing character contract gates.",
+      "referenceHash": "e771030a0bdb936f131dd0e15c0c67192cc82b50a970cc3a49f6a8b14138a89f",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 103,
+        "sha256": "e771030a0bdb936f131dd0e15c0c67192cc82b50a970cc3a49f6a8b14138a89f",
+        "notes": "Referência nativa 6x inspecionada antes da chamada. Fonte privada usada apenas para silhueta/cores; pixels não incorporados."
+      },
+      "sourceViewCount": 1,
+      "queueGroupId": "remaining-body-armor-base-design-rigid-01",
+      "inferredAreas": [
+        "Verso, espessura, construção e materiais propostos a partir de uma vista; não constituem geometria histórica recuperada."
+      ],
+      "coherenceReview": {
+        "status": "inherited-pending-review",
+        "coherentAcrossViewsVerified": false,
+        "observed": "Cinco vistas; placas escuras, faixa prateada, dois círculos ocres, hip flaps e mail central preservados.",
+        "pendingIssues": [
+          "Aros, pontas e construção dorsal ficaram definidos por inferência; confirmar correspondência das partes entre frente/verso.",
+          "Confirmar abertura do pescoço, placas do quadril, escala/folgas com rig; Plate Mail compartilha exatamente este cursor, sem redesign pelo nome."
+        ]
+      },
+      "notes": "Plate Mail e Field Plate compartilham ICURS_FIELD_PLATE 103 e a mesma referência/hash; reuso físico explícito, sem inventar malha por nome. Nenhuma nova chamada; herda inferências e gates da origem.",
+      "reusedFromProductionId": "item.design.base.field-plate",
+      "reusedFromConceptId": "item.design.base.field-plate.concept.r1",
+      "generationCalls": 0
+    }
+  ]
+}

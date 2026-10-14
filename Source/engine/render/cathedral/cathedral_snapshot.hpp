@@ -14,6 +14,15 @@ constexpr int ActiveMin = 16;
 constexpr int ActiveMax = 96; // Exclusive. Bounds do not claim every cell is walkable.
 constexpr int RegionSize = 8;
 constexpr uint8_t Solid = 1;
+constexpr uint8_t BlockLight = 4; // Native SOL bit; opaque masonry backing only.
+constexpr int SkeletonKingSetLevelId = 1; // Native SL_SKELKING; checked by capture.
+/** Retail L1 tileset: normal floors 1..4 and the explicitly admitted L1 set map.
+ * Quest association alone does not admit L2/L3 maps, arenas or Hellfire Crypt. */
+constexpr bool SupportsRetailLevel(int level, int type, bool hellfire, bool setLevel, int setLevelId)
+{
+	return level >= 1 && level <= 4 && type == 1 && !hellfire
+	    && (setLevel ? setLevelId == SkeletonKingSetLevelId : setLevelId == 0);
+}
 
 struct Cell {
 	uint16_t piece = 0; // Zero-based native dPiece, unlike the 1-based mega ID.
@@ -65,7 +74,7 @@ struct Snapshot {
 	bool hellfire = false;
 	int levelType = 1; // Native DTYPE_CATHEDRAL, kept as a scalar in this pure contract.
 	bool setLevel = false;
-	int setLevelId = 0; // Native SL_NONE is required by this pilot.
+	int setLevelId = 0; // Normalize inactive native enum; active SL_SKELKING is 1.
 	int minX = ActiveMin, minZ = ActiveMin, maxX = ActiveMax, maxZ = ActiveMax;
 	std::array<uint8_t, MegaSize * MegaSize> mega {};
 	std::array<Cell, GridSize * GridSize> cells {};

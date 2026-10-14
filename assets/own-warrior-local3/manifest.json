@@ -1,0 +1,21 @@
+{
+  "revision": "warrior-composed-body-r1",
+  "source": "Own authored actor packets; selected local3 revision preserved",
+  "files": [
+    {
+      "path": "assets/own-warrior-local3/buckler.d3d2",
+      "sha256": "45c84d2aeac7f160e6a4b362ffc91e1b6985276fb4c778cb11f5382be9bc738d",
+      "bytes": 1189251
+    },
+    {
+      "path": "assets/own-warrior-local3/short-sword.d3d2",
+      "sha256": "6a64e13b835e337d7d39c2a9cd2c5462c76c5bb0bfeb667d7a872ec301c35971",
+      "bytes": 504563
+    },
+    {
+      "path": "assets/own-warrior-local3/warrior-body.d3dactor",
+      "sha256": "48106d5b7d95200f70977a95f34a16d96c8ee0b404bfb354b4c672a3b3d9863d",
+      "bytes": 13771051
+    }
+  ]
+}

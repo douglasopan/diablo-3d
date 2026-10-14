@@ -1,0 +1,549 @@
+{
+  "format": "d3d.item-concept-art",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "batchId": "batch-next-headgear-unique-identity-all-01",
+  "scope": "Queue-group study fragment; candidate generation and explicit visual reuse only, never full-catalog completion or asset approval.",
+  "catalogSha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d",
+  "generationTool": "built-in image_gen.imagegen",
+  "generationCalls": 7,
+  "postProcessing": "none; generated PNG bytes copied unchanged",
+  "originalGameImagesIncluded": false,
+  "visualApproval": false,
+  "runtimeInstalled": false,
+  "registryAuthority": "assets/registry.json",
+  "summary": {
+    "productionUnits": 228,
+    "batchProductionUnits": 7,
+    "conceptCandidateEntries": 8,
+    "generatedImages": 7,
+    "reuseProposals": 1,
+    "blockedUnits": 0,
+    "modelsGenerated": 0,
+    "runtimeIconsGenerated": 0
+  },
+  "entries": [
+    {
+      "productionId": "item.design.unique.fool-s-crest",
+      "conceptId": "item.design.unique.fool-s-crest.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/fool-s-crest-r1.png",
+      "sha256": "e22f6e4268cc43bbe04eeffd94fb62f9d18f28480aee7141ae37f01d953eefec",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate object-modeling reference.\nInput image 1 is a PRIVATE original inventory sprite, used only to preserve recognizable silhouette, colors, material regions and distinctive details. Create NEW HD imagery throughout; never paste the sprite into any view or thumbnail.\nA clean technical board of the exact SAME single object in FRONT, SIDE, BACK, THREE-QUARTER and a small NEW HD INVENTORY thumbnail. All views must agree on geometry, proportions, material layout and distinctive details; back is the true reverse, not another front. Full object visible, generously spaced, plain charcoal-gray backdrop, neutral soft studio lighting, no colored illumination or glow, realistic restrained dark medieval materials and fine wear. No scene, body, face, hands, stand, exploded alternatives or extra props. Rear/hidden surfaces and absolute scale are proposed reconstruction; preserve visible source design. Thumbnail must be a new high-detail render of this same object, never pixel-art or the supplied sprite. Minimal labels: item name, FRONT, SIDE, BACK, 3/4, ICON.\nSubject: Fool's Crest; item.design.unique.fool-s-crest; native cursor 80.\nA snug medieval jester FOOL'S CREST cap/mask in alternating dark RED and muted BLUE cloth panels, TWO long drooping curved side lobes (red on viewer-left, blue on viewer-right) each ending in a small brass/gold bell/fitting. Preserve the central close-fitting red/blue forehead and two oval dark empty eye cutouts, separated by a narrow central fabric nose piece; the lower face is open/absent. No actual face or eyes inside, no smile, hair, additional third/fourth jester points or bright neon. Cloth folds and hidden seams are proposed.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "cursorId": 80,
+        "sha256": "1f074732d68421b3e3b738069cdc40cc0dde3db58fa6bd78d5993a66693e3a05",
+        "availability": "local-private",
+        "notes": "Licensed original inventory sprite inspected privately at nearest-neighbor 6x enlargement; no original pixels or file paths are included."
+      },
+      "referenceNativeSpriteSha256": "96b49bf925ca4c2308755dde3cfec3803cac47dca4380ea3efb96b8aabef2c24",
+      "referenceInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "viewsUsed": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-concept-thumbnail"
+      ],
+      "inferredParts": [
+        "Back and hidden surfaces",
+        "Thickness and absolute scale",
+        "Fine construction/material details unresolved by source pixels"
+      ],
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "sourceBaseIds": [
+        "item.base.050.helm"
+      ],
+      "sourceUniqueIds": [
+        "item.unique.fool-s-crest"
+      ],
+      "nativeIdentityPolicy": "Visual study only. Native item identities, unique powers, stats, affixes, saves and RNG are separate and unchanged.",
+      "identityGate": "Candidate design requires visual review and multiview reconciliation before master production.",
+      "notes": "Neutral-light candidate board. HD thumbnail is a new concept preview, not a final runtime icon. Hidden geometry is proposed reconstruction."
+    },
+    {
+      "productionId": "item.design.unique.gotterdamerung",
+      "conceptId": "item.design.unique.gotterdamerung.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/gotterdamerung-r1.png",
+      "sha256": "db885bbca62511aabfb8b0e14313e57cccf001145a112f0496ecf4f9b291c28c",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate object-modeling reference.\nInput image 1 is a PRIVATE original inventory sprite, used only to preserve recognizable silhouette, colors, material regions and distinctive details. Create NEW HD imagery throughout; never paste the sprite into any view or thumbnail.\nA clean technical board of the exact SAME single object in FRONT, SIDE, BACK, THREE-QUARTER and a small NEW HD INVENTORY thumbnail. All views must agree on geometry, proportions, material layout and distinctive details; back is the true reverse, not another front. Full object visible, generously spaced, plain charcoal-gray backdrop, neutral soft studio lighting, no colored illumination or glow, realistic restrained dark medieval materials and fine wear. No scene, body, face, hands, stand, exploded alternatives or extra props. Rear/hidden surfaces and absolute scale are proposed reconstruction; preserve visible source design. Thumbnail must be a new high-detail render of this same object, never pixel-art or the supplied sprite. Minimal labels: item name, FRONT, SIDE, BACK, 3/4, ICON.\nSubject: Gotterdamerung; item.design.unique.gotterdamerung; native cursor 85.\nNative cursor VEIL_OF_STEEL 85, shared visual reference for Gotterdamerung/Veil of Steel; preserve this specific ornate dark silver-steel enclosed helm rather than inventing from the unique name. Tall tapered central steel face mask with pronounced vertical ridge and pointed lower chin, FOUR upward-curving silver horns/spikes in two pairs (two each side), antique gold/brass horn sockets and lateral fittings, and a prominent golden SKULL ornament above the center of the crown. Preserve asymmetric hanging trim visible in the reference: muted bluish-purple tassel/cloth on viewer-left and pale silver segmented/chain-like fringe on viewer-right. All views must keep that same left/right construction. No real face, ordinary Viking helmet, glowing eyes, generic gold crown or extra horns. Hidden construction and tiny decorations are inferred. Identity/powers remain separate from the shared visual.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "cursorId": 85,
+        "sha256": "0a97af69bf5d17f7f05621ac13d79a5783aa0dffe42ba329a73e269dc3d5ce36",
+        "availability": "local-private",
+        "notes": "Licensed original inventory sprite inspected privately at nearest-neighbor 6x enlargement; no original pixels or file paths are included."
+      },
+      "referenceNativeSpriteSha256": "06c5204625889e4520921db6dd96238896da23f9347f8286933533e6c797725b",
+      "referenceInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "viewsUsed": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-concept-thumbnail"
+      ],
+      "inferredParts": [
+        "Back and hidden surfaces",
+        "Thickness and absolute scale",
+        "Fine construction/material details unresolved by source pixels"
+      ],
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "sourceBaseIds": [
+        "item.base.053.great-helm"
+      ],
+      "sourceUniqueIds": [
+        "item.unique.gotterdamerung"
+      ],
+      "nativeIdentityPolicy": "Visual study only. Native item identities, unique powers, stats, affixes, saves and RNG are separate and unchanged.",
+      "identityGate": "Candidate design requires visual review and multiview reconciliation before master production.",
+      "notes": "Neutral-light candidate board. HD thumbnail is a new concept preview, not a final runtime icon. Hidden geometry is proposed reconstruction."
+    },
+    {
+      "productionId": "item.design.unique.harlequin-crest",
+      "conceptId": "item.design.unique.harlequin-crest.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/harlequin-crest-r1.png",
+      "sha256": "05474e55af22e875a5ef22edf5769e0a3d1df647f5400f75fe03bb8bb2d6e3c5",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate object-modeling reference.\nInput image 1 is a PRIVATE original inventory sprite, used only to preserve recognizable silhouette, colors, material regions and distinctive details. Create NEW HD imagery throughout; never paste the sprite into any view or thumbnail.\nA clean technical board of the exact SAME single object in FRONT, SIDE, BACK, THREE-QUARTER and a small NEW HD INVENTORY thumbnail. All views must agree on geometry, proportions, material layout and distinctive details; back is the true reverse, not another front. Full object visible, generously spaced, plain charcoal-gray backdrop, neutral soft studio lighting, no colored illumination or glow, realistic restrained dark medieval materials and fine wear. No scene, body, face, hands, stand, exploded alternatives or extra props. Rear/hidden surfaces and absolute scale are proposed reconstruction; preserve visible source design. Thumbnail must be a new high-detail render of this same object, never pixel-art or the supplied sprite. Minimal labels: item name, FRONT, SIDE, BACK, 3/4, ICON.\nSubject: Harlequin Crest; item.design.unique.harlequin-crest; native cursor 81.\nA compact antique GOLD/brass headpiece framing a large empty open face, with a pointed V-shaped forehead bridge, a large central dark RED oval cabochon jewel, a small YELLOW jewel on viewer-left upper crown and small BLUE jewel on viewer-right. Curved gold side pieces descend along both sides of the open face. Preserve this source's gold frame and three-gem palette; no jester cloth, horns, feathers, giant baroque crown or human face. Exact back band and hidden fasteners are proposed, not source-proven.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "cursorId": 81,
+        "sha256": "148f57b81eb53043f40855159de16e76a531f6231b8b33ef439580662a2fcdf4",
+        "availability": "local-private",
+        "notes": "Licensed original inventory sprite inspected privately at nearest-neighbor 6x enlargement; no original pixels or file paths are included."
+      },
+      "referenceNativeSpriteSha256": "58eab240e482627fe80dd6601dbec251da5fb14bda35ee3231e6aaaf399a1931",
+      "referenceInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "viewsUsed": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-concept-thumbnail"
+      ],
+      "inferredParts": [
+        "Back and hidden surfaces",
+        "Thickness and absolute scale",
+        "Fine construction/material details unresolved by source pixels"
+      ],
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "sourceBaseIds": [
+        "item.base.013.idi-harcrest"
+      ],
+      "sourceUniqueIds": [
+        "item.unique.harlequin-crest"
+      ],
+      "nativeIdentityPolicy": "Visual study only. Native item identities, unique powers, stats, affixes, saves and RNG are separate and unchanged.",
+      "identityGate": "Candidate design requires visual review and multiview reconciliation before master production.",
+      "notes": "Neutral-light candidate board. HD thumbnail is a new concept preview, not a final runtime icon. Hidden geometry is proposed reconstruction."
+    },
+    {
+      "productionId": "item.design.unique.helm-of-spirits",
+      "conceptId": "item.design.unique.helm-of-spirits.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/helm-of-spirits-r1.png",
+      "sha256": "8ba4a2cfdffa373d9231a7063e35d218915ddc98ff2edb81850db2691e42bb83",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate object-modeling reference.\nInput image 1 is a PRIVATE original inventory sprite, used only to preserve recognizable silhouette, colors, material regions and distinctive details. Create NEW HD imagery throughout; never paste the sprite into any view or thumbnail.\nA clean technical board of the exact SAME single object in FRONT, SIDE, BACK, THREE-QUARTER and a small NEW HD INVENTORY thumbnail. All views must agree on geometry, proportions, material layout and distinctive details; back is the true reverse, not another front. Full object visible, generously spaced, plain charcoal-gray backdrop, neutral soft studio lighting, no colored illumination or glow, realistic restrained dark medieval materials and fine wear. No scene, body, face, hands, stand, exploded alternatives or extra props. Rear/hidden surfaces and absolute scale are proposed reconstruction; preserve visible source design. Thumbnail must be a new high-detail render of this same object, never pixel-art or the supplied sprite. Minimal labels: item name, FRONT, SIDE, BACK, 3/4, ICON.\nSubject: Helm of Spirits; item.design.unique.helm-of-spirits; native cursor 77.\nA LOW open antique GOLD/brass circlet with a broad brow band, one central oval dark RED cabochon gem and FOUR slender swept-up golden horns in TWO pairs, two on either side. Preserve the ring-like open top and gracefully curving upward horns of the source. No solid helmet bowl, skull ornament, silver shell, feathers, face or glow. The empty central opening must show background/dark hollow space. Hidden rear band, horn roots and gem setting depth are reconstructed consistently.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "cursorId": 77,
+        "sha256": "8892f7ec6fa7f9f6b9f8b0c7647660e5546bb8721ca978802c9a9869919cc73b",
+        "availability": "local-private",
+        "notes": "Licensed original inventory sprite inspected privately at nearest-neighbor 6x enlargement; no original pixels or file paths are included."
+      },
+      "referenceNativeSpriteSha256": "30d14ad9801a9d74c2d63caa0bd097dc7bed717ab45e7aed61fa5d50146700e8",
+      "referenceInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "viewsUsed": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-concept-thumbnail"
+      ],
+      "inferredParts": [
+        "Back and hidden surfaces",
+        "Thickness and absolute scale",
+        "Fine construction/material details unresolved by source pixels"
+      ],
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "sourceBaseIds": [
+        "item.base.050.helm"
+      ],
+      "sourceUniqueIds": [
+        "item.unique.helm-of-spirits"
+      ],
+      "nativeIdentityPolicy": "Visual study only. Native item identities, unique powers, stats, affixes, saves and RNG are separate and unchanged.",
+      "identityGate": "Candidate design requires visual review and multiview reconciliation before master production.",
+      "notes": "Neutral-light candidate board. HD thumbnail is a new concept preview, not a final runtime icon. Hidden geometry is proposed reconstruction."
+    },
+    {
+      "productionId": "item.design.unique.overlord-s-helm",
+      "conceptId": "item.design.unique.overlord-s-helm.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/overlord-s-helm-r1.png",
+      "sha256": "595ad91593364730525cbdfd3186c6285ead60c298261942de09ef321b7ecbf5",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate object-modeling reference.\nInput image 1 is a PRIVATE original inventory sprite, used only to preserve recognizable silhouette, colors, material regions and distinctive details. Create NEW HD imagery throughout; never paste the sprite into any view or thumbnail.\nA clean technical board of the exact SAME single object in FRONT, SIDE, BACK, THREE-QUARTER and a small NEW HD INVENTORY thumbnail. All views must agree on geometry, proportions, material layout and distinctive details; back is the true reverse, not another front. Full object visible, generously spaced, plain charcoal-gray backdrop, neutral soft studio lighting, no colored illumination or glow, realistic restrained dark medieval materials and fine wear. No scene, body, face, hands, stand, exploded alternatives or extra props. Rear/hidden surfaces and absolute scale are proposed reconstruction; preserve visible source design. Thumbnail must be a new high-detail render of this same object, never pixel-art or the supplied sprite. Minimal labels: item name, FRONT, SIDE, BACK, 3/4, ICON.\nSubject: OverLord's Helm; item.design.unique.overlord-s-helm; native cursor 99.\nAn ornate crafted helmet/mask with a broad antique GOLD crescent/horseshoe-like pair of upward horns across the crown, small golden SKULL crest between them near the top, a deep RED lacquered metal face mask with sculpted stylized demonic brows/nose/mouth, gold trim at the flared lower edge and small muted BLUE side/back plates with gold fittings. The red face is an INANIMATE forged/lacquered mask, not a person or flesh. Preserve the source's red/gold/blue color blocks and broad crescent silhouette. No extra horn pairs, glowing eyes, real skin, hair or gratuitous skull additions. Hidden rear construction is proposed.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "cursorId": 99,
+        "sha256": "1ba8bfcaa2bd0a4addbe0894138e988b2b02fb3527a3949cbfffe423041cf005",
+        "availability": "local-private",
+        "notes": "Licensed original inventory sprite inspected privately at nearest-neighbor 6x enlargement; no original pixels or file paths are included."
+      },
+      "referenceNativeSpriteSha256": "f67747f4a2addc91b72d86b9e7170ee9e7180f4df13efe010a8dbd464783795e",
+      "referenceInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "viewsUsed": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-concept-thumbnail"
+      ],
+      "inferredParts": [
+        "Back and hidden surfaces",
+        "Thickness and absolute scale",
+        "Fine construction/material details unresolved by source pixels"
+      ],
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "sourceBaseIds": [
+        "item.base.050.helm"
+      ],
+      "sourceUniqueIds": [
+        "item.unique.overlord-s-helm"
+      ],
+      "nativeIdentityPolicy": "Visual study only. Native item identities, unique powers, stats, affixes, saves and RNG are separate and unchanged.",
+      "identityGate": "Candidate design requires visual review and multiview reconciliation before master production.",
+      "notes": "Neutral-light candidate board. HD thumbnail is a new concept preview, not a final runtime icon. Hidden geometry is proposed reconstruction."
+    },
+    {
+      "productionId": "item.design.unique.royal-circlet",
+      "conceptId": "item.design.unique.royal-circlet.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/royal-circlet-r1.png",
+      "sha256": "956057d7f24225b0c3f613584c5a66b6992bd830d9ac4b97d7fd0bb159a466e9",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate object-modeling reference.\nInput image 1 is a PRIVATE original inventory sprite, used only to preserve recognizable silhouette, colors, material regions and distinctive details. Create NEW HD imagery throughout; never paste the sprite into any view or thumbnail.\nA clean technical board of the exact SAME single object in FRONT, SIDE, BACK, THREE-QUARTER and a small NEW HD INVENTORY thumbnail. All views must agree on geometry, proportions, material layout and distinctive details; back is the true reverse, not another front. Full object visible, generously spaced, plain charcoal-gray backdrop, neutral soft studio lighting, no colored illumination or glow, realistic restrained dark medieval materials and fine wear. No scene, body, face, hands, stand, exploded alternatives or extra props. Rear/hidden surfaces and absolute scale are proposed reconstruction; preserve visible source design. Thumbnail must be a new high-detail render of this same object, never pixel-art or the supplied sprite. Minimal labels: item name, FRONT, SIDE, BACK, 3/4, ICON.\nSubject: Royal Circlet; item.design.unique.royal-circlet; native cursor 79.\nA thick open antique GOLD/brass circular brow band with small muted BLUE inset stones and a few substantial SILVER side fittings, plus hanging gold/silver face-side cheek guards and a narrow lower silver/gold nasal/front support framing an empty face opening. Preserve the source's complex open circlet structure, square/rectangular gold band settings, dark blue small round jewels, and contrasting pale silver cheek components. Do not simplify it to a plain ring, add tall crown spires, red gems, actual eyes or a solid full helmet. Hidden rear construction and exact cheek hinges are inferred.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "cursorId": 79,
+        "sha256": "6de07fb338dca446042b7fae3e86452ea9fd91dcba8c49ba390f579197d486ca",
+        "availability": "local-private",
+        "notes": "Licensed original inventory sprite inspected privately at nearest-neighbor 6x enlargement; no original pixels or file paths are included."
+      },
+      "referenceNativeSpriteSha256": "f0dbeb367440aefb5639a4a7e5413a498fba4da64bf2ba16f437b6008d9dcc5b",
+      "referenceInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "viewsUsed": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-concept-thumbnail"
+      ],
+      "inferredParts": [
+        "Back and hidden surfaces",
+        "Thickness and absolute scale",
+        "Fine construction/material details unresolved by source pixels"
+      ],
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "sourceBaseIds": [
+        "item.base.052.crown"
+      ],
+      "sourceUniqueIds": [
+        "item.unique.royal-circlet"
+      ],
+      "nativeIdentityPolicy": "Visual study only. Native item identities, unique powers, stats, affixes, saves and RNG are separate and unchanged.",
+      "identityGate": "Candidate design requires visual review and multiview reconciliation before master production.",
+      "notes": "Neutral-light candidate board. HD thumbnail is a new concept preview, not a final runtime icon. Hidden geometry is proposed reconstruction."
+    },
+    {
+      "productionId": "item.design.unique.the-undead-crown",
+      "conceptId": "item.design.unique.the-undead-crown.concept.r1-base-state",
+      "revision": "r1-base-state",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/the-undead-crown-base-state-r1.png",
+      "sha256": "b609dc59e7b8f996267c4030f1e6c858384c4a287b65bbeec5d40ee1c1ee48da",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate object-modeling reference.\nInput image 1 is a PRIVATE original inventory sprite, used only to preserve recognizable silhouette, colors, material regions and distinctive details. Create NEW HD imagery throughout; never paste the sprite into any view or thumbnail.\nA clean technical board of the exact SAME single object in FRONT, SIDE, BACK, THREE-QUARTER and a small NEW HD INVENTORY thumbnail. All views must agree on geometry, proportions, material layout and distinctive details; back is the true reverse, not another front. Full object visible, generously spaced, plain charcoal-gray backdrop, neutral soft studio lighting, no colored illumination or glow, realistic restrained dark medieval materials and fine wear. No scene, body, face, hands, stand, exploded alternatives or extra props. Rear/hidden surfaces and absolute scale are proposed reconstruction; preserve visible source design. Thumbnail must be a new high-detail render of this same object, never pixel-art or the supplied sprite. Minimal labels: item name, FRONT, SIDE, BACK, 3/4, ICON.\nSubject: The Undead Crown; item.design.unique.the-undead-crown; native cursor 78.\nREFERENCE STATE STUDY ONLY: native BASE cursor THE_UNDEAD_CROWN 78, not the final runtime unique override. Reconstruct the source as an OPEN silver-steel headband/circlet with a large gold SKULL ornament at the front center, thin sculpted silver cheek/temple supports descending on either side of a large empty face opening, pointed/flared lower cheek ends, and a shallow silver upper ring curving around the open top. Preserve gold skull/silver frame and lack of a solid dome. The gold skull is a crafted ornament, not gore or a real head. No horns, actual face, full enclosed helmet, red gem or invented golden antlers. Title label THE UNDEAD CROWN - BASE STATE. This original base graphic is distinct from the native unique's HELM_OF_SPIRITS77 override, which must be linked separately before identity is accepted.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "cursorId": 78,
+        "sha256": "3c49d6536d97e2b22e44766df4b12f3d4de3950012b23ddc32420b70f00734a2",
+        "availability": "local-private",
+        "notes": "Licensed original inventory sprite inspected privately at nearest-neighbor 6x enlargement; no original pixels or file paths are included."
+      },
+      "referenceNativeSpriteSha256": "6040c9f063bd5c71582334aab1e1a9c3b191b1224415e619bb9d0920bde8866c",
+      "referenceInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "viewsUsed": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-concept-thumbnail"
+      ],
+      "inferredParts": [
+        "Back and hidden surfaces",
+        "Thickness and absolute scale",
+        "Fine construction/material details unresolved by source pixels"
+      ],
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "sourceBaseIds": [
+        "item.base.007.idi-skcrown"
+      ],
+      "sourceUniqueIds": [
+        "item.unique.the-undead-crown"
+      ],
+      "nativeIdentityPolicy": "Visual study only. Native item identities, unique powers, stats, affixes, saves and RNG are separate and unchanged.",
+      "identityGate": "Base-state cursor78 study only. The native unique overrides it with HELM_OF_SPIRITS77. Confirm the actual identified runtime state before binding this design.",
+      "notes": "Neutral-light candidate board. HD thumbnail is a new concept preview, not a final runtime icon. Hidden geometry is proposed reconstruction."
+    },
+    {
+      "productionId": "item.design.unique.the-undead-crown",
+      "conceptId": "item.design.unique.the-undead-crown.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "family-sheet",
+      "image": "assets/concept-art/items/r1/helm-of-spirits-r1.png",
+      "sha256": "8ba4a2cfdffa373d9231a7063e35d218915ddc98ff2edb81850db2691e42bb83",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate object-modeling reference.\nInput image 1 is a PRIVATE original inventory sprite, used only to preserve recognizable silhouette, colors, material regions and distinctive details. Create NEW HD imagery throughout; never paste the sprite into any view or thumbnail.\nA clean technical board of the exact SAME single object in FRONT, SIDE, BACK, THREE-QUARTER and a small NEW HD INVENTORY thumbnail. All views must agree on geometry, proportions, material layout and distinctive details; back is the true reverse, not another front. Full object visible, generously spaced, plain charcoal-gray backdrop, neutral soft studio lighting, no colored illumination or glow, realistic restrained dark medieval materials and fine wear. No scene, body, face, hands, stand, exploded alternatives or extra props. Rear/hidden surfaces and absolute scale are proposed reconstruction; preserve visible source design. Thumbnail must be a new high-detail render of this same object, never pixel-art or the supplied sprite. Minimal labels: item name, FRONT, SIDE, BACK, 3/4, ICON.\nSubject: Helm of Spirits; item.design.unique.helm-of-spirits; native cursor 77.\nA LOW open antique GOLD/brass circlet with a broad brow band, one central oval dark RED cabochon gem and FOUR slender swept-up golden horns in TWO pairs, two on either side. Preserve the ring-like open top and gracefully curving upward horns of the source. No solid helmet bowl, skull ornament, silver shell, feathers, face or glow. The empty central opening must show background/dark hollow space. Hidden rear band, horn roots and gem setting depth are reconstructed consistently.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 0,
+      "reference": {
+        "cursorId": 77,
+        "sha256": "8892f7ec6fa7f9f6b9f8b0c7647660e5546bb8721ca978802c9a9869919cc73b",
+        "availability": "local-private",
+        "notes": "Licensed original inventory sprite inspected privately at nearest-neighbor 6x enlargement; no original pixels or file paths are included."
+      },
+      "referenceNativeSpriteSha256": "30d14ad9801a9d74c2d63caa0bd097dc7bed717ab45e7aed61fa5d50146700e8",
+      "referenceInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "viewsUsed": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-concept-thumbnail"
+      ],
+      "inferredParts": [
+        "Back and hidden surfaces",
+        "Thickness and absolute scale",
+        "Fine construction/material details unresolved by source pixels"
+      ],
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "sourceBaseIds": [
+        "item.base.007.idi-skcrown"
+      ],
+      "sourceUniqueIds": [
+        "item.unique.the-undead-crown"
+      ],
+      "nativeIdentityPolicy": "Visual study only. Native item identities, unique powers, stats, affixes, saves and RNG are separate and unchanged.",
+      "identityGate": "The native unique overrides THE_UNDEAD_CROWN78 with HELM_OF_SPIRITS77. Link both visual studies and confirm an actual identified runtime state before binding. Do not silently treat the base state as the unique.",
+      "notes": "Explicit reuse study; zero new image-generation calls. Shared sheet does not establish an individually approved master or equipped identity.",
+      "reusedFromProductionId": "item.design.unique.helm-of-spirits",
+      "reusedFromConceptId": "item.design.unique.helm-of-spirits.concept.r1",
+      "reuseProposal": true,
+      "nativeCursorOverride": {
+        "baseCursor": 78,
+        "uniqueCursor": 77,
+        "rule": "Native unique HELM_OF_SPIRITS override is preserved; runtime-state visual confirmation pending."
+      },
+      "referenceStudies": [
+        {
+          "productionId": "item.design.unique.helm-of-spirits",
+          "conceptId": "item.design.unique.helm-of-spirits.concept.r1",
+          "image": "assets/concept-art/items/r1/helm-of-spirits-r1.png",
+          "sha256": "8ba4a2cfdffa373d9231a7063e35d218915ddc98ff2edb81850db2691e42bb83",
+          "cursorId": 77,
+          "role": "unique-runtime-override-proposal"
+        },
+        {
+          "productionId": "item.design.unique.the-undead-crown",
+          "conceptId": "item.design.unique.the-undead-crown.concept.r1-base-state",
+          "image": "assets/concept-art/items/r1/the-undead-crown-base-state-r1.png",
+          "sha256": "b609dc59e7b8f996267c4030f1e6c858384c4a287b65bbeec5d40ee1c1ee48da",
+          "cursorId": 78,
+          "role": "original-base-state-study"
+        }
+      ]
+    }
+  ],
+  "blockedUnits": [],
+  "devlogHandoff": {
+    "includeAllGeneratedImages": true,
+    "images": [
+      {
+        "image": "assets/concept-art/items/r1/fool-s-crest-r1.png",
+        "sha256": "e22f6e4268cc43bbe04eeffd94fb62f9d18f28480aee7141ae37f01d953eefec",
+        "dimensions": [
+          1536,
+          1024
+        ]
+      },
+      {
+        "image": "assets/concept-art/items/r1/gotterdamerung-r1.png",
+        "sha256": "db885bbca62511aabfb8b0e14313e57cccf001145a112f0496ecf4f9b291c28c",
+        "dimensions": [
+          1536,
+          1024
+        ]
+      },
+      {
+        "image": "assets/concept-art/items/r1/harlequin-crest-r1.png",
+        "sha256": "05474e55af22e875a5ef22edf5769e0a3d1df647f5400f75fe03bb8bb2d6e3c5",
+        "dimensions": [
+          1536,
+          1024
+        ]
+      },
+      {
+        "image": "assets/concept-art/items/r1/helm-of-spirits-r1.png",
+        "sha256": "8ba4a2cfdffa373d9231a7063e35d218915ddc98ff2edb81850db2691e42bb83",
+        "dimensions": [
+          1536,
+          1024
+        ]
+      },
+      {
+        "image": "assets/concept-art/items/r1/overlord-s-helm-r1.png",
+        "sha256": "595ad91593364730525cbdfd3186c6285ead60c298261942de09ef321b7ecbf5",
+        "dimensions": [
+          1536,
+          1024
+        ]
+      },
+      {
+        "image": "assets/concept-art/items/r1/royal-circlet-r1.png",
+        "sha256": "956057d7f24225b0c3f613584c5a66b6992bd830d9ac4b97d7fd0bb159a466e9",
+        "dimensions": [
+          1536,
+          1024
+        ]
+      },
+      {
+        "image": "assets/concept-art/items/r1/the-undead-crown-base-state-r1.png",
+        "sha256": "b609dc59e7b8f996267c4030f1e6c858384c4a287b65bbeec5d40ee1c1ee48da",
+        "dimensions": [
+          1536,
+          1024
+        ]
+      }
+    ],
+    "generatedConceptIds": [
+      "item.design.unique.fool-s-crest.concept.r1",
+      "item.design.unique.gotterdamerung.concept.r1",
+      "item.design.unique.harlequin-crest.concept.r1",
+      "item.design.unique.helm-of-spirits.concept.r1",
+      "item.design.unique.overlord-s-helm.concept.r1",
+      "item.design.unique.royal-circlet.concept.r1",
+      "item.design.unique.the-undead-crown.concept.r1-base-state"
+    ],
+    "reuseProductionIds": [
+      "item.design.unique.the-undead-crown"
+    ],
+    "limits": [
+      "All outputs remain unapproved candidates.",
+      "Shared cursor reuse preserves separate native identities and powers.",
+      "Hidden surfaces and scale are inferred; master/socket/icon work remains gated."
+    ]
+  }
+}
+

@@ -26,6 +26,7 @@
 #include "engine/render/primitive_render.hpp"
 #include "engine/render/d3d_menu_presentation.hpp"
 #include "engine/render/d3d_hud_presentation.hpp"
+#include "engine/render/d3d_panel_presentation.hpp"
 #include "engine/render/town_presentation.hpp"
 #include "engine/render/town_view.hpp"
 #include "engine/render/ui_overlay_regions.hpp"
@@ -311,8 +312,38 @@ void RenderPresent([[maybe_unused]] bool allowTownLayers)
 		return;
 	}
 
+	// The indexed frame may intentionally omit the selected HUD's
+	// decoration. Materialize its frozen R1 recipe only when the RGB pass
+	// declines, without repeating world/UI/gameplay callbacks.
+	const auto recoverDeferredHud = [&]() {
+		if (!gbRunGame)
+			return false;
+		bool recovered = false;
+		if (HasD3dPanelPresentationDeferredFrame())
+			recovered |= RecoverD3dPanelPresentationFrame(GlobalBackBuffer());
+		if (HasD3dHudPresentationDeferredFrame())
+			recovered |= RecoverD3dHudPresentationFrame(GlobalBackBuffer());
+		// Both passes recover their frozen authored recipe before conversion.
+		// Native handlers, world drawing and cursor drawing are never replayed.
+		if (recovered)
+			BltFast(nullptr, nullptr);
+		return recovered;
+	};
+
 #ifndef USE_SDL1
 	if (renderer != nullptr) {
+		const bool townLayersAvailable = allowTownLayers && gbRunGame
+		    && GetTownViewHighResolutionFrame() != nullptr && GetUiOverlayFrame().source == PalSurface;
+		if (gbRunGame) {
+			const bool hudDeferred = HasD3dHudPresentationDeferredFrame();
+			const bool panelsDeferred = HasD3dPanelPresentationDeferredFrame();
+			const bool hudReady = PrepareD3dHudPresentation(renderer, PalSurface, Palette.get(),
+			    allowTownLayers, townLayersAvailable);
+			const bool panelsReady = PrepareD3dPanelPresentation(renderer, PalSurface, Palette.get(),
+			    allowTownLayers, townLayersAvailable);
+			if ((hudDeferred && !hudReady) || (panelsDeferred && !panelsReady))
+				recoverDeferredHud();
+		}
 #ifdef USE_SDL3
 		if (!SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255)) ErrSdl();
 		if (!SDL_RenderClear(renderer)) ErrSdl();
@@ -325,7 +356,7 @@ void RenderPresent([[maybe_unused]] bool allowTownLayers)
 		if (SDL_RenderCopy(renderer, texture.get(), nullptr, nullptr) <= -1) ErrSdl();
 #endif
 
-		if (IsD3dMainMenuActive() && !RenderD3dMainMenu(renderer, PalSurface)) {
+		if ((IsD3dMainMenuActive() || !gbRunGame) && !RenderD3dMainMenu(renderer, PalSurface)) {
 			// Keep all native controls visible if an optional layer fails midway.
 			SetD3dMainMenuActive(false);
 #ifdef USE_SDL3
@@ -350,10 +381,31 @@ void RenderPresent([[maybe_unused]] bool allowTownLayers)
 			}
 		}
 
-		if (gbRunGame && RenderD3dHudPresentation(renderer, PalSurface, Palette.get(),
-		        allowTownLayers, townLayersPresented) == D3dHudPresentationResult::Failed) {
-			// Inactive leaves the already presented Town intact; only a failed
-			// draw command needs to cover a possibly partial optional pass.
+		const bool hudDeferred = gbRunGame && HasD3dHudPresentationDeferredFrame();
+		const bool panelsDeferred = gbRunGame && HasD3dPanelPresentationDeferredFrame();
+		const auto hudResult = gbRunGame
+		    ? RenderD3dHudPresentation(renderer, PalSurface, Palette.get(), allowTownLayers, townLayersPresented)
+		    : D3dHudPresentationResult::Inactive;
+		// A partial optional submission is always covered by the recovered
+		// full native frame. Otherwise the panel pass follows Town and HUD.
+		const auto panelResult = gbRunGame && hudResult != D3dHudPresentationResult::Failed
+		    ? RenderD3dPanelPresentation(renderer, PalSurface, Palette.get(), allowTownLayers, townLayersPresented)
+		    : D3dHudPresentationResult::Inactive;
+		const bool needsRecovery = (hudDeferred && hudResult != D3dHudPresentationResult::Presented)
+		    || (panelsDeferred && panelResult != D3dHudPresentationResult::Presented)
+		    || hudResult == D3dHudPresentationResult::Failed
+		    || panelResult == D3dHudPresentationResult::Failed;
+		const bool hudRecovered = needsRecovery && recoverDeferredHud();
+		if (hudRecovered || hudResult == D3dHudPresentationResult::Failed
+		    || panelResult == D3dHudPresentationResult::Failed) {
+			// A recovered frame needs a fresh upload: the earlier native
+			// texture did not contain its deferred decoration. Inactive with
+			// no deferred recovery still retains the already presented Town.
+#ifdef USE_SDL3
+			if (hudRecovered && !SDL_UpdateTexture(texture.get(), nullptr, surface->pixels, surface->pitch)) ErrSdl();
+#else
+			if (hudRecovered && SDL_UpdateTexture(texture.get(), nullptr, surface->pixels, surface->pitch) < 0) ErrSdl();
+#endif
 #ifdef USE_SDL3
 			if (!SDL_RenderTexture(renderer, texture.get(), nullptr, nullptr)) ErrSdl();
 #else
@@ -376,6 +428,7 @@ void RenderPresent([[maybe_unused]] bool allowTownLayers)
 			LimitFrameRate();
 		}
 	} else {
+		recoverDeferredHud();
 		if (ControlMode == ControlTypes::VirtualGamepad) {
 			RenderVirtualGamepad(surface);
 		}
@@ -387,6 +440,7 @@ void RenderPresent([[maybe_unused]] bool allowTownLayers)
 		LimitFrameRate();
 	}
 #else
+	recoverDeferredHud();
 	if (SDL_Flip(surface) <= -1) {
 		ErrSdl();
 	}

@@ -19,6 +19,13 @@ struct TownImportedTexture {
 
 inline constexpr std::string_view TownCabinBaselineSha256 = "d12cc57e798151fb4abf3173149a4d7cf1da2cc8bdbc6ac39439aee3fe9069f9";
 
+/** Exact current content identities only. Unknown/new provider contents are not
+ * inferred from paths. Missing policy permits imports; the explicit policy flag
+ * is restart/resource-reset based, not a live scene mutation. */
+bool ShouldDisableKnownMeshyRuntimeContent(std::string_view expectedSha256);
+/** Call as part of ResetTownViewResources, before the next scene is built. */
+void ResetKnownMeshyRuntimePolicy();
+
 /**
  * Optional local model override. Missing or malformed assets leave the existing
  * model untouched. Call after its procedural builder has assigned native metadata.

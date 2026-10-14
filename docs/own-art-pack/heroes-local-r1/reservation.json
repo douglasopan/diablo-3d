@@ -1,0 +1,25 @@
+{
+  "schema": "d3d.hero-art-local-reservation/1",
+  "date": "2026-10-12",
+  "sourceThread": "01a1153a-cad1-7fb1-8326-225511ee918d",
+  "scope": "Explicitly authorized local own-art heroes only; principal owns integration and global registry",
+  "authorization": "Warrior then Rogue then Sorcerer, image generation and local tools, no new Meshy/Tripo spending",
+  "reconciliation": {
+    "legacyOwnership": "D:/Diablo 1 3D/diagnostics/characters-rigs/ownership.json",
+    "legacySuspensionPreserved": true,
+    "warriorExisting": "tripo-warrior-submission-20261009/r1 and tripo-warrior-derivative-20261009/r2 reused",
+    "rogueSorcererAudit": "class-preview-existing-assets-20261009/r1/rogue-sorcerer-audit.json",
+    "cloudNotified": "01a12deb-9f8d-751c-ac49-8a1ac93d9031",
+    "principalNotified": true
+  },
+  "outputs": "D:/Diablo 1 3D/assets/own-art/heroes/local-r1",
+  "entries": [
+    {"id": "tristram.hero.warrior", "variant": "light-unarmed", "stage": "reuse-master-and-rig; native animation gap", "newModelGeneration": false, "status": "masters-preserved; eight-bind-stills-produced; real-local-retarget-proof-diagnostic-reject"},
+    {"id": "tristram.hero.rogue", "variant": "light-unarmed", "stage": "raster-master", "provider": "built-in imagegen", "status": "authoring-produced; identity-master-and-eight-stills; no-geometry-rig-motion"},
+    {"id": "tristram.hero.sorcerer", "variant": "light-unarmed", "stage": "raster-master", "provider": "built-in imagegen", "status": "authoring-produced; identity-master-and-eight-stills-r2; r1-direction-defects-preserved; no-geometry-rig-motion"}
+  ],
+  "hellfire": "conditional, excluded from new production this round",
+  "npcScope": "untouched; preserve Ogden and all NPCs",
+  "registryMutated": false,
+  "paidMeshyTripoCalls": 0
+}

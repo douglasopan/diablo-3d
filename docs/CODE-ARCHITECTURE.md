@@ -2,7 +2,7 @@
 
 Documentation revision **2026.10.11-r1**, inspected on **11 October 2026, America/Sao_Paulo**. This maps existing code, including a private candidate; it does not announce a new engine or a completed refactor. Read the [versioned checkpoint](CHECKPOINT-2026-10-11.md) before attributing a feature to a build, and use [PROJECT-EXECUTION.md](PROJECT-EXECUTION.md) for the active queue. [CODE-AUDIT.md](CODE-AUDIT.md) records the gaps found during this inspection.
 
-**Em português:** este é o mapa do código real para desenvolvedores humanos e IAs. A base limpa está preparada, ainda sem compilação própria. Código presente, candidato testado, versão instalada e aprovação visual são estados diferentes. Não substituir o trabalho selecionado apenas porque existe um arquivo mais novo.
+**Em português:** este é o mapa do código real para desenvolvedores humanos e IAs, inicialmente inspecionado em r1. O incremento operacional r2 compilou a base limpa e entregou a revisão isolada **4391a5 / R26**, com fixture delimitada aprovada; gameplay físico/FPS e aceite visual continuam pendentes. Código presente, candidato testado, versão instalada e aprovação visual são estados diferentes. Não substituir o trabalho selecionado apenas porque existe um arquivo mais novo.
 
 ## 1. Which source is being described?
 
@@ -11,7 +11,7 @@ Documentation revision **2026.10.11-r1**, inspected on **11 October 2026, Americ
 | Public repository checkpoint `5c3d090fc7e103a356c910d5308d22e2342ace60` | Documentation parent at the start of this inspection. It is not a source-to-binary receipt for the local installed EXE. This documentation batch changes no game source. |
 | Frozen private baseline associated with Windows `b77562161864…` | Coherent source preserved separately from the working tree. Working-tree WIP must not be substituted when reproducing this binary. |
 | Frozen dungeon candidate, normal build R4 `ed0e0ad8566d…` | 735-file Source closure inspected for the call paths below: baseline 734 plus one new material header. Retains our camera, movement adapter, Town and UI; adds the bounded dungeon adaptation. Bounded fixtures have separate binary identities. |
-| Separate `clean-base/devilutionx-c1-r1` checkout | Detached upstream `dac104babfb6187415432f428ac2516747ffc154`, plus 186 declared Source deltas from that frozen candidate: 113 added and 73 modified files. Source layers applied; no fresh compile/runtime from this checkout. Its dependency closure is not yet proven minimal. |
+| Separate `clean-base/devilutionx-c1-r1` checkout | Detached upstream `dac104babfb6187415432f428ac2516747ffc154`, plus 186 initial declared Source deltas (113 added/73 modified); 11 paths subsequently changed for bounded C1 defects. Fresh normal EXE `4391a5…` and R26 fixture compiled; 735-file Source closure sealed, isolated review delivered. Dependency minimality and a completed modular rewrite are not established; normal physical gameplay remains pending. |
 | Main developer working tree | Other unpublished Source/CMake/UI/asset work remains present. It is not automatically part of any of the versions above. |
 
 Paths below are relative to the engine repository root. Names beginning with `town_` are historical: several already serve Cathedral rendering too. They are not separate new engines. Some private candidate files are not yet present in a public checkout; their names describe inspected code, not a promised public build.

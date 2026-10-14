@@ -1,4 +1,5 @@
 #include "engine/render/town_gpu.hpp"
+#include "engine/render/d3d_local_diagnostics.hpp"
 #include "engine/render/town_gpu_mesh.hpp"
 
 #include <algorithm>
@@ -25,6 +26,7 @@
 #endif
 
 namespace devilution {
+namespace diag = d3d_local_diagnostics;
 namespace {
 
 TownGpuStatus Status;
@@ -37,6 +39,7 @@ constexpr size_t MaxTextureBytes = 256 * 1024 * 1024;
 // Only the CPU-expanded, per-frame vertex stream consumes this capacity.
 // Reused resident index ranges have their own immutable-cache byte budget.
 constexpr size_t MaxProjectedTriangles = 1024 * 1024;
+constexpr size_t MaxAuthoredColorBytes = MaxProjectedTriangles * 3 * sizeof(std::array<float, 4>);
 constexpr size_t MaxPaletteBlendTriangles = 2048;
 constexpr size_t MaxPaletteBlendCopyBytes = 512 * 1024 * 1024;
 
@@ -79,6 +82,9 @@ public:
 
 struct Float4 { float x, y, z, w; };
 struct UInt4 { uint32_t x, y, z, w; };
+constexpr uint32_t SpritePointLightFlag = 1024;
+constexpr uint32_t FramePointVisibilityFlag = 2048;
+constexpr uint32_t ViewModelFlag = 4096;
 
 // All members occupy complete HLSL constant-buffer registers. Value-initialize
 // the structure before filling it so bytewise batch comparison has no padding.
@@ -104,34 +110,61 @@ struct Constants {
 };
 static_assert(sizeof(Constants) % 16 == 0);
 
+/** One bounded frame field, not duplicated in each recorded triangle batch.
+ * All apertures are copied; no source spans or scene pointers survive Submit. */
+struct SpritePointConstants {
+	std::array<Float4, TownMaxPointLights> positionRadius;
+	std::array<Float4, TownMaxPointLights> colorIntensity;
+	std::array<Float4, TownMaxLightOccluders> occluderMinimum;
+	std::array<Float4, TownMaxLightOccluders> occluderMaximum;
+	std::array<Float4, TownMaxLightOccluders * TownMaxLightApertures> apertureBounds;
+	std::array<Float4, TownMaxLightOccluders * TownMaxLightApertures> aperturePlanes;
+	UInt4 counts;
+};
+static_assert(sizeof(SpritePointConstants) == 9488);
+static_assert(sizeof(SpritePointConstants) <= D3D11_REQ_CONSTANT_BUFFER_ELEMENT_COUNT * 16);
+
+// Keep legacy projected uploads byte-for-byte 80 B. Optional COLOR0 lives in
+// a parallel SRV, not in every projected/resident vertex or immutable mesh.
+struct ProjectedVertex {
+	float x, y, depth, u, v;
+	std::array<float, 3> world;
+	float clipW;
+};
 struct GpuVertex {
-	TownGpuVertex vertex;
+	ProjectedVertex vertex;
 	uint32_t pickId;
 	Float4 normalDiffuse;
 	Float4 shadowParameters;
 	std::array<float, 2> fallback;
 };
-static_assert(sizeof(TownGpuVertex) == 36);
+static_assert(sizeof(ProjectedVertex) == 36);
+static_assert(offsetof(TownGpuVertex, authoredColor) == 36);
 static_assert(sizeof(GpuVertex) == 80);
 
 struct CachedTexels {
 	ComOwner<ID3D11ShaderResourceView> codes;
 	ComOwner<ID3D11ShaderResourceView> opacity;
+	ComOwner<ID3D11ShaderResourceView> unlit;
 	int width;
 	int height;
 	uint32_t maximumCode;
 	bool hasOpacity;
 	size_t bytes;
 	uint64_t lastSeenFrame;
+	uint64_t codesFingerprint, opacityFingerprint, unlitFingerprint;
 };
 
 struct CachedLightLut {
 	ComOwner<ID3D11ShaderResourceView> view;
+	ComOwner<ID3D11ShaderResourceView> rgbaView;
 	unsigned lightLevels;
 	unsigned codeCount;
 	unsigned lutWidth;
 	size_t bytes;
 	uint64_t lastSeenFrame;
+	uint64_t indexedFingerprint, rgbaFingerprint;
+	bool hasRgba;
 };
 
 /** Frame-local binding of independent immutable resources. Both resources are
@@ -192,6 +225,7 @@ struct Batch {
 	UINT count;
 	bool preservePicking;
 	bool paletteBlend;
+	bool viewModel;
 	D3D11_BOX paletteCopyBox;
 };
 
@@ -207,13 +241,23 @@ ComOwner<ID3D11VertexShader> VertexShader;
 ComOwner<ID3D11PixelShader> PixelShader;
 ComOwner<ID3D11InputLayout> InputLayout;
 ComOwner<ID3D11Buffer> VertexBuffer;
+ComOwner<ID3D11Buffer> AuthoredColorBuffer;
+ComOwner<ID3D11ShaderResourceView> AuthoredColorResource;
 ComOwner<ID3D11Buffer> ConstantBuffer;
+ComOwner<ID3D11Buffer> SpritePointConstantBuffer;
 ComOwner<ID3D11RasterizerState> Rasterizer;
 ComOwner<ID3D11DepthStencilState> DepthState;
 ComOwner<ID3D11DepthStencilState> PaletteBlendDepthState;
 ComOwner<ID3D11BlendState> PaletteBlendWriteState;
 std::array<ComOwner<ID3D11BlendState>, 2> BlendStates;
-std::array<Target, 3> Targets;
+std::array<Target, 5> Targets;
+ComOwner<ID3D11ShaderResourceView> RgbPaletteResource, NativeLightResource;
+std::vector<uint32_t> CachedRgbPalette;
+std::vector<float> CachedNativeLight;
+bool FrameSmoothLighting = false;
+bool FrameRgbaLut = false;
+bool FrameSpritePointLighting = false;
+int CachedNativeLightWidth=0,CachedNativeLightHeight=0;
 ComOwner<ID3D11Texture2D> HardwareDepth;
 ComOwner<ID3D11DepthStencilView> HardwareDepthView;
 ComOwner<ID3D11ShaderResourceView> ShadowResource;
@@ -224,13 +268,19 @@ uint64_t PaletteBlendKey = 0;
 uint64_t PaletteBlendRevision = 0;
 bool FramePaletteBlendReady = false;
 bool FramePaletteOverlayStarted = false;
+bool FrameViewModelStarted = false;
 std::unordered_map<TextureKey, CachedTexels, TextureKeyHash> TexelCache;
 std::unordered_map<LightLutKey, CachedLightLut, LightLutKeyHash> LightLutCache;
 std::unordered_map<TextureBindingKey, CachedTexture, TextureBindingKeyHash> TextureCache;
 size_t TextureBytes = 0;
 size_t VertexCapacity = 0;
+size_t AuthoredColorCapacity = 0;
 uint64_t FrameSerial = 0;
+// Separate from the resettable cache TTL serial: successful recording tokens
+// never repeat after a backend reset while a caller still owns warm markers.
+uint64_t TexturePreparationFrame = 0;
 std::vector<GpuVertex> Vertices;
+std::vector<std::array<float, 4>> AuthoredColors;
 std::vector<Batch> Batches;
 TownGpuShadow FrameShadow;
 TownGpuProjection FrameProjection;
@@ -264,13 +314,69 @@ cbuffer Frame : register(b0) {
  float4 blockerMinimum[31];
  float4 blockerMaximum[31];
 };
+// Kept separate from per-draw b0 so a shared optional field does not enlarge
+// every projected/resident batch. C++ SpritePointConstants is exactly 9488 B.
+cbuffer SpritePointField : register(b2) {
+ float4 spritePointPositionRadius[8];
+ float4 spritePointColorIntensity[8];
+ float4 spritePointOccluderMinimum[32];
+ float4 spritePointOccluderMaximum[32];
+ float4 spritePointApertureBounds[256];
+ float4 spritePointAperturePlanes[256];
+ uint4 spritePointCounts;
+};
 Texture2D<uint> codes : register(t0);
 Texture2D<uint> opacity : register(t1);
 Texture2D<uint> lightLut : register(t2);
 Texture2D<float> shadowDepth : register(t3);
 Texture2D<uint> priorIndexedColor : register(t4);
 Texture2D<uint> paletteBlendLut : register(t5);
+Texture2D<uint> rgbPalette : register(t6);
+Texture2D<float> nativeLightGrid : register(t7);
+Texture2D<uint> unlitCodes : register(t8);
+Texture2D<uint> rgbaLightLut : register(t9);
+Buffer<float4> authoredColors : register(t10);
+float4 unpackRgba(uint p) { return float4((p>>16)&255,(p>>8)&255,p&255,p>>24)/255.0; }
+float3 paletteRgb(uint code) {
+ uint p = rgbPalette.Load(int3(min(code,255),0,0));
+ return float3((p>>16)&255,(p>>8)&255,p&255)/255.0;
+}
+float nativeLightAmount(float3 world, float fallback) {
+ uint w,h; nativeLightGrid.GetDimensions(w,h);
+ if(w==0 || h==0) return fallback;
+ float2 p=clamp(world.xz,float2(0,0),float2(w-1,h-1));
+ int2 a=(int2)floor(p), b=min(a+1,int2(w-1,h-1));
+ float2 t=frac(p);
+ return lerp(lerp(nativeLightGrid.Load(int3(a,0)),nativeLightGrid.Load(int3(b.x,a.y,0)),t.x),
+  lerp(nativeLightGrid.Load(int3(a.x,b.y,0)),nativeLightGrid.Load(int3(b,0)),t.x),t.y);
+}
+float3 litRgb(uint code,float level) {
+ float l=clamp(level,0.0,(float)(flags.y-1));
+ uint low=(uint)floor(l), high=min(low+1,flags.y-1), width=max(1,(uint)shadowScale.z);
+ uint start=min(code,flags.z-1)*flags.y;
+ uint a=start+low,b=start+high;
+ return lerp(paletteRgb(lightLut.Load(int3(a%width,a/width,0))),paletteRgb(lightLut.Load(int3(b%width,b/width,0))),frac(l));
+}
+float4 litRgba(uint code,float level) {
+ float l=clamp(level,0.0,(float)(flags.y-1));
+ uint low=(uint)floor(l), high=min(low+1,flags.y-1), width=max(1,(uint)shadowScale.z);
+ uint start=min(code,flags.z-1)*flags.y, a=start+low,b=start+high;
+ return lerp(unpackRgba(rgbaLightLut.Load(int3(a%width,a/width,0))),unpackRgba(rgbaLightLut.Load(int3(b%width,b/width,0))),frac(l));
+}
+float3 srgbToLinear(float3 value) {
+ return float3(value.x<=0.04045?value.x/12.92:pow((value.x+0.055)/1.055,2.4),
+  value.y<=0.04045?value.y/12.92:pow((value.y+0.055)/1.055,2.4),value.z<=0.04045?value.z/12.92:pow((value.z+0.055)/1.055,2.4));
+}
+float3 linearToSrgb(float3 value) {
+ return float3(value.x<=0.0031308?value.x*12.92:1.055*pow(value.x,1.0/2.4)-0.055,
+  value.y<=0.0031308?value.y*12.92:1.055*pow(value.y,1.0/2.4)-0.055,value.z<=0.0031308?value.z*12.92:1.055*pow(value.z,1.0/2.4)-0.055);
+}
+uint packRgb(float3 color) {
+ uint3 c=(uint3)(saturate(color)*255.0+0.5);
+ return 0xFF000000 | (c.r<<16) | (c.g<<8) | c.b;
+}
 struct Input {
+ uint vertexId : SV_VertexID;
  float2 position : POSITION;
  float depth : TEXCOORD0;
  float2 uv : TEXCOORD1;
@@ -291,6 +397,7 @@ struct Interpolated {
  nointerpolation float4 shadowParameters : TEXCOORD4;
  nointerpolation float2 fallback : TEXCOORD5;
  nointerpolation float2 volume : TEXCOORD7;
+ float4 authoredColor : TEXCOORD8;
 };
 Interpolated VS(Input input) {
  Interpolated output;
@@ -307,6 +414,7 @@ Interpolated VS(Input input) {
  output.shadowParameters = input.shadowParameters;
  output.fallback = input.fallback;
  output.volume = float2(-1, 1);
+ output.authoredColor = (flags.w&512)!=0 ? authoredColors[input.vertexId+(uint)target.z] : float4(1,1,1,1);
  return output;
 }
 float directionalShadow(float3 world, float4 receiver) {
@@ -331,6 +439,18 @@ float directionalShadow(float3 world, float4 receiver) {
   }
  }
  return occluded / max(taps, 1);
+}
+float smoothDirectionalShadow(float3 world,float4 receiver) {
+ if((flags.w&8)==0 || parameters.w<1 || (((uint)receiver.w&4)==0))return 0;
+ float2 uv=float2((dot(world,shadowRight.xyz)-shadowRight.w)/shadowLight.w,(dot(world,shadowUp.xyz)-shadowUp.w)/shadowScale.x);
+ if(any(uv<0) || any(uv>=parameters.w))return 0;
+ float2 t=frac(uv);
+ float3 base=world-shadowRight.xyz*t.x*shadowLight.w-shadowUp.xyz*t.y*shadowScale.x
+  -shadowLight.xyz*(receiver.y*t.x*shadowLight.w+receiver.z*t.y*shadowScale.x);
+ float3 du=shadowRight.xyz*shadowLight.w+shadowLight.xyz*receiver.y*shadowLight.w;
+ float3 dv=shadowUp.xyz*shadowScale.x+shadowLight.xyz*receiver.z*shadowScale.x;
+ return lerp(lerp(directionalShadow(base,receiver),directionalShadow(base+du,receiver),t.x),
+  lerp(directionalShadow(base+dv,receiver),directionalShadow(base+du+dv,receiver),t.x),t.y);
 }
 bool openingAt(float3 hit, int axis, float boundary) {
  float2 uv = float2(axis == 0 ? hit.z : hit.x, axis == 1 ? hit.z : hit.y);
@@ -417,6 +537,7 @@ bool visibleThrough(float3 origin, float3 receiver) {
  }
  return true;
 }
+bool spritePointVisibleThrough(float3 origin, float3 receiver);
 float pointAmount(float3 world, float3 authoredNormal) {
  float red = 0;
  float normalLength = length(authoredNormal);
@@ -429,16 +550,98 @@ float pointAmount(float3 world, float3 authoredNormal) {
   float radiusSquared = light.w * light.w;
   if (distanceSquared >= radiusSquared || distanceSquared <= 0.00000001) continue;
   float diffuse = max(0, dot(normal, direction * rsqrt(distanceSquared)));
-  if (diffuse <= 0 || !visibleThrough(light.xyz, world)) continue;
+  if (diffuse <= 0) continue;
+  bool visible;
+  [branch] if ((flags.w&2048)!=0) visible = spritePointVisibleThrough(light.xyz, world);
+  else visible = visibleThrough(light.xyz, world);
+  if (!visible) continue;
   float range = 1 - distanceSquared / radiusSquared;
   red += lightRedIntensity[i].x * lightRedIntensity[i].y * diffuse * range * range / (1 + distanceSquared);
  }
  return saturate(red / normalAndRed.w / parameters.x);
 }
+bool spritePointOpeningAt(float3 hit, int axis, float boundary, uint begin, uint count) {
+ float2 uv = float2(axis == 0 ? hit.z : hit.x, axis == 1 ? hit.z : hit.y);
+ [loop] for (uint i = begin; i < begin + count; ++i) {
+  float4 plane = spritePointAperturePlanes[i];
+  float4 bounds = spritePointApertureBounds[i];
+  if ((int)plane.x != axis || abs(plane.y - boundary) > 0.0001) continue;
+  if (uv.x <= bounds.x + 0.0001 || uv.x >= bounds.y - 0.0001
+   || uv.y <= bounds.z + 0.0001 || uv.y >= bounds.w - 0.0001) continue;
+  int sides = (int)plane.z;
+  bool inside = true;
+  if (sides != 0) {
+   float2 normalized = (uv - float2(bounds.x + bounds.y, bounds.z + bounds.w) * 0.5)
+    / (float2(bounds.y - bounds.x, bounds.w - bounds.z) * 0.5);
+   float sideDistance = cos(3.14159265358979323846 / sides);
+   [loop] for (int side = 0; side < sides; ++side) {
+    float angle = 6.28318530717958647692 * (side + 0.5) / sides;
+    if (dot(normalized, float2(cos(angle), sin(angle))) >= sideDistance - 0.0001) inside = false;
+   }
+  }
+  if (inside) return true;
+ }
+ return false;
+}
+bool spritePointCrossingOpen(float3 origin, float3 delta, float t, float4 minimum, float4 maximum) {
+ if (t <= 0.00001 || t >= 0.99999) return true;
+ float3 hit = origin + delta * t;
+ [loop] for (int axis = 0; axis < 3; ++axis) {
+  if (abs(delta[axis]) <= 0.000001) continue;
+  if (abs(hit[axis] - minimum[axis]) <= 0.0001
+   && !spritePointOpeningAt(hit, axis, minimum[axis], (uint)minimum.w, (uint)maximum.w)) return false;
+  if (abs(hit[axis] - maximum[axis]) <= 0.0001
+   && !spritePointOpeningAt(hit, axis, maximum[axis], (uint)minimum.w, (uint)maximum.w)) return false;
+ }
+ return true;
+}
+bool spritePointVisibleThrough(float3 origin, float3 receiver) {
+ float3 delta = receiver - origin;
+ [loop] for (uint i = 0; i < spritePointCounts.y; ++i) {
+  float4 minimum = spritePointOccluderMinimum[i];
+  float4 maximum = spritePointOccluderMaximum[i];
+  float entry = 0;
+  float exitPoint = 1;
+  bool misses = false;
+  [unroll] for (int axis = 0; axis < 3; ++axis) {
+   if (abs(delta[axis]) <= 0.000001) {
+    if (origin[axis] < minimum[axis] || origin[axis] > maximum[axis]) misses = true;
+   } else {
+    float first = (minimum[axis] - origin[axis]) / delta[axis];
+    float second = (maximum[axis] - origin[axis]) / delta[axis];
+    entry = max(entry, min(first, second));
+    exitPoint = min(exitPoint, max(first, second));
+   }
+  }
+  if (misses || entry > exitPoint) continue;
+  if (!spritePointCrossingOpen(origin, delta, entry, minimum, maximum)
+   || !spritePointCrossingOpen(origin, delta, exitPoint, minimum, maximum)) return false;
+ }
+ return true;
+}
+float3 spritePointIrradiance(float3 world) {
+ float3 irradiance = 0;
+ [loop] for (uint i = 0; i < spritePointCounts.x; ++i) {
+  float4 light = spritePointPositionRadius[i];
+  float3 direction = light.xyz - world;
+  float distanceSquared = dot(direction, direction);
+  float radiusSquared = light.w * light.w;
+  // HLSL logical operators need not short-circuit function calls. Keep the
+  // finite-radius rejection ahead of all shell/aperture work explicitly.
+  [branch] if (distanceSquared >= radiusSquared || spritePointColorIntensity[i].w == 0) continue;
+  if (!spritePointVisibleThrough(light.xyz, world)) continue;
+  float range = 1 - distanceSquared / radiusSquared;
+  irradiance += spritePointColorIntensity[i].xyz * spritePointColorIntensity[i].w
+   * range * range / (1 + distanceSquared);
+ }
+ return irradiance;
+}
 struct Pixel {
  uint color : SV_Target0;
  uint pick : SV_Target1;
  float depth : SV_Target2;
+ uint rgba : SV_Target3;
+ uint viewModelMask : SV_Target4;
 };
 Pixel PS(Interpolated input) {
  if (input.volume.y <= 0) discard;
@@ -462,6 +665,9 @@ Pixel PS(Interpolated input) {
   code = (uint)input.fallback.x;
  }
  uint color = code;
+ float3 rgb = paletteRgb(code);
+ float alpha = 1;
+ if ((flags.w&128)!=0) { float4 rgba=litRgba(code,0); rgb=rgba.rgb; alpha=rgba.a; }
  if (flags.x != 0) {
   uint level = 0;
   if (flags.x == 1) level = ((uint)(absent ? input.fallback.y : input.shadowParameters.w) & 3) * 4
@@ -472,16 +678,46 @@ Pixel PS(Interpolated input) {
   uint lutIndex = min(code, flags.z - 1) * flags.y + min(level, flags.y - 1);
   uint lutWidth = max(1, (uint)shadowScale.z);
   color = lightLut.Load(int3(lutIndex % lutWidth, lutIndex / lutWidth, 0));
+  if((flags.w&32)!=0){
+  float continuous=(float)level;
+  if(flags.x==1) continuous=((uint)(absent?input.fallback.y:input.shadowParameters.w)&3)*4 + smoothDirectionalShadow(input.world,input.shadowParameters)*3;
+  else if(flags.x==2) continuous=saturate(input.normalDiffuse.w*(1-smoothDirectionalShadow(input.world,input.shadowParameters)))*(flags.y-1);
+  else if(flags.x==4) continuous=(flags.w&256)!=0?nativeLightAmount(input.world,shading.x):shading.x;
+  else continuous=pointAmount(input.world,input.normalDiffuse.xyz)*(flags.y-1);
+  uint original=((flags.w&64)!=0 && !absent)?unlitCodes.Load(int3(texel,0)):code;
+  if((flags.w&128)!=0) { float4 rgba=litRgba(code,continuous); rgb=rgba.rgb; alpha=rgba.a; }
+  else rgb=litRgb(original,continuous);
+  } else if((flags.w&128)!=0) { float4 rgba=litRgba(code,(float)level); rgb=rgba.rgb; alpha=rgba.a; }
+  else rgb=paletteRgb(color);
  }
  if ((flags.w & 16) != 0) {
   uint destination = priorIndexedColor.Load(int3((int2)input.position.xy, 0));
   // 256-wide rows are destination codes; source is the column.
   color = paletteBlendLut.Load(int3(color, destination, 0));
+  rgb=paletteRgb(color);
+  alpha=1;
+ }
+ if ((flags.w&512)!=0) {
+  rgb=linearToSrgb(srgbToLinear(saturate(rgb))*saturate(input.authoredColor.rgb));
+  alpha*=saturate(input.authoredColor.a);
+ }
+ [branch] if ((flags.w&1024)!=0) {
+  float3 pointIrradiance = spritePointIrradiance(input.world);
+  // No gamma roundtrip for outside/blocked samples: keep legacy RGB bytes.
+  if (any(pointIrradiance > 0)) {
+   float3 baseLinear = srgbToLinear(saturate(rgb));
+   float luminance = dot(baseLinear, float3(0.2126, 0.7152, 0.0722));
+   rgb = linearToSrgb(saturate(baseLinear + luminance * pointIrradiance));
+  }
  }
  Pixel output;
  output.color = color;
  output.pick = input.pick;
  output.depth = input.depth;
+ output.rgba = (packRgb(rgb)&0x00FFFFFF) | ((uint)(saturate(alpha)*255.0+0.5)<<24);
+ // Coverage is emitted only after the same discard/depth tests as color.
+ // Never borrow or rewrite RGBA alpha to communicate first-person coverage.
+ output.viewModelMask = (flags.w&4096)!=0 ? 1 : 0;
  return output;
 }
 )hlsl";
@@ -499,12 +735,16 @@ bool Fail(const std::string &message, HRESULT result = S_OK, TownGpuFailureKind 
 		std::snprintf(code, sizeof(code), " (HRESULT %08lX)", static_cast<unsigned long>(result));
 		Status.failure += code;
 	}
+	Status.failureCode = static_cast<int32_t>(result);
+	Status.failureCodeKnown = FAILED(result);
+	diag::RecordNativeFailure(static_cast<uint8_t>(Status.failureKind), Status.failureCode, Status.failureCodeKnown);
 	FrameFailed = true;
 	return false;
 }
 
 bool Compile(const char *entry, const char *profile, ComOwner<ID3DBlob> &blob)
 {
+	diag::StageScope diagnosticStage(diag::SessionLogger(), diag::Stage::ShaderCompile, diag::SessionFrame(), diag::SampleSessionFrame());
 	ComOwner<ID3DBlob> errors;
 	const HRESULT result = D3DCompile(ShaderSource, sizeof(ShaderSource) - 1, "town_gpu", nullptr, nullptr,
 	    entry, profile, D3DCOMPILE_ENABLE_STRICTNESS | D3DCOMPILE_OPTIMIZATION_LEVEL3, 0, blob.put(), errors.put());
@@ -519,6 +759,7 @@ bool Compile(const char *entry, const char *profile, ComOwner<ID3DBlob> &blob)
 
 bool CreateDevice(bool allowWarp)
 {
+	diag::StageScope diagnosticStage(diag::SessionLogger(), diag::Stage::Device3D, diag::SessionFrame(), diag::SampleSessionFrame());
 	D3D_FEATURE_LEVEL feature {};
 	const D3D_FEATURE_LEVEL levels[] { D3D_FEATURE_LEVEL_11_0 };
 	HRESULT result = D3D11CreateDevice(nullptr, D3D_DRIVER_TYPE_HARDWARE, nullptr, 0,
@@ -540,6 +781,7 @@ bool CreateDevice(bool allowWarp)
 		char name[512] {};
 		WideCharToMultiByte(CP_UTF8, 0, description.Description, -1, name, sizeof(name), nullptr, nullptr);
 		Status.adapter = name;
+		Status.vendorId = description.VendorId; Status.deviceId = description.DeviceId;
 	}
 	ComOwner<ID3DBlob> vertexCode;
 	ComOwner<ID3DBlob> pixelCode;
@@ -556,7 +798,7 @@ bool CreateDevice(bool allowWarp)
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32_FLOAT, 0, 8, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "TEXCOORD", 2, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 6, DXGI_FORMAT_R32_FLOAT, 0, offsetof(TownGpuVertex, clipW), D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{ "TEXCOORD", 6, DXGI_FORMAT_R32_FLOAT, 0, offsetof(ProjectedVertex, clipW), D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "COLOR", 0, DXGI_FORMAT_R32_UINT, 0, offsetof(GpuVertex, pickId), D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "TEXCOORD", 3, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, offsetof(GpuVertex, normalDiffuse), D3D11_INPUT_PER_VERTEX_DATA, 0 },
 		{ "TEXCOORD", 4, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, offsetof(GpuVertex, shadowParameters), D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -594,6 +836,8 @@ bool CreateDevice(bool allowWarp)
 	D3D11_BLEND_DESC paletteWrite {};
 	paletteWrite.IndependentBlendEnable = TRUE;
 	paletteWrite.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+	paletteWrite.RenderTarget[3].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+	paletteWrite.RenderTarget[4].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 	// Integer render targets use an exact lookup, never DXGI alpha blending.
 	result = Device->CreateBlendState(&paletteWrite, PaletteBlendWriteState.put());
 	if (FAILED(result))
@@ -603,6 +847,7 @@ bool CreateDevice(bool allowWarp)
 		blend.IndependentBlendEnable = TRUE;
 		for (auto &target : blend.RenderTarget)
 			target.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+		blend.RenderTarget[4].RenderTargetWriteMask = 0;
 		if (i != 0)
 			blend.RenderTarget[1].RenderTargetWriteMask = 0;
 		result = Device->CreateBlendState(&blend, BlendStates[i].put());
@@ -615,13 +860,14 @@ bool CreateDevice(bool allowWarp)
 
 bool CreateTargets(int width, int height)
 {
+	diag::StageScope diagnosticStage(diag::SessionLogger(), diag::Stage::Targets, diag::SessionFrame(), diag::SampleSessionFrame());
 	if (Width == width && Height == height && HardwareDepthView)
 		return true;
 	Width = Height = 0;
 	HardwareDepthView.reset();
 	PriorIndexedColorView.reset();
 	PriorIndexedColor.reset();
-	const DXGI_FORMAT formats[] { DXGI_FORMAT_R8_UINT, DXGI_FORMAT_R32_UINT, DXGI_FORMAT_R32_FLOAT };
+	const DXGI_FORMAT formats[] { DXGI_FORMAT_R8_UINT, DXGI_FORMAT_R32_UINT, DXGI_FORMAT_R32_FLOAT, DXGI_FORMAT_R32_UINT, DXGI_FORMAT_R8_UINT };
 	for (size_t i = 0; i < Targets.size(); ++i) {
 		D3D11_TEXTURE2D_DESC description {};
 		description.Width = width;
@@ -727,6 +973,17 @@ bool MakeTextureRoom(size_t bytes)
 	return true;
 }
 
+template <typename T>
+uint64_t PayloadFingerprint(std::span<const T> values)
+{
+	uint64_t result = 14695981039346656037ULL;
+	const auto bytes = std::as_bytes(values);
+	const std::byte *current = bytes.data();
+	for (size_t i = 0; i < bytes.size(); ++i)
+		result = (result ^ std::to_integer<uint8_t>(current[i])) * 1099511628211ULL;
+	return result;
+}
+
 CachedTexture *GetTexture(const TownGpuTexture &input, TownGpuLighting lighting)
 {
 	if (input.width <= 0 || input.height <= 0 || input.lightLevels == 0) {
@@ -744,6 +1001,7 @@ CachedTexture *GetTexture(const TownGpuTexture &input, TownGpuLighting lighting)
 	}
 	if ((!input.texelCodes.empty() && input.texelCodes.size() != count)
 	    || (!input.opacity.empty() && input.opacity.size() != count)
+	    || (!input.unlitCodes.empty() && input.unlitCodes.size() != count)
 	    || input.lightLut.size() % input.lightLevels != 0) {
 		Fail("Invalid GPU texture payload");
 		return nullptr;
@@ -754,9 +1012,11 @@ CachedTexture *GetTexture(const TownGpuTexture &input, TownGpuLighting lighting)
 	auto lutFound = LightLutCache.find(lutKey);
 	CachedTexels *texels = texelsFound == TexelCache.end() ? nullptr : &texelsFound->second;
 	CachedLightLut *lut = lutFound == LightLutCache.end() ? nullptr : &lutFound->second;
+	const bool rgbaEnabled = input.rgbaLightLutEnabled || !input.rgbaLightLut.empty();
 	if ((texels != nullptr && (texels->width != input.width || texels->height != input.height
-	        || (!input.opacity.empty() && !texels->hasOpacity)))
+	        || (!input.opacity.empty() && !texels->hasOpacity) || (!input.unlitCodes.empty() && !texels->unlit)))
 	    || (lut != nullptr && (lut->lightLevels != input.lightLevels
+	        || lut->hasRgba != rgbaEnabled
 	        || (!input.lightLut.empty() && input.lightLut.size() != static_cast<size_t>(lut->codeCount) * lut->lightLevels)))) {
 		Fail("GPU texture/LUT key/revision reused with a different layout");
 		return nullptr;
@@ -769,6 +1029,12 @@ CachedTexture *GetTexture(const TownGpuTexture &input, TownGpuLighting lighting)
 		Fail("Missing GPU light LUT for uncached identity");
 		return nullptr;
 	}
+	const size_t indexedEntries = lut != nullptr ? static_cast<size_t>(lut->codeCount) * lut->lightLevels : input.lightLut.size();
+	if ((rgbaEnabled && (indexedEntries == 0 || (lut == nullptr && input.rgbaLightLut.empty())))
+	    || (!input.rgbaLightLut.empty() && input.rgbaLightLut.size() != indexedEntries)) {
+		Fail("GPU RGBA light LUT requires its complete one-to-one indexed pair");
+		return nullptr;
+	}
 	const unsigned codeCount = lut != nullptr ? lut->codeCount
 	    : input.lightLut.empty() ? 256 : static_cast<unsigned>(input.lightLut.size() / input.lightLevels);
 	const uint32_t maximumCode = texels != nullptr ? texels->maximumCode : *std::max_element(input.texelCodes.begin(), input.texelCodes.end());
@@ -776,12 +1042,25 @@ CachedTexture *GetTexture(const TownGpuTexture &input, TownGpuLighting lighting)
 		Fail("GPU texel code exceeds its palette/LUT");
 		return nullptr;
 	}
-	const size_t texelBytes = texels == nullptr ? count * sizeof(uint32_t) + input.opacity.size() : 0;
+	const size_t texelBytes = texels == nullptr ? count * sizeof(uint32_t) + input.opacity.size() + input.unlitCodes.size() : 0;
 	const unsigned lutWidth = lut != nullptr ? lut->lutWidth : static_cast<unsigned>(std::min<size_t>(16384, input.lightLut.size()));
 	const size_t lutHeight = lutWidth == 0 ? 0 : (input.lightLut.size() + lutWidth - 1) / lutWidth;
-	const size_t lutBytes = lut == nullptr ? lutHeight * lutWidth : 0;
+	const size_t paddedEntries = lutHeight * lutWidth;
+	const size_t lutBytes = lut == nullptr ? paddedEntries * (rgbaEnabled ? 5 : 1) : 0;
 	if (lutHeight > 16384 || texelBytes > MaxTextureBytes || lutBytes > MaxTextureBytes - texelBytes) {
 		Fail("GPU texture/LUT payload exceeds resource dimensions or cache budget", S_OK, TownGpuFailureKind::Capacity);
+		return nullptr;
+	}
+	// Optional RGB pairs validate supplied payload witnesses even on warm hits.
+	// Legacy warm resources keep their existing O(1) immutable-revision contract.
+	if (rgbaEnabled && ((lut != nullptr
+	        && ((!input.lightLut.empty() && PayloadFingerprint(input.lightLut) != lut->indexedFingerprint)
+	            || (!input.rgbaLightLut.empty() && PayloadFingerprint(input.rgbaLightLut) != lut->rgbaFingerprint)))
+	    || (texels != nullptr
+	        && ((!input.texelCodes.empty() && PayloadFingerprint(input.texelCodes) != texels->codesFingerprint)
+	            || (!input.opacity.empty() && PayloadFingerprint(input.opacity) != texels->opacityFingerprint)
+	            || (!input.unlitCodes.empty() && PayloadFingerprint(input.unlitCodes) != texels->unlitFingerprint))))) {
+		Fail("GPU RGB-paired immutable identity reused with different supplied contents");
 		return nullptr;
 	}
 	// Pin hits before making room: a new LUT revision can reuse the exact texel
@@ -801,8 +1080,12 @@ CachedTexture *GetTexture(const TownGpuTexture &input, TownGpuLighting lighting)
 		newTexels.hasOpacity = !input.opacity.empty();
 		newTexels.bytes = texelBytes;
 		newTexels.lastSeenFrame = FrameSerial;
+		newTexels.codesFingerprint = PayloadFingerprint(input.texelCodes);
+		newTexels.opacityFingerprint = PayloadFingerprint(input.opacity);
+		newTexels.unlitFingerprint = PayloadFingerprint(input.unlitCodes);
 		if (!UploadTexture(input.width, input.height, DXGI_FORMAT_R32_UINT, input.texelCodes.data(), input.width * sizeof(uint32_t), newTexels.codes)
-		    || (!input.opacity.empty() && !UploadTexture(input.width, input.height, DXGI_FORMAT_R8_UINT, input.opacity.data(), input.width, newTexels.opacity)))
+		    || (!input.opacity.empty() && !UploadTexture(input.width, input.height, DXGI_FORMAT_R8_UINT, input.opacity.data(), input.width, newTexels.opacity))
+		    || (!input.unlitCodes.empty() && (input.unlitCodes.size()!=count || !UploadTexture(input.width,input.height,DXGI_FORMAT_R8_UINT,input.unlitCodes.data(),input.width,newTexels.unlit))))
 			return nullptr;
 	}
 	if (lut == nullptr && !input.lightLut.empty()) {
@@ -811,15 +1094,29 @@ CachedTexture *GetTexture(const TownGpuTexture &input, TownGpuLighting lighting)
 		newLut.lutWidth = lutWidth;
 		newLut.bytes = lutBytes;
 		newLut.lastSeenFrame = FrameSerial;
+		newLut.hasRgba = rgbaEnabled;
+		newLut.indexedFingerprint = PayloadFingerprint(input.lightLut);
+		newLut.rgbaFingerprint = PayloadFingerprint(input.rgbaLightLut);
 		std::vector<uint8_t> padded;
 		const uint8_t *lutData = input.lightLut.data();
-		if (lutBytes != input.lightLut.size()) {
+		if (paddedEntries != input.lightLut.size()) {
 			padded.assign(input.lightLut.begin(), input.lightLut.end());
-			padded.resize(lutBytes);
+			padded.resize(paddedEntries);
 			lutData = padded.data();
 		}
 		if (!UploadTexture(lutWidth, static_cast<int>(lutHeight), DXGI_FORMAT_R8_UINT, lutData, lutWidth, newLut.view))
 			return nullptr;
+		if (rgbaEnabled) {
+			std::vector<uint32_t> rgbaPadded;
+			const uint32_t *rgbaData = input.rgbaLightLut.data();
+			if (paddedEntries != input.rgbaLightLut.size()) {
+				rgbaPadded.assign(input.rgbaLightLut.begin(), input.rgbaLightLut.end());
+				rgbaPadded.resize(paddedEntries);
+				rgbaData = rgbaPadded.data();
+			}
+			if (!UploadTexture(lutWidth, static_cast<int>(lutHeight), DXGI_FORMAT_R32_UINT, rgbaData, lutWidth * sizeof(uint32_t), newLut.rgbaView))
+				return nullptr;
+		}
 	}
 	// Commit only complete immutable uploads; earlier frame bindings retain
 	// their resource pointers and constants when this shared LUT grows.
@@ -883,8 +1180,12 @@ bool ValidOpaqueBlocker(const TownLightOccluder &blocker)
 	    && blocker.minimum.z < blocker.maximum.z && blocker.apertures.empty();
 }
 
-bool MakeConstants(const TownGpuMaterial &material, const CachedTexture &texture, Constants &output)
+bool MakeConstants(const TownGpuMaterial &material, const CachedTexture &texture, Constants &output, bool projected = false)
 {
+	if (material.viewModel && (!projected || material.paletteBlend))
+		return Fail("GPU viewmodel requires projected geometry and cannot blend a native palette", S_OK, TownGpuFailureKind::Unsupported);
+	if (FrameViewModelStarted && !material.viewModel)
+		return Fail("GPU world geometry cannot follow the final viewmodel pass");
 	if (static_cast<uint32_t>(material.lighting) > static_cast<uint32_t>(TownGpuLighting::Palette)
 	    || !Finite(material.diffuse) || !Finite(material.shadowBias) || !Finite(material.shadowSlopeU) || !Finite(material.shadowSlopeV)
 	    || !std::all_of(material.normal.begin(), material.normal.end(), [](float value) { return Finite(value); })
@@ -893,7 +1194,8 @@ bool MakeConstants(const TownGpuMaterial &material, const CachedTexture &texture
 	    || (material.lighting == TownGpuLighting::Shadow && material.fallbackPaletteIndex >= static_cast<int>(texture.codeCount))
 	    || (material.lighting == TownGpuLighting::Shadow && texture.lightLevels != 16)
 	    || (material.lighting == TownGpuLighting::Palette
-	        && (material.shade < 0 || material.shade > 15 || texture.lightLevels != 16 || texture.codeCount != 256))
+	        && (material.shade < 0 || material.shade > 15 || texture.lightLevels != 16
+	            || (texture.codeCount != 256 && (texture.lut == nullptr || !texture.lut->hasRgba))))
 	    || (material.lighting == TownGpuLighting::Interior
 	        && (!Finite(material.interiorRedNormalization) || material.interiorRedNormalization <= 0
 	            || !Finite(material.interiorPointRange) || material.interiorPointRange <= 0)))
@@ -901,12 +1203,22 @@ bool MakeConstants(const TownGpuMaterial &material, const CachedTexture &texture
 	if (material.blockers.size() > TownMaxLightOccluders - 1
 	    || !std::all_of(material.blockers.begin(), material.blockers.end(), ValidOpaqueBlocker))
 		return Fail("Invalid GPU interior opaque blockers");
+	if (material.receivesSpritePointLight && FrameSpritePointLighting
+	    && (!FrameSmoothLighting && (texture.lut == nullptr || !texture.lut->hasRgba)))
+		return Fail("GPU sprite point irradiance requires smooth RGB or a paired RGB LUT", S_OK, TownGpuFailureKind::Unsupported);
+	if (material.useFramePointLightVisibility
+	    && (!FrameSpritePointLighting || material.lighting != TownGpuLighting::Interior))
+		return Fail("GPU frame point visibility requires a validated frame field and an Interior material");
 	output = {};
 	output.target = { static_cast<float>(Width), static_cast<float>(Height), 0, 0 };
 	output.projection = { FrameProjection.nearClip, FrameProjection.farClip, FrameProjection.perspective ? 1.0F : 0.0F, 0 };
 	output.flags = { static_cast<uint32_t>(material.lighting), texture.lightLevels, texture.codeCount,
 		static_cast<uint32_t>((material.repeat ? 1 : 0) | (material.transparentZero && !texture.hasOpacity ? 2 : 0)
-		    | (texture.hasOpacity ? 4 : 0) | (FrameShadow.resolution > 0 ? 8 : 0) | (material.paletteBlend ? 16 : 0)) };
+		    | (texture.hasOpacity ? 4 : 0) | (FrameShadow.resolution > 0 ? 8 : 0) | (material.paletteBlend ? 16 : 0) | (FrameSmoothLighting ? 32 : 0)
+		    | (texture.texels->unlit ? 64 : 0) | (texture.lut != nullptr && texture.lut->hasRgba ? 128 : 0) | (material.nativeLighting ? 256 : 0)
+		    | (material.receivesSpritePointLight && FrameSpritePointLighting ? SpritePointLightFlag : 0)
+		    | (material.useFramePointLightVisibility ? FramePointVisibilityFlag : 0)
+		    | (material.viewModel ? ViewModelFlag : 0)) };
 	output.shading.x = material.lighting == TownGpuLighting::Palette ? static_cast<float>(material.shade) : 0;
 	output.normal = { 0, 0, 0, material.interiorRedNormalization };
 	output.parameters = { material.interiorPointRange, 0, 0, static_cast<float>(FrameShadow.resolution) };
@@ -974,10 +1286,15 @@ bool TownGpuBeginFrame(int width, int height, bool allowWarpForDiagnostics, cons
 	BeforeReadbackForDiagnostics = nullptr;
 #ifdef _WIN32
 	FrameActive = false;
+	FrameSmoothLighting = false;
+	FrameRgbaLut = false;
+	FrameSpritePointLighting = false;
 	FrameFailed = false;
 	FramePaletteBlendReady = false;
 	FramePaletteOverlayStarted = false;
+	FrameViewModelStarted = false;
 	Vertices.clear();
+	AuthoredColors.clear();
 	Batches.clear();
 	BeginMeshFrame();
 	TextureCache.clear();
@@ -1003,10 +1320,12 @@ bool TownGpuBeginFrame(int width, int height, bool allowWarpForDiagnostics, cons
 	Status.frameSucceeded = false;
 	Status.failure.clear();
 	Status.failureKind = TownGpuFailureKind::None;
+	Status.failureCode = 0; Status.failureCodeKnown = false;
 	Status.submittedTriangles = 0;
 	Status.drawCalls = 0;
 	Status.uploadedTexelBytes = 0;
 	Status.uploadedLutBytes = 0;
+	Status.uploadedAuthoredColorBytes = 0;
 	Status.textureEvictions = 0;
 	Status.paletteBlendTriangles = 0;
 	Status.paletteBlendCopyBytes = 0;
@@ -1035,6 +1354,9 @@ bool TownGpuBeginFrame(int width, int height, bool allowWarpForDiagnostics, cons
 	if (!CreateTargets(width, height))
 		return false;
 	FrameProjection = projection;
+	if (TexturePreparationFrame == std::numeric_limits<uint64_t>::max())
+		return Fail("GPU texture-preparation frame counter exhausted", S_OK, TownGpuFailureKind::Capacity);
+	++TexturePreparationFrame;
 	FrameActive = true;
 	return true;
 #else
@@ -1045,6 +1367,40 @@ bool TownGpuBeginFrame(int width, int height, bool allowWarpForDiagnostics, cons
 	Status = {};
 	Status.failure = "Direct3D11 town rendering is available only on Windows";
 	Status.failureKind = TownGpuFailureKind::Unsupported;
+	return false;
+#endif
+}
+
+void TownGpuDiscardFrame()
+{
+	Status.frameSucceeded = false; // Includes refusal after a successful End.
+#ifdef _WIN32
+	FrameActive = false;
+	FrameFailed = true;
+	BeforeReadbackForDiagnostics = nullptr;
+#endif
+}
+
+uint64_t GetTownGpuRecordingFrame()
+{
+#ifdef _WIN32
+	return FrameActive && !FrameFailed ? TexturePreparationFrame : 0;
+#else
+	return 0;
+#endif
+}
+
+bool TownGpuPrepareTexture(const TownGpuTexture &texture, TownGpuLighting lighting)
+{
+#ifdef _WIN32
+	if (!FrameActive || FrameFailed)
+		return Fail("No valid GPU frame is recording");
+	if (static_cast<uint32_t>(lighting) > static_cast<uint32_t>(TownGpuLighting::Palette))
+		return Fail("Invalid GPU texture preparation lighting mode");
+	return GetTexture(texture, lighting) != nullptr;
+#else
+	(void)texture;
+	(void)lighting;
 	return false;
 #endif
 }
@@ -1128,13 +1484,93 @@ bool TownGpuSetPaletteBlend(const TownGpuPaletteBlend &blend)
 #endif
 }
 
+bool TownGpuSetSmoothLighting(std::span<const uint32_t> palette, std::span<const float> nativeLight, int fieldWidth, int fieldHeight)
+{
+#ifdef _WIN32
+    if(!FrameActive || FrameFailed || !GeometryCommands.empty() || palette.size()!=256 || fieldWidth<0 || fieldHeight<0 || fieldWidth>128 || fieldHeight>128
+       || nativeLight.size()!=static_cast<size_t>(fieldWidth)*fieldHeight || (nativeLight.empty() && (fieldWidth!=0 || fieldHeight!=0))) return Fail("Invalid smooth world light field");
+    if(!RgbPaletteResource || CachedRgbPalette.size()!=palette.size() || !std::equal(palette.begin(),palette.end(),CachedRgbPalette.begin())) {
+        if(!UploadTexture(256,1,DXGI_FORMAT_R32_UINT,palette.data(),256*4,RgbPaletteResource))return false;
+        CachedRgbPalette.assign(palette.begin(),palette.end());
+    }
+    if(nativeLight.empty()){NativeLightResource.reset();CachedNativeLight.clear();CachedNativeLightWidth=CachedNativeLightHeight=0;}
+    else if(!NativeLightResource || CachedNativeLightWidth!=fieldWidth || CachedNativeLightHeight!=fieldHeight || CachedNativeLight.size()!=nativeLight.size() || !std::equal(nativeLight.begin(),nativeLight.end(),CachedNativeLight.begin())) {
+        if(!std::all_of(nativeLight.begin(),nativeLight.end(),[](float value){return std::isfinite(value) && value>=0 && value<=15;}))return Fail("Invalid native light intensity");
+        if(!UploadTexture(fieldWidth,fieldHeight,DXGI_FORMAT_R32_FLOAT,nativeLight.data(),fieldWidth*4,NativeLightResource))return false;
+        CachedNativeLight.assign(nativeLight.begin(),nativeLight.end());CachedNativeLightWidth=fieldWidth;CachedNativeLightHeight=fieldHeight;
+    }
+    FrameSmoothLighting=true;return true;
+#else
+    (void)palette;(void)nativeLight;(void)fieldWidth;(void)fieldHeight;return false;
+#endif
+}
+
+bool TownGpuSetSpritePointLighting(std::span<const TownPointLight> lights,
+    std::span<const TownLightOccluder> occluders)
+{
+#ifdef _WIN32
+	if (!FrameActive || FrameFailed || !GeometryCommands.empty())
+		return Fail("GPU sprite point field must be set before geometry in an active frame");
+	if (!ValidateTownSpritePointLighting(lights, occluders))
+		return Fail("Invalid GPU sprite point lights, shells or apertures");
+	if (lights.empty()) {
+		FrameSpritePointLighting = false;
+		return true;
+	}
+	SpritePointConstants constants {};
+	constants.counts.x = static_cast<uint32_t>(lights.size());
+	constants.counts.y = static_cast<uint32_t>(occluders.size());
+	for (size_t i = 0; i < lights.size(); ++i) {
+		const TownPointLight &light = lights[i];
+		constants.positionRadius[i] = { light.position.x, light.position.height, light.position.z, light.radius };
+		constants.colorIntensity[i] = { light.color.red, light.color.green, light.color.blue, light.intensity };
+	}
+	for (size_t i = 0; i < occluders.size(); ++i) {
+		const TownLightOccluder &occluder = occluders[i];
+		constants.occluderMinimum[i] = { occluder.minimum.x, occluder.minimum.height, occluder.minimum.z, static_cast<float>(constants.counts.z) };
+		constants.occluderMaximum[i] = { occluder.maximum.x, occluder.maximum.height, occluder.maximum.z, static_cast<float>(occluder.apertures.size()) };
+		for (const TownLightAperture &aperture : occluder.apertures) {
+			const size_t index = constants.counts.z++;
+			constants.apertureBounds[index] = { aperture.minU, aperture.maxU, aperture.minV, aperture.maxV };
+			constants.aperturePlanes[index] = { static_cast<float>(aperture.plane), aperture.coordinate, static_cast<float>(aperture.polygonSides), 0 };
+		}
+	}
+	if (!SpritePointConstantBuffer) {
+		D3D11_BUFFER_DESC description {};
+		description.ByteWidth = sizeof(SpritePointConstants);
+		description.Usage = D3D11_USAGE_DYNAMIC;
+		description.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+		description.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		const HRESULT result = Device->CreateBuffer(&description, nullptr, SpritePointConstantBuffer.put());
+		if (FAILED(result))
+			return Fail("Create GPU sprite point constant buffer", result);
+	}
+	D3D11_MAPPED_SUBRESOURCE mapped {};
+	const HRESULT result = Context->Map(SpritePointConstantBuffer.get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+	if (FAILED(result))
+		return Fail("Map GPU sprite point constant buffer", result);
+	std::memcpy(mapped.pData, &constants, sizeof(constants));
+	Context->Unmap(SpritePointConstantBuffer.get(), 0);
+	FrameSpritePointLighting = true;
+	return true;
+#else
+	(void)lights;
+	(void)occluders;
+	return false;
+#endif
+}
+
 bool TownGpuSubmitProjectedTriangle(const std::array<TownGpuVertex, 3> &vertices,
     const TownGpuTexture &texture, const TownGpuMaterial &material, uint32_t pickId)
 {
 #ifdef _WIN32
 	if (!FrameActive || FrameFailed)
 		return Fail("No valid GPU frame is recording");
-	if (!material.paletteBlend && FramePaletteOverlayStarted)
+	if (FrameViewModelStarted && !material.viewModel)
+		return Fail("GPU world geometry cannot follow the final viewmodel pass");
+	if (material.viewModel && material.paletteBlend)
+		return Fail("GPU viewmodel cannot blend a native palette", S_OK, TownGpuFailureKind::Unsupported);
+	if (!material.paletteBlend && !material.viewModel && FramePaletteOverlayStarted)
 		return Fail("Opaque GPU geometry must precede native palette overlays");
 	if (material.paletteBlend && !FramePaletteBlendReady)
 		return Fail("GPU native palette overlay requires a frame blend table");
@@ -1142,21 +1578,29 @@ bool TownGpuSubmitProjectedTriangle(const std::array<TownGpuVertex, 3> &vertices
 		return Fail("GPU projected vertex-stream budget exceeded", S_OK, TownGpuFailureKind::Capacity);
 	if (Status.submittedTriangles == std::numeric_limits<size_t>::max())
 		return Fail("GPU submitted-triangle counter overflow", S_OK, TownGpuFailureKind::Capacity);
+	bool colored = false;
 	for (const TownGpuVertex &vertex : vertices) {
 		if (!Finite(vertex.x) || !Finite(vertex.y) || !Finite(vertex.depth)
 		    || vertex.depth < FrameProjection.nearClip || vertex.depth > FrameProjection.farClip
 		    || !Finite(vertex.clipW) || vertex.clipW != (FrameProjection.perspective ? vertex.depth : 1)
 		    || !Finite((vertex.x * 2 / Width - 1) * vertex.clipW) || !Finite((1 - vertex.y * 2 / Height) * vertex.clipW)
 		    || !Finite(vertex.u) || !Finite(vertex.v)
-		    || !std::all_of(vertex.world.begin(), vertex.world.end(), [](float value) { return Finite(value); }))
+		    || !std::all_of(vertex.world.begin(), vertex.world.end(), [](float value) { return Finite(value); })
+		    || !std::all_of(vertex.authoredColor.begin(), vertex.authoredColor.end(), [](float value) { return Finite(value) && value >= 0 && value <= 1; }))
 			return Fail("GPU projected vertices must be finite, depth-clipped and use clipW=depth (perspective) or 1 (orthographic)");
+		colored = colored || vertex.authoredColor != std::array<float, 4> { 1, 1, 1, 1 };
 	}
+	if (colored && !FrameSmoothLighting && !(texture.rgbaLightLutEnabled || !texture.rgbaLightLut.empty()))
+		return Fail("GPU authored color requires a frame RGB palette or paired RGB LUT");
+	if ((colored || !AuthoredColors.empty()) && (Vertices.size() + 3) * sizeof(std::array<float, 4>) > MaxAuthoredColorBytes)
+		return Fail("GPU authored-color stream budget exceeded", S_OK, TownGpuFailureKind::Capacity);
 	CachedTexture *uploaded = GetTexture(texture, material.lighting);
 	if (uploaded == nullptr)
 		return false;
 	Constants constants {};
-	if (!MakeConstants(material, *uploaded, constants))
+	if (!MakeConstants(material, *uploaded, constants, true))
 		return false;
+	if (colored) constants.flags.w |= 512;
 	D3D11_BOX paletteCopyBox {};
 	size_t paletteCopyBytes = 0;
 	if (material.paletteBlend) {
@@ -1172,19 +1616,24 @@ bool TownGpuSubmitProjectedTriangle(const std::array<TownGpuVertex, 3> &vertices
 			return Fail("GPU native palette overlay triangle/copy budget exceeded", S_OK, TownGpuFailureKind::Capacity);
 	}
 	const UINT first = static_cast<UINT>(Vertices.size());
-	for (const TownGpuVertex &vertex : vertices)
-		Vertices.push_back({ vertex, pickId,
+	if (colored && AuthoredColors.empty()) AuthoredColors.resize(Vertices.size(), { 1, 1, 1, 1 });
+	for (const TownGpuVertex &vertex : vertices) {
+		if (colored || !AuthoredColors.empty()) AuthoredColors.push_back(vertex.authoredColor);
+		Vertices.push_back({ { vertex.x, vertex.y, vertex.depth, vertex.u, vertex.v, vertex.world, vertex.clipW }, pickId,
 		    { material.normal[0], material.normal[1], material.normal[2], std::clamp(material.diffuse, 0.0F, 1.0F) },
 		    { material.shadowBias, material.shadowSlopeU, material.shadowSlopeV,
 		        static_cast<float>(std::clamp(material.shade, 0, 3) + (material.receivesShadow ? 4 : 0)) },
 		    { static_cast<float>(material.fallbackPaletteIndex), static_cast<float>(std::clamp(material.fallbackShade, 0, 3)) } });
+	}
+	FrameRgbaLut = FrameRgbaLut || (uploaded->lut != nullptr && uploaded->lut->hasRgba);
 	if (!material.paletteBlend && !GeometryCommands.empty() && !GeometryCommands.back().mesh && !Batches.empty()
 	    && !Batches.back().paletteBlend && Batches.back().texture == uploaded && Batches.back().preservePicking == material.preservePicking
+	    && Batches.back().viewModel == material.viewModel
 	    && std::memcmp(&Batches.back().constants, &constants, sizeof(constants)) == 0)
 		Batches.back().count += 3;
 	else {
 		GeometryCommands.push_back({ false, Batches.size() });
-		Batches.push_back({ uploaded, constants, first, 3, material.preservePicking, material.paletteBlend,
+		Batches.push_back({ uploaded, constants, first, 3, material.preservePicking, material.paletteBlend, material.viewModel,
 		    paletteCopyBox });
 	}
 	if (material.paletteBlend) {
@@ -1192,6 +1641,7 @@ bool TownGpuSubmitProjectedTriangle(const std::array<TownGpuVertex, 3> &vertices
 		++Status.paletteBlendTriangles;
 		Status.paletteBlendAdmittedBytes += paletteCopyBytes;
 	}
+	FrameViewModelStarted = FrameViewModelStarted || material.viewModel;
 	++Status.submittedTriangles;
 	return true;
 #else
@@ -1217,15 +1667,19 @@ bool TownGpuEndFrame(TownGpuFrame &output)
 		return Fail("Cannot publish an incomplete GPU frame");
 	}
 	FrameActive = false;
+	{
+	diag::StageScope diagnosticCommands(diag::SessionLogger(), diag::Stage::WorldSubmit, diag::SessionFrame(), diag::SampleSessionFrame());
 	const auto commandStart = Clock::now();
 	const float zero[] { 0, 0, 0, 0 };
 	const float infinity[] { std::numeric_limits<float>::infinity(), 0, 0, 0 };
 	Context->ClearRenderTargetView(Targets[0].view.get(), zero);
 	Context->ClearRenderTargetView(Targets[1].view.get(), zero);
 	Context->ClearRenderTargetView(Targets[2].view.get(), infinity);
+	Context->ClearRenderTargetView(Targets[3].view.get(), zero);
+	Context->ClearRenderTargetView(Targets[4].view.get(), zero);
 	Context->ClearDepthStencilView(HardwareDepthView.get(), D3D11_CLEAR_DEPTH, 1, 0);
-	ID3D11RenderTargetView *targets[] { Targets[0].view.get(), Targets[1].view.get(), Targets[2].view.get() };
-	Context->OMSetRenderTargets(3, targets, HardwareDepthView.get());
+	ID3D11RenderTargetView *targets[] { Targets[0].view.get(), Targets[1].view.get(), Targets[2].view.get(), Targets[3].view.get(), Targets[4].view.get() };
+	Context->OMSetRenderTargets(5, targets, HardwareDepthView.get());
 	Context->OMSetDepthStencilState(DepthState.get(), 0);
 	Context->RSSetState(Rasterizer.get());
 	const D3D11_VIEWPORT viewport { 0, 0, static_cast<float>(Width), static_cast<float>(Height), 0, 1 };
@@ -1237,6 +1691,8 @@ bool TownGpuEndFrame(TownGpuFrame &output)
 	ID3D11Buffer *constantBuffer = ConstantBuffer.get();
 	Context->VSSetConstantBuffers(0, 1, &constantBuffer);
 	Context->PSSetConstantBuffers(0, 1, &constantBuffer);
+	ID3D11Buffer *spritePointBuffer = FrameSpritePointLighting ? SpritePointConstantBuffer.get() : nullptr;
+	Context->PSSetConstantBuffers(2, 1, &spritePointBuffer);
 	if (!Vertices.empty()) {
 		if (VertexCapacity < Vertices.size()) {
 			const size_t capacity = std::min<size_t>(MaxProjectedTriangles * 3, std::max(Vertices.size(), VertexCapacity * 2));
@@ -1258,6 +1714,35 @@ bool TownGpuEndFrame(TownGpuFrame &output)
 		Context->Unmap(VertexBuffer.get(), 0);
 		MeshStats.projectedUploadBytes = Vertices.size() * sizeof(GpuVertex);
 	}
+	if (!AuthoredColors.empty()) {
+		if (AuthoredColors.size() != Vertices.size() || AuthoredColors.size() * sizeof(AuthoredColors[0]) > MaxAuthoredColorBytes)
+			return Fail("GPU authored-color recording is incomplete", S_OK, TownGpuFailureKind::Capacity);
+		if (AuthoredColorCapacity < AuthoredColors.size()) {
+			const size_t capacity = std::min<size_t>(MaxProjectedTriangles * 3, std::max(AuthoredColors.size(), AuthoredColorCapacity * 2));
+			D3D11_BUFFER_DESC description {};
+			description.ByteWidth = static_cast<UINT>(capacity * sizeof(AuthoredColors[0]));
+			description.Usage = D3D11_USAGE_DYNAMIC;
+			description.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+			description.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+			AuthoredColorResource.reset();
+			HRESULT result = Device->CreateBuffer(&description, nullptr, AuthoredColorBuffer.put());
+			if (FAILED(result)) return Fail("Create authored-color stream", result);
+			D3D11_SHADER_RESOURCE_VIEW_DESC view {};
+			view.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+			view.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+			view.Buffer.NumElements = static_cast<UINT>(capacity);
+			result = Device->CreateShaderResourceView(AuthoredColorBuffer.get(), &view, AuthoredColorResource.put());
+			if (FAILED(result)) return Fail("Create authored-color stream view", result);
+			AuthoredColorCapacity = capacity;
+		}
+		D3D11_MAPPED_SUBRESOURCE mapped {};
+		const HRESULT result = Context->Map(AuthoredColorBuffer.get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+		if (FAILED(result)) return Fail("Map authored-color stream", result);
+		std::memcpy(mapped.pData, AuthoredColors.data(), AuthoredColors.size() * sizeof(AuthoredColors[0]));
+		Context->Unmap(AuthoredColorBuffer.get(), 0);
+		Status.uploadedAuthoredColorBytes = AuthoredColors.size() * sizeof(AuthoredColors[0]);
+	}
+	bool viewModelDepthReset = false;
 	for (const GeometryCommand &command : GeometryCommands) {
 		if (command.mesh) {
 			if (!DrawMeshBatch(MeshBatches[command.batch]))
@@ -1265,6 +1750,12 @@ bool TownGpuEndFrame(TownGpuFrame &output)
 			continue;
 		}
 		const Batch &batch = Batches[command.batch];
+		if (batch.viewModel && !viewModelDepthReset) {
+			// World ownership/depth MRTs remain bound but write-masked below.
+			// Only hardware depth changes owner for this terminal visual phase.
+			Context->ClearDepthStencilView(HardwareDepthView.get(), D3D11_CLEAR_DEPTH, 1, 0);
+			viewModelDepthReset = true;
+		}
 		if (batch.paletteBlend) {
 			// Never read/write the same resource at once. Each triangle observes
 			// all preceding overlays, including ones with the same material.
@@ -1280,24 +1771,36 @@ bool TownGpuEndFrame(TownGpuFrame &output)
 			else
 				Context->CopySubresourceRegion(PriorIndexedColor.get(), 0, box.left, box.top, 0,
 				    Targets[0].texture.get(), 0, &box);
-			Context->OMSetRenderTargets(3, targets, HardwareDepthView.get());
+			Context->OMSetRenderTargets(5, targets, HardwareDepthView.get());
 			Status.paletteBlendCopyBytes += static_cast<size_t>(box.right - box.left) * (box.bottom - box.top);
 		}
-		if (!BindGeometryConstants(batch.constants))
+		Constants drawConstants = batch.constants;
+		const bool colored = (batch.constants.flags.w & 512) != 0;
+		if (colored) drawConstants.target.z = static_cast<float>(batch.first);
+		if (!BindGeometryConstants(drawConstants))
 			return false;
 		Context->IASetInputLayout(InputLayout.get());
 		Context->VSSetShader(VertexShader.get(), nullptr, 0);
+		ID3D11ShaderResourceView *authoredColor = AuthoredColors.empty() ? nullptr : AuthoredColorResource.get();
+		Context->VSSetShaderResources(10, 1, &authoredColor);
 		ID3D11Buffer *vertexBuffer = VertexBuffer.get();
 		const UINT stride = sizeof(GpuVertex);
-		const UINT offset = 0;
+		// Optional attributes use an explicit global base and a zero-based draw.
+		// This keeps SV_VertexID independent of StartVertexLocation conventions.
+		const UINT offset = colored ? batch.first * sizeof(GpuVertex) : 0;
 		Context->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 		BindGeometryMaterial(*batch.texture, batch.preservePicking, batch.paletteBlend);
-		Context->Draw(batch.count, batch.first);
+		if (batch.viewModel)
+			Context->OMSetBlendState(PaletteBlendWriteState.get(), nullptr, 0xFFFFFFFFU);
+		Context->Draw(batch.count, colored ? 0 : batch.first);
 		++Status.drawCalls;
 	}
 	MeshStats.commandMilliseconds = std::chrono::duration<double, std::milli>(Clock::now() - commandStart).count();
-	ID3D11ShaderResourceView *emptyResources[6] {};
-	Context->PSSetShaderResources(0, 6, emptyResources);
+	}
+	diag::StageScope diagnosticReadback(diag::SessionLogger(), diag::Stage::Readback, diag::SessionFrame(), diag::SampleSessionFrame());
+	ID3D11ShaderResourceView *emptyResources[10] {};
+	Context->PSSetShaderResources(0, 10, emptyResources);
+	Context->VSSetShaderResources(10, 1, emptyResources);
 	Context->OMSetRenderTargets(0, nullptr, nullptr);
 	for (Target &target : Targets)
 		Context->CopyResource(target.staging.get(), target.texture.get());
@@ -1313,8 +1816,12 @@ bool TownGpuEndFrame(TownGpuFrame &output)
 	complete.indexed.resize(count);
 	complete.pickIds.resize(count);
 	complete.depth.resize(count);
-	if (!Readback(Targets[0], complete.indexed) || !Readback(Targets[1], complete.pickIds) || !Readback(Targets[2], complete.depth))
+	complete.viewModelMask.resize(count);
+	if(FrameSmoothLighting || FrameRgbaLut || !AuthoredColors.empty()) complete.rgba.resize(count);
+	if (!Readback(Targets[0], complete.indexed) || !Readback(Targets[1], complete.pickIds) || !Readback(Targets[2], complete.depth) || (!complete.rgba.empty() && !Readback(Targets[3], complete.rgba)) || !Readback(Targets[4], complete.viewModelMask))
 		return false;
+	if (!std::all_of(complete.viewModelMask.begin(), complete.viewModelMask.end(), [](uint8_t value) { return value <= 1; }))
+		return Fail("Invalid GPU viewmodel coverage readback");
 	const HRESULT removed = Device->GetDeviceRemovedReason();
 	if (FAILED(removed))
 		return Fail("D3D11 device removed", removed);
@@ -1340,11 +1847,14 @@ void ResetTownGpuResources()
 #ifdef _WIN32
 	FrameActive = false;
 	FrameFailed = false;
+	FrameSpritePointLighting = false;
 	FramePaletteBlendReady = false;
 	FramePaletteOverlayStarted = false;
+	FrameViewModelStarted = false;
 	Batches.clear();
 	ResetMeshResources();
 	Vertices.clear();
+	AuthoredColors.clear();
 	FrameShadow = {};
 	FrameProjection = {};
 	if (Context) {
@@ -1353,6 +1863,8 @@ void ResetTownGpuResources()
 	}
 	TextureCache.clear();
 	TexelCache.clear();
+	RgbPaletteResource.reset();NativeLightResource.reset();CachedRgbPalette.clear();CachedNativeLight.clear();FrameSmoothLighting=false;
+	FrameRgbaLut = false;
 	LightLutCache.clear();
 	TextureBytes = 0;
 	ShadowResource.reset();
@@ -1376,7 +1888,10 @@ void ResetTownGpuResources()
 	PaletteBlendWriteState.reset();
 	Rasterizer.reset();
 	ConstantBuffer.reset();
+	SpritePointConstantBuffer.reset();
 	VertexBuffer.reset();
+	AuthoredColorResource.reset();
+	AuthoredColorBuffer.reset();
 	InputLayout.reset();
 	PixelShader.reset();
 	VertexShader.reset();
@@ -1384,6 +1899,7 @@ void ResetTownGpuResources()
 	Device.reset();
 	Width = Height = 0;
 	VertexCapacity = 0;
+	AuthoredColorCapacity = 0;
 	FrameSerial = 0;
 #endif
 	Status = {};

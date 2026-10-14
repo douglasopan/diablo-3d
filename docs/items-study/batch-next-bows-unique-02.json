@@ -1,0 +1,162 @@
+{
+  "format": "d3d.item-concept-art",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "batchId": "2026-10-08-batch-next-bows-unique-02",
+  "catalogSha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d",
+  "scope": "Reference-available bows; exact-cursor sharing explicit. Missing Hellfire Blitzen, Flambeau, Gnat Sting remain blocked.",
+  "generationTool": "built-in image_gen.imagegen",
+  "generationCalls": 2,
+  "postProcessing": "none; generated PNG bytes copied unchanged",
+  "originalGameImagesIncluded": false,
+  "visualApproval": false,
+  "runtimeInstalled": false,
+  "summary": {
+    "linkedProductionUnits": 3,
+    "newPNGs": 2,
+    "sharedProposals": 1,
+    "modelsGenerated": 0,
+    "runtimeIconsGenerated": 0
+  },
+  "entries": [
+    {
+      "productionId": "item.design.unique.the-needler",
+      "conceptId": "item.design.unique.the-needler.concept.r1",
+      "revision": "r1",
+      "kind": "concept-sheet",
+      "status": "candidate",
+      "image": "assets/concept-art/items/r1/the-needler-r1.png",
+      "sha256": "bc2c73ac131cc3d987fc704ebe0e4cffcafca51b7f6d5876269e01c68eeb1758",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate unique-item modeling turnaround.\nSubject: ONE THE NEEDLER, item.design.unique.the-needler, cursor158. PRIVATE original inventory sprite is only silhouette/proportion/local-color reference. It is actually a compact CROSSBOW, despite native bow family. Preserve its reddish-brown stock running diagonally in source, ochre/brass rectangular top plate and long narrow brass track on the stock, small steel-gray bow limbs arcing crosswise from front, brown limb centers with pale steel ends, a thin dark string stretched between their tips, dark red/brown wrapped rear grip/stock and compact aged-gold end fitting. No bolt/arrow added; no modern mechanism invented. Rear underside and trigger are conservative simple inference, no name-based needles.\nFIVE distinct fully separated views of the exact SAME whole crossbow: FRONT top plan showing both limbs, SIDE showing stock depth, BACK underside plan, large THREE-QUARTER view AND separate small newly rendered HD inventory thumbnail. Do not combine 3-4 and thumbnail. SAME limb span, stock length, metal plate and string connection in all views. Keep bow limbs perpendicular to stock and string physically continuous with both limb tips; no detached hardware or variants.\nRealistic worn dark medieval wood, muted red leather, steel and aged brass. Opaque charcoal gray backdrop, soft neutral white studio light. Only THE NEEDLER / FRONT / SIDE / BACK / 3-4 / ICON labels. No hand, character, scenery, glowing magic, fantasy ornaments or watermark. Never paste, trace or display private source pixels; ICON is a fresh high-detail rendering of this candidate.",
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 158,
+        "sha256": "5419a0c2c8de7b4d7009914e1f3c4bdfc2216a1c99c8b92bf6d19b41ee029b8c"
+      },
+      "views": [
+        "front-plan",
+        "oblique-side",
+        "back-underside",
+        "three-quarter",
+        "inventory-preview"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "notes": "Incomplete modeling study: SIDE remains an oblique view similar to THREE-QUARTER; true edge-on stock/limb thickness unresolved. Inferred trigger, underside and mechanism not source-proven. All five panels and new thumbnail retained; no proof of model coherence.",
+      "modelReadiness": "blocked-concept-coherence",
+      "coherenceReview": {
+        "passed": false,
+        "gate": "True edge-on side view and mechanism consistency required before modeling."
+      }
+    },
+    {
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "family-sheet",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-thumbnail"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "postProcessing": "none; original generated PNG bytes copied unchanged",
+      "productionId": "item.design.unique.the-rift-bow",
+      "conceptId": "item.design.unique.the-rift-bow.concept.r1",
+      "image": "assets/concept-art/items/r1/short-bow-r1.png",
+      "sha256": "436f71ef93d9d2dada50e0a1ad66e75af7a0922734b5f3b716b540495eb90efa",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "byteCount": 1684500,
+      "prompt": "Use case: stylized-concept. Asset type: Diablo 3D source-based candidate bow study, not runtime art.\nReconstruct ONLY the ONE physical bow in the private attached ICURS 118 reference for item.design.base.short-bow. The name does not authorize redesign. Simple compact reddish/burgundy wood bow, gently curving asymmetric-looking limbs, ochre-gold short wrap/collar on upper limb and lower limb, warm rusty-orange center grip wraps, blocky red-brown turned-out tips, thin muted blue-gray string. Preserve plain silhouette, exact warm palette and grip placement. No steel armor plates, no extra ornamental horns, no arrow.\nProduce a clean realistic HD modeling sheet, charcoal-gray background and soft neutral studio light, restrained physically plausible wood/metal/string texture with no painted floor shadow. Four complete well-separated views of the SAME object labeled FRONT, SIDE, BACK, 3-4 plus a smaller NEW HD ICON thumbnail. Title SHORT BOW. FRONT is full bow plane, SIDE is genuine thin edge-on profile, BACK is opposite face rotated 180 degrees around vertical and therefore horizontally mirrors the curved full silhouette of FRONT. Preserve limbs, tip curves, color blocks, grip, fittings, string nocks and a single taut string in ALL views and the new thumbnail. The 3-4 thumbnail may match native angle but must be newly painted realistic HD, NEVER source pixels. No source sprite inset. No hands, person, scenery, arrows, name/power-derived enchantments, glow, labels on the object or multiple designs. Unseen cross section, back fittings, grip construction and material readings are cautious inferences, keep them minimal. Layout clean and useful for later modeling; this is candidate documentation, not an approved turnaround or finished model.",
+      "referenceHash": "1d0d215199a033c295804f2b8718b8ef826f8bb7bbc8193e8ad7293fa755ee4f",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 118,
+        "sha256": "1d0d215199a033c295804f2b8718b8ef826f8bb7bbc8193e8ad7293fa755ee4f",
+        "notes": "Referência nativa 6x inspecionada antes da chamada. Silhueta e blocos de cor orientam o estudo; pixels privados não incorporados."
+      },
+      "sourceViewCount": 1,
+      "queueGroupId": "remaining-bows-base-design-all-01",
+      "inferredAreas": [
+        "Verso, espessura, nocks, grip, construção e materiais propostos a partir de uma vista; nada recuperado como geometria histórica."
+      ],
+      "coherenceReview": {
+        "status": "incomplete-study",
+        "coherentAcrossViewsVerified": false,
+        "observed": "Paleta e curva geral preservadas; BACK espelha a curva de FRONT; nenhuma flecha, efeito de poder ou sprite colado.",
+        "pendingIssues": [
+          "A vista 3-4 e ICON foram fundidos; falta preview separado, estudo incompleto.",
+          "Ocre foi interpretado como placas em folha, mais pontudas que as faixas nativas; confirmar forma/material e nocks."
+        ]
+      },
+      "notes": "Exact original cursor inherited. Shared design proposed, not a separately generated unique design or accepted mesh; native powers/stats/identity separate. Source incomplete-study gate is inherited. Source notes: Candidato sem aprovação; thumbnail HD de estudo não é ícone runtime. Encaixe, corda/animação e grip dependem da frente de personagens.",
+      "reusedFromProductionId": "item.design.base.short-bow",
+      "generationCalls": 0,
+      "reuseProposal": true,
+      "generationIntent": "Exact-cursor shared appearance proposal, no new generation call."
+    },
+    {
+      "productionId": "item.design.unique.windforce",
+      "conceptId": "item.design.unique.windforce.concept.r1",
+      "revision": "r1",
+      "kind": "turnaround",
+      "status": "candidate",
+      "image": "assets/concept-art/items/r1/windforce-r1.png",
+      "sha256": "695b57a92859ea5ab02e7587508fd643708667af0f31af39508732642c0e619f",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate unique-bow modeling sheet.\nSubject: ONE WINDFORCE, item.design.unique.windforce, original cursor164. PRIVATE original sprite is only silhouette/proportion/local-color reference. Reconstruct the actual tall slender deep-curved bow: warm dark red-brown wooden limbs, multiple small gold/brass wrap bands around the central portion, deep navy blue tip fittings, large rounded faceted dark-blue fitting near upper limb below a thin aged-gold loop/curled open tip, small angled aged-gold lower tip; thin nearly dark-gray string between upper and lower tip. Preserve its lean arc, restrained brown/blue/gold color and asymmetric upper loop. No wind effects or other name-based decorations.\nFIVE SEPARATE panels of the exact SAME whole bow, with enough room: FRONT broad silhouette, SIDE edge-on thin limb construction, BACK opposite broad face horizontally mirroring asymmetric details, full-size clearly oblique THREE-QUARTER view, AND a separate small newly rendered HD inventory thumbnail. Do not combine 3-4 and thumbnail. Matching tip/loop topology, limb proportions and band counts across views, bowstring continuous and attached to both tips. No arrow. Hidden depth and rear conservative inference.\nRealistic worn wood, dull aged brass and navy material, neutral soft white studio light on plain opaque charcoal-gray background. Labels only WINDFORCE / FRONT / SIDE / BACK / 3-4 / ICON. No hands, character, scene, glow, colored lighting or watermark. Never copy/paste/trace/display source pixels; ICON freshly renders this new concept in HD.",
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 164,
+        "sha256": "8fd753cc902e2621dafe92fcb53ba2d210c1391373ff69b05fc339389a611991"
+      },
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-preview"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "notes": "Source proportions and major fittings inspected. Opposite-face silhouette mirrors correctly; string joins tips. Three-quarter is weakly oblique. Fine fittings, band spacing, rear and thickness are inferred and need 3D review. HD thumbnail is a concept preview."
+    }
+  ]
+}

@@ -4,6 +4,7 @@
  * Implementation of the in-game navigation and interaction.
  */
 #include "gmenu.h"
+#include "engine/render/d3d_panel_presentation.hpp"
 
 #include <algorithm>
 #include <cstdint>
@@ -289,7 +290,8 @@ void GmenuDrawSettingsItem(const Surface &out, TMenuItem *item, const GMenuSetti
 	const Rectangle row = layout.row(index);
 	const bool selected = item == sgpCurrItem;
 	if (selected) {
-		FillRect(out, row.position.x, row.position.y, row.size.width, row.size.height, PAL16_GRAY + 12);
+		DrawHorizontalLine(out,row.position,row.size.width,PAL16_BEIGE+10);
+		DrawHorizontalLine(out,row.position+Displacement{0,row.size.height-1},row.size.width,PAL16_BEIGE+10);
 		const OptionalOwnedClxSpriteList &spinners = SettingsPresentation->pauseMenu ? PentSpin_cel : pSPentSpn2Cels;
 		if (spinners) {
 			const ClxSprite sprite = (*spinners)[PentSpn2Spin()];
@@ -342,7 +344,7 @@ void GmenuDrawSettings(const Surface &out)
 	const GMenuSettingsGeometry layout = GetSettingsGeometry();
 	if (layout.panel.size.width <= 0 || layout.panel.size.height <= 0)
 		return;
-	FillRect(out, layout.panel.position.x, layout.panel.position.y, layout.panel.size.width, layout.panel.size.height, PAL16_GRAY + 14);
+	DrawD3dPanelBackplate(out, layout.panel);
 	DrawHorizontalLine(out, layout.panel.position, layout.panel.size.width, PAL16_BEIGE + 10);
 	DrawHorizontalLine(out, { layout.panel.position.x, layout.panel.position.y + layout.panel.size.height - 1 }, layout.panel.size.width, PAL16_BEIGE + 10);
 	if (SettingsPresentation->pauseMenu) {
@@ -366,13 +368,16 @@ void GmenuDrawSettings(const Surface &out)
 	}
 	for (size_t i = 0; i < layout.rows; ++i)
 		GmenuDrawSettingsItem(out, &sgpCurrentMenu[i], layout, i);
-	if (sgpCurrItem == nullptr || SettingsPresentation->describe == nullptr)
+	if (sgpCurrItem == nullptr || SettingsPresentation->describe == nullptr) {
+		SealD3dPanelBackplate(out);
 		return;
+	}
 	const std::string_view description = SettingsPresentation->describe(gmenu_selected_index());
 	const GameFontTables font = SettingsFont(layout.descriptionFontSize);
 	const int lineHeight = std::max(14, GetLineHeight(description, font));
 	DrawString(out, FitSettingsDescription(description, layout.description.size.width, layout.description.size.height / lineHeight, font), layout.description,
 	    { .flags = SettingsFontFlag(layout.descriptionFontSize) | UiFlags::ColorUiSilver, .lineHeight = lineHeight });
+	SealD3dPanelBackplate(out);
 }
 
 void GameMenuMove()

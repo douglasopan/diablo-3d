@@ -24,7 +24,9 @@
 #include "DiabloUI/ui_flags.hpp"
 #include "automap.h"
 #include "control/d3d_hud.hpp"
+#include "control/d3d_floating_panels.hpp"
 #include "engine/render/d3d_hud_presentation.hpp"
+#include "engine/render/d3d_panel_presentation.hpp"
 #include "controls/control_mode.hpp"
 #include "controls/plrctrls.h"
 #include "cursor.h"
@@ -237,6 +239,33 @@ void UndrawCursor(const Surface &out)
 	PrevCursorRect = cursor.rect;
 }
 
+// A deferred HUD recovery only changes its frozen footprints. Preserve late
+// UI outside those regions and never run cursor visibility/input logic again.
+void UndrawD3dHudRecoveryCursor(const Surface &out)
+{
+	const DrawnCursor &cursor = GetDrawnCursor();
+	for (int y = 0; y < cursor.rect.size.height; ++y) {
+		for (int x = 0; x < cursor.rect.size.width; ++x) {
+			const Point pixel = cursor.rect.position + Displacement { x, y };
+			if (out.InBounds(pixel) && IsD3dHudPresentationRecoveryPixel(pixel))
+				out[pixel] = cursor.behindBuffer[static_cast<size_t>(y) * cursor.rect.size.width + x];
+		}
+	}
+}
+
+void RedrawD3dHudRecoveryCursor(const Surface &out)
+{
+	DrawnCursor &cursor = GetDrawnCursor();
+	for (int y = 0; y < cursor.rect.size.height; ++y) {
+		for (int x = 0; x < cursor.rect.size.width; ++x) {
+			const Point pixel = cursor.rect.position + Displacement { x, y };
+			if (out.InBounds(pixel) && IsD3dHudPresentationRecoveryPixel(pixel))
+				cursor.behindBuffer[static_cast<size_t>(y) * cursor.rect.size.width + x] = out[pixel];
+		}
+	}
+	BlitD3dHudPresentationCapturedCursor(out);
+}
+
 bool ShouldShowCursor()
 {
 	if (ControlMode == ControlTypes::KeyboardAndMouse)
@@ -287,6 +316,10 @@ inline void ClxDrawLightBlended(const Surface &out, Point position, ClxSprite cl
 void DrawCursor(const Surface &out)
 {
 	DrawnCursor &cursor = GetDrawnCursor();
+	// Clear the old transient channel, then capture in ordinary UI phase so a
+	// rejected capture records its recovered R1 decoration as persistent UI.
+	BeginUiOverlayCursor();
+	EndUiOverlayCursor();
 	ClearD3dHudPresentationCursor();
 	if (IsTownFirstPersonInputCaptured()) {
 		SetHardwareCursorVisible(false);
@@ -301,7 +334,7 @@ void DrawCursor(const Surface &out)
 		};
 		if (rect.size.width == 0 || rect.size.height == 0)
 			return;
-		BlitCursor(cursor.behindBuffer, rect.size.width, &out[rect.position], out.pitch(), rect.size.width, rect.size.height);
+		std::array<uint8_t, Diameter * Diameter> pixels {};
 		std::array<uint8_t, Diameter * Diameter> opacity {};
 		constexpr auto IsWhite = [](int x, int y) {
 			return (x == 0 && (y <= -2 || y >= 2) && y >= -4 && y <= 4)
@@ -316,15 +349,32 @@ void DrawCursor(const Surface &out)
 				    || IsWhite(dx, dy - 1) || IsWhite(dx, dy + 1);
 				if (!white && !outline)
 					continue;
-				out[pixel] = white ? PAL16_GRAY : PAL16_GRAY + 15;
-				opacity[static_cast<size_t>(y) * rect.size.width + x] = 255;
+				const size_t index = static_cast<size_t>(y) * rect.size.width + x;
+				pixels[index] = white ? PAL16_GRAY : PAL16_GRAY + 15;
+				opacity[index] = 255;
+			}
+		}
+		const size_t area = static_cast<size_t>(rect.size.width) * rect.size.height;
+		// A rejected capture materializes R1 before its background is saved or
+		// any native cursor pixel is written. The clipped reticle stays on stack.
+		CaptureD3dHudPresentationCursorPixels(rect,
+		    std::span<const uint8_t> { pixels.data(), area },
+		    std::span<const uint8_t> { opacity.data(), area });
+		BeginUiOverlayCursor();
+		BlitCursor(cursor.behindBuffer, rect.size.width, &out[rect.position], out.pitch(), rect.size.width, rect.size.height);
+		for (int y = 0; y < rect.size.height; ++y) {
+			for (int x = 0; x < rect.size.width; ++x) {
+				const size_t index = static_cast<size_t>(y) * rect.size.width + x;
+				if (opacity[index] == 0)
+					continue;
+				const Point pixel = rect.position + Displacement { x, y };
 				// Called inside BeginUiOverlayCursor: retain only covered pixels
 				// over the 2x world, without registering the background as UI.
 				MarkUiOverlayRect(out, pixel.x, pixel.y, 1, 1);
+				out[pixel] = pixels[index];
 			}
 		}
-		CaptureD3dHudPresentationCursorPixels(out, rect,
-		    std::span<const uint8_t> { opacity.data(), static_cast<size_t>(rect.size.width) * rect.size.height });
+		EndUiOverlayCursor();
 		return;
 	}
 	if (IsHardwareCursor()) {
@@ -373,10 +423,12 @@ void DrawCursor(const Surface &out)
 	if (rect.size.width == 0 || rect.size.height == 0)
 		return;
 
-	BlitCursor(cursor.behindBuffer, rect.size.width, &out[rect.position], out.pitch(), rect.size.width, rect.size.height);
 	const Point spriteBottomLeft = cursPosition + Displacement { 0, cursSize.height - 1 };
-	DrawSoftwareCursor(out, spriteBottomLeft, pcurs);
 	CaptureD3dHudPresentationCursor(rect, spriteBottomLeft, pcurs);
+	BeginUiOverlayCursor();
+	BlitCursor(cursor.behindBuffer, rect.size.width, &out[rect.position], out.pitch(), rect.size.width, rect.size.height);
+	DrawSoftwareCursor(out, spriteBottomLeft, pcurs);
+	EndUiOverlayCursor();
 }
 
 /**
@@ -1382,6 +1434,43 @@ void DrawGame(const Surface &fullOut, Point position, Displacement offset, bool 
  * @param out Buffer to render to
  * @param startPosition Center of view in dPiece coordinates
  */
+void DrawViewModalOverlays(const Surface &out)
+{
+	if (ShowUniqueItemInfoBox) {
+		DrawUniqueInfo(out);
+	}
+	if (qtextflag) {
+		DrawQText(out);
+	}
+	if (SpellSelectFlag) {
+		DrawSpellList(out);
+	}
+	if (DropGoldFlag) {
+		DrawGoldSplit(out);
+	}
+	DrawGoldWithdraw(out);
+	if (HelpFlag) {
+		DrawHelp(out);
+	}
+	if (ChatLogFlag) {
+		DrawChatLog(out);
+	}
+	if (MyPlayerIsDead) {
+		RedBack(out);
+		DrawDeathText(out);
+	} else if (PauseMode != 0) {
+		gmenu_draw_pause(out);
+	}
+	if (IsDiabloMsgAvailable()) {
+		DrawDiabloMsg(out.subregionY(0, out.h() - GetMainPanel().size.height));
+	}
+
+	DrawControllerModifierHints(out);
+	DrawPlrMsg(out);
+	gmenu_draw(out);
+	doom_draw(out);
+}
+
 void DrawView(const Surface &out, Point startPosition)
 {
 #ifdef _DEBUG
@@ -1389,14 +1478,19 @@ void DrawView(const Surface &out, Point startPosition)
 #endif
 	Displacement offset = {};
 	CalcFirstTilePosition(startPosition, offset);
+	BeginD3dHudAuxiliaryFrame();
 	ClearUiOverlayRegions();
 	DrawGame(out, startPosition, offset);
+	// Freeze resource fill with the same totals used by every HUD layer in
+	// this frame, before the first ordinary UI write can require CPU recovery.
+	UpdateLifeManaPercent();
 	BeginD3dHudPresentationFrame(out);
+	SetD3dHudRecoveryCursorCallbacks(UndrawD3dHudRecoveryCursor, RedrawD3dHudRecoveryCursor);
 #ifndef USE_SDL1
-	if (GetTownViewHighResolutionFrame() != nullptr || IsD3dHudEnabled()) {
+	if (GetTownViewHighResolutionFrame() != nullptr || IsD3dHudSelected()) {
 		BeginUiOverlayRegions(out);
 		const Rectangle &panel = GetMainPanel();
-		if (!IsD3dHudEnabled())
+		if (!IsD3dHudLayoutActive())
 			MarkUiOverlayRect(out, panel.position.x, panel.position.y, panel.size.width, panel.size.height);
 	}
 #endif
@@ -1500,8 +1594,13 @@ void DrawView(const Surface &out, Point startPosition)
 	DrawMonsterHealthBar(out);
 	DrawFloatingNumbers(out, startPosition, offset);
 
-	if (IsPlayerInStore() && !qtextflag)
+	if (!IsD3dHudSelected() && IsPlayerInStore() && !qtextflag)
 		DrawSText(out);
+    if (IsD3dHudSelected()) {
+        ScopedD3dHudThemeText themeText;
+        DrawDurIcon(out);
+        DrawLevelButton(out);
+    } else {
 	if (invflag) {
 		DrawInv(out);
 	} else if (SpellbookFlag) {
@@ -1521,46 +1620,15 @@ void DrawView(const Surface &out, Point startPosition)
 	} else if (IsVisualStoreOpen) {
 		DrawVisualStore(out);
 	}
+    }
 
-	if (ShowUniqueItemInfoBox) {
-		DrawUniqueInfo(out);
-	}
-	if (qtextflag) {
-		DrawQText(out);
-	}
-	if (SpellSelectFlag) {
-		DrawSpellList(out);
-	}
-	if (DropGoldFlag) {
-		DrawGoldSplit(out);
-	}
-	DrawGoldWithdraw(out);
-	if (HelpFlag) {
-		DrawHelp(out);
-	}
-	if (ChatLogFlag) {
-		DrawChatLog(out);
-	}
-	if (MyPlayerIsDead) {
-		RedBack(out);
-		DrawDeathText(out);
-	} else if (PauseMode != 0) {
-		gmenu_draw_pause(out);
-	}
-	if (IsDiabloMsgAvailable()) {
-		DrawDiabloMsg(out.subregionY(0, out.h() - GetMainPanel().size.height));
-	}
-
-	DrawControllerModifierHints(out);
-	DrawPlrMsg(out);
-	gmenu_draw(out);
-	doom_draw(out);
+	if (!IsD3dHudSelected()) DrawViewModalOverlays(out);
 	// All earlier DrawView writes are ordinary UI. InfoBox and flask drawing
 	// below belong to the HUD and must not count as overlapping windows.
 	SetD3dHudPresentationNativeUiCapture(false);
 	SetD3dHudPresentationUiCoverage({});
+	ScopedD3dHudThemeText themeText(IsD3dHudSelected());
 	DrawInfoBox(out);
-	UpdateLifeManaPercent(); // Update life/mana totals before rendering any portion of the flask.
 	DrawLifeFlaskUpper(out);
 	DrawManaFlaskUpper(out);
 }
@@ -1682,6 +1750,36 @@ void OptionShowFPSChanged()
 const auto OptionChangeHandlerShowFPS = (GetOptions().Graphics.showFPS.SetValueChangedCallback(OptionShowFPSChanged), true);
 
 } // namespace
+
+void DrawD3dHudModalOverlays(const Surface &out)
+{
+	if (!IsD3dHudSelected()) return;
+	SetD3dHudPresentationNativeUiCapture(true);
+	if (IsPlayerInStore() && !qtextflag) DrawSText(out);
+	DrawViewModalOverlays(out);
+	SetD3dHudPresentationNativeUiCapture(false);
+}
+
+void DrawD3dHudFloatingPanels(const Surface &out)
+{
+	if (!IsD3dHudSelected()) return;
+	SetD3dHudPresentationNativeUiCapture(true);
+	ScopedD3dHudThemeText themeText;
+        for (UiPanels panel : GetD3dFloatingPanelDrawOrder()) {
+            switch (panel) {
+            case UiPanels::Inventory: if (invflag) DrawInv(out); break;
+            case UiPanels::Spell: if (SpellbookFlag) DrawSpellBook(out); break;
+            case UiPanels::Character: if (CharFlag) DrawChr(out); break;
+            case UiPanels::Quest: if (QuestLogIsOpen) DrawQuestLog(out); break;
+            case UiPanels::Stash:
+                if (IsStashOpen) DrawStash(out);
+                else if (IsVisualStoreOpen) DrawVisualStore(out);
+                break;
+            default: break;
+            }
+        }
+	SetD3dHudPresentationNativeUiCapture(false);
+}
 
 Displacement GetOffsetForWalking(const AnimationInfo &animationInfo, const Direction dir, bool cameraMode /*= false*/)
 {
@@ -1964,9 +2062,8 @@ void scrollrt_draw_game_screen()
 
 	const Surface &out = GlobalBackBuffer();
 	UndrawCursor(out);
-	BeginUiOverlayCursor();
 	DrawCursor(out);
-	EndUiOverlayCursor();
+	FinalizeD3dHudPresentationFrame(out);
 	DrawMain(hgt, false, false, false, false, false);
 
 	RenderPresent(true);
@@ -1995,7 +2092,7 @@ void DrawAndBlit()
 
 	const Rectangle &mainPanel = GetMainPanel();
 
-	if (IsD3dHudEnabled() || gnScreenWidth > mainPanel.size.width || IsRedrawEverything()) {
+	if (IsD3dHudSelected() || gnScreenWidth > mainPanel.size.width || IsRedrawEverything()) {
 		drawHealth = true;
 		drawMana = true;
 		drawControlButtons = true;
@@ -2016,6 +2113,8 @@ void DrawAndBlit()
 
 	this_sdl_thread::yield();
 	DrawView(out, ViewPosition);
+	{
+	ScopedD3dHudThemeText themeText(IsD3dHudSelected());
 	if (drawCtrlPan) {
 		DrawMainPanel(out);
 	}
@@ -2027,25 +2126,31 @@ void DrawAndBlit()
 
 		DrawSpell(out);
 	}
-	if (drawControlButtons) {
-		DrawMainPanelButtons(out);
-	}
 	if (drawBelt) {
 		DrawInvBelt(out);
+	}
+	if (drawControlButtons) {
+		DrawMainPanelButtons(out);
 	}
 	if (drawChatInput) {
 		DrawChatBox(out);
 	}
 	DrawXPBar(out);
 	RecordD3dHudExperienceBar();
-	if (IsD3dHudEnabled())
+	if (IsD3dHudSelected())
 		DrawD3dHudValues(out);
-	if (!IsD3dHudEnabled() && *GetOptions().Gameplay.showHealthValues)
+	if (!IsD3dHudSelected() && *GetOptions().Gameplay.showHealthValues)
 		DrawFlaskValues(out, { mainPanel.position.x + 134, mainPanel.position.y + 28 }, MyPlayer->_pHitPoints >> 6, MyPlayer->_pMaxHP >> 6);
-	if (!IsD3dHudEnabled() && *GetOptions().Gameplay.showManaValues)
+	if (!IsD3dHudSelected() && *GetOptions().Gameplay.showManaValues)
 		DrawFlaskValues(out, { mainPanel.position.x + mainPanel.size.width - 138, mainPanel.position.y + 28 },
 		    (HasAnyOf(InspectPlayer->_pIFlags, ItemSpecialEffect::NoMana) || MyPlayer->hasNoMana()) ? 0 : MyPlayer->_pMana >> 6,
 		    HasAnyOf(InspectPlayer->_pIFlags, ItemSpecialEffect::NoMana) ? 0 : MyPlayer->_pMaxMana >> 6);
+	SealD3dHudPresentationForeground(out);
+	}
+	DrawD3dHudFloatingPanels(out);
+	// Seal panel contents after every floating window, before modal overlays.
+	SealD3dPanelPresentationFrame(out);
+	DrawD3dHudModalOverlays(out);
 	SetD3dHudPresentationNativeUiCapture(true);
 	if (*GetOptions().Gameplay.floatingInfoBox)
 		DrawFloatingInfoBox(out);
@@ -2054,9 +2159,10 @@ void DrawAndBlit()
 		DrawPartyMemberInfoPanel(out);
 	SetD3dHudPresentationNativeUiCapture(false);
 
-	BeginUiOverlayCursor();
 	DrawCursor(out);
-	EndUiOverlayCursor();
+	// Late Lua/FPS writes may materialize a scaled panel. Its recovery must
+	// preserve the cursor that has already been drawn in this frame.
+	FinalizeD3dPanelPresentationFrame(out);
 
 	SetD3dHudPresentationNativeUiCapture(true);
 	DrawFPS(out);
@@ -2064,14 +2170,14 @@ void DrawAndBlit()
 	lua::GameDrawComplete();
 	SetD3dHudPresentationNativeUiCapture(false);
 
-	this_sdl_thread::yield();
-	DrawMain(hgt, drawInfoBox, drawHealth, drawMana, drawBelt, drawControlButtons);
-
 #ifdef _DEBUG
 	SetD3dHudPresentationNativeUiCapture(true);
 	DrawConsole(out);
 	SetD3dHudPresentationNativeUiCapture(false);
 #endif
+	FinalizeD3dHudPresentationFrame(out);
+	this_sdl_thread::yield();
+	DrawMain(hgt, drawInfoBox, drawHealth, drawMana, drawBelt, drawControlButtons);
 
 	RedrawComplete();
 	for (const PanelDrawComponent component : enum_values<PanelDrawComponent>()) {

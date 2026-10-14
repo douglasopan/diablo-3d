@@ -8,6 +8,9 @@
 #include <vector>
 
 #include "engine/assets.hpp"
+#include "engine/hd_sprite_pack.hpp"
+#include "engine/render/d3d_menu_presentation.hpp"
+#include "engine/render/d3d_panel_presentation.hpp"
 #include "engine/palette.h"
 #include "engine/render/clx_render.hpp"
 #include "utils/clx_encode.hpp"
@@ -177,6 +180,15 @@ std::optional<D3dLogo> LoadD3dLogo(D3dLogoKind kind)
 	const D3dLogoSpec spec = GetD3dLogoSpec(kind);
 	if (spec.width == 0)
 		return std::nullopt;
+	D3dLogoPalette authoredPalette;
+	auto replacement=LoadHdSpriteReplacement(spec.path,authoredPalette.data());
+	if(!replacement) return std::nullopt;
+	if(*replacement) {
+		auto sprites=std::move(**replacement).list();
+		if(sprites.numSprites()==D3dLogoFrameCount && sprites[0].width()==spec.width && sprites[0].height()==spec.frameHeight)
+			return D3dLogo{std::move(sprites),authoredPalette};
+		return std::nullopt;
+	}
 	size_t fileSize = 0;
 	AssetHandle handle = OpenAsset(spec.path, fileSize);
 	if (!handle.ok())
@@ -200,6 +212,8 @@ void DrawD3dLogo(const Surface &out, Point bottomPosition, const D3dLogo &logo, 
 	if (frame >= sprites.numSprites())
 		return;
 	ClxDrawTRN(out, bottomPosition, sprites[frame], logo.translation(logical_palette).data());
+	RecordD3dMainMenuSpriteRgba(out,sprites[frame],bottomPosition);
+	RecordD3dPanelItemRgba(out,bottomPosition,sprites[frame]);
 }
 
 } // namespace devilution

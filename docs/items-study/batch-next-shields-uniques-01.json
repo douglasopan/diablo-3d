@@ -1,0 +1,392 @@
+{
+  "format": "d3d.item-concept-art",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "scope": "Independent remaining-shields-unique-identity-all-01 candidate/reuse batch for root consolidation; no global coverage claim.",
+  "batchId": "batch-next-shields-uniques-01",
+  "productionQueueGroup": "remaining-shields-unique-identity-all-01",
+  "catalogSha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d",
+  "generationTool": "built-in image_gen.imagegen; shared-cursor reuse causes zero new calls",
+  "postProcessing": "none; generated PNG bytes copied unchanged, all prior revisions retained",
+  "originalGameImagesIncluded": false,
+  "privateMediaPathsIncluded": false,
+  "visualApproval": false,
+  "accepted": false,
+  "selected": false,
+  "installed": false,
+  "runtimeInstalled": false,
+  "summary": {
+    "candidateUnits": 6,
+    "newImages": 3,
+    "reuseProposals": 3,
+    "modelsGenerated": 0,
+    "runtimeIconsGenerated": 0
+  },
+  "entries": [
+    {
+      "productionId": "item.design.unique.blackoak-shield",
+      "conceptId": "item.design.unique.blackoak-shield.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/blackoak-shield-r1.png",
+      "sha256": "4ac83b29677d8d7e1c1d93af69e6ae5ad07e79c39532c0f003cd279cbb24b45c",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D single-item candidate modelling turnaround, not final game icon.\nThe first input image is the original licensed inventory sprite, PRIMARY silhouette/proportion/palette reference ONLY. The second input image is the generated Claymore sheet, LAYOUT and neutral material presentation ONLY; never include its sword.\nCreate one coherent HD sheet showing the exact SAME object in FRONT, true SIDE thickness, BACK (correctly reverse any asymmetric outline), and 3-4 perspective, plus one small ICON inset newly rendered in crisp HD from the SAME object. All views share identical proportions/geometry/materials, whole item visible and spaced cleanly. Plain charcoal gray background, neutral soft WHITE studio illumination without colored light or warm cast, realistic worn medieval materials, restrained surface wear and minimum contact shadows. Hidden reverse surfaces, thickness and exact fine material details are conservative inferred reconstruction.\nText only item TITLE and labels FRONT / SIDE / BACK / 3-4 / ICON; small footer CANDIDATE - REVERSE AND THICKNESS INFERRED. Never paste/reproduce/trace the source sprite, its image rectangle, reference board or pixel art into output. No characters/hands/scenery, extra objects, magical glow, flames, invented jewels/runes/skulls or watermark. Thumbnail is NEW HD concept depiction, not a runtime icon.\n\nSHIELD CONTRACT: FRONT is the decorated outer face. BACK is an inferred practical inner backing with plausible dark wood/iron and leather handgrip/forearm strap; do NOT duplicate the front emblem on the inside. SIDE shows believable shield curvature/thickness and front relief in profile, not a second shield. All silhouettes and rim points match between views. No hand or character fused to straps. Rear fastening is explicitly a proposal, not source-proven.\nBLACKOAK SHIELD. Production ID item.design.unique.blackoak-shield, ICURS146. Preserve actual inventory icon even where name suggests otherwise: elongated heater/kite shield, broad slightly bowed/sloping near-flat top, narrowed tapered sides ending in a sharp bottom point. Front face is deep BURGUNDY RED, darker recesses, with a fine aged GOLD/BRASS outer border and small compact gold ornamental corner fasteners. Large GOLDEN rampant lion/animal relief across the front, standing on two spread hindlegs, body angled upward, head and raised forepaws facing RIGHT, curling tail rising along LEFT. Match source heraldic pose, proportions and right-facing orientation; not a black plain oak shield, not left-facing Gothic Shield's design. Preserve red/gold contrast with real dark-red lacquer/leather-like facing and aged brass applied relief under neutral white light. No blue background, no huge gems or new text. The future master must reconcile exact tiny heraldic contour from the reference; do not invent narrative or stats.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 146,
+        "sha256": "a4252e08d9edd9195bb44f985c407380b3effbd3245d8c5c9900b96f8386fc9e",
+        "notes": "Original inventory source identity; private paths/pixels omitted. Exact presented source was inspected before new generation."
+      },
+      "referencePresentedSha256": "0795f206c814aa2931853be7bc3832a9c4c563e3e66aee27e0dcffa9a4f46760",
+      "referenceVisualInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-thumbnail-proposal"
+      ],
+      "inferredParts": [
+        "Hidden reverse surfaces, depth and thickness",
+        "Fasteners, exact material microtexture and dimensions",
+        "Rear grip/forearm strap, inner backing and shield curvature"
+      ],
+      "review": {
+        "status": "inspected-candidate",
+        "approval": false,
+        "limitations": [
+          "Original outer-face silhouette/palette inspected; reverse backing, straps, relief thickness and rivets are proposed.",
+          "Heraldic/face contour and exact small details need source comparison and coherent 3D modelling before acceptance."
+        ]
+      },
+      "notes": "Candidate reference-backed concept only; no model, final runtime icon, attachment or installation. Views and new HD thumbnail show one proposed object, not measured geometry."
+    },
+    {
+      "productionId": "item.design.unique.dragon-s-breach",
+      "conceptId": "item.design.unique.dragon-s-breach.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/dragon-s-breach-r1.png",
+      "sha256": "44263c920a7b6d51ee3b59de42902bbe39c964faff5cf00dfb74ad32e8126d2b",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D single-item candidate modelling turnaround, not final game icon.\nThe first input image is the original licensed inventory sprite, PRIMARY silhouette/proportion/palette reference ONLY. The second input image is the generated Claymore sheet, LAYOUT and neutral material presentation ONLY; never include its sword.\nCreate one coherent HD sheet showing the exact SAME object in FRONT, true SIDE thickness, BACK (correctly reverse any asymmetric outline), and 3-4 perspective, plus one small ICON inset newly rendered in crisp HD from the SAME object. All views share identical proportions/geometry/materials, whole item visible and spaced cleanly. Plain charcoal gray background, neutral soft WHITE studio illumination without colored light or warm cast, realistic worn medieval materials, restrained surface wear and minimum contact shadows. Hidden reverse surfaces, thickness and exact fine material details are conservative inferred reconstruction.\nText only item TITLE and labels FRONT / SIDE / BACK / 3-4 / ICON; small footer CANDIDATE - REVERSE AND THICKNESS INFERRED. Never paste/reproduce/trace the source sprite, its image rectangle, reference board or pixel art into output. No characters/hands/scenery, extra objects, magical glow, flames, invented jewels/runes/skulls or watermark. Thumbnail is NEW HD concept depiction, not a runtime icon.\n\nSHIELD CONTRACT: FRONT is the decorated outer face. BACK is an inferred practical inner backing with plausible dark wood/iron and leather handgrip/forearm strap; do NOT duplicate the front emblem on the inside. SIDE shows believable shield curvature/thickness and front relief in profile, not a second shield. All silhouettes and rim points match between views. No hand or character fused to straps. Rear fastening is explicitly a proposal, not source-proven.\nDRAGON'S BREACH. Production ID item.design.unique.dragon-s-breach, ICURS117. Match actual icon: tall tapered shield with pointed bottom, broad upper half. Upper corners extend upward as two long curving horn-like arms of the aged-GOLD/BRASS rim, leaving a broad concave top edge between them and a modest central top point. Front is a large raised stylized DRAGON/DEMON FACE in deep rusty RED-BROWN material, long angular snout/nose, ridged brow and cheeks, a small open lower mouth with visible worn ivory teeth/fangs. Two tiny saturated COBALT BLUE eye insets, solid material colored blue with studio reflections, NO emission or magic glow. Thick aged brass border follows the horned shield outline. Four small dark blue-gray/steel pointed studs project outward at top center, each side near midheight and bottom tip, each with a small brass base. Preserve actual asymmetrical face detail conservatively but overall shield symmetric outline. Not a realistic severed creature head; one crafted metal/wood/leather shield with applied carved relief. No extra horns outside the source silhouette, no flames, no character.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 117,
+        "sha256": "e395274ba12c103326932cc92085bb6734eaea3827877319ea8a17e76c009e80",
+        "notes": "Original inventory source identity; private paths/pixels omitted. Exact presented source was inspected before new generation."
+      },
+      "referencePresentedSha256": "230fb85906621fc46d14b0b168580a64648f28f533bedfa177456881be0160b6",
+      "referenceVisualInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-thumbnail-proposal"
+      ],
+      "inferredParts": [
+        "Hidden reverse surfaces, depth and thickness",
+        "Fasteners, exact material microtexture and dimensions",
+        "Rear grip/forearm strap, inner backing and shield curvature"
+      ],
+      "review": {
+        "status": "inspected-candidate",
+        "approval": false,
+        "limitations": [
+          "Original outer-face silhouette/palette inspected; reverse backing, straps, relief thickness and rivets are proposed.",
+          "Heraldic/face contour and exact small details need source comparison and coherent 3D modelling before acceptance."
+        ]
+      },
+      "notes": "Candidate reference-backed concept only; no model, final runtime icon, attachment or installation. Views and new HD thumbnail show one proposed object, not measured geometry."
+    },
+    {
+      "productionId": "item.design.unique.holy-defender",
+      "conceptId": "item.design.unique.holy-defender.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "family-sheet",
+      "image": "assets/concept-art/items/r1/blackoak-shield-r1.png",
+      "sha256": "4ac83b29677d8d7e1c1d93af69e6ae5ad07e79c39532c0f003cd279cbb24b45c",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D single-item candidate modelling turnaround, not final game icon.\nThe first input image is the original licensed inventory sprite, PRIMARY silhouette/proportion/palette reference ONLY. The second input image is the generated Claymore sheet, LAYOUT and neutral material presentation ONLY; never include its sword.\nCreate one coherent HD sheet showing the exact SAME object in FRONT, true SIDE thickness, BACK (correctly reverse any asymmetric outline), and 3-4 perspective, plus one small ICON inset newly rendered in crisp HD from the SAME object. All views share identical proportions/geometry/materials, whole item visible and spaced cleanly. Plain charcoal gray background, neutral soft WHITE studio illumination without colored light or warm cast, realistic worn medieval materials, restrained surface wear and minimum contact shadows. Hidden reverse surfaces, thickness and exact fine material details are conservative inferred reconstruction.\nText only item TITLE and labels FRONT / SIDE / BACK / 3-4 / ICON; small footer CANDIDATE - REVERSE AND THICKNESS INFERRED. Never paste/reproduce/trace the source sprite, its image rectangle, reference board or pixel art into output. No characters/hands/scenery, extra objects, magical glow, flames, invented jewels/runes/skulls or watermark. Thumbnail is NEW HD concept depiction, not a runtime icon.\n\nSHIELD CONTRACT: FRONT is the decorated outer face. BACK is an inferred practical inner backing with plausible dark wood/iron and leather handgrip/forearm strap; do NOT duplicate the front emblem on the inside. SIDE shows believable shield curvature/thickness and front relief in profile, not a second shield. All silhouettes and rim points match between views. No hand or character fused to straps. Rear fastening is explicitly a proposal, not source-proven.\nBLACKOAK SHIELD. Production ID item.design.unique.blackoak-shield, ICURS146. Preserve actual inventory icon even where name suggests otherwise: elongated heater/kite shield, broad slightly bowed/sloping near-flat top, narrowed tapered sides ending in a sharp bottom point. Front face is deep BURGUNDY RED, darker recesses, with a fine aged GOLD/BRASS outer border and small compact gold ornamental corner fasteners. Large GOLDEN rampant lion/animal relief across the front, standing on two spread hindlegs, body angled upward, head and raised forepaws facing RIGHT, curling tail rising along LEFT. Match source heraldic pose, proportions and right-facing orientation; not a black plain oak shield, not left-facing Gothic Shield's design. Preserve red/gold contrast with real dark-red lacquer/leather-like facing and aged brass applied relief under neutral white light. No blue background, no huge gems or new text. The future master must reconcile exact tiny heraldic contour from the reference; do not invent narrative or stats.",
+      "revisionPrompts": [],
+      "generationTool": "reuse; no new generation; source built-in image_gen.imagegen",
+      "generationCalls": 0,
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 146,
+        "sha256": "a4252e08d9edd9195bb44f985c407380b3effbd3245d8c5c9900b96f8386fc9e",
+        "notes": "Original inventory source identity; private paths/pixels omitted. Exact presented source was inspected before new generation."
+      },
+      "referencePresentedSha256": "0795f206c814aa2931853be7bc3832a9c4c563e3e66aee27e0dcffa9a4f46760",
+      "referenceVisualInspected": false,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-thumbnail-proposal"
+      ],
+      "inferredParts": [
+        "Hidden reverse surfaces, depth and thickness",
+        "Fasteners, exact material microtexture and dimensions"
+      ],
+      "review": {
+        "status": "family-reuse-proposal",
+        "approval": false,
+        "limitations": [
+          "Explicit identical-cursor family reuse proposal only; not a unique-specific design or automatic approval.",
+          "Shield rear attachments are inferred; native powers/stats remain independent and unchanged."
+        ]
+      },
+      "notes": "Explicit family reuse proposal only. Native unique identity, powers, stats, scope and saves remain separate; no new design inferred from the name. This sheet is not unique-specific fidelity or an accepted master.",
+      "reusedFromProductionId": "item.design.unique.blackoak-shield",
+      "reusedFromConceptId": "item.design.unique.blackoak-shield.concept.r1",
+      "reuseGate": "Review explicit shared-cursor reuse; native unique powers and identity remain separate. A new unique visual requires a separate approved design brief.",
+      "nativeCursorNames": [
+        "BLACKOAK_SHIELD"
+      ],
+      "identityAmbiguous": false,
+      "sourcePromptPolicy": "Exact source generation prompt retained; this identity caused zero new generation calls.",
+      "sourceUniqueIds": [
+        "item.unique.holy-defender"
+      ]
+    },
+    {
+      "productionId": "item.design.unique.split-skull-shield",
+      "conceptId": "item.design.unique.split-skull-shield.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/split-skull-shield-r1.png",
+      "sha256": "a59875322db14ca8c57996b8b258fe62e70a9f5525d8b58a24dac07ad81892eb",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D single-item candidate modelling turnaround, not final game icon.\nThe first input image is the original licensed inventory sprite, PRIMARY silhouette/proportion/palette reference ONLY. The second input image is the generated Claymore sheet, LAYOUT and neutral material presentation ONLY; never include its sword.\nCreate one coherent HD sheet showing the exact SAME object in FRONT, true SIDE thickness, BACK (correctly reverse any asymmetric outline), and 3-4 perspective, plus one small ICON inset newly rendered in crisp HD from the SAME object. All views share identical proportions/geometry/materials, whole item visible and spaced cleanly. Plain charcoal gray background, neutral soft WHITE studio illumination without colored light or warm cast, realistic worn medieval materials, restrained surface wear and minimum contact shadows. Hidden reverse surfaces, thickness and exact fine material details are conservative inferred reconstruction.\nText only item TITLE and labels FRONT / SIDE / BACK / 3-4 / ICON; small footer CANDIDATE - REVERSE AND THICKNESS INFERRED. Never paste/reproduce/trace the source sprite, its image rectangle, reference board or pixel art into output. No characters/hands/scenery, extra objects, magical glow, flames, invented jewels/runes/skulls or watermark. Thumbnail is NEW HD concept depiction, not a runtime icon.\n\nSHIELD CONTRACT: FRONT is the decorated outer face. BACK is an inferred practical inner backing with plausible dark wood/iron and leather handgrip/forearm strap; do NOT duplicate the front emblem on the inside. SIDE shows believable shield curvature/thickness and front relief in profile, not a second shield. All silhouettes and rim points match between views. No hand or character fused to straps. Rear fastening is explicitly a proposal, not source-proven.\nSPLIT SKULL SHIELD. Production ID item.design.unique.split-skull-shield, ICURS116. Match actual source: elongated dark near-black BURGUNDY shield with unusual angular scalloped upper silhouette: two tall swept outward upper corner horns, concave top dips toward a small central top point; near mid-height a second shorter outward/upward tip on each side; lower sides taper sharply into pointed bottom. Thin dull old-brass/gray-metal border follows every point, not a simple round shield. On the outer front a LARGE sculpted ivory-gray aged BONE SKULL in relief, occupying middle/upper two-thirds, large deep dark-red recessed eye sockets, severe brow, compact nose cavity, closed visible rows of dull teeth/jaw. A narrow central vertical dark split/groove runs through brow/nose region as visible in reference. Preserve skull shape and red-eyed source colors as solid non-emissive materials, not glowing eyes or living face. Front dark burgundy/black backing; no added gold heraldic animals, no new jewels, no extra horns on the skull itself.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 116,
+        "sha256": "bed49b1e86e01af349750e7deb74b2e1123fdae6572a20c5671f10f5fccc9802",
+        "notes": "Original inventory source identity; private paths/pixels omitted. Exact presented source was inspected before new generation."
+      },
+      "referencePresentedSha256": "aec439224de6437e86de1c8831a7749d5798d46878808263ae93b64ccc85658a",
+      "referenceVisualInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-thumbnail-proposal"
+      ],
+      "inferredParts": [
+        "Hidden reverse surfaces, depth and thickness",
+        "Fasteners, exact material microtexture and dimensions",
+        "Rear grip/forearm strap, inner backing and shield curvature"
+      ],
+      "review": {
+        "status": "inspected-candidate",
+        "approval": false,
+        "limitations": [
+          "Original outer-face silhouette/palette inspected; reverse backing, straps, relief thickness and rivets are proposed.",
+          "Heraldic/face contour and exact small details need source comparison and coherent 3D modelling before acceptance.",
+          "The generated vertical split extends along the front backing as an interpretive seam; the original pixels do not resolve a physical full-shield split."
+        ]
+      },
+      "notes": "Candidate reference-backed concept only; no model, final runtime icon, attachment or installation. Views and new HD thumbnail show one proposed object, not measured geometry."
+    },
+    {
+      "productionId": "item.design.unique.stormshield",
+      "conceptId": "item.design.unique.stormshield.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "family-sheet",
+      "image": "assets/concept-art/items/r1/gothic-shield-r1.png",
+      "sha256": "5e943ec42b550618a39a8786092e5fea452d2cd62ce55e5259c4fe2de02cc141",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate item-modeling reference, not an accepted asset or runtime icon.\nInput image 1 is a PRIVATE original inventory sprite supplied only as silhouette, color and surface-layout reference. Reconstruct its recognizable design in NEW detailed HD imagery; NEVER paste, reproduce or include the pixel sprite anywhere on the board.\nMake a clean professional technical turnaround board of ONE shield: FRONT, SIDE, BACK and THREE-QUARTER views plus a small NEW HD inventory-composition thumbnail of exactly the SAME object. All five depictions must share geometry, face design, thickness, materials and scale. SIDE must show the same front curvature and boss depth; BACK is the real reverse face, not another decorated front. Show a plausible separate grip/attachment on the back only, without any hand or body; rear grip, hidden construction, thickness and scale are explicitly proposed reconstruction. Front design must follow the source.\nPlain charcoal-gray background, generous spacing, full shield visible in each view, neutral soft studio illumination, restrained realistic dark medieval materials with fine wear. Color comes from materials/paint, no glow, colored lighting or painted floor shadows. No scenery, character, weapon, pedestal, exploded variants or ornamental additions. Crisp modern HD rendering throughout, including the thumbnail. Only minimal labels: item name, FRONT, SIDE, BACK, 3/4, ICON.\nSubject: item.design.base.gothic-shield. Original inventory cursor 148.\nGOTHIC SHIELD. Preserve the distinctive tall broad-shouldered heater/kite shield tapering to a pointed bottom, gently arched upper rim and shallow convex face. Front field is near-BLACK dark steel, with a thin antique BRASS/GOLD rim. The defining front ornament is a LARGE raised antique-brass rampant LION facing the viewer's LEFT: forepaws extend toward the left side, strong body occupies center/right, tail curls upward on the right, lower legs continue downward. A narrow cool SILVER/STEEL vertical reinforcement runs down the central face behind/across portions of the raised lion, as visible in the source. Closely preserve the source's black/gold/silver palette, raised lion silhouette and proportions. Fine heraldic anatomy hidden by the pixels is reconstructed rather than claimed exact. No eagle, colored quartering, wood face, extra lion heads, spikes, gems or generic plain medieval shield. Proposed reverse is plain dark metal backing with modest leather forearm strap and grip, preserving curvature and outline; no lion repeated on the reverse.",
+      "revisionPrompts": [],
+      "generationTool": "reuse; no new generation; source built-in image_gen.imagegen",
+      "generationCalls": 0,
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 148,
+        "sha256": "5027605f4d0ae5b4d27809a4b029c4d600cf0618a447f450a4e2d0b32836183d",
+        "notes": "Original inventory source identity; private paths/pixels omitted. Exact presented source was inspected before new generation."
+      },
+      "referencePresentedSha256": "bfc5d5363613f0c503665b226c4ff68d50a274e84bf5405bdfaf8f00a60dfbeb",
+      "referenceVisualInspected": false,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-thumbnail-proposal"
+      ],
+      "inferredParts": [
+        "Hidden reverse surfaces, depth and thickness",
+        "Fasteners, exact material microtexture and dimensions"
+      ],
+      "review": {
+        "status": "family-reuse-proposal",
+        "approval": false,
+        "limitations": [
+          "Explicit identical-cursor family reuse proposal only; not a unique-specific design or automatic approval.",
+          "Shield rear attachments are inferred; native powers/stats remain independent and unchanged."
+        ]
+      },
+      "notes": "Explicit family reuse proposal only. Native unique identity, powers, stats, scope and saves remain separate; no new design inferred from the name. This sheet is not unique-specific fidelity or an accepted master.",
+      "reusedFromProductionId": "item.design.base.gothic-shield",
+      "reusedFromConceptId": "item.design.base.gothic-shield.concept.r1",
+      "reuseGate": "Review explicit shared-cursor reuse; native unique powers and identity remain separate. A new unique visual requires a separate approved design brief.",
+      "nativeCursorNames": [
+        "GOTHIC_SHIELD"
+      ],
+      "identityAmbiguous": false,
+      "sourcePromptPolicy": "Exact source generation prompt retained; this identity caused zero new generation calls.",
+      "sourceUniqueIds": [
+        "item.unique.stormshield"
+      ]
+    },
+    {
+      "productionId": "item.design.unique.the-deflector",
+      "conceptId": "item.design.unique.the-deflector.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "family-sheet",
+      "image": "assets/concept-art/items/r1/buckler-r1.png",
+      "sha256": "dc996ae113ee39813a26d0f72bd061647f426e8d4af990acc510a1a90567bbd0",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate item-modeling reference, not an accepted asset or runtime icon.\nInput image 1 is a PRIVATE original inventory sprite supplied only as silhouette, color and surface-layout reference. Reconstruct its recognizable design in NEW detailed HD imagery; NEVER paste, reproduce or include the pixel sprite anywhere on the board.\nMake a clean professional technical turnaround board of ONE shield: FRONT, SIDE, BACK and THREE-QUARTER views plus a small NEW HD inventory-composition thumbnail of exactly the SAME object. All five depictions must share geometry, face design, thickness, materials and scale. SIDE must show the same front curvature and boss depth; BACK is the real reverse face, not another decorated front. Show a plausible separate grip/attachment on the back only, without any hand or body; rear grip, hidden construction, thickness and scale are explicitly proposed reconstruction. Front design must follow the source.\nPlain charcoal-gray background, generous spacing, full shield visible in each view, neutral soft studio illumination, restrained realistic dark medieval materials with fine wear. Color comes from materials/paint, no glow, colored lighting or painted floor shadows. No scenery, character, weapon, pedestal, exploded variants or ornamental additions. Crisp modern HD rendering throughout, including the thumbnail. Only minimal labels: item name, FRONT, SIDE, BACK, 3/4, ICON.\nSubject: item.design.base.buckler. Original inventory cursor 83.\nBUCKLER. Preserve the small ROUND compact all-metal shield in the reference: very dark blackened iron/steel face, large central rounded domed steel boss, narrow dark metal outer rim and a ring of small spaced rounded metal studs on the surrounding face. Subtle concentric incised/curving ironwork follows the source rather than a heraldic symbol. The brightest muted steel catches are on the upper/right rim and boss; this remains a dark iron material under neutral light. No wood face, painted colors, lion, gold crest, spikes, tall kite outline or oversized boss. Back is dark forged metal with a believable compact transverse grip behind the central boss; do not put a second front boss on the reverse.",
+      "revisionPrompts": [],
+      "generationTool": "reuse; no new generation; source built-in image_gen.imagegen",
+      "generationCalls": 0,
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 83,
+        "sha256": "c5af8872a584bb705f1285c1f81e538fe9a52d1a6e1e3a28c11814a9f1589dd8",
+        "notes": "Original inventory source identity; private paths/pixels omitted. Exact presented source was inspected before new generation."
+      },
+      "referencePresentedSha256": "b390513524d105a6dfc3530e98d895bfd679421a90e0f39a159f233f69fa4570",
+      "referenceVisualInspected": false,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-thumbnail-proposal"
+      ],
+      "inferredParts": [
+        "Hidden reverse surfaces, depth and thickness",
+        "Fasteners, exact material microtexture and dimensions"
+      ],
+      "review": {
+        "status": "family-reuse-proposal",
+        "approval": false,
+        "limitations": [
+          "Explicit identical-cursor family reuse proposal only; not a unique-specific design or automatic approval.",
+          "Shield rear attachments are inferred; native powers/stats remain independent and unchanged."
+        ]
+      },
+      "notes": "Explicit family reuse proposal only. Native unique identity, powers, stats, scope and saves remain separate; no new design inferred from the name. This sheet is not unique-specific fidelity or an accepted master.",
+      "reusedFromProductionId": "item.design.base.buckler",
+      "reusedFromConceptId": "item.design.base.buckler.concept.r1",
+      "reuseGate": "Review explicit shared-cursor reuse; native unique powers and identity remain separate. A new unique visual requires a separate approved design brief.",
+      "nativeCursorNames": [
+        "BUCKLER"
+      ],
+      "identityAmbiguous": false,
+      "sourcePromptPolicy": "Exact source generation prompt retained; this identity caused zero new generation calls.",
+      "sourceUniqueIds": [
+        "item.unique.the-deflector"
+      ]
+    }
+  ],
+  "handoff": {
+    "rootAction": "Consolidate candidate entries and update gallery/queue only after validation. Devlog labels: concept candidate or explicit family reuse proposal; never publish private sprites.",
+    "limits": "No approval/selection/installation/model/runtime icon. Reverse geometry inferred; same master/material gate still required."
+  }
+}

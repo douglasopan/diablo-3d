@@ -4,7 +4,9 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <climits>
 #include <memory>
+#include <new>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -24,6 +26,7 @@
 #include <function_ref.hpp>
 
 #include "DiabloUI/button.h"
+#include "DiabloUI/hero/hero_portrait.hpp"
 #include "DiabloUI/scrollbar.h"
 #include "DiabloUI/text_input.hpp"
 #include "DiabloUI/ui_flags.hpp"
@@ -84,6 +87,7 @@ OptionalOwnedClxSpriteList ArtLogo;
 OptionalOwnedClxSpriteList DifficultyIndicator;
 
 std::array<OptionalOwnedClxSpriteList, 3> ArtFocus;
+std::array<std::array<SDL_Color,256>,3> ArtFocusPalettes;
 
 OptionalOwnedClxSpriteList ArtBackgroundWidescreen;
 OptionalOwnedClxSpriteList ArtBackground;
@@ -98,6 +102,10 @@ std::optional<D3dLogo> CustomMenuLogo;
 OptionalOwnedClxSpriteList ArtHero;
 std::vector<uint8_t> ArtHeroPortraitOrder;
 std::vector<OptionalOwnedClxSpriteList> ArtHeroOverrides;
+std::unique_ptr<std::optional<HeroPortrait>[]> HeroPortraitAtlas;
+std::unique_ptr<std::optional<HeroPortrait>[]> HeroPortraitOverrides;
+size_t HeroPortraitAtlasSize = 0;
+size_t HeroPortraitOverridesSize = 0;
 
 std::size_t SelectedItemMax;
 std::size_t ListViewportSize = 1;
@@ -415,6 +423,7 @@ bool HandleMenuAction(MenuAction menuAction)
 
 void UiOnBackgroundChange()
 {
+	BeginD3dMainMenuUiFrame();
 	StartUiFadeIn();
 
 	if (IsHardwareCursorEnabled() && ArtCursor && ControlDevice == ControlTypes::KeyboardAndMouse && GetCurrentCursorInfo().type() != CursorType::UserInterface) {
@@ -634,6 +643,10 @@ void LoadHeros()
 	if (!ArtHero)
 		return;
 	const uint16_t numPortraits = ClxSpriteList { *ArtHero }.numSprites();
+	const auto atlasPalette = ReadHeroPortraitPalette("ui_art\\heros");
+	const auto legacyPalette = ReadHeroPortraitPalette("ui_art\\selhero");
+	// Preserve the original selector's inherited palette as an explicit basis.
+	// The embedded atlas palette remains available for the integration gate.
 
 	ArtHeroPortraitOrder.resize(GetNumPlayerClasses() + 1);
 	for (size_t i = 0; i < GetNumPlayerClasses(); ++i) {
@@ -645,11 +658,29 @@ void LoadHeros()
 		ArtHeroPortraitOrder.back() = 5;
 	}
 
+	// Only class/empty indices used by this dialog are decoded. Portrait IDs
+	// are uint8_t; do not allocate an unbounded cache from an atlas frame count.
+	HeroPortraitAtlasSize = std::min<size_t>(numPortraits, 256);
+	HeroPortraitAtlas.reset(new (std::nothrow) std::optional<HeroPortrait>[HeroPortraitAtlasSize]);
+	if (HeroPortraitAtlas && legacyPalette) {
+		for (const uint8_t index : ArtHeroPortraitOrder) {
+			if (index < HeroPortraitAtlasSize && !HeroPortraitAtlas[index])
+				HeroPortraitAtlas[index] = DecodeHeroPortrait((*ArtHero)[index], *legacyPalette, HeroPortraitPaletteBasis::LegacySelHero, atlasPalette);
+		}
+	}
+
 	ArtHeroOverrides.resize(GetNumPlayerClasses() + 1);
+	HeroPortraitOverridesSize = ArtHeroOverrides.size();
+	HeroPortraitOverrides.reset(new (std::nothrow) std::optional<HeroPortrait>[HeroPortraitOverridesSize]);
 	for (size_t i = 0; i <= GetNumPlayerClasses(); ++i) {
 		char portraitPath[18];
 		*BufCopy(portraitPath, "ui_art\\hero", i) = '\0';
 		ArtHeroOverrides[i] = LoadPcx(portraitPath, /*transparentColor=*/std::nullopt, /*outPalette=*/nullptr, /*logError=*/false);
+		if (HeroPortraitOverrides && ArtHeroOverrides[i]) {
+			const auto palette = ReadHeroPortraitPalette(portraitPath);
+			if (palette)
+				HeroPortraitOverrides[i] = DecodeHeroPortrait((*ArtHeroOverrides[i])[0], *palette, HeroPortraitPaletteBasis::Asset, palette);
+		}
 	}
 }
 
@@ -664,9 +695,9 @@ void LoadUiGFX()
 		}
 	}
 	DifficultyIndicator = LoadPcx("ui_art\\r1_gry", /*transparentColor=*/0);
-	ArtFocus[FOCUS_SMALL] = LoadPcxSpriteList("ui_art\\focus16", /*numFrames=*/8, /*transparentColor=*/250);
-	ArtFocus[FOCUS_MED] = LoadPcxSpriteList("ui_art\\focus", /*numFrames=*/8, /*transparentColor=*/250);
-	ArtFocus[FOCUS_BIG] = LoadPcxSpriteList("ui_art\\focus42", /*numFrames=*/8, /*transparentColor=*/250);
+	ArtFocus[FOCUS_SMALL] = LoadPcxSpriteList("ui_art\\focus16", /*numFrames=*/8, /*transparentColor=*/250, ArtFocusPalettes[FOCUS_SMALL].data());
+	ArtFocus[FOCUS_MED] = LoadPcxSpriteList("ui_art\\focus", /*numFrames=*/8, /*transparentColor=*/250, ArtFocusPalettes[FOCUS_MED].data());
+	ArtFocus[FOCUS_BIG] = LoadPcxSpriteList("ui_art\\focus42", /*numFrames=*/8, /*transparentColor=*/250, ArtFocusPalettes[FOCUS_BIG].data());
 
 	ArtCursor = LoadPcx("ui_art\\cursor", /*transparentColor=*/0);
 
@@ -682,9 +713,24 @@ ClxSprite UiGetHeroDialogSprite(size_t heroClassIndex)
 	    : (*ArtHero)[ArtHeroPortraitOrder[heroClassIndex]];
 }
 
+const HeroPortrait *UiGetHeroDialogPortrait(size_t heroClassIndex)
+{
+	if (heroClassIndex >= ArtHeroOverrides.size() || heroClassIndex >= ArtHeroPortraitOrder.size()) return nullptr;
+	if (ArtHeroOverrides[heroClassIndex]) {
+		if (!HeroPortraitOverrides || heroClassIndex >= HeroPortraitOverridesSize || !HeroPortraitOverrides[heroClassIndex]) return nullptr;
+		return &*HeroPortraitOverrides[heroClassIndex];
+	}
+	const size_t index = ArtHeroPortraitOrder[heroClassIndex];
+	if (!HeroPortraitAtlas || index >= HeroPortraitAtlasSize || !HeroPortraitAtlas[index]) return nullptr;
+	return &*HeroPortraitAtlas[index];
+}
+
 void UnloadUiGFX()
 {
 	SetD3dMainMenuActive(false);
+	HeroPortraitAtlas.reset();
+	HeroPortraitOverrides.reset();
+	HeroPortraitAtlasSize = HeroPortraitOverridesSize = 0;
 	ArtHero = std::nullopt;
 	for (OptionalOwnedClxSpriteList &override : ArtHeroOverrides)
 		override = std::nullopt;
@@ -779,13 +825,7 @@ bool UiLoadBlackBackground()
 
 void UiLoadMenuBackground(const char *fallbackArt)
 {
-	if (SetD3dMainMenuActive(true)) {
-		ArtBackground = std::nullopt;
-		ArtBackgroundWidescreen = std::nullopt;
-		UiLoadDefaultPalette();
-		UiOnBackgroundChange();
-		return;
-	}
+	SetD3dMainMenuActive(false);
 	if (fallbackArt != nullptr)
 		LoadBackgroundArt(fallbackArt);
 	else
@@ -860,13 +900,28 @@ void DrawSelector(const SDL_Rect &rect)
 	// TODO FOCUS_MED appears higher than the box
 	const int y = rect.y + ((rect.h - static_cast<int>(sprite.height())) / 2);
 
+	const size_t focusSize = rect.h >= 42 ? FOCUS_BIG : rect.h >= 30 ? FOCUS_MED : FOCUS_SMALL;
+	std::array<uint8_t,256> translation {};
+	for (size_t source=0;source<256;++source) {
+		const auto color=ArtFocusPalettes[focusSize][source];
+		int best=INT_MAX;
+		for (size_t target=0;target<256;++target) {
+			const auto candidate=logical_palette[target];
+			const int r=int(color.r)-candidate.r, g=int(color.g)-candidate.g, b=int(color.b)-candidate.b;
+			const int distance=r*r+g*g+b*b;
+			if(distance<best) {best=distance;translation[source]=static_cast<uint8_t>(target);}
+		}
+	}
 	const Surface &out = Surface(DiabloUiSurface());
-	RenderClxSprite(out, sprite, { rect.x, y });
-	RenderClxSprite(out, sprite, { rect.x + rect.w - sprite.width(), y });
+	MarkD3dMainMenuNativeSprite(out, sprite, { rect.x, y });
+	RenderClxSpriteWithTRN(out, sprite, { rect.x, y }, translation.data());
+	MarkD3dMainMenuNativeSprite(out, sprite, { rect.x + rect.w - sprite.width(), y });
+	RenderClxSpriteWithTRN(out, sprite, { rect.x + rect.w - sprite.width(), y }, translation.data());
 }
 
 void UiClearScreen()
 {
+	BeginD3dMainMenuUiFrame();
 	if (!ArtBackground || gnScreenWidth > (*ArtBackground)[0].width() || gnScreenHeight > (*ArtBackground)[0].height()) {
 		SDL_FillSurfaceRect(DiabloUiSurface(), nullptr, 0);
 	}
@@ -906,8 +961,20 @@ void UiPollAndRender(std::optional<tl::function_ref<bool(SDL_Event &)>> eventHan
 
 namespace {
 
+void RejectNativeTextOverlap(const SDL_Rect &rect, UiFlags flags)
+{
+	// Text clipping has only right/bottom bounds. Right alignment can begin
+	// before the supplied rectangle; decline ambiguous overlap conservatively.
+	const int left = HasAnyOf(flags, UiFlags::AlignRight) ? 0 : std::max(0, static_cast<int>(rect.x) - 1);
+	const int top = std::max(0, static_cast<int>(rect.y) - 8);
+	const int right = static_cast<int>(rect.x) + rect.w;
+	const int bottom = rect.h == 0 ? DiabloUiSurface()->h : static_cast<int>(rect.y) + rect.h;
+	RejectD3dMainMenuPortraitOverlap(Surface(DiabloUiSurface()), MakeSdlRect(left, top, std::max(0, right - left), std::max(0, bottom - top)));
+}
+
 void Render(const UiText &uiText)
 {
+	RejectNativeTextOverlap(uiText.m_rect, uiText.GetFlags());
 	const Surface &out = Surface(DiabloUiSurface());
 	DrawString(out, uiText.GetText(), MakeRectangle(uiText.m_rect),
 	    { .flags = uiText.GetFlags() | UiFlags::FontSizeDialog });
@@ -915,6 +982,7 @@ void Render(const UiText &uiText)
 
 void Render(const UiArtText &uiArtText)
 {
+	RejectNativeTextOverlap(uiArtText.m_rect, uiArtText.GetFlags());
 	const Surface &out = Surface(DiabloUiSurface());
 	DrawString(out, uiArtText.GetText(), MakeRectangle(uiArtText.m_rect),
 	    { .flags = uiArtText.GetFlags(), .spacing = uiArtText.GetSpacing(), .lineHeight = uiArtText.GetLineHeight() });
@@ -922,12 +990,21 @@ void Render(const UiArtText &uiArtText)
 
 void Render(const UiImageClx &uiImage)
 {
+	const Surface out(DiabloUiSurface());
+	if (const HeroPortrait *portrait = uiImage.heroPortrait()) {
+		const SDL_Rect rect = FitHeroPortrait(portrait->width, portrait->height, uiImage.m_rect);
+		if (DrawHeroPortraitIndexed(out, *portrait, rect)) {
+			RecordD3dMainMenuPortrait(out, *portrait, rect);
+			return;
+		}
+	}
 	const ClxSprite sprite = uiImage.sprite();
 	int x = uiImage.m_rect.x;
 	if (uiImage.isCentered()) {
 		x += GetCenterOffset(sprite.width(), uiImage.m_rect.w);
 	}
-	RenderClxSprite(Surface(DiabloUiSurface()), sprite, { x, uiImage.m_rect.y });
+	MarkD3dMainMenuNativeSprite(out, sprite, { x, uiImage.m_rect.y });
+	RenderClxSprite(out, sprite, { x, uiImage.m_rect.y });
 }
 
 void Render(const UiImageAnimatedClx &uiImage)
@@ -941,6 +1018,7 @@ void Render(const UiImageAnimatedClx &uiImage)
 	if (uiImage.isCentered()) {
 		x += GetCenterOffset(sprite.width(), uiImage.m_rect.w);
 	}
+	MarkD3dMainMenuNativeSprite(Surface(DiabloUiSurface()), sprite, { x, uiImage.m_rect.y });
 	if (custom != nullptr) {
 		DrawD3dLogo(Surface(DiabloUiSurface()), { x, uiImage.m_rect.y + sprite.height() - 1 }, *custom, frame);
 	} else {
@@ -950,6 +1028,7 @@ void Render(const UiImageAnimatedClx &uiImage)
 
 void Render(const UiArtTextButton &uiButton)
 {
+	RejectNativeTextOverlap(uiButton.m_rect, uiButton.GetFlags());
 	const Surface &out = Surface(DiabloUiSurface());
 	DrawString(out, uiButton.GetText(), MakeRectangle(uiButton.m_rect), { .flags = uiButton.GetFlags() });
 }
@@ -968,6 +1047,7 @@ void Render(const UiList &uiList)
 		    Displacement(GetListSelectorSprites(rect.h)[0].width(), 0));
 
 		const UiFlags uiFlags = uiList.GetFlags() | item.uiFlags;
+		RejectNativeTextOverlap(rect, uiFlags);
 		const GameFontTables fontSize = GetFontSizeFromUiFlags(uiFlags);
 		std::string_view text = item.m_text.str();
 		while (GetLineWidth(text, fontSize, 1) > rectangle.size.width) {
@@ -1170,15 +1250,18 @@ void UiRenderItem(const UiItemBase &item)
 		Render(static_cast<const UiArtTextButton &>(item));
 		break;
 	case UiType::Button:
+		RejectD3dMainMenuPortraitOverlap(Surface(DiabloUiSurface()), item.m_rect);
 		RenderButton(static_cast<const UiButton &>(item));
 		break;
 	case UiType::List:
 		Render(static_cast<const UiList &>(item));
 		break;
 	case UiType::Scrollbar:
+		RejectD3dMainMenuPortraitOverlap(Surface(DiabloUiSurface()), item.m_rect);
 		Render(static_cast<const UiScrollbar &>(item));
 		break;
 	case UiType::Edit:
+		RejectNativeTextOverlap(item.m_rect, item.GetFlags());
 		Render(static_cast<const UiEdit &>(item));
 		break;
 	}
@@ -1256,6 +1339,7 @@ void DrawMouse()
 {
 	if (ControlDevice != ControlTypes::KeyboardAndMouse || IsHardwareCursor() || !ArtCursor)
 		return;
+	MarkD3dMainMenuNativeSprite(Surface(DiabloUiSurface()), (*ArtCursor)[0], MousePosition);
 	RenderClxSprite(Surface(DiabloUiSurface()), (*ArtCursor)[0], MousePosition);
 }
 } // namespace devilution

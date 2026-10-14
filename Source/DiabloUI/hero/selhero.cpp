@@ -98,6 +98,7 @@ void SelheroFree()
 void SelheroSetStats()
 {
 	SELHERO_DIALOG_HERO_IMG->setSprite(UiGetHeroDialogSprite(static_cast<size_t>(selhero_heroInfo.heroclass)));
+	SELHERO_DIALOG_HERO_IMG->setHeroPortrait(UiGetHeroDialogPortrait(static_cast<size_t>(selhero_heroInfo.heroclass)));
 	CopyUtf8(textStats[0], StrCat(selhero_heroInfo.level), sizeof(textStats[0]));
 	CopyUtf8(textStats[1], StrCat(selhero_heroInfo.strength), sizeof(textStats[1]));
 	CopyUtf8(textStats[2], StrCat(selhero_heroInfo.magic), sizeof(textStats[2]));
@@ -148,6 +149,7 @@ void SelheroListFocus(size_t value)
 	}
 
 	SELHERO_DIALOG_HERO_IMG->setSprite(UiGetHeroDialogSprite(GetNumPlayerClasses()));
+	SELHERO_DIALOG_HERO_IMG->setHeroPortrait(UiGetHeroDialogPortrait(GetNumPlayerClasses()));
 	for (char *textStat : textStats)
 		strcpy(textStat, "--");
 	SELLIST_DIALOG_DELETE_BUTTON->SetFlags(baseFlags | UiFlags::ColorUiSilver | UiFlags::ElementDisabled);
@@ -500,8 +502,10 @@ void selhero_Init()
 	SDL_Rect rect = MakeSdlRect(uiPosition.x + 24, uiPosition.y + 161, 590, 35);
 	vecSelHeroDialog.push_back(std::make_unique<UiArtText>(&title, rect, UiFlags::AlignCenter | UiFlags::FontSize30 | UiFlags::ColorUiSilver, 3));
 
-	rect = MakeSdlRect(uiPosition.x + 30, uiPosition.y + 211, 180, 76);
+	// The portrait keeps its aspect ratio inside the existing left-hand block.
+	rect = MakeSdlRect(uiPosition.x + 12, uiPosition.y + 211, 216, 100);
 	auto heroImg = std::make_unique<UiImageClx>(UiGetHeroDialogSprite(0), rect, UiFlags::None);
+	heroImg->setHeroPortrait(UiGetHeroDialogPortrait(0));
 	SELHERO_DIALOG_HERO_IMG = heroImg.get();
 	vecSelHeroDialog.push_back(std::move(heroImg));
 

@@ -13,13 +13,13 @@
 
 namespace devilution::cathedral {
 
-enum class NativeTextureKind : uint8_t { Technical, FloorDiamond, Masonry, DoorWood };
+enum class NativeTextureKind : uint8_t { Technical, FloorDiamond, Masonry, DoorWood, Ceiling };
 enum class NativeTextureAxis : uint8_t { Horizontal, AlongX, AlongZ };
 /** Upper columns keep the original non-repeating MIN footprint. They must not
  * alias the repeated-band cache used by backs/caps/corners. No layout grants
  * full facade, depth, collision, mask, lighting or budget authority.
  */
-enum class NativeTextureLayout : uint8_t { RepeatedBand, OriginalUpperColumn, OriginalFullColumn };
+enum class NativeTextureLayout : uint8_t { RepeatedBand, OriginalUpperColumn, OriginalFullColumn, RectifiedFloor, RectifiedWall, SolidMasonry };
 /** Derivative draw coverage only. Unpartitioned raw material keys/getters retain
  * original pixels and coverage; explicit full-column passes preserve native
  * mixed SOL/TransList operations through the existing opaque/blend renderer.

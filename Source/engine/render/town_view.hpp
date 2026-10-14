@@ -194,7 +194,12 @@ struct TownViewPickResult {
 	int objectIndex = -1, monsterIndex = -1;
 };
 bool PickTownViewDetailed(Point screen, TownViewPickResult &result);
+/** Same current color/depth/pick epoch as ordinary selection. Captured FP may
+ * swing into empty space using the camera's horizontal direction, without
+ * inventing an entity target or reusing a stale/unavailable world frame. */
+bool PickTownViewStandingAttack(Point screen, TownViewPickResult &result);
 /** Memory-only preparation after native missile interpolation, before DrawGame. */
+bool IsTownViewEnabled();
 void PrepareTownViewLiveFrame();
 void InvalidateTownViewFrameForNativeFallback();
 struct TownViewCathedralState {
@@ -208,6 +213,8 @@ struct TownViewCathedralNativeTextureState {
 	uint64_t epoch = 0;
 	size_t entries = 0, bytes = 0, decodes = 0, hits = 0, misses = 0;
 	size_t floorMaterials = 0, masonryMaterials = 0, doorMaterials = 0, donorMaterials = 0;
+	size_t ceilingMaterials = 0;
+	size_t lightBodyTriangles = 0, lightBodyBytes = 0, lightGroundPanels = 0;
 };
 TownViewCathedralNativeTextureState GetTownViewCathedralNativeTextureState();
 /** Read-only copy of an already prepared private runtime texture; no decode.
@@ -229,6 +236,8 @@ struct TownViewCathedralNativeTextureReference {
 	uint8_t operationPass = 0; // Raw getter always unpartitioned; lit getter identifies its draw pass.
 	uint32_t operationRevision = 0;
 	uint64_t rawSignature = 0, lightSignature = 0;
+	uint64_t authoredPixelHash = 0;
+	uint8_t authoredMaterial = 0; // 0: native; 1: own floor r1; 2: own opaque wall r1.
 	uint8_t activeMicroTileLength = 0;
 	uint32_t packingRevision = 0;
 	std::array<uint16_t, 16> upperWords {};
@@ -236,6 +245,10 @@ struct TownViewCathedralNativeTextureReference {
 };
 TownViewCathedralNativeTextureReference GetTownViewCathedralNativeTextureReference(
 	const cathedral::NativeTextureBinding &binding);
+/** Approximate native-stone ceiling, read only; no floor material reuse. */
+TownViewCathedralNativeTextureReference GetTownViewCathedralCeilingTextureReference();
+/** Copy of the current epoch's native light-stand art, for bounded visual QA. */
+TownViewCathedralNativeTextureReference GetTownViewCathedralLightBodyTextureReference();
 
 /** Read-only prepared presentation, for comparison with native lighting. */
 TownViewCathedralNativeTextureReference GetTownViewCathedralLitTextureReference(
@@ -319,4 +332,37 @@ const TownVolumeMesh *TownViewVegetationVolume(size_t groupIndex);
 /** Cached whole-object prop mesh; invalidated on reset. */
 const TownVolumeMesh *TownViewPropVolume(size_t groupIndex);
 
+struct TownViewSarcophagusInfo { bool loaded; size_t bodyTriangles,lidTriangles,draws; };
+TownViewSarcophagusInfo GetTownViewSarcophagusInfo();
+
+struct TownViewBarrelInfo {bool loaded;size_t triangles,meshDraws,nativeBreakDraws,nativeExplosionDraws,shardDraws,terminalShardDraws;};
+TownViewBarrelInfo GetTownViewBarrelInfo();
+
+size_t GetTownViewCorpseGroundDraws();
+
 } // namespace devilution
+
+namespace devilution {
+struct TownViewChestInfo { bool loaded; size_t triangles,draws; };
+/** Freeze presentation prop time only; negative restores SDL clock. */
+void SetTownViewPropAnimationTimeForDiagnostics(int64_t milliseconds);
+TownViewChestInfo GetTownViewChestInfo();
+TownViewChestInfo GetTownViewChestVariantInfo(int variant);
+float GetTownViewChestOpenProgress(int slot);
+}
+
+namespace devilution {
+struct TownViewDoorModelInfo { bool loaded; size_t leafTriangles,archTriangles,leafDraws,archDraws,residentDraws; };
+TownViewDoorModelInfo GetTownViewDoorModelInfo();
+float GetTownViewDoorOpenProgress(int slot);
+}
+
+namespace devilution {
+struct TownViewBrazierInfo {bool loaded;size_t triangles,meshDraws,flameDraws;float flameContact;};
+TownViewBrazierInfo GetTownViewBrazierInfo();
+}
+
+namespace devilution {
+struct TownViewSkullFireInfo {bool loaded;size_t triangles,meshDraws,flameDraws;float minHeight,maxHeight,flameContact;size_t flameCoveredTexels;};
+TownViewSkullFireInfo GetTownViewSkullFireInfo();
+}

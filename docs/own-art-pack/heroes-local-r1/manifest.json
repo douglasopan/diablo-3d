@@ -1,0 +1,2160 @@
+{
+  "schema": "d3d.own-hero-art-handoff/1",
+  "localDate": "2026-10-12",
+  "timezone": "America/Sao_Paulo",
+  "status": "authoring-candidates-not-runtime-pack",
+  "scope": "HERÓIS only; principal integrates",
+  "sourceThread": "01a1153a-cad1-7fb1-8326-225511ee918d",
+  "cloudCoordinatorThread": "01a12deb-9f8d-751c-ac49-8a1ac93d9031",
+  "gameplayPolicy": "ONLY SPRITES for every hero and NPC including Warrior/Ogden until correct rig plus animations are validated; none selected or installed here",
+  "generated": {
+    "provider": "built-in imagegen",
+    "calls": 5,
+    "newRasterMasterFilesIncludingRejectedRevision": 5,
+    "newPaidMeshyTripoCalls": 0,
+    "newMeshyTripoSpend": 0
+  },
+  "counts": {
+    "baseHeroesWithAuthoringAssets": 3,
+    "preservedWarriorGlbSources": 3,
+    "preservedWarriorConcepts": 1,
+    "newRogueSorcererIdentityMasters": 2,
+    "directionStills": 24,
+    "animatedStillsCountedAsMotion": 0,
+    "authoredMotionDiagnosticClips": 1,
+    "renderedMotionDiagnosticFrames": 64,
+    "nativeAnimationClipsValidated": 0,
+    "heroesRuntimeIntegrated": 0,
+    "heroesCompleteForDistribution": 0
+  },
+  "heroes": [
+    {
+      "id": "tristram.hero.warrior",
+      "variant": "light-unarmed",
+      "status": "candidate-authoring-stills",
+      "stills": [
+        {
+          "nativeDirectionIndex": 0,
+          "direction": "s",
+          "file": "art/warrior/bind-directions/s/bind.png",
+          "sha256": "eb526c8a0e196fb991728713d0b6bbe8473a3531579066f060c64b90fdaaa804",
+          "frameCount": 1,
+          "animationFrames": 0
+        },
+        {
+          "nativeDirectionIndex": 1,
+          "direction": "sw",
+          "file": "art/warrior/bind-directions/sw/bind.png",
+          "sha256": "568ce653174a2d5a44ae4831e7623b9f6c4afff2baf7fb4b1e3d39dd0d3c6b26",
+          "frameCount": 1,
+          "animationFrames": 0
+        },
+        {
+          "nativeDirectionIndex": 2,
+          "direction": "w",
+          "file": "art/warrior/bind-directions/w/bind.png",
+          "sha256": "bf5389bf6a6bd145284595b629bfcc3769fcdc29ed62c336f96b6cd030bc17a0",
+          "frameCount": 1,
+          "animationFrames": 0
+        },
+        {
+          "nativeDirectionIndex": 3,
+          "direction": "nw",
+          "file": "art/warrior/bind-directions/nw/bind.png",
+          "sha256": "ed54e66c0003992d967179a9fa8872a9e2f7caebd18482e0606ede01d7b29a43",
+          "frameCount": 1,
+          "animationFrames": 0
+        },
+        {
+          "nativeDirectionIndex": 4,
+          "direction": "n",
+          "file": "art/warrior/bind-directions/n/bind.png",
+          "sha256": "1d319344ce01060fde4eb6c793834a601644c44b347ce767b4dffa039f4de783",
+          "frameCount": 1,
+          "animationFrames": 0
+        },
+        {
+          "nativeDirectionIndex": 5,
+          "direction": "ne",
+          "file": "art/warrior/bind-directions/ne/bind.png",
+          "sha256": "57c03589d26237a7f8fb8c10c856be797f3a57e1a1e43e51e26855f919882f4e",
+          "frameCount": 1,
+          "animationFrames": 0
+        },
+        {
+          "nativeDirectionIndex": 6,
+          "direction": "e",
+          "file": "art/warrior/bind-directions/e/bind.png",
+          "sha256": "f1f2b8a7b72ad80f73c00e959c01945cc40859ced05b41ae847668e25306ce52",
+          "frameCount": 1,
+          "animationFrames": 0
+        },
+        {
+          "nativeDirectionIndex": 7,
+          "direction": "se",
+          "file": "art/warrior/bind-directions/se/bind.png",
+          "sha256": "ea9d144cadb3f07c9bba00dc77a47c930fe4a1e1a677174d8f39f9ebcaff0e25",
+          "frameCount": 1,
+          "animationFrames": 0
+        }
+      ],
+      "authoringPixelPivot": [
+        256,
+        448
+      ],
+      "canvas": [
+        512,
+        512
+      ],
+      "nativePivotCalibrated": false,
+      "nativeAnimationSlotsValidated": 0,
+      "runtimeEligible": false,
+      "masterKind": "preserved-own-GLB-master-and-rig",
+      "projection": "measured orthographic elevation30 from real GLB"
+    },
+    {
+      "id": "tristram.hero.rogue",
+      "variant": "light-unarmed",
+      "status": "candidate-authoring-stills",
+      "stills": [
+        {
+          "nativeDirectionIndex": 0,
+          "direction": "s",
+          "file": "art/rogue/authoring-directions-r1/s/still.png",
+          "sha256": "d7ee1881817416fea19b11f1e370a707f8c23619baa24b4bbd0f245a8a485f22",
+          "frameCount": 1,
+          "animationFrames": 0
+        },
+        {
+          "nativeDirectionIndex": 1,
+          "direction": "sw",
+          "file": "art/rogue/authoring-directions-r1/sw/still.png",
+          "sha256": "84072e3e26fd5cd2496f6157157eecadb4f2941fba45a39570bc1d256bcc77ca",
+          "frameCount": 1,
+          "animationFrames": 0
+        },
+        {
+          "nativeDirectionIndex": 2,
+          "direction": "w",
+          "file": "art/rogue/authoring-directions-r1/w/still.png",
+          "sha256": "594a9f517f8a3eafabec353277262713269300e02d071f7a37708a0c37e4eaea",
+          "frameCount": 1,
+          "animationFrames": 0
+        },
+        {
+          "nativeDirectionIndex": 3,
+          "direction": "nw",
+          "file": "art/rogue/authoring-directions-r1/nw/still.png",
+          "sha256": "7b3a54afb34ebc0e712f3b326779957ae5ca05f06473906df9978b8fb8337ef8",
+          "frameCount": 1,
+          "animationFrames": 0
+        },
+        {
+          "nativeDirectionIndex": 4,
+          "direction": "n",
+          "file": "art/rogue/authoring-directions-r1/n/still.png",
+          "sha256": "b8cf4682773bb7023776cd03f57e8b6b0f081773f0151a1a99c5b59963f3c358",
+          "frameCount": 1,
+          "animationFrames": 0
+        },
+        {
+          "nativeDirectionIndex": 5,
+          "direction": "ne",
+          "file": "art/rogue/authoring-directions-r1/ne/still.png",
+          "sha256": "f20c38d5617486d4f42d9b7bb5bf0db5cb9a06d3430cbbbb7f363f2499c06bf1",
+          "frameCount": 1,
+          "animationFrames": 0
+        },
+        {
+          "nativeDirectionIndex": 6,
+          "direction": "e",
+          "file": "art/rogue/authoring-directions-r1/e/still.png",
+          "sha256": "e924cfcdf356a28a9976c7d12a81e9898835d2b8c1d1e724d566d1e147bcbdb7",
+          "frameCount": 1,
+          "animationFrames": 0
+        },
+        {
+          "nativeDirectionIndex": 7,
+          "direction": "se",
+          "file": "art/rogue/authoring-directions-r1/se/still.png",
+          "sha256": "004a0ac552a05654dc02de4ef78f052b59fbaec9f3958fa832dfe00c60f66f62",
+          "frameCount": 1,
+          "animationFrames": 0
+        }
+      ],
+      "authoringPixelPivot": [
+        256,
+        608
+      ],
+      "canvas": [
+        512,
+        640
+      ],
+      "nativePivotCalibrated": false,
+      "nativeAnimationSlotsValidated": 0,
+      "runtimeEligible": false,
+      "masterKind": "new-own-raster-identity-master-no-geometry",
+      "projection": "generated low-camera approximate yaw; needs camera calibration"
+    },
+    {
+      "id": "tristram.hero.sorcerer",
+      "variant": "light-unarmed",
+      "status": "candidate-authoring-stills",
+      "stills": [
+        {
+          "nativeDirectionIndex": 0,
+          "direction": "s",
+          "file": "art/sorcerer/authoring-directions-r2/s/still.png",
+          "sha256": "ed3470311912f83aa43ee42ef5b9f9b6882ef9aecbdf3e81946176134b241622",
+          "frameCount": 1,
+          "animationFrames": 0
+        },
+        {
+          "nativeDirectionIndex": 1,
+          "direction": "sw",
+          "file": "art/sorcerer/authoring-directions-r2/sw/still.png",
+          "sha256": "9f087bdd4ebca7d261b4e4ff919f6baf56e857eb72f9f51095a9dd111818a157",
+          "frameCount": 1,
+          "animationFrames": 0
+        },
+        {
+          "nativeDirectionIndex": 2,
+          "direction": "w",
+          "file": "art/sorcerer/authoring-directions-r2/w/still.png",
+          "sha256": "eecb60c96ec22d9cd7079b633474d24197f90075aa651e06b1aa6eda2343c0f1",
+          "frameCount": 1,
+          "animationFrames": 0
+        },
+        {
+          "nativeDirectionIndex": 3,
+          "direction": "nw",
+          "file": "art/sorcerer/authoring-directions-r2/nw/still.png",
+          "sha256": "4f934520576519350be0a22fff0c1aebfacf6eed0688e2dc25a377af195ba64f",
+          "frameCount": 1,
+          "animationFrames": 0
+        },
+        {
+          "nativeDirectionIndex": 4,
+          "direction": "n",
+          "file": "art/sorcerer/authoring-directions-r2/n/still.png",
+          "sha256": "b1efe92bfb09bb653a76984ecd90525a0a227b48953174c232bc4da206a2b2a7",
+          "frameCount": 1,
+          "animationFrames": 0
+        },
+        {
+          "nativeDirectionIndex": 5,
+          "direction": "ne",
+          "file": "art/sorcerer/authoring-directions-r2/ne/still.png",
+          "sha256": "a347ce3b7709789badc46c9aa785006872ed9ab2db99c14ee61990be97c06394",
+          "frameCount": 1,
+          "animationFrames": 0
+        },
+        {
+          "nativeDirectionIndex": 6,
+          "direction": "e",
+          "file": "art/sorcerer/authoring-directions-r2/e/still.png",
+          "sha256": "3fd5e7c1304155662627cf710f6878751c6d5be7941576062b05a70391fff188",
+          "frameCount": 1,
+          "animationFrames": 0
+        },
+        {
+          "nativeDirectionIndex": 7,
+          "direction": "se",
+          "file": "art/sorcerer/authoring-directions-r2/se/still.png",
+          "sha256": "f4908395542bf62e8e568bf5b5e91b281ae82b1922b2898e30b86189ef27ecb2",
+          "frameCount": 1,
+          "animationFrames": 0
+        }
+      ],
+      "authoringPixelPivot": [
+        256,
+        608
+      ],
+      "canvas": [
+        512,
+        640
+      ],
+      "nativePivotCalibrated": false,
+      "nativeAnimationSlotsValidated": 0,
+      "runtimeEligible": false,
+      "masterKind": "new-own-raster-identity-master-no-geometry",
+      "projection": "generated low-camera approximate yaw; needs camera calibration"
+    }
+  ],
+  "motionDiagnostics": [
+    {
+      "receipt": "art/warrior/candidate-firstwalk1/diagnostic-directions/render-receipt.json",
+      "status": "diagnostic-reject",
+      "rendererStatus": "diagnostic-reject",
+      "nativeState": null,
+      "clip": "own-retarget-griswold-walk-proof-r1",
+      "renderedFrames": 64,
+      "projection": {
+        "canvas": [
+          512,
+          512
+        ],
+        "pixelPivot": [
+          256,
+          448
+        ],
+        "footpointSourceWorld": [
+          0,
+          0,
+          0
+        ],
+        "pixelsPerSourceUnit": 360.0,
+        "elevationDegrees": 30,
+        "perFrameRecenter": false,
+        "groundBias": 0,
+        "uniformScale": true
+      },
+      "validation": {
+        "allInsideCanvas": true,
+        "allNonempty": true,
+        "everyDirectionHasMotion": true,
+        "distinctMeshPoses": 8,
+        "groundCheck": "FAIL preserved, diagnostic reject",
+        "visualReview": "pending"
+      },
+      "nativeCompatibleValidated": false,
+      "runtimeEligible": false
+    }
+  ],
+  "retargetDiagnostics": [
+    {
+      "receipt": "art/warrior/candidate-firstwalk1/retarget-receipt.json",
+      "status": "diagnostic-reject",
+      "clip": "own-retarget-griswold-walk-proof-r1",
+      "candidate": {
+        "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\warrior-r2-firstwalk1.glb",
+        "sha256": "ad2b74aa5444281f9c80dd9a1c74ef6e08c695ee18b54e1b42672952edb32272",
+        "bytes": 6742468,
+        "clip": "own-retarget-griswold-walk-proof-r1"
+      },
+      "source": {
+        "path": "D:\\Diablo 1 3D\\models\\meshy\\characters-20261008\\griswold-rig-r1\\downloads\\basic_animations_walking_glb_url.glb",
+        "sha256": "6ea36f19d87ecb784f50a11cc6880853c7196e7aab781a64b42255e0600c1dce",
+        "clip": "Armature|walking_man|baselayer"
+      },
+      "nativeCompatibleValidated": false,
+      "runtimeEligible": false
+    }
+  ],
+  "nativeContract": {
+    "file": "metadata/contract-audit.json",
+    "directionOrder": [
+      "s",
+      "sw",
+      "w",
+      "nw",
+      "n",
+      "ne",
+      "e",
+      "se"
+    ],
+    "clock": "native tick/frame/fraction authoritative; default20 and habitualSpeed32 are distinct",
+    "eventRule": "attackImpact A-1, spellRelease SF; no visual damage/audio/RNG",
+    "clxPivot": "CalculateSpriteTileCenterX(width)=(width-64)/2; native bottom-left/tile-origin anchor differs from authoring raster footpoint",
+    "stateMatrix": "eleven native resource slots per graphic appearance, variant/guard/frame counts in audit; no reference atlas counts treated as native durations"
+  },
+  "authoringSelection": {
+    "warriorSource": "warrior-light-unarmed-r3-tripo-bind-basis-repaired-2k-sha256-1c09cc5e55fb.glb",
+    "warriorCloseupMaster": "warrior-light-unarmed-r3-tripo-master-4k-sha256-bb8c85b9186e.glb",
+    "rogueSheet": "rogue-light-unarmed-directions-r1.png",
+    "sorcererSheet": "sorcerer-light-unarmed-directions-r2.png",
+    "rejectedButPreserved": [
+      "sorcerer-light-unarmed-directions-r1.png",
+      "Warrior raw4K rig known defective bind; preserved source only"
+    ],
+    "isGlobalRegistrySelection": false
+  },
+  "provenance": {
+    "newRogueSorcererPixels": "OpenAI built-in imagegen, prompts bundled, original own-art",
+    "warrior": "existing own Tripo master, job e18a8313-d802-44b6-80bd-b9620409a1ea,40 historicalcredits; re-used immutable source hashes",
+    "productionCredit": "Douglas Pan / Diablo3D",
+    "DamnationXPixelInput": false,
+    "nativeExtractPixelInput": false,
+    "acknowledgement": "DamnationX studied historically for category/compatibility reference; no redistribution of its pixels"
+  },
+  "limits": [
+    "Stills/concepts are not clips",
+    "Rogue/Sorcerer have no mesh/rig/motion yet",
+    "Approximate raster directions need exact game-camera/yaw/native-pivot review",
+    "Warrior materials use diffuse-only CPU preview, no fullPBR match",
+    "Armor light/medium/heavy, weapons/shields and all native-state motions are incomplete",
+    "Hellfire conditional, Monk/Bard/Barbarian not newly produced",
+    "Local private production handoff, no release installer/public publication; Panvia entry, own launcher cancelled",
+    "Principal owns Source/build/global registry/container/runtime QA/install"
+  ],
+  "verification": {
+    "contractAudit": "metadata/contract-audit.json",
+    "rasterQA": "metadata/raster-qa.json",
+    "rasterPostwrite": "metadata/raster-extraction-validation.json",
+    "cpuPipeline": "metadata/pipeline/pipeline-validation.json",
+    "retargetIndependent": "metadata/retarget-independent-review-r1.json",
+    "nativeRuntimeTestRun": false,
+    "humanArtisticApproval": false
+  },
+  "files": [
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\masters\\master-preservation-receipt.json",
+      "archivePath": "art/masters/master-preservation-receipt.json",
+      "bytes": 3663,
+      "sha256": "9ff30c437c9847fd708dbe2c41c87b37f5c072dc3b19bf91aad054a13e69eae5"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\masters\\rogue-light-unarmed-a-pose-r1.png",
+      "archivePath": "art/masters/rogue-light-unarmed-a-pose-r1.png",
+      "bytes": 1775511,
+      "sha256": "5c0801b8d1836fdb60324b2a12172e9772d2f8fa952adf4d32c46335cc4fedc7",
+      "dimensions": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        254
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\masters\\rogue-light-unarmed-directions-r1.png",
+      "archivePath": "art/masters/rogue-light-unarmed-directions-r1.png",
+      "bytes": 1933733,
+      "sha256": "4a3fdfb6664eb429b35f0e960349f1b6e58e7c8caf5ac7e1c120da0908d875c4",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        254
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\masters\\sorcerer-light-unarmed-a-pose-r1.png",
+      "archivePath": "art/masters/sorcerer-light-unarmed-a-pose-r1.png",
+      "bytes": 1994923,
+      "sha256": "6ca758b5328b5a32e4cb96b84952a3390ecab9d75507efd984c3b4e8245cddd2",
+      "dimensions": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        254
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\masters\\sorcerer-light-unarmed-directions-r1.png",
+      "archivePath": "art/masters/sorcerer-light-unarmed-directions-r1.png",
+      "bytes": 1945491,
+      "sha256": "6d9050c0fcf365de3805ea877d3f6ae3e571f3977cc63be7ed38b708db727fda",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        254
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\masters\\sorcerer-light-unarmed-directions-r2.png",
+      "archivePath": "art/masters/sorcerer-light-unarmed-directions-r2.png",
+      "bytes": 1958665,
+      "sha256": "29817a7cbdc85cad159aedcd577cef14e8b4bc5ec0d109dc060db8fd8fd768e6",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        254
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\masters\\warrior-light-unarmed-a-pose-r3.png",
+      "archivePath": "art/masters/warrior-light-unarmed-a-pose-r3.png",
+      "bytes": 1598467,
+      "sha256": "1c37f7587debc732aed67e086b9531fb7ed9b9e8a97304163d3c80f6f1a3c9fd",
+      "dimensions": [
+        1024,
+        1536
+      ],
+      "mode": "RGB"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\masters\\warrior-light-unarmed-r3-tripo-bind-basis-repaired-2k-sha256-1c09cc5e55fb.glb",
+      "archivePath": "art/masters/warrior-light-unarmed-r3-tripo-bind-basis-repaired-2k-sha256-1c09cc5e55fb.glb",
+      "bytes": 6725032,
+      "sha256": "1c09cc5e55fbc1f6de5d5db94adae2cbb52a2842e5d1b300b3913f98a4d28507"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\masters\\warrior-light-unarmed-r3-tripo-master-4k-sha256-bb8c85b9186e.glb",
+      "archivePath": "art/masters/warrior-light-unarmed-r3-tripo-master-4k-sha256-bb8c85b9186e.glb",
+      "bytes": 4708948,
+      "sha256": "bb8c85b9186ea4a687d440762139becbcd1b8ec7e731a5b1f1e9004b981d0da4"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\masters\\warrior-light-unarmed-r3-tripo-rigged-4k-sha256-61565b41d367.glb",
+      "archivePath": "art/masters/warrior-light-unarmed-r3-tripo-rigged-4k-sha256-61565b41d367.glb",
+      "bytes": 5049600,
+      "sha256": "61565b41d367e04449fdb073105acef0ca4d1a652047cdf8ab994f2fd40c01e9"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\review\\rogue-authoring-directions-r1-still-review.png",
+      "archivePath": "art/review/rogue-authoring-directions-r1-still-review.png",
+      "bytes": 493218,
+      "sha256": "2e49cb83ad793356a63eca63b3ff16387b7edcf5234b105275b9d6ef0dcc2945",
+      "dimensions": [
+        2048,
+        684
+      ],
+      "mode": "RGB"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\review\\rogue-light-unarmed-a-pose-r1-alpha-review.png",
+      "archivePath": "art/review/rogue-light-unarmed-a-pose-r1-alpha-review.png",
+      "bytes": 336459,
+      "sha256": "e7a9c01d8f8fe8ac3f29582a3e3b874bbe22c5e6d287120f46cfde21b3c97143",
+      "dimensions": [
+        1024,
+        796
+      ],
+      "mode": "RGB"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\review\\rogue-light-unarmed-directions-r1-alpha-review.png",
+      "archivePath": "art/review/rogue-light-unarmed-directions-r1-alpha-review.png",
+      "bytes": 370666,
+      "sha256": "a60b305e12c837bab7e5a02f3eb29979ac34b27b3c9385c5c62e0e658880aa34",
+      "dimensions": [
+        1536,
+        540
+      ],
+      "mode": "RGB"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\review\\sorcerer-authoring-directions-r2-still-review.png",
+      "archivePath": "art/review/sorcerer-authoring-directions-r2-still-review.png",
+      "bytes": 498691,
+      "sha256": "af2a588f8ed18ea4ae97d303a84f8727a9d00a5b3e07823388da56361957aa2e",
+      "dimensions": [
+        2048,
+        684
+      ],
+      "mode": "RGB"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\review\\sorcerer-light-unarmed-a-pose-r1-alpha-review.png",
+      "archivePath": "art/review/sorcerer-light-unarmed-a-pose-r1-alpha-review.png",
+      "bytes": 413322,
+      "sha256": "720c5055862bb044be07293e2ab0c9539dc4adc9604d9b6579b442b1bc4a7467",
+      "dimensions": [
+        1024,
+        796
+      ],
+      "mode": "RGB"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\review\\sorcerer-light-unarmed-directions-r1-alpha-review.png",
+      "archivePath": "art/review/sorcerer-light-unarmed-directions-r1-alpha-review.png",
+      "bytes": 401416,
+      "sha256": "51eca430fd30c3ceae5e931cdbdea45bcb03129a8be9cf605985d9e18a92f948",
+      "dimensions": [
+        1536,
+        540
+      ],
+      "mode": "RGB"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\review\\sorcerer-light-unarmed-directions-r2-alpha-review.png",
+      "archivePath": "art/review/sorcerer-light-unarmed-directions-r2-alpha-review.png",
+      "bytes": 403180,
+      "sha256": "518ad694eadb397af93781b3b20299a92bbd9b46bae95360e011ab7cd6a2e19e",
+      "dimensions": [
+        1536,
+        540
+      ],
+      "mode": "RGB"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\rogue\\authoring-directions-r1\\e\\still.png",
+      "archivePath": "art/rogue/authoring-directions-r1/e/still.png",
+      "bytes": 119728,
+      "sha256": "e924cfcdf356a28a9976c7d12a81e9898835d2b8c1d1e724d566d1e147bcbdb7",
+      "dimensions": [
+        512,
+        640
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\rogue\\authoring-directions-r1\\n\\still.png",
+      "archivePath": "art/rogue/authoring-directions-r1/n/still.png",
+      "bytes": 182157,
+      "sha256": "b8cf4682773bb7023776cd03f57e8b6b0f081773f0151a1a99c5b59963f3c358",
+      "dimensions": [
+        512,
+        640
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\rogue\\authoring-directions-r1\\ne\\still.png",
+      "archivePath": "art/rogue/authoring-directions-r1/ne/still.png",
+      "bytes": 173691,
+      "sha256": "f20c38d5617486d4f42d9b7bb5bf0db5cb9a06d3430cbbbb7f363f2499c06bf1",
+      "dimensions": [
+        512,
+        640
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\rogue\\authoring-directions-r1\\nw\\still.png",
+      "archivePath": "art/rogue/authoring-directions-r1/nw/still.png",
+      "bytes": 173033,
+      "sha256": "7b3a54afb34ebc0e712f3b326779957ae5ca05f06473906df9978b8fb8337ef8",
+      "dimensions": [
+        512,
+        640
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\rogue\\authoring-directions-r1\\s\\still.png",
+      "archivePath": "art/rogue/authoring-directions-r1/s/still.png",
+      "bytes": 186942,
+      "sha256": "d7ee1881817416fea19b11f1e370a707f8c23619baa24b4bbd0f245a8a485f22",
+      "dimensions": [
+        512,
+        640
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\rogue\\authoring-directions-r1\\se\\still.png",
+      "archivePath": "art/rogue/authoring-directions-r1/se/still.png",
+      "bytes": 181975,
+      "sha256": "004a0ac552a05654dc02de4ef78f052b59fbaec9f3958fa832dfe00c60f66f62",
+      "dimensions": [
+        512,
+        640
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\rogue\\authoring-directions-r1\\sw\\still.png",
+      "archivePath": "art/rogue/authoring-directions-r1/sw/still.png",
+      "bytes": 182041,
+      "sha256": "84072e3e26fd5cd2496f6157157eecadb4f2941fba45a39570bc1d256bcc77ca",
+      "dimensions": [
+        512,
+        640
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\rogue\\authoring-directions-r1\\w\\still.png",
+      "archivePath": "art/rogue/authoring-directions-r1/w/still.png",
+      "bytes": 126172,
+      "sha256": "594a9f517f8a3eafabec353277262713269300e02d071f7a37708a0c37e4eaea",
+      "dimensions": [
+        512,
+        640
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\sorcerer\\authoring-directions-r2\\e\\still.png",
+      "archivePath": "art/sorcerer/authoring-directions-r2/e/still.png",
+      "bytes": 130019,
+      "sha256": "3fd5e7c1304155662627cf710f6878751c6d5be7941576062b05a70391fff188",
+      "dimensions": [
+        512,
+        640
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\sorcerer\\authoring-directions-r2\\n\\still.png",
+      "archivePath": "art/sorcerer/authoring-directions-r2/n/still.png",
+      "bytes": 188433,
+      "sha256": "b1efe92bfb09bb653a76984ecd90525a0a227b48953174c232bc4da206a2b2a7",
+      "dimensions": [
+        512,
+        640
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\sorcerer\\authoring-directions-r2\\ne\\still.png",
+      "archivePath": "art/sorcerer/authoring-directions-r2/ne/still.png",
+      "bytes": 176044,
+      "sha256": "a347ce3b7709789badc46c9aa785006872ed9ab2db99c14ee61990be97c06394",
+      "dimensions": [
+        512,
+        640
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\sorcerer\\authoring-directions-r2\\nw\\still.png",
+      "archivePath": "art/sorcerer/authoring-directions-r2/nw/still.png",
+      "bytes": 171343,
+      "sha256": "4f934520576519350be0a22fff0c1aebfacf6eed0688e2dc25a377af195ba64f",
+      "dimensions": [
+        512,
+        640
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\sorcerer\\authoring-directions-r2\\s\\still.png",
+      "archivePath": "art/sorcerer/authoring-directions-r2/s/still.png",
+      "bytes": 206195,
+      "sha256": "ed3470311912f83aa43ee42ef5b9f9b6882ef9aecbdf3e81946176134b241622",
+      "dimensions": [
+        512,
+        640
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\sorcerer\\authoring-directions-r2\\se\\still.png",
+      "archivePath": "art/sorcerer/authoring-directions-r2/se/still.png",
+      "bytes": 191542,
+      "sha256": "f4908395542bf62e8e568bf5b5e91b281ae82b1922b2898e30b86189ef27ecb2",
+      "dimensions": [
+        512,
+        640
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\sorcerer\\authoring-directions-r2\\sw\\still.png",
+      "archivePath": "art/sorcerer/authoring-directions-r2/sw/still.png",
+      "bytes": 199298,
+      "sha256": "9f087bdd4ebca7d261b4e4ff919f6baf56e857eb72f9f51095a9dd111818a157",
+      "dimensions": [
+        512,
+        640
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\sorcerer\\authoring-directions-r2\\w\\still.png",
+      "archivePath": "art/sorcerer/authoring-directions-r2/w/still.png",
+      "bytes": 132652,
+      "sha256": "eecb60c96ec22d9cd7079b633474d24197f90075aa651e06b1aa6eda2343c0f1",
+      "dimensions": [
+        512,
+        640
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\bind-directions\\e\\bind.png",
+      "archivePath": "art/warrior/bind-directions/e/bind.png",
+      "bytes": 61511,
+      "sha256": "f1f2b8a7b72ad80f73c00e959c01945cc40859ced05b41ae847668e25306ce52",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\bind-directions\\n\\bind.png",
+      "archivePath": "art/warrior/bind-directions/n/bind.png",
+      "bytes": 86286,
+      "sha256": "1d319344ce01060fde4eb6c793834a601644c44b347ce767b4dffa039f4de783",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\bind-directions\\ne\\bind.png",
+      "archivePath": "art/warrior/bind-directions/ne/bind.png",
+      "bytes": 83208,
+      "sha256": "57c03589d26237a7f8fb8c10c856be797f3a57e1a1e43e51e26855f919882f4e",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\bind-directions\\nw\\bind.png",
+      "archivePath": "art/warrior/bind-directions/nw/bind.png",
+      "bytes": 84636,
+      "sha256": "ed54e66c0003992d967179a9fa8872a9e2f7caebd18482e0606ede01d7b29a43",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\bind-directions\\render-receipt.json",
+      "archivePath": "art/warrior/bind-directions/render-receipt.json",
+      "bytes": 11080,
+      "sha256": "16b4affc4fc8ff49beda0f207c63218caa5139e2a43dac0c88787bb81d64eeb0"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\bind-directions\\s\\bind.png",
+      "archivePath": "art/warrior/bind-directions/s/bind.png",
+      "bytes": 92175,
+      "sha256": "eb526c8a0e196fb991728713d0b6bbe8473a3531579066f060c64b90fdaaa804",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\bind-directions\\se\\bind.png",
+      "archivePath": "art/warrior/bind-directions/se/bind.png",
+      "bytes": 88038,
+      "sha256": "ea9d144cadb3f07c9bba00dc77a47c930fe4a1e1a677174d8f39f9ebcaff0e25",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\bind-directions\\sw\\bind.png",
+      "archivePath": "art/warrior/bind-directions/sw/bind.png",
+      "bytes": 89026,
+      "sha256": "568ce653174a2d5a44ae4831e7623b9f6c4afff2baf7fb4b1e3d39dd0d3c6b26",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\bind-directions\\w\\bind.png",
+      "archivePath": "art/warrior/bind-directions/w/bind.png",
+      "bytes": 61945,
+      "sha256": "bf5389bf6a6bd145284595b629bfcc3769fcdc29ed62c336f96b6cd030bc17a0",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\bind-directions\\warrior-bind-8directions-contact.png",
+      "archivePath": "art/warrior/bind-directions/warrior-bind-8directions-contact.png",
+      "bytes": 170922,
+      "sha256": "fd0e9d7f511f7d4bee784aa27c26f4113d11ddf8dd685051b353cf25506c15f2",
+      "dimensions": [
+        1024,
+        600
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        255,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\e\\frame-000.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/e/frame-000.png",
+      "bytes": 50596,
+      "sha256": "cef8bfef01758f337fe4c946374716257074a2eba84f4e6ef8adb5ae47c2b52a",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\e\\frame-001.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/e/frame-001.png",
+      "bytes": 68004,
+      "sha256": "9a0253542072cd05be9399113323327ed5feeafd759211a471adc85f449e6bf4",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\e\\frame-002.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/e/frame-002.png",
+      "bytes": 72467,
+      "sha256": "927d7348f54cf9e558ddd87861f543313ff17767b8dc0fef234de3891f788c35",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\e\\frame-003.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/e/frame-003.png",
+      "bytes": 62716,
+      "sha256": "a320c43b829297773a7dcde219a48652bb916e585fc47034c69ee5dbccb8d48e",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\e\\frame-004.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/e/frame-004.png",
+      "bytes": 54607,
+      "sha256": "85c49f795e60e83a8bee6871a8cd5964cf7431a8f07c9f501d0175c146d6a172",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\e\\frame-005.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/e/frame-005.png",
+      "bytes": 66596,
+      "sha256": "fe51514afc1f3817151f01cf00ef00dd731db010fdac0df0608f23f01fd54005",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\e\\frame-006.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/e/frame-006.png",
+      "bytes": 66718,
+      "sha256": "00ba77771c04d0c6b1307d2314132c022457b2ef0070b990a5144c82d945f7a1",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\e\\frame-007.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/e/frame-007.png",
+      "bytes": 61369,
+      "sha256": "adb9e1d9c085d30f6e1e922ecf162fff626c5373c48c4e164f17d7ca8523b367",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\n\\frame-000.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/n/frame-000.png",
+      "bytes": 71551,
+      "sha256": "2b2a1d97f4823483ebc657117e2fe4e622d644eeffbdf715a5f58d5b030c6049",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\n\\frame-001.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/n/frame-001.png",
+      "bytes": 69603,
+      "sha256": "f27872f9b8b46e26a832d0930f63101717f6c103675ace729b0d95e06746975c",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\n\\frame-002.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/n/frame-002.png",
+      "bytes": 68420,
+      "sha256": "139b8fbe6865b07c040320ee147e5f00480dd91caa05e55ba1e74fbf20d97870",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\n\\frame-003.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/n/frame-003.png",
+      "bytes": 71930,
+      "sha256": "dbb29802140008ba489e384e30150b6b6cd18e41107d183fffb6124f6eb987ba",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\n\\frame-004.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/n/frame-004.png",
+      "bytes": 70579,
+      "sha256": "8b93f37fb4b5699b65d1751746f79d34bbb16e4e392bff2916663b0aa798fe20",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\n\\frame-005.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/n/frame-005.png",
+      "bytes": 67480,
+      "sha256": "971c90db8e1f90bbdcef1f03002483f4372fa9a013c2a00a9fa52dd320053973",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\n\\frame-006.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/n/frame-006.png",
+      "bytes": 66280,
+      "sha256": "a014e2e17da22cd0d091643f655ee689044f34b121cf1ee33e9eef13d158fc45",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\n\\frame-007.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/n/frame-007.png",
+      "bytes": 70505,
+      "sha256": "0a8365e34a995b20eef94e6c1d6d6ea49b656f994461fcd665dadc1d107b6d12",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\ne\\frame-000.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/ne/frame-000.png",
+      "bytes": 67440,
+      "sha256": "d87ded3a5ec3166f8113de134edf2780b7c3bf3d033debc6f9f9be1a3b2162de",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\ne\\frame-001.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/ne/frame-001.png",
+      "bytes": 66924,
+      "sha256": "e1a1503e8a14585b79790349584028389a7ecad723014129d96ebde76db795dc",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\ne\\frame-002.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/ne/frame-002.png",
+      "bytes": 70134,
+      "sha256": "bdb3579b886d75e14de91f58f527ec24c5d2f10bfe86cb87577cce728f7d05a8",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\ne\\frame-003.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/ne/frame-003.png",
+      "bytes": 65172,
+      "sha256": "2a6e5b613a63cead7fa1d64483b8d3d8c1a799407a6edc5da22dfc4506f3341a",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\ne\\frame-004.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/ne/frame-004.png",
+      "bytes": 63935,
+      "sha256": "47c854158ef48f792569a099c16f4d14df4c35424a6d6513aa5e8125936312e3",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\ne\\frame-005.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/ne/frame-005.png",
+      "bytes": 62453,
+      "sha256": "0f8890fe1022e955b0a281b9ae63ff04f72d40bba55ef1352c8a338553110ca9",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\ne\\frame-006.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/ne/frame-006.png",
+      "bytes": 63764,
+      "sha256": "9b5bdef56ad004148e3fe51af64158bc15b51bafbc0425e3f8f1953ff7050190",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\ne\\frame-007.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/ne/frame-007.png",
+      "bytes": 61611,
+      "sha256": "c05be8b9a57e8268269fa0bf5e56487317099a57324e430aff577440f11fbb2f",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\nw\\frame-000.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/nw/frame-000.png",
+      "bytes": 70048,
+      "sha256": "5a3e11faa5843ed00ea381c6cf499d6d2e7ddc300a6f4beee526b663d2bfe246",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\nw\\frame-001.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/nw/frame-001.png",
+      "bytes": 62761,
+      "sha256": "446a8eca21f26e809f16186c812b963037f3ff20511c1087657d7a9c054f95fa",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\nw\\frame-002.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/nw/frame-002.png",
+      "bytes": 62431,
+      "sha256": "3325dad4fd48b8b70d6ee75b8d6c0ee78477038cbbbfc8731a16d055109ada23",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\nw\\frame-003.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/nw/frame-003.png",
+      "bytes": 63722,
+      "sha256": "b0f7c70a389bdcf3b5e38eff5afed4b6734293fcf0c73dffa172c52649b18022",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\nw\\frame-004.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/nw/frame-004.png",
+      "bytes": 68223,
+      "sha256": "cea3a0c22b7a720a8c9dbabd80a18c0eaaf005ce1d6af9d579c9ef0151336978",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\nw\\frame-005.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/nw/frame-005.png",
+      "bytes": 66317,
+      "sha256": "e5a804a40c38e90bc4c795f865f8d6e72190d608d94fab187fb235a3c63b36ff",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\nw\\frame-006.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/nw/frame-006.png",
+      "bytes": 68993,
+      "sha256": "c23cbf219f8e1b3cb16d4ca7c0ab618c60b79e2f08b5fc2299b76310ec47d915",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\nw\\frame-007.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/nw/frame-007.png",
+      "bytes": 66665,
+      "sha256": "1a48f6716553b8b674f4b419cf015f8d9b22a54523118d198b54fac305d83a4b",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\render-receipt-cpu.json",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/render-receipt-cpu.json",
+      "bytes": 122003,
+      "sha256": "2e4a336964484c7de522b3fa147a792a3760c398f30bf72f14da94365d665938"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\render-receipt.json",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/render-receipt.json",
+      "bytes": 124017,
+      "sha256": "5c7fe749b50da1a520ed1fcd423843d40b94474eedaac9f26e8d60e5fb0bdbf5"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\s\\frame-000.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/s/frame-000.png",
+      "bytes": 75899,
+      "sha256": "e95d7501e19b71705d1b969dc6e403b5d247dd788250b308bd34b5334d5552e4",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\s\\frame-001.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/s/frame-001.png",
+      "bytes": 73872,
+      "sha256": "462026c52d7554964e2648dae642d030dd2f303cc59bd675c22a178419661eb6",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\s\\frame-002.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/s/frame-002.png",
+      "bytes": 71552,
+      "sha256": "6642f06036edfe164777a3e48e24da962b967a547938864b031c63602394a591",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\s\\frame-003.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/s/frame-003.png",
+      "bytes": 73288,
+      "sha256": "536ec36ebf930bc8bae16a007f706534c97ecb742abd77f56cecdf330c85bc0d",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\s\\frame-004.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/s/frame-004.png",
+      "bytes": 76316,
+      "sha256": "caf827037ae4e0fba3e97fd35d59cef7e73347d1222f101c11016ce9f93c97a1",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\s\\frame-005.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/s/frame-005.png",
+      "bytes": 73088,
+      "sha256": "43da29159b30da5bd1bbaef520a17f4065c831a02a0d44cac8132d6c2f1e503f",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\s\\frame-006.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/s/frame-006.png",
+      "bytes": 69435,
+      "sha256": "9ede6d30ab258286ee58aa4ccdc7fd6eb9d4f85dbde1845b2fa48662989e8b43",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\s\\frame-007.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/s/frame-007.png",
+      "bytes": 72189,
+      "sha256": "9600fb7bf19fef64042fb5005e010955a6a7b7c3e734527f61429ba06b13c6b2",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\se\\frame-000.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/se/frame-000.png",
+      "bytes": 71257,
+      "sha256": "91839dabe3839571f02c1468abb7f287b53f3516f98b7dd90bd948358234ac66",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\se\\frame-001.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/se/frame-001.png",
+      "bytes": 65826,
+      "sha256": "feada92ff95fe8a0d9e33e47c3354d59d63c613ae3d595779c34e08c9dab1b7d",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\se\\frame-002.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/se/frame-002.png",
+      "bytes": 64232,
+      "sha256": "e9afe225c4a080e7d466e5d196caf20f48a6cf0b8bd08f46b6ffecc0bb50bb57",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\se\\frame-003.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/se/frame-003.png",
+      "bytes": 69257,
+      "sha256": "77ca5a57a4e2eaa6602de6db56a1a0d5e789ab1a4f28d0dd536d87fa604a03ae",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\se\\frame-004.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/se/frame-004.png",
+      "bytes": 73456,
+      "sha256": "7241687bfdc66cd88db69a7ad9dd487906f51a9d42a610568816b537b2ac76e8",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\se\\frame-005.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/se/frame-005.png",
+      "bytes": 68170,
+      "sha256": "0a603ca2708716d4b27fccf89d2818abceea3134c5942c969113063b99882feb",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\se\\frame-006.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/se/frame-006.png",
+      "bytes": 69994,
+      "sha256": "9b83418f612255fc9bcece541359e539825f6ab0a639a157293481279ff2f0cf",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\se\\frame-007.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/se/frame-007.png",
+      "bytes": 69979,
+      "sha256": "42dc24fb5f00c0bf652b6324f9f9e2ca18b0a98bcc24f1152cd5b2b6f44db2f5",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\sw\\frame-000.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/sw/frame-000.png",
+      "bytes": 70172,
+      "sha256": "add0ae94af94c7fc3c86997acf2be4d4cfbfdd850c83426f149a3f4b8b3312dd",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\sw\\frame-001.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/sw/frame-001.png",
+      "bytes": 64928,
+      "sha256": "1e9f355f7ca7cb27f14cfd13caa3e46cb5b93b1005ac830ac7646ed318b36903",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\sw\\frame-002.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/sw/frame-002.png",
+      "bytes": 69068,
+      "sha256": "c7fd559d3d91b9023b7cf76ad41dd0fcae1c3c098f0320100a53709213ba3a2e",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\sw\\frame-003.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/sw/frame-003.png",
+      "bytes": 68719,
+      "sha256": "639e40965205321cdec79b9c053d80772599cf71600c747a964cc2823bf9b2d8",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\sw\\frame-004.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/sw/frame-004.png",
+      "bytes": 68106,
+      "sha256": "4a35126f3c8ceaf771332450451bba13b1f77d1628953aed470fb110b6f7155e",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\sw\\frame-005.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/sw/frame-005.png",
+      "bytes": 63781,
+      "sha256": "bbc9e0fdd99bcb57246e5e99cfb18849fe596667b7609f091840e7d713fd4928",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\sw\\frame-006.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/sw/frame-006.png",
+      "bytes": 63754,
+      "sha256": "606fad6af773c1411f7657e909489d4010e76116bff1d6994a69a431ce8c79f8",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\sw\\frame-007.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/sw/frame-007.png",
+      "bytes": 67918,
+      "sha256": "9b83ea1f5c1d1f6a5b86c39961ecdfbadfb646be26b8d0d45ef665a833303c56",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\w\\frame-000.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/w/frame-000.png",
+      "bytes": 52692,
+      "sha256": "d488e7a28cdd58ff38717accebe102d1403bce79878f7aa45f335c36add79d6a",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\w\\frame-001.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/w/frame-001.png",
+      "bytes": 62619,
+      "sha256": "b623cc3b69da84919e04718ae442b0fcd8b65d29710ebea693c2305e86422c14",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\w\\frame-002.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/w/frame-002.png",
+      "bytes": 64887,
+      "sha256": "7c166081234bc3fb8869adb7420ee9ca286a1618e533cb6d6468298f2ac8f39c",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\w\\frame-003.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/w/frame-003.png",
+      "bytes": 59451,
+      "sha256": "f71bc06acbb0c6ca888073e94be5813db8c6ff23abd04e6256af87e2af289fd7",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\w\\frame-004.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/w/frame-004.png",
+      "bytes": 51596,
+      "sha256": "71b8f99779573fca939b78e1cf39579a0a135338037f2e2cf094b2d0b07aee33",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\w\\frame-005.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/w/frame-005.png",
+      "bytes": 69933,
+      "sha256": "923cd380476031613fd8b0ecd724ac651ceff121aa1a0f4ea44beafc99fbfd34",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\w\\frame-006.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/w/frame-006.png",
+      "bytes": 72780,
+      "sha256": "ce8aa73745c1104f22e8c9a63fb916afa082d60ced7c8f3c508bd29f9afcdc53",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\w\\frame-007.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/w/frame-007.png",
+      "bytes": 67141,
+      "sha256": "bbeaa0643114505794222d32296eadfdf2030c1c36ba0b1f719bf9bceb7cb555",
+      "dimensions": [
+        512,
+        512
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        0,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\diagnostic-directions\\warrior-firstwalk1-diagnostic-64-contact.png",
+      "archivePath": "art/warrior/candidate-firstwalk1/diagnostic-directions/warrior-firstwalk1-diagnostic-64-contact.png",
+      "bytes": 676089,
+      "sha256": "680afd645b127e1367a74173ea1bd55643ff6726fc2cfa83289bdfd4563ca086",
+      "dimensions": [
+        1536,
+        1732
+      ],
+      "mode": "RGBA",
+      "alphaExtrema": [
+        255,
+        255
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\retarget-receipt.json",
+      "archivePath": "art/warrior/candidate-firstwalk1/retarget-receipt.json",
+      "bytes": 14627,
+      "sha256": "577934a2aaffbb7eeb60c3ee035f43f745201edbf0bd1d89850569ebad2f018f"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\warrior-r2-firstwalk1.glb",
+      "archivePath": "art/warrior/candidate-firstwalk1/warrior-r2-firstwalk1.glb",
+      "bytes": 6742468,
+      "sha256": "ad2b74aa5444281f9c80dd9a1c74ef6e08c695ee18b54e1b42672952edb32272"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1-json-failed-r0\\incomplete-attempt.json",
+      "archivePath": "art/warrior/candidate-firstwalk1-json-failed-r0/incomplete-attempt.json",
+      "bytes": 399,
+      "sha256": "dea9651f94baf5f871f2f2afd707cccef959620fd8d1a26c335fd0b809347e6b"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1-json-failed-r0\\warrior-r2-firstwalk1.glb",
+      "archivePath": "art/warrior/candidate-firstwalk1-json-failed-r0/warrior-r2-firstwalk1.glb",
+      "bytes": 6742468,
+      "sha256": "ad2b74aa5444281f9c80dd9a1c74ef6e08c695ee18b54e1b42672952edb32272"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\devilutionx\\docs\\own-art-pack\\heroes-local-r1\\build_handoff.py",
+      "archivePath": "metadata/build_handoff.py",
+      "bytes": 9871,
+      "sha256": "ee7465e86e150a1d6c081e7132e871e61820aad6d4ce59a008e08aaac9c49746"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\devilutionx\\docs\\own-art-pack\\heroes-local-r1\\contract-audit.json",
+      "archivePath": "metadata/contract-audit.json",
+      "bytes": 239478,
+      "sha256": "c4741ebc373d36abadad070379258d9dbab14d6dcf46c02ed55a74b31f85a621"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\devilutionx\\docs\\own-art-pack\\heroes-local-r1\\contract-audit.md",
+      "archivePath": "metadata/contract-audit.md",
+      "bytes": 8447,
+      "sha256": "d1f981ada8eb82804dcd19573354facbafa769d13a62c1b6e12344cc0bbf4c74"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\devilutionx\\docs\\own-art-pack\\heroes-local-r1\\contract_audit.py",
+      "archivePath": "metadata/contract_audit.py",
+      "bytes": 38345,
+      "sha256": "c6d861fd0f1ad82734a84af310f83ebd0d5767da190b9375a8add6ab5d3b4f4a"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\devilutionx\\docs\\own-art-pack\\heroes-local-r1\\HANDOFF.md",
+      "archivePath": "metadata/HANDOFF.md",
+      "bytes": 6242,
+      "sha256": "e1453f79400767c8a5c7699d33836513f5353afa03ed7d5a3dc0af0146b6619f"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\devilutionx\\docs\\own-art-pack\\heroes-local-r1\\pipeline\\annotate_retarget_review.py",
+      "archivePath": "metadata/pipeline/annotate_retarget_review.py",
+      "bytes": 3198,
+      "sha256": "e87b653c7ddad71d65f89ac71a89e25c7adc7f2e922c25e454d4b509a8d16261"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\devilutionx\\docs\\own-art-pack\\heroes-local-r1\\pipeline\\assemble_pipeline_handoff.py",
+      "archivePath": "metadata/pipeline/assemble_pipeline_handoff.py",
+      "bytes": 5136,
+      "sha256": "516a634f9a62f81f1ca14b476dce7043ddbd486810e6da00e627cced1b0153ca"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\devilutionx\\docs\\own-art-pack\\heroes-local-r1\\pipeline\\extract_raster_directions.py",
+      "archivePath": "metadata/pipeline/extract_raster_directions.py",
+      "bytes": 18649,
+      "sha256": "c9296436f5e3587124220fdbe3458c8486dcc9f51a2bb0552cfe0161f186c6fd"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\devilutionx\\docs\\own-art-pack\\heroes-local-r1\\pipeline\\hero_pipeline.py",
+      "archivePath": "metadata/pipeline/hero_pipeline.py",
+      "bytes": 30815,
+      "sha256": "5826cdd2308a59007760b2c9e9a6d829f6baa984bf9234d628ce685a097f9cc5"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\devilutionx\\docs\\own-art-pack\\heroes-local-r1\\pipeline\\pipeline-delivery-manifest.json",
+      "archivePath": "metadata/pipeline/pipeline-delivery-manifest.json",
+      "bytes": 39280,
+      "sha256": "20f2ffd903280271528ff92e6652da9350a292330f5c21f5c4218a790be63e1c"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\devilutionx\\docs\\own-art-pack\\heroes-local-r1\\pipeline\\pipeline-validation.json",
+      "archivePath": "metadata/pipeline/pipeline-validation.json",
+      "bytes": 10671,
+      "sha256": "fe70097d3bc0f2961e138529502f3776890b794c7ca3be247ec331e9765197ba"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\devilutionx\\docs\\own-art-pack\\heroes-local-r1\\pipeline\\PIPELINE.md",
+      "archivePath": "metadata/pipeline/PIPELINE.md",
+      "bytes": 14514,
+      "sha256": "3d2b375776689773192a2417569654f8c0a9cc26e888d95f5d0f6faf6c755318"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\devilutionx\\docs\\own-art-pack\\heroes-local-r1\\pipeline\\render_retarget_diagnostic.py",
+      "archivePath": "metadata/pipeline/render_retarget_diagnostic.py",
+      "bytes": 7043,
+      "sha256": "042643ad02e6647e27cd570c7c872570e3becfe9d49cf25067079711b49cbcc3"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\devilutionx\\docs\\own-art-pack\\heroes-local-r1\\pipeline\\retarget_local_probe.py",
+      "archivePath": "metadata/pipeline/retarget_local_probe.py",
+      "bytes": 13863,
+      "sha256": "a6dc0fe84b8345e93ab2afe19993c2784e22d49afcde41f120f4a2652edb2aa4"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\devilutionx\\docs\\own-art-pack\\heroes-local-r1\\pipeline\\stage_warrior_masters.py",
+      "archivePath": "metadata/pipeline/stage_warrior_masters.py",
+      "bytes": 2334,
+      "sha256": "d995851f71936090343f936e4e3413af3bc99ba44f3ea46aebc25c896b303f69"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\devilutionx\\docs\\own-art-pack\\heroes-local-r1\\pipeline\\test_hero_pipeline.py",
+      "archivePath": "metadata/pipeline/test_hero_pipeline.py",
+      "bytes": 4735,
+      "sha256": "edb3f5d619ae4b7479770d039ed3df937f3796dbdf2f3ef7c518c854d84b4539"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\devilutionx\\docs\\own-art-pack\\heroes-local-r1\\pipeline\\verify_delivery.py",
+      "archivePath": "metadata/pipeline/verify_delivery.py",
+      "bytes": 6650,
+      "sha256": "a7403dba1856ffded2de3bf962d67b7fb9bd06b23f59d9b3fcb7cbd8c9001113"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\devilutionx\\docs\\own-art-pack\\heroes-local-r1\\pipeline\\warrior-local-glb-audit.json",
+      "archivePath": "metadata/pipeline/warrior-local-glb-audit.json",
+      "bytes": 4373,
+      "sha256": "8803141324bb2bc3807b700e3034b6b288b5053d617eb662dd77aa3891d97919"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\devilutionx\\docs\\own-art-pack\\heroes-local-r1\\raster-extraction-validation.json",
+      "archivePath": "metadata/raster-extraction-validation.json",
+      "bytes": 6435,
+      "sha256": "e7dde59079ae5c0c8a12a5aec672be4973bef3159666707dfa5823094a4a1bf8"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\devilutionx\\docs\\own-art-pack\\heroes-local-r1\\raster-qa.json",
+      "archivePath": "metadata/raster-qa.json",
+      "bytes": 68317,
+      "sha256": "b1a27f19ebf1224c9d92a2476b24d323dea807903d05079596110d9de25883ef"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\devilutionx\\docs\\own-art-pack\\heroes-local-r1\\reservation.json",
+      "archivePath": "metadata/reservation.json",
+      "bytes": 1788,
+      "sha256": "47b266b45562543dc07593903081b9331cc1bf1c595a99d191aa8209ab12e0c4"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\devilutionx\\docs\\own-art-pack\\heroes-local-r1\\retarget-independent-review-r1.json",
+      "archivePath": "metadata/retarget-independent-review-r1.json",
+      "bytes": 15653,
+      "sha256": "58ff60ffe5d14b9866de424189fc4d1792c0593fb5b65de4edf9a9fef93f4482"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\devilutionx\\docs\\own-art-pack\\heroes-local-r1\\retarget-independent-review-r1.md",
+      "archivePath": "metadata/retarget-independent-review-r1.md",
+      "bytes": 3507,
+      "sha256": "fd6e3b32c6299182ab911c6093710781a09d1e58a409199c49481f05a39eb0a4"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\devilutionx\\docs\\own-art-pack\\heroes-local-r1\\review_retarget_independent.py",
+      "archivePath": "metadata/review_retarget_independent.py",
+      "bytes": 26350,
+      "sha256": "b1dba491dadeb0916c1eedee69c9d2686afac0bcf1ba3cb647781aa9340e3439"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\devilutionx\\docs\\own-art-pack\\heroes-local-r1\\rogue-directions-prompt.txt",
+      "archivePath": "metadata/rogue-directions-prompt.txt",
+      "bytes": 1762,
+      "sha256": "dcd60ee05122e5a81764f74b2ecc8611f6e68e3a26d1b74d8de68bea51a30047"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\devilutionx\\docs\\own-art-pack\\heroes-local-r1\\rogue-master-prompt.txt",
+      "archivePath": "metadata/rogue-master-prompt.txt",
+      "bytes": 1538,
+      "sha256": "7a19b86c4b45269845780f9bbd4e6dae3963d380bab1b4dd74d8b4547e797de4"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\devilutionx\\docs\\own-art-pack\\heroes-local-r1\\sorcerer-directions-prompt.txt",
+      "archivePath": "metadata/sorcerer-directions-prompt.txt",
+      "bytes": 1603,
+      "sha256": "8d9a405b24e02ab21757164366a3fdcb10782fb86644691c8df129d6b0e28429"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\devilutionx\\docs\\own-art-pack\\heroes-local-r1\\sorcerer-directions-r2-prompt.txt",
+      "archivePath": "metadata/sorcerer-directions-r2-prompt.txt",
+      "bytes": 1279,
+      "sha256": "59b0bdd3dd7cfd8eef41582960165e16e1a6d7c19873ae06d293194bc1d66a9d"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\devilutionx\\docs\\own-art-pack\\heroes-local-r1\\sorcerer-master-prompt.txt",
+      "archivePath": "metadata/sorcerer-master-prompt.txt",
+      "bytes": 1610,
+      "sha256": "d97ab6f46c97ae52cf9597ff75c0c17bcb4b66c62c51ddd8602e1d0ac32e0b72"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\devilutionx\\tools\\inspect_glb.py",
+      "archivePath": "tools/inspect_glb.py",
+      "bytes": 28597,
+      "sha256": "a571a42bd214e4101d45b90b40a7641a0c33a87ace45849543bf722d89855e10"
+    }
+  ]
+}

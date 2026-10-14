@@ -1,0 +1,135 @@
+{
+  "format": "d3d.item-concept-art",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "scope": "Scale e Splint Mail candidatos; fidelidade de materiais e verso permanece em revisão.",
+  "catalogSha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d",
+  "generationTool": "built-in image_gen.imagegen",
+  "generationCalls": 2,
+  "originalGameImagesIncluded": false,
+  "visualApproval": false,
+  "runtimeInstalled": false,
+  "postProcessing": "none; original generated PNG bytes copied unchanged",
+  "summary": {
+    "conceptCandidatesInThisFile": 2,
+    "newImages": 2,
+    "familyReuses": 0,
+    "modelsGenerated": 0,
+    "runtimeIconsGenerated": 0
+  },
+  "entries": [
+    {
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-thumbnail"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "postProcessing": "none; original generated PNG bytes copied unchanged",
+      "productionId": "item.design.base.scale-mail",
+      "conceptId": "item.design.base.scale-mail.concept.r1",
+      "image": "assets/concept-art/items/r1/scale-mail-r1.png",
+      "sha256": "447d8d9b474c3ba0e6327b4eadfd22ad1b33d8f7ee793246c4260404b0dc83e8",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "byteCount": 2223540,
+      "prompt": "Use case: stylized-concept. Diablo 3D candidate armor study based strictly on private attached ICURS 114, item.design.base.scale-mail. Source shape and actual palette take priority over item name. Compact short-sleeved silver-gray scale armor, many overlapping small pale semicircular/fish-scale shapes over dark base, warm rusty brown-red collar/yoke with small ochre studs around the open round neck, brown belt edged ochre with LARGE round ochre central buckle, lower scale skirt narrows to a pointed central hem. Preserve short broad source shape and pointed end; not knee-length chainmail or plate.\nEXACTLY FIVE separate NEW realistic HD depictions of one SAME empty physical armor: four large whole views FRONT (straight front), SIDE (true 90-degree profile), BACK (actual opposite rear surface, not another front), 3-4 (45-degree angle visibly showing FRONT AND one side, distinct from SIDE), plus fifth small inventory ICON below/right showing same complete object. Never combine 3-4/ICON or substitute second SIDE for 3-4. Keep all objects fully in frame, separated, labels FRONT/SIDE/BACK/3-4/ICON. Charcoal background, neutral soft studio lighting, restrained real candidate metal/textile/leather, no painted floor shadow. No person, skin, head, mannequin, stand, hands, weapons, extra equipment, letters, magic effects or source sprite inset. Invisible display support only. Preserve all segments, bands, colors, cord counts and hem across views; orient asymmetric knots correctly on opposite surface. Rear, depth, fasteners and material assignments are provisional inferences, minimal construction. New HD thumbnail never uses native source pixels. Not an approved turnaround/model/rig.",
+      "referenceHash": "a61241dc50354b44fa77c416ef51cdaffe27a67bb791fbab1742b361a1333747",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 114,
+        "sha256": "a61241dc50354b44fa77c416ef51cdaffe27a67bb791fbab1742b361a1333747",
+        "notes": "Referência nativa 6x inspecionada antes da chamada. Fonte privada usada apenas para silhueta/cores; pixels não incorporados."
+      },
+      "sourceViewCount": 1,
+      "queueGroupId": "remaining-body-armor-base-design-rigid-02",
+      "inferredAreas": [
+        "Verso, espessura, construção e materiais propostos a partir de uma vista; não constituem geometria histórica recuperada."
+      ],
+      "coherenceReview": {
+        "status": "pending-review",
+        "coherentAcrossViewsVerified": false,
+        "observed": "Cinco vistas separadas; escamas cinza, yoke castanho, cinto redondo ocre e barra pontuda preservados.",
+        "pendingIssues": [
+          "Escamas foram interpretadas como folhas pontudas metálicas, maiores/mais definidas que os pixels; confirmar forma, densidade e material.",
+          "Fecho traseiro, fundo e espessura são inferidos; reconciliar deformação e LOD sem substituir master."
+        ]
+      },
+      "notes": "Candidato sem aprovação. Thumbnail HD de estudo não é ícone runtime. Master/material, chão, rig/encaixe e legibilidade na grade lógica de 28px continuam pendentes."
+    },
+    {
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "concept-sheet",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-thumbnail"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "postProcessing": "none; original generated PNG bytes copied unchanged",
+      "productionId": "item.design.base.splint-mail",
+      "conceptId": "item.design.base.splint-mail.concept.r1",
+      "image": "assets/concept-art/items/r1/splint-mail-r1.png",
+      "sha256": "7a9c0b8941c13193389717ef6daa24bb8cd70f9b2308734f3eb86c5c73ab60ee",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "byteCount": 2539152,
+      "prompt": "Use case: stylized-concept. Diablo 3D candidate armor study based strictly on private attached ICURS 136, item.design.base.splint-mail. Source shape and actual palette take priority over item name. Distinctive armor of many narrow DARK BLUE/indigo vertical splints, held by SILVER/gray horizontal bands and muted RED narrow lacing/bands. Boxy tall shoulders and long side upper-arm/sleeve panels with pale ochre/silver edge borders; top shoulder openings dark with ochre trim. Four conspicuous rusty ORANGE cord/knot bundles on chest/sleeve fronts, two dark reddish crossed support straps above open neck, broad dark red waist pad, and flared lower indigo/red segmented skirt with short pale ochre tabs at bottom. Short dangling dark/rust cuff shapes on sides stay empty armor, never hands. Preserve exact blue/red/orange/silver/ochre source palette. Do not replace with plain brown splints or silver European plate, and do not invent cultural symbols.\nEXACTLY FIVE separate NEW realistic HD depictions of one SAME empty physical armor: four large whole views FRONT (straight front), SIDE (true 90-degree profile), BACK (actual opposite rear surface, not another front), 3-4 (45-degree angle visibly showing FRONT AND one side, distinct from SIDE), plus fifth small inventory ICON below/right showing same complete object. Never combine 3-4/ICON or substitute second SIDE for 3-4. Keep all objects fully in frame, separated, labels FRONT/SIDE/BACK/3-4/ICON. Charcoal background, neutral soft studio lighting, restrained real candidate metal/textile/leather, no painted floor shadow. No person, skin, head, mannequin, stand, hands, weapons, extra equipment, letters, magic effects or source sprite inset. Invisible display support only. Preserve all segments, bands, colors, cord counts and hem across views; orient asymmetric knots correctly on opposite surface. Rear, depth, fasteners and material assignments are provisional inferences, minimal construction. New HD thumbnail never uses native source pixels. Not an approved turnaround/model/rig.",
+      "referenceHash": "84132b120065024799b872e4cf1d2673cd0469ec990a1d7cea5cea69eb87b49b",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 136,
+        "sha256": "84132b120065024799b872e4cf1d2673cd0469ec990a1d7cea5cea69eb87b49b",
+        "notes": "Referência nativa 6x inspecionada antes da chamada. Fonte privada usada apenas para silhueta/cores; pixels não incorporados."
+      },
+      "sourceViewCount": 1,
+      "queueGroupId": "remaining-body-armor-base-design-rigid-02",
+      "inferredAreas": [
+        "Verso, espessura, construção e materiais propostos a partir de uma vista; não constituem geometria histórica recuperada."
+      ],
+      "coherenceReview": {
+        "status": "incomplete-study",
+        "coherentAcrossViewsVerified": false,
+        "observed": "Cinco representações, paleta indigo/vermelho/laranja e estrutura em splints preservadas; thumbnail novo HD.",
+        "pendingIssues": [
+          "BACK repete praticamente FRONT inclusive nós e bandas, portanto não comprova verso físico; estudo incompleto.",
+          "Quatro grupos laranja viraram tassels/nós elaborados e surgiram pendentes adicionais; inferência precisa ser simplificada/confirmada.",
+          "Reconciliar amarrações cruzadas, fundo dos painéis, ombro e segmentos com rig existente; sem assumir origem cultural ou lettering."
+        ]
+      },
+      "notes": "Candidato sem aprovação. Thumbnail HD de estudo não é ícone runtime. Master/material, chão, rig/encaixe e legibilidade na grade lógica de 28px continuam pendentes."
+    }
+  ]
+}

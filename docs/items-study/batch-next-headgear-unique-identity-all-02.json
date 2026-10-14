@@ -1,0 +1,160 @@
+{
+  "format": "d3d.item-concept-art",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "batchId": "batch-next-headgear-unique-identity-all-02",
+  "scope": "Queue-group study fragment; candidate generation and explicit visual reuse only, never full-catalog completion or asset approval.",
+  "catalogSha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d",
+  "generationTool": "built-in image_gen.imagegen",
+  "generationCalls": 1,
+  "postProcessing": "none; generated PNG bytes copied unchanged",
+  "originalGameImagesIncluded": false,
+  "visualApproval": false,
+  "runtimeInstalled": false,
+  "registryAuthority": "assets/registry.json",
+  "summary": {
+    "productionUnits": 228,
+    "batchProductionUnits": 2,
+    "conceptCandidateEntries": 2,
+    "generatedImages": 1,
+    "reuseProposals": 1,
+    "blockedUnits": 0,
+    "modelsGenerated": 0,
+    "runtimeIconsGenerated": 0
+  },
+  "entries": [
+    {
+      "productionId": "item.design.unique.thinking-cap",
+      "conceptId": "item.design.unique.thinking-cap.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/thinking-cap-r1.png",
+      "sha256": "4566f39ac2b290c42175856f29f1b6eb4864bc1f29cce317bf399dcd21d229cc",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate object-modeling reference.\nInput image 1 is a PRIVATE original inventory sprite, used only to preserve recognizable silhouette, colors, material regions and distinctive details. Create NEW HD imagery throughout; never paste the sprite into any view or thumbnail.\nA clean technical board of the exact SAME single object in FRONT, SIDE, BACK, THREE-QUARTER and a small NEW HD INVENTORY thumbnail. All views must agree on geometry, proportions, material layout and distinctive details; back is the true reverse, not another front. Full object visible, generously spaced, plain charcoal-gray backdrop, neutral soft studio lighting, no colored illumination or glow, realistic restrained dark medieval materials and fine wear. No scene, body, face, hands, stand, exploded alternatives or extra props. Rear/hidden surfaces and absolute scale are proposed reconstruction; preserve visible source design. Thumbnail must be a new high-detail render of this same object, never pixel-art or the supplied sprite. Minimal labels: item name, FRONT, SIDE, BACK, 3/4, ICON.\nSubject: THINKING CAP; item.design.unique.thinking-cap; native cursor93.\nPreserve the reference's small low dark-gray steel cap with sweeping diagonal/radial flutes, a tiny silver pointed finial with a dark red collar on top, and a WIDE soft dark BURGUNDY/RED padded or cloth-wrapped rolled brim below. The red brim is thick and rounded, not a gold band. The cap is open underneath and has NO nasal tab, face, cheek guard, feather or horn. Hidden liner and rear seam are proposed. Do not copy the gold-brim Skull Cap design; the broad red padded brim and lack of nasal tab are crucial.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "cursorId": 93,
+        "sha256": "5fd4b7a43164645b425f0c15fd33b88c440933d24130e85bb5ec1d9474f6ccd0",
+        "availability": "local-private",
+        "notes": "Licensed original inventory sprite inspected privately at nearest-neighbor 6x enlargement; no original pixels or file paths are included."
+      },
+      "referenceNativeSpriteSha256": "fdc05dccbd08e8ef46897dd03effaf0823c4d6297fb75dce436f360b3b4ca34b",
+      "referenceInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "viewsUsed": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-concept-thumbnail"
+      ],
+      "inferredParts": [
+        "Back and hidden surfaces",
+        "Thickness and absolute scale",
+        "Fine construction/material details unresolved by source pixels"
+      ],
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "sourceBaseIds": [
+        "item.base.049.skull-cap"
+      ],
+      "sourceUniqueIds": [
+        "item.unique.thinking-cap"
+      ],
+      "nativeIdentityPolicy": "Visual study only. Native item identities, unique powers, stats, affixes, saves and RNG are separate and unchanged.",
+      "identityGate": "Candidate design requires visual review and multiview reconciliation before master production.",
+      "notes": "Neutral-light candidate board. HD thumbnail is a new concept preview, not a final runtime icon. Hidden geometry is proposed reconstruction."
+    },
+    {
+      "productionId": "item.design.unique.veil-of-steel",
+      "conceptId": "item.design.unique.veil-of-steel.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "family-sheet",
+      "image": "assets/concept-art/items/r1/gotterdamerung-r1.png",
+      "sha256": "db885bbca62511aabfb8b0e14313e57cccf001145a112f0496ecf4f9b291c28c",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate object-modeling reference.\nInput image 1 is a PRIVATE original inventory sprite, used only to preserve recognizable silhouette, colors, material regions and distinctive details. Create NEW HD imagery throughout; never paste the sprite into any view or thumbnail.\nA clean technical board of the exact SAME single object in FRONT, SIDE, BACK, THREE-QUARTER and a small NEW HD INVENTORY thumbnail. All views must agree on geometry, proportions, material layout and distinctive details; back is the true reverse, not another front. Full object visible, generously spaced, plain charcoal-gray backdrop, neutral soft studio lighting, no colored illumination or glow, realistic restrained dark medieval materials and fine wear. No scene, body, face, hands, stand, exploded alternatives or extra props. Rear/hidden surfaces and absolute scale are proposed reconstruction; preserve visible source design. Thumbnail must be a new high-detail render of this same object, never pixel-art or the supplied sprite. Minimal labels: item name, FRONT, SIDE, BACK, 3/4, ICON.\nSubject: Gotterdamerung; item.design.unique.gotterdamerung; native cursor 85.\nNative cursor VEIL_OF_STEEL 85, shared visual reference for Gotterdamerung/Veil of Steel; preserve this specific ornate dark silver-steel enclosed helm rather than inventing from the unique name. Tall tapered central steel face mask with pronounced vertical ridge and pointed lower chin, FOUR upward-curving silver horns/spikes in two pairs (two each side), antique gold/brass horn sockets and lateral fittings, and a prominent golden SKULL ornament above the center of the crown. Preserve asymmetric hanging trim visible in the reference: muted bluish-purple tassel/cloth on viewer-left and pale silver segmented/chain-like fringe on viewer-right. All views must keep that same left/right construction. No real face, ordinary Viking helmet, glowing eyes, generic gold crown or extra horns. Hidden construction and tiny decorations are inferred. Identity/powers remain separate from the shared visual.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 0,
+      "reference": {
+        "cursorId": 85,
+        "sha256": "0a97af69bf5d17f7f05621ac13d79a5783aa0dffe42ba329a73e269dc3d5ce36",
+        "availability": "local-private",
+        "notes": "Licensed original inventory sprite inspected privately at nearest-neighbor 6x enlargement; no original pixels or file paths are included."
+      },
+      "referenceNativeSpriteSha256": "06c5204625889e4520921db6dd96238896da23f9347f8286933533e6c797725b",
+      "referenceInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "viewsUsed": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-concept-thumbnail"
+      ],
+      "inferredParts": [
+        "Back and hidden surfaces",
+        "Thickness and absolute scale",
+        "Fine construction/material details unresolved by source pixels"
+      ],
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "sourceBaseIds": [
+        "item.base.014.idi-steelveil"
+      ],
+      "sourceUniqueIds": [
+        "item.unique.veil-of-steel"
+      ],
+      "nativeIdentityPolicy": "Visual study only. Native item identities, unique powers, stats, affixes, saves and RNG are separate and unchanged.",
+      "identityGate": "Gotterdamerung and Veil of Steel share native cursor VEIL_OF_STEEL85. Reuse is a visual study only; native unique identities, profile mappings and powers remain distinct.",
+      "notes": "Explicit reuse study; zero new image-generation calls. Shared sheet does not establish an individually approved master or equipped identity.",
+      "reusedFromProductionId": "item.design.unique.gotterdamerung",
+      "reusedFromConceptId": "item.design.unique.gotterdamerung.concept.r1",
+      "reuseProposal": true
+    }
+  ],
+  "blockedUnits": [],
+  "devlogHandoff": {
+    "includeAllGeneratedImages": true,
+    "images": [
+      {
+        "image": "assets/concept-art/items/r1/thinking-cap-r1.png",
+        "sha256": "4566f39ac2b290c42175856f29f1b6eb4864bc1f29cce317bf399dcd21d229cc",
+        "dimensions": [
+          1536,
+          1024
+        ]
+      }
+    ],
+    "generatedConceptIds": [
+      "item.design.unique.thinking-cap.concept.r1"
+    ],
+    "reuseProductionIds": [
+      "item.design.unique.veil-of-steel"
+    ],
+    "limits": [
+      "All outputs remain unapproved candidates.",
+      "Shared cursor reuse preserves separate native identities and powers.",
+      "Hidden surfaces and scale are inferred; master/socket/icon work remains gated."
+    ]
+  }
+}
+

@@ -5,6 +5,8 @@
  */
 #include "spells.h"
 
+#include "engine/render/player_actor_native_hooks.hpp"
+
 #include "control/control.hpp"
 #include "cursor.h"
 #ifdef _DEBUG
@@ -244,6 +246,7 @@ void SpawnResurrectBeam(Player &caster, Player &target)
 
 void ApplyResurrect(Player &target)
 {
+	const NativePlayerActorResurrectionScope actorResurrection(target);
 	if (&target == MyPlayer) {
 		MyPlayerIsDead = false;
 		gamemenu_off();

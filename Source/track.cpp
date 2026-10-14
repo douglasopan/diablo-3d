@@ -4,6 +4,7 @@
  * Implementation of functionality tracking what the mouse cursor is pointing at.
  */
 #include "track.h"
+#include "diablo.h"
 
 #include "controls/control_mode.hpp"
 #include "controls/game_controls.h"
@@ -59,6 +60,12 @@ void InvalidateTargets()
 
 void RepeatPlayerAction()
 {
+	if (IsDungeon3DActionContextForRepeat()) {
+		if (!CanRepeatDungeon3DWorldAction() || (sgbMouseDown != CLICK_LEFT && sgbMouseDown != CLICK_RIGHT)) {
+			LastPlayerAction=PlayerActionType::None;
+			return;
+		}
+	}
 	if (pcurs != CURSOR_HAND)
 		return;
 
@@ -68,7 +75,7 @@ void RepeatPlayerAction()
 	if (IsPlayerInStore())
 		return;
 
-	if (LastPlayerAction == PlayerActionType::None)
+	if (LastPlayerAction == PlayerActionType::None && !IsDungeon3DActionContextForRepeat())
 		return;
 
 	Player &myPlayer = *MyPlayer;
@@ -78,6 +85,12 @@ void RepeatPlayerAction()
 		return;
 	if (!myPlayer.CanChangeAction())
 		return;
+	if (IsDungeon3DActionContextForRepeat()) {
+		// A hit/death or a temporary invalid aim does not end the held episode.
+		// Re-resolve current aim only when the native player can begin an action.
+		if (sgbMouseDown == CLICK_LEFT && !RefreshDungeon3DStandingAttackTarget()) return;
+		if (sgbMouseDown == CLICK_RIGHT && !RefreshDungeon3DStandingSpellTarget()) return;
+	}
 
 	const bool rangedAttack = myPlayer.UsesRangedWeapon();
 	switch (LastPlayerAction) {

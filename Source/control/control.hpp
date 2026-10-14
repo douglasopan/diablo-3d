@@ -19,6 +19,7 @@
 #endif
 #endif
 
+#include "control/d3d_hud.hpp"
 #include "DiabloUI/text_input.hpp"
 #include "DiabloUI/ui_flags.hpp"
 #include "engine/displacement.hpp"
@@ -67,6 +68,9 @@ extern DVL_API_FOR_TEST bool SpellSelectFlag;
 [[nodiscard]] const Rectangle &GetMainPanel();
 [[nodiscard]] const Rectangle &GetLeftPanel();
 [[nodiscard]] const Rectangle &GetRightPanel();
+/** Per-identity body origin at native content scale. The side getters retain
+ * the legacy base areas; movable HUD windows use this explicit identity. */
+[[nodiscard]] Rectangle GetPanelArea(UiPanels panel);
 bool IsLeftPanelOpen();
 bool IsRightPanelOpen();
 void CalculatePanelAreas();
@@ -84,6 +88,9 @@ void ToggleCharPanel();
  */
 [[nodiscard]] inline bool CanPanelsCoverView()
 {
+	// Floating translucent panels never crop or shift the world camera.
+	if (IsD3dHudSelected())
+		return false;
 	const Rectangle &mainPanel = GetMainPanel();
 	return GetScreenWidth() <= mainPanel.size.width && GetScreenHeight() <= SidePanelSize.height + mainPanel.size.height;
 }

@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "createdAtUtc": "2026-10-12T03:30:25.793387+00:00",
+  "tool": {
+    "path": "D:\\Diablo 1 3D\\devilutionx\\docs\\own-art-pack\\heroes-local-r1\\pipeline\\hero_pipeline.py",
+    "sha256": "5826cdd2308a59007760b2c9e9a6d829f6baa984bf9234d628ce685a097f9cc5"
+  },
+  "reader": {
+    "path": "D:\\Diablo 1 3D\\devilutionx\\tools\\inspect_glb.py",
+    "sha256": "a571a42bd214e4101d45b90b40a7641a0c33a87ace45849543bf722d89855e10"
+  },
+  "policy": {
+    "cpuOnly": true,
+    "networkAccess": false,
+    "sourceModified": false,
+    "globalRegistryModified": false,
+    "sourcePixels": "only embedded own GLB textures; no sprite pack/reference-image input"
+  },
+  "models": [
+    {
+      "source": {
+        "path": "D:\\Diablo 1 3D\\diagnostics\\characters-rigs\\tripo-warrior-submission-20261009\\r1\\assets\\warrior-light-unarmed-r3-tripo-master-4k.glb",
+        "bytes": 4708948,
+        "sha256": "bb8c85b9186ea4a687d440762139becbcd1b8ec7e731a5b1f1e9004b981d0da4",
+        "dependencies": []
+      },
+      "counts": {
+        "nodes": 2,
+        "skinJoints": [],
+        "clips": 0,
+        "vertices": 13627,
+        "triangles": 11039
+      },
+      "bindWorldBounds": {
+        "min": [
+          -0.318603515625,
+          0.0,
+          -0.09741213917732239
+        ],
+        "max": [
+          0.318603515625,
+          0.99951171875,
+          0.09741213917732239
+        ],
+        "extent": [
+          0.63720703125,
+          0.99951171875,
+          0.19482427835464478
+        ]
+      },
+      "animations": [],
+      "status": "master/rig only; zero animation clips",
+      "materials": "real source UV/base color; CPU renderer below explicitly approximates directional diffuse lighting",
+      "approval": "technical candidate; no selection, visual acceptance or game integration"
+    },
+    {
+      "source": {
+        "path": "D:\\Diablo 1 3D\\diagnostics\\characters-rigs\\tripo-warrior-submission-20261009\\r1\\assets\\warrior-light-unarmed-r3-tripo-rigged-4k.glb",
+        "bytes": 5049600,
+        "sha256": "61565b41d367e04449fdb073105acef0ca4d1a652047cdf8ab994f2fd40c01e9",
+        "dependencies": []
+      },
+      "counts": {
+        "nodes": 68,
+        "skinJoints": [
+          52
+        ],
+        "clips": 0,
+        "vertices": 13627,
+        "triangles": 11039
+      },
+      "bindWorldBounds": {
+        "min": [
+          -0.709452267434559,
+          -0.7984101578443069,
+          -0.9920544938215263
+        ],
+        "max": [
+          0.2799826151691805,
+          0.8185441287070846,
+          0.9264240714025915
+        ],
+        "extent": [
+          0.9894348826037396,
+          1.6169542865513915,
+          1.9184785652241179
+        ]
+      },
+      "animations": [],
+      "status": "master/rig only; zero animation clips",
+      "materials": "real source UV/base color; CPU renderer below explicitly approximates directional diffuse lighting",
+      "approval": "technical candidate; no selection, visual acceptance or game integration"
+    },
+    {
+      "source": {
+        "path": "D:\\Diablo 1 3D\\diagnostics\\characters-rigs\\tripo-warrior-derivative-20261009\\r2\\candidate\\warrior-light-unarmed-r3-tripo-bind-basis-repaired-2k.glb",
+        "bytes": 6725032,
+        "sha256": "1c09cc5e55fbc1f6de5d5db94adae2cbb52a2842e5d1b300b3913f98a4d28507",
+        "dependencies": []
+      },
+      "counts": {
+        "nodes": 68,
+        "skinJoints": [
+          52
+        ],
+        "clips": 0,
+        "vertices": 13627,
+        "triangles": 11039
+      },
+      "bindWorldBounds": {
+        "min": [
+          -0.31860349459718323,
+          -2.6662675888765358e-08,
+          -0.0974121419662526
+        ],
+        "max": [
+          0.3186034606115031,
+          0.9995116607853753,
+          0.09741216557041511
+        ],
+        "extent": [
+          0.6372069552086863,
+          0.9995116874480512,
+          0.1948243075366677
+        ]
+      },
+      "animations": [],
+      "status": "master/rig only; zero animation clips",
+      "materials": "real source UV/base color; CPU renderer below explicitly approximates directional diffuse lighting",
+      "approval": "technical candidate; no selection, visual acceptance or game integration"
+    }
+  ]
+}

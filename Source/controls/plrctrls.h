@@ -60,6 +60,8 @@ void PerformPrimaryActionRelease();
 
 // Open chests, doors, pickup items.
 void PerformSecondaryAction();
+/** Native world interaction, without dispatching inventory UI controls. */
+void PerformSecondaryWorldAction();
 void UpdateSpellTarget(SpellID spell);
 bool TryDropItem();
 void InvalidateInventorySlot();

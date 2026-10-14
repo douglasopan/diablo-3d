@@ -426,6 +426,11 @@ void RenderClxOutline(const Surface &out, Point position, ClxSprite sprite, uint
 
 void ClxApplyTrans(ClxSprite sprite, const uint8_t *trn)
 {
+	if (const auto *translation = sprite.hdTranslation()) {
+		auto *mapping = const_cast<uint8_t *>(translation);
+		for (size_t i = 0; i < 256; ++i)
+			mapping[i] = trn[mapping[i]];
+	}
 	// A bit of a hack but this is the only place in the code where we need mutable sprites.
 	auto *dst = const_cast<uint8_t *>(sprite.pixelData());
 	uint16_t remaining = sprite.pixelDataSize();

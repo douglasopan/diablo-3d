@@ -17,8 +17,11 @@ extern Rectangle BeltRect;
 
 void SetPanelObjectPosition(UiPanels panel, Rectangle &button);
 
-// Draw one original translated button at the local origin, including its
-// native pressed or multiplayer state. Layout and actions are handled separately.
+/** Current native held state, without modifying input or button dispatch. */
+bool IsMainPanelButtonPressed(int button);
+
+// Draw the localized label or preserved multiplayer state at the local origin.
+// Legacy decoration is used only when the D3D skin is not selected.
 void DrawNativePanelButton(const Surface &out, int button, bool pressed);
 
 } // namespace devilution

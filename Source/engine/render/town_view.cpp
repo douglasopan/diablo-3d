@@ -1,3 +1,4 @@
+#include "engine/render/cathedral/dungeon_rectified_material.hpp"
 #include "engine/render/town_view.hpp"
 
 #include <algorithm>
@@ -7,6 +8,8 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <fstream>
+#include <iomanip>
 #include <limits>
 #include <map>
 #include <memory>
@@ -28,6 +31,7 @@
 #endif
 
 #include "control/control.hpp"
+#include "cursor.h"
 #include "diablo.h"
 #include "game_mode.hpp"
 #include "mods/mod_identity.h"
@@ -35,11 +39,15 @@
 #include "engine/render/actor_model.hpp"
 #include "engine/render/actor_pose.hpp"
 #include "engine/render/actor_visual_snapshot.hpp"
+#include "engine/render/player_actor_material.hpp"
+#include "engine/render/player_actor_runtime.hpp"
+#include "engine/render/player_actor_runtime_profile.hpp"
 #include "engine/render/ogden_idle_pilot.hpp"
 #include "engine/render/ogden_idle_native_clock.hpp"
 #include "dead.h"
 #include "engine/assets.hpp"
 #include "engine/clx_sprite.hpp"
+#include "engine/hd_sprite_pack.hpp"
 #include "engine/light_tables.hpp"
 #include "engine/palette.h"
 #include "engine/render/clx_render.hpp"
@@ -59,6 +67,9 @@
 #include "engine/render/town_camera_visibility.hpp"
 #include "engine/render/town_ground_shadow.hpp"
 #include "engine/render/town_gpu.hpp"
+#include "engine/render/d3d_local_diagnostics.hpp"
+#include "engine/render/text_render.hpp"
+#include "utils/display.h"
 #include "engine/render/town_gpu_mesh.hpp"
 #include "engine/render/town_gpu_recovery.hpp"
 #include "engine/render/town_horizon.hpp"
@@ -70,6 +81,8 @@
 #include "engine/render/town_model_import.hpp"
 #include "engine/render/town_props.hpp"
 #include "engine/render/town_volume.hpp"
+#include "engine/render/town_visual_objects.hpp"
+#include "engine/render/town_visual_scene.hpp"
 #include "engine/render/town_vegetation.hpp"
 #include "engine/render/town_actor.hpp"
 #include "engine/render/town_body.hpp"
@@ -83,12 +96,14 @@
 #include "items.h"
 #include "levels/dun_tile_data.hpp"
 #include "levels/tile_properties.hpp"
+#include "levels/trigs.h"
 #include "lighting.h"
 #include "missiles.h"
 #include "monster.h"
 #include "objects.h"
 #include "options.h"
 #include "player.h"
+#include "quests.h"
 #include "utils/endian_swap.hpp"
 #include "utils/log.hpp"
 #include "utils/palette_blending.hpp"
@@ -96,6 +111,7 @@
 #include "utils/ui_fwd.h"
 
 namespace devilution {
+namespace diag = d3d_local_diagnostics;
 namespace {
 
 constexpr float Pi = 3.14159265358979323846F;
@@ -108,6 +124,13 @@ constexpr size_t FlameLightLevels = 16;
 constexpr size_t InteriorMaterialCount = 5;
 constexpr size_t FlameBandCount = 3;
 constexpr float FireIntensityVariation = 0.06F;
+
+// Drawing, picking and diagnostics share the effective session request.
+bool EffectiveGpuRequested()
+{
+	return diag::SessionPolicy().mode != diag::Mode::CpuDiagnosticExplicit
+	    && *GetOptions().Graphics.townViewGpuRendering;
+}
 
 /** Prepared once per room/frame, never allocated by the pixel lighting loop. */
 struct InteriorLighting {
@@ -158,6 +181,7 @@ struct Vertex {
 	Vec3 position;
 	float u;
 	float v;
+	std::array<float, 4> authoredColor { 1, 1, 1, 1 };
 };
 
 struct ProjectedVertex {
@@ -186,19 +210,27 @@ struct TextureGpuIdentity {
 	TextureGpuIdentity &operator=(TextureGpuIdentity &&) noexcept { value = NextTextureGpuIdentity(); return *this; }
 };
 
+bool DrawingWarriorViewModel = false;
+bool WarriorViewModelEnabledForDiagnostics = true;
+std::vector<uint8_t> WarriorViewModelCoverage;
+
 struct Texture {
 	int width = 0;
 	int height = 0;
 	std::vector<uint8_t> pixels;
 	bool repeat = false;
 	std::vector<uint8_t> opacity;
+	std::vector<uint8_t> lightingBasePixels;
 	// Imported base color stays independent of the game palette until lighting.
 	std::vector<uint32_t> albedoPixels;
+	// A separately owned actor surface keeps exact authored RGB codes and its
+	// indexed/RGBA pair; it never joins the scenery six-bit color namespace.
+	std::optional<PlayerActorMaterial> actorMaterial;
 	// Interior materials use a small point-irradiance LUT and clean base colors.
 	std::vector<std::array<uint8_t, ImportedLightLevels>> interiorLightTables;
 	bool emissive = false;
 	TextureGpuIdentity gpuIdentity;
-	bool sample(float u, float v, uint8_t &color, uint32_t *albedoColor = nullptr) const
+	bool sample(float u, float v, uint8_t &color, uint32_t *albedoColor = nullptr, uint8_t *unlitColor = nullptr) const
 	{
 		if (width <= 0 || height <= 0 || !std::isfinite(u) || !std::isfinite(v))
 			return false;
@@ -212,6 +244,12 @@ struct Texture {
 		const int y = std::clamp(static_cast<int>(v * static_cast<float>(height)), 0, height - 1);
 		const size_t index = static_cast<size_t>(y) * width + x;
 		color = pixels.empty() ? 0 : pixels[index];
+		if (actorMaterial) {
+			const auto code = actorMaterial->texelCodes[index];
+			color = actorMaterial->indexedLightLut[std::size_t(code) * actorMaterial->lightLevels];
+			if (albedoColor != nullptr) *albedoColor = code;
+		}
+		if (unlitColor != nullptr) *unlitColor=lightingBasePixels.empty()?color:lightingBasePixels[index];
 		if (albedoColor != nullptr && !albedoPixels.empty())
 			*albedoColor = albedoPixels[index];
 		return opacity.empty() || opacity[index] != 0;
@@ -270,6 +308,26 @@ struct VolumeArtwork {
 	mutable std::map<std::array<float, 3>, ResidentMeshArtwork> residentPlacements;
 };
 
+// These caches borrow a validated persistent archive, never the native dungeon
+// allocation. Resource/scene epochs invalidate them without rewriting assets.
+std::string FixedTownArchiveHash;
+uint64_t FixedTownSceneRevision = 0;
+std::vector<Texture> FixedTownTextures;
+std::map<size_t, VolumeArtwork> FixedTownVolumes;
+struct FixedTownDelta { uint64_t signature = 0; VolumeArtwork art; };
+std::map<size_t, FixedTownDelta> FixedTownDeltas;
+TownViewFixedObjectState FixedTownObjectState;
+
+void ClearFixedTownRendererCache()
+{
+	FixedTownArchiveHash.clear();
+	FixedTownSceneRevision = 0;
+	FixedTownTextures.clear();
+	FixedTownVolumes.clear();
+	FixedTownDeltas.clear();
+	FixedTownObjectState = {};
+}
+
 enum class PickKind : uint8_t { Ground, Towner, Item, Player, Object, Monster };
 struct PickRecord {
 	uint16_t tile = std::numeric_limits<uint16_t>::max();
@@ -287,6 +345,7 @@ size_t ItemLabelAnchorCount = 0;
 cathedral::PilotFrame CathedralFrame;
 bool CathedralFrameReady = false;
 bool DrawingCathedral = false;
+size_t CorpseGroundDraws=0;
 bool CathedralPaletteBlend = false;
 const uint8_t *CathedralTranslation = nullptr;
 
@@ -316,6 +375,10 @@ bool GameplayCameraPolicy = false;
 TownCameraVisibilityIndex CameraVisibilityIndex;
 TownViewCameraVisibilityState CameraVisibilityState;
 std::vector<uint8_t> CameraHiddenArchitecture, CameraVisibilityQueryMask;
+TownCameraVisibilityIndex CathedralVisibilityIndex;
+std::unordered_map<uint64_t, uint32_t> CathedralVisibilityOwners;
+std::vector<uint8_t> CathedralHiddenOwners;
+uint64_t CathedralVisibilityGeometry = 0, CathedralVisibilityPresentation = 0;
 uint64_t CameraVisibilitySceneRevision = 0;
 bool CameraVisibilityBuildAttempted = false;
 uint64_t CameraVisibilityRevision = 0, PickCameraVisibilityRevision = 0;
@@ -358,8 +421,50 @@ struct PreparedGpuTexture {
 	std::vector<uint32_t> codes;
 	std::vector<uint8_t> interiorLut;
 	uint64_t lastSeen = 0;
+	uint64_t actorPreparedFrame = 0;
+	TownGpuLighting actorPreparedLighting = TownGpuLighting::Unlit;
 };
 std::unordered_map<uint64_t, PreparedGpuTexture> PreparedGpuTextures;
+std::vector<uint32_t> SmoothWorldPixels;
+std::unique_ptr<OwnedSurface> SmoothWorldSurface;
+std::array<uint32_t,256> SmoothWorldPalette {};
+std::array<SDL_Color,256> SmoothToneRamp {};
+bool SmoothWorldValid=false;
+float SmoothNativeLight(Vec3 world) {
+    const float x=std::clamp(world.x,0.0F,float(MAXDUNX-1)),z=std::clamp(world.z,0.0F,float(MAXDUNY-1));
+    const int ax=int(x),az=int(z),bx=std::min(ax+1,MAXDUNX-1),bz=std::min(az+1,MAXDUNY-1);
+    const auto at=[](int x,int z){return float(std::min<int>(dLight[x][z],15));};
+    const float top=at(ax,az)+(at(bx,az)-at(ax,az))*(x-ax);
+    const float bottom=at(ax,bz)+(at(bx,bz)-at(ax,bz))*(x-ax);
+    return top+(bottom-top)*(z-az);
+}
+float SmoothShadowOcclusion(Vec3 world,const TownShadowReceiver &receiver) {
+    const auto view=GetTownShadowMapView();if(view.depth.empty())return 0;
+    const float u=(world.x*view.right.x+world.y*view.right.height+world.z*view.right.z-view.minU)/view.texelU;
+    const float v=(world.x*view.up.x+world.y*view.up.height+world.z*view.up.z-view.minV)/view.texelV;
+    if(u<0 || v<0 || u>=view.config.resolution || v>=view.config.resolution)return 0;
+    const float fu=u-std::floor(u),fv=v-std::floor(v);
+    const auto sample=[&](float du,float dv){
+        const float plane=receiver.depthSlopeU*du*view.texelU+receiver.depthSlopeV*dv*view.texelV;
+        return SampleTownShadow(world.x+view.right.x*du*view.texelU+view.up.x*dv*view.texelV+view.light.x*plane,
+            world.y+view.right.height*du*view.texelU+view.up.height*dv*view.texelV+view.light.height*plane,
+            world.z+view.right.z*du*view.texelU+view.up.z*dv*view.texelV+view.light.z*plane,receiver);
+    };
+    const float a=sample(-fu,-fv),b=sample(1-fu,-fv),c=sample(-fu,1-fv),d=sample(1-fu,1-fv);
+    return (a+(b-a)*fu)*(1-fv)+(c+(d-c)*fu)*fv;
+}
+uint32_t ToneWorldRgb(TownLightColor color) {
+    const auto r=SmoothToneRamp[std::clamp(int(color.red*255+.5F),0,255)].r;
+    const auto g=SmoothToneRamp[std::clamp(int(color.green*255+.5F),0,255)].g;
+    const auto b=SmoothToneRamp[std::clamp(int(color.blue*255+.5F),0,255)].b;
+    return 0xFF000000U|(uint32_t(r)<<16)|(uint32_t(g)<<8)|b;
+}
+uint32_t BlendWorldRgb(uint32_t a,uint32_t b,float amount) {
+    amount=std::clamp(amount,0.0F,1.0F);uint32_t color=0xFF000000U;
+    for(unsigned shift:{0U,8U,16U}) {const float low=float((a>>shift)&255),high=float((b>>shift)&255);color|=uint32_t(low+(high-low)*amount+0.5F)<<shift;}
+    return color;
+}
+
 struct CathedralGpuPaletteBinding {
 	TextureGpuIdentity identity;
 	cathedral::NativePaletteRevision palette;
@@ -381,6 +486,8 @@ using CathedralNativeTextureKey = std::tuple<cathedral::NativeTextureKind, uint1
 struct CathedralNativeTextureEntry {
 	Texture texture;
 	uint64_t signature = 0, validatedAt = 0;
+	uint64_t authoredPixelHash = 0;
+	uint8_t authoredMaterial = 0; // 1: own floor r1; 2: own opaque wall r1.
 	uint16_t sourcePiece = 0;
 	uint8_t sourceMicro = 0, sourceColumn = 0;
 	uint16_t sourceBlock = 0, secondBlock = 0;
@@ -391,6 +498,10 @@ struct CathedralNativeTextureEntry {
 };
 constexpr size_t CathedralNativeTextureMaxEntries = 512;
 constexpr size_t CathedralNativeTextureMaxBytes = 8 * 1024 * 1024;
+// Immutable r1 LOD identities, qualified against the original-only asset manifest.
+constexpr uint64_t CathedralOwnFloorPixelHash = 0x19fb0138bd10258bULL;
+constexpr uint64_t CathedralOwnWallPixelHash = 0x7ceac50e7ad3f981ULL;
+bool CathedralOwnFloorPresent = false, CathedralOwnWallPresent = false;
 // Raw keys keep their existing 512-entry cap; lit keys add coordinates without
 // multiplying CEL decodes. Only this frame's lit sources are resident (max512).
 // The raw+lit pixel/coverage payload shares the existing 8 MiB byte budget.
@@ -491,6 +602,10 @@ uint64_t CathedralNativeLitGameRevision = 0, CathedralNativeLitGeometryRevision 
 TownViewCathedralNativeTextureState CathedralNativeTextureState;
 const std::byte *CathedralNativeTextureResource = nullptr;
 uint_fast8_t CathedralNativeTextureMicroLen = 0;
+cathedral::NativeTextureBinding CathedralCeilingBinding;
+uint64_t CathedralCommonPaletteSignature = 0;
+bool CathedralCeilingBindingReady = false;
+std::unique_ptr<VolumeArtwork> CathedralNativeLightBody;
 TownViewCathedralFallbackDiagnostic CathedralFallbackDiagnostic;
 TownViewCathedralFallbackDiagnostic CathedralFallbackLastLogged;
 CathedralFallbackStage CathedralDiagnosticStage = CathedralFallbackStage::None;
@@ -501,6 +616,9 @@ bool CathedralPreparationRefused = false, CathedralDiagnosticGpuAttempted = fals
 bool CathedralDiagnosticForceGeometry = false, CathedralDiagnosticHasLogKey = false;
 bool CathedralDiagnosticHasLogAttempt = false;
 uint32_t CathedralDiagnosticLastLogAttempt = 0;
+TownViewCathedralFirstRefusal CathedralFirstRefusal;
+bool CathedralFirstRefusalLogged = false, CathedralFirstRefusalLogAttempted = false;
+uint32_t CathedralFirstRefusalLastAttempt = 0;
 
 bool SameCathedralDiagnosticTransition(const TownViewCathedralFallbackDiagnostic &a,
     const TownViewCathedralFallbackDiagnostic &b) noexcept
@@ -573,10 +691,49 @@ void RecordCathedralDiagnostic(CathedralFallbackReason reason, CathedralFallback
 		++next.transitions; next.firstFocusX = next.focusX; next.firstFocusZ = next.focusZ; next.firstTick = next.tick;
 	}
 	CathedralFallbackDiagnostic = next; // Fixed-size POD; no allocation, text or exception formatting.
+	if (!CathedralFirstRefusal.present && next.nativeFallback
+	    && !gbIsSpawn && cathedral::SupportsRetailLevel(currlevel, leveltype, gbIsHellfire, setlevel, setlevel ? setlvlnum : SL_NONE)
+	    && reason != CathedralFallbackReason::NativePoseReference && reason != CathedralFallbackReason::RenderDisabled) {
+		const auto input = GetTownViewInputStateForDiagnostics();
+		CathedralFirstRefusal.present = true;
+		CathedralFirstRefusal.observation = next;
+		CathedralFirstRefusal.cameraMode = static_cast<int>(CameraRig.mode());
+		CathedralFirstRefusal.yaw = CameraYaw; CathedralFirstRefusal.pitch = CameraPitch;
+		CathedralFirstRefusal.distance = CameraDistance;
+		CathedralFirstRefusal.verticalFovDegrees = CameraRig.preferences().verticalFovDegrees;
+		CathedralFirstRefusal.firstPersonPhase = input.firstPersonPhase;
+		CathedralFirstRefusal.thirdPersonPhase = input.thirdPersonPhase;
+		CathedralFirstRefusal.firstPersonKeys = input.firstPersonKeys;
+		CathedralFirstRefusal.thirdPersonKeys = input.thirdPersonKeys;
+		CathedralFirstRefusal.leftDown = input.leftDown; CathedralFirstRefusal.active = input.active;
+		if (MyPlayer != nullptr) {
+			CathedralFirstRefusal.playerMode = static_cast<int>(MyPlayer->_pmode);
+			CathedralFirstRefusal.playerChangingLevel = MyPlayer->_pLvlChanging;
+		}
+	}
 }
 
 void TryLogCathedralDiagnostic() noexcept
 {
+	const auto &first = CathedralFirstRefusal;
+	if (first.present && !CathedralFirstRefusalLogged
+	    && (!CathedralFirstRefusalLogAttempted || SDL_GetTicks() - CathedralFirstRefusalLastAttempt >= 1000)) {
+		CathedralFirstRefusalLogAttempted = true;
+		CathedralFirstRefusalLastAttempt = SDL_GetTicks();
+#if defined(__cpp_exceptions) || defined(_CPPUNWIND)
+		try {
+			const auto &d = first.observation;
+			Log("Cathedral FIRST refusal: reason={}, stage={}, tick={}, level={}/{}, seed={}, epoch={}, frameEpoch={}, focus=({},{}), camera={} yaw={} pitch={} distance={} fov={}, input=FP{}:{} TP{}:{} left={} active={}, playerMode={} changing={}, ready={} flags={} GPUrequested={} kind={}",
+				CathedralFallbackReasonName(d.reason), CathedralFallbackStageName(d.stage), d.tick,
+				d.level, d.levelType, d.seed, d.liveEpoch, d.frameEpoch, d.focusX, d.focusZ,
+				first.cameraMode, first.yaw, first.pitch, first.distance, first.verticalFovDegrees,
+				first.firstPersonPhase, first.firstPersonKeys, first.thirdPersonPhase, first.thirdPersonKeys,
+				first.leftDown, first.active, first.playerMode, first.playerChangingLevel,
+				d.frameReady, d.frameFallbackFlags, d.requestedGpu, d.gpuFailureKind);
+			CathedralFirstRefusalLogged = true;
+		} catch (...) { ++CathedralFallbackDiagnostic.logFailures; }
+#endif
+	}
 	const auto &d = CathedralFallbackDiagnostic;
 	if (d.reason == CathedralFallbackReason::None) return;
 	if (!d.enabled || d.reason == CathedralFallbackReason::RenderDisabled || d.reason == CathedralFallbackReason::NativePoseReference
@@ -626,6 +783,7 @@ struct SceneMaterials {
 	std::array<SceneDetailMaterial, static_cast<size_t>(TownSceneSurfaceDetail::Count)> details;
 };
 std::unordered_map<size_t, SceneMaterials> SceneMaterialCache;
+std::unordered_map<size_t, bool> SceneWaterEventState;
 std::unordered_map<size_t, Texture> ImportedTextureCache;
 std::unordered_map<size_t, std::array<Texture, InteriorMaterialCount + FlameBandCount * FlameLightLevels>> CabinInteriorTextureCache;
 struct CachedArchitectureBounds {
@@ -639,10 +797,63 @@ bool CabinFireEnabledForDiagnostics = true;
 bool DirectionalShadowsEnabledForDiagnostics = true;
 double CabinFireDiagnosticTime = -1;
 double FrameFireTime = 0;
+std::array<TownPointLight, TownMaxPointLights> FrameSpritePointLights {};
+size_t FrameSpritePointLightCount = 0;
+std::vector<TownLightOccluder> FrameSpritePointOccluders;
+bool FrameSpritePointLightingValid = false;
+const TownCabinInterior *FrameSpritePointChurchRoom = nullptr;
+int16_t FrameSpritePointChurchArchitecture = -1;
+
+bool SpritePointReceiver(PickRecord pick)
+{
+	return !DrawingCathedral && pick.kind != PickKind::Ground;
+}
+
+void ClearFrameSpritePointLighting()
+{
+	FrameSpritePointLightingValid = false;
+	FrameSpritePointLightCount = 0;
+	FrameSpritePointOccluders.clear();
+	FrameSpritePointChurchRoom = nullptr;
+	FrameSpritePointChurchArchitecture = -1;
+}
+
+void PrepareFrameSpritePointLighting()
+{
+	ClearFrameSpritePointLighting();
+	if (DrawingCathedral || leveltype != DTYPE_TOWN || !CabinFireEnabledForDiagnostics)
+		return;
+	// The church's authored emitters also illuminate native entity surfaces.
+	// Its room owns the aperture spans for this frame; reset clears them first.
+	const auto &scene = GetTownScene();
+	for (size_t index = 0; index < scene.size(); ++index) {
+		const TownSceneModel &model = scene[index];
+		if (model.kind != TownSceneKind::Cathedral || !model.cabinInterior)
+			continue;
+		const TownCabinInterior &room = *model.cabinInterior;
+		FrameSpritePointChurchRoom = &room;
+		FrameSpritePointChurchArchitecture = static_cast<int16_t>(index);
+		if (room.fireSources.size() > TownMaxPointLights - FrameSpritePointLightCount
+		    || room.lightOccluders.size() > TownMaxLightOccluders - FrameSpritePointOccluders.size()) {
+			ClearFrameSpritePointLighting();
+			return;
+		}
+		for (const TownCabinFireSource &fire : room.fireSources)
+			FrameSpritePointLights[FrameSpritePointLightCount++] = TownFireLightAtTime(fire.light, fire.flickerSeed, FrameFireTime);
+		FrameSpritePointOccluders.insert(FrameSpritePointOccluders.end(), room.lightOccluders.begin(), room.lightOccluders.end());
+	}
+	FrameSpritePointLightingValid = FrameSpritePointLightCount != 0
+	    && ValidateTownSpritePointLighting({ FrameSpritePointLights.data(), FrameSpritePointLightCount }, FrameSpritePointOccluders);
+}
+
 std::unordered_map<uint32_t, uint32_t> ImportedAlbedoColors;
 std::vector<std::array<uint8_t, ImportedLightLevels>> ImportedAlbedoLightTables;
 TownLightingConfig SceneLightingConfig = TristramLightingConfig();
 bool SceneLightingProfileLoaded = false;
+int SceneTimeOfDay = -1;
+uint64_t SceneLightingRevision = 1;
+float SceneDayBrightness = 1;
+uint64_t ImportedLightingRevision = 0;
 TownHorizonMesh HorizonMesh;
 std::vector<uint8_t> HorizonColors;
 TownHorizonFogPalette HorizonFogPalette;
@@ -663,10 +874,16 @@ std::unordered_map<const uint8_t *, VolumeArtwork> ActorVolumeCache;
 struct BillboardArtwork {
 	Texture texture;
 	uint64_t sourceHash;
+	int bottomCoveredRow = -1;
 };
 std::unordered_map<const uint8_t *, BillboardArtwork> BillboardTextureCache;
+std::unordered_map<const uint8_t *, BillboardArtwork> SkullFireFlameCache;
 std::unordered_map<size_t, VolumeArtwork> VegetationArtworkCache;
 std::unordered_map<size_t, VolumeArtwork> PropArtworkCache;
+std::array<std::array<bool, MAXDUNY>, MAXDUNX> PropVisualReplacementMask {};
+std::array<std::array<bool, MAXDUNY>, MAXDUNX> PropGroundPaintReplacementMask {};
+bool PropReplacementReady = false;
+bool PreparedTownPropReplacesTile(Point tile, bool groundPaint = false);
 std::unordered_map<uint16_t, VolumeArtwork> SceneryVolumeCache;
 const std::array<Texture, 256> PaletteTextures = [] {
 	std::array<Texture, 256> textures;
@@ -728,19 +945,26 @@ void PrepareSceneLighting()
 		if (handle.ok() && handle.read(text.data(), text.size()))
 			SceneLightingProfileLoaded = ParseTownLightingProfile(text, SceneLightingConfig);
 	}
+	SceneTimeOfDay = std::clamp(*GetOptions().Graphics.townViewTimeOfDay, 0, 2);
+	SceneDayBrightness = SceneTimeOfDay == 0 ? 1.0F : SceneTimeOfDay == 1 ? 0.70F : 0.36F;
+	const float energy = SceneTimeOfDay == 0 ? 1.0F : SceneTimeOfDay == 1 ? 0.46F : 0.12F;
+	SceneLightingConfig.ambient.red *= energy;
+	SceneLightingConfig.ambient.green *= energy;
+	SceneLightingConfig.ambient.blue *= energy * (SceneTimeOfDay == 2 ? 1.5F : 1.10F);
+	SceneLightingConfig.directionalIntensity *= energy;
 	constexpr std::array<float, 4> Brightness { 1.0F, 0.93F, 0.84F, 0.74F };
 	// Match darkened RGB colors back into the actual Tristram palette. Its first
 	// 128 entries are not ordered shade ramps, unlike the dungeon palettes.
 	for (size_t shade = 0; shade < Brightness.size(); ++shade) {
 		for (size_t index = 0; index < logical_palette.size(); ++index) {
-			if (shade == 0 || index == 0) {
+			if ((shade == 0 && SceneDayBrightness == 1) || index == 0) {
 				SceneLightTables[shade][index] = static_cast<uint8_t>(index);
 				continue;
 			}
 			const SDL_Color color = logical_palette[index];
-			const float red = color.r * Brightness[shade];
-			const float green = color.g * Brightness[shade];
-			const float blue = color.b * Brightness[shade];
+			const float red = color.r * Brightness[shade] * SceneDayBrightness;
+			const float green = color.g * Brightness[shade] * SceneDayBrightness;
+			const float blue = color.b * Brightness[shade] * SceneDayBrightness;
 			float bestDistance = std::numeric_limits<float>::max();
 			uint8_t best = static_cast<uint8_t>(index);
 			for (size_t candidate = 1; candidate < logical_palette.size(); ++candidate) {
@@ -765,7 +989,7 @@ void PrepareSceneLighting()
 		for (size_t shadow = 1; shadow < ShadowBrightness.size(); ++shadow) {
 			for (size_t index = 0; index < logical_palette.size(); ++index) {
 				const SDL_Color color = logical_palette[index];
-				const float brightness = Brightness[shade] * ShadowBrightness[shadow];
+				const float brightness = Brightness[shade] * ShadowBrightness[shadow] * SceneDayBrightness;
 				float bestDistance = std::numeric_limits<float>::max();
 				uint8_t best = static_cast<uint8_t>(index);
 				for (size_t candidate = 0; candidate < logical_palette.size(); ++candidate) {
@@ -839,6 +1063,10 @@ void ResetFollowCameraHistory(bool clearIndex = false)
 	++FollowProjectionRevision;
 	PickingValid = false;
 	if (clearIndex) {
+		CathedralVisibilityIndex.Clear();
+		CathedralVisibilityOwners.clear();
+		CathedralHiddenOwners.clear();
+		CathedralVisibilityGeometry = CathedralVisibilityPresentation = 0;
 		CameraVisibilityIndex.Clear();
 		CameraVisibilityBuildAttempted = false;
 		CameraVisibilitySceneRevision = 0;
@@ -851,7 +1079,8 @@ void ResetFollowCameraHistory(bool clearIndex = false)
 
 bool FollowThroughTownArchitecture()
 {
-	return GameplayCameraPolicy && leveltype == DTYPE_TOWN && !CameraRig.suspended()
+	return GameplayCameraPolicy && (leveltype == DTYPE_TOWN
+	        || (cathedral::LiveLevelEligible() && CameraRig.mode() == TownCameraMode::ThirdPerson)) && !CameraRig.suspended()
 	    && IsTownGameplayCameraMode(CameraRig.mode());
 }
 
@@ -866,6 +1095,37 @@ bool PrepareCameraVisibilityFrame()
 {
 	if (!FollowThroughTownArchitecture()) {
 		ClearCameraVisibilityFrame();
+		return true;
+	}
+	if (cathedral::LiveLevelEligible()) {
+		ClearCameraVisibilityFrame();
+		if (!CathedralVisibilityIndex.ready() || CathedralVisibilityGeometry != CathedralFrame.geometryRevision
+		    || CathedralVisibilityPresentation != CathedralFrame.presentationSignature) {
+			CathedralVisibilityIndex.Clear();
+			CathedralVisibilityOwners.clear();
+			std::vector<TownCameraVisibilityTriangle> triangles;
+			for (const auto &surface : CathedralFrame.triangles) {
+				if (surface.module == cathedral::ModuleKind::Floor || surface.module == cathedral::ModuleKind::StairsUp
+				    || surface.module == cathedral::ModuleKind::StairsDown || surface.pick.kind == cathedral::PickKind::Object)
+					continue;
+				const auto [owner, inserted] = CathedralVisibilityOwners.emplace(surface.instanceId, static_cast<uint32_t>(CathedralVisibilityOwners.size()));
+				TownCameraVisibilityTriangle triangle;
+				triangle.owner = owner->second;
+				for (size_t i = 0; i < 3; ++i) {
+					const auto &v = surface.vertices[i].position;
+					triangle.vertices[i] = { v.x, v.y, v.z };
+				}
+				triangles.push_back(triangle);
+			}
+			CathedralVisibilityGeometry = CathedralFrame.geometryRevision;
+			CathedralVisibilityPresentation = CathedralFrame.presentationSignature;
+			CathedralVisibilityIndex.Build(CathedralVisibilityGeometry, static_cast<uint32_t>(CathedralVisibilityOwners.size()), std::move(triangles));
+			CathedralHiddenOwners.assign(CathedralVisibilityOwners.size(), 0);
+		}
+		const TownCameraPoint focus { ViewCamera.target.x, ViewCamera.target.y + FollowCameraState.eyeHeight, ViewCamera.target.z };
+		const auto stats = CathedralVisibilityIndex.Query(ViewCamera.projection.eye, focus,
+		    TownCameraCollisionRadius(ViewCamera.projection) + 0.02F, true, CathedralVisibilityGeometry, CathedralHiddenOwners);
+		if (!stats.valid) std::fill(CathedralHiddenOwners.begin(), CathedralHiddenOwners.end(), 0);
 		return true;
 	}
 	const auto &scene = GetTownScene();
@@ -1238,9 +1498,11 @@ TownGpuTexture PrepareGpuTexture(const Texture &texture, const InteriorLighting 
 	auto [entry, inserted] = PreparedGpuTextures.try_emplace(texture.gpuIdentity.value);
 	PreparedGpuTexture &prepared = entry->second;
 	prepared.lastSeen = GpuFrameNumber;
-	const bool albedo = !texture.emissive && !texture.albedoPixels.empty();
+	const bool albedo = !texture.emissive && (!texture.albedoPixels.empty() || texture.actorMaterial.has_value());
 	if (inserted) {
-		if (albedo)
+		if (texture.actorMaterial) {
+			// Codes and paired LUTs already have one immutable owner.
+		} else if (albedo)
 			prepared.codes = texture.albedoPixels;
 		else
 			prepared.codes.assign(texture.pixels.begin(), texture.pixels.end());
@@ -1252,7 +1514,41 @@ TownGpuTexture PrepareGpuTexture(const Texture &texture, const InteriorLighting 
 	result.width = texture.width;
 	result.height = texture.height;
 	result.texelCodes = prepared.codes;
+	result.unlitCodes = texture.lightingBasePixels;
 	result.opacity = texture.opacity;
+	if (texture.actorMaterial) {
+		const auto &actor = *texture.actorMaterial;
+		result.texelCodes = actor.texelCodes;
+		result.lightLut = actor.indexedLightLut;
+		result.rgbaLightLut = actor.rgbaLightLut;
+		result.rgbaLightLutEnabled = true;
+		result.lightLevels = actor.lightLevels;
+		// This owned actor material is frozen before either backend draws. A
+		// replacement mints a new texture identity, including its private LUT.
+		const auto lighting = DrawingCathedral ? TownGpuLighting::Palette
+		    : texture.emissive ? TownGpuLighting::Unlit
+		    : interior != nullptr ? TownGpuLighting::Interior : TownGpuLighting::Directional;
+		const uint64_t recordingFrame = GetTownGpuRecordingFrame();
+		if (recordingFrame == 0 || prepared.actorPreparedFrame != recordingFrame
+		    || prepared.actorPreparedLighting != lighting) {
+			// Preparing the descriptor alone does not prove GPU residency. This
+			// uploads/validates and pins before any primitive can be submitted.
+			if (!TownGpuPrepareTexture(result, lighting)) {
+				CaptureGpuFailed = true;
+				return {};
+			}
+			prepared.actorPreparedFrame = recordingFrame;
+			prepared.actorPreparedLighting = lighting;
+		}
+		// Same-frame resources are pinned against eviction. Keep every immutable
+		// identity/layout/RGB-enabled witness, but never rehash megabytes per face.
+		result.texelCodes = {};
+		result.unlitCodes = {};
+		result.opacity = {};
+		result.lightLut = {};
+		result.rgbaLightLut = {};
+		return result;
+	}
 	if (DrawingCathedral) {
 		// Cache buckets may use the native pointer; immutable GPU identities and
 		// revisions come from exact bytes, never from that address alone.
@@ -1289,7 +1585,7 @@ TownGpuTexture PrepareGpuTexture(const Texture &texture, const InteriorLighting 
 		// Albedo codes are immutable for this texture identity. Growing the shared
 		// lighting table must not upload another copy of every 2048px code atlas.
 		result.lightLutKey = 1;
-		result.lightLutRevision = GpuImportedLutColors;
+		result.lightLutRevision = (SceneLightingRevision << 32) | GpuImportedLutColors;
 		result.lightLut = GpuImportedLut;
 		result.lightLevels = ImportedLightLevels;
 	} else {
@@ -1300,6 +1596,8 @@ TownGpuTexture PrepareGpuTexture(const Texture &texture, const InteriorLighting 
 					for (size_t shadow = 0; shadow < 4; ++shadow)
 						GpuOrdinaryLut[code * 16 + shade * 4 + shadow] = SceneShadowTables[shade][shadow][code];
 		}
+		result.lightLutKey = 2;
+		result.lightLutRevision = SceneLightingRevision;
 		result.lightLut = GpuOrdinaryLut;
 		result.lightLevels = 16;
 	}
@@ -1413,7 +1711,7 @@ void Rasterize(const Surface &out, const std::array<TownCameraProjectedVertex, 3
 		normal = normal * -1.0F;
 	if (authoredNormal != nullptr)
 		normal = { authoredNormal->x, authoredNormal->height, authoredNormal->z };
-	const bool hasAlbedo = !texture.albedoPixels.empty();
+	const bool hasAlbedo = !texture.albedoPixels.empty() || texture.actorMaterial.has_value();
 	if (hasAlbedo) {
 		// D3DMESH1 imports render both material sides. A visible back face must
 		// light its visible side, without changing authored vertices or UVs.
@@ -1430,8 +1728,14 @@ void Rasterize(const Surface &out, const std::array<TownCameraProjectedVertex, 3
 	// the source. Shadowing their absent direct light again crushed the masonry.
 	const bool receivesDirectLight = normal.x * light.x + normal.y * light.height + normal.z * light.z > 0.02F;
 	const float diffuse = std::clamp(normal.x * light.x + normal.y * light.height + normal.z * light.z, 0.0F, 1.0F);
-	const bool receivesShadow = !DrawingCathedral && DirectionalShadowsEnabledForDiagnostics && interior == nullptr && !texture.emissive
+	const bool receivesShadow = !DrawingWarriorViewModel && !DrawingCathedral && DirectionalShadowsEnabledForDiagnostics && interior == nullptr && !texture.emissive
 	    && (hasAlbedo ? diffuse > 0 : receivesDirectLight);
+	// The church exterior keeps its directional base. Its authored point sources
+	// additionally reach the actual doorway masonry and upper front tower;
+	// terrain and other architecture retain their existing lighting policy.
+	const bool receivesFramePointLight = SpritePointReceiver(pick)
+	    || (!DrawingCathedral && interior == nullptr && FrameSpritePointChurchRoom != nullptr
+	        && pick.architecture == FrameSpritePointChurchArchitecture);
 	if (CaptureGpu) {
 		if (CaptureGpuFailed)
 			return;
@@ -1443,6 +1747,7 @@ void Rasterize(const Surface &out, const std::array<TownCameraProjectedVertex, 3
 		material.repeat = texture.repeat;
 		material.transparentZero = transparent && !hasAlbedo && texture.opacity.empty();
 		material.preservePicking = pick.preservePicking || CathedralPaletteBlend;
+		material.viewModel = DrawingWarriorViewModel;
 		material.paletteBlend = DrawingCathedral && CathedralPaletteBlend;
 		material.receivesShadow = receivesShadow;
 		material.shade = shade;
@@ -1453,26 +1758,36 @@ void Rasterize(const Surface &out, const std::array<TownCameraProjectedVertex, 3
 		material.shadowSlopeU = shadowReceiver.depthSlopeU;
 		material.shadowSlopeV = shadowReceiver.depthSlopeV;
 		material.normal = { normal.x, normal.y, normal.z };
+		material.receivesSpritePointLight = FrameSpritePointLightingValid && !SmoothWorldPixels.empty()
+		    && receivesFramePointLight && !texture.emissive;
+		// The native player path supplies local/TRN shade 0 and the remote -5
+		// offset explicitly. Do not replace that policy with the world light grid.
+		if (texture.actorMaterial && DrawingCathedral) material.nativeLighting = false;
 		if (interior != nullptr) {
 			material.lights = { interior->lights.data(), interior->lightCount };
 			material.interiorRedNormalization = interior->room->fireColor.red;
 			material.interiorPointRange = InteriorPointLightRange;
 			const std::span<const TownLightOccluder> occluders(interior->room->lightOccluders);
 			material.room = &occluders.front();
-			material.blockers = occluders.subspan(1);
+			material.useFramePointLightVisibility = FrameSpritePointLightingValid && interior->room == FrameSpritePointChurchRoom;
+			// The church has several apertured shells. The frozen frame field owns
+			// their visibility; the legacy material span only admits opaque blockers.
+			if (!material.useFramePointLightVisibility)
+				material.blockers = occluders.subspan(1);
 		}
 		const bool constantPalette = !hasAlbedo && texture.opacity.empty()
 		    && texture.width == 1 && texture.height == 1 && texture.pixels.size() == 1;
 		if (constantPalette)
 			material.repeat = false;
-		const auto vertex = [&](ProjectedVertex p, Vec3 w) {
+		const auto vertex = [&](ProjectedVertex p, Vec3 w, const std::array<float, 4> &authoredColor) {
 			if (constantPalette) {
 				p.u = (static_cast<float>(texture.pixels[0]) + 0.5F) / 256;
 				p.v = 0.5F;
 			}
-			return TownGpuVertex { p.x, p.y, p.depth, p.u, p.v, { w.x, w.y, w.z }, ViewCamera.projection.perspective ? p.depth : 1.0F };
+			return TownGpuVertex { p.x, p.y, p.depth, p.u, p.v, { w.x, w.y, w.z }, ViewCamera.projection.perspective ? p.depth : 1.0F, authoredColor };
 		};
-		CaptureGpuFailed = !TownGpuSubmitProjectedTriangle({ vertex(a, worldA), vertex(b, worldB), vertex(c, worldC) },
+		CaptureGpuFailed = !TownGpuSubmitProjectedTriangle({ vertex(a, worldA, triangle[0].source.authoredColor),
+			vertex(b, worldB, triangle[1].source.authoredColor), vertex(c, worldC, triangle[2].source.authoredColor) },
 			PrepareGpuTexture(constantPalette ? GpuPaletteAtlas : texture, interior), material, GpuPickId(pick));
 		++RendererState.gpuSubmittedTriangles;
 		return;
@@ -1518,16 +1833,27 @@ void Rasterize(const Surface &out, const std::array<TownCameraProjectedVertex, 3
 			const float v = ca * a.v + cb * b.v + cc * c.v;
 			uint8_t color;
 			uint32_t albedoColor = 0;
-			if (!texture.sample(u, v, color, &albedoColor) || (transparent && !hasAlbedo && texture.opacity.empty() && color == 0))
+			uint8_t unlitColor=0;
+			if (!texture.sample(u, v, color, &albedoColor, &unlitColor) || (transparent && !hasAlbedo && texture.opacity.empty() && color == 0))
 				continue;
 			const uint8_t previousColor = destination[x];
-			if (DrawingCathedral && CathedralTranslation != nullptr)
+			if (DrawingCathedral && CathedralTranslation != nullptr && !texture.actorMaterial)
 				color = CathedralTranslation[color];
 			const Vec3 world = worldA * ca + worldB * cb + worldC * cc;
 			const float shadow = receivesShadow
 			    ? SampleTownShadow(world.x, world.y, world.z, shadowReceiver) : 0;
 			const int shadowLevel = std::clamp(static_cast<int>(shadow * 3.0F + 0.5F), 0, 3);
-			if (texture.emissive) {
+			uint32_t actorRgb = 0;
+			if (texture.actorMaterial) {
+				const auto &actor = *texture.actorMaterial;
+				const float level = DrawingCathedral ? static_cast<float>(std::clamp(shade, 0, 15))
+					: std::clamp(diffuse * (1 - shadow), 0.0F, 1.0F) * (actor.lightLevels - 1);
+				const unsigned low = static_cast<unsigned>(level), high = std::min(low + 1, actor.lightLevels - 1);
+				const auto base = std::size_t(albedoColor) * actor.lightLevels;
+				const unsigned nearest = std::min(static_cast<unsigned>(level + 0.5F), actor.lightLevels - 1);
+				destination[x] = actor.indexedLightLut[base + nearest];
+				actorRgb = BlendWorldRgb(actor.rgbaLightLut[base + low], actor.rgbaLightLut[base + high], level - low);
+			} else if (texture.emissive) {
 				destination[x] = color;
 			} else if (interior != nullptr) {
 				TownLightingConfig roomLight;
@@ -1546,8 +1872,54 @@ void Rasterize(const Surface &out, const std::array<TownCameraProjectedVertex, 3
 				destination[x] = shadowLevel == 0 ? lightTable[color]
 				    : SceneShadowTables[std::clamp(shade, 0, 3)][shadowLevel][color];
 			}
+			if (!SmoothWorldPixels.empty()) {
+				const float smoothShadow=receivesShadow?SmoothShadowOcclusion(world,shadowReceiver):shadow;
+				uint32_t rgb = actorRgb != 0 ? actorRgb : SmoothWorldPalette[destination[x]];
+				if (!texture.actorMaterial && !texture.emissive && !CathedralPaletteBlend) {
+					float level=0;
+					if (DrawingCathedral) {
+						const uint8_t base=texture.lightingBasePixels.empty()?color:unlitColor;
+						level=SmoothNativeLight(world);const unsigned low=unsigned(level),high=std::min(low+1,15U);
+						const auto codeAt=[&](unsigned value){return value==0?base:value==15?uint8_t(0):LightTables[value][base];};
+						rgb=BlendWorldRgb(SmoothWorldPalette[codeAt(low)],SmoothWorldPalette[codeAt(high)],level-low);
+					} else if (interior != nullptr) {
+						TownLightingConfig ambient;ambient.ambient={.015F,.013F,.010F};ambient.directionalIntensity=0;
+						const auto sample=SampleTownLighting({normal.x,normal.y,normal.z},{world.x,world.y,world.z},0,ambient,{interior->lights.data(),interior->lightCount},interior->room->lightOccluders);
+						level=std::clamp(sample.point.red/interior->room->fireColor.red/InteriorPointLightRange,0.0F,1.0F)*(ImportedLightLevels-1);
+						const unsigned low=unsigned(level),high=std::min<unsigned>(low+1,ImportedLightLevels-1);
+						rgb=BlendWorldRgb(SmoothWorldPalette[texture.interiorLightTables[albedoColor][low]],SmoothWorldPalette[texture.interiorLightTables[albedoColor][high]],level-low);
+					} else if (hasAlbedo) {
+						level=std::clamp(diffuse*(1-smoothShadow),0.0F,1.0F)*(ImportedLightLevels-1);
+						const unsigned low=unsigned(level),high=std::min<unsigned>(low+1,ImportedLightLevels-1);
+						rgb=BlendWorldRgb(SmoothWorldPalette[ImportedAlbedoLightTables[albedoColor][low]],SmoothWorldPalette[ImportedAlbedoLightTables[albedoColor][high]],level-low);
+					} else {
+						level=std::clamp(smoothShadow*3,0.0F,3.0F);const unsigned low=unsigned(level),high=std::min(low+1,3U);
+						rgb=BlendWorldRgb(SmoothWorldPalette[SceneShadowTables[std::clamp(shade,0,3)][low][color]],SmoothWorldPalette[SceneShadowTables[std::clamp(shade,0,3)][high][color]],level-low);
+					}
+				}
+				std::array<float, 4> color {};
+				for (size_t component = 0; component < color.size(); ++component) {
+					const float first = triangle[0].source.authoredColor[component];
+					color[component] = first == triangle[1].source.authoredColor[component] && first == triangle[2].source.authoredColor[component]
+						? first : std::clamp(ca * first + cb * triangle[1].source.authoredColor[component] + cc * triangle[2].source.authoredColor[component], 0.0F, 1.0F);
+				}
+				if (color != std::array<float, 4> { 1, 1, 1, 1 }) {
+					const auto linear = TownSrgbToLinear({ float((rgb >> 16) & 255) / 255, float((rgb >> 8) & 255) / 255, float(rgb & 255) / 255 });
+					const auto encoded = TownLinearToSrgb({ linear.red * color[0], linear.green * color[1], linear.blue * color[2] });
+					const auto byte = [](float value) { return uint32_t(std::clamp(value * 255 + 0.5F, 0.0F, 255.0F)); };
+					rgb = (byte(float((rgb >> 24) & 255) / 255 * color[3]) << 24)
+						| (byte(encoded.red) << 16) | (byte(encoded.green) << 8) | byte(encoded.blue);
+				}
+				if (FrameSpritePointLightingValid && receivesFramePointLight && !texture.emissive) {
+					const TownLightColor point = SampleTownSpritePointLighting({ world.x, world.y, world.z },
+					    { FrameSpritePointLights.data(), FrameSpritePointLightCount }, FrameSpritePointOccluders);
+					rgb = TintTownSpritePointArgb(rgb, point);
+				}
+				SmoothWorldPixels[index] = rgb;
+			}
 			if (DrawingCathedral && CathedralPaletteBlend) {
 				destination[x] = paletteTransparencyLookup[previousColor][destination[x]];
+				if (!SmoothWorldPixels.empty()) SmoothWorldPixels[index]=SmoothWorldPalette[destination[x]];
 				++RendererState.cpuShadedFragments;
 				continue; // Overlay preserves the opaque depth and target owner.
 			}
@@ -1565,7 +1937,7 @@ void DrawTriangle(const Surface &out, std::array<Vertex, 3> triangle, const Text
 {
 	std::array<TownCameraVertex, 3> world;
 	for (size_t i = 0; i < triangle.size(); ++i)
-		world[i] = { { triangle[i].position.x, triangle[i].position.y, triangle[i].position.z }, triangle[i].u, triangle[i].v };
+		world[i] = { { triangle[i].position.x, triangle[i].position.y, triangle[i].position.z }, triangle[i].u, triangle[i].v, triangle[i].authoredColor };
 	// Both backends receive the same six-plane clipped vertices, UV and world
 	// positions. No perspective vertex is divided before clipping.
 	const auto clipped = ClipTownCameraTriangle(ViewCamera.projection, world);
@@ -1753,6 +2125,8 @@ NativeSceneArt ComposeNativeArtwork(const TownSceneModel &model)
 	const int spanY = maxTile.y - minTile.y;
 	const int width = 32 * (spanX + spanY + 2) + 16;
 	const int height = 16 * (spanX + spanY) + 272;
+	if (width <= 0 || height <= 0 || width > 4096 || height > 4096 || static_cast<size_t>(width) * height > 8000000)
+		return {}; // Same admission bound as the projection-owner builder.
 	const Point origin { 32 * (spanY + 1) + 8, 263 };
 	OwnedSurface paint(width, height);
 	OwnedSurface coverage(width, height);
@@ -1822,8 +2196,11 @@ NativeSceneArt ComposeNativeArtwork(const TownSceneModel &model)
 	for (int y = 0; y < result.texture.height; ++y)
 		for (int x = 0; x < result.texture.width; ++x)
 			result.texture.opacity[static_cast<size_t>(y) * result.texture.width + x] = paint[{ left + x, top + y }] == coverage[{ left + x, top + y }];
+	const auto sourceModels = GetTownVisualSceneSourceModels();
 	result.projectionOwners = BuildTownSceneProjectionOwners(model, result.referenceTile, result.pixelOrigin,
-		result.texture.width, result.texture.height, GetTownScene());
+		result.texture.width, result.texture.height, sourceModels.empty() ? std::span<const TownSceneModel>(GetTownScene()) : sourceModels);
+	if (result.projectionOwners.size() != result.texture.pixels.size())
+		return {}; // Fail closed before indexing a refused/incomplete owner map.
 	result.projectedFaces.resize(model.triangles.size());
 	for (size_t triangleIndex = 0; triangleIndex < model.triangles.size(); ++triangleIndex) {
 		if (!model.triangles[triangleIndex].nativeProjection)
@@ -1871,7 +2248,9 @@ const NativeSceneArt &NativeArtwork(size_t index, const TownSceneModel &model)
 	const auto found = SceneArtworkCache.find(index);
 	if (found != SceneArtworkCache.end())
 		return found->second;
-	return SceneArtworkCache.emplace(index, ComposeNativeArtwork(model)).first->second;
+	const auto sourceModels = GetTownVisualSceneSourceModels();
+	const TownSceneModel &source = index < sourceModels.size() ? sourceModels[index] : model;
+	return SceneArtworkCache.emplace(index, ComposeNativeArtwork(source)).first->second;
 }
 
 uint8_t ClosestSceneColor(float red, float green, float blue)
@@ -1914,7 +2293,8 @@ void PrepareHorizon()
 		const SDL_Color color = logical_palette[i];
 		linearPalette[i] = { TownSrgbToLinear(color.r / 255.0F), TownSrgbToLinear(color.g / 255.0F), TownSrgbToLinear(color.b / 255.0F) };
 	}
-	HorizonFogPalette = BuildTownHorizonFogPalette(linearPalette, HorizonFog.color);
+	const TownHorizonColor fogColor { HorizonFog.color.red * SceneDayBrightness * SceneDayBrightness, HorizonFog.color.green * SceneDayBrightness * SceneDayBrightness, HorizonFog.color.blue * SceneDayBrightness * SceneDayBrightness };
+	HorizonFogPalette = BuildTownHorizonFogPalette(linearPalette, fogColor);
 	HorizonColors.resize(HorizonMesh.triangles.size());
 	for (size_t i = 0; i < HorizonMesh.triangles.size(); ++i) {
 		const TownHorizonTriangle &triangle = HorizonMesh.triangles[i];
@@ -1931,7 +2311,7 @@ void PrepareHorizon()
 		const float amount = static_cast<float>(i) / (HorizonSkyColors.size() - 1);
 		const TownLightColor color = TownLinearToSrgb({ 0.055F + (HorizonFog.color.red - 0.055F) * amount,
 		    0.085F + (HorizonFog.color.green - 0.085F) * amount, 0.13F + (HorizonFog.color.blue - 0.13F) * amount });
-		HorizonSkyColors[i] = ClosestSceneColor(color.red * 255, color.green * 255, color.blue * 255);
+		HorizonSkyColors[i] = ClosestSceneColor(color.red * 255 * SceneDayBrightness, color.green * 255 * SceneDayBrightness, color.blue * 255 * SceneDayBrightness);
 	}
 	HorizonPaletteSignature = signature;
 	HorizonPaletteValid = true;
@@ -1959,15 +2339,33 @@ void ApplyHorizonAtmosphere(const Surface &out)
 		uint8_t *destination = out.at(0, y);
 		const size_t sky = static_cast<size_t>(y) * (HorizonSkyColors.size() - 1) / std::max(1, out.h() - 1);
 		for (int x = 0; x < out.w(); ++x) {
-			const float depth = DepthBuffer[static_cast<size_t>(y) * out.w() + x];
+			const size_t index = static_cast<size_t>(y) * out.w() + x;
+			// GPU FP publishes explicit surviving-fragment coverage in its fifth
+			// MRT. World depth/picks stay intact; sky/fog must not overwrite hands.
+			if (WarriorViewModelCoverage.size() == DepthBuffer.size() && WarriorViewModelCoverage[index] == 1) continue;
+			const float depth = DepthBuffer[index];
 			if (!std::isfinite(depth)) {
 				destination[x] = HorizonSkyColors[sky];
+				if(!SmoothWorldPixels.empty()) {
+					const float amount=float(y)/std::max(1,out.h()-1);
+					auto color=TownLinearToSrgb({.055F+(HorizonFog.color.red-.055F)*amount,.085F+(HorizonFog.color.green-.085F)*amount,.13F+(HorizonFog.color.blue-.13F)*amount});
+					color.red*=SceneDayBrightness;color.green*=SceneDayBrightness;color.blue*=SceneDayBrightness;
+					SmoothWorldPixels[static_cast<size_t>(y)*out.w()+x]=ToneWorldRgb(color);
+				}
 				continue;
 			}
 			const float fogDepth = TownCameraFogDepth(ViewCamera.projection, depth);
 			if (fogDepth <= HorizonFog.startDepth)
 				continue;
 			const size_t step = static_cast<size_t>(std::min(fogDepth, HorizonFog.endDepth) * HorizonDepthSteps);
+			if (!SmoothWorldPixels.empty()) {
+				const size_t index=static_cast<size_t>(y)*out.w()+x;
+				const uint32_t original=SmoothWorldPixels[index]!=0?SmoothWorldPixels[index]:SmoothWorldPalette[destination[x]];
+				const float amount=TownHorizonFogAmount(fogDepth,HorizonFog);
+				const auto fog=TownLinearToSrgb({HorizonFog.color.red*SceneDayBrightness*SceneDayBrightness,HorizonFog.color.green*SceneDayBrightness*SceneDayBrightness,HorizonFog.color.blue*SceneDayBrightness*SceneDayBrightness});
+				const uint32_t target=ToneWorldRgb(fog);
+				SmoothWorldPixels[index]=BlendWorldRgb(original,target,amount);
+			}
 			destination[x] = HorizonFogPalette[HorizonFogDepthLevels[step]][destination[x]];
 		}
 	}
@@ -2074,8 +2472,12 @@ SceneMaterials BuildSceneMaterials(const TownSceneModel &model, const NativeScen
 					const float worldHeight = wa * a.height + wb * b.height + wc * c.height;
 					const float nativeX = 32 * (worldX - worldZ - art.referenceTile.x + art.referenceTile.y);
 					const float nativeY = 16 * (worldX + worldZ - art.referenceTile.x - art.referenceTile.y) - 32 * worldHeight;
-					const int sampleX = static_cast<int>(std::floor(nativeX - art.pixelOrigin.x));
-					const int sampleY = static_cast<int>(std::floor(nativeY - art.pixelOrigin.y));
+					const float sourceX = nativeX - art.pixelOrigin.x, sourceY = nativeY - art.pixelOrigin.y;
+					if (!std::isfinite(sourceX) || !std::isfinite(sourceY) || sourceX < 0 || sourceY < 0
+					    || sourceX >= art.texture.width || sourceY >= art.texture.height)
+						continue; // Check before a potentially overflowing float-to-int cast.
+					const int sampleX = static_cast<int>(std::floor(sourceX));
+					const int sampleY = static_cast<int>(std::floor(sourceY));
 					const int32_t triangleIndex = static_cast<int32_t>(candidates[candidateIndex] - model.triangles.data());
 					if (sampleX < 0 || sampleY < 0
 						|| sampleX >= art.texture.width || sampleY >= art.texture.height
@@ -2158,10 +2560,12 @@ const SceneMaterials &OpaqueSceneMaterials(size_t index, const TownSceneModel &m
 	const auto found = SceneMaterialCache.find(index);
 	if (found != SceneMaterialCache.end())
 		return found->second;
-	return SceneMaterialCache.emplace(index, BuildSceneMaterials(model, art)).first->second;
+	const auto sourceModels = GetTownVisualSceneSourceModels();
+	const TownSceneModel &source = index < sourceModels.size() ? sourceModels[index] : model;
+	return SceneMaterialCache.emplace(index, BuildSceneMaterials(source, art)).first->second;
 }
 
-const Texture &ImportedRgbTexture(size_t index, uint32_t width, uint32_t height, std::span<const uint8_t> rgbBytes)
+const Texture &ImportedRgbTexture(size_t index, uint32_t width, uint32_t height, std::span<const uint8_t> rgbBytes, bool cathedralStone = false)
 {
 	const auto found = ImportedTextureCache.find(index);
 	if (found != ImportedTextureCache.end())
@@ -2172,6 +2576,13 @@ const Texture &ImportedRgbTexture(size_t index, uint32_t width, uint32_t height,
 	texture.albedoPixels.resize(static_cast<size_t>(width) * height);
 	for (size_t i = 0; i < texture.albedoPixels.size(); ++i) {
 		const uint8_t *rgb = rgbBytes.data() + i * 3;
+		std::array<uint8_t, 3> stone;
+		if (cathedralStone) {
+			// Runtime material grading, preserving the original texture bytes.
+			const float gray = rgb[0] * 0.2126F + rgb[1] * 0.7152F + rgb[2] * 0.0722F;
+			stone = { static_cast<uint8_t>(gray * 0.66F), static_cast<uint8_t>(gray * 0.70F), static_cast<uint8_t>(gray * 0.80F) };
+			rgb = stone.data();
+		}
 		// Six bits per source channel bound the shared LUT to 262144 colors;
 		// all levels are generated from albedo, before the final game palette.
 		const uint32_t key = (static_cast<uint32_t>(rgb[0] >> 2) << 12)
@@ -2205,12 +2616,366 @@ const Texture &ImportedRgbTexture(size_t index, uint32_t width, uint32_t height,
 	return ImportedTextureCache.emplace(index, std::move(texture)).first->second;
 }
 
-const Texture &ImportedSceneTexture(size_t index, const TownImportedTexture &source)
+const Texture &ImportedSceneTexture(size_t index, const TownImportedTexture &source, bool cathedralStone = false)
 {
-	return ImportedRgbTexture(index, source.width, source.height, source.rgb);
+	return ImportedRgbTexture(index, source.width, source.height, source.rgb, cathedralStone);
 }
 
-Texture DecodeSprite(ClxSprite sprite);
+// Rigid two-part OBJ_SARC visual. Native object state and occupancy remain authoritative.
+struct SarcophagusVisual {
+    TownSceneModel body, lid;
+    bool attempted=false, loaded=false;
+    size_t draws=0;
+};
+SarcophagusVisual Sarcophagus;
+void PrepareSarcophagusVisual()
+{
+    if(Sarcophagus.attempted) return;
+    Sarcophagus.attempted=true;
+    Sarcophagus.loaded=LoadTownModelOverride(Sarcophagus.body,"d3d-props/sarcophagus/body.d3d","6b5f63e2593bff03ad5b2c20bb1ca87eda2277bcfad4a93375fd89afc8937fc0","sarcophagus-user-r1-body")
+        && LoadTownModelOverride(Sarcophagus.lid,"d3d-props/sarcophagus/lid.d3d","caa81b744f59313f981bc60e29ace570008648c8e4019d18fe8e1278bcaff26d","sarcophagus-user-r1-lid");
+}
+const Texture &RigidPropNativeTexture(size_t key,const TownImportedTexture &source)
+{
+    if(const auto found=ImportedTextureCache.find(key);found!=ImportedTextureCache.end()) return found->second;
+    Texture texture;texture.width=source.width;texture.height=source.height;
+    texture.pixels.resize(size_t(source.width)*source.height);
+    std::vector<int16_t> colors(262144,-1);
+    for(size_t i=0;i<texture.pixels.size();++i) {
+        const auto *rgb=source.rgb.data()+i*3;
+        const size_t color=(size_t(rgb[0]>>2)<<12)|(size_t(rgb[1]>>2)<<6)|(rgb[2]>>2);
+        if(colors[color]<0) colors[color]=ClosestSceneColor(rgb[0],rgb[1],rgb[2]);
+        texture.pixels[i]=uint8_t(colors[color]);
+    }
+    // Cathedral GPU palette/light LUT requires native texel codes, not Town albedo-table indices.
+    // The full source RGB texture and UV resolution remain in the imported master.
+    return ImportedTextureCache.emplace(key,std::move(texture)).first->second;
+}
+bool CathedralTileInFrame(Point tile);
+struct DoorVisualState {
+    Point tile {}; int orientation=-1; bool observed=false,open=false;
+    uint32_t started=0; float from=0,progress=0;
+};
+struct DoorVisual {
+    std::array<TownSceneModel,2> models; // leaf, stone arch
+    std::array<ResidentMeshArtwork,2> resident;
+    std::array<DoorVisualState,MAXOBJECTS> states;
+    uint64_t epoch=0;
+    bool attempted=false,loaded=false;
+    size_t leafDraws=0,archDraws=0,residentDraws=0;
+};
+DoorVisual DoorModels;
+constexpr size_t DoorTextureKey=std::numeric_limits<size_t>::max()-512;
+void PrepareDoorVisual()
+{
+    if(DoorModels.attempted)return;
+    DoorModels.attempted=true;
+    DoorModels.loaded=LoadTownModelOverride(DoorModels.models[0],"d3d-props/doors/leaf.d3d","a7b83890118b0e855da53408bc5fde7096c9245b7a9c3b89455291cf26ca81cd","door-user-r1-leaf")
+        && LoadTownModelOverride(DoorModels.models[1],"d3d-props/doors/arch.d3d","7dce3db8f998679f04a61fe4c70aa9427a37d22e8aebd90e0ee9b201e282bf8a","door-user-r1-stone-arch");
+    if(!DoorModels.loaded)return;
+    for(size_t part=0;part<2;++part) {
+        auto &mesh=DoorModels.resident[part];
+        const auto &triangles=DoorModels.models[part].triangles;
+        mesh.vertices.reserve(triangles.size()*3);mesh.indices.reserve(triangles.size()*3);
+        for(const auto &tr:triangles)for(const auto &v:tr.vertices) {
+            mesh.indices.push_back(uint32_t(mesh.vertices.size()));
+            mesh.vertices.push_back({{v.x,v.height,v.z},{v.u,v.v},{tr.normal.x,tr.normal.height,tr.normal.z}});
+        }
+        mesh.ready=true;
+    }
+}
+int64_t PropAnimationDiagnosticTime=-1;
+uint32_t PropAnimationTicks(){return PropAnimationDiagnosticTime<0?SDL_GetTicks():static_cast<uint32_t>(PropAnimationDiagnosticTime);}
+void PrepareDoorVisualStates(const cathedral::Snapshot &snapshot)
+{
+    if(!DoorModels.loaded)return;
+    if(DoorModels.epoch!=cathedral::LiveEpoch()) {
+        DoorModels.states={};DoorModels.epoch=cathedral::LiveEpoch();
+    }
+    const uint32_t now=PropAnimationTicks();
+    for(const auto &door:snapshot.doors) {
+        auto &state=DoorModels.states[door.slot];const bool open=door.state!=cathedral::DoorState::Closed;
+        const Point tile{door.x,door.z};
+        if(!state.observed || state.tile!=tile || state.orientation!=int(door.orientation)) {
+            state={tile,int(door.orientation),true,open,now,open?1.0F:0.0F,open?1.0F:0.0F};continue;
+        }
+        const float t=std::clamp(float(now-state.started)/350.0F,0.0F,1.0F),smooth=t*t*(3-2*t);
+        state.progress=state.from+((state.open?1.0F:0.0F)-state.from)*smooth;
+        if(open!=state.open){state.from=state.progress;state.open=open;state.started=now;}
+    }
+}
+bool DoorArchitectureHidden(const cathedral::Door &door)
+{
+    if(!FollowThroughTownArchitecture() || CameraRig.mode()!=TownCameraMode::ThirdPerson || CathedralVisibilityGeometry!=CathedralFrame.geometryRevision)return false;
+    for(const auto &tr:CathedralFrame.triangles)if(tr.module==cathedral::ModuleKind::DoorFrame && tr.pick.x==door.x && tr.pick.z==door.z) {
+        const auto owner=CathedralVisibilityOwners.find(tr.instanceId);
+        return owner!=CathedralVisibilityOwners.end() && owner->second<CathedralHiddenOwners.size() && CathedralHiddenOwners[owner->second]!=0;
+    }
+    return false;
+}
+void DrawDoorModels(const Surface &out,const cathedral::Door &door)
+{
+    if(!CathedralTileInFrame({door.x,door.z}) || DoorArchitectureHidden(door))return;
+    const float base=door.orientation==cathedral::DoorOrientation::Left?1.570796327F:0;
+    const float progress=DoorModels.states[door.slot].progress;
+    const Vec3 hinge=door.orientation==cathedral::DoorOrientation::Left?Vec3{float(door.x),0,float(door.z)-.5F}:Vec3{float(door.x)-.5F,0,float(door.z)};
+    const Point tile{door.x,door.z};
+    for(size_t part=0;part<2;++part) {
+        const float angle=base+(part==0?1.570796327F*progress:0),cs=std::cos(angle),sn=std::sin(angle);
+        const Vec3 origin=part==0?hinge+Vec3{.5F*cs,0,.5F*sn}:Vec3{float(door.x),0,float(door.z)};
+        const auto world=[&](Vec3 v){return origin+Vec3{cs*v.x-sn*v.z,v.y,sn*v.x+cs*v.z};};
+        const float half=part==0?.65F:1.07F,depth=part==0?.17F:.24F,height=part==0?2.4F:2.8F;
+        const float inf=std::numeric_limits<float>::infinity();
+        TownArchitectureBounds bounds{{inf,inf,inf},{-inf,-inf,-inf},true};
+        for(float x:{-half,half})for(float y:{0.0F,height})for(float z:{-depth,depth}) {
+            const auto v=world({x,y,z});
+            bounds.minimum.x=std::min(bounds.minimum.x,v.x);bounds.minimum.height=std::min(bounds.minimum.height,v.y);bounds.minimum.z=std::min(bounds.minimum.z,v.z);
+            bounds.maximum.x=std::max(bounds.maximum.x,v.x);bounds.maximum.height=std::max(bounds.maximum.height,v.y);bounds.maximum.z=std::max(bounds.maximum.z,v.z);
+        }
+        if(ViewCamera.projection.perspective && !IsTownArchitectureBoundsVisible(ViewCamera.projection,bounds))continue;
+        const auto &texture=ImportedTextureCache.at(DoorTextureKey-part);
+        PickRecord pick=PickAt(tile,part==0 && door.selectable?PickKind::Object:PickKind::Ground,part==0 && door.selectable?door.slot:-1);
+        const int shade=dLight[door.x][door.z];
+        if(CaptureGpu && ResidentMeshesEnabledForDiagnostics && ViewCamera.projection.perspective) {
+            auto &mesh=DoorModels.resident[part];if(!PrepareResidentMesh(mesh))return;
+            TownGpuMeshInstance instance;instance.identity=mesh.identity();instance.pickId=GpuPickId(pick);
+            instance.localToWorld={{{cs,0,-sn,origin.x},{0,1,0,0},{sn,0,cs,origin.z}}};
+            TownGpuMaterial material;material.lighting=TownGpuLighting::Palette;material.shade=shade;
+            if(!TownGpuSubmitMeshInstance(instance,PrepareGpuTexture(texture,nullptr),material)){CaptureGpuFailed=true;return;}
+            ++DoorModels.residentDraws;
+        } else {
+            for(const auto &tr:DoorModels.models[part].triangles) {
+                std::array<Vertex,3> vertices;
+                for(size_t i=0;i<3;++i){const auto &v=tr.vertices[i];vertices[i]={world({v.x,v.height,v.z}),v.u,v.v};}
+                DrawTriangle(out,vertices,texture,pick,shade);
+            }
+        }
+        if(part==0)++DoorModels.leafDraws;else ++DoorModels.archDraws;
+    }
+}
+struct ChestVisualState { Point tile {}; int type=-1; bool observed=false,open=false; uint32_t started=0; float progress=0; };
+struct ChestVisual {
+    std::array<TownSceneModel,66> parts;
+    std::array<ChestVisualState,MAXOBJECTS> states;
+    bool attempted=false,loaded=false;
+    size_t draws=0;
+};
+ChestVisual Chest;
+constexpr std::array<bool,66> ChestLidParts { true,false,true,true,true,true,true,true,false,false,false,false,true,true,true,true,true,true,true,false,false,false,false,false,true,true,true,true,true,true,false,false,false,false,false,true,true,true,true,false,false,false,false,true,true,false,true,true,false,false,false,false,false,false,true,false,false,false,false,true,false,false,false,false,false,true };
+struct ChestVariantVisual {
+    std::vector<TownSceneModel> parts;
+    std::vector<bool> lid;
+    Vec3 hinge {};
+    bool attempted=false,loaded=false;
+};
+std::array<ChestVariantVisual,2> ChestVariants;
+void PrepareChestVariants()
+{
+    { auto &variant=ChestVariants[0]; if(!variant.attempted){variant.attempted=true;variant.loaded=true;variant.parts.resize(82);
+    variant.hinge={0.000000F,0.278000F,-0.248000F};
+    variant.lid={true,true,false,false,false,false,false,true,true,true,false,false,false,false,false,true,false,false,true,true,true,false,true,true,true,true,true,true,true,true,true,true,false,true,true,true,true,false,true,true,true,true,true,false,false,false,false,true,true,false,true,false,true,false,false,false,true,false,true,false,false,false,false,true,true,false,true,true,true,false,false,false,false,true,true,true,false,true,true,false,true,false};
+    constexpr std::array<std::string_view,82> hashes {"099eafc0b0ccd9bca43bf5b96cbdab3c4020f60baa0e074d8ea51928c936c454","9047e29d443d980ad875eec67a99192e1667a0701dc4c72d6c5a0e70cb1217d5","83e08143094058c8a9910d886ac3c6e94b6c18450cba202e18d2d1e90968d8f1","931fe86e2a2964b46caf5b66f42a1991e351c30bf809348b8189253a902886f8","b42dcb3afb8d15b9575433f7fd4307428b5c8eec1b1d712d7c8caf19c7a91378","65a01b2ac54fd4f55ef3eda13bf635daaf4e0589d2bed5191a1ed8cb89336f3d","8d7c2110b3aef6ba85dfb80c2f239593f9557a33698c19eddd2a8765f9ca96c3","9b500c14a8deb4f3863dd9d5fd168a87a1e01d913aac78d4e14762f4d220f243","7b7b1fb3129155e6c36464ab9886e7adf16e2f237bf7046947cd4fd51426cc4f","1fb49e355981bcc48705ac3c3f2487dca28b579b6cd13f13dc26c4f44f6442c1","89accb3527c4ec11a2a1205397984c9ae9e3a9d4d52e1209fffbecd56816b80e","eea51e8d637b10c07bd8346ae6778d4f43648fb7cb8d70002fa40aaf2b29239c","372a9192251ba7ad95924533dcab8bc0b08b446b43a76e5a18cb059c021411db","78a036522992dfa0855d0d0632a24c439b1b79fdb8bd19c5e4d9bbaa64ce82e3","1ebf57765c08e6ad9a1b3c08e95386e16579ec92194ad028737ecb47ffe464b2","0b8f130ab1c62d123cfecf909d57e35a0735648947afde8de08561483273bcc3","059363bdf893275089fd76e79d2eed5c52842c0d597b02fd12c8855bd2539069","37d930cfcb5fc6e77b7bf01acf9d3a1c9eddfb7036355b50f71d2d34cd919091","bfd42663543d896dbe17e21cb19ebaf2ce2f579e319fedb6de1ce1c1290bb24f","07593abcdd7176724819b1f1da472c92368b67232e1742835cdb8cb23af977cd","b0c23a13092f312cf6885b4bf736768c4e54066328fde5837696ea63e3193df6","cb7aacef22a435dc21ab716e01f560bb47694464802f742f48381727c92e7ecc","752beb047dc583adbf62271a32751caaf356b605d7cbc3f46c1aff85a9dc4bb5","2eab9953b018fccbc5b72bb4e4f0c3aaacf76befad83f4024857a9d68bfe4585","5693cc79a2b65f5b3533c96968778db2f3af9e066f91058e137de7b8c1817e0b","bc8c1f9aec6d894944166dfa24af989a0b8c8f3796c06d7556058625c060f888","ed5bcda6d7c4168b040e8cdc9a016384bee11120626907c8e4da5d1cf3782dd5","a7bf064a8535dc62abfbd338c4635bcde692aed421e1df209ae059d187fe6aac","24be27fa0714e9d854fd24da66f91a0eef0ae06bc220026b146eb836aa0a58ac","fb495d0d632ab04ca0c45c15f50d02f445d1e3e692a5a1db747dd6a772af01b5","b6e57d944a8e762ecf259e20ff087f4cfbfff63cb4a7979602e618fa3f9ccd7b","72a15ace489d72b1a63465e418b8e4897cb9dc9dfbfff9a26168cba818c21e6f","be7748fd90750ffa5e73881b815d1dd523177e4a76982aec740028bf72fff136","c49181ae89b43b09b3dd9719d313d45cc371e56a7a3da62089c6eb26121d0bef","23787afb50cb347a9bfd1e7d25ea64a942ea5c4823901b65b6ca1042d2a9fb6a","ad3ba6d2ac6b644765b923086a8bece4156abc61d4e0867e96a7453c59cd8959","b5e6d1131e0215d96b3d8fe686af7aca0224e118993fc247bfc1e65b82b2d7a7","3dc6d3c3b7e9e631c33b22b0533de22da9e702091585e9356743a716fa90edb1","af8e98b0126d68dbfae1845274eb05b41c29727b4527c3d5492bb48b41a6ce45","0986226d9b41f726b66e64d0eed9fafcd3f68f9b52f577fdbaad5891d3cd1c10","9bbc0392906c2c85d046c19cc9ced34d69dcb05782baccb68c03b45645c8ea7e","6a0e1f7d13d0e61b62611cda571bfa4b2371dde5f9a98038dc19da6dd5d496eb","600e379b4fb8dd180f12c2f1ec01244f4ad1f3627e9d6d9cdaeab06dd1267453","918e997ae4bc6791be4145bfc991103c30f7fe2e3afbfc27b1542cecd4915030","d4f846101b5e4646bf03148d94381df3572984a8dafce9f10ea60fdcdc8733da","a39b658a198d651642fbbc98e7b533309cb0430cba4917d8114b7eb0bd34f8ba","2d919b85190ed3f6bff21552521fd6beadb3c113942e1415bb06a59f617b7ab7","bf5a3ae74c86ec43a29d26fe2edeb6eca9763d26f9cbfb43409f1bf0a09daacd","e7dbf300600157d033483225d261a9524099db22ed0d7caf4193ce0885298c75","8ea77460840fa548a882393209d65543eb3c6a2f3425a63a403adf6cd0f02be9","c048ab40e707b008ffad98cea322fc4c180b4c6c8b3ee151321171dc5ca596c4","6902b16c90b7a7f8882a2c37c7a851d3eec4c58acba01f75a0eaadefc127deca","53bec5722db0e503b82ac6b23754198832a9945bf4af6ecf4e5074f942a3b0be","291e3207ec279c39cf01eae9543ca1cd658ef6924663755b79cdc7e03893764e","0da9a3105941fb67ddcde6d4c3b7c245415ed31e9c3316e31269a0e9c89483e6","b02c5e39ecf40f5e68e4fd557a320b50cb2287671a1f674e7d7be08a92de6174","0a0abead679d94f95d5672b1648a6696bd618e94774156116c0aa1c5e3904e48","e903be3ba492cd41e505da014e401ae98f99e13070b89d989d9b0ff6029f49be","f8f57201c31abb66a4adcf129c6775f2cb9ed4b850ce93fa6208bfccbb84e885","b3ac183261aa4eebde3c9d083761dfd2d7d7baad2f7bf814f492569ea5a8c532","8b3b072233a996252be0f341a3d68fcb1d20ba5404e989ab87d3242bb31b8a17","d27993d0170f730ebc6989530ffb0838056c29fd8dfbeb8956900b3ac1a6f52d","571a93b95975a4aaeefd05a4c4585121ca7b8dd1e85415baed8de634e6a3c937","d29b41e59d8b4f0c69bde162a21eabf8af0dcafc2c16b499270ae160e5a0f265","e8f9d2f3a726ee16355ed4da8548f27ea809b30196d565b0394077e4c25e48dc","335304a70adc762ed35fe9db3ad1ac2dea201eddfc6052aaa8dd4e99aee4ef39","29c64ac013106c1d1013a591ec8edd52a67a7afcb4c5835373bbefd870bd51fd","db58f5734b7ed807eca9e1522888e79f5113cc485f2e5a9a95ecc58214675c6f","349cbb707e90e4da07edc08db391f057980fb7fc7daab9e614496fa0cf890db4","8c9304267e063254996a5f66edce7320b7c26686f77a78bb6b4bddfdb9f24f9f","4c7d48f82bada9c68671a40a19fee9ba38f7ff174967bfc90dc3feb953a8c930","869ce85bfc8ff39921c8ad124a43b4e9fb82cdbd0ce9debb384d9c5966155631","42b04b1ddedebdcbe6b7e01d8d77fdca16a906e5dbd6caed143212117b31f4db","474256cd73770615a392587081fd09ddd2e10922868faa58a5add5c19ced8471","925952d11671d62552cee64f92787247fcc8a5d73e38a9bdd9ca85caaf7a79b6","8cf62bbda832ca47108d94eb4ec209aa16335542f16e43190cbafa983fe24022","a7e6b8a8172865ccdbc13fd872dd42996a69a1bb480938a9d922a86a0665cb75","a88c6df5b70e19043cf5d7e6543bd34bf200b47b95aa61782d3701e83ff877a3","d1aaba02b4ffc3f1bf4e02b85b33bfde1d089e5e1000df7991a612b39a043cc5","78759cc97bfe6f19f105fce09b9249446e14556e81baa4a0cdef5a1d6e550327","dc0f531204162e82687b61df22839d75cacb26a4e68900d047ddb0d72510813e","a0087f32d782db870bde5da70bfdf0de12258e7bb9e3413fbba4933f1a757ccb"};
+    for(size_t i=0;i<hashes.size();++i) variant.loaded=LoadTownModelOverride(variant.parts[i],"d3d-props/chest-reinforced/part"+std::to_string(i)+".d3d",hashes[i],"chest-reinforced-user-r1") && variant.loaded;
+    }}
+    { auto &variant=ChestVariants[1]; if(!variant.attempted){variant.attempted=true;variant.loaded=true;variant.parts.resize(45);
+    variant.hinge={0.000000F,0.548000F,-0.400000F};
+    variant.lid={false,true,true,false,true,false,true,false,true,false,false,false,false,true,true,true,false,true,true,false,false,true,false,true,true,true,true,false,true,true,false,false,true,true,false,false,false,false,false,false,false,true,true,true,true};
+    constexpr std::array<std::string_view,45> hashes {"d4580325069f23aa359138ba7f12d90ca78d5c237c122080466017d317f5e0e0","3baee806cb017d50b2cb03359ee0b6c643916ad75c20f5547e7432d000befd3d","1ce1e0b8422cf08cbdfc1acec5dc719c9b9b11d9f30ef955a779a9fe023e61f1","aed9e8f25f1c52b5119bdd8dce0c7bd4cc1010a8470afcb8a11ff9c5d8f90ee6","d7041878344a24a17c296cba130363d925aa5272f883f97389031dfaff620aeb","f646032b9e3ca475095ba0221c7225e7cc3c0c8061468ee6137373670a17c09a","5e65a46f05efde6595e42e677144808628111faf21ded1b1de87fa429f97a5da","e56f63454ec281c1a455dd873ec471843c67b3116e57210c385140abe7064516","ac0f90935e60698a250e6dc620656a8052348ceee85e628b7132707b9c026ea1","838a256acb40942d51f001660fdf92b8763ffe328c8cf5fef0fbd68423ab30d1","e809f7b2e5492a3673b2f5d404d8843c1d17ee19c51061c6a83760cc637a9413","1c60e64f74ca533ae5bc869c40d145e2e587b7660ba0939a1b571d5c04a5d1e2","22d1921ff1337232b608ea1eec5e78f72cf545aa47710ea6b02fc15fafc79bdf","6d6a476f615b9fadb08cfe1fb24b64bbd335651aa8ed76f033f7c9c330b0894e","69642b45f61b89f12238e11dda9e9c5a95c63c48b1215dc03a940ab3ba01e4de","a7805888aee38d5272df7fdf3c670fa1f4e30b03261c2c72277e0b3c64341151","38b4b30067e21fbbb60f25377eb7131417106de6f3c61c90b0d651e091e6178d","57622a63e23d83fa9e8ee217dea0d9862cba819ed70a1e3e5965830d0d2abe6a","e5cc670961de4bf72cf6f933dcbfa84f80580a17ad99c379e9874fdc1cb2aaa6","2da9f3245b0d0f285ca50362469bff48e21ad46609ff6bcbea423b0ea35faed2","6ce0bf9b795781ddb612cf322a6087db1729399c07f733a48202a19a472292b8","09e1c10ca354ae7d584a1166203ed20d5e7511dc25855b74ae3c14eb700b92d4","a71100b1f16246c65ad9d7d992a398e8fb9eda0b15cfb8c3982b07d3dc798fb7","9054db228226929f900ede46a7151af6d450dadee2309ba16a8a56a7f3cef796","1e9e23a38aa13ebba93ffb78ee9cd9d947545504c74f8e4952a874e6d9ec02d2","cce761d5ed4615a6cc3df67d9b63699a4e9ca010da028ad94c6b8aeefa12e48e","75ce80cd7ce5ef8914949fb7d69aa52f0a443e166a20f6473bf347d0c2c9fb4e","8e72031baba23047e90e90ca677bad19aa73642ba8193e470d78f13877f224d5","b707717ddc99ab3000a4e68aad600195eabfdfb6425c23af91192abb93895d6a","6f6d8a1a05a0a8b7d030f2394c3c72eb11c1d6f6bce3b6151c4fcbf43c2ca73b","3ce63d081f039041cdcb36e0201a16eae572116a1e318e5c18e865ab59e33711","3988558d816dae173d291ad92bd8a0dc07cec68912335a8771f5228671ed76eb","23b2be92e4c6161cc2435f509d00b3360604d2bd01dd0a1ae88b2bf538b778c4","1c2cffc1f9e07fb51400fd81d5d135cf2a90734aa33e85a57298a13579bd1d47","f8e4dacb556a286d726eb8cbc4cbaa783df478a4f806c82e3e9c5ae7ce6dab19","c26a1a9232a3a5eeca63f9d033603892c00578dcbb4d8a1beb08fe2650ef871c","996bf893e1b9ad7340dc770c1b25a7b291aa358d1bfe6c13f2e3df45c4ee95bb","f2a413400cfdb1b15282088c466a91a449441a3d076c455b960ee577638270fe","de7bdec9c39044b2e36a21a596d1ab8a319439e2f8346f1dca9e22c659d200a6","f666bdd54688bd011c46e714203408f28f8ca09cabfa9cf65181c32ba72b1196","fd6753103a70e14b54c2b1d2a116ca6e201d4c03521c7424daea4e8c503c485b","c1646ed0f314d82f06186e21fa3a65898e9ab8a731edc6803f9a6c0a84ca006a","8d38d0dda5e046167ace7bb296539ba13db5a4ac45cfb1087c20744add0a60ae","1c512d8bccfcd0aec560950e2870d51ed1738ee8457338af88aef388f7f69191","5dac48fca41c0e4899e79e3ec1c8b0ed6562379f39e984885313235c7ab19986"};
+    for(size_t i=0;i<hashes.size();++i) variant.loaded=LoadTownModelOverride(variant.parts[i],"d3d-props/chest-wooden/part"+std::to_string(i)+".d3d",hashes[i],"chest-wooden-user-r1") && variant.loaded;
+    }}
+}
+int ChestVariantIndex(const Object &object)
+{
+    if(object._otype==OBJ_CHEST2 || object._otype==OBJ_TCHEST2)return 0;
+    if(object._otype==OBJ_CHEST3 || object._otype==OBJ_TCHEST3)return 1;
+    return -1;
+}
+void PrepareChestVisual()
+{
+    PrepareChestVariants();
+    if(Chest.attempted)return;
+    Chest.attempted=true;Chest.loaded=true;
+    constexpr std::array<std::string_view,66> hashes { "bf9467c22f91daf1afe381d9ab0a84b2184f198cd73d20d86780f6a5b3930a99","bfec70480b209d759b4fee4e1de01cfbe3bd622b7ad448af48c0bcab0278d62e","9524ecedc81d236e00588d144e7e7986df7dfb5e80701b5e3194a0960b168a66","271cee7a90da6520ff5d7d17940f2cd52c1bea6f1b16f9a8fa5fb5d31dcca12a","544d19fa2df5e4b2e110a05e645f9235669b1a77a2432c3d6a75df164c3d54bd","0dd0d060d97b7a2a0c9541478ce32eca8de8280583e677e0780fe3bc78d034bf","6f94126ef5de27d39c4097c66283681667f5cd59cfdcf3525891f1433cb66589","1abc591cfbc87060948294f1d21c8c5a0c07b1309fd29327cbb0d10477343bf5","9ff14a45b2e0169ba63bc235aba2ae94046b6f655d09959a9c49e17da7b9146e","60cbba4d8fc96aa9b882c4828dcb0f48da78ff25daaf12c604cd45a17d11cd19","eb93c2fb10020356219b6deb9203fde434c3e9917d915ff402801ed49ef963a0","3ed4bf3c18c19fa66fb0e07c8b951c53239d70fc6390acdcdbfcf86b7151f9b7","ffe5cc193091ce25a019d0519e2844b479f1827fee09575739d928e2f6c2bb24","d9a939bbe44037f691e50cc30b6ee44ce79af2551875337e4be60de0aba78fac","e3ad074afa700396edd920f8c510897dbe86b6cbc3a79dfc2a86d1af3c74c20b","9b2fa8e95a87164d15dd3680707bdbcfb1b6215bead7ab1a9963720001198e8b","8f9fc8503dcafb332197f95424379cdbd9333c3b2419d3f0e0cb0d7845a05131","ff5c1d6036f0626a5b17c254fbb86b17333c07ebb84effb14c7dff1658f333d2","5a5b5ad8b399c07aba51c3ad716ff14631d78f751bdbe7ec63a15c154285a3b8","42a37a6e5a6adc7276e579469aee7477af3d8684fddb6bee42bc3809a7c94b96","3c07ffe8dacfddde7343c7caa71c552ad526b4daa4c4e4c9316107b403e78dc2","7e19cf38ce329cae2960f591ce78e89f86f57e51375b54a79ab0a8ff9d0f5559","8116443082bfd73ab93542b9325400c6327eaf060dde304662f92d37b99dd2d1","f18da06ef5531955cf1a617b31caf15a01b2a2faf9abc4a4f55c597d425a0e3e","caf8d2a547f7a646dd503495989c99d1860be1398c12607f840b8c64fec03314","0c11e90fb8406ac9c2d0559ac791c0df67180e6703fa39fd54568f6cc261df2d","30239022440076602f3b97be735999b6a271efeef355a97399d2945d866935f2","0fbe30d26f293c8c434d59198f1026b22e84f3f951037a4245079c0d29f9f0c2","e09656e15a4130a4d70667762e774c60e19309582ef3c6121c2ca237280563fc","0196813ded3dd30f84bef5f5aeed8decc635b1282b471a2c5820145da0c24164","9ad64e277c51d63b3f2e99c43d484ce14ebbc66e5fa6f058480a220f7c957426","fa6460464489581775212e6fbc15008c7046ca4ce1e517afcdd9967cfa16e727","f86b097a03ec7a8c6ac5ce170501d61c4af9ad494ac272f7d497920e69ce1a48","4ac3d3936dfde25f1f217fb690cc345b095ed3147f9cf49a29f0e31c24c5712b","ed2e4793d6571c2b223e097b1ee909fc883e5ae7b54fc3a33f46fc6747e43099","ff00db691b218cff5b21f126a0f5b13e1d2dc56c7c6e2810d4f093e91cf5326d","01a749226533caee864abe5659e29e2a7a4b8ed3e0598370e1f6e41925d1bea1","f0ecf09433bef1c2ae4e1a6269e80912c99a8972a519e3007bc8db5a3ae6eba2","af09ca624f66fec59735db17f2415edd24139a7216f2ede3f30f65b70ffc8ecb","33628988805b8db7f3b28d8894e07cceec70574488637f21bd3172855e85ea91","4d3148cb72bbd5a38e1ce9945a07c1970fec15bbcaff57d65479a5e4611da035","2657b7c07bcc4e6b49cf408efe14d83345c21ebc028e728a4c29e6e7e42f85af","cc3e5360cdabff89bbc7d8b82ecf08ad4becaf0c6750f55fb6b05810d1c067fe","d9a7bdb96e4bbf1415cf19607dfa929a861c107faa8d157c0cd5e7eab5fbd01f","d9a5d7635ea857c18ce23848fdb2d12b876c6b3a0c740f5fb86ab01d2ee33448","63909870d323c7443e55914da6a75f921f81d27e0ca26c42fd1c22c1381f389c","17a3bcae40f2ea65520776bf8c54220a66b3412c8f52f0fe898fea46e818e821","b5f4d0782f3e06c8cd165ee0dd2126d779d18f35b77050d1736ae5a33aa54f13","d3d4a88feae101e924dadaefd70cc6be92f3ef2a3466697ed9d5e92deb8851bc","65d45ba0c81123f9422782e67546e7c3acc404a4b4e550ff1661e2be516bee52","6ffa89ba7bf58e6da6c5fb73d5fe0721304a57934a8f4bce2ace0ade6d3dc6d6","6c047aa5d388d87b79b8a72c13faebe6d4d50b7755b1ce4f26e84f1240e3f58f","4053faed99b090dec47c267105a4142ea869b55d32fe9871beb253d3247ae0fa","211288c646b45d08cdfab5a07af7e319378655372c439d70a8ffc2380ef61a3a","d0bf2f43c9f0ad28babe830056d07805775ecf6aa0efa7be409833fd4d5804b8","7c976b3df9a2c9486fe797cfc6c45df98c0c5b189a845016d2ed1a0e0f32411c","3184f9d1e0c23fcb62cdb69811192c1d4670a907a8525754b3af6c23e6519a4e","dffdcf51c768722dd33ce108b70d91dc8e7e8cfc27df0dc1c881a08d4522a730","92871b93f521f2b1d7e40086dbdcbd7cea440a4578541a244541e0ae87cbf170","474a8ab29c84ca11a9b9b3bdc97d49af0b61b7339acca8e7b57766c0aa865662","616143e355d49bb3a66b8871ee5fe4cd6e2548c5ef37db71c2410a40d5ae8638","0b3deca47f5989e62191d217d225ab93eade77edfce26db1b76e284614297201","0c8bb934d78d46e601814cac93a2c14dad70afd991e82f5b983e18eb90d60465","aef53a8435a30b91552727584d39a4670baf9f6f585ee76573688d06d1ab6398","45d6db31f59b2f497cf921e650b649385429620e3187166ae40caecd24f083ba","9fdb502d3e4c6b1af663194aea7b9b0e333677549b2751fb98a7140fb330c1c5" };
+    for(size_t i=0;i<66;++i)Chest.loaded=LoadTownModelOverride(Chest.parts[i],"d3d-props/chest/part"+std::to_string(i)+".d3d",hashes[i],"chest-user-r1") && Chest.loaded;
+}
+float ChestVisualProgress(const Object &object,int slot)
+{
+    auto &state=Chest.states[slot];const bool open=(object._oAnimFrame%3)==0;
+    const uint32_t now=PropAnimationTicks();
+    if(!state.observed || state.tile!=object.position || state.type!=int(object._otype)) {
+        state={object.position,int(object._otype),true,open,now,open?1.0F:0.0F};return state.progress;
+    }
+    if(open && !state.open){state.started=now;state.progress=0;}
+    state.open=open;
+    if(!open)state.progress=0;
+    else if(state.progress<1)state.progress=std::clamp(float(now-state.started)/600.0F,0.0F,1.0F);
+    return state.progress;
+}
+bool DrawChestVisual(const Surface &out,const Object &object,int slot,bool selectable)
+{
+    const int choice=ChestVariantIndex(object);
+    const ChestVariantVisual *variant=choice>=0 && ChestVariants[choice].loaded?&ChestVariants[choice]:nullptr;
+    if(!variant && !Chest.loaded)return false;
+    const size_t count=variant?variant->parts.size():Chest.parts.size();
+    const Vec3 hinge=variant?variant->hinge:Vec3{0,.330F,-.313F};
+    const float t=ChestVisualProgress(object,slot),angle=-1.832595715F*t*t*(3-2*t),cs=std::cos(angle),sn=std::sin(angle);
+    for(size_t part=0;part<count;++part) {
+        const auto &model=variant?variant->parts[part]:Chest.parts[part];
+        const bool lid=variant?variant->lid[part]:ChestLidParts[part];
+        const auto &texture=RigidPropNativeTexture(std::numeric_limits<size_t>::max()-(variant?768+choice*128:256)-part,*model.importedTexture);
+        const auto rotate=[&](Vec3 v){return lid?Vec3{v.x,v.y*cs-v.z*sn,v.y*sn+v.z*cs}:v;};
+        for(const auto &tr:model.triangles) {
+            std::array<Vertex,3> vertices;
+            for(size_t i=0;i<3;++i){const auto &v=tr.vertices[i];const auto q=lid?hinge+rotate(Vec3{v.x-hinge.x,v.height-hinge.y,v.z-hinge.z}):Vec3{v.x,v.height,v.z};vertices[i]={{float(object.position.x)+q.x,q.y,float(object.position.y)+q.z},v.u,v.v};}
+            const auto n=rotate({tr.normal.x,tr.normal.height,tr.normal.z});const TownSceneNormal normal{n.x,n.y,n.z};
+            DrawTriangle(out,vertices,texture,PickAt(object.position,selectable?PickKind::Object:PickKind::Ground,selectable?slot:-1),object.applyLighting?dLight[object.position.x][object.position.y]:0,false,&normal);
+        }
+    }
+    ++Chest.draws;return true;
+}
+struct SkullFireVisual {
+    TownSceneModel model;
+    bool attempted=false,loaded=false;
+    size_t meshDraws=0,flameDraws=0;
+};
+SkullFireVisual SkullFire;
+constexpr size_t SkullFireTextureKey=std::numeric_limits<size_t>::max()-2049;
+constexpr float SkullFireFlameHeight=0.112193307F;
+void PrepareSkullFireVisual()
+{
+    if(SkullFire.attempted)return;
+    SkullFire.attempted=true;
+    SkullFire.loaded=LoadTownModelOverride(SkullFire.model,"d3d-props/skull-fire/skull-fire.d3d","64443c6f3f27e6c86b44426c1584289f63ddfa076f8a469c897757feb4e16cba","cathedral-prop-skull-fire-user-r1");
+}
+bool DrawSkullFireVisual(const Surface &out,const Object &object)
+{
+    if(!SkullFire.loaded)return false;
+    const auto &texture=RigidPropNativeTexture(SkullFireTextureKey,*SkullFire.model.importedTexture);
+    for(const auto &tr:SkullFire.model.triangles){
+        std::array<Vertex,3> vertices;
+        for(size_t i=0;i<3;++i){const auto &v=tr.vertices[i];vertices[i]={{float(object.position.x)+v.x,v.height,float(object.position.y)+v.z},v.u,v.v};}
+        DrawTriangle(out,vertices,texture,PickAt(object.position),dLight[object.position.x][object.position.y],false,&tr.normal);
+    }
+    ++SkullFire.meshDraws;return true;
+}
+struct BrazierVisual {
+    TownSceneModel model;
+    bool attempted=false,loaded=false;
+    size_t meshDraws=0,flameDraws=0;
+};
+BrazierVisual Brazier;
+constexpr size_t BrazierTextureKey=std::numeric_limits<size_t>::max()-2048;
+constexpr float BrazierFlameContact=1.38F;
+void PrepareBrazierVisual()
+{
+    if(Brazier.attempted)return;
+    Brazier.attempted=true;
+    Brazier.loaded=LoadTownModelOverride(Brazier.model,"d3d-props/brazier-light01/brazier.d3d","51dbfab247182fddb5ac8660751edaf26fd890afaf5c3f605385df5565664922","cathedral-prop-brazier-light01-user-r1");
+}
+bool DrawBrazierVisual(const Surface &out,const Object &object)
+{
+    if(!Brazier.loaded)return false;
+    const auto &texture=RigidPropNativeTexture(BrazierTextureKey,*Brazier.model.importedTexture);
+    for(const auto &tr:Brazier.model.triangles){
+        std::array<Vertex,3> vertices;
+        for(size_t i=0;i<3;++i){const auto &v=tr.vertices[i];vertices[i]={{float(object.position.x)+v.x,v.height,float(object.position.y)+v.z},v.u,v.v};}
+        DrawTriangle(out,vertices,texture,PickAt(object.position),dLight[object.position.x][object.position.y],false,&tr.normal);
+    }
+    ++Brazier.meshDraws;return true;
+}
+struct BarrelVisual {
+    std::array<TownSceneModel,7> parts;
+    bool attempted=false,loaded=false;
+    size_t meshDraws=0,nativeBreakDraws=0,nativeExplosionDraws=0,shardDraws=0,terminalShardDraws=0;
+};
+BarrelVisual Barrel;
+void PrepareBarrelVisual()
+{
+    if(Barrel.attempted) return;
+    Barrel.attempted=true;Barrel.loaded=true;
+    constexpr std::array<std::string_view,7> hashes { "6f7e059c48af51fbb7a90788a52cda03c25cb3f509c2315fd610f6a564e89c28","b7b01027a6068dff62a3d667f6e486b1b7242c896a27a839c88d7a0b8dd1ae62","1660674fd35715d8d5d1915d1ab335b26f80357a43da8b5b28b22a290b280da6","0368b61a99c38db9da7c7af189b0771c466418443e47a6b82850e78ca2b1afcc","c08b5afbfdb1361ebb437c9da9d6650738ab3a3e5dd2c1942d4dd751f9f6a19b","faf5b46a55464254a509954e7ab5e605c0182743b5bb4b29d6678a818b3bd169","6fd89cd72cfbc37540f583e251bb30e39233a4a439943191a2735f2941b6c3c3" };
+    for(size_t i=0;i<7;++i) Barrel.loaded=LoadTownModelOverride(Barrel.parts[i],"d3d-props/barrel/part"+std::to_string(i)+".d3d",hashes[i],"barrel-user-r1") && Barrel.loaded;
+}
+bool DrawBrokenBarrelShards(const Surface &out,const Object &object)
+{
+    if(!Barrel.loaded) return false;
+    const float t=std::clamp(float(object._oAnimFrame-1)/float(std::max(1,int(object._oAnimLen)-1)),0.0F,1.0F);
+    constexpr int shards=12;
+    // Stable tile identity, not camera yaw or simulation RNG. Terminal geometry is reproducible after loading.
+    const uint32_t seed=uint32_t(object.position.x)*73856093U ^ uint32_t(object.position.y)*19349663U;
+    for(size_t part=0;part<7;++part) {
+        const auto &model=Barrel.parts[part];
+        const auto &texture=RigidPropNativeTexture(std::numeric_limits<size_t>::max()-16-part,*model.importedTexture);
+        for(int shard=0;shard<shards;++shard) {
+            const float theta=(float(shard)+0.5F)*6.283185307F/shards-3.141592654F;
+            const Vec3 radial{std::cos(theta),0,std::sin(theta)},axis{-std::sin(theta),0,std::cos(theta)};
+            const float tilt=-1.570796327F*t,cs=std::cos(tilt),sn=std::sin(tilt);
+            const float scatter=0.38F+float((seed>>(shard%16))&7U)*0.025F;
+            const Vec3 center=radial*0.28F+Vec3{0,0.5F,0};
+            const auto group=[](const TownSceneTriangle &tr) {
+                const float x=(tr.vertices[0].x+tr.vertices[1].x+tr.vertices[2].x)/3;
+                const float z=(tr.vertices[0].z+tr.vertices[1].z+tr.vertices[2].z)/3;
+                return std::clamp(int((std::atan2(z,x)+3.141592654F)*12/6.283185307F),0,11);
+            };
+            const auto rotate=[&](Vec3 v){return v*cs+Cross(axis,v)*sn+axis*(Dot(axis,v)*(1-cs));};
+            const auto transform=[&](const TownSceneVertex &v){return center+rotate(Vec3{v.x,v.height,v.z}-center)+radial*(scatter*t);};
+            float bottom=100;
+            for(const auto &tr:model.triangles)if(group(tr)==shard)for(const auto &v:tr.vertices)bottom=std::min(bottom,transform(v).y);
+            if(bottom==100)continue;
+            // Land each rigid fragment on the floor; an arc lifts it while it separates.
+            const float lift=-bottom*t+0.45F*std::sin(3.141592654F*t)+0.008F*t;
+            for(const auto &tr:model.triangles)if(group(tr)==shard) {
+                std::array<Vertex,3> vertices;
+                for(size_t i=0;i<3;++i){const auto &v=tr.vertices[i];const auto q=transform(v);vertices[i]={{float(object.position.x)+q.x,q.y+lift,float(object.position.y)+q.z},v.u,v.v};}
+                const auto n=rotate({tr.normal.x,tr.normal.height,tr.normal.z});const TownSceneNormal normal{n.x,n.y,n.z};
+                DrawTriangle(out,vertices,texture,PickAt(object.position),dLight[object.position.x][object.position.y],false,&normal);
+            }
+        }
+    }
+    ++Barrel.shardDraws;if(t>=1)++Barrel.terminalShardDraws;return true;
+}
+bool DrawBarrelVisual(const Surface &out,const Object &object,int slot,bool selectable)
+{
+    // Break/explosion/terminal remain a separate native effect layer. Replacing
+    // their visual later must not replace native damage, chain reactions or loot.
+    if(!Barrel.loaded || object.IsBroken()) return false;
+    for(size_t part=0;part<7;++part) {
+        const auto &model=Barrel.parts[part];
+        const auto &texture=RigidPropNativeTexture(std::numeric_limits<size_t>::max()-16-part,*model.importedTexture);
+        for(const auto &triangle:model.triangles) {
+            std::array<Vertex,3> vertices;
+            for(size_t i=0;i<3;++i) {const auto &v=triangle.vertices[i];vertices[i]={{float(object.position.x)+v.x,v.height,float(object.position.y)+v.z},v.u,v.v};}
+            const PickRecord pick=PickAt(object.position,selectable ? PickKind::Object : PickKind::Ground,selectable ? slot : -1);
+            DrawTriangle(out,vertices,texture,pick,object.applyLighting ? dLight[object.position.x][object.position.y] : 0,false,&triangle.normal);
+        }
+    }
+    ++Barrel.meshDraws;return true;
+}
+bool DrawSarcophagusVisual(const Surface &out,const Object &object,int slot,bool selectable)
+{
+    if(!Sarcophagus.loaded) return false;
+    const float progress=std::clamp((float(object._oAnimFrame)-1.0F)/4.0F,0.0F,1.0F);
+    // Source raw parts intersect by 0.00586 world units; explicit rigid clearance avoids it.
+    const float lift=0.0064F+(progress>0 ? 0.016F : 0);
+    for(int part=0;part<2;++part) {
+        const auto &model=part==0 ? Sarcophagus.body : Sarcophagus.lid;
+        const auto &texture=RigidPropNativeTexture(std::numeric_limits<size_t>::max()-part,*model.importedTexture);
+        for(const auto &triangle:model.triangles) {
+            std::array<Vertex,3> vertices;
+            for(size_t i=0;i<3;++i) {
+                const auto &v=triangle.vertices[i];
+                vertices[i]={{float(object.position.x)+v.x-(part==1 ? 0.36F*progress : 0),
+                    v.height+(part==1 ? lift : 0),float(object.position.y)-0.5F+v.z},v.u,v.v};
+            }
+            PickRecord pick=PickAt(object.position);pick.kind=selectable ? PickKind::Object : PickKind::Ground;pick.entity=selectable ? slot : -1;
+            DrawTriangle(out,vertices,texture,pick,object.applyLighting ? dLight[object.position.x][object.position.y] : 0,false,&triangle.normal);
+        }
+    }
+    ++Sarcophagus.draws;
+    return true;
+}
+
+Texture DecodeSprite(ClxSprite sprite, bool highDefinition = false);
 Texture ActorGroundShadow(const Texture &texture);
 
 // Private Ogden runtime pilot: opt-in exact package, CPU skin, existing draw path.
@@ -2248,6 +3013,8 @@ bool FailOgdenGpuSubmissionForDiagnostics = false;
 
 bool EnsureOgdenIdlePilotLoaded()
 {
+	if (ShouldDisableKnownMeshyRuntimeContent(OgdenPilotPackageSha256))
+		return false; // No selection/package read, CPU skin or texture preparation.
 	if (OgdenPilot.attempted)
 		return OgdenPilot.ready;
 	OgdenPilot.attempted = true;
@@ -2320,7 +3087,7 @@ void PrepareOgdenIdlePilotTexture()
 
 bool DrawOgdenIdlePilot(const Surface &out, const Towner &towner, size_t index)
 {
-	if (towner._ttype != TOWN_TAVERN || !OgdenPilot.ready)
+	if (towner._ttype != TOWN_TAVERN || !OgdenPilot.ready || ShouldDisableKnownMeshyRuntimeContent(OgdenPilotPackageSha256))
 		return false;
 	bool drawingStarted = false;
 	try {
@@ -2582,7 +3349,7 @@ void PrepareFrameImportedAlbedo()
 	for (size_t index = 0; index < scene.size(); ++index) {
 		const auto &model = scene[index];
 		if (model.externalModel && model.importedTexture && IsArchitectureVisible(index, model))
-			ImportedSceneTexture(index, *model.importedTexture);
+			ImportedSceneTexture(index, *model.importedTexture, model.kind == TownSceneKind::Cathedral);
 	}
 	// Freeze the append-only color table before any GPU batch snapshots it.
 	// One cold frame then shares a single LUT revision instead of pinning a
@@ -2592,6 +3359,15 @@ void PrepareFrameImportedAlbedo()
 void DrawScene(const Surface &out)
 {
 	const std::vector<TownSceneModel> &scene = GetTownScene();
+	if (UpdateTownVisualSceneEvents()) {
+		for (const auto &object : GetTownVisualSceneAudit().objects) {
+			if (object.eventBinding == "none") continue;
+			// A named native quest/access change invalidates only event objects;
+			// geometry, transform, source pixels and all other caches stay intact.
+			SceneArtworkCache.erase(object.sceneIndex);
+			SceneMaterialCache.erase(object.sceneIndex);
+		}
+	}
 	PrepareArchitectureBoundsCache(scene);
 	ArchitectureCullingState.modelsConsidered = 0;
 	ArchitectureCullingState.modelsSubmitted = 0;
@@ -2599,6 +3375,18 @@ void DrawScene(const Surface &out)
 	ArchitectureCullingState.trianglesVisited = 0;
 	for (size_t index = 0; index < scene.size(); ++index) {
 		const TownSceneModel &model = scene[index];
+		if (model.kind == TownSceneKind::Well) {
+			const bool poisoned = TownVisualSceneWaterPoisoned(index);
+			const auto previous = SceneWaterEventState.find(index);
+			if (previous != SceneWaterEventState.end() && previous->second != poisoned) {
+				// Native CleanTownFountain changes the identified well cells. Retain
+				// authored geometry/transforms; recompose only this event's source
+				// artwork/material texture so Water surfaces show the native change.
+				SceneArtworkCache.erase(index);
+				SceneMaterialCache.erase(index);
+			}
+			SceneWaterEventState[index] = poisoned;
+		}
 		++ArchitectureCullingState.modelsConsidered;
 		// One frozen local mask owns exterior, interior and attached fire together.
 		// Native SOL/tiles, static shadow casters and remote players are untouched.
@@ -2612,7 +3400,7 @@ void DrawScene(const Surface &out)
 		}
 		++ArchitectureCullingState.modelsSubmitted;
 		if (model.externalModel && model.importedTexture) {
-			const Texture &texture = ImportedSceneTexture(index, *model.importedTexture);
+			const Texture &texture = ImportedSceneTexture(index, *model.importedTexture, model.kind == TownSceneKind::Cathedral);
 			for (const TownSceneTriangle &triangle : TownSceneExteriorTriangles(model)) {
 				++ArchitectureCullingState.trianglesVisited;
 				std::array<Vertex, 3> vertices;
@@ -2652,6 +3440,8 @@ void DrawScene(const Surface &out)
 		for (size_t triangleIndex = 0; triangleIndex < model.triangles.size(); ++triangleIndex) {
 			++ArchitectureCullingState.trianglesVisited;
 			const TownSceneTriangle &triangle = model.triangles[triangleIndex];
+			const auto sourceModels = GetTownVisualSceneSourceModels();
+			const TownSceneTriangle &sourceTriangle = index < sourceModels.size() ? sourceModels[index].triangles[triangleIndex] : triangle;
 			const NativeSceneFace &face = art.projectedFaces[triangleIndex];
 			if (!triangle.nativeProjection || face.texture.width == 0)
 				continue;
@@ -2661,8 +3451,9 @@ void DrawScene(const Surface &out)
 			std::array<Vertex, 3> vertices;
 			for (size_t i = 0; i < vertices.size(); ++i) {
 				const TownSceneVertex &vertex = triangle.vertices[i];
-				const float nativeX = 32 * (vertex.x - vertex.z - art.referenceTile.x + art.referenceTile.y);
-				const float nativeY = 16 * (vertex.x + vertex.z - art.referenceTile.x - art.referenceTile.y) - 32 * vertex.height;
+				const TownSceneVertex &sourceVertex = sourceTriangle.vertices[i];
+				const float nativeX = 32 * (sourceVertex.x - sourceVertex.z - art.referenceTile.x + art.referenceTile.y);
+				const float nativeY = 16 * (sourceVertex.x + sourceVertex.z - art.referenceTile.x - art.referenceTile.y) - 32 * sourceVertex.height;
 				vertices[i] = { { vertex.x, vertex.height, vertex.z },
 					(nativeX - face.pixelOrigin.x) / face.texture.width, (nativeY - face.pixelOrigin.y) / face.texture.height };
 			}
@@ -2845,8 +3636,9 @@ void DrawVolume(const Surface &out, Vec3 position, Point tile, const VolumeArtwo
 			continue;
 		const float length = std::sqrt(Dot(normal, normal));
 		const float light = length > 0 ? (normal.x + normal.y + normal.z) / (length * 1.7320508F) : 0;
-		const int shade = std::clamp(lighting + (light < -0.1F ? 2 : (light < 0.4F ? 1 : 0)), 0, 3);
-		if (CaptureGpu && triangle.material == TownVolumeMaterial::SpriteFront) {
+		const int shade = std::clamp(lighting + (light < -0.1F ? 2 : (light < 0.4F ? 1 : 0)),
+		    0, DrawingCathedral ? static_cast<int>(NumLightingLevels) - 1 : 3);
+		if (CaptureGpu && !DrawingCathedral && triangle.material == TownVolumeMaterial::SpriteFront) {
 			const Texture &texture = art.physicalFrame && !art.directionalTextures[triangle.textureView].pixels.empty()
 			    ? art.directionalTextures[triangle.textureView] : art.texture;
 			// The CPU draws a solid backing and a cutout at identical depth. The
@@ -2856,6 +3648,9 @@ void DrawVolume(const Surface &out, Vec3 position, Point tile, const VolumeArtwo
 				{ triangle.paletteIndex, shade });
 			continue;
 		}
+		// Dungeon palette materials use the native 16-level LUT. The Town
+		// combined front/back fallback is not admitted by that GPU material;
+		// retain the existing ordered backing + covered front submissions.
 		DrawTriangle(out, vertices, PaletteTextures[triangle.paletteIndex], pick, shade);
 		if (triangle.material == TownVolumeMaterial::SpriteFront) {
 			const Texture &texture = art.physicalFrame && !art.directionalTextures[triangle.textureView].pixels.empty()
@@ -2873,10 +3668,10 @@ void DrawScenery(const Surface &out, Point tile, const TileArt &art, const Textu
 	if (art.solid)
 		// The bottom MIN row of a solid object may contain its painted base
 		// (notably the well rim). Its new body supplies that art in space.
-		DrawGround(out, tile, TownSceneReplacesTile(tile) || TownPropReplacesTile(tile) ? fallback : SceneGround(dPiece[tile.x][tile.y]));
+		DrawGround(out, tile, TownSceneReplacesTile(tile) || PreparedTownPropReplacesTile(tile, true) ? fallback : SceneGround(dPiece[tile.x][tile.y]));
 	// A tree's MIN base and its delayed CLX crown are one object. The solid tree
 	// volume below replaces both; retaining this cell proxy duplicates its trunk.
-	if (TownVegetationReplacesTile(tile) || TownSceneReplacesTile(tile) || TownPropReplacesTile(tile) || art.height < 0.25F)
+	if (TownVegetationReplacesTile(tile) || TownSceneReplacesTile(tile) || PreparedTownPropReplacesTile(tile) || art.height < 0.25F)
 		return;
 	// Unclassified scenery retains its true painted contour in a closed relief,
 	// rather than filling its transparent exterior into a tall one-cell box.
@@ -2888,8 +3683,15 @@ void DrawScenery(const Surface &out, Point tile, const TileArt &art, const Textu
 	DrawVolume(out, { x, 0, z }, tile, volume, PickKind::Ground, -1, lighting, false);
 }
 
-Texture DecodeSprite(ClxSprite sprite)
+Texture DecodeSprite(ClxSprite sprite, bool highDefinition)
 {
+	if (highDefinition && sprite.hdFrameId() != 0) {
+		auto source = LoadHdSpritePixels(sprite);
+		if (!source) throw std::runtime_error(source.error());
+		Texture result; result.width = source->width; result.height = source->height;
+		result.pixels = std::move(source->pixels); result.opacity = std::move(source->opacity);
+		return result;
+	}
 	const int width = sprite.width();
 	const int height = sprite.height();
 	if (!SpriteSurface || width > SpriteSurfaceWidth || height > SpriteSurfaceHeight) {
@@ -2932,6 +3734,11 @@ CathedralNativeTextureKey NativeTextureKey(const cathedral::NativeTextureBinding
 
 void ResetCathedralNativeTextureCache()
 {
+	CathedralOwnFloorPresent = CathedralOwnWallPresent = false;
+	CathedralCeilingBindingReady = false;
+	CathedralCeilingBinding = {};
+	CathedralCommonPaletteSignature = 0;
+	CathedralNativeLightBody.reset();
 	CathedralNativeLitTexturesReady = false;
 	CathedralNativeLitTextureCache.clear();
 	CathedralNativeLitTextureBytes = 0;
@@ -2975,8 +3782,31 @@ uint64_t NativeTextureSignature(const cathedral::NativeTextureBinding &binding)
 		        ? cathedral::NativeFullColumnPackingRevision : cathedral::NativeUpperColumnPackingRevision);
 		mix(static_cast<uint8_t>(binding.layout));
 		mix(MicroTileLen);
+	} else if (binding.layout == cathedral::NativeTextureLayout::RectifiedFloor) {
+		if (binding.kind != cathedral::NativeTextureKind::FloorDiamond)
+			throw std::invalid_argument("Rectified floor requires native floor material");
+		mix(cathedral::rectified_material::Revision);
+		mix(static_cast<uint8_t>(binding.layout));
+	} else if (binding.layout == cathedral::NativeTextureLayout::RectifiedWall) {
+		if (binding.kind != cathedral::NativeTextureKind::Masonry || binding.approximate || MicroTileLen != 10)
+			throw std::invalid_argument("Rectified wall requires primary Cathedral masonry");
+		mix(cathedral::rectified_material::Revision); mix(static_cast<uint8_t>(binding.layout));
+	} else if (binding.layout == cathedral::NativeTextureLayout::SolidMasonry) {
+		if ((binding.kind != cathedral::NativeTextureKind::Masonry && binding.kind != cathedral::NativeTextureKind::Ceiling)
+		    || MicroTileLen != 10)
+			throw std::invalid_argument("Solid masonry requires native Cathedral grain");
+		mix(cathedral::rectified_material::Revision); mix(static_cast<uint8_t>(binding.layout));
 	} else if (binding.layout != cathedral::NativeTextureLayout::RepeatedBand) {
 		throw std::invalid_argument("Cathedral native material layout unknown");
+	}
+	// Presence and qualified LOD identity belong to the native resource epoch.
+	// A pack change requires ResetHdSpritePack plus the existing resource reset.
+	if (binding.kind == cathedral::NativeTextureKind::FloorDiamond
+	    && binding.layout == cathedral::NativeTextureLayout::RectifiedFloor) {
+		mix(2026101201ULL); mix(CathedralOwnFloorPresent ? CathedralOwnFloorPixelHash : 0);
+	} else if (binding.kind == cathedral::NativeTextureKind::Masonry
+	    && binding.layout == cathedral::NativeTextureLayout::SolidMasonry) {
+		mix(2026101201ULL); mix(CathedralOwnWallPresent ? CathedralOwnWallPixelHash : 0);
 	}
 	// Constant-size MIN metadata only. Immutable CEL bytes are never rescanned
 	// on a warm hit; resource loads must renew the native visual epoch.
@@ -3092,6 +3922,27 @@ cathedral::wall_composition::SourceCellMetadata CaptureCathedralNativeColumnSour
 	return source;
 }
 
+bool LoadCathedralOwnMaterial(Texture &texture, const char *resource, int width, int height, uint64_t expectedHash)
+{
+	auto replacement = LoadHdSpriteReplacement(resource);
+	if (!replacement) throw std::runtime_error(replacement.error());
+	if (!*replacement) return false; // Existing native/per-piece fallback remains available.
+	if ((**replacement).isSheet() || (**replacement).list().numSprites() != 1)
+		throw std::runtime_error("Own Cathedral material requires one CLX frame");
+	const auto sprite = (**replacement).list()[0];
+	if (sprite.width() != width || sprite.height() != height)
+		throw std::runtime_error("Own Cathedral material dimensions mismatch");
+	texture = DecodeSprite(sprite);
+	if (texture.pixels.size() != static_cast<size_t>(width) * height
+	    || texture.opacity.size() != texture.pixels.size()
+	    || std::any_of(texture.opacity.begin(), texture.opacity.end(), [](uint8_t alpha) { return alpha != 1; }))
+		throw std::runtime_error("Own Cathedral material must be fully opaque");
+	uint64_t hash = 14695981039346656037ULL;
+	for (uint8_t code : texture.pixels) { hash ^= code; hash *= 1099511628211ULL; }
+	if (hash != expectedHash) throw std::runtime_error("Own Cathedral material r1 pixel identity mismatch");
+	return true;
+}
+
 CathedralNativeTextureEntry DecodeCathedralNativeMaterial(const cathedral::NativeTextureBinding &binding)
 {
 	using cathedral::NativeTextureKind;
@@ -3113,11 +3964,40 @@ CathedralNativeTextureEntry DecodeCathedralNativeMaterial(const cathedral::Nativ
 		    || static_cast<unsigned>(micros.mt[0].type()) > 5 || static_cast<unsigned>(micros.mt[1].type()) > 5)
 			throw std::invalid_argument("Cathedral floor native subframes absent or invalid");
 		entry.sourceBlock = micros.mt[0].data; entry.secondBlock = micros.mt[1].data;
+		if (binding.layout == cathedral::NativeTextureLayout::RectifiedFloor) {
+			CathedralOwnFloorPresent = LoadCathedralOwnMaterial(entry.texture,
+			    "materials/cathedral/floor/stone-r1.clx", 128, 128, CathedralOwnFloorPixelHash);
+			if (CathedralOwnFloorPresent) {
+				entry.texture.repeat = false;
+				entry.authoredMaterial = 1; entry.authoredPixelHash = CathedralOwnFloorPixelHash;
+				entry.signature = NativeTextureSignature(binding);
+				return entry;
+			}
+			const std::string resource = "materials/cathedral/floor/" + std::to_string(entry.sourcePiece) + ".clx";
+			auto replacement = LoadHdSpriteReplacement(resource);
+			if (!replacement) throw std::runtime_error(replacement.error());
+			if (*replacement) {
+				if ((**replacement).isSheet() || (**replacement).list().numSprites() != 1)
+					throw std::runtime_error("HD floor must have a single material frame");
+				entry.texture = DecodeSprite((**replacement).list()[0]);
+				if (entry.texture.width != 128 || entry.texture.height != 128)
+					throw std::runtime_error("HD floor material dimensions");
+				entry.texture.repeat = false;
+				return entry; // Selected before decoding the original floor pixels.
+			}
+		}
 		entry.texture = DecodeCathedralCoverage(64, 32, [&](const Surface &out, const Lightmap &light, const uint8_t *table) {
 			for (int column = 0; column < 2; ++column)
 				RenderTileFrame(out, light, { column * 32, 31 }, column == 0 ? TileType::LeftTriangle : TileType::RightTriangle,
 					GetDunFrame(pDungeonCels.get(), micros.mt[column].frame()), DunFrameTriangleHeight, MaskType::Solid, table);
 		}); // Exact native DrawFloorTile semantics after SetDungeonMicros.
+		if (binding.layout == cathedral::NativeTextureLayout::RectifiedFloor) {
+			const auto square = cathedral::rectified_material::RectifyFloor(entry.texture.pixels, entry.texture.opacity);
+			entry.texture.width = entry.texture.height = 64;
+			entry.texture.pixels.assign(square.pixels.begin(), square.pixels.end());
+			entry.texture.opacity.assign(square.coverage.begin(), square.coverage.end());
+			entry.texture.repeat = false;
+		}
 	} else if (binding.kind == NativeTextureKind::Masonry
 	    && binding.layout == cathedral::NativeTextureLayout::OriginalFullColumn) {
 		cathedral::wall_composition::SourceCellMetadata source;
@@ -3164,7 +4044,19 @@ CathedralNativeTextureEntry DecodeCathedralNativeMaterial(const cathedral::Nativ
 		entry.sourceMicro = static_cast<uint8_t>(atlas.layerOperations.front().source.micro);
 		entry.sourceBlock = source.words[entry.sourceMicro]; entry.upperWords = source.words;
 		entry.approximate = true; // Existing physical plane is a technical placement, not native3D depth proof.
-	} else if (binding.kind == NativeTextureKind::Masonry) {
+	} else if (binding.kind == NativeTextureKind::Masonry || binding.kind == NativeTextureKind::Ceiling) {
+		if (binding.kind == NativeTextureKind::Masonry && binding.layout == cathedral::NativeTextureLayout::SolidMasonry) {
+			CathedralOwnWallPresent = LoadCathedralOwnMaterial(entry.texture,
+			    "materials/cathedral/wall/stone-r1.clx", 64, 128, CathedralOwnWallPixelHash);
+			if (CathedralOwnWallPresent) {
+				entry.texture.repeat = true;
+				entry.horizontalFlip = binding.axis == cathedral::NativeTextureAxis::AlongZ;
+				entry.approximate = true;
+				entry.authoredMaterial = 2; entry.authoredPixelHash = CathedralOwnWallPixelHash;
+				entry.signature = NativeTextureSignature(binding);
+				return entry; // Native light Bake follows; do not apply stone courses/bevel again.
+			}
+		}
 		const auto bandForPiece = [&](uint16_t piece) -> bool {
 			for (int micro = 2 + binding.column; micro < std::min<int>(MicroTileLen, 16); micro += 2) {
 				const LevelCelBlock block = DPieceMicros[piece].mt[micro];
@@ -3198,6 +4090,37 @@ CathedralNativeTextureEntry DecodeCathedralNativeMaterial(const cathedral::Nativ
 		if (!bandForPiece(binding.piece) && !bandForPiece(binding.axis == cathedral::NativeTextureAxis::AlongX ? 4 : 0))
 			throw std::invalid_argument("Cathedral native masonry band unavailable");
 		entry.approximate = true; // Repeated planar material, not complete facade reconstruction.
+		if (binding.layout == cathedral::NativeTextureLayout::RectifiedWall || binding.layout == cathedral::NativeTextureLayout::SolidMasonry) {
+			const MICROS &micros = DPieceMicros[entry.sourcePiece];
+			const Texture atlas = DecodeCathedralCoverage(64,256,[&](const Surface &out,const Lightmap &light,const uint8_t *table) {
+				for (unsigned micro=0;micro<MicroTileLen;++micro) {
+					const LevelCelBlock block=micros.mt[micro];
+					if (!block.hasValue()) continue;
+					RenderTile(out,light,{static_cast<int>(micro%2)*32,255-static_cast<int>(micro/2)*32},
+						pDungeonCels.get(),block,MaskType::Solid,table);
+				}
+			});
+			const auto face = cathedral::rectified_material::RectifySolidWall(atlas.pixels,atlas.opacity,
+				entry.texture.pixels,binding.column,entry.horizontalFlip);
+			entry.texture.height=128;entry.texture.repeat=false;
+			entry.texture.pixels.assign(face.pixels.begin(),face.pixels.end());
+			entry.texture.opacity.assign(face.coverage.begin(),face.coverage.end());
+			entry.approximate=true; // Reconstruction and any covered masonry infill are visual estimates.
+			if (binding.layout == cathedral::NativeTextureLayout::SolidMasonry) {
+				const auto courses = cathedral::rectified_material::BuildStoneCourses(entry.texture.pixels);
+				entry.texture.width=64;entry.texture.height=128;entry.texture.repeat=true;
+				entry.texture.pixels.assign(courses.pixels.begin(),courses.pixels.end());
+				entry.texture.opacity.assign(entry.texture.pixels.size(),1);
+				for(size_t i=0;i<entry.texture.pixels.size();++i)
+					if(courses.bevel[i]!=0) entry.texture.pixels[i]=LightTables[courses.bevel[i]][entry.texture.pixels[i]];
+				if(binding.kind == NativeTextureKind::Ceiling) {
+					const auto ceiling=cathedral::rectified_material::CeilingFromStoneCourses(entry.texture.pixels);
+					entry.texture.height=64;
+					entry.texture.pixels.assign(ceiling.pixels.begin(),ceiling.pixels.end());
+					entry.texture.opacity.assign(ceiling.coverage.begin(),ceiling.coverage.end());
+				}
+			}
+		}
 	} else if (binding.kind == NativeTextureKind::DoorWood) {
 		const ClxSprite closed = (*NativeMaterialDoor(binding)._oAnimData)[0];
 		if (closed.width() == 0 || closed.height() == 0 || closed.width() > 512 || closed.height() > 512)
@@ -3310,7 +4233,7 @@ uint64_t CathedralNativeSourceLightSignature(const cathedral::NativeTextureBindi
 [[noreturn]] void RefuseCathedralNativeLightCacheBudget()
 {
 	RecordCathedralDiagnostic(CathedralFallbackReason::NativeMaterialBudgetRefused,
-	    CathedralFallbackStage::NativeMaterials, true, *GetOptions().Graphics.townViewGpuRendering);
+	    CathedralFallbackStage::NativeMaterials, true, EffectiveGpuRequested());
 	CathedralPreparationRefused = true;
 	throw std::length_error("Cathedral raw+lit native material host-cache budget exceeded");
 }
@@ -3320,14 +4243,16 @@ Texture BakeCathedralNativeMasonryLight(const cathedral::NativeTextureBinding &b
 {
 	if (binding.kind != cathedral::NativeTextureKind::Masonry || binding.column > 1
 	    || binding.x < 0 || binding.z < 0 || binding.x >= MAXDUNX || binding.z >= MAXDUNY
-	    || raw.texture.width != 32 || raw.texture.height <= 0
+	    || raw.texture.width != (binding.layout == cathedral::NativeTextureLayout::SolidMasonry ? 64 : 32) || raw.texture.height <= 0
 	    || raw.texture.pixels.size() != static_cast<size_t>(raw.texture.width) * raw.texture.height
 	    || raw.texture.opacity.size() != raw.texture.pixels.size())
 		throw std::invalid_argument("Cathedral native lit masonry source invalid");
 	const bool repeated = binding.layout == cathedral::NativeTextureLayout::RepeatedBand;
 	if ((repeated && (raw.texture.height != 16 || raw.sourceMicro >= MicroTileLen))
 	    || (!repeated && binding.layout != cathedral::NativeTextureLayout::OriginalFullColumn
-	        && binding.layout != cathedral::NativeTextureLayout::OriginalUpperColumn))
+	        && binding.layout != cathedral::NativeTextureLayout::OriginalUpperColumn
+	        && binding.layout != cathedral::NativeTextureLayout::RectifiedWall
+	        && binding.layout != cathedral::NativeTextureLayout::SolidMasonry))
 		throw std::invalid_argument("Cathedral native lit masonry layout invalid");
 	// Same native source anchor used by DrawCell. A scratch surface is only an
 	// address coordinate system for Lightmap; no CEL decode, native build/global
@@ -3341,6 +4266,7 @@ Texture BakeCathedralNativeMasonryLight(const cathedral::NativeTextureBinding &b
 	Texture lit;
 	lit.width = raw.texture.width; lit.height = raw.texture.height; lit.repeat = raw.texture.repeat;
 	lit.pixels = raw.texture.pixels;
+	lit.lightingBasePixels = raw.texture.pixels;
 	lit.opacity = raw.texture.opacity; // Coverage is independent of every palette index, including 0/255.
 	const uint8_t uniform = std::min<uint8_t>(dLight[binding.x][binding.z], static_cast<uint8_t>(NumLightingLevels - 1));
 	for (int y = 0; y < lit.height; ++y) for (int x = 0; x < lit.width; ++x) {
@@ -3360,6 +4286,11 @@ Texture BakeCathedralNativeMasonryLight(const cathedral::NativeTextureBinding &b
 			sourceX = raw.horizontalFlip ? 31 - x : x;
 			const int shear = binding.axis == cathedral::NativeTextureAxis::AlongX ? sourceX / 2 : (31 - sourceX) / 2;
 			sourceY = anchor.y - 32 * (raw.sourceMicro / 2) - 31 + y + shear;
+		} else if (binding.layout == cathedral::NativeTextureLayout::RectifiedWall || binding.layout == cathedral::NativeTextureLayout::SolidMasonry) {
+			const unsigned nativeX=static_cast<unsigned>(x)*32/static_cast<unsigned>(lit.width);
+			const auto sample = cathedral::rectified_material::WallSource(nativeX,y,binding.column,raw.horizontalFlip);
+			sourceX=static_cast<int>(sample[0])-static_cast<int>(binding.column)*32;
+			sourceY=anchor.y+static_cast<int>(sample[1])-255;
 		} else {
 			const int minY = binding.layout == cathedral::NativeTextureLayout::OriginalFullColumn
 			    ? 1 - lit.height : -31 - lit.height;
@@ -3383,17 +4314,133 @@ Texture BakeCathedralNativeMasonryLight(const cathedral::NativeTextureBinding &b
 	return lit;
 }
 
+bool CathedralNativeLightBodyAdmitted(int slot)
+{
+	if (slot<0 || slot>=MAXOBJECTS || currlevel!=1 || leveltype!=DTYPE_CATHEDRAL || setlevel || gbIsHellfire || gbIsSpawn) return false;
+	const Object &object=Objects[slot];const Point tile=object.position;
+	return object._otype==OBJ_L1LIGHT && tile.x>=16 && tile.y>=16 && tile.x<96 && tile.y<96
+	    && dPiece[tile.x][tile.y]==269 && std::abs(dObject[tile.x][tile.y])==slot+1;
+}
+
+void PrepareCathedralLightGroundPanels(cathedral::PilotFrame &frame)
+{
+	// Native light stands occupy a blocked SOL cell but have a floor beneath
+	// them. Supply presentation-only floor/ceiling quads, never a walkable cell
+	// or collision/physics change. The known native269 + exact L1LIGHT owner is
+	// required; no black-pixel heuristic, arbitrary emitter or corner blanket.
+	for(int i=0;i<ActiveObjectCount;++i) {
+		const int slot=ActiveObjects[i];
+		if(!CathedralNativeLightBodyAdmitted(slot)) continue;
+		const Point tile=Objects[slot].position;
+		if (!IsTileVisible(tile))
+			continue;
+		if (tile.x < frame.regionX - cathedral::RegionSize || tile.x >= frame.regionX + 2 * cathedral::RegionSize
+		    || tile.y < frame.regionZ - cathedral::RegionSize || tile.y >= frame.regionZ + 2 * cathedral::RegionSize)
+			continue;
+		bool alreadyFloor=false;
+		for(const auto &s:frame.triangles)
+			alreadyFloor=alreadyFloor || (s.module==cathedral::ModuleKind::Floor && s.pick.x==tile.x && s.pick.z==tile.y);
+		if(alreadyFloor) continue;
+		uint16_t donor=0;bool found=false;
+		for(int radius=1;radius<=3 && !found;++radius)
+		for(int x=tile.x-radius;x<=tile.x+radius && !found;++x)
+		for(int z=tile.y-radius;z<=tile.y+radius && !found;++z) {
+			if(x<16||z<16||x>=96||z>=96||dSpecial[x][z]!=0||dObject[x][z]!=0) continue;
+			const uint16_t piece=dPiece[x][z];
+			if(piece>=MAXTILES || !HasNoneOf(SOLData[piece],TileProperties::Solid|TileProperties::BlockMissile)) continue;
+			donor=piece;found=true;
+		}
+		if(!found) throw std::invalid_argument("Native light stand has no nearby verified floor donor");
+		const float x=static_cast<float>(tile.x),z=static_cast<float>(tile.y);
+		const std::array<cathedral::Vertex,4> v={{{{x-.5F,0,z-.5F},0,0},{{x-.5F,0,z+.5F},0,1},{{x+.5F,0,z+.5F},1,1},{{x+.5F,0,z-.5F},1,0}}};
+		for(const auto indices:{std::array<unsigned,3>{0,1,2},std::array<unsigned,3>{0,2,3}}) {
+			cathedral::FrameTriangle panel{};
+			panel.module=cathedral::ModuleKind::Floor;panel.pick={cathedral::PickKind::Ground,tile.x,tile.y,-1};
+			panel.instanceId=0xd3d1000000000000ULL|static_cast<uint64_t>(slot);
+			panel.light=dLight[tile.x][tile.y];panel.policy=cathedral::FrameSurfacePolicy::Opaque;
+			panel.nativeTexture.kind=cathedral::NativeTextureKind::FloorDiamond;
+			panel.nativeTexture.layout=cathedral::NativeTextureLayout::RectifiedFloor;
+			panel.nativeTexture.piece=donor;panel.nativeTexture.x=tile.x;panel.nativeTexture.z=tile.y;panel.nativeTexture.approximate=true;
+			for(size_t n=0;n<3;++n)panel.vertices[n]=panel.textureVertices[n]=v[indices[n]];
+			frame.nativeArtPanels.push_back(panel);
+		}
+	}
+}
+
+void PrepareCathedralLightBody()
+{
+	if(CathedralNativeLightBody) return;
+	bool needed=false;
+	for(int i=0;i<ActiveObjectCount;++i)needed=needed||CathedralNativeLightBodyAdmitted(ActiveObjects[i]);
+	if(!needed) return;
+	TileArt source=DecodeTile(269); // Exact current native resource, not the Town tile cache.
+	if(source.facade.height<=32) throw std::invalid_argument("Native light stand has no upper body artwork");
+	// Native269's bottom MIN row includes the stand's base/pole, not just
+	// ground. Keep the full native anchor; cropping that row lowers the bowl
+	// by one world unit and separates it from its original flame sprite.
+	auto body=std::make_unique<VolumeArtwork>();body->texture=std::move(source.facade);
+	body->mesh = BuildCathedralLightStandVolume({ body->texture.width, body->texture.height, body->texture.pixels, body->texture.opacity });
+	body->physicalFrame = true;
+	if(body->mesh.triangles.empty() || body->mesh.triangles.size()>4096)
+		throw std::invalid_argument("Native light stand exceeds bounded closed-body geometry");
+	const size_t bytes=body->texture.pixels.size()+body->texture.opacity.size()+body->mesh.triangles.size()*sizeof(TownVolumeTriangle);
+	const size_t cachedBytes = CathedralNativeTextureState.bytes + CathedralNativeLitTextureBytes;
+	if (cachedBytes > CathedralNativeTextureMaxBytes || bytes > CathedralNativeTextureMaxBytes - cachedBytes)
+		RefuseCathedralNativeLightCacheBudget();
+	CathedralNativeTextureState.lightBodyTriangles=body->mesh.triangles.size();
+	CathedralNativeTextureState.lightBodyBytes=bytes;
+	CathedralNativeTextureState.bytes+=bytes;
+	CathedralNativeLightBody=std::move(body);
+}
+
+void PrepareCathedralCeilingBinding()
+{
+	// Once per native visual epoch: stable full-level donor, independent of
+	// camera, focus, exploration and region selection. Do not consume game RNG.
+	std::map<uint16_t, size_t> frequency;
+	std::map<uint16_t, Point> origins;
+	for(int x=16;x<96;++x)for(int z=16;z<96;++z) {
+		const uint16_t piece=dPiece[x][z];
+		if(piece>=MAXTILES || dSpecial[x][z]!=0 || dObject[x][z]!=0
+		    || !HasAllOf(SOLData[piece],TileProperties::Solid | TileProperties::BlockLight)) continue;
+		bool bordersFloor=false;
+		for(const Point neighbor : {Point{x-1,z},Point{x+1,z},Point{x,z-1},Point{x,z+1}})
+			bordersFloor = bordersFloor || IsTileWalkable(neighbor);
+		if(!bordersFloor) continue;
+		++frequency[piece]; origins.try_emplace(piece,Point{x,z});
+	}
+	if(frequency.empty()) throw std::invalid_argument("Cathedral ceiling has no native opaque masonry donor");
+	uint16_t selected=0;size_t most=0;
+	for(const auto &[piece,count]:frequency) if(count>most){selected=piece;most=count;}
+	const Point origin=origins.at(selected);
+	CathedralCeilingBinding={};
+	CathedralCeilingBinding.kind=cathedral::NativeTextureKind::Ceiling;
+	CathedralCeilingBinding.layout=cathedral::NativeTextureLayout::SolidMasonry;
+	CathedralCeilingBinding.axis=cathedral::NativeTextureAxis::AlongX;
+	CathedralCeilingBinding.column=1;CathedralCeilingBinding.piece=selected;
+	CathedralCeilingBinding.x=origin.x;CathedralCeilingBinding.z=origin.y;
+	CathedralCeilingBinding.approximate=true;
+	CathedralCeilingBindingReady=true;
+}
+
 void PrepareCathedralNativeTextures(const cathedral::PilotFrame &frame)
 {
 	CathedralNativeLitTexturesReady = false; // Every refusal leaves the presentation incomplete.
 	if (frame.gameRevision == 0 || !pDungeonCels || MicroTileLen < 2)
 		throw std::invalid_argument("Cathedral texture preparation requires a loaded native epoch");
+	const uint64_t paletteSignature = CathedralNativeLightPaletteSignature();
 	if (CathedralNativeTextureState.epoch != frame.gameRevision || CathedralNativeTextureResource != pDungeonCels.get()
-	    || CathedralNativeTextureMicroLen != MicroTileLen) {
+	    || CathedralNativeTextureMicroLen != MicroTileLen || CathedralCommonPaletteSignature != paletteSignature) {
 		ResetCathedralNativeTextureCache();
 		CathedralNativeTextureState.epoch = frame.gameRevision;
 		CathedralNativeTextureResource = pDungeonCels.get(); CathedralNativeTextureMicroLen = MicroTileLen;
 	}
+	CathedralCommonPaletteSignature=paletteSignature;
+	if(!CathedralCeilingBindingReady) PrepareCathedralCeilingBinding();
+	PrepareCathedralLightBody();
+	CathedralNativeTextureState.lightGroundPanels=0;
+	for(const auto &panel:frame.nativeArtPanels)
+		CathedralNativeTextureState.lightGroundPanels+=panel.module==cathedral::ModuleKind::Floor;
 	std::map<CathedralNativeLitTextureKey, cathedral::NativeTextureBinding> selectedLit;
 	for (const auto *surfaces : { &frame.triangles, &frame.nativeArtPanels })
 	for (const auto &surface : *surfaces) {
@@ -3408,24 +4455,20 @@ void PrepareCathedralNativeTextures(const cathedral::PilotFrame &frame)
 	// stay in place; raw material history/selected masters are untouched.
 	for (auto it = CathedralNativeLitTextureCache.begin(); it != CathedralNativeLitTextureCache.end();) {
 		if (selectedLit.find(it->first) != selectedLit.end()) { ++it; continue; }
-		CathedralNativeLitTextureBytes -= it->second.texture.pixels.size() + it->second.texture.opacity.size();
+		CathedralNativeLitTextureBytes -= it->second.texture.pixels.size() + it->second.texture.opacity.size() + it->second.texture.lightingBasePixels.size();
 		it = CathedralNativeLitTextureCache.erase(it);
 	}
 	std::set<CathedralNativeTextureKey> selected;
-	for (const auto *surfaces : { &frame.triangles, &frame.nativeArtPanels })
-	for (const auto &surface : *surfaces) {
-		if (surface.visualSuppressed) continue;
-		const auto &binding = surface.nativeTexture;
-		if (binding.kind == cathedral::NativeTextureKind::Technical) continue;
+	const auto prepareRaw=[&](const cathedral::NativeTextureBinding &binding) {
 		// POD identity is captured before signature validation, decode or budget.
 		CathedralDiagnosticMaterialBinding = binding;
 		CathedralDiagnosticMaterialBindingValid = true;
 		const auto key = NativeTextureKey(binding);
-		if (!selected.insert(key).second) continue;
+		if (!selected.insert(key).second) return;
 		const auto found = CathedralNativeTextureCache.find(key);
 		if (found != CathedralNativeTextureCache.end() && found->second.signature == NativeTextureSignature(binding)) {
 			++CathedralNativeTextureState.hits;
-			continue;
+			return;
 		}
 		++CathedralNativeTextureState.misses;
 		auto entry = DecodeCathedralNativeMaterial(binding); // Cold preparation only, never DrawSurface.
@@ -3435,7 +4478,7 @@ void PrepareCathedralNativeTextures(const cathedral::PilotFrame &frame)
 		if ((found == CathedralNativeTextureCache.end() && CathedralNativeTextureCache.size() >= CathedralNativeTextureMaxEntries)
 		    || bytes > CathedralNativeTextureMaxBytes - (CathedralNativeTextureState.bytes - oldBytes + CathedralNativeLitTextureBytes)) {
 			RecordCathedralDiagnostic(CathedralFallbackReason::NativeMaterialBudgetRefused,
-				CathedralFallbackStage::NativeMaterials, true, *GetOptions().Graphics.townViewGpuRendering);
+				CathedralFallbackStage::NativeMaterials, true, EffectiveGpuRequested());
 			CathedralPreparationRefused = true;
 			throw std::length_error("Cathedral native material host-cache budget exceeded");
 		}
@@ -3443,10 +4486,15 @@ void PrepareCathedralNativeTextures(const cathedral::PilotFrame &frame)
 		else found->second = std::move(entry);
 		CathedralNativeTextureState.bytes = CathedralNativeTextureState.bytes - oldBytes + bytes;
 		++CathedralNativeTextureState.decodes;
+	};
+	prepareRaw(CathedralCeilingBinding);
+	for (const auto *surfaces : { &frame.triangles, &frame.nativeArtPanels })
+	for (const auto &surface : *surfaces) {
+		if (surface.visualSuppressed || surface.nativeTexture.kind == cathedral::NativeTextureKind::Technical) continue;
+		prepareRaw(surface.nativeTexture);
 	}
 	CathedralNativeTextureState.entries = CathedralNativeTextureCache.size();
 	const bool perPixel = *GetOptions().Graphics.perPixelLighting;
-	const uint64_t paletteSignature = CathedralNativeLightPaletteSignature();
 	const uint64_t frameLightSignature = CathedralNativeFrameLightSignature(paletteSignature, perPixel);
 	CathedralNativeLightScratch scratch;
 	for (const auto &[key, binding] : selectedLit) {
@@ -3456,9 +4504,9 @@ void PrepareCathedralNativeTextures(const cathedral::PilotFrame &frame)
 		auto found = CathedralNativeLitTextureCache.find(key);
 		if (found != CathedralNativeLitTextureCache.end() && found->second.rawSignature == raw.signature
 		    && found->second.rawGpuIdentity == raw.texture.gpuIdentity.value && found->second.lightSignature == signature) continue;
-		const size_t bytes = raw.texture.pixels.size() + raw.texture.opacity.size();
+		const size_t bytes = raw.texture.pixels.size()*2 + raw.texture.opacity.size();
 		const size_t oldBytes = found == CathedralNativeLitTextureCache.end() ? 0
-		    : found->second.texture.pixels.size() + found->second.texture.opacity.size();
+		    : found->second.texture.pixels.size() + found->second.texture.opacity.size() + found->second.texture.lightingBasePixels.size();
 		if ((found == CathedralNativeLitTextureCache.end() && CathedralNativeLitTextureCache.size() >= CathedralNativeLitTextureMaxEntries)
 		    || bytes > CathedralNativeTextureMaxBytes - (CathedralNativeTextureState.bytes + CathedralNativeLitTextureBytes - oldBytes))
 			RefuseCathedralNativeLightCacheBudget();
@@ -3476,9 +4524,11 @@ void PrepareCathedralNativeTextures(const cathedral::PilotFrame &frame)
 	CathedralDiagnosticMaterialBindingValid = false;
 	CathedralNativeTextureState.floorMaterials = CathedralNativeTextureState.masonryMaterials = CathedralNativeTextureState.doorMaterials = 0;
 	CathedralNativeTextureState.donorMaterials = 0;
+	CathedralNativeTextureState.ceilingMaterials = 0;
 	for (const auto &[key, entry] : CathedralNativeTextureCache) {
 		if (std::get<0>(key) == cathedral::NativeTextureKind::FloorDiamond) ++CathedralNativeTextureState.floorMaterials;
 		else if (std::get<0>(key) == cathedral::NativeTextureKind::Masonry) ++CathedralNativeTextureState.masonryMaterials;
+		else if (std::get<0>(key) == cathedral::NativeTextureKind::Ceiling) ++CathedralNativeTextureState.ceilingMaterials;
 		else ++CathedralNativeTextureState.doorMaterials;
 		if (entry.sourcePiece != std::get<1>(key)) ++CathedralNativeTextureState.donorMaterials;
 	}
@@ -3497,6 +4547,10 @@ bool CathedralNativeTexturesCurrent(const cathedral::PilotFrame &frame)
 	const bool perPixel = *GetOptions().Graphics.perPixelLighting;
 	const uint64_t paletteSignature = CathedralNativeLightPaletteSignature();
 	if (CathedralNativeLitFrameLightSignature != CathedralNativeFrameLightSignature(paletteSignature, perPixel)) return false;
+	if (!CathedralCeilingBindingReady || CathedralCommonPaletteSignature != paletteSignature) return false;
+	const auto ceiling = CathedralNativeTextureCache.find(NativeTextureKey(CathedralCeilingBinding));
+	if (ceiling == CathedralNativeTextureCache.end() || ceiling->second.texture.width != 64 || ceiling->second.texture.height != 64
+	    || ceiling->second.signature != NativeTextureSignature(CathedralCeilingBinding)) return false;
 	for (const auto *surfaces : { &frame.triangles, &frame.nativeArtPanels })
 	for (const auto &surface : *surfaces) {
 		if (surface.visualSuppressed || surface.nativeTexture.kind == cathedral::NativeTextureKind::Technical) continue;
@@ -3622,13 +4676,319 @@ VolumeArtwork ComposeNativeScenery(const Group &group, bool vegetation, bool fol
 			result.texture.opacity[static_cast<size_t>(y) * result.texture.width + x] = paint[{ startX + x, top + y }] == coverage[{ startX + x, top + y }];
 	const TownVolumeSprite source { result.texture.width, result.texture.height, result.texture.pixels, result.texture.opacity };
 	const uint32_t seed = static_cast<uint32_t>(group.referenceFootpoint.x + group.referenceFootpoint.y * MAXDUNX + 1);
-	result.mesh = vegetation ? BuildTownTreeVolume(source, seed, foliage) : BuildTownPropVolume(source);
+	if constexpr (requires { group.kind; group.nativeLayout; }) {
+		result.mesh = BuildTownPhysicalPropVolume(source, group.kind, group.nativeLayout, seed);
+		result.physicalFrame = true;
+	} else {
+		result.mesh = BuildTownTreeVolume(source, seed, foliage);
+	}
 	return result;
 }
 
 VolumeArtwork ComposeVegetation(const TownVegetationGroup &group)
 {
 	return ComposeNativeScenery(group, true, group.foliage);
+}
+
+bool TownPropArtworkValid(const VolumeArtwork &art)
+{
+	if (art.mesh.triangles.empty() || art.texture.pixels.empty()
+	    || !(art.mesh.width > 0) || !(art.mesh.height > 0) || !(art.mesh.depth > 0)
+	    || !std::isfinite(art.mesh.width) || !std::isfinite(art.mesh.height) || !std::isfinite(art.mesh.depth))
+		return false;
+	for (const auto &triangle : art.mesh.triangles)
+		for (const auto &v : triangle.vertices)
+			if (!std::isfinite(v.x) || !std::isfinite(v.height) || !std::isfinite(v.z)
+			    || !std::isfinite(v.u) || !std::isfinite(v.v))
+				return false;
+	return true;
+}
+
+void PrepareTownPropArtwork()
+{
+	if (PropReplacementReady || !pDungeonCels)
+		return;
+	for (auto &column : PropVisualReplacementMask)
+		column.fill(false);
+	for (auto &column : PropGroundPaintReplacementMask)
+		column.fill(false);
+	const auto &groups = GetTownPropGroups();
+	for (size_t i = 0; i < groups.size(); ++i) {
+		const auto &group = groups[i];
+		const auto found = PropArtworkCache.find(i);
+		const auto &art = found != PropArtworkCache.end() ? found->second
+		    : PropArtworkCache.emplace(i, ComposeNativeScenery(group, false)).first->second;
+		// Native paint is suppressed only after its complete physical replacement
+		// is admitted. Empty or refused preparation retains the native fallback.
+		if (!TownPropArtworkValid(art))
+			continue;
+		for (Point tile : group.sourceTiles) {
+			if (!InDungeonBounds(tile))
+				continue;
+			PropVisualReplacementMask[tile.x][tile.y] = true;
+			PropGroundPaintReplacementMask[tile.x][tile.y] = TownPropReplacesGroundPaint(tile);
+		}
+	}
+	PropReplacementReady = true;
+}
+
+bool PreparedTownPropReplacesTile(Point tile, bool groundPaint)
+{
+	if (leveltype != DTYPE_TOWN || !PropReplacementReady || !InDungeonBounds(tile))
+		return false;
+	return groundPaint ? PropGroundPaintReplacementMask[tile.x][tile.y] : PropVisualReplacementMask[tile.x][tile.y];
+}
+
+Texture FixedObjectTexture(const TownVisualObjectTexture &source)
+{
+	Texture result;
+	result.width = static_cast<int>(source.width);
+	result.height = static_cast<int>(source.height);
+	result.pixels = source.pixels;
+	result.opacity = source.opacity;
+	result.repeat = source.repeat;
+	return result;
+}
+
+void ApplyFixedObjectTransform(TownVolumeMesh &mesh, const TownVisualObject &object)
+{
+	const auto &t = object.transform;
+	if (t.yaw == 0 && t.scale == 1)
+		return; // Preserve the baseline floats exactly, including its native-ray bias.
+	constexpr float I = 0.7071067811865475F;
+	const float c = std::cos(t.yaw), s = std::sin(t.yaw);
+	for (auto &triangle : mesh.triangles) {
+		for (auto &v : triangle.vertices) {
+			const float dx = (v.x + v.z) * I;
+			const float dz = (-v.x + v.z) * I;
+			const float dy = v.height + (object.physicalFrame ? 0 : v.z * I - 1 / PixelsPerWorldUnit);
+			const float x = t.scale * (c * dx + s * dz);
+			const float z = t.scale * (-s * dx + c * dz);
+			v.x = (x - z) * I;
+			v.z = (x + z) * I;
+			v.height = dy * t.scale - (object.physicalFrame ? 0 : v.z * I - 1 / PixelsPerWorldUnit);
+		}
+	}
+}
+
+void PrepareFixedTownObjects()
+{
+	const auto &audit = GetTownVisualObjectAudit();
+	if (FixedTownArchiveHash == audit.sha256 && FixedTownSceneRevision == GetTownSceneRevision())
+		return;
+	ClearFixedTownRendererCache();
+	const auto &set = GetTownVisualObjects();
+	std::vector<Texture> textures;
+	textures.reserve(set.textures.size());
+	for (const auto &texture : set.textures)
+		textures.push_back(FixedObjectTexture(texture));
+	FixedTownTextures = std::move(textures);
+	FixedTownArchiveHash = audit.sha256;
+	FixedTownSceneRevision = GetTownSceneRevision();
+}
+
+uint64_t FixedObjectNativeSignature(const TownVisualObject &object)
+{
+	bool state = false;
+	switch (object.eventBinding) {
+	case TownVisualObjectEvent::None: return 0;
+	case TownVisualObjectEvent::WellWater:
+		state = Quests[Q_PWATER]._qactive != QUEST_DONE && Quests[Q_PWATER]._qactive != QUEST_NOTAVAIL; break;
+	case TownVisualObjectEvent::CatacombsAccess: state = MyPlayer != nullptr && IsWarpOpen(DTYPE_CATACOMBS); break;
+	case TownVisualObjectEvent::CavesAccess: state = MyPlayer != nullptr && IsWarpOpen(DTYPE_CAVES); break;
+	case TownVisualObjectEvent::HellAccess: state = MyPlayer != nullptr && IsWarpOpen(DTYPE_HELL); break;
+	}
+	// Native town creation may randomize closed Hell tiles on each return.
+	// The persisted visual source is retained while its semantic state agrees.
+	if (state == object.eventState) return 0;
+	uint64_t hash = 14695981039346656037ULL;
+	hash ^= state ? 1 : 2; hash *= 1099511628211ULL;
+	for (const auto &cell : object.sourceCells) {
+		const uint16_t piece = dPiece[cell.tile.x][cell.tile.y];
+		const uint16_t special = static_cast<uint8_t>(dSpecial[cell.tile.x][cell.tile.y]);
+		hash ^= piece; hash *= 1099511628211ULL;
+		hash ^= special; hash *= 1099511628211ULL;
+	}
+	return hash != 0 ? hash : 1;
+}
+
+VolumeArtwork &FixedObjectVolume(size_t index, const TownVisualObject &object, uint64_t changedSignature)
+{
+	if (changedSignature == 0) {
+		const auto cached = FixedTownVolumes.find(index);
+		if (cached != FixedTownVolumes.end()) return cached->second;
+		VolumeArtwork art;
+		art.texture = FixedTownTextures[object.texture];
+		art.mesh = object.mesh;
+		art.physicalFrame = object.physicalFrame;
+		ApplyFixedObjectTransform(art.mesh, object);
+		return FixedTownVolumes.emplace(index, std::move(art)).first->second;
+	}
+	auto &delta = FixedTownDeltas[index];
+	if (delta.signature == changedSignature) return delta.art;
+	// Only this identified object's changed source cells are observed. No whole
+	// town scan/group reconstruction or authored-file regeneration occurs here.
+	VolumeArtwork art;
+	if (object.kind == TownVisualObjectKind::Scenery) {
+		const uint16_t piece = dPiece[object.anchor.x][object.anchor.y];
+		if (piece < MAXTILES) {
+			const TileArt &tile = GetTile(piece);
+			if (tile.height >= 0.25F) {
+				art.texture = tile.facade;
+				art.mesh = BuildTownPropVolume({ art.texture.width, art.texture.height, art.texture.pixels, art.texture.opacity });
+			}
+		}
+	} else {
+		struct DeltaGroup { Point referenceFootpoint, minTile, maxTile; std::vector<Point> sourceTiles; };
+		DeltaGroup group { object.anchor, { MAXDUNX, MAXDUNY }, { -1, -1 }, {} };
+		for (const auto &cell : object.sourceCells) {
+			group.sourceTiles.push_back(cell.tile);
+			group.minTile.x = std::min(group.minTile.x, cell.tile.x); group.minTile.y = std::min(group.minTile.y, cell.tile.y);
+			group.maxTile.x = std::max(group.maxTile.x, cell.tile.x); group.maxTile.y = std::max(group.maxTile.y, cell.tile.y);
+		}
+		const bool foliage = std::any_of(object.mesh.triangles.begin(), object.mesh.triangles.end(), [](const auto &triangle) { return triangle.material == TownVolumeMaterial::Foliage; });
+		art = ComposeNativeScenery(group, object.kind == TownVisualObjectKind::Vegetation, foliage);
+	}
+	art.physicalFrame = object.physicalFrame;
+	ApplyFixedObjectTransform(art.mesh, object);
+	delta.art = std::move(art); delta.signature = changedSignature;
+	++FixedTownObjectState.nativeDeltaRebuilds;
+	return delta.art;
+}
+
+void DrawFixedTownObjects(const Surface &out, bool volumesAfterArchitecture)
+{
+	PrepareFixedTownObjects();
+	if (!volumesAfterArchitecture) FixedTownObjectState = { true };
+	const auto &set = GetTownVisualObjects();
+	for (size_t index = 0; index < set.objects.size(); ++index) {
+		const auto &object = set.objects[index];
+		if ((object.phase == 2) != volumesAfterArchitecture || !object.visible || object.nativeSuppressed)
+			continue;
+		const uint64_t changed = FixedObjectNativeSignature(object);
+		if (changed != 0) ++FixedTownObjectState.nativeDeltaObjects;
+		const auto &t = object.transform;
+		const Vec3 origin { static_cast<float>(object.anchor.x) + t.x, t.height, static_cast<float>(object.anchor.y) + t.z };
+		if (object.kind == TownVisualObjectKind::Ground) {
+			const Texture *texture = &FixedTownTextures[object.texture];
+			if (changed != 0 && !object.groundFallback) {
+				const uint16_t piece = dPiece[object.anchor.x][object.anchor.y];
+				if (piece >= MAXTILES) continue;
+				texture = &SceneGround(piece);
+			}
+			const float c = std::cos(t.yaw), s = std::sin(t.yaw);
+			const auto vertex = [&](float x, float z) { return Vec3 { origin.x + t.scale * (c * x + s * z), origin.y, origin.z + t.scale * (-s * x + c * z) }; };
+			DrawQuad(out, { vertex(-1.46875F, -0.46875F), vertex(-0.46875F, -1.46875F), vertex(0.53125F, -0.46875F), vertex(-0.46875F, 0.53125F) },
+				*texture, PickAt(object.anchor), dLight[object.anchor.x][object.anchor.y], true);
+			++FixedTownObjectState.groundSubmissions;
+		} else {
+			VolumeArtwork &art = FixedObjectVolume(index, object, changed);
+			DrawVolume(out, origin, object.anchor, art, PickKind::Ground, -1, dLight[object.anchor.x][object.anchor.y], object.kind != TownVisualObjectKind::Scenery);
+			if (!art.mesh.triangles.empty()) ++FixedTownObjectState.volumeSubmissions;
+		}
+	}
+	FixedTownObjectState.cachedVolumes = FixedTownVolumes.size();
+}
+
+bool CaptureFixedTownObjects(TownVisualObjectSet &set, std::string &failure)
+{
+	if (leveltype != DTYPE_TOWN || !pDungeonCels || MicroTileLen == 0 || gbIsHellfire) {
+		failure = "static-capture-requires-native-town"; return false;
+	}
+	// Explicit capture snapshots exactly the selected native visual branch once.
+	// This function is never called by the successful persistent startup path.
+	PrepareTownPropArtwork();
+	const Texture &fallback = FallbackGround();
+	const auto addTexture = [&](const Texture &texture) -> uint32_t {
+		for (size_t i = 0; i < set.textures.size(); ++i) {
+			const auto &existing = set.textures[i];
+			if (existing.width == static_cast<uint32_t>(texture.width) && existing.height == static_cast<uint32_t>(texture.height)
+			    && existing.repeat == texture.repeat && existing.pixels == texture.pixels && existing.opacity == texture.opacity)
+				return static_cast<uint32_t>(i);
+		}
+		TownVisualObjectTexture record;
+		record.width = texture.width; record.height = texture.height; record.repeat = texture.repeat;
+		record.pixels = texture.pixels; record.opacity = texture.opacity;
+		if (record.width == 0 || record.height == 0) { record.width = record.height = 1; record.pixels = { 0 }; }
+		set.textures.push_back(std::move(record));
+		return static_cast<uint32_t>(set.textures.size() - 1);
+	};
+	const auto cellAt = [](Point tile) { return TownVisualSourceCell { tile, dPiece[tile.x][tile.y], static_cast<uint8_t>(dSpecial[tile.x][tile.y]) }; };
+	const auto cellId = [](std::string_view prefix, Point tile) { return std::string(prefix) + '-' + std::to_string(tile.x) + '-' + std::to_string(tile.y); };
+	const auto bindEvent = [](TownVisualObject &object) {
+		const Point tile = object.anchor;
+		if (tile.x >= 60 && tile.x <= 61 && tile.y >= 70 && tile.y <= 71) {
+			object.eventBinding = TownVisualObjectEvent::WellWater;
+			object.eventState = Quests[Q_PWATER]._qactive != QUEST_DONE && Quests[Q_PWATER]._qactive != QUEST_NOTAVAIL;
+		} else if (tile.x >= 48 && tile.x <= 49 && tile.y >= 20 && tile.y <= 21) {
+			object.eventBinding = TownVisualObjectEvent::CatacombsAccess;
+			object.eventState = MyPlayer != nullptr && IsWarpOpen(DTYPE_CATACOMBS);
+		} else if (tile.x >= 16 && tile.x <= 17 && tile.y >= 68 && tile.y <= 71) {
+			object.eventBinding = TownVisualObjectEvent::CavesAccess;
+			object.eventState = MyPlayer != nullptr && IsWarpOpen(DTYPE_CAVES);
+		} else if (tile.x >= 36 && tile.x <= 55 && tile.y >= 78 && tile.y <= 79) {
+			object.eventBinding = TownVisualObjectEvent::HellAccess;
+			object.eventState = MyPlayer != nullptr && IsWarpOpen(DTYPE_HELL);
+		}
+	};
+	const auto forEachTile = [](const auto &visit) {
+		for (int diagonal = 0; diagonal < MAXDUNX + MAXDUNY - 1; ++diagonal)
+			for (int x = std::max(0, diagonal - MAXDUNY + 1); x <= std::min(MAXDUNX - 1, diagonal); ++x)
+				visit(Point { x, diagonal - x });
+	};
+	const auto addGround = [&](Point tile, bool solid) {
+		TownVisualObject object;
+		object.id = cellId("ground", tile); object.anchor = tile; object.phase = solid ? 1 : 0;
+		object.sourceCells.push_back(cellAt(tile));
+		object.groundFallback = solid ? (TownSceneReplacesTile(tile) || PreparedTownPropReplacesTile(tile, true)) : PreparedTownPropReplacesTile(tile, true);
+		object.texture = addTexture(object.groundFallback ? fallback : SceneGround(dPiece[tile.x][tile.y]));
+		bindEvent(object);
+		set.objects.push_back(std::move(object));
+	};
+	forEachTile([&](Point tile) { if (dPiece[tile.x][tile.y] < MAXTILES && !GetTile(dPiece[tile.x][tile.y]).solid) addGround(tile, false); });
+	forEachTile([&](Point tile) {
+		const uint16_t piece = dPiece[tile.x][tile.y];
+		if (piece >= MAXTILES) return;
+		const TileArt &art = GetTile(piece);
+		if (art.solid) addGround(tile, true);
+		TownVisualObject object;
+		object.id = cellId("scenery", tile); object.anchor = tile; object.kind = TownVisualObjectKind::Scenery; object.phase = 1;
+		object.sourceCells.push_back(cellAt(tile));
+		bindEvent(object);
+		object.nativeSuppressed = TownVegetationReplacesTile(tile) || TownSceneReplacesTile(tile) || PreparedTownPropReplacesTile(tile);
+		object.texture = addTexture(art.facade);
+		if (!object.nativeSuppressed && art.height >= 0.25F)
+			object.mesh = BuildTownPropVolume({ art.facade.width, art.facade.height, art.facade.pixels, art.facade.opacity });
+		set.objects.push_back(std::move(object));
+	});
+	for (const auto &group : GetTownVegetationGroups()) {
+		TownVisualObject object;
+		object.id = "tree-" + std::to_string(static_cast<unsigned>(group.family)) + '-' + std::to_string(group.referenceFootpoint.x) + '-' + std::to_string(group.referenceFootpoint.y);
+		object.kind = TownVisualObjectKind::Vegetation; object.phase = 2; object.anchor = group.referenceFootpoint;
+		const VolumeArtwork art = ComposeVegetation(group); object.mesh = art.mesh; object.physicalFrame = art.physicalFrame; object.texture = addTexture(art.texture);
+		for (Point tile : group.sourceTiles) object.sourceCells.push_back(cellAt(tile));
+		set.objects.push_back(std::move(object));
+	}
+	const auto &propGroups = GetTownPropGroups();
+	for (size_t i = 0; i < propGroups.size(); ++i) {
+		const auto &group = propGroups[i];
+		const auto prepared = PropArtworkCache.find(i);
+		if (prepared == PropArtworkCache.end() || !TownPropArtworkValid(prepared->second))
+			continue; // The generic captured scenery retains this refused native fallback.
+		std::string_view prefix;
+		switch (group.kind) {
+		case town_prop_stencils::Kind::Rock: prefix = "rock"; break;
+		case town_prop_stencils::Kind::Grave: prefix = "grave"; break;
+		case town_prop_stencils::Kind::Wall: prefix = "wall"; break;
+		}
+		TownVisualObject object;
+		object.id = cellId(prefix, group.referenceFootpoint); object.kind = TownVisualObjectKind::Prop; object.phase = 2; object.anchor = group.referenceFootpoint;
+		object.visible = !TownPropHiddenByArchitecture(group);
+		const VolumeArtwork &art = prepared->second; object.mesh = art.mesh; object.physicalFrame = art.physicalFrame; object.texture = addTexture(art.texture);
+		for (Point tile : group.sourceTiles) object.sourceCells.push_back(cellAt(tile));
+		set.objects.push_back(std::move(object));
+	}
+	failure.clear(); return true;
 }
 
 void DrawProps(const Surface &out)
@@ -3641,6 +5001,8 @@ void DrawProps(const Surface &out)
 		const auto found = PropArtworkCache.find(i);
 		const VolumeArtwork &art = found != PropArtworkCache.end() ? found->second
 			: PropArtworkCache.emplace(i, ComposeNativeScenery(group, false)).first->second;
+		if (!TownPropArtworkValid(art))
+			continue;
 		const Point tile = group.referenceFootpoint;
 		DrawVolume(out, { static_cast<float>(tile.x), 0, static_cast<float>(tile.y) }, tile, art, PickKind::Ground, -1,
 			InDungeonBounds(tile) ? dLight[tile.x][tile.y] : 0);
@@ -3772,7 +5134,337 @@ void DrawPlayerVolume(const Surface &out, Vec3 position, const Player &player, i
 		static_cast<int>(player._pdir), player.AnimInfo.getFrameToUseForRendering(), current, PickKind::Player, entity);
 }
 
-void DrawBillboard(const Surface &out, Vec3 position, Point tile, ClxSprite sprite, PickKind kind, int entity, int lighting = 0, bool preservePicking = false)
+struct WarriorPilotArtwork {
+	PlayerActorNativeRuntime runtime;
+	std::array<std::optional<PlayerActorNativePilotFrame>, MAX_PLRS> frames;
+	std::array<uint8_t, MAX_PLRS> retainedProgress {};
+	Texture body;
+	std::array<std::vector<Texture>, 2> equipment;
+	std::array<uint32_t, 256> palette {};
+	std::map<std::pair<int, int>, Texture> inventorySprites;
+	bool attempted = false, materialsReady = false, cathedralMaterials = false;
+	int timeOfDay = -1;
+};
+WarriorPilotArtwork WarriorPilot;
+TownViewWarriorPilotState WarriorPilotState;
+
+bool EnsureWarriorNativePilotLoaded()
+{
+	if (WarriorPilot.attempted) return WarriorPilot.runtime.loaded();
+	WarriorPilot.attempted = true;
+	WarriorPilotState.attempted = true;
+	try {
+		std::array<std::vector<std::byte>, 3> owned;
+		std::array<std::span<const std::byte>, 3> packets;
+		for (size_t i = 0; i < owned.size(); ++i) {
+			const auto &profile = PlayerActorHumanPilotResources[i];
+			AssetRef ref = FindAsset(profile.path);
+			if (!ref.ok() || ref.size() != profile.packageBytes) {
+				WarriorPilotState.refusal = "warrior-pinned-resource-missing-or-size"; return false;
+			}
+			owned[i].resize(profile.packageBytes);
+			AssetHandle handle = OpenAsset(std::move(ref));
+			if (!handle.ok() || !handle.read(owned[i].data(), owned[i].size())) {
+				WarriorPilotState.refusal = "warrior-resource-read"; return false;
+			}
+			packets[i] = owned[i];
+		}
+		if (!WarriorPilot.runtime.Load(packets, WarriorPilotState.refusal)) return false;
+		WarriorPilotState.loaded = true;
+		return true;
+	} catch (const std::bad_alloc &) {
+		WarriorPilotState.refusal = "warrior-resource-allocation"; return false;
+	}
+}
+
+bool PrepareWarriorNativeMaterials(bool cathedralWorld)
+{
+	std::array<uint32_t, 256> palette;
+	for (size_t i = 0; i < palette.size(); ++i) {
+		const auto color = logical_palette[i];
+		palette[i] = 0xFF000000U | (uint32_t(color.r) << 16) | (uint32_t(color.g) << 8) | color.b;
+	}
+	if (WarriorPilot.materialsReady && WarriorPilot.cathedralMaterials == cathedralWorld
+	    && WarriorPilot.palette == palette && (cathedralWorld || WarriorPilot.timeOfDay == SceneTimeOfDay)) return true;
+	try {
+		const auto nativeLight = cathedral::BuildNativeLightLut(LightTables);
+		const auto world = cathedralWorld ? PlayerActorMaterialWorld::NativeCathedral : PlayerActorMaterialWorld::TownDirectional;
+		const auto prepare = [&](uint32_t width, uint32_t height, std::span<const uint8_t> rgb, Texture &texture) {
+			PlayerActorMaterial material;
+			if (!PreparePlayerActorMaterial({ width, height, rgb, palette, nativeLight, world, SceneLightingConfig },
+			        material, WarriorPilotState.refusal)) return false;
+			texture.width = width; texture.height = height;
+			texture.actorMaterial = std::move(material);
+			return true;
+		};
+		Texture body;
+		const ActorModel &model = *WarriorPilot.runtime.Resources().Body();
+		if (!prepare(model.textureWidth, model.textureHeight, model.textureRgb, body)) return false;
+		std::array<std::vector<Texture>, 2> gear;
+		const std::array<const ActorRigidResource *, 2> rigid { WarriorPilot.runtime.Resources().Sword(), WarriorPilot.runtime.Resources().Buckler() };
+		for (size_t resource = 0; resource < rigid.size(); ++resource) {
+			// This exact pilot has no encoded gear textures. Keep all authored
+			// material partitions and vertex COLOR0; do not flatten 27 shield parts.
+			if (!rigid[resource]->textures.empty()) { WarriorPilotState.refusal = "warrior-unsupported-rigid-textures"; return false; }
+			gear[resource].resize(rigid[resource]->materials.size());
+			for (size_t index = 0; index < gear[resource].size(); ++index) {
+				const auto &material = rigid[resource]->materials[index];
+				if (material.alphaMode != 0 || material.baseColor[3] != 1
+				    || std::any_of(material.textures.begin(), material.textures.end(), [](const auto &texture) { return texture.texture >= 0; })) {
+					WarriorPilotState.refusal = "warrior-unsupported-rigid-material"; return false;
+				}
+				const auto srgb = TownLinearToSrgb({ material.baseColor[0], material.baseColor[1], material.baseColor[2] });
+				const auto byte = [](float color) { return static_cast<uint8_t>(std::clamp(color * 255 + .5F, 0.0F, 255.0F)); };
+				const std::array<uint8_t, 3> rgb { byte(srgb.red), byte(srgb.green), byte(srgb.blue) };
+				if (!prepare(1, 1, rgb, gear[resource][index])) return false;
+			}
+			for (const auto &part : rigid[resource]->parts) if (part.material >= gear[resource].size()) {
+				WarriorPilotState.refusal = "warrior-rigid-material-out-of-range"; return false;
+			}
+		}
+		WarriorPilot.body = std::move(body); WarriorPilot.equipment = std::move(gear);
+		WarriorPilot.palette = palette; WarriorPilot.cathedralMaterials = cathedralWorld;
+		WarriorPilot.timeOfDay = SceneTimeOfDay; WarriorPilot.materialsReady = true;
+		return true;
+	} catch (const std::bad_alloc &) { WarriorPilotState.refusal = "warrior-material-allocation"; return false; }
+}
+
+struct WarriorFirstPersonPresentation {
+	const PlayerActorNativePilotFrame *frame = nullptr;
+	Vec3 footpoint {}, right {}, forward {};
+	float nativeCos = 1, nativeSin = 0;
+};
+WarriorFirstPersonPresentation WarriorFirstPerson;
+
+Vec3 WarriorFirstPersonPoint(Vec3 position)
+{
+	const auto &pose = WarriorFirstPerson;
+	const auto p = position - pose.footpoint;
+	const float localX = pose.nativeCos * p.x - pose.nativeSin * p.z;
+	const float localZ = pose.nativeSin * p.x + pose.nativeCos * p.z;
+	// Asset front is +Z and anatomical right is -X. This complete horizontal
+	// basis (-cameraRight, worldUp, horizontalForward) has determinant +1.
+	return pose.footpoint + pose.right * -localX + Vec3 { 0, p.y, 0 } + pose.forward * localZ;
+}
+
+void PrepareWarriorNativeFrame(bool cathedralWorld)
+{
+	for (auto &frame : WarriorPilot.frames) frame.reset();
+	WarriorPilotState.preparedPlayers = WarriorPilotState.worldBodyDraws = WarriorPilotState.firstPersonDraws = 0;
+	WarriorPilotState.bodyTriangles = WarriorPilotState.handTriangles = WarriorPilotState.rigidTriangles = WarriorPilotState.spriteQuads = 0;
+	WarriorFirstPerson = {};
+	if (!EnsureWarriorNativePilotLoaded()) return;
+	const WarriorWorldIdentity world { cathedralWorld ? WarriorWorldKind::Cathedral : WarriorWorldKind::Town,
+		currlevel, setlevel, gbIsHellfire, gbIsSpawn };
+	const auto sprites = [](const PlayerActorEquippedHand &item) -> std::optional<PlayerActorInventorySpriteSource> {
+		const int cursor = item.inventoryCursor + CURSOR_FIRSTITEM;
+		const auto sprite = TryGetInvItemSprite(cursor);
+		if (!sprite) return std::nullopt;
+		// Explicit pilot grip: bottom center, full alpha canvas, 0.731 authored
+		// rig units high (the real sword bounds); no ground/category substitution.
+		return PlayerActorInventorySpriteSource { sprite, { sprite->width() * .5F, float(sprite->height() - 1) }, .731F / sprite->height() };
+	};
+	for (size_t slot = 0; slot < Players.size(); ++slot) {
+		const Player &player = Players[slot];
+		if (!player.plractive || !player.isOnActiveLevel() || !player.AnimInfo.sprites || player._pClass != HeroClass::Warrior) continue;
+		const bool local = &player == MyPlayer;
+		const bool firstPerson = local && CameraRig.mode() == TownCameraMode::FirstPerson;
+		const bool hidden = local && FollowCameraState.localPlayerHidden;
+		if (PauseMode != 2) WarriorPilot.retainedProgress[slot] = static_cast<uint8_t>(std::min<unsigned>(ProgressToNextGameTick, 128));
+		const auto position = PlayerPosition(player);
+		PlayerActorNativePilotFrame frame;
+		if (!WarriorPilot.runtime.Prepare(player, NativePlayerActorLifecycle(),
+		        { world, static_cast<uint32_t>(slot), { position.x, 0, position.z }, WarriorPilot.retainedProgress[slot],
+		            PauseMode == 2, local, hidden, firstPerson }, sprites, frame, WarriorPilotState.refusal)) continue;
+		bool valid = true;
+		try {
+		for (auto &sprite : frame.hands.spriteAttachments) {
+			if (!sprite.sprite) { valid = false; break; }
+			const std::pair<int, int> key { sprite.equipment.nativeItemId, sprite.equipment.inventoryCursor };
+			if (WarriorPilot.inventorySprites.find(key) == WarriorPilot.inventorySprites.end()) {
+				try { WarriorPilot.inventorySprites.emplace(key, DecodeSprite(*sprite.sprite)); }
+				catch (const std::bad_alloc &) { valid = false; break; }
+			}
+			const auto &texture = WarriorPilot.inventorySprites.at(key);
+			frame.inventoryPixels.push_back({ key.first, key.second, texture.width, texture.height, texture.pixels, texture.opacity });
+			sprite.sprite.reset(); // Borrowed CLX used only during the owned decode.
+		}
+		} catch (const std::bad_alloc &) { valid = false; }
+		if (!valid) { WarriorPilotState.refusal = "warrior-inventory-sprite-texture"; continue; }
+		WarriorPilot.frames[slot] = std::move(frame); ++WarriorPilotState.preparedPlayers;
+	}
+}
+
+void PrepareWarriorFirstPersonPresentation()
+{
+	if (CameraRig.mode() != TownCameraMode::FirstPerson || MyPlayer == nullptr || !ViewCamera.projection.valid) return;
+	const size_t slot = static_cast<size_t>(MyPlayer - Players.data());
+	if (slot >= WarriorPilot.frames.size() || !WarriorPilot.frames[slot]) return;
+	const auto &frame = *WarriorPilot.frames[slot];
+	if (!frame.firstPerson || !WarriorPilot.runtime.IsCurrent(*MyPlayer, NativePlayerActorLifecycle(), frame)) return;
+	// Provisional measured iris-surface landmarks from the same pinned BODY:
+	// source UV/triangle barycentrics, not guessed Head-pivot offsets. These
+	// vertices include small Neck weights, so use their already sampled skin.
+	static constexpr std::array<std::array<uint32_t, 3>, 2> eyeIndices {{
+		{ 1125, 1122, 1124 }, { 2795, 2797, 2796 }
+	}};
+	static constexpr std::array<std::array<float, 3>, 2> eyeWeights {{
+		{ .03924311324954033F, .3877051770687103F, .5730516910552979F },
+		{ .06292831897735596F, .5515196919441223F, .38555195927619934F }
+	}};
+	Vec3 nativeEye {};
+	for (size_t eye = 0; eye < eyeIndices.size(); ++eye) {
+		Vec3 point {};
+		float total = 0;
+		for (size_t i = 0; i < eyeIndices[eye].size(); ++i) {
+			if (eyeIndices[eye][i] >= frame.geometry.body.vertices.size()) return;
+			const auto p = frame.geometry.body.vertices[eyeIndices[eye][i]].worldPosition;
+			point = point + Vec3 { p.x, p.y, p.z } * eyeWeights[eye][i];
+			total += eyeWeights[eye][i];
+		}
+		nativeEye = nativeEye + point * (.5F / total);
+	}
+	const auto &capture = frame.capture.snapshot;
+	const auto &camera = ViewCamera.projection;
+	const float horizontal = std::hypot(camera.forward.x, camera.forward.z);
+	if (!std::isfinite(horizontal) || horizontal < .001F) return;
+	WarriorFirstPerson = { &frame,
+		{ capture.authoritativeFootpoint.x, capture.authoritativeFootpoint.y, capture.authoritativeFootpoint.z },
+		{ camera.right.x, 0, camera.right.z },
+		{ camera.forward.x / horizontal, 0, camera.forward.z / horizontal },
+		std::cos(capture.nativeYawRadians), std::sin(capture.nativeYawRadians) };
+	if (Dot(Cross(WarriorFirstPerson.right * -1, { 0, 1, 0 }), WarriorFirstPerson.forward) < .999F) {
+		WarriorFirstPerson = {};
+		return;
+	}
+	const Vec3 eye = WarriorFirstPersonPoint(nativeEye);
+	const TownCameraPoint presentedEye { eye.x, eye.y, eye.z };
+	const float radius = TownCameraCollisionRadius(camera);
+	bool safe = std::isfinite(eye.x) && std::isfinite(eye.y) && std::isfinite(eye.z)
+	    && radius > 0 && eye.y >= radius + .002F;
+	if (safe && !FollowThroughTownArchitecture()) {
+		// Refuse rather than detach the eye from its rig to recover a safe boom.
+		// Raw camera resolution already prepared this scene's collision index.
+		const auto hit = CameraCollisionIndex.Sweep(camera.eye, presentedEye, radius);
+		FollowCameraState.nodesVisited += hit.nodesVisited;
+		FollowCameraState.trianglesTested += hit.trianglesTested;
+		safe = hit.valid && !hit.initialOverlap && hit.fraction >= 1;
+	}
+	if (!safe) {
+		WarriorFirstPerson = {};
+		ViewCamera.projection.valid = false;
+		FollowCameraState.valid = false;
+		WarriorPilotState.refusal = "warrior-fp-eye-projection-collision";
+		return;
+	}
+	ViewCamera.projection.eye = presentedEye;
+	ViewCamera.eye = eye;
+	FollowCameraState.desiredEye = FollowCameraState.resolvedEye = presentedEye;
+	FollowCameraState.eyeHeight = eye.y - capture.authoritativeFootpoint.y;
+	FollowCameraState.visualDistance = FollowCameraState.resolvedDistance = 0;
+	FollowCameraState.localPlayerHidden = true;
+	HasSafeCameraEye = false; // Never reuse a calibrated eye as an unrelated boom.
+	++FollowProjectionRevision;
+}
+
+bool WarriorFirstPersonBodyAdmitted(const Player &player, size_t slot)
+{
+	// Admission, not requested visibility or visible arm triangles. A diagnostic
+	// self-draw OFF still has the same admitted frame for OFF/ON pick witnesses.
+	if (&player != MyPlayer || CameraRig.mode() != TownCameraMode::FirstPerson
+	    || !ViewCamera.projection.valid || !WarriorPilot.materialsReady || player.hasNoLife()
+	    || CathedralTranslation != nullptr || slot >= WarriorPilot.frames.size()
+	    || !WarriorPilot.frames[slot]) return false;
+	const auto &frame = *WarriorPilot.frames[slot];
+	return frame.firstPerson && WarriorFirstPerson.frame == &frame
+	    && !frame.geometry.body.vertices.empty() && !frame.geometry.body.indices.empty()
+	    && WarriorPilot.runtime.IsCurrent(player, NativePlayerActorLifecycle(), frame);
+}
+
+bool DrawWarriorNativePilot(const Surface &out, const Player &player, size_t slot, bool selectable, int shade, bool firstPerson)
+{
+	if (slot >= WarriorPilot.frames.size() || !WarriorPilot.frames[slot] || !WarriorPilot.materialsReady || CathedralTranslation != nullptr) return false;
+	const auto &frame = *WarriorPilot.frames[slot];
+	if (frame.firstPerson != firstPerson || !WarriorPilot.runtime.IsCurrent(player, NativePlayerActorLifecycle(), frame)) return false;
+	const auto &geometry = frame.geometry;
+	if (firstPerson && WarriorFirstPerson.frame != &frame) return false;
+	const auto convert = [&](const ActorPlayerGeometryVertex &vertex) {
+		const auto &p = vertex.worldPosition;
+		const Vec3 world { p.x, p.y, p.z };
+		const Vec3 position = firstPerson ? WarriorFirstPersonPoint(world) : world;
+		return Vertex { position, vertex.uv.x, vertex.uv.y,
+			{ vertex.authoredColor.x, vertex.authoredColor.y, vertex.authoredColor.z, vertex.authoredColor.w } };
+	};
+	PickRecord pick = PickAt(player.position.tile, firstPerson || selectable ? PickKind::Player : PickKind::Ground,
+		firstPerson || selectable ? static_cast<int>(slot) : -1);
+	if (firstPerson) pick.preservePicking = true;
+	const auto draw = [&](const auto &vertices, std::span<const uint32_t> indices, const Texture &texture, bool twoSided) {
+		for (size_t triangle = 0; triangle < indices.size(); triangle += 3) {
+			const std::array<Vertex, 3> projected { convert(vertices[indices[triangle]]), convert(vertices[indices[triangle + 1]]), convert(vertices[indices[triangle + 2]]) };
+			const auto normal = Cross(projected[1].position - projected[0].position, projected[2].position - projected[0].position);
+			if (!twoSided && Dot(normal, ViewCamera.eye - projected[0].position) <= 0) continue;
+			const float length = std::sqrt(Dot(normal, normal));
+			if (length <= 0) continue;
+			const TownSceneNormal face { normal.x / length, normal.y / length, normal.z / length };
+			DrawTriangle(out, projected, texture, pick, shade, false, &face);
+		}
+	};
+	if (firstPerson) {
+		draw(geometry.body.vertices, frame.hands.leftArmIndices, WarriorPilot.body, true);
+		draw(geometry.body.vertices, frame.hands.rightArmIndices, WarriorPilot.body, true);
+		WarriorPilotState.handTriangles += (frame.hands.leftArmIndices.size() + frame.hands.rightArmIndices.size()) / 3;
+		++WarriorPilotState.firstPersonDraws;
+	} else {
+		draw(geometry.body.vertices, geometry.body.indices, WarriorPilot.body, true);
+		WarriorPilotState.bodyTriangles += geometry.body.indices.size() / 3;
+		++WarriorPilotState.worldBodyDraws;
+	}
+	for (const auto &attachment : geometry.attachments) {
+		const size_t resource = attachment.nativeItemId == 1 ? 0 : 1;
+		for (const auto &part : attachment.parts) {
+			draw(part.vertices, part.indices, WarriorPilot.equipment[resource][part.material], true);
+			WarriorPilotState.rigidTriangles += part.indices.size() / 3;
+		}
+	}
+	for (const auto &sprite : frame.hands.spriteAttachments) {
+		const auto texture = WarriorPilot.inventorySprites.find({ sprite.equipment.nativeItemId, sprite.equipment.inventoryCursor });
+		draw(sprite.quad, PlayerActorInventorySpriteQuadIndices, texture->second, true);
+		++WarriorPilotState.spriteQuads;
+	}
+	return true;
+}
+
+void DrawWarriorViewModel(const Surface &out)
+{
+	if (!WarriorViewModelEnabledForDiagnostics || CameraRig.mode() != TownCameraMode::FirstPerson || MyPlayer == nullptr) return;
+	const size_t slot = static_cast<size_t>(MyPlayer - Players.data());
+	if (slot >= WarriorPilot.frames.size() || !WarriorPilot.frames[slot] || !WarriorPilot.frames[slot]->firstPerson) return;
+	try {
+		struct VisualDepthScope {
+			bool cpu;
+			bool previous;
+			std::vector<float> depth;
+			explicit VisualDepthScope(bool gpu) : cpu(!gpu), previous(DrawingWarriorViewModel)
+			{
+				if (cpu) {
+					depth.assign(DepthBuffer.size(), std::numeric_limits<float>::infinity());
+					depth.swap(DepthBuffer);
+				}
+				DrawingWarriorViewModel = true;
+			}
+			~VisualDepthScope()
+			{
+				DrawingWarriorViewModel = previous;
+				if (cpu) depth.swap(DepthBuffer);
+			}
+		} scope(CaptureGpu);
+		DrawWarriorNativePilot(out, *MyPlayer, slot, false, 0, true);
+	} catch (const std::bad_alloc &) {
+		WarriorPilotState.refusal = "warrior-view-model-allocation";
+	}
+}
+
+void DrawBillboard(const Surface &out, Vec3 position, Point tile, ClxSprite sprite, PickKind kind, int entity, int lighting = 0, bool preservePicking = false, float scale = 1, float contactHeight = -1, bool groundAligned = false, bool skullFlameOnly = false)
 {
 	if (!ViewCamera.projection.perspective && (std::abs(position.x - ViewCamera.target.x) > 80 || std::abs(position.z - ViewCamera.target.z) > 80))
 		return;
@@ -3782,23 +5474,68 @@ void DrawBillboard(const Surface &out, Vec3 position, Point tile, ClxSprite spri
 		hash ^= key[i];
 		hash *= 1099511628211ULL;
 	}
-	auto found = BillboardTextureCache.find(key);
-	if (found != BillboardTextureCache.end() && (found->second.sourceHash != hash
-	    || found->second.texture.width != sprite.width() || found->second.texture.height != sprite.height())) {
-		BillboardTextureCache.erase(found);
-		found = BillboardTextureCache.end();
+	if (const auto *translation = sprite.hdTranslation()) {
+		for (size_t i = 0; i < 256; ++i) {
+			hash ^= translation[i];
+			hash *= 1099511628211ULL;
+		}
 	}
-	if (found == BillboardTextureCache.end()) {
-		if (BillboardTextureCache.size() >= 192)
-			BillboardTextureCache.clear();
-		found = BillboardTextureCache.emplace(key, BillboardArtwork { DecodeSprite(sprite), hash }).first;
+	hash ^= sprite.hdFrameId();
+	const int density = sprite.hdScale();
+	auto &billboardCache=skullFlameOnly?SkullFireFlameCache:BillboardTextureCache;
+	auto found = billboardCache.find(key);
+	if (found != billboardCache.end() && (found->second.sourceHash != hash
+	    || found->second.texture.width != sprite.width() * density || found->second.texture.height != sprite.height() * density)) {
+		billboardCache.erase(found);
+		found = billboardCache.end();
+	}
+	if (found == billboardCache.end()) {
+		if (billboardCache.size() >= 192)
+			billboardCache.clear();
+		found = billboardCache.emplace(key, BillboardArtwork { DecodeSprite(sprite, true), hash }).first;
+        if(skullFlameOnly){
+            // The native flame sprite includes its old skull base. Crop that
+            // base only in this separate 3D effect cache; source/2D stay intact.
+            auto &flame=found->second.texture;int bottom=-1;
+            for(int y=flame.height-1;y>=0 && bottom<0;--y)for(int x=0;x<flame.width;++x)if(flame.opacity[size_t(y)*flame.width+x]){bottom=y;break;}
+            int left=flame.width,right=-1;
+            for(int y=0;y<flame.height;++y)for(int x=0;x<flame.width;++x)if(flame.opacity[size_t(y)*flame.width+x]){left=std::min(left,x);right=std::max(right,x);}
+            // Native canvas contains substantial side padding. Measure the
+            // actual skull silhouette, not animWidth, to avoid deleting fire.
+            const int bodyRows=std::max(1,int(std::ceil((right-left+1)*.34F)));
+            const int cut=std::max(0,bottom-bodyRows+1);
+            std::fill(flame.opacity.begin()+size_t(cut)*flame.width,flame.opacity.end(),0);
+        }
 	}
 	const Texture &texture = found->second.texture;
-	const float width = static_cast<float>(texture.width) / NativeCameraScale;
-	const float height = static_cast<float>(texture.height) / PixelsPerWorldUnit;
+	const float width = static_cast<float>(sprite.width()) / NativeCameraScale * scale;
+	const float height = static_cast<float>(sprite.height()) / PixelsPerWorldUnit * scale;
+	if (contactHeight >= 0) {
+		// C1 flame frames have a large transparent native offset. Anchor their
+		// actual coverage to the physical bowl, not the bitmap rectangle. Cache
+		// this measurement once per decoded frame; native pixels and animation
+		// remain unchanged. Other billboards retain their native placement.
+		int &bottom = found->second.bottomCoveredRow;
+		if (bottom < 0) {
+			for (int row = texture.height - 1; row >= 0 && bottom < 0; --row) {
+				const auto begin = texture.opacity.begin() + static_cast<size_t>(row) * texture.width;
+				if (std::any_of(begin, begin + texture.width, [](uint8_t covered) { return covered != 0; }))
+					bottom = row;
+			}
+		}
+		if (bottom >= 0)
+			position.y += contactHeight - static_cast<float>(texture.height - 1 - bottom) / (PixelsPerWorldUnit * density) * scale;
+	}
+    if(groundAligned) {
+        // Fixed native-isometric world basis: death direction is already baked into the selected sprite.
+        const auto point=[&](float dx,float dy){return Vec3{position.x+(dx+2*dy)/64.0F,0.012F,position.z+(2*dy-dx)/64.0F};};
+        const float half=sprite.width()*scale/2,depth=sprite.height()*scale;
+        DrawQuad(out,{point(-half,-depth),point(half,-depth),point(half,0),point(-half,0)},texture,PickAt(tile,kind,entity),lighting,true);
+        ++CorpseGroundDraws;return;
+    }
 	// CLX's anchor is the bottom pixel, while a rasterized quad ends at the edge
 	// after that pixel. Keep the native anchor and its last row at the default pose.
-	position.y -= 1.0F / PixelsPerWorldUnit;
+	position.y -= scale / PixelsPerWorldUnit;
 	const Vec3 halfWidth = ViewCamera.right * (width / 2);
 	const Vec3 rise { 0, height, 0 };
 	PickRecord pick = PickAt(tile, kind, entity);
@@ -3806,6 +5543,15 @@ void DrawBillboard(const Surface &out, Vec3 position, Point tile, ClxSprite spri
 	DrawQuad(out, { position - halfWidth + rise, position + halfWidth + rise,
 		position + halfWidth, position - halfWidth }, texture, pick, lighting, true);
 }
+
+void DrawBarrelNativeBreakEffect(const Surface &out,const Object &object,int slot,bool selectable)
+{
+    // Dedicated replacement seam for a future authored effect. Today use the exact native sprite/frame.
+    DrawBillboard(out,{float(object.position.x),0,float(object.position.y)},object.position,object.currentSprite(),selectable ? PickKind::Object : PickKind::Ground,selectable ? slot : -1,object.applyLighting ? dLight[object.position.x][object.position.y] : 0);
+    ++Barrel.nativeBreakDraws;if(object.isExplosive())++Barrel.nativeExplosionDraws;
+}
+
+
 
 bool CathedralTileInFrame(Point tile)
 {
@@ -3858,6 +5604,13 @@ void DrawCathedralWorld(const Surface &out)
 	}
 	const auto drawSurface = [&](const cathedral::FrameTriangle &surface) {
 		if (surface.visualSuppressed) return; // No color, depth or pixel pick for hidden art.
+        if(DoorModels.loaded && (surface.module==cathedral::ModuleKind::DoorFrame || surface.module==cathedral::ModuleKind::DoorLeaf))return;
+		if (FollowThroughTownArchitecture() && CameraRig.mode() == TownCameraMode::ThirdPerson
+		    && CathedralVisibilityGeometry == CathedralFrame.geometryRevision) {
+			const auto owner = CathedralVisibilityOwners.find(surface.instanceId);
+			if (owner != CathedralVisibilityOwners.end() && owner->second < CathedralHiddenOwners.size()
+			    && CathedralHiddenOwners[owner->second] != 0) return;
+		}
 		const Texture *texture = &textures[static_cast<size_t>(surface.module)];
 		const auto *artVertices = &surface.vertices;
 		if (surface.nativeTexture.kind != cathedral::NativeTextureKind::Technical) {
@@ -3884,23 +5637,39 @@ void DrawCathedralWorld(const Surface &out)
 			pick = PickAt(tile, PickKind::Object, surface.pick.nativeSlot);
 		const uint8_t shade = surface.nativeTexture.kind == cathedral::NativeTextureKind::Masonry ? 0 : surface.light;
 		DrawTriangle(out, vertices, *texture, pick, shade); // Lit codes use the same identity palette on CPU/GPU.
+		// First-person dungeon ceiling is presentation only: no Town geometry,
+		// simulation collision or pick target is added. Third-person stays open.
+		if (surface.module == cathedral::ModuleKind::Floor
+		    && surface.nativeTexture.layout == cathedral::NativeTextureLayout::RectifiedFloor
+		    && GetTownViewCameraMode() == TownCameraMode::FirstPerson) {
+			for (auto &vertex : vertices) vertex.position.y = 2.8F;
+			std::swap(vertices[0],vertices[2]);
+			const auto &ceiling = CathedralNativeTextureCache.at(NativeTextureKey(CathedralCeilingBinding)).texture;
+			DrawTriangle(out,vertices,ceiling,PickRecord {},surface.light);
+		}
 	};
 	const auto drawSpecial = [&](const cathedral::NativeSpecialOverlay &special) {
 		if (!pSpecialCels || special.frameIndex < 0 || static_cast<uint32_t>(special.frameIndex) >= pSpecialCels->numSprites())
 			return; // Normal frames were gated; forced diagnostics remain safe.
 		const Point tile { special.x, special.z };
+        if(DoorModels.loaded)if(const auto *snapshot=cathedral::LiveSnapshot())for(const auto &door:snapshot->doors)if(std::abs(door.x-tile.x)<=1 && std::abs(door.z-tile.y)<=1)return; // Replaced doorway includes its neighboring native trim cells.
+		// CLX holes remain coverage; TransList is only the original 2D view aid.
 		DrawBillboard(out, { static_cast<float>(tile.x), 0, static_cast<float>(tile.y) }, tile,
-			(*pSpecialCels)[special.frameIndex], PickKind::Ground, -1, special.light, CathedralPaletteBlend);
+			(*pSpecialCels)[special.frameIndex], PickKind::Ground, -1, special.light);
 	};
 	CathedralPaletteBlend = false;
 	InjectCathedralAllocationFailure(TownViewCathedralAllocationFailurePoint::BeforeOpaque);
+	// Native SOL/TransList cutaways let the player see through foreground
+	// walls in the isometric renderer. A 3D wall is always opaque, regardless
+	// of that native view policy. Retain policy/provenance in the frame for
+	// validation; keep raw texture/CLX coverage (doorways and grate holes).
+	// Both disjoint native fence material passes draw opaque here.
 	for (const auto *surfaces : { &CathedralFrame.triangles, &CathedralFrame.nativeArtPanels })
 	for (const auto &surface : *surfaces)
-		if (surface.policy == cathedral::FrameSurfacePolicy::Opaque)
-			drawSurface(surface);
+		drawSurface(surface);
 	for (const auto &special : CathedralFrame.nativeSpecialOverlays)
-		if (!special.blendActive)
-			drawSpecial(special);
+		drawSpecial(special);
+    if(DoorModels.loaded)if(const auto *snapshot=cathedral::LiveSnapshot())for(const auto &door:snapshot->doors)DrawDoorModels(out,door);
 	for (int i = 0; i < ActiveObjectCount; ++i) {
 		const int slot = ActiveObjects[i];
 		if (slot < 0 || slot >= MAXOBJECTS)
@@ -3911,9 +5680,41 @@ void DrawCathedralWorld(const Surface &out)
 		    || object._otype == OBJ_L1LDOOR || object._otype == OBJ_L1RDOOR)
 			continue; // Door frames/leaves already retain their native object binding.
 		const bool selectable = object.canInteractWith() && std::abs(dObject[object.position.x][object.position.y]) == slot + 1;
+        if(object._otype==OBJ_CHEST1 || object._otype==OBJ_CHEST2 || object._otype==OBJ_CHEST3 || object._otype==OBJ_TCHEST1 || object._otype==OBJ_TCHEST2 || object._otype==OBJ_TCHEST3) {
+            if(DrawChestVisual(out,object,slot,selectable))continue;
+        }
+		if(object._otype==OBJ_BARREL || object._otype==OBJ_BARRELEX) {
+			if(object.IsBroken() && DrawBrokenBarrelShards(out,object)) {
+                // Retain only the active explosive sprite, never its old terminal debris image.
+                if(object.isExplosive() && object._oAnimFrame>1 && object._oAnimFrame<object._oAnimLen)
+                    DrawBarrelNativeBreakEffect(out,object,slot,false);
+            } else if(!DrawBarrelVisual(out,object,slot,selectable)) DrawBarrelNativeBreakEffect(out,object,slot,selectable);
+			continue;
+		}
+		if(object._otype==OBJ_SARC && DrawSarcophagusVisual(out,object,slot,selectable)) continue;
+        if(object._otype==OBJ_SKFIRE && SkullFire.loaded){
+            if(!IsTileVisible(object.position) || object._oDelFlag || std::abs(dObject[object.position.x][object.position.y])!=slot+1)continue;
+            if(DrawSkullFireVisual(out,object)){
+                DrawBillboard(out,{float(object.position.x)+-0.004782099F,0,float(object.position.y)+-0.005263244F},object.position,object.currentSprite(),PickKind::Ground,-1,0,false,.55F,SkullFireFlameHeight,false,true);
+                ++SkullFire.flameDraws;continue;
+            }
+        }
+		const bool nativeLightBody = CathedralNativeLightBodyAdmitted(slot);
+		// Body, floor support and flame are one visual object. Native light may
+		// reach an unseen cell; that alone must not reveal an orphan flame there.
+		if (nativeLightBody && !IsTileVisible(object.position))
+			continue;
+        const bool ownBrazier=nativeLightBody && DrawBrazierVisual(out,object);
+		if (nativeLightBody && !ownBrazier) {
+			if(!CathedralNativeLightBody) throw std::invalid_argument("Native light body not prepared for draw");
+			DrawVolume(out,{static_cast<float>(object.position.x),0,static_cast<float>(object.position.y)},object.position,
+			    *CathedralNativeLightBody,PickKind::Ground,-1,dLight[object.position.x][object.position.y],false);
+		}
 		DrawBillboard(out, { static_cast<float>(object.position.x), 0, static_cast<float>(object.position.y) },
 			object.position, object.currentSprite(), selectable ? PickKind::Object : PickKind::Ground,
-			selectable ? slot : -1, object.applyLighting ? dLight[object.position.x][object.position.y] : 0);
+			selectable ? slot : -1, object.applyLighting ? dLight[object.position.x][object.position.y] : 0, false,
+			nativeLightBody ? 0.45F : 1.0F, nativeLightBody ? (ownBrazier ? BrazierFlameContact : CathedralNativeLightBody->mesh.height) : -1.0F);
+        if(ownBrazier)++Brazier.flameDraws;
 	}
 	for (size_t i = 0; i < ActiveMonsterCount; ++i) {
 		const size_t slot = ActiveMonsters[i];
@@ -3960,16 +5761,17 @@ void DrawCathedralWorld(const Surface &out)
 		const Player &player = Players[i];
 		const Point tile = player.position.tile;
 		if (!player.plractive || !player.isOnActiveLevel() || !player.AnimInfo.sprites || !CathedralTileInFrame(tile)
-		    || (&player != MyPlayer && !IsTileLit(tile) && !MyPlayer->_pInfraFlag)
-		    || (FollowCameraState.localPlayerHidden && &player == MyPlayer))
+		    || (&player != MyPlayer && !IsTileLit(tile) && !MyPlayer->_pInfraFlag))
 			continue;
+		if (FollowCameraState.localPlayerHidden && WarriorFirstPersonBodyAdmitted(player, i)) continue;
 		if (&player != MyPlayer && (!IsTileLit(tile) || (MyPlayer->_pInfraFlag && dLight[tile.x][tile.y] > 8)))
 			CathedralTranslation = GetInfravisionTRN();
 		const bool selectable = std::abs(dPlayer[tile.x][tile.y]) == static_cast<int>(i) + 1
 		    || (player.hasNoLife() && TileContainsDeadPlayer(tile));
-		DrawBillboard(out, PlayerPosition(player), tile, player.currentSprite(), selectable ? PickKind::Player : PickKind::Ground,
-			selectable ? static_cast<int>(i) : -1,
-			&player == MyPlayer || CathedralTranslation != nullptr ? 0 : std::max(static_cast<int>(dLight[tile.x][tile.y]) - 5, 0));
+		const int shade = &player == MyPlayer || CathedralTranslation != nullptr ? 0 : std::max(static_cast<int>(dLight[tile.x][tile.y]) - 5, 0);
+		if (!DrawWarriorNativePilot(out, player, i, selectable, shade, false))
+			DrawBillboard(out, PlayerPosition(player), tile, player.currentSprite(), selectable ? PickKind::Player : PickKind::Ground,
+				selectable ? static_cast<int>(i) : -1, shade);
 		CathedralTranslation = nullptr;
 	}
 	for (const Missile &missile : Missiles) {
@@ -4004,54 +5806,13 @@ void DrawCathedralWorld(const Surface &out)
 			if (corpse.translationPaletteIndex > 0 && corpse.translationPaletteIndex <= MaxMonsters)
 				CathedralTranslation = Monsters[corpse.translationPaletteIndex - 1].uniqueMonsterTRN.get();
 			DrawBillboard(out, { static_cast<float>(x), 0, static_cast<float>(z) }, { x, z },
-				sprites[corpse.frame], PickKind::Ground, -1, CathedralTranslation != nullptr ? 0 : dLight[x][z]);
+				sprites[corpse.frame], PickKind::Ground, -1, CathedralTranslation != nullptr ? 0 : dLight[x][z],false,1.0F,-1.0F,true);
 			CathedralTranslation = nullptr;
 		}
 	}
 	InjectCathedralAllocationFailure(TownViewCathedralAllocationFailurePoint::AfterOpaque);
-	struct OverlayCommand {
-		bool special;
-		bool nativePanel;
-		size_t index;
-		float depth;
-	};
-	std::vector<OverlayCommand> overlays;
-	for (size_t i = 0; i < CathedralFrame.triangles.size(); ++i) {
-		const auto &surface = CathedralFrame.triangles[i];
-		if (surface.visualSuppressed || surface.policy != cathedral::FrameSurfacePolicy::NativePaletteBlend)
-			continue;
-		Vec3 center {};
-		for (const auto &vertex : surface.vertices)
-			center = center + Vec3 { vertex.position.x, vertex.position.y, vertex.position.z } * (1.0F / 3);
-		overlays.push_back({ false, false, i, ToCamera(center).z });
-	}
-	for (size_t i = 0; i < CathedralFrame.nativeArtPanels.size(); ++i) {
-		const auto &surface = CathedralFrame.nativeArtPanels[i];
-		if (surface.visualSuppressed || surface.policy != cathedral::FrameSurfacePolicy::NativePaletteBlend) continue;
-		Vec3 center {};
-		for (const auto &vertex : surface.textureVertices)
-			center = center + Vec3 { vertex.position.x, vertex.position.y, vertex.position.z } * (1.0F / 3);
-		overlays.push_back({ false, true, i, ToCamera(center).z });
-	}
-	for (size_t i = 0; i < CathedralFrame.nativeSpecialOverlays.size(); ++i) {
-		const auto &special = CathedralFrame.nativeSpecialOverlays[i];
-		if (!special.blendActive || !pSpecialCels || special.frameIndex < 0
-		    || static_cast<uint32_t>(special.frameIndex) >= pSpecialCels->numSprites())
-			continue;
-		const auto sprite = (*pSpecialCels)[special.frameIndex];
-		const Vec3 center { static_cast<float>(special.x), sprite.height() / (2 * PixelsPerWorldUnit), static_cast<float>(special.z) };
-		overlays.push_back({ true, false, i, ToCamera(center).z });
-	}
-	std::stable_sort(overlays.begin(), overlays.end(), [](const OverlayCommand &a, const OverlayCommand &b) { return a.depth > b.depth; });
-	CathedralPaletteBlend = true;
-	for (const auto &overlay : overlays) {
-		if (overlay.special)
-			drawSpecial(CathedralFrame.nativeSpecialOverlays[overlay.index]);
-		else if (overlay.nativePanel)
-			drawSurface(CathedralFrame.nativeArtPanels[overlay.index]);
-		else
-			drawSurface(CathedralFrame.triangles[overlay.index]);
-	}
+	// Architecture and structural CLX overlays have already written opaque
+	// depth/picking above; do not submit them again as palette blends.
 	CathedralPaletteBlend = false;
 	DrawingCathedral = false;
 }
@@ -4142,7 +5903,7 @@ bool CurrentPickingValid()
 	    && PickFollowProjectionRevision == FollowProjectionRevision
 	    && PickCameraVisibilityRevision == CameraVisibilityRevision
 	    && PickHorizonEnabled == *GetOptions().Graphics.townViewHorizon
-	    && PickGpuRequested == *GetOptions().Graphics.townViewGpuRendering
+	    && PickGpuRequested == EffectiveGpuRequested()
 	    && PickFrustumCullingRequested == *GetOptions().Graphics.townViewFrustumCulling
 	    && PickSceneRevision == ViewSceneRevision()
 	    && (!cathedral::LiveLevelEligible() || (CathedralFrameReady && !CathedralFrame.requiresNativeFallback
@@ -4156,6 +5917,21 @@ bool CurrentPickingValid()
 }
 
 } // namespace
+
+TownViewWarriorPilotState GetTownViewWarriorPilotState()
+{
+	return WarriorPilotState;
+}
+
+void SetTownViewWarriorViewModelEnabledForDiagnostics(bool enabled)
+{
+	WarriorViewModelEnabledForDiagnostics = enabled;
+}
+
+const PlayerActorNativePilotFrame *GetTownViewWarriorPilotFrameForDiagnostics(size_t slot)
+{
+	return slot < WarriorPilot.frames.size() && WarriorPilot.frames[slot] ? &*WarriorPilot.frames[slot] : nullptr;
+}
 
 TownArchitectureBounds BuildTownArchitectureBounds(const TownSceneModel &model)
 {
@@ -4241,6 +6017,8 @@ bool IsTownViewActive()
 	    || (cathedral::LiveLevelEligible() && CathedralFrameReady && !CathedralFrame.requiresNativeFallback));
 }
 
+bool IsTownViewEnabled() { return Enabled; }
+
 void PrepareTownViewLiveFrame()
 {
 	CathedralDiagnosticStage = CathedralFallbackStage::Context;
@@ -4249,7 +6027,7 @@ void PrepareTownViewLiveFrame()
 	if (!cathedral::LiveLevelEligible() || MyPlayer == nullptr) {
 		if (leveltype == DTYPE_CATHEDRAL || CathedralFrameReady) {
 			RecordCathedralDiagnostic(MyPlayer == nullptr ? CathedralFallbackReason::PlayerUnavailable : CathedralFallbackReason::ContextIneligible,
-				CathedralDiagnosticStage, Enabled, *GetOptions().Graphics.townViewGpuRendering);
+				CathedralDiagnosticStage, Enabled, EffectiveGpuRequested());
 			CathedralPreparationRefused = true;
 		}
 		if (CathedralFrameReady && leveltype != DTYPE_TOWN)
@@ -4266,8 +6044,14 @@ void PrepareTownViewLiveFrame()
 	CathedralAllocationState.gpuSubmittedBeforeFailure = 0;
 	CathedralAllocationState.gpuDrawCallsBeforeFailure = 0;
 	CathedralAllocationState.cpuRasterizedBeforeFailure = 0;
-	const bool diagnosticRequestedGpu = *GetOptions().Graphics.townViewGpuRendering;
+	const bool diagnosticRequestedGpu = EffectiveGpuRequested();
 	try {
+		PrepareSarcophagusVisual();
+		PrepareBarrelVisual();
+        PrepareBrazierVisual();
+        PrepareSkullFireVisual();
+        PrepareChestVisual();
+        PrepareDoorVisual();
 		const Point focus = MyPlayer->position.tile;
 		CathedralDiagnosticStage = CathedralFallbackStage::RefreshLiveFrame;
 		if (cathedral::RefreshLiveFrame(focus.x, focus.y)) {
@@ -4275,6 +6059,7 @@ void PrepareTownViewLiveFrame()
 			const auto *snapshot = cathedral::LiveSnapshot();
 			const auto *scene = cathedral::LiveScene();
 			if (snapshot != nullptr && scene != nullptr) {
+                PrepareDoorVisualStates(*snapshot);
 				CathedralDiagnosticStage = CathedralFallbackStage::BuildPilotFrame;
 				CathedralFrame = cathedral::BuildPilotFrame(*snapshot, *scene, focus.x, focus.y);
 				CathedralFrameReady = true;
@@ -4299,6 +6084,7 @@ void PrepareTownViewLiveFrame()
 					const auto lightUpdates = cathedral::native_visual_policy::BuildNativeLightSuppression(
 					    *snapshot, CathedralFrame, lightObjects);
 					cathedral::native_visual_policy::ApplySuppression(CathedralFrame, lightUpdates);
+					PrepareCathedralLightGroundPanels(CathedralFrame);
 #endif
 #if defined(D3D_CATHEDRAL_FULL_WALL_EXPERIMENT) && !defined(DUN_RENDER_STATS) && !defined(DEBUG_STR) \
     && !defined(DEBUG_RENDER_OFFSET_X) && !defined(DEBUG_RENDER_OFFSET_Y)
@@ -4355,7 +6141,7 @@ void PrepareTownViewLiveFrame()
 		ResetFollowCameraHistory(true);
 		CameraRig.Suspend(true);
 		RendererState = {};
-		RendererState.requestedGpu = *GetOptions().Graphics.townViewGpuRendering;
+		RendererState.requestedGpu = EffectiveGpuRequested();
 		try {
 			RendererState.failure = "Private Cathedral pilot R2: incomplete frame or unresolved native surface; complete native fallback";
 		} catch (const std::bad_alloc &) {
@@ -4372,6 +6158,11 @@ void PrepareTownViewLiveFrame()
 TownViewCathedralFallbackDiagnostic GetTownViewCathedralFallbackDiagnostic() noexcept
 {
 	return CathedralFallbackDiagnostic;
+}
+
+TownViewCathedralFirstRefusal GetTownViewCathedralFirstRefusal() noexcept
+{
+	return CathedralFirstRefusal;
 }
 
 void InvalidateTownViewFrameForNativeFallback()
@@ -4413,6 +6204,8 @@ TownViewCathedralNativeTextureReference GetTownViewCathedralNativeTextureReferen
 	reference.pixels = entry.texture.pixels; reference.opacity = entry.texture.opacity;
 	reference.gpuIdentity = entry.texture.gpuIdentity.value; reference.epoch = CathedralNativeTextureState.epoch;
 	reference.rawSignature = entry.signature; // Raw getter stays unpartitioned for every requested pass.
+	reference.authoredMaterial = entry.authoredMaterial;
+	reference.authoredPixelHash = entry.authoredPixelHash;
 	reference.sourceX = binding.x; reference.sourceZ = binding.z; reference.nativeSlot = binding.nativeSlot;
 	reference.requestedPiece = binding.piece; reference.sourcePiece = entry.sourcePiece;
 	reference.sourceMicro = entry.sourceMicro; reference.sourceColumn = entry.sourceColumn;
@@ -4430,6 +6223,27 @@ TownViewCathedralNativeTextureReference GetTownViewCathedralNativeTextureReferen
 		reference.sourceWords = entry.upperWords;
 	}
 	return reference;
+}
+
+TownViewCathedralNativeTextureReference GetTownViewCathedralCeilingTextureReference()
+{
+	if(!CathedralCeilingBindingReady) return {};
+	return GetTownViewCathedralNativeTextureReference(CathedralCeilingBinding);
+}
+
+TownViewCathedralNativeTextureReference GetTownViewCathedralLightBodyTextureReference()
+{
+	if (!CathedralNativeLightBody || CathedralNativeTextureState.epoch == 0
+	    || CathedralNativeTextureState.epoch != cathedral::LiveEpoch()
+	    || CathedralNativeTextureResource != pDungeonCels.get())
+		return {};
+	TownViewCathedralNativeTextureReference result;
+	const auto &texture = CathedralNativeLightBody->texture;
+	result.width = texture.width; result.height = texture.height;
+	result.pixels = texture.pixels; result.opacity = texture.opacity;
+	result.gpuIdentity = texture.gpuIdentity.value; result.epoch = CathedralNativeTextureState.epoch;
+	result.requestedPiece = result.sourcePiece = 269; result.approximate = true;
+	return result;
 }
 
 TownViewCathedralNativeTextureReference GetTownViewCathedralLitTextureReference(
@@ -4532,8 +6346,88 @@ TownViewCathedralCellMaterialDiagnostic GetTownViewCathedralCellMaterialDiagnost
 	return result;
 }
 
+namespace {
+bool DiagnosticGpuPreflightAttempted = false;
+diag::Failure DiagnosticGpuPreflightFailure;
+bool DiagnosticEligibleFrame = false;
+
+bool RequiredGpu() { return diag::SessionPolicy().mode == diag::Mode::GpuRequired; }
+diag::Failure PrepareDiagnosticGpuSession()
+{
+	if (DiagnosticGpuPreflightAttempted) {
+		const auto logging = diag::OpenSession();
+		return logging.error != diag::Error::None ? logging : DiagnosticGpuPreflightFailure;
+	}
+	DiagnosticGpuPreflightAttempted = true;
+	// Visible progress and flushed enter stages precede shader/device work.
+#ifndef USE_SDL1
+	const std::string title = ghMainWnd != nullptr ? SDL_GetWindowTitle(ghMainWnd) : "";
+	if (ghMainWnd != nullptr) SDL_SetWindowTitle(ghMainWnd, "Diablo3D: verificando GPU, shaders e targets");
+	struct RestoreTitle { const std::string &title; ~RestoreTitle() { if (ghMainWnd != nullptr) SDL_SetWindowTitle(ghMainWnd, title.c_str()); } } restore { title };
+#endif
+	DiagnosticGpuPreflightFailure = diag::OpenSession();
+	if (DiagnosticGpuPreflightFailure.error != diag::Error::None) return DiagnosticGpuPreflightFailure;
+	diag::StageScope stage(diag::SessionLogger(), diag::Stage::Device3D, 0);
+	if (!RequiredGpu()) { diag::SessionLogger().RecordBackend(diag::Backend::CpuDiagnostic, 0, 0, 0, gnScreenWidth, gnViewportHeight); return {}; }
+	if (!*GetOptions().Graphics.townViewGpuRendering) return DiagnosticGpuPreflightFailure = { diag::Error::GpuPreferenceDisabled, diag::Stage::WorldPrepare };
+	diag::Preflight preflight;
+#ifdef USE_SDL3
+	preflight.renderer2DReady = renderer != nullptr;
+	const char *name = renderer != nullptr ? SDL_GetRendererName(renderer) : nullptr;
+	preflight.renderer2DAccelerated = name != nullptr && (std::strcmp(name,"direct3d11")==0 || std::strcmp(name,"direct3d12")==0 || std::strcmp(name,"opengl")==0 || std::strcmp(name,"opengles2")==0 || std::strcmp(name,"vulkan")==0 || std::strcmp(name,"metal")==0);
+#elif !defined(USE_SDL1)
+	SDL_RendererInfo info {};
+	preflight.renderer2DReady = renderer != nullptr && SDL_GetRendererInfo(renderer, &info) == 0;
+	preflight.renderer2DAccelerated = preflight.renderer2DReady && (info.flags & SDL_RENDERER_ACCELERATED) != 0;
+#endif
+	diag::SessionLogger().RecordBackend(preflight.renderer2DReady && preflight.renderer2DAccelerated ? diag::Backend::SdlHardware : diag::Backend::SdlSoftware, 0, 0, 0, gnScreenWidth, gnViewportHeight);
+	if (preflight.renderer2DReady && preflight.renderer2DAccelerated) {
+		const bool ready = TownGpuBeginFrame(gnScreenWidth, gnViewportHeight, false);
+		const auto &gpu = GetTownGpuStatus();
+		preflight.device3DReady = ready && gpu.available && gpu.featureLevel >= 0xB000;
+		preflight.device3DWarp = gpu.warp;
+		diag::SessionLogger().RecordBackend(gpu.warp ? diag::Backend::Direct3D11Warp : preflight.device3DReady ? diag::Backend::Direct3D11Hardware : diag::Backend::Unknown, gpu.vendorId, gpu.deviceId, gpu.featureLevel, gnScreenWidth, gnViewportHeight);
+		TownGpuDiscardFrame(); // No geometry, End, readback or extra gameplay frame.
+	}
+	DiagnosticGpuPreflightFailure = diag::CheckPreflight(diag::SessionPolicy(), preflight);
+	if (DiagnosticGpuPreflightFailure.error != diag::Error::None) diag::RecordSessionFailure(DiagnosticGpuPreflightFailure);
+	return DiagnosticGpuPreflightFailure;
+}
+bool RefuseRequiredGpuFrame(const Surface &fullOut, diag::Failure failure) noexcept
+{
+	// Preserve eligibility; clearing CathedralFrameReady here would let the next
+	// frame masquerade as an unsupported context and enter native fallback.
+	diag::RecordSessionFailure(failure);
+	TownGpuDiscardFrame();
+	CaptureGpu = false; CaptureGpuFailed = true; PickingValid = false;
+	RendererState.usedGpu = false; // Refusal owns no published GPU world.
+	DepthBuffer.clear(); PickBuffer.clear(); GpuFrame = {}; GpuPickRecords.clear();
+	WarriorViewModelCoverage.clear(); WarriorFirstPerson = {};
+	SmoothWorldValid = false; SmoothWorldPixels.clear(); SmoothWorldSurface.reset();
+	SamplingSurface.reset(); SamplingState = {}; ItemLabelAnchorCount = 0;
+	ClearCameraVisibilityFrame(); FollowCameraState.valid = false;
+	const auto error = failure.error == diag::Error::None ? diag::Error::CpuFallbackRefused : failure.error;
+	const Surface errorOut = fullOut.subregionY(0, std::min<int>(gnViewportHeight, fullOut.h()));
+	ClearSurface(errorOut);
+	try {
+		RendererState.failure = diag::PublicErrorMessage(error);
+		DrawString(errorOut, diag::PublicErrorMessage(error), Point { 16, 16 });
+		DrawString(errorOut, "F4: modo classico. Diagnostico CPU exige reiniciar com --cpu-render-diagnostic.", Point { 16, 64 });
+		const auto first = diag::SessionFirstFailure();
+		if (first.nativeCodeKnown) DrawString(errorOut, "HRESULT: " + std::to_string(first.nativeCode), Point { 16, 104 });
+	} catch (const std::bad_alloc &) { } // Cleared world is still refused; never CPU redraw.
+	diag::Frame frame; frame.sequence = diag::SessionFrame(); frame.requestedGpu = RendererState.requestedGpu;
+	frame.cpuRasterizedTriangles = RendererState.cpuRasterizedTriangles;
+	diag::RecordSessionFrame(frame, diag::Decision::RefuseFrame);
+	return true; // Own the error-only surface; DrawGame must not draw a native world.
+}
+} // namespace
+
 void InitializeTownViewForGame()
 {
+	CathedralFirstRefusal = {};
+	CathedralFirstRefusalLogged = CathedralFirstRefusalLogAttempted = false;
+	CathedralFirstRefusalLastAttempt = 0;
 	Enabled = *GetOptions().Graphics.townViewStartIn3D;
 	CameraRig = TownCameraRig {};
 	ApplyTownViewCameraPreferences();
@@ -4542,6 +6436,8 @@ void InitializeTownViewForGame()
 	GameplayCameraPolicy = true;
 	ResetFollowCameraHistory(true);
 	CameraRig.Suspend(!Enabled);
+	DiagnosticGpuPreflightAttempted = false;
+	if (Enabled) (void)PrepareDiagnosticGpuSession();
 }
 
 bool IsTownViewNativePose()
@@ -4718,6 +6614,7 @@ TownViewRendererState GetTownViewRendererState()
 
 const Surface *GetTownViewHighResolutionFrame()
 {
+	if (*GetOptions().Graphics.smooth3dLighting && SmoothWorldValid && SmoothWorldSurface && IsTownViewActive() && CurrentPickingValid() && CachedDungeonData==pDungeonCels.get()) return SmoothWorldSurface.get();
 	if (!IsTownViewActive() || !CurrentPickingValid() || CachedDungeonData != pDungeonCels.get()
 	    || SamplingState.factor != 2 || !SamplingSurface
 	    || SamplingSurface->w() != gnScreenWidth * 2 || SamplingSurface->h() != gnViewportHeight * 2)
@@ -4809,6 +6706,22 @@ void SetTownViewRasterJitterForDiagnostics(float x, float y)
 
 void ResetTownViewResources()
 {
+	WarriorPilot = {};
+	WarriorPilotState = {};
+	WarriorViewModelCoverage.clear();
+	DrawingWarriorViewModel = false;
+	WarriorViewModelEnabledForDiagnostics = true;
+	ClearFrameSpritePointLighting();
+	ResetKnownMeshyRuntimePolicy();
+	Sarcophagus = {};
+	Barrel = {};
+    Brazier = {};
+    SkullFire = {};
+    Chest = {};
+    ChestVariants = {};
+    DoorModels = {};
+    PropAnimationDiagnosticTime=-1;
+	CorpseGroundDraws=0;
 	ResetCathedralNativeTextureCache();
 	OgdenPilot = {};
 	OgdenPilotState = {};
@@ -4824,6 +6737,7 @@ void ResetTownViewResources()
 	std::vector<uint8_t>().swap(HorizonColors);
 	HorizonPaletteValid = false;
 	BillboardTextureCache.clear();
+    SkullFireFlameCache.clear();
 	ClearUiOverlayRegions();
 #ifndef USE_SDL1
 	ResetTownPresentationResources();
@@ -4838,6 +6752,8 @@ void ResetTownViewResources()
 	SceneGroundCache.clear();
 	SceneArtworkCache.clear();
 	SceneMaterialCache.clear();
+	SceneWaterEventState.clear();
+	ClearFixedTownRendererCache();
 	ImportedTextureCache.clear();
 	CabinInteriorTextureCache.clear();
 	ArchitectureBoundsCache.clear();
@@ -4850,10 +6766,12 @@ void ResetTownViewResources()
 	ActorVolumeCache.clear();
 	VegetationArtworkCache.clear();
 	PropArtworkCache.clear();
+	PropReplacementReady = false;
 	SceneryVolumeCache.clear();
 	SceneLightingValid = false;
 	SceneLightingProfileLoaded = false;
 	SceneLightingConfig = TristramLightingConfig();
+	SmoothWorldValid=false;SmoothWorldSurface.reset();SmoothWorldPixels.clear();
 	ResetTownScene();
 	ResetTownVegetation();
 	ResetTownProps();
@@ -4864,6 +6782,9 @@ void ResetTownViewResources()
 
 static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 {
+	WarriorFirstPerson = {}; // No prior-frame self presentation survives early fallback.
+	DiagnosticEligibleFrame = false;
+	SmoothWorldValid=false;SmoothWorldPixels.clear();
 	CathedralDiagnosticStage = CathedralFallbackStage::Preflight;
 	CathedralDiagnosticGpuRefusalStage = CathedralFallbackStage::None;
 	CathedralDiagnosticGpuAttempted = false;
@@ -4882,7 +6803,7 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 	RendererState = {};
 	ArchitectureCullingState = {};
 	ArchitectureCullingState.requested = *GetOptions().Graphics.townViewFrustumCulling;
-	RendererState.requestedGpu = *GetOptions().Graphics.townViewGpuRendering;
+	RendererState.requestedGpu = EffectiveGpuRequested();
 	CaptureGpu = CaptureGpuFailed = false;
 	if (!RendererState.requestedGpu) {
 		if (GpuRecovery.DisableOrReset())
@@ -4912,16 +6833,20 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 		return false; // Never publish a frame with missing/stale material bindings.
 	}
 	if (CachedDungeonData != pDungeonCels.get()) {
+		ClearFrameSpritePointLighting();
 		ResetFollowCameraHistory(true);
 		ClearGpuSceneResources();
 		HorizonPaletteValid = false;
-		RendererState.requestedGpu = *GetOptions().Graphics.townViewGpuRendering;
+		RendererState.requestedGpu = EffectiveGpuRequested();
 		BillboardTextureCache.clear();
+    SkullFireFlameCache.clear();
 		ClearTownShadowMap();
 		TerrainCache.clear();
 		SceneGroundCache.clear();
 		SceneArtworkCache.clear();
 		SceneMaterialCache.clear();
+		SceneWaterEventState.clear();
+		ClearFixedTownRendererCache();
 		ImportedTextureCache.clear();
 		CabinInteriorTextureCache.clear();
 		ArchitectureBoundsCache.clear();
@@ -4933,6 +6858,7 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 		ActorVolumeCache.clear();
 		VegetationArtworkCache.clear();
 		PropArtworkCache.clear();
+		PropReplacementReady = false;
 		SceneryVolumeCache.clear();
 		SceneLightingValid = false;
 		SceneLightingProfileLoaded = false;
@@ -4971,7 +6897,20 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 		ClearSurface(logical);
 		return DrawNativeTownViewReference(fullOut, ViewPosition);
 	}
+	DiagnosticEligibleFrame = true;
+	const uint64_t diagnosticFrame = diag::BeginSessionFrame();
+	diag::StageScope diagnosticWorld(diag::SessionLogger(), diag::Stage::WorldPrepare, diagnosticFrame, diag::SampleSessionFrame());
+	const auto preflight = PrepareDiagnosticGpuSession();
+	if (preflight.error != diag::Error::None) return RefuseRequiredGpuFrame(fullOut, preflight);
+	if (RequiredGpu() && !RendererState.requestedGpu) return RefuseRequiredGpuFrame(fullOut, { diag::Error::GpuPreferenceDisabled, diag::Stage::WorldPrepare });
+	if (ViewCamera.projection.valid) {
+		// Sample the rig once, then publish its eye before visibility/culling,
+		// sampling buffers, shadow receivers and the GPU recovery identity.
+		PrepareWarriorNativeFrame(cathedralWorld);
+		PrepareWarriorFirstPersonPresentation();
+	}
 	if (!ViewCamera.projection.valid) {
+		if (RequiredGpu()) return RefuseRequiredGpuFrame(fullOut, { diag::Error::CameraProjectionInvalid, diag::Stage::Camera });
 		ClearCameraVisibilityFrame();
 		RendererState.failure = "Invalid town camera frame";
 		if (cathedralWorld) {
@@ -4991,6 +6930,7 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 	// Compute once before any backend consumes the scene. The same immutable
 	// snapshot is used by both drawWorld calls when a GPU frame replays on CPU.
 	if (!PrepareCameraVisibilityFrame()) {
+		if (RequiredGpu()) return RefuseRequiredGpuFrame(fullOut, { diag::Error::CameraVisibilityUnavailable, diag::Stage::Camera });
 		// Reporting memory pressure must not allocate outside the protected path.
 		try {
 			RendererState.failure = "Town camera visibility index/query unavailable";
@@ -5003,9 +6943,54 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 	}
 	CathedralDiagnosticStage = CathedralFallbackStage::SamplingBuffers;
 	const Surface out = PrepareSamplingBuffers(logical);
+	if (*GetOptions().Graphics.smooth3dLighting && static_cast<size_t>(out.w())*out.h()<=MaxSmoothWorldPixels) {
+#if defined(__cpp_exceptions) || defined(_CPPUNWIND)
+		try {
+#endif
+		SmoothWorldPixels.assign(static_cast<size_t>(out.w())*out.h(),0);
+		std::array<SDL_Color,256> colors,gray;
+		for(unsigned i=0;i<256;++i)gray[i]={uint8_t(i),uint8_t(i),uint8_t(i),255};
+		ApplyGlobalBrightness(colors.data(),logical_palette.data());ApplyGlobalBrightness(SmoothToneRamp.data(),gray.data());
+		uint64_t expected=0,active=0;for(unsigned i=0;i<256;++i){expected+=colors[i].r+colors[i].g+colors[i].b;active+=Palette->colors[i].r+Palette->colors[i].g+Palette->colors[i].b;}
+		// Normal-frame palette rotations (water/lava) preserve total energy.
+		// Fade frames retain unfaded colors and are faded in presentation instead.
+		if(expected>0 && std::abs(double(active)-double(expected))<double(expected)*.005)for(unsigned i=0;i<256;++i)colors[i]=Palette->colors[i];
+		for(size_t i=0;i<SmoothWorldPalette.size();++i){const auto color=colors[i];SmoothWorldPalette[i]=0xFF000000U|(uint32_t(color.r)<<16)|(uint32_t(color.g)<<8)|color.b;}
+#if defined(__cpp_exceptions) || defined(_CPPUNWIND)
+        } catch(const std::bad_alloc &) {SmoothWorldPixels.clear();SmoothWorldValid=false;}
+#endif
+	}
 	ClearSurface(out);
-	if (!cathedralWorld)
+	if (!cathedralWorld) {
+		if (SceneTimeOfDay != std::clamp(*GetOptions().Graphics.townViewTimeOfDay, 0, 2)) {
+			SceneLightingValid = false;
+			HorizonPaletteValid = false;
+			GpuOrdinaryLut.clear();
+			GpuImportedLutColors = 0;
+			++SceneLightingRevision;
+		}
 		PrepareSceneLighting();
+		if (ImportedLightingRevision != SceneLightingRevision) {
+			ImportedLightingRevision = SceneLightingRevision;
+			for (const auto &[key, row] : ImportedAlbedoColors) {
+				const TownLightColor base = TownSrgbToLinear({
+					(static_cast<float>((key >> 12) & 63) * 4 + 1.5F) / 255,
+					(static_cast<float>((key >> 6) & 63) * 4 + 1.5F) / 255,
+					(static_cast<float>(key & 63) * 4 + 1.5F) / 255 });
+				auto &table = ImportedAlbedoLightTables[row];
+				for (size_t level = 0; level < table.size(); ++level) {
+					const float amount = static_cast<float>(level) / (table.size() - 1);
+					TownLightingSample lighting;
+					lighting.ambient = SceneLightingConfig.ambient;
+					lighting.directional = { SceneLightingConfig.directional.red * SceneLightingConfig.directionalIntensity * amount,
+						SceneLightingConfig.directional.green * SceneLightingConfig.directionalIntensity * amount,
+						SceneLightingConfig.directional.blue * SceneLightingConfig.directionalIntensity * amount };
+					const auto lit = TownLinearToSrgb(ComposeTownLitColor(base, lighting));
+					table[level] = ClosestSceneColor(lit.red * 255, lit.green * 255, lit.blue * 255);
+				}
+			}
+		}
+	}
 	const bool horizonEnabled = !cathedralWorld && *GetOptions().Graphics.townViewHorizon;
 	if (horizonEnabled) {
 		PrepareHorizon();
@@ -5014,6 +6999,7 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 		    + sizeof(HorizonFogPalette) + sizeof(HorizonFogDepthLevels) + sizeof(HorizonSkyColors) + sizeof(HorizonPaletteSignature);
 	}
 	FrameFireTime = CabinFireDiagnosticTime >= 0 ? CabinFireDiagnosticTime : static_cast<double>(SDL_GetTicks()) / 1000;
+	PrepareFrameSpritePointLighting();
 	TownShadowConfig shadowConfig;
 	shadowConfig.toLight = { SceneLightingConfig.toLight.x, SceneLightingConfig.toLight.height, SceneLightingConfig.toLight.z };
 	if (cathedralWorld)
@@ -5030,6 +7016,12 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 	// Both backends need the pilot; prepare before any frozen GPU material table.
 	if (!cathedralWorld)
 		PrepareOgdenIdlePilotTexture();
+    else if(DoorModels.loaded)for(size_t part=0;part<2;++part)RigidPropNativeTexture(DoorTextureKey-part,*DoorModels.models[part].importedTexture);
+    if(cathedralWorld && Brazier.loaded)RigidPropNativeTexture(BrazierTextureKey,*Brazier.model.importedTexture);
+    if(cathedralWorld && SkullFire.loaded)RigidPropNativeTexture(SkullFireTextureKey,*SkullFire.model.importedTexture);
+	// Pose/gear/eye are already frozen. Material preparation stays after the
+	// world/palette lighting update and never samples another pose.
+	if (!WarriorPilot.runtime.loaded() || !PrepareWarriorNativeMaterials(cathedralWorld)) WarriorPilot.materialsReady = false;
 	// The Cathedral path binds native discrete light/TRN LUTs and overlays on
 	// the existing hardware backend. A failed request always returns to native.
 	if (GpuRecovery.ShouldAttempt(RendererState.requestedGpu, recoveryKey, SDL_GetTicks())) {
@@ -5037,8 +7029,16 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 			PrepareFrameImportedAlbedo();
 		CathedralDiagnosticStage = CathedralFallbackStage::GpuBegin;
 		CathedralDiagnosticGpuAttempted = true;
+		diag::StageScope diagnosticBegin(diag::SessionLogger(), diag::Stage::GpuBegin, diagnosticFrame, diag::SampleSessionFrame());
 		CaptureGpu = TownGpuBeginFrame(out.w(), out.h(), false,
 		    { ViewCamera.projection.perspective, ViewCamera.projection.nearClip, ViewCamera.projection.farClip });
+		if (CaptureGpu && !SmoothWorldPixels.empty()) {
+			std::vector<float> native;
+			if(cathedralWorld){native.resize(MAXDUNX*MAXDUNY);for(int z=0;z<MAXDUNY;++z)for(int x=0;x<MAXDUNX;++x)native[z*MAXDUNX+x]=std::min<int>(dLight[x][z],15);}
+			CaptureGpuFailed=!TownGpuSetSmoothLighting(SmoothWorldPalette,native,cathedralWorld?MAXDUNX:0,cathedralWorld?MAXDUNY:0);
+		}
+		if (CaptureGpu && !CaptureGpuFailed && FrameSpritePointLightingValid)
+			CaptureGpuFailed = !TownGpuSetSpritePointLighting({ FrameSpritePointLights.data(), FrameSpritePointLightCount }, FrameSpritePointOccluders);
 		if (CaptureGpu) {
 			GpuPickIds.clear();
 			GpuPickRecords.assign(1, PickRecord {});
@@ -5067,13 +7067,14 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 				CaptureGpuFailed = !PrepareCathedralGpuBlend();
 				if (CaptureGpuFailed) CathedralDiagnosticGpuRefusalStage = CathedralDiagnosticStage;
 			}
-			if (!CaptureGpuFailed && !cathedralWorld && ResidentMeshesEnabledForDiagnostics)
+			if (!CaptureGpuFailed && ResidentMeshesEnabledForDiagnostics)
 				ConfigureResidentMeshCamera();
 		} else {
 			GpuRecovery.RecordFailure(GetTownGpuStatus().failureKind, recoveryKey, SDL_GetTicks());
 			GpuFailure = GetTownGpuStatus().failure;
 		}
 	}
+	if (RequiredGpu() && !CaptureGpu) return RefuseRequiredGpuFrame(fullOut, { diag::Error::GpuBeginFailed, diag::Stage::GpuBegin, GetTownGpuStatus().failureCode, GetTownGpuStatus().failureCodeKnown });
 	if (cathedralWorld && RendererState.requestedGpu && !CaptureGpu) {
 		RecordCathedralDiagnostic(CathedralDiagnosticGpuAttempted ? CathedralFallbackReason::GpuBeginRefused : CathedralFallbackReason::GpuRequestDeferred,
 			CathedralFallbackStage::GpuBegin, true, RendererState.requestedGpu);
@@ -5083,6 +7084,7 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 		return false;
 	}
 	const auto drawWorld = [&]() {
+		diag::StageScope diagnosticRecord(diag::SessionLogger(), diag::Stage::SceneRecord, diagnosticFrame, diag::SampleSessionFrame());
 		const auto recordStart = std::chrono::steady_clock::now();
 		if (cathedralWorld) {
 			DrawCathedralWorld(out);
@@ -5091,6 +7093,16 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 		}
 		if (horizonEnabled)
 			DrawHorizon(out);
+		// GetTownScene admits architecture and static archive in one transaction.
+		// A validated persistent scene never calls native visual generators here.
+		(void)GetTownScene();
+		if (HasTownVisualObjects()) {
+			DrawFixedTownObjects(out, false);
+			DrawScene(out);
+			DrawFixedTownObjects(out, true);
+		} else {
+		FixedTownObjectState = {};
+		PrepareTownPropArtwork();
 		const Texture &fallback = FallbackGround();
 		// Native town generation fills the entire dungeon grid, including the outer
 		// grass visible around Farnham and Adria in wide views.
@@ -5114,7 +7126,7 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 		forEachTile([&](Point tile) {
 			const TileArt &art = GetTile(dPiece[tile.x][tile.y]);
 			if (!art.solid)
-				DrawGround(out, tile, TownPropReplacesTile(tile) ? fallback : SceneGround(dPiece[tile.x][tile.y]));
+				DrawGround(out, tile, PreparedTownPropReplacesTile(tile, true) ? fallback : SceneGround(dPiece[tile.x][tile.y]));
 		});
 		forEachTile([&](Point tile) {
 			DrawScenery(out, tile, GetTile(dPiece[tile.x][tile.y]), fallback);
@@ -5122,6 +7134,7 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 		DrawScene(out);
 		DrawVegetation(out);
 		DrawProps(out);
+		}
 		for (size_t i = 0; i < Towners.size(); ++i) {
 			const Towner &towner = Towners[i];
 			if (!towner.anim)
@@ -5163,11 +7176,11 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 			const Player &player = Players[i];
 			if (!player.plractive || !player.isOnActiveLevel() || !player.AnimInfo.sprites)
 				continue;
-			if (FollowCameraState.localPlayerHidden && &player == MyPlayer)
-				continue;
+			if (FollowCameraState.localPlayerHidden && WarriorFirstPersonBodyAdmitted(player, i)) continue;
 			Vec3 position = PlayerPosition(player);
 			position.y = 0;
-			DrawPlayerVolume(out, position, player, static_cast<int>(i));
+			if (!DrawWarriorNativePilot(out, player, i, true, 0, false))
+				DrawPlayerVolume(out, position, player, static_cast<int>(i));
 		}
 		for (const Missile &missile : Missiles) {
 			if (!missile._miDrawFlag || missile._miDelFlag || !missile._miAnimData
@@ -5184,23 +7197,39 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 		RendererState.sceneRecordMilliseconds += std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - recordStart).count();
 	};
 	CathedralDiagnosticStage = CathedralFallbackStage::Submission;
+	WarriorViewModelCoverage.clear();
 	drawWorld();
+	if (CaptureGpu && !CaptureGpuFailed) {
+		diag::StageScope diagnosticViewModel(diag::SessionLogger(), diag::Stage::ViewModelSubmit, diagnosticFrame, diag::SampleSessionFrame());
+		DrawWarriorViewModel(out);
+	}
 	if (CaptureGpu) {
 		if (cathedralWorld && CathedralAllocationState.armed == TownViewCathedralAllocationFailurePoint::BeforeReadback)
 			SetTownGpuBeforeReadbackForDiagnostics(InjectCathedralReadbackAllocationFailure);
 		CathedralDiagnosticStage = CathedralFallbackStage::GpuEnd;
-		const bool diagnosticGpuEndSucceeded = !CaptureGpuFailed && TownGpuEndFrame(GpuFrame);
+		const bool diagnosticGpuEndSucceeded = [&]() {
+			diag::StageScope diagnosticReadback(diag::SessionLogger(), diag::Stage::Readback, diagnosticFrame, diag::SampleSessionFrame());
+			return !CaptureGpuFailed && TownGpuEndFrame(GpuFrame);
+		}();
 		CathedralDiagnosticStage = CathedralFallbackStage::OutputValidation;
 		const bool complete = diagnosticGpuEndSucceeded
 		    && GpuFrame.width == out.w() && GpuFrame.height == out.h()
 		    && GpuFrame.indexed.size() == DepthBuffer.size()
+		    && (SmoothWorldPixels.empty() || GpuFrame.rgba.size()==DepthBuffer.size())
 		    && GpuFrame.depth.size() == DepthBuffer.size() && GpuFrame.pickIds.size() == PickBuffer.size()
+		    && GpuFrame.viewModelMask.size() == DepthBuffer.size()
+		    && std::all_of(GpuFrame.viewModelMask.begin(), GpuFrame.viewModelMask.end(), [](uint8_t mask) { return mask <= 1; })
 		    && std::all_of(GpuFrame.pickIds.begin(), GpuFrame.pickIds.end(), [](uint32_t id) { return id < GpuPickRecords.size(); });
 		CaptureGpu = false;
+		if (!complete && RequiredGpu()) return RefuseRequiredGpuFrame(fullOut,
+		    { CaptureGpuFailed ? diag::Error::GpuSubmissionFailed : diagnosticGpuEndSucceeded ? diag::Error::GpuOutputRejected : diag::Error::GpuReadbackFailed,
+		        CaptureGpuFailed ? diag::Stage::WorldSubmit : diag::Stage::Readback, GetTownGpuStatus().failureCode, GetTownGpuStatus().failureCodeKnown });
 		if (complete) {
 			for (int y = 0; y < out.h(); ++y)
 				std::memcpy(out.at(0, y), GpuFrame.indexed.data() + static_cast<size_t>(y) * out.w(), out.w());
 			DepthBuffer.swap(GpuFrame.depth);
+			WarriorViewModelCoverage = std::move(GpuFrame.viewModelMask);
+			if (!SmoothWorldPixels.empty()) SmoothWorldPixels.swap(GpuFrame.rgba);
 			for (size_t i = 0; i < PickBuffer.size(); ++i)
 				PickBuffer[i] = GpuPickRecords[GpuFrame.pickIds[i]];
 			RendererState.usedGpu = true;
@@ -5246,6 +7275,18 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 			drawWorld();
 		}
 	}
+	diag::Frame diagnosticPublication;
+	diagnosticPublication.sequence = diagnosticFrame;
+	diagnosticPublication.requestedGpu = RendererState.requestedGpu; diagnosticPublication.usedGpu = RendererState.usedGpu;
+	diagnosticPublication.hardware = GetTownGpuStatus().available && !GetTownGpuStatus().warp;
+	diagnosticPublication.warp = RendererState.usedGpu && GetTownGpuStatus().warp;
+	diagnosticPublication.completeOutput = DepthBuffer.size() == static_cast<size_t>(out.w()) * out.h() && PickBuffer.size() == DepthBuffer.size();
+	diagnosticPublication.cpuRasterizedTriangles = RendererState.cpuRasterizedTriangles;
+	diagnosticPublication.submittedTriangles = GetTownGpuStatus().submittedTriangles; diagnosticPublication.drawCalls = GetTownGpuStatus().drawCalls;
+	diagnosticPublication.readbackMicroseconds = static_cast<uint64_t>(GetTownGpuStatus().readbackMilliseconds * 1000);
+	diag::Failure diagnosticFailure;
+	const auto diagnosticDecision = diag::CheckFrame(diag::SessionPolicy(), diagnosticPublication, diagnosticFailure);
+	if (diagnosticDecision == diag::Decision::RefuseFrame) return RefuseRequiredGpuFrame(fullOut, diagnosticFailure);
 	RendererState.failure = GpuFailure;
 	for (auto it = PreparedGpuTextures.begin(); it != PreparedGpuTextures.end();) {
 		if (it->second.lastSeen + 2 < GpuFrameNumber)
@@ -5253,10 +7294,35 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 		else
 			++it;
 	}
-	if (horizonEnabled)
+	if (horizonEnabled) {
+		diag::StageScope diagnosticAtmosphere(diag::SessionLogger(), diag::Stage::Atmosphere, diagnosticFrame, diag::SampleSessionFrame());
 		ApplyHorizonAtmosphere(out);
+	}
+	// CPU FP is composed after fog against its own visual depth; published world
+	// depth/picks are restored before AA resolution and interaction/label reads.
+	if (!RendererState.usedGpu) DrawWarriorViewModel(out);
 	CathedralDiagnosticStage = CathedralFallbackStage::Resolve;
-	ResolveSampling(logical, out);
+	{
+		diag::StageScope diagnosticResolve(diag::SessionLogger(), diag::Stage::Resolve, diagnosticFrame, diag::SampleSessionFrame());
+		ResolveSampling(logical, out);
+	}
+	if (!SmoothWorldPixels.empty()) {
+#if defined(__cpp_exceptions) || defined(_CPPUNWIND)
+		try {
+#endif
+		if (!SmoothWorldSurface || SmoothWorldSurface->w()!=out.w() || SmoothWorldSurface->h()!=out.h()) {
+#ifdef USE_SDL3
+			SDLSurfaceUniquePtr surface {SDL_CreateSurface(out.w(),out.h(),SDL_PIXELFORMAT_ARGB8888)};
+#else
+			SDLSurfaceUniquePtr surface {SDL_CreateRGBSurfaceWithFormat(0,out.w(),out.h(),32,SDL_PIXELFORMAT_ARGB8888)};
+#endif
+			if(surface)SmoothWorldSurface=std::make_unique<OwnedSurface>(std::move(surface));else SmoothWorldSurface.reset();
+		}
+		if(SmoothWorldSurface){for(int y=0;y<out.h();++y){auto *row=reinterpret_cast<uint32_t *>(static_cast<uint8_t *>(SmoothWorldSurface->surface->pixels)+y*SmoothWorldSurface->surface->pitch);for(int x=0;x<out.w();++x){const size_t i=static_cast<size_t>(y)*out.w()+x;row[x]=SmoothWorldPixels[i]!=0?SmoothWorldPixels[i]:SmoothWorldPalette[*out.at(x,y)];}}SmoothWorldValid=true;}
+#if defined(__cpp_exceptions) || defined(_CPPUNWIND)
+        } catch(const std::bad_alloc &) {SmoothWorldValid=false;SmoothWorldSurface.reset();}
+#endif
+	}
 	PickScreenWidth = gnScreenWidth;
 	PickScreenHeight = gnScreenHeight;
 	PickViewportHeight = gnViewportHeight;
@@ -5287,8 +7353,22 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 			    || item.selectionRegion == SelectionRegion::None
 			    || dItem[item.position.x][item.position.y] != slot + 1
 			    || (!item.AnimInfo.isLastFrame() && item._iCurs != ICURS_MAGIC_ROCK)
-			    || (cathedralWorld && !CathedralTileInFrame(item.position)))
+			    || (cathedralWorld && (!CathedralTileInFrame(item.position) || !IsTileVisible(item.position)
+			        || !IsTileLit(item.position) || dLight[item.position.x][item.position.y] >= LightsMax
+			        || !LineClearMissile(MyPlayer->position.tile, item.position))))
 				continue;
+			if (cathedralWorld) {
+				// Labels use the published world depth, not an unobstructed overlay
+				// projection that could disclose loot behind masonry/camera walls.
+				TownCameraProjectedVertex body;
+				if (!ProjectTownCameraPoint(ViewCamera.projection,
+				        { static_cast<float>(item.position.x), 0.2F, static_cast<float>(item.position.y) }, body))
+					continue;
+				const int x = static_cast<int>(std::lround(body.x)), y = static_cast<int>(std::lround(body.y));
+				if (x < 0 || y < 0 || x >= ViewCamera.width || y >= ViewCamera.height
+				    || DepthBuffer[static_cast<size_t>(y) * ViewCamera.width + x] + 0.08F < body.depth)
+					continue;
+			}
 			TownCameraProjectedVertex projected;
 			// Native labels sit one tile-height above the item's bottom anchor.
 			if (!ProjectTownCameraPoint(ViewCamera.projection,
@@ -5302,6 +7382,11 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 		}
 	}
 	RendererState.worldMilliseconds = std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - worldStart).count();
+	diagnosticPublication.worldMicroseconds = static_cast<uint64_t>(RendererState.worldMilliseconds * 1000);
+	diagnosticPublication.recordMicroseconds = static_cast<uint64_t>(RendererState.sceneRecordMilliseconds * 1000);
+	diag::RecordSessionFrame(diagnosticPublication, diagnosticDecision);
+	const auto diagnosticLogState = diag::OpenSession();
+	if (diagnosticLogState.error != diag::Error::None) return RefuseRequiredGpuFrame(fullOut, diagnosticLogState);
 	CathedralDiagnosticStage = CathedralFallbackStage::SessionTrace;
 	if (!forceGeometry) {
 		// A bounded real-session trace identifies the effective backend/fallback.
@@ -5317,6 +7402,15 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 				RendererState.usedGpu, gpu.adapter, static_cast<int>(CameraRig.mode()), out.w(), out.h(), RendererState.worldMilliseconds,
 				RendererState.sceneRecordMilliseconds, gpu.drawCalls, gpu.submittedTriangles, mesh.instances,
 				mesh.uploadedVertexBytes + mesh.uploadedIndexBytes, mesh.projectedUploadBytes, static_cast<int>(GpuRecovery.failureKind()), RendererState.failure);
+			if (leveltype == DTYPE_TOWN) {
+				const auto &scene = GetTownVisualSceneAudit();
+				const auto &statics = GetTownVisualObjectAudit();
+				LogInfo("Tristram scene frame: status={}, sourceKind={}, revision={}, manifestSHA={}, staticStatus={}, staticSHA={}, fixedActive={}, staticFallback={}, groundSubmissions={}, volumeSubmissions={}, nativeDeltaObjects={}, nativeDeltaRebuilds={}, GPU={}, rendererFallback={}",
+				    scene.status, scene.sourceKind, scene.revision, scene.sha256, statics.status, statics.sha256,
+				    FixedTownObjectState.active, !FixedTownObjectState.active, FixedTownObjectState.groundSubmissions,
+				    FixedTownObjectState.volumeSubmissions, FixedTownObjectState.nativeDeltaObjects,
+				    FixedTownObjectState.nativeDeltaRebuilds, RendererState.usedGpu, RendererState.failure);
+			}
 			lastReport = now;
 			lastGpu = RendererState.usedGpu;
 			lastFailure = RendererState.failure;
@@ -5350,6 +7444,7 @@ static bool DiscardCathedralAllocationFailure(const Surface &fullOut, bool reque
 	// DecodeSprite updates dimensions before both surface allocations finish.
 	// Discard that partially grown scratch and partially prepared host bindings.
 	BillboardTextureCache.clear();
+    SkullFireFlameCache.clear();
 	SpriteSurface.reset();
 	SpriteCoverageSurface.reset();
 	SpriteSurfaceWidth = SpriteSurfaceHeight = 0;
@@ -5381,9 +7476,18 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 {
 	// Preserve the Town/Ogden draw body and failure branches exactly. Only the
 	// native Cathedral transaction gets this recoverable allocation boundary.
-	if (!cathedral::LiveLevelEligible() || !CathedralFrameReady)
+	if (!cathedral::LiveLevelEligible() || !CathedralFrameReady) {
+#if defined(__cpp_exceptions) || defined(_CPPUNWIND)
+		try { return DrawTownViewFrame(fullOut, forceGeometry); }
+		catch (const std::bad_alloc &) {
+			if (RequiredGpu() && DiagnosticEligibleFrame) return RefuseRequiredGpuFrame(fullOut, { diag::Error::CapacityExceeded, diag::Stage::WorldSubmit });
+			throw; // Preserve the original non-GPU/native/Town exception contract.
+		}
+#else
 		return DrawTownViewFrame(fullOut, forceGeometry);
-	const bool requestedGpu = *GetOptions().Graphics.townViewGpuRendering;
+#endif
+	}
+	const bool requestedGpu = EffectiveGpuRequested();
 	CathedralAllocationState.failed = false;
 	CathedralAllocationState.injected = TownViewCathedralAllocationFailurePoint::None;
 	CathedralAllocationState.gpuSubmittedBeforeFailure = 0;
@@ -5393,6 +7497,13 @@ bool DrawTownView(const Surface &fullOut, bool forceGeometry)
 	try {
 		return DrawTownViewFrame(fullOut, forceGeometry);
 	} catch (const std::bad_alloc &) {
+		if (RequiredGpu() && DiagnosticEligibleFrame) {
+			CathedralAllocationState.failed = true;
+			CathedralAllocationState.gpuSubmittedBeforeFailure = GetTownGpuStatus().submittedTriangles;
+			CathedralAllocationState.gpuDrawCallsBeforeFailure = GetTownGpuStatus().drawCalls;
+			CathedralAllocationState.cpuRasterizedBeforeFailure = RendererState.cpuRasterizedTriangles;
+			return RefuseRequiredGpuFrame(fullOut, { diag::Error::CapacityExceeded, diag::Stage::WorldSubmit });
+		}
 		return DiscardCathedralAllocationFailure(fullOut, requestedGpu);
 	}
 #else
@@ -5512,6 +7623,28 @@ bool PickTownViewDetailed(Point screen, TownViewPickResult &result)
 	return true;
 }
 
+bool PickTownViewStandingAttack(Point screen, TownViewPickResult &result)
+{
+	if (PickTownViewDetailed(screen, result))
+		return true;
+	result = {};
+	if (CameraRig.mode() != TownCameraMode::FirstPerson || MyPlayer == nullptr
+	    || !IsTownViewActive() || !CurrentPickingValid() || CachedDungeonData != pDungeonCels.get()
+	    || screen.x < 0 || screen.y < 0 || screen.x >= ViewCamera.width || screen.y >= ViewCamera.height)
+		return false;
+	// Quantize only the published horizontal view direction to a native adjacent
+	// tile. Pitch, empty ceiling/sky and depth are not attack-cadence controls.
+	const auto &forward = ViewCamera.projection.forward;
+	if (!std::isfinite(forward.x) || !std::isfinite(forward.z)
+	    || std::hypot(forward.x, forward.z) < 0.001F)
+		return false;
+	constexpr float Octant = 0.7853981633974483F;
+	const float angle = std::round(std::atan2(forward.z, forward.x) / Octant) * Octant;
+	result.tile = MyPlayer->position.tile + Displacement {
+		static_cast<int>(std::lround(std::cos(angle))), static_cast<int>(std::lround(std::sin(angle))) };
+	return InDungeonBounds(result.tile);
+}
+
 uint64_t TownViewItemLabelFrameId()
 {
 	return IsTownViewActive() && !IsTownViewNativePose() && CurrentPickingValid()
@@ -5535,6 +7668,72 @@ Point TownViewScreenPosition(Point tile)
 	        { static_cast<float>(tile.x) - 0.5F, 0, static_cast<float>(tile.y) - 0.5F }, projected))
 		return { -10000, -10000 };
 	return { static_cast<int>(std::lround(projected.x)), static_cast<int>(std::lround(projected.y)) };
+}
+
+TownViewFixedObjectState GetTownViewFixedObjectState()
+{
+	return FixedTownObjectState;
+}
+
+bool ExportTownViewFixedObjects(const std::filesystem::path &directory, std::string &failure)
+{
+	try {
+		std::error_code error;
+		if (std::filesystem::exists(directory / "tristram.d3dvis", error)
+		    || std::filesystem::exists(directory / "town-visual-objects.json", error)
+		    || std::filesystem::exists(directory / "palette.rgb", error)) {
+			failure = "static-export-exists"; return false;
+		}
+		TownVisualObjectSet set;
+		if (!CaptureFixedTownObjects(set, failure)) return false;
+		std::vector<std::byte> bytes;
+		if (!EncodeTownVisualObjects(set, bytes, failure)) return false;
+		std::filesystem::create_directories(directory, error);
+		if (error) { failure = "static-export-directory"; return false; }
+		const std::string sha256 = ModHashToHex(ComputeBytesSha256(bytes));
+		std::ofstream binary(directory / "tristram.d3dvis", std::ios::binary);
+		binary.write(reinterpret_cast<const char *>(bytes.data()), static_cast<std::streamsize>(bytes.size())); binary.close();
+		if (!binary) { failure = "static-export-write"; return false; }
+		std::ofstream palette(directory / "palette.rgb", std::ios::binary);
+		for (const auto &color : logical_palette) {
+			const std::array<uint8_t, 3> rgb { color.r, color.g, color.b };
+			palette.write(reinterpret_cast<const char *>(rgb.data()), rgb.size());
+		}
+		palette.close();
+		if (!palette) { failure = "static-export-palette"; return false; }
+		std::ofstream json(directory / "town-visual-objects.json", std::ios::binary);
+		json.imbue(std::locale::classic());
+		json << std::setprecision(std::numeric_limits<float>::max_digits10)
+		     << "{\"format\":\"d3d.fixed-town-objects\",\"schemaVersion\":1,\"private\":true,\"archive\":\"tristram.d3dvis\",\"archiveSha256\":\""
+		     << sha256 << "\",\"palette\":\"palette.rgb\",\"gridSize\":[112,112],\"textureCount\":" << set.textures.size()
+		     << ",\"coordinates\":\"native-anchor-plus-fixed-sprite-ray-frame\",\"objects\":[";
+		size_t offset = 28;
+		for (const auto &texture : set.textures)
+			offset += 12 + texture.pixels.size() + texture.opacity.size();
+		bool first = true;
+		for (const auto &object : set.objects) {
+			json << (first ? "" : ",") << "{\"id\":\"" << object.id << "\",\"kind\":" << static_cast<unsigned>(object.kind)
+			     << ",\"anchor\":[" << object.anchor.x << ',' << object.anchor.y << "],\"transform\":["
+			     << object.transform.x << ',' << object.transform.height << ',' << object.transform.z << ',' << object.transform.yaw << ',' << object.transform.scale
+			     << "],\"transformOffset\":" << offset + 4 + object.id.size() + 12 << ",\"texture\":" << object.texture
+			     << ",\"triangles\":" << object.mesh.triangles.size() << ",\"phase\":" << static_cast<unsigned>(object.phase)
+			     << ",\"visible\":" << (object.visible ? "true" : "false") << ",\"nativeSuppressed\":" << (object.nativeSuppressed ? "true" : "false")
+			     << ",\"groundFallback\":" << (object.groundFallback ? "true" : "false") << ",\"eventBinding\":" << static_cast<unsigned>(object.eventBinding)
+			     << ",\"eventState\":" << (object.eventState ? "true" : "false")
+			     << ",\"sourceCells\":[";
+			bool firstCell = true;
+			for (const auto &cell : object.sourceCells) {
+				json << (firstCell ? "" : ",") << '[' << cell.tile.x << ',' << cell.tile.y << ',' << cell.piece << ',' << cell.special << ']';
+				firstCell = false;
+			}
+			json << "]}";
+			first = false;
+			offset += 4 + object.id.size() + 56 + object.sourceCells.size() * 8 + object.mesh.triangles.size() * 64;
+		}
+		json << "]}\n"; json.close();
+		if (!json || offset != bytes.size()) { failure = "static-export-json"; return false; }
+		failure.clear(); return true;
+	} catch (const std::bad_alloc &) { failure = "static-export-allocation"; return false; }
 }
 
 TownGroundReferenceTexture GetTownGroundReferenceTexture(uint16_t piece, bool fallback)
@@ -5625,4 +7824,36 @@ bool DrawTownViewVegetationDiagnostic(const Surface &out, size_t groupIndex, Poi
 	return true;
 }
 
+TownViewSarcophagusInfo GetTownViewSarcophagusInfo()
+{
+    return {Sarcophagus.loaded,Sarcophagus.body.triangles.size(),Sarcophagus.lid.triangles.size(),Sarcophagus.draws};
+}
+
+TownViewBarrelInfo GetTownViewBarrelInfo()
+{
+    size_t triangles=0;for(const auto &part:Barrel.parts)triangles+=part.triangles.size();
+    return {Barrel.loaded,triangles,Barrel.meshDraws,Barrel.nativeBreakDraws,Barrel.nativeExplosionDraws,Barrel.shardDraws,Barrel.terminalShardDraws};
+}
+
+size_t GetTownViewCorpseGroundDraws(){return CorpseGroundDraws;}
+
 } // namespace devilution
+
+namespace devilution {
+void SetTownViewPropAnimationTimeForDiagnostics(int64_t milliseconds){PropAnimationDiagnosticTime=milliseconds<0?-1:std::min<int64_t>(milliseconds,UINT32_MAX);}
+TownViewChestInfo GetTownViewChestVariantInfo(int variant){
+    if(variant<1 || variant>2)return GetTownViewChestInfo();
+    const auto &v=ChestVariants[variant-1];size_t triangles=0;for(const auto &part:v.parts)triangles+=part.triangles.size();return {v.loaded,triangles,Chest.draws};
+}
+TownViewChestInfo GetTownViewChestInfo(){size_t triangles=0;for(const auto &part:Chest.parts)triangles+=part.triangles.size();return {Chest.loaded,triangles,Chest.draws};}
+float GetTownViewChestOpenProgress(int slot){return slot>=0 && slot<MAXOBJECTS?Chest.states[slot].progress:0;}
+}
+
+namespace devilution {
+TownViewDoorModelInfo GetTownViewDoorModelInfo(){return {DoorModels.loaded,DoorModels.models[0].triangles.size(),DoorModels.models[1].triangles.size(),DoorModels.leafDraws,DoorModels.archDraws,DoorModels.residentDraws};}
+float GetTownViewDoorOpenProgress(int slot){return slot>=0 && slot<MAXOBJECTS?DoorModels.states[slot].progress:0;}
+}
+
+namespace devilution { TownViewBrazierInfo GetTownViewBrazierInfo(){return {Brazier.loaded,Brazier.model.triangles.size(),Brazier.meshDraws,Brazier.flameDraws,BrazierFlameContact};} }
+
+namespace devilution { TownViewSkullFireInfo GetTownViewSkullFireInfo(){float lo=0,hi=0;if(SkullFire.loaded){lo=std::numeric_limits<float>::infinity();for(const auto &tr:SkullFire.model.triangles)for(const auto &v:tr.vertices){lo=std::min(lo,v.height);hi=std::max(hi,v.height);}}size_t covered=0;for(const auto &[key,art]:SkullFireFlameCache)covered+=std::count_if(art.texture.opacity.begin(),art.texture.opacity.end(),[](uint8_t c){return c!=0;});return {SkullFire.loaded,SkullFire.model.triangles.size(),SkullFire.meshDraws,SkullFire.flameDraws,lo,hi,SkullFireFlameHeight,covered};} }

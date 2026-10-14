@@ -1,0 +1,455 @@
+{
+  "format": "d3d.item-concept-art",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "batchId": "batch-next-quest-objects-base-design-all-01",
+  "scope": "Queue-group study fragment; candidate generation and explicit visual reuse only, never full-catalog completion or asset approval.",
+  "catalogSha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d",
+  "generationTool": "built-in image_gen.imagegen",
+  "generationCalls": 7,
+  "postProcessing": "none; generated PNG bytes copied unchanged",
+  "originalGameImagesIncluded": false,
+  "visualApproval": false,
+  "runtimeInstalled": false,
+  "registryAuthority": "assets/registry.json",
+  "summary": {
+    "productionUnits": 228,
+    "batchProductionUnits": 7,
+    "conceptCandidateEntries": 7,
+    "generatedImages": 7,
+    "reuseProposals": 0,
+    "blockedUnits": 0,
+    "modelsGenerated": 0,
+    "runtimeIconsGenerated": 0
+  },
+  "entries": [
+    {
+      "productionId": "item.design.base.anvil-of-fury",
+      "conceptId": "item.design.base.anvil-of-fury.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/anvil-of-fury-r1.png",
+      "sha256": "dbe477a8a93e405183338149df6ef26e66d7f93d2ed6bba4ce43802c98ec540f",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate object-modeling reference.\nInput image 1 is a PRIVATE original inventory sprite, used only to preserve recognizable silhouette, colors, material regions and distinctive details. Create NEW HD imagery throughout; never paste the sprite into any view or thumbnail.\nA clean technical board of the exact SAME single object in FRONT, SIDE, BACK, THREE-QUARTER and a small NEW HD INVENTORY thumbnail. All views must agree on geometry, proportions, material layout and distinctive details; back is the true reverse, not another front. Full object visible, generously spaced, plain charcoal-gray backdrop, neutral soft studio lighting, no colored illumination or glow, realistic restrained dark medieval materials and fine wear. No scene, body, face, hands, stand, exploded alternatives or extra props. Rear/hidden surfaces and absolute scale are proposed reconstruction; preserve visible source design. Thumbnail must be a new high-detail render of this same object, never pixel-art or the supplied sprite. Minimal labels: item name, FRONT, SIDE, BACK, 3/4, ICON.\nSubject: Anvil of Fury; item.design.base.anvil-of-fury; native cursor 140.\nA squat blackened iron anvil, with a broad central rectangular body, one long tapered horn sweeping up slightly to the left, a shorter opposing horn to the right, and a wide low pedestal/foot. Preserve the nearly black gray iron and shallow dark decorative relief on the broad side from the reference. Do not add flames, runes glowing, chains, weapons or red color. Side/back relief and tool-face finish are restrained inference.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "cursorId": 140,
+        "sha256": "e4dabd813e2569fcff73c24783bca34b2cd1ebeb63c817913c1d18082e34c08e",
+        "availability": "local-private",
+        "notes": "Licensed original inventory sprite inspected privately at nearest-neighbor 6x enlargement; no original pixels or file paths are included."
+      },
+      "referenceNativeSpriteSha256": "d4ade50e8070164864c0062b961251bb8c2c07489988497654fdef78611c94cb",
+      "referenceInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "viewsUsed": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-concept-thumbnail"
+      ],
+      "inferredParts": [
+        "Back and hidden surfaces",
+        "Thickness and absolute scale",
+        "Fine construction/material details unresolved by source pixels"
+      ],
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "sourceBaseIds": [
+        "item.base.016.idi-anvil"
+      ],
+      "sourceUniqueIds": [],
+      "nativeIdentityPolicy": "Visual study only. Native item identities, unique powers, stats, affixes, saves and RNG are separate and unchanged.",
+      "identityGate": "Candidate design requires visual review and multiview reconciliation before master production.",
+      "notes": "Neutral-light candidate board. HD thumbnail is a new concept preview, not a final runtime icon. Hidden geometry is proposed reconstruction."
+    },
+    {
+      "productionId": "item.design.base.black-mushroom",
+      "conceptId": "item.design.base.black-mushroom.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/black-mushroom-r1.png",
+      "sha256": "58f583d19cd23a251c26f63bcec5e16912b3cf089bbb805a9f9804020885e815",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate object-modeling reference.\nInput image 1 is a PRIVATE original inventory sprite, used only to preserve recognizable silhouette, colors, material regions and distinctive details. Create NEW HD imagery throughout; never paste the sprite into any view or thumbnail.\nA clean technical board of the exact SAME single object in FRONT, SIDE, BACK, THREE-QUARTER and a small NEW HD INVENTORY thumbnail. All views must agree on geometry, proportions, material layout and distinctive details; back is the true reverse, not another front. Full object visible, generously spaced, plain charcoal-gray backdrop, neutral soft studio lighting, no colored illumination or glow, realistic restrained dark medieval materials and fine wear. No scene, body, face, hands, stand, exploded alternatives or extra props. Rear/hidden surfaces and absolute scale are proposed reconstruction; preserve visible source design. Thumbnail must be a new high-detail render of this same object, never pixel-art or the supplied sprite. Minimal labels: item name, FRONT, SIDE, BACK, 3/4, ICON.\nSubject: Black Mushroom; item.design.base.black-mushroom; native cursor 89.\nOne black charcoal mushroom: the source has a wide irregular asymmetrical, flattened cap with lobed/wavy ragged edges, a broad raised hump near its central top and a slender dark stem descending with a slightly thicker base. Its cap is much wider than the stem. Preserve matte black/dark gray silhouette and subtle cool gray highlights. No cluster, no fantasy spots, no luminosity or extra roots. Infer gills only beneath the hidden cap.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "cursorId": 89,
+        "sha256": "81fdbb735ee63640a854b9c450309d44cce9fd0e634055798c5fc6cd3d81f56b",
+        "availability": "local-private",
+        "notes": "Licensed original inventory sprite inspected privately at nearest-neighbor 6x enlargement; no original pixels or file paths are included."
+      },
+      "referenceNativeSpriteSha256": "01b03a09b759bcb7cc787776977c831d5bb2bf6c8fe075cf7989fdbb09235ad2",
+      "referenceInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "viewsUsed": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-concept-thumbnail"
+      ],
+      "inferredParts": [
+        "Back and hidden surfaces",
+        "Thickness and absolute scale",
+        "Fine construction/material details unresolved by source pixels"
+      ],
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "sourceBaseIds": [
+        "item.base.017.idi-mushroom"
+      ],
+      "sourceUniqueIds": [],
+      "nativeIdentityPolicy": "Visual study only. Native item identities, unique powers, stats, affixes, saves and RNG are separate and unchanged.",
+      "identityGate": "Candidate design requires visual review and multiview reconciliation before master production.",
+      "notes": "Neutral-light candidate board. HD thumbnail is a new concept preview, not a final runtime icon. Hidden geometry is proposed reconstruction."
+    },
+    {
+      "productionId": "item.design.base.blood-stone",
+      "conceptId": "item.design.base.blood-stone.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/blood-stone-r1.png",
+      "sha256": "a5e4ea443f9f26fce3163df3fb08ac01ca493399732509bf72227bf8dd2e5891",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate object-modeling reference.\nInput image 1 is a PRIVATE original inventory sprite, used only to preserve recognizable silhouette, colors, material regions and distinctive details. Create NEW HD imagery throughout; never paste the sprite into any view or thumbnail.\nA clean technical board of the exact SAME single object in FRONT, SIDE, BACK, THREE-QUARTER and a small NEW HD INVENTORY thumbnail. All views must agree on geometry, proportions, material layout and distinctive details; back is the true reverse, not another front. Full object visible, generously spaced, plain charcoal-gray backdrop, neutral soft studio lighting, no colored illumination or glow, realistic restrained dark medieval materials and fine wear. No scene, body, face, hands, stand, exploded alternatives or extra props. Rear/hidden surfaces and absolute scale are proposed reconstruction; preserve visible source design. Thumbnail must be a new high-detail render of this same object, never pixel-art or the supplied sprite. Minimal labels: item name, FRONT, SIDE, BACK, 3/4, ICON.\nSubject: Blood Stone; item.design.base.blood-stone; native cursor 25.\nOne small opaque-to-translucent deep blood-red faceted gemstone, blocky upper mass with irregular broad angular cut faces tapering toward a lower point. Preserve the reference's rich dark ruby-red body and short lighter crimson facet edges. No setting, chain, gold, liquid, glow, magical aura or droplets. Show one consistent solid gemstone cut from every view.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "cursorId": 25,
+        "sha256": "dcdfe033defc30cd593ad6ba146605b593c91b793bc8835e387433a08eb4702e",
+        "availability": "local-private",
+        "notes": "Licensed original inventory sprite inspected privately at nearest-neighbor 6x enlargement; no original pixels or file paths are included."
+      },
+      "referenceNativeSpriteSha256": "9ec01df7b6bda40cb19d85c987586138f1890360c99ed70fc58e63aac78d233e",
+      "referenceInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "viewsUsed": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-concept-thumbnail"
+      ],
+      "inferredParts": [
+        "Back and hidden surfaces",
+        "Thickness and absolute scale",
+        "Fine construction/material details unresolved by source pixels"
+      ],
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "sourceBaseIds": [
+        "item.base.021.idi-bldstone"
+      ],
+      "sourceUniqueIds": [],
+      "nativeIdentityPolicy": "Visual study only. Native item identities, unique powers, stats, affixes, saves and RNG are separate and unchanged.",
+      "identityGate": "Candidate design requires visual review and multiview reconciliation before master production.",
+      "notes": "Neutral-light candidate board. HD thumbnail is a new concept preview, not a final runtime icon. Hidden geometry is proposed reconstruction."
+    },
+    {
+      "productionId": "item.design.base.brain",
+      "conceptId": "item.design.base.brain.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/brain-r1.png",
+      "sha256": "e465d48116aec4443a4dd4dd812dc6f146f61c3f0fc64741f4d120d13864fd35",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate object-modeling reference.\nInput image 1 is a PRIVATE original inventory sprite, used only to preserve recognizable silhouette, colors, material regions and distinctive details. Create NEW HD imagery throughout; never paste the sprite into any view or thumbnail.\nA clean technical board of the exact SAME single object in FRONT, SIDE, BACK, THREE-QUARTER and a small NEW HD INVENTORY thumbnail. All views must agree on geometry, proportions, material layout and distinctive details; back is the true reverse, not another front. Full object visible, generously spaced, plain charcoal-gray backdrop, neutral soft studio lighting, no colored illumination or glow, realistic restrained dark medieval materials and fine wear. No scene, body, face, hands, stand, exploded alternatives or extra props. Rear/hidden surfaces and absolute scale are proposed reconstruction; preserve visible source design. Thumbnail must be a new high-detail render of this same object, never pixel-art or the supplied sprite. Minimal labels: item name, FRONT, SIDE, BACK, 3/4, ICON.\nSubject: Brain; item.design.base.brain; native cursor 40.\nOne dark burgundy anatomical brain quest prop, an isolated simplified inanimate game-object reconstruction of the reference's rounded lobed form and low curled/folded grooves with small muted red highlights. It is a clean collectible prop, non-graphic: no scene, blood pool, dripping fluid, exposed wound, attached body, skull, surgical context or wet gore. Preserve compact rounded shape and subdued dark red material. This is a stylized medieval game inventory prop.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "cursorId": 40,
+        "sha256": "cd527908bb3e6e0739b5ad0858c473d9f49002492f7b6651fdf4ca8d6e754c3e",
+        "availability": "local-private",
+        "notes": "Licensed original inventory sprite inspected privately at nearest-neighbor 6x enlargement; no original pixels or file paths are included."
+      },
+      "referenceNativeSpriteSha256": "8df1686c4b7251ea568c9da29d3a3b082372441df43d1909c129e9d0253dea00",
+      "referenceInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "viewsUsed": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-concept-thumbnail"
+      ],
+      "inferredParts": [
+        "Back and hidden surfaces",
+        "Thickness and absolute scale",
+        "Fine construction/material details unresolved by source pixels"
+      ],
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "sourceBaseIds": [
+        "item.base.018.idi-brain"
+      ],
+      "sourceUniqueIds": [],
+      "nativeIdentityPolicy": "Visual study only. Native item identities, unique powers, stats, affixes, saves and RNG are separate and unchanged.",
+      "identityGate": "Candidate design requires visual review and multiview reconciliation before master production.",
+      "notes": "Neutral-light candidate board. HD thumbnail is a new concept preview, not a final runtime icon. Hidden geometry is proposed reconstruction."
+    },
+    {
+      "productionId": "item.design.base.cathedral-map",
+      "conceptId": "item.design.base.cathedral-map.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/cathedral-map-r1.png",
+      "sha256": "65770f2e27740559dc346c5be8ab679f712ef9ce896cc22d2d7e828308ce8115",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate object-modeling reference.\nInput image 1 is a PRIVATE original inventory sprite, used only to preserve recognizable silhouette, colors, material regions and distinctive details. Create NEW HD imagery throughout; never paste the sprite into any view or thumbnail.\nA clean technical board of the exact SAME single object in FRONT, SIDE, BACK, THREE-QUARTER and a small NEW HD INVENTORY thumbnail. All views must agree on geometry, proportions, material layout and distinctive details; back is the true reverse, not another front. Full object visible, generously spaced, plain charcoal-gray backdrop, neutral soft studio lighting, no colored illumination or glow, realistic restrained dark medieval materials and fine wear. No scene, body, face, hands, stand, exploded alternatives or extra props. Rear/hidden surfaces and absolute scale are proposed reconstruction; preserve visible source design. Thumbnail must be a new high-detail render of this same object, never pixel-art or the supplied sprite. Minimal labels: item name, FRONT, SIDE, BACK, 3/4, ICON.\nSubject: Cathedral Map; item.design.base.cathedral-map; native cursor 96.\nA single old yellow-olive parchment scroll held partially open horizontally with BOTH left and right edges tightly rolled vertically inward, broad cylindrical rolls framing a central map panel. Preserve short rough parchment ends and reference's muted dark burgundy/red diagram/map marks across the central panel. Its open width is only modestly wider than height; do not turn it into a loose sheet, book, modern map or white paper. Fine unreadable map lines are interpretation, no invented readable words. Back shows aged plain parchment.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "cursorId": 96,
+        "sha256": "05d5cf79bad0656044fb7cc5db8c9245b6af521ed8c4b904a91daf6d5a45cb8c",
+        "availability": "local-private",
+        "notes": "Licensed original inventory sprite inspected privately at nearest-neighbor 6x enlargement; no original pixels or file paths are included."
+      },
+      "referenceNativeSpriteSha256": "ef103276f156e59d920a27391ff7a1094dc3d3d01dce319a49e50d73089de8c0",
+      "referenceInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "viewsUsed": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-concept-thumbnail"
+      ],
+      "inferredParts": [
+        "Back and hidden surfaces",
+        "Thickness and absolute scale",
+        "Fine construction/material details unresolved by source pixels"
+      ],
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "sourceBaseIds": [
+        "item.base.022.idi-mapofdoom"
+      ],
+      "sourceUniqueIds": [],
+      "nativeIdentityPolicy": "Visual study only. Native item identities, unique powers, stats, affixes, saves and RNG are separate and unchanged.",
+      "identityGate": "Candidate design requires visual review and multiview reconciliation before master production.",
+      "notes": "Neutral-light candidate board. HD thumbnail is a new concept preview, not a final runtime icon. Hidden geometry is proposed reconstruction."
+    },
+    {
+      "productionId": "item.design.base.fungal-tome",
+      "conceptId": "item.design.base.fungal-tome.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/fungal-tome-r1.png",
+      "sha256": "0badf03afc02206b533ccb1a7886c20ecce5583bb3bdc5d4a89512f4f5d17e45",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate object-modeling reference.\nInput image 1 is a PRIVATE original inventory sprite, used only to preserve recognizable silhouette, colors, material regions and distinctive details. Create NEW HD imagery throughout; never paste the sprite into any view or thumbnail.\nA clean technical board of the exact SAME single object in FRONT, SIDE, BACK, THREE-QUARTER and a small NEW HD INVENTORY thumbnail. All views must agree on geometry, proportions, material layout and distinctive details; back is the true reverse, not another front. Full object visible, generously spaced, plain charcoal-gray backdrop, neutral soft studio lighting, no colored illumination or glow, realistic restrained dark medieval materials and fine wear. No scene, body, face, hands, stand, exploded alternatives or extra props. Rear/hidden surfaces and absolute scale are proposed reconstruction; preserve visible source design. Thumbnail must be a new high-detail render of this same object, never pixel-art or the supplied sprite. Minimal labels: item name, FRONT, SIDE, BACK, 3/4, ICON.\nSubject: Fungal Tome; item.design.base.fungal-tome; native cursor 97.\nOne thick CLOSED burgundy/dark-red leather-bound medieval book, with yellowed page block and substantial dull old-gold ornamental binding details: preserve reference's broad curving/looped gold cover ornament and small corner/crossing metal details as visible rather than using the name to invent a mushroom. Keep rich red-brown cover, warm old brass and creamy aged page edge. No sprouting fungus, eye, skull, jewels, legible text or open pages. Front is cover face, side shows thickness/page block, back an inferred restrained reverse.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "cursorId": 97,
+        "sha256": "9010e5bec2b3a386e22eda892e4154cd10c328d6150297e50f793091eed87137",
+        "availability": "local-private",
+        "notes": "Licensed original inventory sprite inspected privately at nearest-neighbor 6x enlargement; no original pixels or file paths are included."
+      },
+      "referenceNativeSpriteSha256": "405ac854375497ef54671e1b208a87fbfa4a10902bf9ce133955d446c5bc7610",
+      "referenceInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "viewsUsed": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-concept-thumbnail"
+      ],
+      "inferredParts": [
+        "Back and hidden surfaces",
+        "Thickness and absolute scale",
+        "Fine construction/material details unresolved by source pixels"
+      ],
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "sourceBaseIds": [
+        "item.base.019.idi-fungaltm"
+      ],
+      "sourceUniqueIds": [],
+      "nativeIdentityPolicy": "Visual study only. Native item identities, unique powers, stats, affixes, saves and RNG are separate and unchanged.",
+      "identityGate": "Candidate design requires visual review and multiview reconciliation before master production.",
+      "notes": "Neutral-light candidate board. HD thumbnail is a new concept preview, not a final runtime icon. Hidden geometry is proposed reconstruction."
+    },
+    {
+      "productionId": "item.design.base.magic-rock",
+      "conceptId": "item.design.base.magic-rock.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/magic-rock-r1.png",
+      "sha256": "705529f35b3cc6a9002eeac66327324f2e6beef5b5887e8ded6a77161b5a4a48",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate object-modeling reference.\nInput image 1 is a PRIVATE original inventory sprite, used only to preserve recognizable silhouette, colors, material regions and distinctive details. Create NEW HD imagery throughout; never paste the sprite into any view or thumbnail.\nA clean technical board of the exact SAME single object in FRONT, SIDE, BACK, THREE-QUARTER and a small NEW HD INVENTORY thumbnail. All views must agree on geometry, proportions, material layout and distinctive details; back is the true reverse, not another front. Full object visible, generously spaced, plain charcoal-gray backdrop, neutral soft studio lighting, no colored illumination or glow, realistic restrained dark medieval materials and fine wear. No scene, body, face, hands, stand, exploded alternatives or extra props. Rear/hidden surfaces and absolute scale are proposed reconstruction; preserve visible source design. Thumbnail must be a new high-detail render of this same object, never pixel-art or the supplied sprite. Minimal labels: item name, FRONT, SIDE, BACK, 3/4, ICON.\nSubject: Magic Rock; item.design.base.magic-rock; native cursor 76.\nOne irregular roughly oval upright cluster/lump of rough charcoal-black gray rock, with several jagged angular protrusions and fractures, almost metallic pale gray small planes/highlights. Preserve the dense asymmetrical dark knobby silhouette from the source, wider upper/middle mass and uneven pointed bottom. It has no gemstones, rune, colored light, magenta/purple saturation, pedestal or magical aura; do not smooth it into a generic pebble.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "cursorId": 76,
+        "sha256": "cf98f63e7c2154672ec06b185a3694ada55944076a30844291d6e68712443172",
+        "availability": "local-private",
+        "notes": "Licensed original inventory sprite inspected privately at nearest-neighbor 6x enlargement; no original pixels or file paths are included."
+      },
+      "referenceNativeSpriteSha256": "0f56528262525544808444fcc14593e29bda15e1421acf421f78282e4fdcba57",
+      "referenceInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "viewsUsed": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-concept-thumbnail"
+      ],
+      "inferredParts": [
+        "Back and hidden surfaces",
+        "Thickness and absolute scale",
+        "Fine construction/material details unresolved by source pixels"
+      ],
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "sourceBaseIds": [
+        "item.base.009.idi-rock"
+      ],
+      "sourceUniqueIds": [],
+      "nativeIdentityPolicy": "Visual study only. Native item identities, unique powers, stats, affixes, saves and RNG are separate and unchanged.",
+      "identityGate": "Candidate design requires visual review and multiview reconciliation before master production.",
+      "notes": "Neutral-light candidate board. HD thumbnail is a new concept preview, not a final runtime icon. Hidden geometry is proposed reconstruction."
+    }
+  ],
+  "blockedUnits": [],
+  "devlogHandoff": {
+    "includeAllGeneratedImages": true,
+    "images": [
+      {
+        "image": "assets/concept-art/items/r1/anvil-of-fury-r1.png",
+        "sha256": "dbe477a8a93e405183338149df6ef26e66d7f93d2ed6bba4ce43802c98ec540f",
+        "dimensions": [
+          1536,
+          1024
+        ]
+      },
+      {
+        "image": "assets/concept-art/items/r1/black-mushroom-r1.png",
+        "sha256": "58f583d19cd23a251c26f63bcec5e16912b3cf089bbb805a9f9804020885e815",
+        "dimensions": [
+          1536,
+          1024
+        ]
+      },
+      {
+        "image": "assets/concept-art/items/r1/blood-stone-r1.png",
+        "sha256": "a5e4ea443f9f26fce3163df3fb08ac01ca493399732509bf72227bf8dd2e5891",
+        "dimensions": [
+          1536,
+          1024
+        ]
+      },
+      {
+        "image": "assets/concept-art/items/r1/brain-r1.png",
+        "sha256": "e465d48116aec4443a4dd4dd812dc6f146f61c3f0fc64741f4d120d13864fd35",
+        "dimensions": [
+          1536,
+          1024
+        ]
+      },
+      {
+        "image": "assets/concept-art/items/r1/cathedral-map-r1.png",
+        "sha256": "65770f2e27740559dc346c5be8ab679f712ef9ce896cc22d2d7e828308ce8115",
+        "dimensions": [
+          1536,
+          1024
+        ]
+      },
+      {
+        "image": "assets/concept-art/items/r1/fungal-tome-r1.png",
+        "sha256": "0badf03afc02206b533ccb1a7886c20ecce5583bb3bdc5d4a89512f4f5d17e45",
+        "dimensions": [
+          1536,
+          1024
+        ]
+      },
+      {
+        "image": "assets/concept-art/items/r1/magic-rock-r1.png",
+        "sha256": "705529f35b3cc6a9002eeac66327324f2e6beef5b5887e8ded6a77161b5a4a48",
+        "dimensions": [
+          1536,
+          1024
+        ]
+      }
+    ],
+    "generatedConceptIds": [
+      "item.design.base.anvil-of-fury.concept.r1",
+      "item.design.base.black-mushroom.concept.r1",
+      "item.design.base.blood-stone.concept.r1",
+      "item.design.base.brain.concept.r1",
+      "item.design.base.cathedral-map.concept.r1",
+      "item.design.base.fungal-tome.concept.r1",
+      "item.design.base.magic-rock.concept.r1"
+    ],
+    "reuseProductionIds": [],
+    "limits": [
+      "All outputs remain unapproved candidates.",
+      "Shared cursor reuse preserves separate native identities and powers.",
+      "Hidden surfaces and scale are inferred; master/socket/icon work remains gated."
+    ]
+  }
+}
+

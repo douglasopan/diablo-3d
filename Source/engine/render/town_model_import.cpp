@@ -26,6 +26,87 @@ constexpr std::size_t BytesPerTriangle = 15 * sizeof(uint32_t);
 constexpr std::size_t MaxAssetBytes = HeaderBytes + MaxTriangles * BytesPerTriangle + MaxTextureSide * MaxTextureSide * 3;
 constexpr std::array<char, 8> Magic { 'D', '3', 'D', 'M', 'E', 'S', 'H', '1' };
 
+
+// Exact current payload identities, not provider guesses from filenames.
+constexpr std::array<std::string_view, 14> KnownMeshyRuntimeContent {{
+	"42df3d0e2eece276c8825ef887ada7691c8f77130102123f230245dcb4defe05", // house-gillian
+	"4e19f753639c84fc2f676943c9af90362144e2132db60162c4a10ccf8ace098d", // house-pepin
+	"ba4b553f3627bc46f4b85b06eb072963f95f79e513f635807176765bf954b845", // house-adria
+	"d8e8c2ddd000089e4c308cb9a52e8346c8b67968d9dc86e109b0aac704e0134e", // house-north
+	"05acffbb80d4652be80d484856fc77d2f15ba4e2d60cb0604add2298766757ce", // house-southeast
+	"e58e48ab1f22a0e59e299b6dbb75a15b22b6ccbc6506043f5ca8edc181830ae2", // cabin-west
+	"de7ed5872d58ee5bede3879875ae776aaed7b7729ebc7a872bfefb238d9c195b", // cathedral
+	"11cf73e7ea0b2779e8a6c8b989ea5ad0c062c518ece1e2674bc776d2093d88a0", // tavern-main
+	"a0adba330232fcd785e0640dcc76a11067ace1347cf326eac6870def0c7efc62", // tavern-wing
+	"2b86d6cd4c2ad826f4e43ed3e77c071ec3c9f98922664ca2a84f63902ffe8739", // smithy-house
+	"de3fd42311cb4ff2139a87a38976517a9a320035d2d0a5a1470b04b702cecc9a", // smithy-forge
+	"f8f25dbfb49dd7a82ce4d7795bd71919b4ead773ce22165de37bc8bb59e83563", // well
+	"d12cc57e798151fb4abf3173149a4d7cf1da2cc8bdbc6ac39439aee3fe9069f9", // cabin-east
+	"9b7793d3e2187228a206ff139ba9e44e575de2f7ff40a783f4eee3d5b970759d", // ogden
+}};
+constexpr std::string_view KnownMeshyPolicyPath = "d3d-models/known-meshy.policy";
+constexpr std::string_view KnownMeshyPolicyDisabled = "D3DKNOWNMESHY1\nenabled=0\n";
+constexpr std::string_view KnownMeshyPolicyEnabled = "D3DKNOWNMESHY1\nenabled=1\n";
+bool KnownMeshyPolicyAttempted = false;
+bool KnownMeshyPolicyDisabledValue = false;
+
+bool SameSha256Hex(std::string_view actual, std::string_view known)
+{
+	if (actual.size() != known.size())
+		return false;
+	for (size_t i = 0; i < actual.size(); ++i) {
+		const char lower = actual[i] >= 'A' && actual[i] <= 'F' ? actual[i] - 'A' + 'a' : actual[i];
+		if (lower != known[i])
+			return false;
+	}
+	return true;
+}
+
+void EnsureKnownMeshyPolicyLoaded()
+{
+	if (KnownMeshyPolicyAttempted)
+		return;
+	KnownMeshyPolicyAttempted = true;
+	// Missing policy preserves normal native/installed behavior. The browser
+	// profile can explicitly ship enabled=0 for the bounded pause.
+	AssetRef ref = FindAsset(KnownMeshyPolicyPath);
+	if (!ref.ok())
+		return;
+	// A present but invalid policy does not silently re-enable these 14 files.
+	KnownMeshyPolicyDisabledValue = true;
+	constexpr size_t MaximumPolicyBytes = 128;
+	const size_t size = ref.size();
+	if (size == 0 || size > MaximumPolicyBytes) {
+		LogWarn("Known Meshy runtime policy: invalid size; fourteen known contents disabled until policy is repaired and resources restarted");
+		return;
+	}
+	std::array<char, MaximumPolicyBytes> bytes {};
+	AssetHandle handle = OpenAsset(std::move(ref));
+	if (!handle.ok() || !handle.read(bytes.data(), size)) {
+		LogWarn("Known Meshy runtime policy: unreadable; fourteen known contents disabled until restart");
+		return;
+	}
+	std::string normalized;
+	normalized.reserve(size);
+	for (size_t i = 0; i < size; ++i) {
+		if (bytes[i] == '\r') {
+			if (i + 1 >= size || bytes[i + 1] != '\n') {
+				LogWarn("Known Meshy runtime policy: invalid newline; fourteen known contents disabled until restart");
+				return;
+			}
+			continue;
+		}
+		normalized.push_back(bytes[i]);
+	}
+	std::string_view text = normalized;
+	if (text.starts_with("\xEF\xBB\xBF"))
+		text.remove_prefix(3);
+	if (text == KnownMeshyPolicyEnabled)
+		KnownMeshyPolicyDisabledValue = false;
+	else if (text != KnownMeshyPolicyDisabled)
+		LogWarn("Known Meshy runtime policy: invalid schema/value; fourteen known contents disabled until restart");
+}
+
 bool IsBaselineCabin(const TownSceneModel &model)
 {
 	return model.kind == TownSceneKind::Cabin && model.minTile == Point { 70, 66 };
@@ -203,6 +284,28 @@ bool ParseModelWithAudit(TownSceneModel &model, std::span<const std::byte> data,
 
 } // namespace
 
+
+bool ShouldDisableKnownMeshyRuntimeContent(std::string_view expectedSha256)
+{
+	if (std::none_of(KnownMeshyRuntimeContent.begin(), KnownMeshyRuntimeContent.end(), [&](std::string_view known) {
+		return SameSha256Hex(expectedSha256, known);
+	}))
+		return false; // Unknown/new/Tripo content is never inferred from its path.
+	try {
+		EnsureKnownMeshyPolicyLoaded();
+	} catch (const std::bad_alloc &) {
+		KnownMeshyPolicyAttempted = true;
+		KnownMeshyPolicyDisabledValue = true;
+	}
+	return KnownMeshyPolicyDisabledValue;
+}
+
+void ResetKnownMeshyRuntimePolicy()
+{
+	KnownMeshyPolicyAttempted = false;
+	KnownMeshyPolicyDisabledValue = false;
+}
+
 bool ParseTownModelOverride(TownSceneModel &model, std::span<const std::byte> data)
 {
 	try {
@@ -242,6 +345,8 @@ bool LoadTownModelOverride(TownSceneModel &model, std::string_view assetPath,
 				return fail("invalid-hash");
 			audit.expectedSha256 = ModHashToHex(digest);
 		}
+		if (!expectedSha256.empty() && ShouldDisableKnownMeshyRuntimeContent(audit.expectedSha256))
+			return fail("known-meshy-disabled"); // Before heavy Find/Open/read/decode.
 		AssetRef ref = FindAsset(assetPath);
 		if (!ref.ok())
 			return fail("missing");
@@ -260,6 +365,8 @@ bool LoadTownModelOverride(TownSceneModel &model, std::string_view assetPath,
 		if (!handle.read(data.data(), data.size()))
 			return fail("read");
 		audit.sha256 = ModHashToHex(ComputeBytesSha256(data));
+		if (ShouldDisableKnownMeshyRuntimeContent(audit.sha256))
+			return fail("known-meshy-disabled"); // Bounded read fallback for unregistered aliases, before decoding.
 		if (!ParseModelWithAudit(model, data, audit, !expectedSha256.empty()))
 			return fail(audit.failure);
 		if (attemptAudit != nullptr)

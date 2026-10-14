@@ -4,7 +4,7 @@ This guide covers the D3D Windows prototype. The public repository places `CMake
 
 The public source does not include a compiler, a `.tools` bundle, Diablo game archives, extracted game artwork, player saves or a ready-made player profile. The current script builds a local-only executable with `NONET=ON`; this does not establish multiplayer or voice support. A first build may download source dependencies through CMake. Disabling game networking does not make the initial dependency setup an offline build.
 
-**Build qualification — 11 October 2026, America/Sao_Paulo:** consult the [versioned checkpoint](CHECKPOINT-2026-10-11.md) and [code/lifecycle guide](CODE-ARCHITECTURE.md). Public source, habitual b775, experimental R3 preview, private R4 fixtures and the uncompiled clean C1 checkout are different identities. This guide does not provide unpublished candidate source, private support payloads or HD textures. For a new isolated candidate, use a separate build directory/profile and record source/EXE/asset hashes before running it.
+**Build qualification — 11 October 2026, America/Sao_Paulo:** consult the [versioned checkpoint](CHECKPOINT-2026-10-11.md) and [code/lifecycle guide](CODE-ARCHITECTURE.md). Public source, habitual b775, experimental R3 preview, private R4 fixtures and the compiled clean C1 review **4391a5 / R26** are different identities. R26 passed a private bounded fixture and was delivered separately; normal gameplay/FPS and human visual approval remain pending. This guide does not provide unpublished candidate source, private support payloads or HD textures. For a new isolated candidate, use a separate build directory/profile and record source/EXE/asset hashes before running it.
 
 ## Início rápido em português
 

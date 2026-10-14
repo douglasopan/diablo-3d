@@ -9,6 +9,7 @@
 #include <cstdint>
 
 #include "control/control.hpp"
+#include "control/d3d_hud.hpp"
 #include "engine/clx_sprite.hpp"
 #include "engine/load_clx.hpp"
 #include "engine/point.hpp"
@@ -78,20 +79,16 @@ void FreeXPBar()
 
 void DrawXPBar(const Surface &out)
 {
-	if (!*GetOptions().Gameplay.experienceBar || ChatFlag)
-		return;
-
+	if (!*GetOptions().Gameplay.experienceBar || ChatFlag || !xpbarArt) return;
+	const auto drawNative = [&](const Surface &target, Point back) {
 	const Player &player = *MyPlayer;
-	const Rectangle &mainPanel = GetMainPanel();
-
-	const Point back = { mainPanel.position.x + (mainPanel.size.width / 2) - 155, mainPanel.position.y + mainPanel.size.height - 11 };
 	const Point position = back + Displacement { 3, 2 };
 
-	RenderClxSprite(out, (*xpbarArt)[0], back);
+	RenderClxSprite(target, (*xpbarArt)[0], back);
 
 	if (player.isMaxCharacterLevel()) {
 		// Draw a nice golden bar for max level characters.
-		DrawBar(out, position, BarWidth, GoldGradient);
+		DrawBar(target, position, BarWidth, GoldGradient);
 
 		return;
 	}
@@ -113,10 +110,20 @@ void DrawXPBar(const Surface &out)
 	const uint64_t fade = (prevXpDelta1 - lastFullPx) * (SilverGradient.size() - 1) / onePx;
 
 	// Draw beginning of bar full brightness
-	DrawBar(out, position, static_cast<int>(fullBar), SilverGradient);
+	DrawBar(target, position, static_cast<int>(fullBar), SilverGradient);
 
 	// End pixels appear gradually
-	DrawEndCap(out, position + Displacement { static_cast<int>(fullBar), 0 }, static_cast<int>(fade), SilverGradient);
+	DrawEndCap(target, position + Displacement { static_cast<int>(fullBar), 0 }, static_cast<int>(fade), SilverGradient);
+	};
+	if (IsD3dHudLayoutActive()) {
+		OwnedSurface native(BackWidth, BackHeight);
+		FillRect(native, 0, 0, BackWidth, BackHeight, 0);
+		drawNative(native, {0,0});
+		DrawD3dHudSurface(out, native, GetD3dHudExperienceRect(), true);
+	} else {
+		const Rectangle &panel = GetMainPanel();
+		drawNative(out, {panel.position.x + panel.size.width / 2 - 155, panel.position.y + panel.size.height - 11});
+	}
 }
 
 bool CheckXPBarInfo()
@@ -125,10 +132,10 @@ bool CheckXPBarInfo()
 		return false;
 	const Rectangle &mainPanel = GetMainPanel();
 
-	const int backX = mainPanel.position.x + (mainPanel.size.width / 2) - 155;
-	const int backY = mainPanel.position.y + mainPanel.size.height - 11;
+	const Rectangle bounds = IsD3dHudLayoutActive() ? GetD3dHudExperienceRect()
+	    : Rectangle {{mainPanel.position.x + mainPanel.size.width / 2 - 155, mainPanel.position.y + mainPanel.size.height - 11}, {BackWidth,BackHeight}};
 
-	if (MousePosition.x < backX || MousePosition.x >= backX + BackWidth || MousePosition.y < backY || MousePosition.y >= backY + BackHeight)
+	if (!bounds.contains(MousePosition))
 		return false;
 
 	const Player &player = *MyPlayer;

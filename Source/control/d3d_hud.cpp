@@ -2,17 +2,23 @@
 
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <cstdlib>
 #include <limits>
 #include <string_view>
 
 #include "control/control.hpp"
+#include "automap.h"
 #include "control/control_flasks.hpp"
 #include "control/control_panel.hpp"
+#include "control/d3d_floating_panels.hpp"
 #include "control/d3d_hud_layout.hpp"
+#include "control/d3d_hud_skin.hpp"
 #include "controls/control_mode.hpp"
 #include "controls/game_controls.h"
+#include "controls/plrctrls.h"
 #include "engine/palette.h"
+#include "engine/hd_sprite_pack.hpp"
 #include "engine/render/d3d_hud_presentation.hpp"
 #include "engine/render/d3d_ui_layout.hpp"
 #include "engine/render/primitive_render.hpp"
@@ -24,6 +30,7 @@
 #include "player.h"
 #include "utils/display.h"
 #include "utils/sdl_geometry.h"
+#include "utils/str_cat.hpp"
 
 namespace devilution {
 
@@ -31,124 +38,106 @@ extern Rectangle LevelButtonRect;
 
 namespace {
 
+bool ClockDrawnInLastFrame = false;
+
 Rectangle LayoutRect(size_t index)
 {
-	const int screenHeight = std::max<int>(1, GetScreenHeight());
-	const int width = GetScreenWidth() * 480 / screenHeight;
-	constexpr int height = 480;
-	const int safeWidth = D3dHudSafeWidth(width, height);
-	const auto &entry = D3dHudLayoutEntries[index];
-	return D3dHudScaleRect(D3dHudPlaceRect(GetD3dUiRect(entry.name, safeWidth, height,
-	                         D3dHudDefaultRect(entry, safeWidth, height)),
-	    entry, width, height), screenHeight);
+	return GetD3dHudGeometry().elements[index];
+}
+
+bool IsCompactLayout()
+{
+	return IsD3dHudLayoutActive() && GetD3dHudGeometry().mode == D3dHudGeometryMode::Compact;
+}
+
+int DesignPixelsX(int pixels)
+{
+	return IsCompactLayout() ? GetD3dHudDesignPixelsX(pixels) : std::max(1, pixels * GetScreenHeight() / 480);
+}
+
+int DesignPixelsY(int pixels)
+{
+	return IsCompactLayout() ? GetD3dHudDesignPixelsY(pixels) : std::max(1, pixels * GetScreenHeight() / 480);
+}
+
+Rectangle ContainContent(Rectangle target, int width, int height)
+{
+	const auto &context = GetD3dHudGeometry().context;
+	const float scale = std::min(target.size.width * context.outputScaleX / width, target.size.height * context.outputScaleY / height);
+	const Size size { std::clamp(static_cast<int>(std::lround(width * scale / context.outputScaleX)), 1, target.size.width),
+		std::clamp(static_cast<int>(std::lround(height * scale / context.outputScaleY)), 1, target.size.height) };
+	return { target.position + Displacement { (target.size.width - size.width) / 2, (target.size.height - size.height) / 2 }, size };
+}
+
+Rectangle CenterGlyphBuffer(Rectangle target, const Surface &source, float scaleX, float scaleY)
+{
+	const Size size { std::clamp(static_cast<int>(std::lround(source.w() * scaleX)), 1, target.size.width),
+		std::clamp(static_cast<int>(std::lround(source.h() * scaleY)), 1, target.size.height) };
+	return { target.position + Displacement { (target.size.width - size.width) / 2, (target.size.height - size.height) / 2 }, size };
 }
 
 void BlitScaled(const Surface &out, const Surface &source, Rectangle target, bool skipZero = false)
 {
+	if (target.size.width <= 0 || target.size.height <= 0) return;
+	const int right = std::min(out.w(), target.position.x + target.size.width);
 	for (int y = std::max(0, target.position.y); y < std::min(out.h(), target.position.y + target.size.height); ++y) {
 		const int sy = (y - target.position.y) * source.h() / target.size.height;
-		int runStart = -1;
-		for (int x = std::max(0, target.position.x); x < std::min(out.w(), target.position.x + target.size.width); ++x) {
-			const uint8_t color = *source.at((x - target.position.x) * source.w() / target.size.width, sy);
-			if (!skipZero || color != 0) {
-				*out.at(x, y) = color;
-				if (runStart < 0) runStart = x;
-			} else if (runStart >= 0) {
-				MarkUiOverlayRect(out, runStart, y, x - runStart, 1);
-				runStart = -1;
-			}
+		int x = std::max(0, target.position.x);
+		while (x < right) {
+			while (x < right && skipZero && *source.at((x - target.position.x) * source.w() / target.size.width, sy) == 0) ++x;
+			const int start = x;
+			while (x < right && (!skipZero || *source.at((x - target.position.x) * source.w() / target.size.width, sy) != 0)) ++x;
+			if (start == x) continue;
+			MarkUiOverlayRect(out, start, y, x - start, 1);
+			for (int dx = start; dx < x; ++dx)
+				*out.at(dx, y) = *source.at((dx - target.position.x) * source.w() / target.size.width, sy);
 		}
-		if (runStart >= 0)
-			MarkUiOverlayRect(out, runStart, y, std::min(out.w(), target.position.x + target.size.width) - runStart, 1);
 	}
-}
-
-bool Intersects(Rectangle a, Rectangle b)
-{
-	return a.position.x < b.position.x + b.size.width && b.position.x < a.position.x + a.size.width
-	    && a.position.y < b.position.y + b.size.height && b.position.y < a.position.y + a.size.height;
-}
-
-// Auxiliary native controls have no authored INI entries. Reserve a nearby free
-// rectangle so the default HUD never hides them or consumes their mouse input.
-Rectangle ReserveAuxiliaryRect(Rectangle preferred, Rectangle extra = {})
-{
-	const int width = GetScreenWidth(), height = GetScreenHeight();
-	preferred.size.width = std::min(preferred.size.width, width);
-	preferred.size.height = std::min(preferred.size.height, height);
-	std::array<Rectangle, D3dHudLayoutEntries.size() + 4> occupied;
-	size_t count = 0;
-	for (size_t i = 0; i < D3dHudLayoutEntries.size(); ++i) {
-		if (i >= 11 && !IsChatAvailable()) continue;
-		occupied[count++] = LayoutRect(i);
-	}
-	occupied[count++] = GetD3dHudFrameRect();
-	if (IsLeftPanelOpen()) occupied[count++] = GetLeftPanel();
-	if (IsRightPanelOpen()) occupied[count++] = GetRightPanel();
-	if (extra.size.width > 0 && extra.size.height > 0) occupied[count++] = extra;
-	const int gap = std::max(1, 8 * height / 480);
-	Rectangle result = preferred;
-	int bestDistance = std::numeric_limits<int>::max();
-	const auto consider = [&](Rectangle candidate) {
-		candidate.position.x = std::clamp(candidate.position.x, 0, width - candidate.size.width);
-		candidate.position.y = std::clamp(candidate.position.y, 0, height - candidate.size.height);
-		for (size_t i = 0; i < count; ++i)
-			if (Intersects(candidate, occupied[i])) return;
-		const int distance = std::abs(candidate.position.x - preferred.position.x) + std::abs(candidate.position.y - preferred.position.y);
-		if (distance < bestDistance) {
-			bestDistance = distance;
-			result = candidate;
-		}
-	};
-	consider(preferred);
-	for (size_t i = 0; i < count; ++i) {
-		Rectangle candidate = preferred;
-		candidate.position.x = occupied[i].position.x - gap - candidate.size.width;
-		consider(candidate);
-		candidate.position.x = occupied[i].position.x + occupied[i].size.width + gap;
-		consider(candidate);
-		candidate = preferred;
-		candidate.position.y = occupied[i].position.y - gap - candidate.size.height;
-		consider(candidate);
-	}
-	// Arbitrarily overlapping authored controls can leave no free area; clamp
-	// that fallback as well. Default compact/wide layouts have a reserved result.
-	result.position.x = std::clamp(result.position.x, 0, width - result.size.width);
-	result.position.y = std::clamp(result.position.y, 0, height - result.size.height);
-	return result;
 }
 
 Rectangle LevelGroupRect()
 {
-	const Rectangle orb = GetD3dHudOrbRect(false);
-	const int height = GetScreenHeight();
-	const Size size { std::max(1, 120 * height / 480), std::max(1, 45 * height / 480) };
-	return ReserveAuxiliaryRect({ { orb.Center().x - size.width / 2, orb.position.y - std::max(1, 8 * height / 480) - size.height }, size });
+	// Auxiliary defaults belong to the base layout. Opening/moving a panel or
+	// another module must never repack this module's independent saved position.
+	const auto standard = ResolveD3dHudGeometry(GetD3dHudGeometryContext());
+	const Rectangle orb = standard.elements[0];
+	const Size size { DesignPixelsX(120), DesignPixelsY(45) };
+	return ResolveD3dHudCustomizedRect(14, { { orb.Center().x - size.width / 2, orb.position.y - DesignPixelsY(8) - size.height }, size });
 }
 
 } // namespace
 
+bool IsD3dHudSelected()
+{
+	// This build has one selected skin. Home/F4 select the world backend only;
+	// chat, controllers and renderer failure change presentation, never the skin.
+	return true;
+}
+
+bool IsD3dHudLayoutActive()
+{
+	// RGB may decline for native controller overlays; their CPU path keeps
+	// the same geometry. Chat retains its modal native input/recipient layout.
+	return IsD3dHudSelected() && !ChatFlag;
+}
+
+uint8_t GetD3dHudBackgroundOpacity()
+{
+	const int transparency = std::clamp(*GetOptions().Graphics.hudTransparency, 0, 100);
+	return static_cast<uint8_t>((255 * (100 - transparency) + 50) / 100);
+}
+
 bool IsD3dHudEnabled()
 {
-	// Compact side panels occupy the same rows as the utility strip. Keep their
-	// complete legacy surface until the next, explicitly separate panel pass.
-	// Modifier menus also need the native spell surface for their button hints.
-	if (IsChatAvailable()) {
-		for (size_t index : { size_t { 11 }, size_t { 12 } }) {
-			const Rectangle button = LayoutRect(index);
-			if ((IsLeftPanelOpen() && Intersects(button, GetLeftPanel()))
-			    || (IsRightPanelOpen() && Intersects(button, GetRightPanel())))
-				return false;
-		}
-	}
-	return !ChatFlag && ControlMode != ControlTypes::VirtualGamepad
-	    && !PadMenuNavigatorActive && !PadHotspellMenuActive
-	    && !(CanPanelsCoverView() && (IsLeftPanelOpen() || IsRightPanelOpen()));
+    // Floating panels retain their own presentation and hit priority. Their
+    // visibility never repacks or replaces independently customized modules.
+    return !ChatFlag && ControlMode != ControlTypes::VirtualGamepad
+        && !PadMenuNavigatorActive && !PadHotspellMenuActive;
 }
 
 Rectangle GetD3dHudPanelButtonRect(int button)
 {
-	if (!IsD3dHudEnabled()) {
+	if (!IsD3dHudLayoutActive()) {
 		Rectangle rect = MainPanelButtonRect[button];
 		SetPanelObjectPosition(UiPanels::Main, rect);
 		return rect;
@@ -159,7 +148,7 @@ Rectangle GetD3dHudPanelButtonRect(int button)
 
 Rectangle GetD3dHudBeltRect()
 {
-	if (IsD3dHudEnabled()) return LayoutRect(2);
+	if (IsD3dHudLayoutActive()) return LayoutRect(2);
 	Rectangle rect = BeltRect;
 	SetPanelObjectPosition(UiPanels::Main, rect);
 	return rect;
@@ -167,14 +156,23 @@ Rectangle GetD3dHudBeltRect()
 
 Rectangle GetD3dHudBeltSlotRect(int slot)
 {
+	if (IsD3dHudLayoutActive()) return GetD3dHudGeometry().beltSlots[std::clamp(slot, 0, 7)];
 	Rectangle rect = D3dHudBeltSlotRect(GetD3dHudBeltRect(), slot);
-	if (!IsD3dHudEnabled()) rect.size.height = 29;
+	rect.size.height = 29;
 	return rect;
+}
+
+Rectangle GetD3dHudBeltInteriorRect(Rectangle slot)
+{
+	const bool compact = IsCompactLayout();
+	const int insetX = compact ? DesignPixelsX(2) : 2;
+	const int insetY = compact ? DesignPixelsY(2) : 2;
+	return slot.size.width > 2 * insetX && slot.size.height > 2 * insetY ? slot.inset({ insetX, insetY }) : slot;
 }
 
 Rectangle GetD3dHudSpellRect()
 {
-	if (IsD3dHudEnabled()) return LayoutRect(3);
+	if (IsD3dHudLayoutActive()) return LayoutRect(3);
 	Rectangle rect = SpellButtonRect;
 	SetPanelObjectPosition(UiPanels::Main, rect);
 	return rect;
@@ -182,7 +180,7 @@ Rectangle GetD3dHudSpellRect()
 
 Rectangle GetD3dHudInfoRect()
 {
-	if (IsD3dHudEnabled()) return LayoutRect(4);
+	if (IsD3dHudLayoutActive()) return LayoutRect(4);
 	Rectangle rect = InfoBoxRect;
 	SetPanelObjectPosition(UiPanels::Main, rect);
 	return rect;
@@ -190,47 +188,31 @@ Rectangle GetD3dHudInfoRect()
 
 Rectangle GetD3dHudFrameRect()
 {
-	if (!IsD3dHudEnabled()) return GetMainPanel();
-	// The stone body follows the editable core. Globes protrude above its top
-	// edge; conditional multiplayer controls do not fill the world between them.
-	Rectangle frame = LayoutRect(2);
-	for (size_t index : { size_t { 3 }, size_t { 4 }, size_t { 5 }, size_t { 6 }, size_t { 7 }, size_t { 8 }, size_t { 9 }, size_t { 10 } }) {
-		const Rectangle rect = LayoutRect(index);
-		const int right = std::max(frame.position.x + frame.size.width, rect.position.x + rect.size.width);
-		const int bottom = std::max(frame.position.y + frame.size.height, rect.position.y + rect.size.height);
-		frame.position.x = std::min(frame.position.x, rect.position.x);
-		frame.position.y = std::min(frame.position.y, rect.position.y);
-		frame.size = { right - frame.position.x, bottom - frame.position.y };
-	}
-	const int horizontal = std::max(1, 10 * GetScreenHeight() / 480);
-	const int top = std::max(1, 6 * GetScreenHeight() / 480);
-	const int right = std::min<int>(GetScreenWidth(), frame.position.x + frame.size.width + horizontal);
-	frame.position.x = std::max(0, frame.position.x - horizontal);
-	frame.size.width = right - frame.position.x;
-	frame.position.y = std::max(0, frame.position.y - top);
-	frame.size.height += top;
-	frame.size.height = std::min<int>(frame.size.height, GetScreenHeight() - frame.position.y);
-	return frame;
+	if (!IsD3dHudLayoutActive()) return GetMainPanel();
+	return GetD3dHudGeometry().frame;
 }
 
-Rectangle GetD3dHudOrbRect(bool mana) { return LayoutRect(mana ? 1 : 0); }
+Rectangle GetD3dHudOrbRect(bool mana)
+{
+	if (IsD3dHudLayoutActive()) return LayoutRect(mana ? 1 : 0);
+	return { GetMainPanel().position + Displacement { mana ? 448 : 84, -16 }, { 112, 144 } };
+}
 
 Rectangle GetD3dHudLevelButtonRect()
 {
-	if (!IsD3dHudEnabled()) {
+	if (!IsD3dHudLayoutActive()) {
 		Rectangle rect = LevelButtonRect;
 		SetPanelObjectPosition(UiPanels::Main, rect);
 		return rect;
 	}
 	const Rectangle group = LevelGroupRect();
-	const int height = GetScreenHeight();
-	const Size size { std::max(1, 41 * height / 480), std::max(1, 22 * height / 480) };
+	const Size size { std::max(1, group.size.width * 41 / 120), std::max(1, group.size.height * 22 / 45) };
 	return { group.position + Displacement { (group.size.width - size.width) / 2, group.size.height - size.height }, size };
 }
 
 Rectangle GetD3dHudLevelLabelRect()
 {
-	if (!IsD3dHudEnabled())
+	if (!IsD3dHudLayoutActive())
 		return { GetMainPanel().position + Displacement { 0, LevelButtonRect.position.y - 23 }, { 120, 23 } };
 	Rectangle group = LevelGroupRect();
 	group.size.height -= GetD3dHudLevelButtonRect().size.height;
@@ -239,20 +221,110 @@ Rectangle GetD3dHudLevelLabelRect()
 
 Rectangle GetD3dHudDurabilityRect()
 {
-	const int height = GetScreenHeight();
-	const Size size { std::max(1, 152 * height / 480), std::max(1, 32 * height / 480) };
-	int right = 0, top = height;
+	const Size size { DesignPixelsX(152), DesignPixelsY(32) };
+	int right = 0, top = GetScreenHeight();
+	const auto standard = ResolveD3dHudGeometry(GetD3dHudGeometryContext());
 	for (int i = 0; i < (IsChatAvailable() ? TotalMpMainPanelButtons : TotalSpMainPanelButtons); ++i) {
-		const Rectangle button = GetD3dHudPanelButtonRect(i);
+		constexpr std::array<size_t, 8> indices { 5, 8, 9, 10, 6, 7, 11, 12 };
+		const Rectangle button = standard.elements[indices[i]];
 		right = std::max(right, button.position.x + button.size.width);
 		top = std::min(top, button.position.y);
 	}
-	return ReserveAuxiliaryRect({ { right - size.width, top - std::max(1, 8 * height / 480) - size.height }, size }, LevelGroupRect());
+	return ResolveD3dHudCustomizedRect(15, { { std::max(0,right - size.width), std::max(0,top - DesignPixelsY(8) - size.height) }, size });
+}
+
+Rectangle GetD3dHudExperienceRect()
+{
+	const auto &panel = GetMainPanel();
+	return ResolveD3dHudCustomizedRect(13, { { panel.position.x + panel.size.width / 2 - 155, panel.position.y + panel.size.height - 11 }, {313,9} });
+}
+
+Rectangle GetD3dHudClockRect()
+{
+	return ResolveD3dHudCustomizedRect(D3dHudClockElement,
+		{ { std::max<int>(0, gnScreenWidth - 76), 6 }, { 76, 16 } });
+}
+
+bool IsD3dHudClockPoint(Point point)
+{
+	return ClockDrawnInLastFrame && !IsD3dWindowPointerTransformed()
+		&& IsD3dHudLayoutActive() && GetD3dHudClockRect().contains(point);
+}
+
+void BeginD3dHudAuxiliaryFrame() { ClockDrawnInLastFrame = false; }
+
+void DrawD3dHudClock(const Surface &out, std::string_view text)
+{
+	if (text.empty()) return;
+	// Preserve the existing late Lua hook and native UI capture/recovery order.
+	// Time comes from Lua, never from a new gameplay clock or timer.
+	OwnedSurface glyphs(76, 16);
+	SDL_FillRect(glyphs.surface, nullptr, 1);
+	DrawString(glyphs, text.substr(0, 64), { 0, 0 });
+	DrawD3dHudContent(out, glyphs, GetD3dHudClockRect());
+	ClockDrawnInLastFrame = true;
+}
+
+std::optional<size_t> GetD3dHudElementAt(Point point)
+{
+	if (!IsD3dHudLayoutActive()) return std::nullopt;
+	// The existing Lua callback paints last, above panels and Map.
+	if (IsD3dHudClockPoint(point)) return D3dHudClockElement;
+	if (D3dFloatingPanelAt(point) || IsD3dMinimapPoint(point)) return std::nullopt;
+	// Top-to-bottom native foreground order. Values belong to their orb;
+	// every other decorative module is one complete interactive container.
+	for (bool mana : {true,false}) {
+		if ((mana ? *GetOptions().Gameplay.showManaValues : *GetOptions().Gameplay.showHealthValues)
+		    && GetD3dHudValueRect(mana).contains(point)) return mana ? 1 : 0;
+	}
+	constexpr std::array<size_t,16> order {13,12,11,7,6,10,9,8,5,2,3,1,0,4,14,15};
+	for (size_t id : order) {
+		if (id >= 11 && id <= 12 && !IsChatAvailable()) continue;
+		if (id == 13 && !*GetOptions().Gameplay.experienceBar) continue;
+		if (id == 14 && (!MyPlayer || MyPlayer->_pStatPts == 0 || CharFlag || SpellSelectFlag)) continue;
+		if (id == 15) {
+			bool visible = false;
+			if (MyPlayer) for (int slot : {INVLOC_HEAD,INVLOC_CHEST,INVLOC_HAND_LEFT,INVLOC_HAND_RIGHT}) {
+				const Item &item = MyPlayer->InvBody[slot];
+				visible |= !item.isEmpty() && item._iDurability <= 5;
+			}
+			if (!visible) continue;
+		}
+		const Rectangle area = id < 13 ? LayoutRect(id) : id == 13 ? GetD3dHudExperienceRect()
+		    : id == 14 ? LevelGroupRect() : GetD3dHudDurabilityRect();
+		if (area.contains(point)) return id;
+	}
+	return std::nullopt;
+}
+
+bool HandleD3dHudCustomizationDown(Point point, uint8_t button, uint16_t modifiers)
+{
+	if (!IsD3dHudLayoutActive() || InGameMenu() || ControlDevice != ControlTypes::KeyboardAndMouse
+	    || (modifiers & SDL_KMOD_CTRL) == 0 || (MyPlayer && !MyPlayer->HoldItem.isEmpty())) return false;
+	const auto id = GetD3dHudElementAt(point);
+	if (!id) return false;
+	const Rectangle area = *id < 13 ? LayoutRect(*id) : *id == 13 ? GetD3dHudExperienceRect()
+	    : *id == 14 ? LevelGroupRect() : *id == D3dHudClockElement ? GetD3dHudClockRect() : GetD3dHudDurabilityRect();
+	if (button == SDL_BUTTON_RIGHT) {
+		if ((modifiers & SDL_KMOD_SHIFT) != 0) { ResetAllD3dHudCustomizations(); ResetD3dFloatingPanelLayout(); }
+		else ResetD3dHudCustomization(*id);
+		return true;
+	}
+	if (button != SDL_BUTTON_LEFT) return false;
+	BeginD3dHudCustomization(*id, area, point, (modifiers & SDL_KMOD_SHIFT) != 0);
+	return true;
 }
 
 Rectangle GetD3dHudValueRect(bool mana)
 {
 	const Rectangle orb = GetD3dHudOrbRect(mana);
+	if (IsCompactLayout()) {
+		const auto placement = PlaceD3dHudSkinOrb(orb, mana);
+		const int width = std::max(1, static_cast<int>(placement.radius * 2));
+		const int height = std::clamp(static_cast<int>(std::lround(14 * GetD3dHudMetrics().valueGlyphScaleY)), 1, width);
+		return { { static_cast<int>(std::lround(placement.centerX - width / 2.0F)),
+			         static_cast<int>(std::lround(placement.centerY - height / 2.0F)) }, { width, height } };
+	}
 	// Values belong inside the native bulb, above its complete sculpted support.
 	return { orb.position + Displacement { (mana ? 16 : 12) * orb.size.width / 112, 48 * orb.size.height / 144 },
 		{ std::max(1, 88 * orb.size.width / 112), std::max(1, 14 * orb.size.height / 144) } };
@@ -260,140 +332,107 @@ Rectangle GetD3dHudValueRect(bool mana)
 
 bool IsPointOnD3dHud(Point point)
 {
-	if (!IsD3dHudEnabled()) return GetMainPanel().contains(point);
-	if (GetD3dHudFrameRect().contains(point) || GetD3dHudBeltRect().contains(point) || GetD3dHudSpellRect().contains(point)
-	    || GetD3dHudOrbRect(false).contains(point) || GetD3dHudOrbRect(true).contains(point)) return true;
-	for (int i = 0; i < (IsChatAvailable() ? TotalMpMainPanelButtons : TotalSpMainPanelButtons); ++i)
-		if (GetD3dHudPanelButtonRect(i).contains(point)) return true;
-	for (bool mana : { false, true }) {
-		if (mana ? !*GetOptions().Gameplay.showManaValues : !*GetOptions().Gameplay.showHealthValues) continue;
-		if (GetD3dHudValueRect(mana).contains(point)) return true;
-	}
-	if (*GetOptions().Gameplay.experienceBar
-	    && Rectangle { { GetScreenWidth() / 2 - 155, GetScreenHeight() - 11 }, { 313, 9 } }.contains(point)) return true;
-	return false;
+	if (!IsD3dHudLayoutActive()) return GetMainPanel().contains(point);
+	return GetD3dHudElementAt(point).has_value();
 }
 
-void DrawD3dHudPlate(const Surface &out, Rectangle rect, bool)
+void DrawD3dHudPlate(const Surface &out, Rectangle rect, bool pressed)
 {
-	// InfoBoxRect is the black text interior. Add the native panel's fine
-	// border explicitly; copying that interior alone leaves an unframed hole.
-	OwnedSurface plate(288, 64);
-	plate.BlitFrom(*BottomBuffer, MakeSdlRect(177, 62, 288, 64), { 0, 0 });
-	BlitScaled(plate, BottomBuffer->subregion(205, 16, 232, 4), { { 0, 0 }, { 288, 2 } });
-	BlitScaled(plate, BottomBuffer->subregion(0, 140, 640, 4), { { 0, 62 }, { 288, 2 } });
-	BlitScaled(plate, BottomBuffer->subregion(0, 16, 4, 128), { { 0, 0 }, { 2, 64 } });
-	BlitScaled(plate, BottomBuffer->subregion(636, 16, 4, 128), { { 286, 0 }, { 2, 64 } });
-	BlitScaled(out, plate, rect);
+	if (!IsD3dHudPresentationCapturing(out))
+		DrawD3dHudSkinIndexedPlate(out, rect, pressed);
 }
 
 void DrawD3dHudBackground(const Surface &out)
 {
-	const Rectangle frame = GetD3dHudFrameRect();
-	const int screenHeight = std::max<int>(1, GetScreenHeight());
-	OwnedSurface body(std::max(1, frame.size.width * 480 / screenHeight),
-	    std::max(1, frame.size.height * 480 / screenHeight));
-	// This narrow native stone strip contains no buttons, text or filled bulb.
-	// Repeat at its original pixel scale instead of stretching a complete panel
-	// with stale controls underneath the editable elements.
-	for (int y = 0; y < body.h(); ++y)
-		for (int x = 0; x < body.w(); ++x)
-			*body.at(x, y) = *BottomBuffer->at(185 + x % 16, 18 + y % 40);
-	const int border = std::min({ 4, body.w() / 2, body.h() / 2 });
-	if (border > 0) {
-		BlitScaled(body, BottomBuffer->subregion(205, 16, 232, 4), { { 0, 0 }, { body.w(), border } });
-		BlitScaled(body, BottomBuffer->subregion(0, 140, 640, 4), { { 0, body.h() - border }, { body.w(), border } });
-		BlitScaled(body, BottomBuffer->subregion(0, 16, 4, 128), { { 0, 0 }, { border, body.h() } });
-		BlitScaled(body, BottomBuffer->subregion(636, 16, 4, 128), { { body.w() - border, 0 }, { border, body.h() } });
-	}
-	BlitScaled(out, body, frame);
-	// Keep the existing contextual area visible even while it contains no text.
+	if (IsD3dHudPresentationCapturing(out)) return;
+	// Modular controls leave the spaces between them transparent and interactive.
 	DrawD3dHudPlate(out, GetD3dHudInfoRect());
+	DrawD3dHudPlate(out, GetD3dHudSpellRect());
 }
 
 void DrawD3dHudPanelButton(const Surface &out, int button, bool pressed)
 {
 	RecordD3dHudButtonState(button, pressed);
 	const Rectangle target = GetD3dHudPanelButtonRect(button);
-	OwnedSurface buttonImage(button < TotalSpMainPanelButtons ? 71 : 33,
-	    button < TotalSpMainPanelButtons ? 21 : 32);
-	FillRect(buttonImage, 0, 0, buttonImage.w(), buttonImage.h(), 0);
-	DrawNativePanelButton(buttonImage, button, pressed);
-	BlitScaled(out, buttonImage, target);
-	// Keep the complete indexed panel as the fallback. Only its translated
-	// lettering belongs above the optional authored RGBA button skin.
-	OwnedSurface foreground(buttonImage.w(), buttonImage.h());
+	if (!IsD3dHudPresentationCapturing(out))
+		DrawD3dHudSkinIndexedPlateShade(out, target, D3dHudSkinPart::Button,
+		    pressed ? 184 : target.contains(MousePosition) ? 255 : 232);
+	const bool compact = IsCompactLayout();
+	const auto &metrics = GetD3dHudMetrics();
+	const bool label = button < TotalSpMainPanelButtons;
+	OwnedSurface foreground(compact && label ? std::max(1, static_cast<int>(target.size.width / metrics.labelGlyphScaleX)) : label ? 71 : 33,
+	    compact && label ? std::max(1, static_cast<int>(target.size.height / metrics.labelGlyphScaleY)) : label ? 21 : 32);
 	FillRect(foreground, 0, 0, foreground.w(), foreground.h(), 1);
 	if (button < TotalSpMainPanelButtons)
 		DrawMainPanelButtonLabel(foreground, button, pressed);
 	else
-		// Multiplayer pictograms retain their original state artwork.
 		DrawNativePanelButton(foreground, button, pressed);
-	RecordD3dHudForeground(foreground, target);
+	const Rectangle content = !compact ? target : label ? CenterGlyphBuffer(target, foreground, metrics.labelGlyphScaleX, metrics.labelGlyphScaleY) : ContainContent(target, foreground.w(), foreground.h());
+	DrawD3dHudContent(out, foreground, content);
 }
 
 void DrawD3dHudBeltBackground(const Surface &out)
 {
+	if (IsD3dHudPresentationCapturing(out)) return;
 	for (int i = 0; i < 8; ++i)
-		BlitScaled(out, BottomBuffer->subregion(205 + i * 29, 21, 29, 29), GetD3dHudBeltSlotRect(i));
+		DrawD3dHudSkinIndexedPlate(out, GetD3dHudBeltSlotRect(i));
 }
 
 void DrawD3dHudBeltItem(const Surface &out, const Surface &nativeItem, Rectangle slot)
 {
-	const Rectangle inside = slot.size.width > 4 && slot.size.height > 4 ? slot.inset({ 2, 2 }) : slot;
-	BlitScaled(out, nativeItem, inside, true);
+	const bool compact = IsCompactLayout();
+	const Rectangle inside = GetD3dHudBeltInteriorRect(slot);
+	DrawD3dHudContent(out, nativeItem, compact ? ContainContent(inside, nativeItem.w(), nativeItem.h()) : inside);
+}
+
+bool DrawD3dHudBeltHdItem(const Surface &out, ClxSprite sprite, Rectangle slot)
+{
+	auto pixels = LoadHdSpritePixels(sprite);
+	if (!pixels || pixels->pixels.empty()) return false;
+	OwnedSurface image(pixels->width, pixels->height);
+	for (int y = 0; y < pixels->height; ++y)
+		for (int x = 0; x < pixels->width; ++x) {
+			const size_t i = static_cast<size_t>(y) * pixels->width + x;
+			*image.at(x, y) = pixels->opacity[i] ? pixels->pixels[i] : 1;
+		}
+	const Rectangle inside = GetD3dHudBeltInteriorRect(slot);
+	const Rectangle target = ContainContent(inside, image.w(), image.h());
+	DrawD3dHudContent(out, image, target);
+	auto rgba = LoadHdSpriteRgba(sprite);
+	if (rgba && !rgba->empty()) RecordD3dHudRgbaForeground(image.w(), image.h(), *rgba, target);
+	return true;
 }
 
 void DrawD3dHudSpellIcon(const Surface &out, Rectangle rect, SpellID spell, SpellType type)
 {
 	OwnedSurface icon(SPLICONLENGTH, SPLICONLENGTH);
-	FillRect(icon, 0, 0, icon.w(), icon.h(), 0);
+	FillRect(icon, 0, 0, icon.w(), icon.h(), 1);
 	SetSpellTrans(type);
 	DrawLargeSpellIcon(icon, { 0, SPLICONLENGTH - 1 }, spell);
-	BlitScaled(out, icon, rect);
-	FillRect(icon, 0, 0, icon.w(), icon.h(), 1);
-	DrawLargeSpellIcon(icon, { 0, SPLICONLENGTH - 1 }, spell);
-	RecordD3dHudForeground(icon, rect);
+	if (IsCompactLayout()) {
+		const int insetX = DesignPixelsX(2), insetY = DesignPixelsY(2);
+		if (rect.size.width > 2 * insetX && rect.size.height > 2 * insetY) rect = rect.inset({ insetX, insetY });
+		rect = ContainContent(rect, icon.w(), icon.h());
+	}
+	auto hd = LoadLargeSpellIconHdPixels(spell);
+	if (hd && !hd->pixels.empty()) {
+		OwnedSurface image(hd->width, hd->height);
+		for (int y = 0; y < hd->height; ++y)
+			for (int x = 0; x < hd->width; ++x) {
+				const size_t i = static_cast<size_t>(y) * hd->width + x;
+				*image.at(x, y) = hd->opacity[i] ? hd->pixels[i] : 1;
+			}
+		DrawD3dHudContent(out, image, rect);
+		auto rgba = LoadLargeSpellIconRgba(spell);
+		if (rgba && !rgba->empty()) RecordD3dHudRgbaForeground(image.w(), image.h(), *rgba, rect);
+	} else DrawD3dHudContent(out, icon, rect);
 }
 
 void DrawD3dHudFlask(const Surface &out, bool mana)
 {
-	const Surface &empty = mana ? *pManaBuff : *pLifeBuff;
-	const int offset = mana ? 464 : 96;
-	const int columnOffset = mana ? 448 : 84;
-	const int bulbOffset = offset - columnOffset;
+	if (IsD3dHudPresentationCapturing(out)) return;
 	const int fill = std::clamp(mana ? MyPlayer->_pManaPer : MyPlayer->_pHPPer, 0, 81);
-	const Rectangle rect = GetD3dHudOrbRect(mana);
-	// Include the complete native support below the bulb. Replace the full
-	// bulb opaquely before applying its fill, so 0% cannot reveal stale liquid.
-	OwnedSurface column(112, 144);
-	column.BlitFrom(*BottomBuffer, MakeSdlRect(columnOffset, 0, 112, 144), { 0, 0 });
-	column.BlitFrom(empty, MakeSdlRect(0, 0, 88, 88), { bulbOffset, 0 });
-	for (int y = 3; y < 85; ++y) {
-		const bool filled = y < 16 ? y >= 3 + std::clamp(81 - fill, 0, 13)
-		                          : y >= 85 - std::min(fill, 69);
-		if (filled)
-			column.BlitFrom(*BottomBuffer, MakeSdlRect(offset, y, 88, 1), { bulbOffset, y });
-	}
-	for (int y = 0; y < rect.size.height; ++y) {
-		const int sy = y * 144 / rect.size.height;
-		int runStart = -1;
-		for (int x = 0; x < rect.size.width; ++x) {
-			const int sx = x * 112 / rect.size.width;
-			const bool globe = (sx - bulbOffset - 43) * (sx - bulbOffset - 43) + (sy - 43) * (sy - 43) < 37 * 37;
-			const uint8_t color = *column.at(sx, sy);
-			const Point target = rect.position + Displacement { x, y };
-			if ((color != 0 || globe) && out.InBounds(target)) {
-				*out.at(target.x, target.y) = color;
-				if (runStart < 0) runStart = x;
-			} else if (runStart >= 0) {
-				MarkUiOverlayRect(out, rect.position.x + runStart, rect.position.y + y, x - runStart, 1);
-				runStart = -1;
-			}
-		}
-		if (runStart >= 0)
-			MarkUiOverlayRect(out, rect.position.x + runStart, rect.position.y + y, rect.size.width - runStart, 1);
-	}
+	DrawD3dHudSkinIndexedOrb(out, GetD3dHudOrbRect(mana), mana, fill);
 }
 
 void DrawD3dHudValues(const Surface &out)
@@ -401,42 +440,67 @@ void DrawD3dHudValues(const Surface &out)
 	for (bool mana : { false, true }) {
 		if (mana ? !*GetOptions().Gameplay.showManaValues : !*GetOptions().Gameplay.showHealthValues)
 			continue;
-		OwnedSurface values(88, 14);
-		FillRect(values, 0, 0, values.w(), values.h(), 0);
+		Rectangle target = GetD3dHudPresentationValueRect(mana);
+		const bool compact = IsCompactLayout();
+		int width = compact ? std::max(1, static_cast<int>(target.size.width / GetD3dHudMetrics().valueGlyphScaleX)) : 88;
 		const bool noMana = HasAnyOf(InspectPlayer->_pIFlags, ItemSpecialEffect::NoMana);
-		DrawFlaskValues(values, { 44, 1 },
-		    mana ? (noMana || MyPlayer->hasNoMana() ? 0 : MyPlayer->_pMana >> 6) : MyPlayer->_pHitPoints >> 6,
-		    mana ? (noMana ? 0 : MyPlayer->_pMaxMana >> 6) : MyPlayer->_pMaxHP >> 6);
-		BlitScaled(out, values, GetD3dHudValueRect(mana), true);
+		const int current = mana ? (noMana || MyPlayer->hasNoMana() ? 0 : MyPlayer->_pMana >> 6) : MyPlayer->_pHitPoints >> 6;
+		const int maximum = mana ? (noMana ? 0 : MyPlayer->_pMaxMana >> 6) : MyPlayer->_pMaxHP >> 6;
+		if (compact) {
+			// The native slash is centred, with both values placed independently.
+			// Preserve every digit when either side exceeds the intended font size;
+			// fit that complete source uniformly inside the measured bulb rectangle.
+			const int half = std::max(GetLineWidth(StrCat(current), GameFont12), GetLineWidth(StrCat(maximum), GameFont12));
+			width = std::max(width, 2 * (half + GetLineWidth("/", GameFont12) + 2));
+			const int height = std::min(target.size.height, std::max(1, static_cast<int>(std::lround(14.0F * target.size.width / width))));
+			target.position.y += (target.size.height - height) / 2;
+			target.size.height = height;
+		}
+		OwnedSurface values(width, 14);
 		FillRect(values, 0, 0, values.w(), values.h(), 1);
-		DrawFlaskValues(values, { 44, 1 },
-		    mana ? (noMana || MyPlayer->hasNoMana() ? 0 : MyPlayer->_pMana >> 6) : MyPlayer->_pHitPoints >> 6,
-		    mana ? (noMana ? 0 : MyPlayer->_pMaxMana >> 6) : MyPlayer->_pMaxHP >> 6);
-		// The authored sculpture has an asymmetric aperture. Values follow its
-		// measured center (skin.json), independently of the native fallback bulb.
-		RecordD3dHudForeground(values, GetD3dHudPresentationValueRect(mana));
+		DrawFlaskValues(values, { values.w() / 2, 1 }, current, maximum);
+		DrawD3dHudContent(out, values, target);
 	}
 }
 
 void DrawD3dHudKeyLabel(const Surface &out, Rectangle rect, std::string_view text)
 {
-	const int scaleHeight = std::max<int>(1, GetScreenHeight());
-	OwnedSurface label(std::max(1, rect.size.width * 480 / scaleHeight), 13);
-	FillRect(label, 0, 0, label.w(), label.h(), 0);
-	DrawString(label, text, { { 0, 0 }, { label.w(), label.h() } },
-	    { .flags = UiFlags::ColorWhite | UiFlags::AlignRight | UiFlags::Outlined | UiFlags::KerningFitSpacing, .spacing = 0 });
-	const int height = std::min(rect.size.height, std::max(1, 13 * scaleHeight / 480));
-	const Rectangle target { rect.position + Displacement { 0, rect.size.height - height }, { rect.size.width, height } };
-	BlitScaled(out, label, target, true);
+	const int scaleHeight = IsD3dHudLayoutActive() ? std::max<int>(1, GetScreenHeight()) : 480;
+	const bool compact = IsCompactLayout();
+	const auto &metrics = GetD3dHudMetrics();
+	OwnedSurface label(compact ? std::max(1, static_cast<int>(rect.size.width / metrics.keyGlyphScaleX)) : std::max(1, rect.size.width * 480 / scaleHeight), 13);
 	FillRect(label, 0, 0, label.w(), label.h(), 1);
 	DrawString(label, text, { { 0, 0 }, { label.w(), label.h() } },
 	    { .flags = UiFlags::ColorWhite | UiFlags::AlignRight | UiFlags::Outlined | UiFlags::KerningFitSpacing, .spacing = 0 });
-	RecordD3dHudForeground(label, target);
+	const int height = std::min(rect.size.height, compact ? std::max(1, static_cast<int>(std::lround(13 * metrics.keyGlyphScaleY))) : std::max(1, 13 * scaleHeight / 480));
+	const Rectangle target { rect.position + Displacement { 0, rect.size.height - height }, { rect.size.width, height } };
+	DrawD3dHudContent(out, label, target);
 }
 
 void DrawD3dHudSurface(const Surface &out, const Surface &source, Rectangle rect, bool transparent)
 {
 	BlitScaled(out, source, rect, transparent);
+}
+
+void DrawD3dHudContent(const Surface &out, const Surface &source, Rectangle rect, uint8_t transparentIndex)
+{
+	RecordD3dHudForeground(source, rect, transparentIndex);
+	if (rect.size.width <= 0 || rect.size.height <= 0) return;
+	const int right = std::min(out.w(), rect.position.x + rect.size.width);
+	for (int y = std::max(0, rect.position.y); y < std::min(out.h(), rect.position.y + rect.size.height); ++y) {
+		const int sy = (y - rect.position.y) * source.h() / rect.size.height;
+		int x = std::max(0, rect.position.x);
+		while (x < right) {
+			while (x < right && *source.at((x - rect.position.x) * source.w() / rect.size.width, sy) == transparentIndex) ++x;
+			const int start = x;
+			while (x < right && *source.at((x - rect.position.x) * source.w() / rect.size.width, sy) != transparentIndex) ++x;
+			if (start == x) continue;
+			// Coverage is announced before the write, including opaque palette 0.
+			MarkUiOverlayRect(out, start, y, x - start, 1);
+			for (int dx = start; dx < x; ++dx)
+				*out.at(dx, y) = *source.at((dx - rect.position.x) * source.w() / rect.size.width, sy);
+		}
+	}
 }
 
 } // namespace devilution

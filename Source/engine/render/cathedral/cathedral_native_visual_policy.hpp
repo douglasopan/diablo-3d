@@ -21,7 +21,7 @@
 
 namespace devilution::cathedral::native_visual_policy {
 
-inline constexpr std::uint32_t PolicyRevision = 1;
+inline constexpr std::uint32_t PolicyRevision = 2;
 inline constexpr const char *SourceArtifactStatus = "SOURCE_ONLY_CPP_EXECUTION_UNKNOWN";
 inline constexpr bool SuppliesReplacementPanels = false;
 enum class AdmissionKind : std::uint8_t { ExplicitVerifiedTarget, NativeObjectAndPieceRule };
@@ -170,10 +170,11 @@ inline void RequireFrame(const PilotFrame &frame)
 inline void RequireSnapshot(const Snapshot &snapshot, const PilotFrame &frame)
 {
 	RequireFrame(frame);
-	Require(snapshot.gameRevision == frame.gameRevision && snapshot.level == 1 && snapshot.levelType == 1
-	        && snapshot.originalCathedral && !snapshot.hellfire && !snapshot.setLevel && snapshot.setLevelId == 0
+	Require(snapshot.gameRevision == frame.gameRevision
+	        && SupportsRetailLevel(snapshot.level, snapshot.levelType, snapshot.hellfire, snapshot.setLevel, snapshot.setLevelId)
+	        && snapshot.originalCathedral
 	        && snapshot.minX == ActiveMin && snapshot.minZ == ActiveMin && snapshot.maxX == ActiveMax && snapshot.maxZ == ActiveMax,
-	    "Native visual suppression requires this normal Cathedral1 snapshot/epoch");
+	    "Native visual suppression requires a supported retail L1 snapshot/epoch");
 }
 
 inline void RequireOriginalWall(const NativeSurfaceRecord &record)
@@ -186,6 +187,26 @@ inline void RequireOriginalWall(const NativeSurfaceRecord &record)
 	Require(source.x >= ActiveMin && source.x < ActiveMax && source.z >= ActiveMin && source.z < ActiveMax
 	        && source.piece == 269 && source.microMasksKnown,
 	    "Native visual suppression target requires authoritative piece269 source");
+}
+
+// A graph node belongs to this light only when its complete provenance
+// names that single native cell. Mixed joins with a real wall stay visible.
+inline bool IsLightSupportModule(ModuleKind module)
+{
+	return module == ModuleKind::Wall || (module >= ModuleKind::Corner && module <= ModuleKind::Junction4);
+}
+
+inline void RequireOriginalLightSupport(const NativeSurfaceRecord &record)
+{
+	Require(record.instanceId != 0 && record.instanceId == record.sourceInstanceId
+			&& IsLightSupportModule(record.module) && record.sourceModule == record.module
+			&& record.provenanceResolved && record.sources.size() == 1
+			&& static_cast<unsigned>(record.policy) <= static_cast<unsigned>(FrameSurfacePolicy::ConservativeNativeCutaway),
+		"Native light suppression requires original single-source support geometry");
+	const auto &source = record.sources.front();
+	Require(source.x >= ActiveMin && source.x < ActiveMax && source.z >= ActiveMin && source.z < ActiveMax
+			&& source.piece == 269 && source.microMasksKnown,
+		"Native light suppression requires authoritative piece269 support source");
 }
 
 inline bool SurfaceMatchesSource(const NativeSurfaceRecord &record, const wall_composition::SourceCellMetadata &source)
@@ -205,7 +226,7 @@ inline bool SurfaceMatchesSource(const NativeSurfaceRecord &record, const wall_c
  */
 inline void RequireNativeTarget(const TargetUpdate &target, const FrameStamp &frame)
 {
-	RequireOriginalWall(target.expectedSurface);
+	RequireOriginalLightSupport(target.expectedSurface);
 	Require(target.proof.instanceId == target.expectedSurface.instanceId
 	        && target.proof.sourceInstanceId == target.expectedSurface.sourceInstanceId
 	        && target.context.epoch == frame.epoch && target.nativeObject.epoch == frame.epoch
@@ -255,11 +276,12 @@ inline void RequireProof(const TargetUpdate &target, const FrameStamp &frame)
 
 inline void RequireTargetTriangle(const FrameTriangle &triangle, const NativeSurfaceRecord &surface)
 {
-	Require(triangle.instanceId == surface.instanceId && triangle.module == ModuleKind::Wall && triangle.policy == surface.policy
+	Require(triangle.instanceId == surface.instanceId && triangle.module == surface.module
+	        && IsLightSupportModule(surface.module) && triangle.policy == surface.policy
 	        && !triangle.visualSuppressed && static_cast<unsigned>(triangle.nativeTexture.kind) <= static_cast<unsigned>(NativeTextureKind::DoorWood)
 	        && static_cast<unsigned>(triangle.nativeTexture.axis) <= static_cast<unsigned>(NativeTextureAxis::AlongZ)
 	        && static_cast<unsigned>(triangle.nativeTexture.layout) <= static_cast<unsigned>(NativeTextureLayout::OriginalFullColumn),
-	    "Native visual suppression triangle is stale, already suppressed or not original Wall");
+	    "Native visual suppression triangle is stale, already suppressed or not original support geometry");
 	for (std::size_t n = 0; n < 3; ++n)
 		Require(FiniteVertex(triangle.vertices[n]) && FiniteVertex(triangle.textureVertices[n]),
 		    "Native visual suppression triangle has nonfinite physical/visual vertices");
@@ -269,10 +291,10 @@ inline void RequireTargetTriangle(const FrameTriangle &triangle, const NativeSur
 
 /** Deterministic GAMEPLAY path: no receipt, SHA or per-cell visual declaration.
  * Native piece269 + actual active OBJ_L1LIGHT, signed occupancy, same origin,
- * native radius5 and epoch means decoration, so this exact technical Wall
- * instance is hidden VISUALLY. Physical triangles/picks/collision stay intact.
- * Only original single-source unfragmented Wall is supported. Adjacent corners,
- * joins, fragments and native objects/lights remain untouched and detectable.
+ * native radius5 and epoch means decoration, so its exact technical Wall
+ * and single-source graph nodes are hidden VISUALLY. Physical geometry stays.
+ * Mixed joins, fragments and native objects/lights remain untouched. Explicit
+ * diagnostic proofs retain their original Wall-only scope.
  * Missing corroboration produces no target; malformed supplied active records
  * throw. No native record/seed/map/SOL/light is changed. The root caller must
  * capture the authoritative active slot, dObject and Object.position freshly.
@@ -288,9 +310,9 @@ inline Updates BuildNativeLightSuppression(const Snapshot &snapshot, const Pilot
 	std::set<std::uint64_t> instances;
 	for (std::size_t recordIndex = 0; recordIndex < frame.nativeSurfaces.size(); ++recordIndex) {
 		const auto &record = frame.nativeSurfaces[recordIndex];
-		if (record.module != ModuleKind::Wall || record.sourceModule != ModuleKind::Wall || record.instanceId != record.sourceInstanceId
+		if (!detail::IsLightSupportModule(record.module) || record.sourceModule != record.module || record.instanceId != record.sourceInstanceId
 		    || !record.provenanceResolved || record.sources.size() != 1 || record.sources.front().piece != 269) continue;
-		detail::RequireOriginalWall(record);
+		detail::RequireOriginalLightSupport(record);
 		TargetUpdate target;
 		target.surfaceRecordIndex = recordIndex; target.expectedSurface = record;
 		// These are identifiers only on this path; no diagnostic proof is used.

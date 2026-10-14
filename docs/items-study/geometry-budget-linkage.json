@@ -1,0 +1,3686 @@
+{
+  "format": "d3d.item-geometry-budget-linkage",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "studyId": "item.study.grouped-compact-01",
+  "status": "linkage-prepared; relayed-experimental-guide-received; target-and-measurements-pending",
+  "purpose": "Prepare existing family/productionId/reuse links and visual-size metadata for the cloud guide; no new queue or count selection.",
+  "humanEvent": "Sentinel_cab58c0598d4819195d2878edfe1e535",
+  "sourceFiles": [
+    {
+      "path": "docs/items-study/catalog.json",
+      "sha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d"
+    },
+    {
+      "path": "docs/items-study/production-queue.json",
+      "sha256": "fc87a85cfad1f55b81946fa44f2c88945a509ba661212a211a4e6176addd00e8"
+    },
+    {
+      "path": "docs/items-study/concept-art.json",
+      "sha256": "25396b2b70da8ebd759d1e18314a07a09cda3b22077145a644381100bf5494c2"
+    },
+    {
+      "path": "docs/items-study/devlog-handoff.json",
+      "sha256": "14c9c829f7445bd3a7533ce5df4e3cb2c5f4c169ec8c16923a5510210ff775a0"
+    },
+    {
+      "path": "docs/items-study/inventory-prep-r1.json",
+      "sha256": "f75c435a7b3806523b5c9e888b074ce06ea39f635c199d791b3642511813a97d"
+    },
+    {
+      "path": "docs/items-study/smart-production-context.json",
+      "sha256": "5f1ae39b96485b2fc3cd654404f637bafafc984dfd27a68b57c9d5bcd52f9d3e"
+    },
+    {
+      "path": "docs/items-study/studio-preflight-candidate-r1.json",
+      "sha256": "5fe604b1d329cea912bbb7f58ef92e0361345eeb3456cd7a0b1247fa2c3a6df9"
+    },
+    {
+      "path": "docs/ITEM-PRODUCTION-CONTRACT.md",
+      "sha256": "329f449ffab494b6eadd2af302c120cd9808cf6e3a5926738f2ed59dd1d281e4"
+    },
+    {
+      "path": "assets/registry.json",
+      "sha256": "62f2fbdd943b7ad93175c7167bd2edd1fda20d6f43bf132924bf662a9168d830"
+    },
+    {
+      "path": "editor/godot/review/catalog.json",
+      "sha256": "38e52c9ea52c7dadb63256dd75fbd6f1f8a96513a69adda9bd8da1326ebbb67b"
+    },
+    {
+      "path": "docs/items-study/batch-02-great-sword-r3.json",
+      "sha256": "ff8ac48ca263aaec3c9a5957651ae84d8563a87204d45c415f872193c530ef1f"
+    },
+    {
+      "path": "docs/items-study/build_smart_production_review.py",
+      "sha256": "8bfc5236483c9d165bfd0007279100868abcba98476cbda4990c1de84aaba515"
+    },
+    {
+      "path": "docs/items-study/grouped-items-study.json",
+      "sha256": "6c3d40b4944ac5f2bdc471f33f2ebe81a0ded408ac8f490412c3c675df4a31f4"
+    }
+  ],
+  "researchGuide": {
+    "status": "relayed-hypotheses-only; not measured category minima",
+    "source": "cloud researcher guide summarized by parent and relayed through sole Studio operator",
+    "sourceKind": "relayed message; original guide artifact bytes not provided",
+    "receiptId": "item.geometry.guide.relay.r1",
+    "revision": null,
+    "sha256": null,
+    "categoryRules": [
+      {
+        "categoryId": "coin",
+        "label": "Moeda",
+        "metric": "exportedTriangles",
+        "usageProjectedPixels": [
+          40,
+          150
+        ],
+        "usageTrianglesExperimental": [
+          32,
+          160
+        ],
+        "firstPersonInspectionProjectedPixels": [
+          250,
+          700
+        ],
+        "firstPersonTrianglesExperimental": [
+          150,
+          800
+        ],
+        "minimumVertexCount": null,
+        "measuredMinimum": false,
+        "approved": false
+      },
+      {
+        "categoryId": "gem",
+        "label": "Gema",
+        "metric": "exportedTriangles",
+        "usageProjectedPixels": [
+          40,
+          150
+        ],
+        "usageTrianglesExperimental": [
+          24,
+          160
+        ],
+        "firstPersonInspectionProjectedPixels": [
+          250,
+          700
+        ],
+        "firstPersonTrianglesExperimental": [
+          150,
+          800
+        ],
+        "minimumVertexCount": null,
+        "measuredMinimum": false,
+        "approved": false
+      },
+      {
+        "categoryId": "scroll",
+        "label": "Pergaminho",
+        "metric": "exportedTriangles",
+        "usageProjectedPixels": [
+          40,
+          150
+        ],
+        "usageTrianglesExperimental": [
+          100,
+          500
+        ],
+        "firstPersonInspectionProjectedPixels": [
+          250,
+          700
+        ],
+        "firstPersonTrianglesExperimental": [
+          500,
+          2000
+        ],
+        "minimumVertexCount": null,
+        "measuredMinimum": false,
+        "approved": false
+      },
+      {
+        "categoryId": "potion",
+        "label": "Poção",
+        "metric": "exportedTriangles",
+        "usageProjectedPixels": [
+          40,
+          150
+        ],
+        "usageTrianglesExperimental": [
+          300,
+          900
+        ],
+        "firstPersonInspectionProjectedPixels": [
+          250,
+          700
+        ],
+        "firstPersonTrianglesExperimental": [
+          1000,
+          3000
+        ],
+        "minimumVertexCount": null,
+        "measuredMinimum": false,
+        "approved": false
+      },
+      {
+        "categoryId": "weapon",
+        "label": "Arma",
+        "metric": "exportedTriangles",
+        "usageProjectedPixels": [
+          40,
+          150
+        ],
+        "usageTrianglesExperimental": [
+          400,
+          1800
+        ],
+        "firstPersonInspectionProjectedPixels": [
+          250,
+          700
+        ],
+        "firstPersonTrianglesExperimental": [
+          2000,
+          8000
+        ],
+        "minimumVertexCount": null,
+        "measuredMinimum": false,
+        "approved": false
+      },
+      {
+        "categoryId": "shield",
+        "label": "Escudo",
+        "metric": "exportedTriangles",
+        "usageProjectedPixels": [
+          40,
+          150
+        ],
+        "usageTrianglesExperimental": [
+          300,
+          1400
+        ],
+        "firstPersonInspectionProjectedPixels": [
+          250,
+          700
+        ],
+        "firstPersonTrianglesExperimental": [
+          1000,
+          5000
+        ],
+        "minimumVertexCount": null,
+        "measuredMinimum": false,
+        "approved": false
+      },
+      {
+        "categoryId": "rigid-piece",
+        "label": "Peça rígida",
+        "metric": "exportedTriangles",
+        "usageProjectedPixels": [
+          40,
+          150
+        ],
+        "usageTrianglesExperimental": [
+          500,
+          2500
+        ],
+        "firstPersonInspectionProjectedPixels": [
+          250,
+          700
+        ],
+        "firstPersonTrianglesExperimental": null,
+        "minimumVertexCount": null,
+        "measuredMinimum": false,
+        "approved": false
+      },
+      {
+        "categoryId": "armor",
+        "label": "Armadura",
+        "metric": "exportedTriangles",
+        "usageProjectedPixels": [
+          40,
+          150
+        ],
+        "usageTrianglesExperimental": null,
+        "firstPersonInspectionProjectedPixels": [
+          250,
+          700
+        ],
+        "firstPersonTrianglesExperimental": [
+          2000,
+          8000
+        ],
+        "minimumVertexCount": null,
+        "measuredMinimum": false,
+        "approved": false
+      }
+    ],
+    "lodRatiosExperimental": [
+      1.0,
+      0.5,
+      0.25
+    ],
+    "lodRatioBasis": "per-identity accepted drawable reference, never destructive replacement of preserved master or an automatic choice",
+    "projectedErrorPixelsExperimental": 1,
+    "numericProvenance": "All ranges, ratios, size windows and master2x margin are cloud test proposals; not measured in this project and not numeric recommendations extracted from the linked tool documentation.",
+    "sourcesForWorkflowSemantics": [
+      "https://meshoptimizer.org/#simplification",
+      "https://docs.blender.org/manual/en/5.1/addons/import_export/scene_gltf2.html",
+      "https://docs.blender.org/manual/en/5.1/modeling/meshes/editing/mesh/separate.html"
+    ],
+    "sixItemArithmeticDoesNotExpandPilot": true,
+    "operatorSupplementSha256": "c859071199f655b66be98222bbe7ee67ba95620e65237a51d5d7f8875891151e"
+  },
+  "operatorComplement": {
+    "status": "received-and-bytes-hash-verified; no model binary",
+    "receiptFileName": "tripo-geometry-budget-study.json",
+    "bytes": 14126,
+    "sha256": "c859071199f655b66be98222bbe7ee67ba95620e65237a51d5d7f8875891151e",
+    "parentReceiptSha256": "d712a5969945d3e66f32c9f9284eb34263763c3d17dbc5c87c8ca4353772a570",
+    "parentReceiptHashUnchangedVerifiedByItems": true,
+    "validationFileName": "tripo-geometry-budget-validation.json",
+    "validationSha256": "c812d5b4f440386843db6d23766e87fefa41c4d668186cdb8045cac19f00cb19",
+    "accountReadByItems": false,
+    "modelBinaryAvailable": false
+  },
+  "referencePreparationPolicy": {
+    "humanEvent": "Sentinel_84292341680c8191a8b69178e78b0d4e",
+    "sequence": [
+      "exact original real reference and provenance",
+      "faithful clear imagegen image with neutral light and no strong shadows",
+      "approve exact individual image or deliberate small-group composition hash",
+      "sole operator reconfirms final Studio target/input quote/private destination and human ceiling",
+      "Smart Mesh output",
+      "download/hash immutable joint GLB",
+      "separate identity groups on copies and measure/QA child exports",
+      "principal-owned approved runtime integration/test"
+    ],
+    "originalSourcesPreserved": true,
+    "individualOrDeliberateDistinctGroup": true,
+    "fullMultiviewBoardAsGroupAllowed": false,
+    "currentBoardsAutomaticallyApproved": false,
+    "newImageGenerated": false,
+    "finalImage": null,
+    "finalImageSha256": null,
+    "newPaidImageGenerationAuthorized": false,
+    "uploadOrProviderGenerationAuthorized": false,
+    "creditsAuthorized": 0
+  },
+  "totalGeometry": {
+    "increaseRequestedForStudy": true,
+    "selectedProviderTarget": null,
+    "selectedMetric": null,
+    "selectedTotalTriangles": null,
+    "observedEmptyFormFaceControls": [
+      5000,
+      10000
+    ],
+    "perIdentityEqualDivisionAssumed": false,
+    "perItemMinimumOrDensityGuaranteed": false,
+    "finalQuoteConfirmed": false,
+    "approved": false,
+    "conditionalTriangleSums": [
+      {
+        "productionIds": [
+          "item.design.base.scroll",
+          "item.design.base.potion-of-healing"
+        ],
+        "firstPersonSumHypothesis": [
+          1500,
+          5000
+        ],
+        "masterTwoTimesHeadroomHypothesis": [
+          3000,
+          10000
+        ],
+        "selected": false,
+        "densityPerItemGuaranteed": false,
+        "usageSumHypothesis": [
+          400,
+          1400
+        ],
+        "usageMasterTwoTimesHeadroomHypothesis": [
+          800,
+          2800
+        ]
+      },
+      {
+        "productionIds": [
+          "item.design.base.scroll",
+          "item.design.base.potion-of-healing",
+          "item.design.base.potion-of-mana"
+        ],
+        "firstPersonSumHypothesis": [
+          2500,
+          8000
+        ],
+        "masterTwoTimesHeadroomHypothesis": [
+          5000,
+          16000
+        ],
+        "selected": false,
+        "densityPerItemGuaranteed": false,
+        "usageSumHypothesis": [
+          700,
+          2300
+        ],
+        "usageMasterTwoTimesHeadroomHypothesis": [
+          1400,
+          4600
+        ]
+      }
+    ],
+    "quadApproximationNotAdopted": "The relay also expressed roughly half as many quads. Do not use triangle/2 as measured quads or a provider target without verified source topology and triangulation. GLB topology and vertex records remain unmeasured."
+  },
+  "metricPolicy": [
+    "Provider/UI face or vertex labels retain their original meaning and source; do not silently reinterpret UI vertices as geometry or attribute records.",
+    "Source quads/polygons, actual exported triangles and vertex records are separate measurements. Record tool/version, primitive mode, accessor/index methodology and triangulation outcome.",
+    "POSITION accessor rows are stored attribute-vertex records, not necessarily distinct geometric positions. Record referenced indices separately from unused rows; UV/normal seams can duplicate positions.",
+    "A distinct-position count needs declared space and exact/tolerance comparison; it is observational only. Do not weld or destroy seams/normals/UVs to report it.",
+    "Count unique stored geometry resources separately from instances/draw occurrences and per-identity selections; shared meshes/atlas prevent naive summation.",
+    "No fixed vertex-to-triangle or face-to-vertex ratio. Source quads, if retained, do not imply exported GLB quad primitives.",
+    "Total provider target is not a per-item target or equal allocation. Relayed category triangle/LOD bands are now recorded as hypotheses; category vertex minima remain null. No actual metric, provider target or minimum is inferred.",
+    "Keep immutable joint/source master, extracted child and each drawable LOD as different stages with hashes and comparable counts. Local extraction must not reduce geometry; any change requires explained revision and renewed QA.",
+    "Primitive mode and index entry count are explicit. Referenced unique attribute rows differ from index entries; indexCount/3 gives triangles only for valid indexed TRIANGLES, not strips/fans/lines/points.",
+    "Simplifier-reported approximate/normalized error, possibly attribute-aware, is not automatically conservative geometricError and cannot set errorVerified=true. Record metric/units/reference, independently establish a conservative bound and pass visual/material QA."
+  ],
+  "visualSizePolicy": "Native28x28 inventory cells and1536x1024 concept canvases are verified presentation metadata, not physical size or close-camera screen coverage. Composition boxes are framing reserves. Physical bounds, camera/FOV/depth/viewport and projected size remain unmeasured.",
+  "closeViewQa": "Preserve scroll spirals/ribbon/thickness and vial neck/cork/cord/glass/liquid; evaluate close silhouette/material and conservative projected error before any LOD choice. The existing selector provides no category triangle budget.",
+  "runtimePolicy": "Parser/transport limits remain technical compatibility gates, not artistic minima. Preserve unsupported source data and native fallback; no automatic decimation, source overwrite or install.",
+  "sourceContracts": [
+    {
+      "path": "docs/ITEM-PRODUCTION-CONTRACT.md",
+      "sha256": "329f449ffab494b6eadd2af302c120cd9808cf6e3a5926738f2ed59dd1d281e4"
+    },
+    {
+      "path": "docs/TOWN-ASSET-LOD-SELECTOR.md",
+      "sha256": "4540e654b7629d42f9391c2332aaf5617451f1a316d56898266c0a06bb0e9e63"
+    },
+    {
+      "path": "docs/TOWN-ASSET-LOD-REVIEW.md",
+      "sha256": "c83a624a7c84ce011e017206a43b3325834ee86d3350e63010f5a313e5edd687"
+    }
+  ],
+  "families": [
+    {
+      "family": "axes",
+      "identities": 16,
+      "proposedMasterGroups": 9,
+      "allCategoriesAssigned": false
+    },
+    {
+      "family": "blades",
+      "identities": 32,
+      "proposedMasterGroups": 21,
+      "allCategoriesAssigned": false
+    },
+    {
+      "family": "blunt-weapons",
+      "identities": 17,
+      "proposedMasterGroups": 8,
+      "allCategoriesAssigned": false
+    },
+    {
+      "family": "body-armor",
+      "identities": 32,
+      "proposedMasterGroups": 24,
+      "allCategoriesAssigned": false
+    },
+    {
+      "family": "bows",
+      "identities": 21,
+      "proposedMasterGroups": 13,
+      "allCategoriesAssigned": false
+    },
+    {
+      "family": "ears",
+      "identities": 4,
+      "proposedMasterGroups": 3,
+      "allCategoriesAssigned": false
+    },
+    {
+      "family": "gold",
+      "identities": 3,
+      "proposedMasterGroups": 3,
+      "allCategoriesAssigned": false
+    },
+    {
+      "family": "headgear",
+      "identities": 15,
+      "proposedMasterGroups": 13,
+      "allCategoriesAssigned": false
+    },
+    {
+      "family": "jewelry",
+      "identities": 21,
+      "proposedMasterGroups": 21,
+      "allCategoriesAssigned": false
+    },
+    {
+      "family": "oils",
+      "identities": 1,
+      "proposedMasterGroups": 1,
+      "allCategoriesAssigned": false
+    },
+    {
+      "family": "potions-elixirs",
+      "identities": 13,
+      "proposedMasterGroups": 13,
+      "allCategoriesAssigned": false
+    },
+    {
+      "family": "quest-objects",
+      "identities": 18,
+      "proposedMasterGroups": 18,
+      "allCategoriesAssigned": false
+    },
+    {
+      "family": "runes",
+      "identities": 5,
+      "proposedMasterGroups": 5,
+      "allCategoriesAssigned": false
+    },
+    {
+      "family": "scrolls",
+      "identities": 1,
+      "proposedMasterGroups": 1,
+      "allCategoriesAssigned": false
+    },
+    {
+      "family": "shields",
+      "identities": 12,
+      "proposedMasterGroups": 9,
+      "allCategoriesAssigned": false
+    },
+    {
+      "family": "spellbooks",
+      "identities": 3,
+      "proposedMasterGroups": 3,
+      "allCategoriesAssigned": false
+    },
+    {
+      "family": "staves",
+      "identities": 14,
+      "proposedMasterGroups": 5,
+      "allCategoriesAssigned": false
+    }
+  ],
+  "entries": [
+    {
+      "productionId": "item.design.base.short-sword",
+      "family": "blades",
+      "proposedMasterGroupId": "item.design.base.short-sword",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.dagger",
+      "family": "blades",
+      "proposedMasterGroupId": "item.design.base.dagger",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.falchion",
+      "family": "blades",
+      "proposedMasterGroupId": "item.design.base.falchion",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.scimitar",
+      "family": "blades",
+      "proposedMasterGroupId": "item.design.base.scimitar",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.broad-sword",
+      "family": "blades",
+      "proposedMasterGroupId": "item.design.base.broad-sword",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.potion-of-healing",
+      "family": "potions-elixirs",
+      "proposedMasterGroupId": "item.design.base.potion-of-healing",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": "potion",
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.potion-of-mana",
+      "family": "potions-elixirs",
+      "proposedMasterGroupId": "item.design.base.potion-of-mana",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": "potion",
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.gold",
+      "family": "gold",
+      "proposedMasterGroupId": "item.design.base.gold",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.scroll",
+      "family": "scrolls",
+      "proposedMasterGroupId": "item.design.base.scroll",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": "scroll",
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.claymore",
+      "family": "blades",
+      "proposedMasterGroupId": "item.design.base.claymore",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.blade",
+      "family": "blades",
+      "proposedMasterGroupId": "item.design.base.blade",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.sabre",
+      "family": "blades",
+      "proposedMasterGroupId": "item.design.base.sabre",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.long-sword",
+      "family": "blades",
+      "proposedMasterGroupId": "item.design.base.long-sword",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.bastard-sword",
+      "family": "blades",
+      "proposedMasterGroupId": "item.design.base.bastard-sword",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.two-handed-sword",
+      "family": "blades",
+      "proposedMasterGroupId": "item.design.base.two-handed-sword",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.great-sword",
+      "family": "blades",
+      "proposedMasterGroupId": "item.design.base.great-sword",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": true,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.buckler",
+      "family": "shields",
+      "proposedMasterGroupId": "item.design.base.buckler",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.small-shield",
+      "family": "shields",
+      "proposedMasterGroupId": "item.design.base.small-shield",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.large-shield",
+      "family": "shields",
+      "proposedMasterGroupId": "item.design.base.large-shield",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.kite-shield",
+      "family": "shields",
+      "proposedMasterGroupId": "item.design.base.kite-shield",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.tower-shield",
+      "family": "shields",
+      "proposedMasterGroupId": "item.design.base.tower-shield",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.gothic-shield",
+      "family": "shields",
+      "proposedMasterGroupId": "item.design.base.gothic-shield",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.griswold-s-edge",
+      "family": "blades",
+      "proposedMasterGroupId": "item.design.base.broad-sword",
+      "directReuseSourceProductionId": "item.design.base.broad-sword",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.gonnagal-s-dirk",
+      "family": "blades",
+      "proposedMasterGroupId": "item.design.unique.gonnagal-s-dirk",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.gryphon-s-claw",
+      "family": "blades",
+      "proposedMasterGroupId": "item.design.unique.gryphon-s-claw",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.black-razor",
+      "family": "blades",
+      "proposedMasterGroupId": "item.design.unique.black-razor",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.the-defender",
+      "family": "blades",
+      "proposedMasterGroupId": "item.design.base.sabre",
+      "directReuseSourceProductionId": "item.design.base.sabre",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.small-axe",
+      "family": "axes",
+      "proposedMasterGroupId": "item.design.base.small-axe",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.axe",
+      "family": "axes",
+      "proposedMasterGroupId": "item.design.base.axe",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.large-axe",
+      "family": "axes",
+      "proposedMasterGroupId": "item.design.base.large-axe",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.broad-axe",
+      "family": "axes",
+      "proposedMasterGroupId": "item.design.base.broad-axe",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.battle-axe",
+      "family": "axes",
+      "proposedMasterGroupId": "item.design.base.battle-axe",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.great-axe",
+      "family": "axes",
+      "proposedMasterGroupId": "item.design.base.great-axe",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.the-butcher-s-cleaver",
+      "family": "axes",
+      "proposedMasterGroupId": "item.design.unique.the-butcher-s-cleaver",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.potion-of-full-healing",
+      "family": "potions-elixirs",
+      "proposedMasterGroupId": "item.design.base.potion-of-full-healing",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.potion-of-full-mana",
+      "family": "potions-elixirs",
+      "proposedMasterGroupId": "item.design.base.potion-of-full-mana",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.potion-of-rejuvenation",
+      "family": "potions-elixirs",
+      "proposedMasterGroupId": "item.design.base.potion-of-rejuvenation",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.potion-of-full-rejuvenation",
+      "family": "potions-elixirs",
+      "proposedMasterGroupId": "item.design.base.potion-of-full-rejuvenation",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.spellbook-blue",
+      "family": "spellbooks",
+      "proposedMasterGroupId": "item.design.base.spellbook-blue",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.spellbook-red",
+      "family": "spellbooks",
+      "proposedMasterGroupId": "item.design.base.spellbook-red",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.spellbook-grey",
+      "family": "spellbooks",
+      "proposedMasterGroupId": "item.design.base.spellbook-grey",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.oil-flask",
+      "family": "oils",
+      "proposedMasterGroupId": "item.design.base.oil-flask",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.club",
+      "family": "blunt-weapons",
+      "proposedMasterGroupId": "item.design.base.club",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.flail",
+      "family": "blunt-weapons",
+      "proposedMasterGroupId": "item.design.base.flail",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.mace",
+      "family": "blunt-weapons",
+      "proposedMasterGroupId": "item.design.base.mace",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.maul",
+      "family": "blunt-weapons",
+      "proposedMasterGroupId": "item.design.base.maul",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.morning-star",
+      "family": "blunt-weapons",
+      "proposedMasterGroupId": "item.design.base.morning-star",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.spiked-club",
+      "family": "blunt-weapons",
+      "proposedMasterGroupId": "item.design.base.spiked-club",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.war-hammer",
+      "family": "blunt-weapons",
+      "proposedMasterGroupId": "item.design.base.war-hammer",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.baranar-s-star",
+      "family": "blunt-weapons",
+      "proposedMasterGroupId": "item.design.base.morning-star",
+      "directReuseSourceProductionId": "item.design.base.morning-star",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.civerb-s-cudgel",
+      "family": "blunt-weapons",
+      "proposedMasterGroupId": "item.design.base.mace",
+      "directReuseSourceProductionId": "item.design.base.mace",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.crackrust",
+      "family": "blunt-weapons",
+      "proposedMasterGroupId": "item.design.base.mace",
+      "directReuseSourceProductionId": "item.design.base.mace",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.dreamflange",
+      "family": "blunt-weapons",
+      "proposedMasterGroupId": "item.design.base.mace",
+      "directReuseSourceProductionId": "item.design.base.mace",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.gnarled-root",
+      "family": "blunt-weapons",
+      "proposedMasterGroupId": "item.design.base.club",
+      "directReuseSourceProductionId": "item.design.base.club",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.hammer-of-jholm",
+      "family": "blunt-weapons",
+      "proposedMasterGroupId": "item.design.base.maul",
+      "directReuseSourceProductionId": "item.design.base.maul",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.schaefer-s-hammer",
+      "family": "blunt-weapons",
+      "proposedMasterGroupId": "item.design.base.war-hammer",
+      "directReuseSourceProductionId": "item.design.base.war-hammer",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.the-celestial-star",
+      "family": "blunt-weapons",
+      "proposedMasterGroupId": "item.design.base.flail",
+      "directReuseSourceProductionId": "item.design.base.flail",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.the-cranium-basher",
+      "family": "blunt-weapons",
+      "proposedMasterGroupId": "item.design.base.maul",
+      "directReuseSourceProductionId": "item.design.base.maul",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.composite-bow",
+      "family": "bows",
+      "proposedMasterGroupId": "item.design.base.composite-bow",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.hunter-s-bow",
+      "family": "bows",
+      "proposedMasterGroupId": "item.design.base.hunter-s-bow",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.long-battle-bow",
+      "family": "bows",
+      "proposedMasterGroupId": "item.design.base.long-battle-bow",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.long-bow",
+      "family": "bows",
+      "proposedMasterGroupId": "item.design.base.hunter-s-bow",
+      "directReuseSourceProductionId": "item.design.base.hunter-s-bow",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.long-war-bow",
+      "family": "bows",
+      "proposedMasterGroupId": "item.design.base.long-war-bow",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.short-battle-bow",
+      "family": "bows",
+      "proposedMasterGroupId": "item.design.base.short-battle-bow",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.short-bow",
+      "family": "bows",
+      "proposedMasterGroupId": "item.design.base.short-bow",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.short-war-bow",
+      "family": "bows",
+      "proposedMasterGroupId": "item.design.base.short-war-bow",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.bow-of-the-dead",
+      "family": "bows",
+      "proposedMasterGroupId": "item.design.unique.deadly-hunter",
+      "directReuseSourceProductionId": "item.design.unique.deadly-hunter",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.deadly-hunter",
+      "family": "bows",
+      "proposedMasterGroupId": "item.design.unique.deadly-hunter",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.eaglehorn",
+      "family": "bows",
+      "proposedMasterGroupId": "item.design.unique.deadly-hunter",
+      "directReuseSourceProductionId": "item.design.unique.deadly-hunter",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.flamedart",
+      "family": "bows",
+      "proposedMasterGroupId": "item.design.base.hunter-s-bow",
+      "directReuseSourceProductionId": "item.design.base.hunter-s-bow",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.fleshstinger",
+      "family": "bows",
+      "proposedMasterGroupId": "item.design.base.hunter-s-bow",
+      "directReuseSourceProductionId": "item.design.base.hunter-s-bow",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.the-blackoak-bow",
+      "family": "bows",
+      "proposedMasterGroupId": "item.design.base.hunter-s-bow",
+      "directReuseSourceProductionId": "item.design.base.hunter-s-bow",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.the-celestial-bow",
+      "family": "bows",
+      "proposedMasterGroupId": "item.design.base.composite-bow",
+      "directReuseSourceProductionId": "item.design.base.composite-bow",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.the-needler",
+      "family": "bows",
+      "proposedMasterGroupId": "item.design.unique.the-needler",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.the-rift-bow",
+      "family": "bows",
+      "proposedMasterGroupId": "item.design.base.short-bow",
+      "directReuseSourceProductionId": "item.design.base.short-bow",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.windforce",
+      "family": "bows",
+      "proposedMasterGroupId": "item.design.unique.windforce",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.composite-staff",
+      "family": "staves",
+      "proposedMasterGroupId": "item.design.base.composite-staff",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.long-staff",
+      "family": "staves",
+      "proposedMasterGroupId": "item.design.base.long-staff",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.quarter-staff",
+      "family": "staves",
+      "proposedMasterGroupId": "item.design.base.short-staff",
+      "directReuseSourceProductionId": "item.design.base.short-staff",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.short-staff",
+      "family": "staves",
+      "proposedMasterGroupId": "item.design.base.short-staff",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.war-staff",
+      "family": "staves",
+      "proposedMasterGroupId": "item.design.base.war-staff",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.gleamsong",
+      "family": "staves",
+      "proposedMasterGroupId": "item.design.base.short-staff",
+      "directReuseSourceProductionId": "item.design.base.short-staff",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.immolator",
+      "family": "staves",
+      "proposedMasterGroupId": "item.design.base.long-staff",
+      "directReuseSourceProductionId": "item.design.base.long-staff",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.mindcry",
+      "family": "staves",
+      "proposedMasterGroupId": "item.design.base.short-staff",
+      "directReuseSourceProductionId": "item.design.base.short-staff",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.naj-s-puzzler",
+      "family": "staves",
+      "proposedMasterGroupId": "item.design.base.long-staff",
+      "directReuseSourceProductionId": "item.design.base.long-staff",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.rod-of-onan",
+      "family": "staves",
+      "proposedMasterGroupId": "item.design.base.war-staff",
+      "directReuseSourceProductionId": "item.design.base.war-staff",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.staff-of-shadows",
+      "family": "staves",
+      "proposedMasterGroupId": "item.design.base.long-staff",
+      "directReuseSourceProductionId": "item.design.base.long-staff",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.storm-spire",
+      "family": "staves",
+      "proposedMasterGroupId": "item.design.base.war-staff",
+      "directReuseSourceProductionId": "item.design.base.war-staff",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.the-protector",
+      "family": "staves",
+      "proposedMasterGroupId": "item.design.unique.the-protector",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.thundercall",
+      "family": "staves",
+      "proposedMasterGroupId": "item.design.base.composite-staff",
+      "directReuseSourceProductionId": "item.design.base.composite-staff",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.cap",
+      "family": "headgear",
+      "proposedMasterGroupId": "item.design.base.cap",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.crown",
+      "family": "headgear",
+      "proposedMasterGroupId": "item.design.base.crown",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.full-helm",
+      "family": "headgear",
+      "proposedMasterGroupId": "item.design.base.full-helm",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.great-helm",
+      "family": "headgear",
+      "proposedMasterGroupId": "item.design.base.great-helm",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.helm",
+      "family": "headgear",
+      "proposedMasterGroupId": "item.design.base.helm",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.skull-cap",
+      "family": "headgear",
+      "proposedMasterGroupId": "item.design.base.skull-cap",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.fool-s-crest",
+      "family": "headgear",
+      "proposedMasterGroupId": "item.design.unique.fool-s-crest",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.gotterdamerung",
+      "family": "headgear",
+      "proposedMasterGroupId": "item.design.unique.gotterdamerung",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.harlequin-crest",
+      "family": "headgear",
+      "proposedMasterGroupId": "item.design.unique.harlequin-crest",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.helm-of-spirits",
+      "family": "headgear",
+      "proposedMasterGroupId": "item.design.unique.helm-of-spirits",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.overlord-s-helm",
+      "family": "headgear",
+      "proposedMasterGroupId": "item.design.unique.overlord-s-helm",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.royal-circlet",
+      "family": "headgear",
+      "proposedMasterGroupId": "item.design.unique.royal-circlet",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.the-undead-crown",
+      "family": "headgear",
+      "proposedMasterGroupId": "item.design.unique.helm-of-spirits",
+      "directReuseSourceProductionId": "item.design.unique.helm-of-spirits",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.thinking-cap",
+      "family": "headgear",
+      "proposedMasterGroupId": "item.design.unique.thinking-cap",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.veil-of-steel",
+      "family": "headgear",
+      "proposedMasterGroupId": "item.design.unique.gotterdamerung",
+      "directReuseSourceProductionId": "item.design.unique.gotterdamerung",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.cape",
+      "family": "body-armor",
+      "proposedMasterGroupId": "item.design.base.cape",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.cloak",
+      "family": "body-armor",
+      "proposedMasterGroupId": "item.design.base.cloak",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.rags",
+      "family": "body-armor",
+      "proposedMasterGroupId": "item.design.base.rags",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.robe",
+      "family": "body-armor",
+      "proposedMasterGroupId": "item.design.base.robe",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.hard-leather-armor",
+      "family": "body-armor",
+      "proposedMasterGroupId": "item.design.base.hard-leather-armor",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.leather-armor",
+      "family": "body-armor",
+      "proposedMasterGroupId": "item.design.base.leather-armor",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.quilted-armor",
+      "family": "body-armor",
+      "proposedMasterGroupId": "item.design.base.quilted-armor",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.studded-leather-armor",
+      "family": "body-armor",
+      "proposedMasterGroupId": "item.design.base.studded-leather-armor",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.breast-plate",
+      "family": "body-armor",
+      "proposedMasterGroupId": "item.design.base.breast-plate",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.chain-mail",
+      "family": "body-armor",
+      "proposedMasterGroupId": "item.design.base.chain-mail",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.field-plate",
+      "family": "body-armor",
+      "proposedMasterGroupId": "item.design.base.field-plate",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.full-plate-mail",
+      "family": "body-armor",
+      "proposedMasterGroupId": "item.design.base.full-plate-mail",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.gothic-plate",
+      "family": "body-armor",
+      "proposedMasterGroupId": "item.design.base.gothic-plate",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.plate-mail",
+      "family": "body-armor",
+      "proposedMasterGroupId": "item.design.base.field-plate",
+      "directReuseSourceProductionId": "item.design.base.field-plate",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.ring-mail",
+      "family": "body-armor",
+      "proposedMasterGroupId": "item.design.base.ring-mail",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.scale-mail",
+      "family": "body-armor",
+      "proposedMasterGroupId": "item.design.base.scale-mail",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.splint-mail",
+      "family": "body-armor",
+      "proposedMasterGroupId": "item.design.base.splint-mail",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.arkaine-s-valor",
+      "family": "body-armor",
+      "proposedMasterGroupId": "item.design.unique.arkaine-s-valor",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.demonspike-coat",
+      "family": "body-armor",
+      "proposedMasterGroupId": "item.design.base.full-plate-mail",
+      "directReuseSourceProductionId": "item.design.base.full-plate-mail",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.leather-of-aut",
+      "family": "body-armor",
+      "proposedMasterGroupId": "item.design.base.leather-armor",
+      "directReuseSourceProductionId": "item.design.base.leather-armor",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.naj-s-light-plate",
+      "family": "body-armor",
+      "proposedMasterGroupId": "item.design.unique.naj-s-light-plate",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.nightscape",
+      "family": "body-armor",
+      "proposedMasterGroupId": "item.design.unique.nightscape",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.scavenger-carapace",
+      "family": "body-armor",
+      "proposedMasterGroupId": "item.design.base.breast-plate",
+      "directReuseSourceProductionId": "item.design.base.breast-plate",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.sparking-mail",
+      "family": "body-armor",
+      "proposedMasterGroupId": "item.design.base.chain-mail",
+      "directReuseSourceProductionId": "item.design.base.chain-mail",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.the-gladiator-s-bane",
+      "family": "body-armor",
+      "proposedMasterGroupId": "item.design.base.studded-leather-armor",
+      "directReuseSourceProductionId": "item.design.base.studded-leather-armor",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.the-rainbow-cloak",
+      "family": "body-armor",
+      "proposedMasterGroupId": "item.design.unique.nightscape",
+      "directReuseSourceProductionId": "item.design.unique.nightscape",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.torn-flesh-of-souls",
+      "family": "body-armor",
+      "proposedMasterGroupId": "item.design.unique.torn-flesh-of-souls",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.wisdom-s-wrap",
+      "family": "body-armor",
+      "proposedMasterGroupId": "item.design.unique.nightscape",
+      "directReuseSourceProductionId": "item.design.unique.nightscape",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.amulet",
+      "family": "jewelry",
+      "proposedMasterGroupId": "item.design.base.amulet",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.ring",
+      "family": "jewelry",
+      "proposedMasterGroupId": "item.design.base.ring",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.bramble",
+      "family": "jewelry",
+      "proposedMasterGroupId": "item.design.unique.bramble",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.constricting-ring",
+      "family": "jewelry",
+      "proposedMasterGroupId": "item.design.unique.constricting-ring",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.empyrean-band",
+      "family": "jewelry",
+      "proposedMasterGroupId": "item.design.unique.empyrean-band",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.optic-amulet",
+      "family": "jewelry",
+      "proposedMasterGroupId": "item.design.unique.optic-amulet",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.ring-of-engagement",
+      "family": "jewelry",
+      "proposedMasterGroupId": "item.design.unique.ring-of-engagement",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.ring-of-regha",
+      "family": "jewelry",
+      "proposedMasterGroupId": "item.design.unique.ring-of-regha",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.ring-of-truth",
+      "family": "jewelry",
+      "proposedMasterGroupId": "item.design.unique.ring-of-truth",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.the-bleeder",
+      "family": "jewelry",
+      "proposedMasterGroupId": "item.design.unique.the-bleeder",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.arena-potion",
+      "family": "potions-elixirs",
+      "proposedMasterGroupId": "item.design.base.arena-potion",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.elixir-of-dexterity",
+      "family": "potions-elixirs",
+      "proposedMasterGroupId": "item.design.base.elixir-of-dexterity",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.elixir-of-magic",
+      "family": "potions-elixirs",
+      "proposedMasterGroupId": "item.design.base.elixir-of-magic",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.elixir-of-strength",
+      "family": "potions-elixirs",
+      "proposedMasterGroupId": "item.design.base.elixir-of-strength",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.elixir-of-vitality",
+      "family": "potions-elixirs",
+      "proposedMasterGroupId": "item.design.base.elixir-of-vitality",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.golden-elixir",
+      "family": "potions-elixirs",
+      "proposedMasterGroupId": "item.design.base.golden-elixir",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.spectral-elixir",
+      "family": "potions-elixirs",
+      "proposedMasterGroupId": "item.design.base.spectral-elixir",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.anvil-of-fury",
+      "family": "quest-objects",
+      "proposedMasterGroupId": "item.design.base.anvil-of-fury",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.black-mushroom",
+      "family": "quest-objects",
+      "proposedMasterGroupId": "item.design.base.black-mushroom",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.blood-stone",
+      "family": "quest-objects",
+      "proposedMasterGroupId": "item.design.base.blood-stone",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.brain",
+      "family": "quest-objects",
+      "proposedMasterGroupId": "item.design.base.brain",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.cathedral-map",
+      "family": "quest-objects",
+      "proposedMasterGroupId": "item.design.base.cathedral-map",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.fungal-tome",
+      "family": "quest-objects",
+      "proposedMasterGroupId": "item.design.base.fungal-tome",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.magic-rock",
+      "family": "quest-objects",
+      "proposedMasterGroupId": "item.design.base.magic-rock",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.staff-of-lazarus",
+      "family": "quest-objects",
+      "proposedMasterGroupId": "item.design.base.staff-of-lazarus",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.tavern-sign",
+      "family": "quest-objects",
+      "proposedMasterGroupId": "item.design.base.tavern-sign",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.aguinara-s-hatchet",
+      "family": "axes",
+      "proposedMasterGroupId": "item.design.base.small-axe",
+      "directReuseSourceProductionId": "item.design.base.small-axe",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.bloodslayer",
+      "family": "axes",
+      "proposedMasterGroupId": "item.design.base.axe",
+      "directReuseSourceProductionId": "item.design.base.axe",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.hellslayer",
+      "family": "axes",
+      "proposedMasterGroupId": "item.design.base.battle-axe",
+      "directReuseSourceProductionId": "item.design.base.battle-axe",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.messerschmidt-s-reaver",
+      "family": "axes",
+      "proposedMasterGroupId": "item.design.unique.messerschmidt-s-reaver",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.sharp-beak",
+      "family": "axes",
+      "proposedMasterGroupId": "item.design.base.great-axe",
+      "directReuseSourceProductionId": "item.design.base.great-axe",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.stonecleaver",
+      "family": "axes",
+      "proposedMasterGroupId": "item.design.unique.stonecleaver",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.the-celestial-axe",
+      "family": "axes",
+      "proposedMasterGroupId": "item.design.base.battle-axe",
+      "directReuseSourceProductionId": "item.design.base.battle-axe",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.the-mangler",
+      "family": "axes",
+      "proposedMasterGroupId": "item.design.base.axe",
+      "directReuseSourceProductionId": "item.design.base.axe",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.wicked-axe",
+      "family": "axes",
+      "proposedMasterGroupId": "item.design.base.great-axe",
+      "directReuseSourceProductionId": "item.design.base.great-axe",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.doombringer",
+      "family": "blades",
+      "proposedMasterGroupId": "item.design.base.bastard-sword",
+      "directReuseSourceProductionId": "item.design.base.bastard-sword",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.gibbous-moon",
+      "family": "blades",
+      "proposedMasterGroupId": "item.design.base.broad-sword",
+      "directReuseSourceProductionId": "item.design.base.broad-sword",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.ice-shank",
+      "family": "blades",
+      "proposedMasterGroupId": "item.design.base.long-sword",
+      "directReuseSourceProductionId": "item.design.base.long-sword",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.inferno",
+      "family": "blades",
+      "proposedMasterGroupId": "item.design.base.long-sword",
+      "directReuseSourceProductionId": "item.design.base.long-sword",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.lightsabre",
+      "family": "blades",
+      "proposedMasterGroupId": "item.design.base.sabre",
+      "directReuseSourceProductionId": "item.design.base.sabre",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.shadowhawk",
+      "family": "blades",
+      "proposedMasterGroupId": "item.design.base.broad-sword",
+      "directReuseSourceProductionId": "item.design.base.broad-sword",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.shirotachi",
+      "family": "blades",
+      "proposedMasterGroupId": "item.design.base.great-sword",
+      "directReuseSourceProductionId": "item.design.base.great-sword",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": true,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.the-bonesaw",
+      "family": "blades",
+      "proposedMasterGroupId": "item.design.base.claymore",
+      "directReuseSourceProductionId": "item.design.base.claymore",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.the-executioner-s-blade",
+      "family": "blades",
+      "proposedMasterGroupId": "item.design.unique.the-executioner-s-blade",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.the-falcon-s-talon",
+      "family": "blades",
+      "proposedMasterGroupId": "item.design.unique.gryphon-s-claw",
+      "directReuseSourceProductionId": "item.design.unique.gryphon-s-claw",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.the-grandfather",
+      "family": "blades",
+      "proposedMasterGroupId": "item.design.unique.the-grandfather",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.the-grizzly",
+      "family": "blades",
+      "proposedMasterGroupId": "item.design.unique.the-grizzly",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.wizardspike",
+      "family": "blades",
+      "proposedMasterGroupId": "item.design.unique.wizardspike",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.blackoak-shield",
+      "family": "shields",
+      "proposedMasterGroupId": "item.design.unique.blackoak-shield",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.dragon-s-breach",
+      "family": "shields",
+      "proposedMasterGroupId": "item.design.unique.dragon-s-breach",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.holy-defender",
+      "family": "shields",
+      "proposedMasterGroupId": "item.design.unique.blackoak-shield",
+      "directReuseSourceProductionId": "item.design.unique.blackoak-shield",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.split-skull-shield",
+      "family": "shields",
+      "proposedMasterGroupId": "item.design.unique.split-skull-shield",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.stormshield",
+      "family": "shields",
+      "proposedMasterGroupId": "item.design.base.gothic-shield",
+      "directReuseSourceProductionId": "item.design.base.gothic-shield",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.the-deflector",
+      "family": "shields",
+      "proposedMasterGroupId": "item.design.base.buckler",
+      "directReuseSourceProductionId": "item.design.base.buckler",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.dynamic.gold-large",
+      "family": "gold",
+      "proposedMasterGroupId": "item.design.dynamic.gold-large",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.dynamic.gold-medium",
+      "family": "gold",
+      "proposedMasterGroupId": "item.design.dynamic.gold-medium",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.ear",
+      "family": "ears",
+      "proposedMasterGroupId": "item.design.dynamic.ear-warrior",
+      "directReuseSourceProductionId": "item.design.dynamic.ear-warrior",
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.dynamic.ear-rogue",
+      "family": "ears",
+      "proposedMasterGroupId": "item.design.dynamic.ear-rogue",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.dynamic.ear-sorcerer",
+      "family": "ears",
+      "proposedMasterGroupId": "item.design.dynamic.ear-sorcerer",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.dynamic.ear-warrior",
+      "family": "ears",
+      "proposedMasterGroupId": "item.design.dynamic.ear-warrior",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.thunderclap",
+      "family": "blunt-weapons",
+      "proposedMasterGroupId": "item.design.unique.thunderclap",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.blitzen",
+      "family": "bows",
+      "proposedMasterGroupId": "item.design.unique.blitzen",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.flambeau",
+      "family": "bows",
+      "proposedMasterGroupId": "item.design.unique.flambeau",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.gnat-sting",
+      "family": "bows",
+      "proposedMasterGroupId": "item.design.unique.gnat-sting",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.armor-of-gloom",
+      "family": "body-armor",
+      "proposedMasterGroupId": "item.design.unique.armor-of-gloom",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.bone-chain-armor",
+      "family": "body-armor",
+      "proposedMasterGroupId": "item.design.unique.bone-chain-armor",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.bovine-plate",
+      "family": "body-armor",
+      "proposedMasterGroupId": "item.design.unique.bovine-plate",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.demon-plate-armor",
+      "family": "body-armor",
+      "proposedMasterGroupId": "item.design.unique.demon-plate-armor",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.auric-amulet",
+      "family": "jewelry",
+      "proposedMasterGroupId": "item.design.base.auric-amulet",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.acolyte-s-amulet",
+      "family": "jewelry",
+      "proposedMasterGroupId": "item.design.unique.acolyte-s-amulet",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.amulet-of-warding",
+      "family": "jewelry",
+      "proposedMasterGroupId": "item.design.unique.amulet-of-warding",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.giant-s-knuckle",
+      "family": "jewelry",
+      "proposedMasterGroupId": "item.design.unique.giant-s-knuckle",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.gladiator-s-ring",
+      "family": "jewelry",
+      "proposedMasterGroupId": "item.design.unique.gladiator-s-ring",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.karik-s-ring",
+      "family": "jewelry",
+      "proposedMasterGroupId": "item.design.unique.karik-s-ring",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.mercurial-ring",
+      "family": "jewelry",
+      "proposedMasterGroupId": "item.design.unique.mercurial-ring",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.ring-of-magma",
+      "family": "jewelry",
+      "proposedMasterGroupId": "item.design.unique.ring-of-magma",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.ring-of-the-mystics",
+      "family": "jewelry",
+      "proposedMasterGroupId": "item.design.unique.ring-of-the-mystics",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.ring-of-thunder",
+      "family": "jewelry",
+      "proposedMasterGroupId": "item.design.unique.ring-of-thunder",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.xorine-s-ring",
+      "family": "jewelry",
+      "proposedMasterGroupId": "item.design.unique.xorine-s-ring",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.brown-suit",
+      "family": "quest-objects",
+      "proposedMasterGroupId": "item.design.base.brown-suit",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.grey-suit",
+      "family": "quest-objects",
+      "proposedMasterGroupId": "item.design.base.grey-suit",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.reconstructed-note",
+      "family": "quest-objects",
+      "proposedMasterGroupId": "item.design.base.reconstructed-note",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.rune-bomb",
+      "family": "quest-objects",
+      "proposedMasterGroupId": "item.design.base.rune-bomb",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.theodore",
+      "family": "quest-objects",
+      "proposedMasterGroupId": "item.design.base.theodore",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.torn-note-1",
+      "family": "quest-objects",
+      "proposedMasterGroupId": "item.design.base.torn-note-1",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.torn-note-2",
+      "family": "quest-objects",
+      "proposedMasterGroupId": "item.design.base.torn-note-2",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.torn-note-3",
+      "family": "quest-objects",
+      "proposedMasterGroupId": "item.design.base.torn-note-3",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.lightforge",
+      "family": "quest-objects",
+      "proposedMasterGroupId": "item.design.unique.lightforge",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.diamondedge",
+      "family": "blades",
+      "proposedMasterGroupId": "item.design.unique.diamondedge",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.unique.eater-of-souls",
+      "family": "blades",
+      "proposedMasterGroupId": "item.design.unique.eater-of-souls",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.greater-rune-of-fire",
+      "family": "runes",
+      "proposedMasterGroupId": "item.design.base.greater-rune-of-fire",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.greater-rune-of-lightning",
+      "family": "runes",
+      "proposedMasterGroupId": "item.design.base.greater-rune-of-lightning",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.rune-of-fire",
+      "family": "runes",
+      "proposedMasterGroupId": "item.design.base.rune-of-fire",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.rune-of-lightning",
+      "family": "runes",
+      "proposedMasterGroupId": "item.design.base.rune-of-lightning",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    },
+    {
+      "productionId": "item.design.base.rune-of-stone",
+      "family": "runes",
+      "proposedMasterGroupId": "item.design.base.rune-of-stone",
+      "directReuseSourceProductionId": null,
+      "geometrySharingApproved": false,
+      "manualGroupExcluded": false,
+      "experimentalGuideCategoryProposal": null,
+      "categoryApplicationApproved": false,
+      "minimumVertexCount": null
+    }
+  ],
+  "candidates": [
+    {
+      "productionId": "item.design.base.scroll",
+      "family": "scrolls",
+      "role": "required-proposal",
+      "sourceBoard": {
+        "path": "assets/concept-art/items/r1/scroll-r1.png",
+        "sha256": "efb23d5d5582b550de65231a3de659474923d63bc47f40e595b6eb60457ab28d",
+        "bytes": 2231532,
+        "dimensions": [
+          1536,
+          1024
+        ],
+        "hasAlpha": false,
+        "tool": "built-in image_gen.imagegen",
+        "sourcePixelIconPasted": false,
+        "originalBytesPreserved": true,
+        "individualInputReady": false,
+        "specificVisualApproval": false
+      },
+      "reuse": {
+        "proposedMasterGroupId": "item.design.base.scroll",
+        "directSourceProductionId": null,
+        "sourceConceptRevisionPinned": false,
+        "geometrySharingApproved": false,
+        "policy": "Explicit concept linkage only, not approved geometry reuse. Preserve unique/dynamic/material identities and review family exceptions."
+      },
+      "experimentalGuideCategoryProposal": "scroll",
+      "categoryApplicationApproved": false,
+      "triangleHypotheses": {
+        "categoryId": "scroll",
+        "label": "Pergaminho",
+        "metric": "exportedTriangles",
+        "usageProjectedPixels": [
+          40,
+          150
+        ],
+        "usageTrianglesExperimental": [
+          100,
+          500
+        ],
+        "firstPersonInspectionProjectedPixels": [
+          250,
+          700
+        ],
+        "firstPersonTrianglesExperimental": [
+          500,
+          2000
+        ],
+        "minimumVertexCount": null,
+        "measuredMinimum": false,
+        "approved": false
+      },
+      "minimumVertexCount": null,
+      "visualSize": {
+        "nativeInventoryPixels": [
+          28,
+          28
+        ],
+        "nativeCells": [
+          1,
+          1
+        ],
+        "conceptCanvasPixels": [
+          1536,
+          1024
+        ],
+        "twoItemLayoutReserve": [
+          0.06,
+          0.14,
+          0.36,
+          0.72
+        ],
+        "threeItemLayoutReserve": [
+          0.04,
+          0.14,
+          0.25,
+          0.72
+        ],
+        "physicalBoundsMeters": null,
+        "approvedRelativeScale": null,
+        "cameraViewportFovDepth": null,
+        "measuredProjectedPixels": null
+      },
+      "measurements": [
+        {
+          "stage": "source-identity-selection",
+          "artifactPath": null,
+          "sha256": null,
+          "tool": null,
+          "toolVersion": null,
+          "method": null,
+          "countingDomain": null,
+          "sourceQuadsOrPolygons": null,
+          "sourceTopologyVertexCount": null,
+          "indexCount": null,
+          "primitiveModesObserved": [],
+          "primitiveMeasurementTemplate": {
+            "mode": null,
+            "indexed": null,
+            "indexAccessor": null,
+            "indexEntryCount": null,
+            "positionAccessor": null,
+            "positionAccessorRows": null,
+            "referencedAttributeVertexRows": null,
+            "triangles": null,
+            "method": null
+          },
+          "exportedTriangles": null,
+          "degenerateTriangles": null,
+          "storedAttributeVertexRows": null,
+          "referencedAttributeVertexRows": null,
+          "distinctPositionCount": null,
+          "positionComparisonSpace": null,
+          "positionComparisonTolerance": null,
+          "primitiveMeasurements": [],
+          "instanceSelections": [],
+          "materialTextureHashes": [],
+          "sourceTransform": null,
+          "pivot": null,
+          "units": null,
+          "measured": false
+        },
+        {
+          "stage": "extracted-child",
+          "artifactPath": null,
+          "sha256": null,
+          "tool": null,
+          "toolVersion": null,
+          "method": null,
+          "countingDomain": null,
+          "sourceQuadsOrPolygons": null,
+          "sourceTopologyVertexCount": null,
+          "indexCount": null,
+          "primitiveModesObserved": [],
+          "primitiveMeasurementTemplate": {
+            "mode": null,
+            "indexed": null,
+            "indexAccessor": null,
+            "indexEntryCount": null,
+            "positionAccessor": null,
+            "positionAccessorRows": null,
+            "referencedAttributeVertexRows": null,
+            "triangles": null,
+            "method": null
+          },
+          "exportedTriangles": null,
+          "degenerateTriangles": null,
+          "storedAttributeVertexRows": null,
+          "referencedAttributeVertexRows": null,
+          "distinctPositionCount": null,
+          "positionComparisonSpace": null,
+          "positionComparisonTolerance": null,
+          "primitiveMeasurements": [],
+          "instanceSelections": [],
+          "materialTextureHashes": [],
+          "sourceTransform": null,
+          "pivot": null,
+          "units": null,
+          "measured": false
+        },
+        {
+          "stage": "reopened-child",
+          "artifactPath": null,
+          "sha256": null,
+          "tool": null,
+          "toolVersion": null,
+          "method": null,
+          "countingDomain": null,
+          "sourceQuadsOrPolygons": null,
+          "sourceTopologyVertexCount": null,
+          "indexCount": null,
+          "primitiveModesObserved": [],
+          "primitiveMeasurementTemplate": {
+            "mode": null,
+            "indexed": null,
+            "indexAccessor": null,
+            "indexEntryCount": null,
+            "positionAccessor": null,
+            "positionAccessorRows": null,
+            "referencedAttributeVertexRows": null,
+            "triangles": null,
+            "method": null
+          },
+          "exportedTriangles": null,
+          "degenerateTriangles": null,
+          "storedAttributeVertexRows": null,
+          "referencedAttributeVertexRows": null,
+          "distinctPositionCount": null,
+          "positionComparisonSpace": null,
+          "positionComparisonTolerance": null,
+          "primitiveMeasurements": [],
+          "instanceSelections": [],
+          "materialTextureHashes": [],
+          "sourceTransform": null,
+          "pivot": null,
+          "units": null,
+          "measured": false
+        }
+      ],
+      "drawableLodMeasurements": [],
+      "partitionQa": {
+        "exclusiveIdentityAssignmentVerified": false,
+        "unassignedTriangleCount": null,
+        "multiplyAssignedTriangleCount": null,
+        "sourceChildTriangleDifference": null,
+        "differenceExplanation": null,
+        "roundTripPreservationVerified": false
+      },
+      "resourcesPolicy": "Keep immutable joint/source master and exact child lineage. Preserve UVs/normals/tangents/materials/textures/atlas/transforms/pivot. Shared resources can be duplicated in self-contained exports; do not claim memory saving."
+    },
+    {
+      "productionId": "item.design.base.potion-of-healing",
+      "family": "potions-elixirs",
+      "role": "required-proposal",
+      "sourceBoard": {
+        "path": "assets/concept-art/items/r1/potion-of-healing-r1.png",
+        "sha256": "fbfeaad3e56dc88ff64bf54d6238ed1390ad70362e1d121a7703b880b227f63e",
+        "bytes": 2130911,
+        "dimensions": [
+          1536,
+          1024
+        ],
+        "hasAlpha": false,
+        "tool": "built-in image_gen.imagegen",
+        "sourcePixelIconPasted": false,
+        "originalBytesPreserved": true,
+        "individualInputReady": false,
+        "specificVisualApproval": false
+      },
+      "reuse": {
+        "proposedMasterGroupId": "item.design.base.potion-of-healing",
+        "directSourceProductionId": null,
+        "sourceConceptRevisionPinned": false,
+        "geometrySharingApproved": false,
+        "policy": "Explicit concept linkage only, not approved geometry reuse. Preserve unique/dynamic/material identities and review family exceptions."
+      },
+      "experimentalGuideCategoryProposal": "potion",
+      "categoryApplicationApproved": false,
+      "triangleHypotheses": {
+        "categoryId": "potion",
+        "label": "Poção",
+        "metric": "exportedTriangles",
+        "usageProjectedPixels": [
+          40,
+          150
+        ],
+        "usageTrianglesExperimental": [
+          300,
+          900
+        ],
+        "firstPersonInspectionProjectedPixels": [
+          250,
+          700
+        ],
+        "firstPersonTrianglesExperimental": [
+          1000,
+          3000
+        ],
+        "minimumVertexCount": null,
+        "measuredMinimum": false,
+        "approved": false
+      },
+      "minimumVertexCount": null,
+      "visualSize": {
+        "nativeInventoryPixels": [
+          28,
+          28
+        ],
+        "nativeCells": [
+          1,
+          1
+        ],
+        "conceptCanvasPixels": [
+          1536,
+          1024
+        ],
+        "twoItemLayoutReserve": [
+          0.58,
+          0.18,
+          0.32,
+          0.64
+        ],
+        "threeItemLayoutReserve": [
+          0.375,
+          0.18,
+          0.25,
+          0.64
+        ],
+        "physicalBoundsMeters": null,
+        "approvedRelativeScale": null,
+        "cameraViewportFovDepth": null,
+        "measuredProjectedPixels": null
+      },
+      "measurements": [
+        {
+          "stage": "source-identity-selection",
+          "artifactPath": null,
+          "sha256": null,
+          "tool": null,
+          "toolVersion": null,
+          "method": null,
+          "countingDomain": null,
+          "sourceQuadsOrPolygons": null,
+          "sourceTopologyVertexCount": null,
+          "indexCount": null,
+          "primitiveModesObserved": [],
+          "primitiveMeasurementTemplate": {
+            "mode": null,
+            "indexed": null,
+            "indexAccessor": null,
+            "indexEntryCount": null,
+            "positionAccessor": null,
+            "positionAccessorRows": null,
+            "referencedAttributeVertexRows": null,
+            "triangles": null,
+            "method": null
+          },
+          "exportedTriangles": null,
+          "degenerateTriangles": null,
+          "storedAttributeVertexRows": null,
+          "referencedAttributeVertexRows": null,
+          "distinctPositionCount": null,
+          "positionComparisonSpace": null,
+          "positionComparisonTolerance": null,
+          "primitiveMeasurements": [],
+          "instanceSelections": [],
+          "materialTextureHashes": [],
+          "sourceTransform": null,
+          "pivot": null,
+          "units": null,
+          "measured": false
+        },
+        {
+          "stage": "extracted-child",
+          "artifactPath": null,
+          "sha256": null,
+          "tool": null,
+          "toolVersion": null,
+          "method": null,
+          "countingDomain": null,
+          "sourceQuadsOrPolygons": null,
+          "sourceTopologyVertexCount": null,
+          "indexCount": null,
+          "primitiveModesObserved": [],
+          "primitiveMeasurementTemplate": {
+            "mode": null,
+            "indexed": null,
+            "indexAccessor": null,
+            "indexEntryCount": null,
+            "positionAccessor": null,
+            "positionAccessorRows": null,
+            "referencedAttributeVertexRows": null,
+            "triangles": null,
+            "method": null
+          },
+          "exportedTriangles": null,
+          "degenerateTriangles": null,
+          "storedAttributeVertexRows": null,
+          "referencedAttributeVertexRows": null,
+          "distinctPositionCount": null,
+          "positionComparisonSpace": null,
+          "positionComparisonTolerance": null,
+          "primitiveMeasurements": [],
+          "instanceSelections": [],
+          "materialTextureHashes": [],
+          "sourceTransform": null,
+          "pivot": null,
+          "units": null,
+          "measured": false
+        },
+        {
+          "stage": "reopened-child",
+          "artifactPath": null,
+          "sha256": null,
+          "tool": null,
+          "toolVersion": null,
+          "method": null,
+          "countingDomain": null,
+          "sourceQuadsOrPolygons": null,
+          "sourceTopologyVertexCount": null,
+          "indexCount": null,
+          "primitiveModesObserved": [],
+          "primitiveMeasurementTemplate": {
+            "mode": null,
+            "indexed": null,
+            "indexAccessor": null,
+            "indexEntryCount": null,
+            "positionAccessor": null,
+            "positionAccessorRows": null,
+            "referencedAttributeVertexRows": null,
+            "triangles": null,
+            "method": null
+          },
+          "exportedTriangles": null,
+          "degenerateTriangles": null,
+          "storedAttributeVertexRows": null,
+          "referencedAttributeVertexRows": null,
+          "distinctPositionCount": null,
+          "positionComparisonSpace": null,
+          "positionComparisonTolerance": null,
+          "primitiveMeasurements": [],
+          "instanceSelections": [],
+          "materialTextureHashes": [],
+          "sourceTransform": null,
+          "pivot": null,
+          "units": null,
+          "measured": false
+        }
+      ],
+      "drawableLodMeasurements": [],
+      "partitionQa": {
+        "exclusiveIdentityAssignmentVerified": false,
+        "unassignedTriangleCount": null,
+        "multiplyAssignedTriangleCount": null,
+        "sourceChildTriangleDifference": null,
+        "differenceExplanation": null,
+        "roundTripPreservationVerified": false
+      },
+      "resourcesPolicy": "Keep immutable joint/source master and exact child lineage. Preserve UVs/normals/tangents/materials/textures/atlas/transforms/pivot. Shared resources can be duplicated in self-contained exports; do not claim memory saving."
+    },
+    {
+      "productionId": "item.design.base.potion-of-mana",
+      "family": "potions-elixirs",
+      "role": "optional-proposal; no automatic expansion",
+      "sourceBoard": {
+        "path": "assets/concept-art/items/r1/potion-of-mana-r1.png",
+        "sha256": "92a7527bfd54ef0844e52eeb56d4af8ceded077ef1af8d4e1ef16c22969cc177",
+        "bytes": 2107503,
+        "dimensions": [
+          1536,
+          1024
+        ],
+        "hasAlpha": false,
+        "tool": "built-in image_gen.imagegen",
+        "sourcePixelIconPasted": false,
+        "originalBytesPreserved": true,
+        "individualInputReady": false,
+        "specificVisualApproval": false
+      },
+      "reuse": {
+        "proposedMasterGroupId": "item.design.base.potion-of-mana",
+        "directSourceProductionId": null,
+        "sourceConceptRevisionPinned": false,
+        "geometrySharingApproved": false,
+        "policy": "Explicit concept linkage only, not approved geometry reuse. Preserve unique/dynamic/material identities and review family exceptions."
+      },
+      "experimentalGuideCategoryProposal": "potion",
+      "categoryApplicationApproved": false,
+      "triangleHypotheses": {
+        "categoryId": "potion",
+        "label": "Poção",
+        "metric": "exportedTriangles",
+        "usageProjectedPixels": [
+          40,
+          150
+        ],
+        "usageTrianglesExperimental": [
+          300,
+          900
+        ],
+        "firstPersonInspectionProjectedPixels": [
+          250,
+          700
+        ],
+        "firstPersonTrianglesExperimental": [
+          1000,
+          3000
+        ],
+        "minimumVertexCount": null,
+        "measuredMinimum": false,
+        "approved": false
+      },
+      "minimumVertexCount": null,
+      "visualSize": {
+        "nativeInventoryPixels": [
+          28,
+          28
+        ],
+        "nativeCells": [
+          1,
+          1
+        ],
+        "conceptCanvasPixels": [
+          1536,
+          1024
+        ],
+        "twoItemLayoutReserve": null,
+        "threeItemLayoutReserve": [
+          0.71,
+          0.18,
+          0.25,
+          0.64
+        ],
+        "physicalBoundsMeters": null,
+        "approvedRelativeScale": null,
+        "cameraViewportFovDepth": null,
+        "measuredProjectedPixels": null
+      },
+      "measurements": [
+        {
+          "stage": "source-identity-selection",
+          "artifactPath": null,
+          "sha256": null,
+          "tool": null,
+          "toolVersion": null,
+          "method": null,
+          "countingDomain": null,
+          "sourceQuadsOrPolygons": null,
+          "sourceTopologyVertexCount": null,
+          "indexCount": null,
+          "primitiveModesObserved": [],
+          "primitiveMeasurementTemplate": {
+            "mode": null,
+            "indexed": null,
+            "indexAccessor": null,
+            "indexEntryCount": null,
+            "positionAccessor": null,
+            "positionAccessorRows": null,
+            "referencedAttributeVertexRows": null,
+            "triangles": null,
+            "method": null
+          },
+          "exportedTriangles": null,
+          "degenerateTriangles": null,
+          "storedAttributeVertexRows": null,
+          "referencedAttributeVertexRows": null,
+          "distinctPositionCount": null,
+          "positionComparisonSpace": null,
+          "positionComparisonTolerance": null,
+          "primitiveMeasurements": [],
+          "instanceSelections": [],
+          "materialTextureHashes": [],
+          "sourceTransform": null,
+          "pivot": null,
+          "units": null,
+          "measured": false
+        },
+        {
+          "stage": "extracted-child",
+          "artifactPath": null,
+          "sha256": null,
+          "tool": null,
+          "toolVersion": null,
+          "method": null,
+          "countingDomain": null,
+          "sourceQuadsOrPolygons": null,
+          "sourceTopologyVertexCount": null,
+          "indexCount": null,
+          "primitiveModesObserved": [],
+          "primitiveMeasurementTemplate": {
+            "mode": null,
+            "indexed": null,
+            "indexAccessor": null,
+            "indexEntryCount": null,
+            "positionAccessor": null,
+            "positionAccessorRows": null,
+            "referencedAttributeVertexRows": null,
+            "triangles": null,
+            "method": null
+          },
+          "exportedTriangles": null,
+          "degenerateTriangles": null,
+          "storedAttributeVertexRows": null,
+          "referencedAttributeVertexRows": null,
+          "distinctPositionCount": null,
+          "positionComparisonSpace": null,
+          "positionComparisonTolerance": null,
+          "primitiveMeasurements": [],
+          "instanceSelections": [],
+          "materialTextureHashes": [],
+          "sourceTransform": null,
+          "pivot": null,
+          "units": null,
+          "measured": false
+        },
+        {
+          "stage": "reopened-child",
+          "artifactPath": null,
+          "sha256": null,
+          "tool": null,
+          "toolVersion": null,
+          "method": null,
+          "countingDomain": null,
+          "sourceQuadsOrPolygons": null,
+          "sourceTopologyVertexCount": null,
+          "indexCount": null,
+          "primitiveModesObserved": [],
+          "primitiveMeasurementTemplate": {
+            "mode": null,
+            "indexed": null,
+            "indexAccessor": null,
+            "indexEntryCount": null,
+            "positionAccessor": null,
+            "positionAccessorRows": null,
+            "referencedAttributeVertexRows": null,
+            "triangles": null,
+            "method": null
+          },
+          "exportedTriangles": null,
+          "degenerateTriangles": null,
+          "storedAttributeVertexRows": null,
+          "referencedAttributeVertexRows": null,
+          "distinctPositionCount": null,
+          "positionComparisonSpace": null,
+          "positionComparisonTolerance": null,
+          "primitiveMeasurements": [],
+          "instanceSelections": [],
+          "materialTextureHashes": [],
+          "sourceTransform": null,
+          "pivot": null,
+          "units": null,
+          "measured": false
+        }
+      ],
+      "drawableLodMeasurements": [],
+      "partitionQa": {
+        "exclusiveIdentityAssignmentVerified": false,
+        "unassignedTriangleCount": null,
+        "multiplyAssignedTriangleCount": null,
+        "sourceChildTriangleDifference": null,
+        "differenceExplanation": null,
+        "roundTripPreservationVerified": false
+      },
+      "resourcesPolicy": "Keep immutable joint/source master and exact child lineage. Preserve UVs/normals/tangents/materials/textures/atlas/transforms/pivot. Shared resources can be duplicated in self-contained exports; do not claim memory saving."
+    }
+  ],
+  "jointMeasurement": {
+    "stage": "joint-source",
+    "artifactPath": null,
+    "sha256": null,
+    "tool": null,
+    "toolVersion": null,
+    "method": null,
+    "countingDomain": null,
+    "sourceQuadsOrPolygons": null,
+    "sourceTopologyVertexCount": null,
+    "indexCount": null,
+    "primitiveModesObserved": [],
+    "primitiveMeasurementTemplate": {
+      "mode": null,
+      "indexed": null,
+      "indexAccessor": null,
+      "indexEntryCount": null,
+      "positionAccessor": null,
+      "positionAccessorRows": null,
+      "referencedAttributeVertexRows": null,
+      "triangles": null,
+      "method": null
+    },
+    "exportedTriangles": null,
+    "degenerateTriangles": null,
+    "storedAttributeVertexRows": null,
+    "referencedAttributeVertexRows": null,
+    "distinctPositionCount": null,
+    "positionComparisonSpace": null,
+    "positionComparisonTolerance": null,
+    "primitiveMeasurements": [],
+    "instanceSelections": [],
+    "materialTextureHashes": [],
+    "sourceTransform": null,
+    "pivot": null,
+    "units": null,
+    "measured": false
+  },
+  "countsSelected": false,
+  "newJobsAuthorized": 0,
+  "creditsAuthorized": 0
+}

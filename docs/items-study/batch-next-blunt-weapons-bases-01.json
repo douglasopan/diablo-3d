@@ -1,0 +1,409 @@
+{
+  "format": "d3d.item-concept-art",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "scope": "Independent remaining-blunt-weapons-base-design-all-01 candidate/reuse batch for root consolidation; no global coverage claim.",
+  "batchId": "batch-next-blunt-weapons-bases-01",
+  "productionQueueGroup": "remaining-blunt-weapons-base-design-all-01",
+  "catalogSha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d",
+  "generationTool": "built-in image_gen.imagegen; shared-cursor reuse causes zero new calls",
+  "postProcessing": "none; generated PNG bytes copied unchanged, all prior revisions retained",
+  "originalGameImagesIncluded": false,
+  "privateMediaPathsIncluded": false,
+  "visualApproval": false,
+  "accepted": false,
+  "selected": false,
+  "installed": false,
+  "runtimeInstalled": false,
+  "summary": {
+    "candidateUnits": 7,
+    "newImages": 7,
+    "reuseProposals": 0,
+    "modelsGenerated": 0,
+    "runtimeIconsGenerated": 0
+  },
+  "entries": [
+    {
+      "productionId": "item.design.base.club",
+      "conceptId": "item.design.base.club.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/club-r1.png",
+      "sha256": "5cb127afd2fd3476577649519239dde9869f9dc1533c2414866597907c14cdd9",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D single-item candidate modelling turnaround, not final game icon.\nThe first input image is the original licensed inventory sprite, PRIMARY silhouette/proportion/palette reference ONLY. The second input image is the generated Claymore sheet, LAYOUT and neutral material presentation ONLY; never include its sword.\nCreate one coherent HD sheet showing the exact SAME object in FRONT, true SIDE thickness, BACK (correctly reverse any asymmetric outline), and 3-4 perspective, plus one small ICON inset newly rendered in crisp HD from the SAME object. All views share identical proportions/geometry/materials, whole item visible and spaced cleanly. Plain charcoal gray background, neutral soft WHITE studio illumination without colored light or warm cast, realistic worn medieval materials, restrained surface wear and minimum contact shadows. Hidden reverse surfaces, thickness and exact fine material details are conservative inferred reconstruction.\nText only item TITLE and labels FRONT / SIDE / BACK / 3-4 / ICON; small footer CANDIDATE - REVERSE AND THICKNESS INFERRED. Never paste/reproduce/trace the source sprite, its image rectangle, reference board or pixel art into output. No characters/hands/scenery, extra objects, magical glow, flames, invented jewels/runes/skulls or watermark. Thumbnail is NEW HD concept depiction, not a runtime icon.\nCLUB. Production ID item.design.base.club, ICURS66. Match actual sprite: a short straight slender roughly rectangular olive-tan weathered wooden cudgel, not a bulbous tree branch or baseball bat. Upper striking section is long, flat-sided and irregularly split at its blunt squared top into two uneven raised wood ridges. Very visible vertical wood grain, width nearly constant down its length. A small gray tapered side protrusion points out near the upper LEFT and a tiny opposite stub is visible on the right; retain those small original protrusions without adding a ring of giant spikes. Lower roughly two-fifths is wrapped in a few broad irregular reddish-brown/orange-red leather bands, with exposed tan wood between bands and a short naked wood butt at bottom. No gold pommel, no new metal cap, no skull. Treat exact small protrusion attachment/material as inferred.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 66,
+        "sha256": "2e94e76f671ae7d7c9ea416c0663941af46131dfc922d84178c3b6a2e33965aa",
+        "notes": "Original inventory source identity; private paths/pixels omitted. Exact presented source was inspected before new generation."
+      },
+      "referencePresentedSha256": "942d7db5f8d739356d2e8d0f0e75a3ee95930cad5d88c23be964e7068741881d",
+      "referenceVisualInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-thumbnail-proposal"
+      ],
+      "inferredParts": [
+        "Hidden reverse surfaces, depth and thickness",
+        "Fasteners, exact material microtexture and dimensions"
+      ],
+      "review": {
+        "status": "inspected-candidate",
+        "approval": false,
+        "limitations": [
+          "Original small side protrusions are retained; their metallic construction and attachment depth are proposed.",
+          "Rear wood split, leather winding and physical dimensions are inferred."
+        ]
+      },
+      "notes": "Candidate reference-backed concept only; no model, final runtime icon, attachment or installation. Views and new HD thumbnail show one proposed object, not measured geometry."
+    },
+    {
+      "productionId": "item.design.base.flail",
+      "conceptId": "item.design.base.flail.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "concept-sheet",
+      "image": "assets/concept-art/items/r1/flail-r1.png",
+      "sha256": "660e094903b11150c95e590455ea6b17030f599233b38365e8a72821bdb03589",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D single-item candidate modelling turnaround, not final game icon.\nThe first input image is the original licensed inventory sprite, PRIMARY silhouette/proportion/palette reference ONLY. The second input image is the generated Claymore sheet, LAYOUT and neutral material presentation ONLY; never include its sword.\nCreate one coherent HD sheet showing the exact SAME object in FRONT, true SIDE thickness, BACK (correctly reverse any asymmetric outline), and 3-4 perspective, plus one small ICON inset newly rendered in crisp HD from the SAME object. All views share identical proportions/geometry/materials, whole item visible and spaced cleanly. Plain charcoal gray background, neutral soft WHITE studio illumination without colored light or warm cast, realistic worn medieval materials, restrained surface wear and minimum contact shadows. Hidden reverse surfaces, thickness and exact fine material details are conservative inferred reconstruction.\nText only item TITLE and labels FRONT / SIDE / BACK / 3-4 / ICON; small footer CANDIDATE - REVERSE AND THICKNESS INFERRED. Never paste/reproduce/trace the source sprite, its image rectangle, reference board or pixel art into output. No characters/hands/scenery, extra objects, magical glow, flames, invented jewels/runes/skulls or watermark. Thumbnail is NEW HD concept depiction, not a runtime icon.\nFLAIL. Production ID item.design.base.flail, ICURS131. Match actual sprite: one straight short red-brown leather handle at LEFT with a vertical row of small golden/brass diamond/round studs, ornate but compact stepped brass upper cap and a plain rounded red-brown bottom. One long slender dark steel linked CHAIN attaches at top cap, sweeps upward in a tall arch/loop over the handle, bends across to the RIGHT then descends to one large dark charcoal iron SPIKED BALL hanging on the right at about the upper-middle handle level. Brass little ring/collar above the ball. Ball dark faceted spherical with a few stout black iron spikes directed around it; pale gray metallic highlights, not silver smooth ball. Preserve this long-chain silhouette and red/gold/black palette. One handle, ONE chain, one ball. Chain links must be discernible metal links, not a solid rope, duplicate chain or rigid bar. The sheet shows an illustrative arranged chain pose for comparison; chain is articulated, and its pose is not a rigid model specification. Preserve plausible link connectivity across all views. Do not invent flame or magic.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 131,
+        "sha256": "5ba4aed729a2c7b4c7ef61b79321327461838ef392a7355dd86c80fd34aaaad9",
+        "notes": "Original inventory source identity; private paths/pixels omitted. Exact presented source was inspected before new generation."
+      },
+      "referencePresentedSha256": "dfbb1a6eccf089f6b5e80d9964fd7fa3731fe4e72e45e9ba5d9a1e1f6704ef41",
+      "referenceVisualInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-thumbnail-proposal"
+      ],
+      "inferredParts": [
+        "Hidden reverse surfaces, depth and thickness",
+        "Fasteners, exact material microtexture and dimensions"
+      ],
+      "review": {
+        "status": "inspected-candidate",
+        "approval": false,
+        "limitations": [
+          "R1 repeats the front chain orientation in BACK and introduces a brass bottom ferrule absent from source; preserved as incomplete study only.",
+          "R2 addresses these reproduced defects; chain articulation remains separate from the arranged board pose."
+        ]
+      },
+      "notes": "Candidate reference-backed concept only; no model, final runtime icon, attachment or installation. Views and new HD thumbnail show one proposed object, not measured geometry.",
+      "studyStatus": "incomplete",
+      "blocksMasterGeneration": true
+    },
+    {
+      "productionId": "item.design.base.mace",
+      "conceptId": "item.design.base.mace.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/mace-r1.png",
+      "sha256": "8180574f1606927dee03a055dbf9de68afd6ed60015f375975e14737a73d670c",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D single-item candidate modelling turnaround, not final game icon.\nThe first input image is the original licensed inventory sprite, PRIMARY silhouette/proportion/palette reference ONLY. The second input image is the generated Claymore sheet, LAYOUT and neutral material presentation ONLY; never include its sword.\nCreate one coherent HD sheet showing the exact SAME object in FRONT, true SIDE thickness, BACK (correctly reverse any asymmetric outline), and 3-4 perspective, plus one small ICON inset newly rendered in crisp HD from the SAME object. All views share identical proportions/geometry/materials, whole item visible and spaced cleanly. Plain charcoal gray background, neutral soft WHITE studio illumination without colored light or warm cast, realistic worn medieval materials, restrained surface wear and minimum contact shadows. Hidden reverse surfaces, thickness and exact fine material details are conservative inferred reconstruction.\nText only item TITLE and labels FRONT / SIDE / BACK / 3-4 / ICON; small footer CANDIDATE - REVERSE AND THICKNESS INFERRED. Never paste/reproduce/trace the source sprite, its image rectangle, reference board or pixel art into output. No characters/hands/scenery, extra objects, magical glow, flames, invented jewels/runes/skulls or watermark. Thumbnail is NEW HD concept depiction, not a runtime icon.\nMACE. Production ID item.design.base.mace, ICURS59. Match actual sprite: slim straight long reddish-brown/orange-red handle occupying lower half to three-fifths, split into upper and lower grip segments by one tiny dark metal band; subtle small silver rivets down lower grip and rounded plain red-brown end. Upper head is dark steel/charcoal iron, one compact tall double-tier sculpted FLANGED mace head: tiny pointed top cap, upper near-spherical/angular diamond bulb with small angular horizontal flange shoulders and a lower taper, slender waisted stem continuing down into a smaller flared diamond/skirt-like bulb/collar. Readable gray steel highlights on outer flange edges and center rib. Narrow dark metal collar between iron head and red handle. Preserve head's two tiers and narrow waist, no huge round spiked ball, no long spear, no golden fittings or invented symbols.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 59,
+        "sha256": "71933f67c957008113a4aab7209d08b74c85e3e844a3afeba8a2b1d24d0a1acc",
+        "notes": "Original inventory source identity; private paths/pixels omitted. Exact presented source was inspected before new generation."
+      },
+      "referencePresentedSha256": "71817cbdb3b764720c02b5458f3002a889c38e19bd202bfbf0810a40579e995a",
+      "referenceVisualInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-thumbnail-proposal"
+      ],
+      "inferredParts": [
+        "Hidden reverse surfaces, depth and thickness",
+        "Fasteners, exact material microtexture and dimensions"
+      ],
+      "review": {
+        "status": "inspected-candidate",
+        "approval": false,
+        "limitations": [
+          "Radial head profile, tier depths and handle material microtexture are inferred from low-resolution pixels.",
+          "Side is interpreted as another radial aspect of the same flanged head."
+        ]
+      },
+      "notes": "Candidate reference-backed concept only; no model, final runtime icon, attachment or installation. Views and new HD thumbnail show one proposed object, not measured geometry."
+    },
+    {
+      "productionId": "item.design.base.maul",
+      "conceptId": "item.design.base.maul.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/maul-r1.png",
+      "sha256": "6f294243452655d3f7247038d9d5ef28c34a299d1fe62232622ce789d0dfec9c",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D single-item candidate modelling turnaround, not final game icon.\nThe first input image is the original licensed inventory sprite, PRIMARY silhouette/proportion/palette reference ONLY. The second input image is the generated Claymore sheet, LAYOUT and neutral material presentation ONLY; never include its sword.\nCreate one coherent HD sheet showing the exact SAME object in FRONT, true SIDE thickness, BACK (correctly reverse any asymmetric outline), and 3-4 perspective, plus one small ICON inset newly rendered in crisp HD from the SAME object. All views share identical proportions/geometry/materials, whole item visible and spaced cleanly. Plain charcoal gray background, neutral soft WHITE studio illumination without colored light or warm cast, realistic worn medieval materials, restrained surface wear and minimum contact shadows. Hidden reverse surfaces, thickness and exact fine material details are conservative inferred reconstruction.\nText only item TITLE and labels FRONT / SIDE / BACK / 3-4 / ICON; small footer CANDIDATE - REVERSE AND THICKNESS INFERRED. Never paste/reproduce/trace the source sprite, its image rectangle, reference board or pixel art into output. No characters/hands/scenery, extra objects, magical glow, flames, invented jewels/runes/skulls or watermark. Thumbnail is NEW HD concept depiction, not a runtime icon.\nMAUL. Production ID item.design.base.maul, ICURS122. Match actual sprite: large horizontal silver-gray rectangular steel hammer block, short rounded corners, centered atop a long straight pale olive-tan wooden shaft. On the broad front of head a circular recessed/raised round boss with four chunky quartered silver lobes separated by dark grooves; no invented skull or crest. Head has a low round silver top cap. Upper/middle wooden shaft has a short red leather wrap segment with red bands above and below ONE muted blue-gray/lavender band centered on it. Rest shaft exposed tan wood. Bottom grip has several broad silver steel collars stacked with dark olive-brown wood/leather gaps between them, ending in a simple blunt silver round ferrule. Preserve reference silver/tan/red/single blue band palette, huge block head relative thin straight shaft; no spiked ball, no golden ornament.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 122,
+        "sha256": "78e2f5de530179081b5644c48ea8985050be501e203185c28545b84f28f2c43b",
+        "notes": "Original inventory source identity; private paths/pixels omitted. Exact presented source was inspected before new generation."
+      },
+      "referencePresentedSha256": "411ee8d67e96277bf2a0c4203011171a40d3d1bdbb290cca56ec5602df27d6f5",
+      "referenceVisualInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-thumbnail-proposal"
+      ],
+      "inferredParts": [
+        "Hidden reverse surfaces, depth and thickness",
+        "Fasteners, exact material microtexture and dimensions"
+      ],
+      "review": {
+        "status": "inspected-candidate",
+        "approval": false,
+        "limitations": [
+          "Round head boss lobe count and exact relief are ambiguous at native resolution; candidate shows a three-lobed interpretation.",
+          "Single blue-gray handle band and surrounding red bands retained; rear relief is inferred."
+        ]
+      },
+      "notes": "Candidate reference-backed concept only; no model, final runtime icon, attachment or installation. Views and new HD thumbnail show one proposed object, not measured geometry."
+    },
+    {
+      "productionId": "item.design.base.morning-star",
+      "conceptId": "item.design.base.morning-star.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/morning-star-r1.png",
+      "sha256": "99b35c194111f38484bedc4f18e7b8c4b5538c1490c8a16bfe88a84ec8c6bab1",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D single-item candidate modelling turnaround, not final game icon.\nThe first input image is the original licensed inventory sprite, PRIMARY silhouette/proportion/palette reference ONLY. The second input image is the generated Claymore sheet, LAYOUT and neutral material presentation ONLY; never include its sword.\nCreate one coherent HD sheet showing the exact SAME object in FRONT, true SIDE thickness, BACK (correctly reverse any asymmetric outline), and 3-4 perspective, plus one small ICON inset newly rendered in crisp HD from the SAME object. All views share identical proportions/geometry/materials, whole item visible and spaced cleanly. Plain charcoal gray background, neutral soft WHITE studio illumination without colored light or warm cast, realistic worn medieval materials, restrained surface wear and minimum contact shadows. Hidden reverse surfaces, thickness and exact fine material details are conservative inferred reconstruction.\nText only item TITLE and labels FRONT / SIDE / BACK / 3-4 / ICON; small footer CANDIDATE - REVERSE AND THICKNESS INFERRED. Never paste/reproduce/trace the source sprite, its image rectangle, reference board or pixel art into output. No characters/hands/scenery, extra objects, magical glow, flames, invented jewels/runes/skulls or watermark. Thumbnail is NEW HD concept depiction, not a runtime icon.\nMORNING STAR. Production ID item.design.base.morning-star, ICURS63. Match actual sprite: ONE compact dark charcoal iron near-spherical/angular ball head FIXED directly to straight haft, no chain. Several small sharp silver-gray spikes around the head, including one upright pointed top cap; diagonal forged ridge/band across the black head. Short dark metal neck and collar under ball. Upper shaft segment deep burgundy-red, narrow and smooth; a silver collar separates it from lower dark olive-brown spiral wrapped/riveted grip. Dark lower grip has tiny dull-gold accents, not blue. Another narrow silver band and a modest round faceted silver steel pommel at bottom. Preserve slender silhouette, compact head and subdued silver/black/red/olive palette. No large ornate star-shaped gold head, no dangling straps.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 63,
+        "sha256": "a74b48114f72d473b961fe7804953066a3fa9bc5cd9237ab1186fbc5d1ca5c8c",
+        "notes": "Original inventory source identity; private paths/pixels omitted. Exact presented source was inspected before new generation."
+      },
+      "referencePresentedSha256": "a7a3ac04b39c4267c60506f7e010d21904e5d59bbcce6330f51182036fc87186",
+      "referenceVisualInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-thumbnail-proposal"
+      ],
+      "inferredParts": [
+        "Hidden reverse surfaces, depth and thickness",
+        "Fasteners, exact material microtexture and dimensions"
+      ],
+      "review": {
+        "status": "inspected-candidate",
+        "approval": false,
+        "limitations": [
+          "Spike count, diagonal rib topology and backside arrangement are proposed; no exact native pixel measurements are claimed."
+        ]
+      },
+      "notes": "Candidate reference-backed concept only; no model, final runtime icon, attachment or installation. Views and new HD thumbnail show one proposed object, not measured geometry."
+    },
+    {
+      "productionId": "item.design.base.spiked-club",
+      "conceptId": "item.design.base.spiked-club.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/spiked-club-r1.png",
+      "sha256": "873749cfd9ec8923620b12bff47f4607a2843c1414c9f53e6c4af9c545f861e6",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D single-item candidate modelling turnaround, not final game icon.\nThe first input image is the original licensed inventory sprite, PRIMARY silhouette/proportion/palette reference ONLY. The second input image is the generated Claymore sheet, LAYOUT and neutral material presentation ONLY; never include its sword.\nCreate one coherent HD sheet showing the exact SAME object in FRONT, true SIDE thickness, BACK (correctly reverse any asymmetric outline), and 3-4 perspective, plus one small ICON inset newly rendered in crisp HD from the SAME object. All views share identical proportions/geometry/materials, whole item visible and spaced cleanly. Plain charcoal gray background, neutral soft WHITE studio illumination without colored light or warm cast, realistic worn medieval materials, restrained surface wear and minimum contact shadows. Hidden reverse surfaces, thickness and exact fine material details are conservative inferred reconstruction.\nText only item TITLE and labels FRONT / SIDE / BACK / 3-4 / ICON; small footer CANDIDATE - REVERSE AND THICKNESS INFERRED. Never paste/reproduce/trace the source sprite, its image rectangle, reference board or pixel art into output. No characters/hands/scenery, extra objects, magical glow, flames, invented jewels/runes/skulls or watermark. Thumbnail is NEW HD concept depiction, not a runtime icon.\nSPIKED CLUB. Production ID item.design.base.spiked-club, ICURS70. Match actual sprite: rustic long slightly crooked olive-tan WOODEN club with an elongated uneven swollen striking knob at top, a narrower unwrapped curving wooden neck below, then a lower straight dark olive-brown grip. Several short thin silver iron nails/spikes project laterally left/right from the upper swollen wood only; irregular spacing, roughly three on each visible side, not enormous fantasy cones. Preserve asymmetrical crooked branch silhouette and grain, no rectangular plank. Small gray steel band/collar around midline just above grip; lower grip dark olive-brown leather/cord and narrow steel wire bands including diagonal winding, blunt dark wooden bottom with a diagonal silver band nearby. No gold, no red wrapping, no skull or studded metal ball.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 70,
+        "sha256": "806d2a10bd515cc5fb7742e91e88c0b2d0dbdec6f5f5660922fca3d8b2dc1674",
+        "notes": "Original inventory source identity; private paths/pixels omitted. Exact presented source was inspected before new generation."
+      },
+      "referencePresentedSha256": "826d5f5f87543a2840f2bc0a8afd30a98062ab1f7f900a49d713adabfa66e159",
+      "referenceVisualInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-thumbnail-proposal"
+      ],
+      "inferredParts": [
+        "Hidden reverse surfaces, depth and thickness",
+        "Fasteners, exact material microtexture and dimensions"
+      ],
+      "review": {
+        "status": "inspected-candidate",
+        "approval": false,
+        "limitations": [
+          "Irregular wood contour, spike count and wire attachment are reconstructed; later master needs full silhouette/fastener review."
+        ]
+      },
+      "notes": "Candidate reference-backed concept only; no model, final runtime icon, attachment or installation. Views and new HD thumbnail show one proposed object, not measured geometry."
+    },
+    {
+      "productionId": "item.design.base.war-hammer",
+      "conceptId": "item.design.base.war-hammer.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/war-hammer-r1.png",
+      "sha256": "9f16904d4d3af627235b489b23fd0c324494be1aa614a4e75bb1a6728cf32d9d",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D single-item candidate modelling turnaround, not final game icon.\nThe first input image is the original licensed inventory sprite, PRIMARY silhouette/proportion/palette reference ONLY. The second input image is the generated Claymore sheet, LAYOUT and neutral material presentation ONLY; never include its sword.\nCreate one coherent HD sheet showing the exact SAME object in FRONT, true SIDE thickness, BACK (correctly reverse any asymmetric outline), and 3-4 perspective, plus one small ICON inset newly rendered in crisp HD from the SAME object. All views share identical proportions/geometry/materials, whole item visible and spaced cleanly. Plain charcoal gray background, neutral soft WHITE studio illumination without colored light or warm cast, realistic worn medieval materials, restrained surface wear and minimum contact shadows. Hidden reverse surfaces, thickness and exact fine material details are conservative inferred reconstruction.\nText only item TITLE and labels FRONT / SIDE / BACK / 3-4 / ICON; small footer CANDIDATE - REVERSE AND THICKNESS INFERRED. Never paste/reproduce/trace the source sprite, its image rectangle, reference board or pixel art into output. No characters/hands/scenery, extra objects, magical glow, flames, invented jewels/runes/skulls or watermark. Thumbnail is NEW HD concept depiction, not a runtime icon.\nWAR HAMMER. Production ID item.design.base.war-hammer, ICURS121. Match actual sprite: small wide horizontal dark iron/steel hammer head. Central socket is a rectangular silver-edged box with a black inset and tiny abstract silver block shapes, not readable text or heraldic runes. LEFT is a short pointed faceted pyramidal spike/poll; RIGHT is a short blunt faceted silver striking block. Tiny steel top pin above central-left head, short gray steel socket neck below. Long slender straight upper haft dark brown wood, lower half wrapped bright deep RED leather. Small dull brass collar above a silver faceted bulb pommel. A RED leather wrist lanyard is tied below pommel and hangs to the RIGHT in loose oval loop, preserve in all views with reverse orientation mirrored. Compact head relative long haft, no double axe blades, no generic big sledge block. Brass only minimal collar, not gold hammer.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 121,
+        "sha256": "404876b0f9e2fb55d6818bb16c7ab1f404dc5653f8e58889e8925fbba8ddc65b",
+        "notes": "Original inventory source identity; private paths/pixels omitted. Exact presented source was inspected before new generation."
+      },
+      "referencePresentedSha256": "a6c14f7fa6d2e09927e43b98927a6c9806e4fae67fce808e8a1fbf5733923931",
+      "referenceVisualInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-thumbnail-proposal"
+      ],
+      "inferredParts": [
+        "Hidden reverse surfaces, depth and thickness",
+        "Fasteners, exact material microtexture and dimensions"
+      ],
+      "review": {
+        "status": "inspected-candidate",
+        "approval": false,
+        "limitations": [
+          "Tiny central inset pattern is interpretive, not a readable rune or gameplay marking.",
+          "Flexible wrist-loop drape varies between views; exact rig/attachment remains separate."
+        ]
+      },
+      "notes": "Candidate reference-backed concept only; no model, final runtime icon, attachment or installation. Views and new HD thumbnail show one proposed object, not measured geometry."
+    }
+  ],
+  "handoff": {
+    "rootAction": "Consolidate candidate entries and update gallery/queue only after validation. Devlog labels: concept candidate or explicit family reuse proposal; never publish private sprites.",
+    "limits": "No approval/selection/installation/model/runtime icon. Reverse geometry inferred; same master/material gate still required."
+  }
+}

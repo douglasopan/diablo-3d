@@ -24,6 +24,17 @@
 
 namespace devilution {
 
+/** Limit imported HUD font/color styling to a drawing scope; geometry is native. */
+class ScopedD3dHudThemeText {
+public:
+	explicit ScopedD3dHudThemeText(bool enable = true);
+	~ScopedD3dHudThemeText();
+	ScopedD3dHudThemeText(const ScopedD3dHudThemeText &) = delete;
+	ScopedD3dHudThemeText &operator=(const ScopedD3dHudThemeText &) = delete;
+private:
+	bool previous_;
+};
+
 enum GameFontTables : uint8_t {
 	GameFont12,
 	GameFont24,

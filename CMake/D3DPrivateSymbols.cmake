@@ -1,0 +1,78 @@
+# Prepared additive module; root includes this only after all owned targets exist.
+# Never invokes the compiler, creates an executable or installs/packages a PDB.
+include_guard(GLOBAL)
+
+function(_d3d_owned_source_targets directory output)
+  get_property(_targets DIRECTORY "${directory}" PROPERTY BUILDSYSTEM_TARGETS)
+  get_property(_children DIRECTORY "${directory}" PROPERTY SUBDIRECTORIES)
+  foreach(_child IN LISTS _children)
+    _d3d_owned_source_targets("${_child}" _child_targets)
+    list(APPEND _targets ${_child_targets})
+  endforeach()
+  set(${output} "${_targets}" PARENT_SCOPE)
+endfunction()
+
+function(d3d_enable_private_symbols normal_executable)
+  if(NOT MSVC OR NOT CMAKE_BUILD_TYPE STREQUAL "Release")
+    message(FATAL_ERROR "Private symbols support requires existing MSVC Release configuration")
+  endif()
+  if(NOT D3D_SOURCE_CLOSURE_SHA256 MATCHES "^[0-9a-f]+$")
+    message(FATAL_ERROR "Frozen source closure is required")
+  endif()
+  string(LENGTH "${D3D_SOURCE_CLOSURE_SHA256}" _closure_length)
+  if(NOT _closure_length EQUAL 64)
+    message(FATAL_ERROR "Frozen source closure must contain 64 lowercase hex characters")
+  endif()
+  if(NOT TARGET "${normal_executable}")
+    message(FATAL_ERROR "Normal executable target is missing")
+  endif()
+  # Only root's own Source targets. Imported/vendor targets retain their settings.
+  _d3d_owned_source_targets("${PROJECT_SOURCE_DIR}/Source" _owned_targets)
+  list(APPEND _owned_targets "${normal_executable}" ${ARGN})
+  list(REMOVE_DUPLICATES _owned_targets)
+  foreach(_target IN LISTS _owned_targets)
+    get_target_property(_imported "${_target}" IMPORTED)
+    get_target_property(_type "${_target}" TYPE)
+    if(_imported OR _type STREQUAL "INTERFACE_LIBRARY" OR _type STREQUAL "UTILITY")
+      continue()
+    endif()
+    # CMP0141 is already NEW before project() in the integrated root.
+    if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.25")
+      set_property(TARGET "${_target}" PROPERTY MSVC_DEBUG_INFORMATION_FORMAT ProgramDatabase)
+    else()
+      target_compile_options("${_target}" PRIVATE /Zi)
+    endif()
+    target_compile_options("${_target}" PRIVATE /FS)
+    # Separate compiler PDBs, retained privately for successful full linking.
+    set_target_properties("${_target}" PROPERTIES
+      COMPILE_PDB_NAME "d3d-${_target}"
+      COMPILE_PDB_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/private-symbols/compiler")
+    if(_type STREQUAL "EXECUTABLE" OR _type STREQUAL "SHARED_LIBRARY" OR _type STREQUAL "MODULE_LIBRARY")
+      target_link_options("${_target}" PRIVATE /DEBUG:FULL "/PDBALTPATH:%_PDB%"
+        /OPT:REF /OPT:ICF /INCREMENTAL:NO)
+      # Linker PDB remains in integrated-build/private-symbols. No install rule.
+      set_target_properties("${_target}" PROPERTIES PDB_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/private-symbols")
+    endif()
+  endforeach()
+  set(_diagnostics "${PROJECT_SOURCE_DIR}/Source/engine/render/d3d_local_diagnostics.cpp")
+  if(NOT EXISTS "${_diagnostics}")
+    message(FATAL_ERROR "Diagnostics implementation must be integrated first")
+  endif()
+  # Respect the R1/S2 source-local definition; refuse a conflicting definition.
+  get_source_file_property(_definitions "${_diagnostics}" DIRECTORY "${PROJECT_SOURCE_DIR}/Source" COMPILE_DEFINITIONS)
+  set(_expected "D3D_SOURCE_CLOSURE_SHA256=\"${D3D_SOURCE_CLOSURE_SHA256}\"")
+  set(_found FALSE)
+  foreach(_definition IN LISTS _definitions)
+    if(_definition MATCHES "^D3D_SOURCE_CLOSURE_SHA256=")
+      if(NOT _definition STREQUAL _expected)
+        message(FATAL_ERROR "Conflicting diagnostics source closure definition")
+      endif()
+      set(_found TRUE)
+    endif()
+  endforeach()
+  if(NOT _found)
+    set_property(SOURCE "${_diagnostics}" DIRECTORY "${PROJECT_SOURCE_DIR}/Source"
+      APPEND PROPERTY COMPILE_DEFINITIONS "${_expected}")
+  endif()
+  # Does not set DISABLE_LTO, IPO, optimization, runtime-library, assets or saves.
+endfunction()

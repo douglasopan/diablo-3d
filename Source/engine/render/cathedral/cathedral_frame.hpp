@@ -71,12 +71,11 @@ struct FrameTriangle {
 
 /** Pure presentation bridge over the accepted live-map adapter. Camera collision
  * retains every selected physical triangle, including geometry hidden by fog.
- * Full active SOL blending uses the native palette operator over the technical
- * geometry. Native diagonal MIN masks have no corresponding module UVs: their
- * complete technical wall volume is conservatively omitted from drawing, while
- * every physical triangle and its native provenance remain in this frame.
- * Floors, stairs and door objects remain opaque. Special CLX overlays retain
- * their independent native TransList gate and are not inferred from SOL.
+ * Native SOL/TransList policies remain recorded for provenance and native
+ * comparisons. The 3D renderer draws architecture opaquely, including native
+ * foreground cutaways, preserving texture/CLX coverage for actual openings.
+ * Floors, stairs and door objects stay opaque. No native SOL/TransList, collision
+ * or game state is changed by that presentation rule.
  */
 struct PilotFrame {
 	std::vector<FrameTriangle> triangles;

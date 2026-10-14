@@ -4,6 +4,8 @@ Revision **2026.10.11-r1** · **11 October 2026, America/Sao_Paulo**. Read-only 
 
 Findings distinguish observed calls/data from performance hypotheses. A symbol search alone does not prove safe deletion across tools, platform conditionals or alternate builds. The transcribed phrase “código buffer” did not authorize deleting GPU buffers.
 
+**Operational follow-up r2:** findings below retain their r1 inspection scope. The clean C1 candidate now has fresh normal EXE `4391a5…`, sealed Source/build closure and R26 PASS **245,750**; it was delivered as a separate local review. A05/A06 gained first-refusal and recovery witnesses; A07 gained common masonry, independent ceiling, textured stairs and a closed candelabrum proxy; A12 gained native inventory/injected-focus and held/released native-tick witnesses; A13 now has configure/compile/link/runtime receipts. These bounded results update preparation status, not full human gameplay, target/UI coverage, sustained FPS, modularity or deletion safety. See the [r2 checkpoint](CHECKPOINT-2026-10-11.md); no broad cleanup was performed.
+
 | ID / finding | Evidence in the inspected source | Impact and next bounded action |
 | --- | --- | --- |
 | A01 — Preview cadence differs | Native `Source/options.cpp` default Speed 20; `multi.cpp` assigns `nTickRate`/tick delay. Read-only profiles: habitual 32, R3 preview 20; Run in Town off in both. Eight movement/timing sources are byte-identical between R3 and the frozen habitual baseline. | Concrete configuration discrepancy, not evidence of imported movement logic. Preserve current preview/profile; explicitly use 32 in the next isolated profile and measure distance/time with the same animation/tick context. Nominal ratio 0.625 is not a benchmark. |
@@ -61,7 +63,7 @@ Keep the known-good baseline and current session intact. Pin the actual launcher
 
 No runtime removal has enough cross-build evidence in this pass. In particular, CPU/native recovery, GPU resident buffers, native command/network plumbing, save serializers, UI recovery and prepared asset tools have purposes outside one visible camera scene. No broad cleanup or automatic deletion is justified.
 
-The immediate safe corrections are documentary: consistent build qualification, Home/F4 behavior, active Meshy OFF status, exact Speed-profile discrepancy, and explicit ownership/lifecycle contracts. Small future code removals require an exact obsolete caller/flag finding, a candidate-only patch and appropriate native/web/save/net tests. Keep any legitimate alternative backend.
+In the original r1 audit, the immediate corrections were documentary: build qualification, Home/F4 behavior, Meshy OFF, Speed-profile discrepancy and ownership/lifecycle contracts. The subsequent bounded clean-candidate work is recorded separately above and in the r2 checkpoint. Small future code removals still require an exact obsolete caller/flag finding, a candidate-only patch and appropriate native/web/save/net tests. Keep legitimate alternative backends.
 
 ## Next fixes in the existing queue
 

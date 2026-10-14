@@ -143,6 +143,33 @@ void DrawLargeSpellIcon(const Surface &out, Point position, SpellID spell)
 	ClxDrawTRN(out, position, (*LargeSpellIcons)[GetSpellIconFrame(spell)], SplTransTbl);
 }
 
+std::expected<HdSpritePixels, std::string> LoadLargeSpellIconHdPixels(SpellID spell)
+{
+	if (!LargeSpellIcons) return HdSpritePixels {};
+	auto pixels = LoadHdSpritePixels((*LargeSpellIcons)[GetSpellIconFrame(spell)]);
+	if (!pixels) return std::unexpected(pixels.error());
+	for (uint8_t &color : pixels->pixels) color = SplTransTbl[color];
+	return pixels;
+}
+
+std::expected<std::vector<uint32_t>, std::string> LoadLargeSpellIconRgba(SpellID spell)
+{
+	if (!LargeSpellIcons) return std::vector<uint32_t> {};
+	const auto sprite = (*LargeSpellIcons)[GetSpellIconFrame(spell)];
+	auto rgba = LoadHdSpriteRgba(sprite);
+	if (!rgba || rgba->empty()) return rgba;
+	auto indices = LoadHdSpritePixels(sprite);
+	if (!indices || indices->pixels.size() != rgba->size()) return std::unexpected("HD spell RGB/translation dimensions disagree");
+	for (size_t i = 0; i < rgba->size(); ++i) {
+		const uint8_t code = indices->pixels[i];
+		if (SplTransTbl[code] == code) continue;
+		const SDL_Color color = logical_palette[SplTransTbl[code]];
+		(*rgba)[i] = ((*rgba)[i] & 0xFF000000U) | static_cast<uint32_t>(color.r) << 16
+		    | static_cast<uint32_t>(color.g) << 8 | color.b;
+	}
+	return rgba;
+}
+
 void DrawSmallSpellIcon(const Surface &out, Point position, SpellID spell)
 {
 #ifdef UNPACKED_MPQS

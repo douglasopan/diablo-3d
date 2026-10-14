@@ -95,14 +95,16 @@ void InitKeymapActions();
 void SetCursorPos(Point position);
 /** Captured first-person input uses the logical world viewport center. */
 bool IsTownFirstPersonInputCaptured();
-/** Eligible keyboard movement in FPP or Third; Third does not capture mouse. */
+/** Hard-safe keyboard movement in Third, or a captured/legitimate UI-released
+ * FPP session. Nontextual panels keep movement; text/modal/device/failure gates do not. */
 bool IsTownCameraMovementInputActive();
 Point GetTownFirstPersonPointer(Point absolute);
 Direction GetTownFirstPersonMoveDirection();
 /** Release capture, owned arrows and only a walk issued by this adapter. */
 void SuspendTownFirstPersonInput();
 void StopTownFirstPersonWalk();
-/** Native interaction takes ownership before its command is dispatched. */
+/** Native world interaction takes ownership before its command is dispatched.
+ * UI pointer pairs use their own latch and must not invoke this cancellation. */
 void CancelTownFirstPersonWalk();
 
 /** Diagnostic seam replaces only SDL capture/focus/keyboard services.
@@ -123,6 +125,16 @@ void SetTownFirstPersonInputServicesForDiagnostics(const TownFirstPersonInputSer
 /** Calls the exact live-session handler and synchronization used by gameplay. */
 void DispatchGameEventForDiagnostics(const SDL_Event &event, uint16_t modState);
 void SyncFirstPersonInputForDiagnostics();
+/** Raw adapter state only: no eligibility checks, SDL queries or input dispatch. */
+struct TownViewInputStateDiagnostic {
+	int firstPersonPhase = 0, thirdPersonPhase = 0;
+	uint8_t firstPersonKeys = 0, thirdPersonKeys = 0;
+	bool leftDown = false, active = false;
+};
+TownViewInputStateDiagnostic GetTownViewInputStateForDiagnostics() noexcept;
+/** Calls the normal visual-clock/advance gate without drawing; returned seconds
+ * are the actual elapsed clock admitted to AdvanceTownViewCamera. */
+float AdvanceTownCameraForDrawForDiagnostics();
 /** Same post-draw queue flush used by the live game loop. */
 void FlushFirstPersonClicksForDiagnostics();
 EventHandler GetGameEventHandlerForDiagnostics();
@@ -159,3 +171,12 @@ extern bool DebugDisableNetworkTimeout;
 extern GameLogicStep gGameLogicStep;
 
 } // namespace devilution
+
+namespace devilution {
+bool IsDungeon3DActionContextForRepeat();
+bool CanRepeatDungeon3DWorldAction();
+/** Refreshes standing attack aim from the current rendered frame. No command,
+ * movement or damage is issued; callers retain native action/cadence guards. */
+bool RefreshDungeon3DStandingAttackTarget();
+bool RefreshDungeon3DStandingSpellTarget();
+}

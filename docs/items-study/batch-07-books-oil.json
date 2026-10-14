@@ -1,0 +1,253 @@
+{
+  "format": "d3d.item-concept-art",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "scope": "Books/oil batch: three physical cover-family candidates and one physical oil-flask candidate only. Global coverage, queue and selected revisions are not changed here.",
+  "catalogSha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d",
+  "generationTool": "built-in image_gen.imagegen",
+  "generationCalls": 4,
+  "postProcessing": "none; original generated PNG bytes copied unchanged after confirming each destination absent",
+  "originalGameImagesIncluded": false,
+  "visualApproval": false,
+  "runtimeInstalled": false,
+  "variantPolicy": "Três capas físicas e um frasco de óleo. Não gerar uma malha/livro por magia nem dez frascos por óleo; não letrar magias ou rótulos individuais.",
+  "summary": {
+    "conceptCandidatesInThisFile": 4,
+    "modelsGenerated": 0,
+    "runtimeIconsGenerated": 0
+  },
+  "entries": [
+    {
+      "productionId": "item.design.base.spellbook-blue",
+      "conceptId": "item.design.base.spellbook-blue.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-thumbnail"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "postProcessing": "none; original generated PNG bytes copied unchanged",
+      "image": "assets/concept-art/items/r1/spellbook-blue-r1.png",
+      "sha256": "4e64cbc613182e6b748be850461b9dc359eda52b4768e126d183cd0a82357819",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "byteCount": 2214183,
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate physical spellbook modeling reference, not a runtime icon.\nInput image is the PRIVATE original ICURS_BOOK_BLUE 88 for item.design.base.spellbook-blue. Use its actual book silhouette and colors; do not generate a generic ornate magic tome or individual spell edition.\nCreate a clean realistic HD turnaround sheet of ONE SAME CLOSED book in FRONT cover view, SIDE spine/thickness view, BACK rear-cover view and THREE-QUARTER view matching the source's closed-book angle, plus a small NEW HD inventory-composition thumbnail. Whole book visible, well separated on charcoal-gray backdrop, neutral soft studio light, restrained realistic leather/board/paper/metal texture. Only labels SPELLBOOK BLUE / FRONT / SIDE / BACK / 3-4 / ICON.\nPreserve the source identity: muted slate/indigo BLUE cover, thick rectangular closed binding, dark blue spine on the left bound edge, slightly raised/edged cover rim, worn pale-blue shallow horizontal embossed markings across the front center, ochre/pale cream page block, dull gold/brass corner protectors at the visible outer corners, and a narrow DARK RED ribbon bookmark hanging from the lower page edge. Not bright cobalt, not neon, not gold all over. The source front-center marks are indistinct texture/embossing: do not invent readable letters, spell names or a lightning symbol. The BACK and unseen corners are inferred; use a restrained plain matching blue back rather than inventing new magical decoration. Candidate materials are proposed from source colors, not recovered historical fact.\nAll views rotate the SAME volume with matching thickness, cover/page dimensions, spine attachment, protector geometry and red ribbon position/length. SIDE must be the genuine narrow bound-spine profile; BACK is the opposite cover and must place the spine/ribbon naturally. THREE-QUARTER and the small thumbnail show this same closed book and red marker, not a second design. Every inset is NEW realistic HD art, never source sprite pixels.\nNo open pages, floating pages, glow, gems, skulls, decorative chains, added clasps/cages, readable magic lettering, individual spell names, hands, scenery, alternate variants or source-pixel inset. This is only the blue physical cover family; it does not illustrate or letter every lightning spell.",
+      "referenceHash": "e538a7e6363e9f7a3cbb43eab1c02c7adcbc33773d3e9c73f9e81422c6675bd7",
+      "reference": {
+        "cursorId": 88,
+        "sha256": "e538a7e6363e9f7a3cbb43eab1c02c7adcbc33773d3e9c73f9e81422c6675bd7",
+        "availability": "local-private",
+        "notes": "Fonte: livro fechado azul-ardósia/índigo, lombada escura, cantos dourados, páginas ocres e marcador vermelho; marcas centrais indistintas. Referência 6x inspecionada antes da chamada; pixels originais não foram incorporados."
+      },
+      "sourceViewCount": 1,
+      "variantScope": "Uma família física de capa azul; as magias de raio permanecem variantes de dados, sem lettering individual.",
+      "inferredAreas": [
+        "Verso liso, espessura, nervuras da lombada, relevo central, rebites e construção dos cantos são reconstruções.",
+        "Couro, papel e latão são interpretações materiais; o relevo não recupera letras originais."
+      ],
+      "coherenceReview": {
+        "status": "pending-review",
+        "coherentAcrossViewsVerified": false,
+        "observed": "Capa azul-ardósia, cantos dourados, páginas ocres, relevo abstrato e marcador vermelho preservados em FRONT/3-4/thumbnail; thumbnail HD novo.",
+        "pendingIssues": [
+          "O marcador vermelho não aparece abaixo de BACK, embora apareça nas outras vistas; reconciliar a continuidade da mesma fita e sua posição antes de modelar.",
+          "Revisar espessura, cantos e nervuras entre SIDE e 3-4; o relevo gerado não é leitura recuperada da fonte.",
+          "Confirmar enquadramento/legibilidade no footprint lógico nativo, sem criar um livro por magia."
+        ]
+      },
+      "notes": "Conceito candidato individual. Verso/espessura e detalhes inferidos; gates registrados antes do master 3D. Thumbnail novo HD é preview, não ícone runtime. Nenhuma magia/capa/rótulo individual foi letrada."
+    },
+    {
+      "productionId": "item.design.base.spellbook-red",
+      "conceptId": "item.design.base.spellbook-red.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-thumbnail"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "postProcessing": "none; original generated PNG bytes copied unchanged",
+      "image": "assets/concept-art/items/r1/spellbook-red-r1.png",
+      "sha256": "1300531ab4d9cd5d4ae2d7af5d1cc75128e252323c6ef2878eb231ff7632c9d8",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "byteCount": 2124720,
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate physical spellbook modeling reference, not a runtime icon.\nInput image is the PRIVATE original ICURS_BOOK_RED 87 for item.design.base.spellbook-red. Reconstruct THIS red source independently, not a recolored blue spellbook.\nProduce a clean realistic HD sheet of ONE SAME CLOSED rectangular book in FRONT cover view, SIDE spine/thickness view, BACK rear-cover view and THREE-QUARTER view near the original angle, plus a small NEW HD inventory-composition thumbnail. Whole objects separated, charcoal-gray background, neutral soft studio light, restrained real leather/board/paper/metal materials. Only labels SPELLBOOK RED / FRONT / SIDE / BACK / 3-4 / ICON.\nPreserve the source: dark muted BURGUNDY/russet RED covers and binding, worn low-relief red cover texture/indistinct central ornament, dull SILVER-GRAY protective corner pieces at the two conspicuous corners along the bound/spine-side edge, pale ochre/yellow page block, and a narrow dark BLUE ribbon bookmark hanging from the exposed lower page edge. The ribbon is blue and the corner pieces gray, NOT the red ribbon/gold corners of the blue book. Maintain the closed book's thick rectangular volume, dark red spine and raised cover border. Do not invent readable letters, spell names, fire glyphs, gems or elaborate new cover insignia; the native surface marks are indistinct and must stay subdued abstract wear/embossing. Unseen back/corners/thickness and materials are proposed reconstructions; use a plain restrained matching red rear cover.\nAll views must rotate the SAME single object, preserving dimensions, thickness, exact two-protector placement, blue ribbon attachment and length, binding and page block. Show the actual narrow spine in SIDE. BACK is the opposite cover: reverse the projected side of the spine/protectors naturally and keep the hanging blue marker present wherever its protruding tail is visible. THREE-QUARTER and ICON show this same closed red book with gray corners and blue ribbon. ICON is wholly NEW realistic HD art, never pasted pixels of the reference.\nNo open pages, readable spell lettering, individually named magic editions, ornate gold corners, red bookmark, glowing effects, chains, added clasps, hands, scenery, multiple variants or original source-pixel inset. This is the red physical cover family only; no lettering or separate book per fire spell.",
+      "referenceHash": "3040c375608cd7885d6ce54ca73e2da748c08a49d38d0330af227001411394e4",
+      "reference": {
+        "cursorId": 87,
+        "sha256": "3040c375608cd7885d6ce54ca73e2da748c08a49d38d0330af227001411394e4",
+        "availability": "local-private",
+        "notes": "Fonte: capa vermelho-burgundy, duas proteções cinza/prateadas junto à borda da lombada, páginas ocres e marcador azul. Referência 6x inspecionada antes da chamada; pixels originais não foram incorporados."
+      },
+      "sourceViewCount": 1,
+      "variantScope": "Uma família física de capa vermelha; as magias de fogo permanecem variantes de dados, sem lettering individual.",
+      "inferredAreas": [
+        "Verso, espessura, desenho exato das proteções e seu retorno ao lado oposto são reconstruções.",
+        "Couro/papel/metal e o emblema/relevo central abstrato são propostas; nenhuma letra ou magia individual foi recuperada."
+      ],
+      "coherenceReview": {
+        "status": "pending-review",
+        "coherentAcrossViewsVerified": false,
+        "observed": "Capa burgundy, proteções cinza na borda encadernada, páginas ocres e marcador azul presentes; sem recolorir o livro azul e com thumbnail HD novo.",
+        "pendingIssues": [
+          "Reconciliar o retorno/espessura das proteções metálicas em BACK e SIDE; a presença exata dos dois protetores precisa ser coerente no volume único.",
+          "O relevo central ficou mais definido que a pequena fonte; confirmar ou simplificar antes de produzir o master.",
+          "Confirmar marcador azul, encadernação e proporções em todas as vistas e no tamanho lógico nativo."
+        ]
+      },
+      "notes": "Conceito candidato individual. Verso/espessura e detalhes inferidos; gates registrados antes do master 3D. Thumbnail novo HD é preview, não ícone runtime. Nenhuma magia/capa/rótulo individual foi letrada."
+    },
+    {
+      "productionId": "item.design.base.spellbook-grey",
+      "conceptId": "item.design.base.spellbook-grey.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-thumbnail"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "postProcessing": "none; original generated PNG bytes copied unchanged",
+      "image": "assets/concept-art/items/r1/spellbook-grey-r1.png",
+      "sha256": "219c49c216b0211d82ff151b189a705606e5617e3ab25f8365bc7e71e6fda5cc",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "byteCount": 1967369,
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate physical spellbook modeling reference, not a runtime icon.\nInput image is the PRIVATE original ICURS_BOOK_GREY 86 for item.design.base.spellbook-grey. Reconstruct this source independently, not a recolored blue/red book.\nCreate a clean realistic HD concept board of ONE SAME CLOSED book in FRONT cover view, SIDE spine/thickness view, BACK rear-cover view and THREE-QUARTER view near the source angle, plus a small NEW HD inventory-composition thumbnail. Whole objects separated on charcoal-gray background, neutral soft studio light, realistic restrained wear and legible silhouette. Labels only SPELLBOOK GREY / FRONT / SIDE / BACK / 3-4 / ICON.\nPreserve the source's very dark CHARCOAL/BLACK-GRAY rectangular cover, gray raised/worn rim, shallow indistinct silver-gray central relief/embossing, dark gray spine, broad yellowed ochre/cream page block visible along the outer and lower edges, and narrow DARK RED ribbon bookmark hanging from the lower edge nearer the bound side. Keep this dark gray rather than white/silver, blue or red. Do not invent gold corner plates from the blue book or large silver corner armor from the red one: the grey source mainly shows dark covers and gray edges over the pale page block. The center marks are indistinct, not readable text; preserve subdued abstract worn relief without inventing a definite skull, jewel, pentagram or named spell. Back, thickness and exact relief construction are inferred; plain matching dark-gray rear cover.\nAll views must be rotations of the SAME book: coherent cover/page proportions, thickness, spine, raised rim, gray surface pattern and the SAME red bookmark attachment/length. SIDE exposes the real narrow spine. BACK reverses the spine's projected side and must retain the protruding red ribbon tail rather than omitting it. THREE-QUARTER and ICON must agree on this single dark book with pale pages and red marker. The ICON is wholly NEW realistic HD art, never source pixels.\nNo opened pages, glowing glyphs, individual spell names or readable magic letters, ornate extra metalwork, gems, chains, clasps, hands, scenery, alternate designs or pasted native sprite. This is only the grey physical cover family; it does not letter or generate every magic spell separately.",
+      "referenceHash": "da9122db6a5f90afc478736a3eeecfc356f33d4caa6c3673a581c644c1aba445",
+      "reference": {
+        "cursorId": 86,
+        "sha256": "da9122db6a5f90afc478736a3eeecfc356f33d4caa6c3673a581c644c1aba445",
+        "availability": "local-private",
+        "notes": "Fonte: capa quase preta/cinza-carvão, bordas e marcas cinzentas, páginas amarelo-ocres e marcador vermelho; sem cantos dourados evidentes. Referência 6x inspecionada antes da chamada; pixels originais não foram incorporados."
+      },
+      "sourceViewCount": 1,
+      "variantScope": "Uma família física de capa cinza; as magias dessa capa permanecem variantes de dados, sem lettering individual.",
+      "inferredAreas": [
+        "Verso, espessura, nervuras, contorno do relevo e sua construção são reconstruções.",
+        "Couro/board/papel e o motivo circular/faixas centrais gerados são propostas, não símbolo nem texto recuperado."
+      ],
+      "coherenceReview": {
+        "status": "pending-review",
+        "coherentAcrossViewsVerified": false,
+        "observed": "Capa escura, relevo cinza abstrato, páginas ocres e fita vermelha presentes; BACK reverte lombada/fita e o thumbnail é HD novo.",
+        "pendingIssues": [
+          "Comparar o relevo central e a largura da borda com a referência; seus contornos finos são inferidos.",
+          "Confirmar espessura, nervuras e posição/comprimento do marcador num volume único.",
+          "Revisar legibilidade do livro escuro no tamanho lógico de inventário e nas vistas de chão."
+        ]
+      },
+      "notes": "Conceito candidato individual. Verso/espessura e detalhes inferidos; gates registrados antes do master 3D. Thumbnail novo HD é preview, não ícone runtime. Nenhuma magia/capa/rótulo individual foi letrada."
+    },
+    {
+      "productionId": "item.design.base.oil-flask",
+      "conceptId": "item.design.base.oil-flask.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-thumbnail"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "postProcessing": "none; original generated PNG bytes copied unchanged",
+      "image": "assets/concept-art/items/r1/oil-flask-r1.png",
+      "sha256": "7d8481bac98b68b489a93d96d22698938924b413e2a6e7574fcdbdea6dee350c",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "byteCount": 1710906,
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate physical oil-flask modeling reference, not a runtime icon.\nInput image is the PRIVATE original ICURS_OIL 30 for item.design.base.oil-flask. Reconstruct this dark source independently; do not reuse a potion bottle or add a potion's gold cord.\nCreate a clean realistic HD board of ONE SAME flask in FRONT, true SIDE, BACK and THREE-QUARTER views, plus a smaller NEW HD inventory-composition thumbnail of the same concept. Whole object visible, separated on plain charcoal-gray background, neutral soft studio light, enough soft gray reflection to read its dark silhouette. Only labels OIL FLASK / FRONT / SIDE / BACK / 3-4 / ICON.\nPreserve the original silhouette and palette: long narrow straight dark-gray neck, small short DARK RED/BURGUNDY stopper with a pale gray lip, sloping triangular/conical shoulders broadening into a LOW WIDE flattened-base body. The body is a compact rounded-triangular/conical flask, not a sphere, not a square medicinal vial. Nearly BLACK contents or dark smoky glass dominate the body; gray glass edges/base and subdued ordinary highlights define it. The source has NO visible rope wrap, gold collar, hanging cord or paper label: do not add these. Propose smoky glass, a red-brown stopper and very dark oily contents as material interpretations only; exact contents, wall thickness and hidden back are inferred. Keep the oil dark and non-emissive.\nAll views rotate one coherent flask with identical neck length, stopper, body/base shape, content height and thickness. SIDE is a genuine profile of its proposed volume; BACK and 3-4 show the same construction. ICON is newly rendered detailed realistic HD, never original pixel-art.\nNo labels or individual oil names, spell letters/runes, colored liquids, gold bands/cords, ornate cagework, gems, flames/glow, hands/characters, scenery, extra variants or pasted source sprite. This is ONE physical oil-family flask; ten named oil effects remain data/label variants and are not ten new bottles or ten individually lettered designs.",
+      "referenceHash": "321070836ac959c0ea074626934180891be8d381ef716c7d6d592716acdf0ca1",
+      "reference": {
+        "cursorId": 30,
+        "sha256": "321070836ac959c0ea074626934180891be8d381ef716c7d6d592716acdf0ca1",
+        "availability": "local-private",
+        "notes": "Fonte: frasco de base larga/achatada e corpo triangular arredondado, pescoço comprido estreito, conteúdo/vidro escuro e stopper vermelho; sem corda ou rótulo visíveis. Referência 6x inspecionada antes da chamada; pixels originais não foram incorporados."
+      },
+      "sourceViewCount": 1,
+      "variantScope": "Uma família física de frasco para dez óleos nomeados; efeitos e futuros rótulos são variantes, sem gerar ou letrar cada óleo.",
+      "inferredAreas": [
+        "Profundidade, verso, espessura, menisco, vidro/óleo e mecanismo de fechamento são reconstruções a partir da silhueta/cor.",
+        "A fonte não comprova o material do stopper, a composição do conteúdo negro nem o aro metálico detalhado."
+      ],
+      "coherenceReview": {
+        "status": "pending-review",
+        "coherentAcrossViewsVerified": false,
+        "observed": "Corpo triangular/base achatada, pescoço longo, stopper burgundy e conteúdo negro preservados; nenhuma corda ou rótulo adicionados e thumbnail HD novo.",
+        "pendingIssues": [
+          "Confirmar profundidade mais estreita em SIDE, base e espessura em todas as vistas.",
+          "Comparar a transparência proposta e o nível do conteúdo com a referência; preto do sprite não prova vidro ou líquido específicos.",
+          "Manter futuros nomes/rótulos de óleo como variantes da família e confirmar legibilidade na célula lógica nativa."
+        ]
+      },
+      "notes": "Conceito candidato individual. Verso/espessura e detalhes inferidos; gates registrados antes do master 3D. Thumbnail novo HD é preview, não ícone runtime. Nenhuma magia/capa/rótulo individual foi letrada."
+    }
+  ]
+}

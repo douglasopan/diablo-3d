@@ -19,7 +19,9 @@
 #endif
 
 #include "DiabloUI/diabloui.h"
+#include "automap.h"
 #include "control/control.hpp"
+#include "control/d3d_floating_panels.hpp"
 #include "control/d3d_hud.hpp"
 #include "controls/control_mode.hpp"
 #include "controls/plrctrls.h"
@@ -29,6 +31,7 @@
 #include "engine/point.hpp"
 #include "engine/points_in_rectangle_range.hpp"
 #include "engine/render/clx_render.hpp"
+#include "engine/render/d3d_panel_presentation.hpp"
 #include "engine/render/primitive_render.hpp"
 #include "engine/render/town_view.hpp"
 #include "engine/trn.hpp"
@@ -475,6 +478,16 @@ ClxSprite GetInvItemSprite(int cursId)
 	return (*pCursCels2)[cursId - numSprites - 1];
 }
 
+std::optional<ClxSprite> TryGetInvItemSprite(int cursId)
+{
+	if (cursId <= 0 || !pCursCels) return std::nullopt;
+	const size_t frame = static_cast<size_t>(cursId);
+	const size_t count = pCursCels->numSprites();
+	if (frame <= count) return (*pCursCels)[frame - 1];
+	if (!pCursCels2 || frame - count > pCursCels2->numSprites()) return std::nullopt;
+	return (*pCursCels2)[frame - count - 1];
+}
+
 Size GetInvItemSize(int cursId)
 {
 	const ClxSprite sprite = GetInvItemSprite(cursId);
@@ -556,6 +569,7 @@ void DrawItem(const Item &item, const Surface &out, Point position, ClxSprite cl
 	const bool usable = !IsInspectingPlayer() ? item._iStatFlag : InspectPlayer->CanUseItem(item);
 	if (usable) {
 		ClxDraw(out, position, clx);
+		RecordD3dPanelItemRgba(out, position, clx);
 	} else {
 		ClxDrawTRN(out, position, clx, GetInfravisionTRN());
 	}
@@ -829,6 +843,23 @@ bool CheckPlayerState(const Point currentTile, const Player &myPlayer)
 
 bool CheckPanelsAndFlags(Rectangle /*mainPanel*/)
 {
+	// Inventory remains functional before the enclosing floating UI catches
+	// pointer input; its shared body origin also positions CheckInvHLight.
+	if (invflag && IsD3dPanelBodyPoint(UiPanels::Inventory, MousePosition)
+	    && (!ChatFlag || !IsPointOnD3dHud(MousePosition))) {
+		pcursinvitem = CheckInvHLight();
+		return true;
+	}
+	if (IsD3dHudSelected()) {
+		const auto panel = D3dFloatingPanelAt(MousePosition);
+		if (panel) {
+			if (*panel == UiPanels::Stash && IsStashOpen && IsD3dPanelBodyPoint(*panel, MousePosition))
+				pcursstashitem = CheckStashHLight(MousePosition);
+			if (*panel == UiPanels::Stash && IsVisualStoreOpen && IsD3dPanelBodyPoint(*panel, MousePosition))
+				pcursstoreitem = CheckVisualStoreHLight(MousePosition);
+			return true; // Foreground panel/header wins before any HUD or world hover.
+		}
+	}
 	if (IsPointOnD3dHud(MousePosition)) {
 		CheckPanelInfo();
 		return true;
@@ -836,22 +867,20 @@ bool CheckPanelsAndFlags(Rectangle /*mainPanel*/)
 	if (DoomFlag) {
 		return true;
 	}
-	if (invflag && GetRightPanel().contains(MousePosition)) {
-		pcursinvitem = CheckInvHLight();
-		return true;
-	}
-	if (IsStashOpen && GetLeftPanel().contains(MousePosition)) {
+	if (IsStashOpen && IsD3dPanelBodyPoint(UiPanels::Stash, MousePosition)) {
 		pcursstashitem = CheckStashHLight(MousePosition);
 	}
-	if (IsVisualStoreOpen && GetLeftPanel().contains(MousePosition)) {
+	if (IsVisualStoreOpen && IsD3dPanelBodyPoint(UiPanels::Stash, MousePosition)) {
 		pcursstoreitem = CheckVisualStoreHLight(MousePosition);
 	}
-	if (SpellbookFlag && GetRightPanel().contains(MousePosition)) {
+	if (SpellbookFlag && IsD3dPanelBodyPoint(UiPanels::Spell, MousePosition)) {
 		return true;
 	}
-	if (IsLeftPanelOpen() && GetLeftPanel().contains(MousePosition)) {
+	if (!IsD3dHudSelected() && IsLeftPanelOpen() && GetLeftPanel().contains(MousePosition)) {
 		return true;
 	}
+	if (IsD3dFloatingPanelPoint(MousePosition) || IsD3dMinimapPoint(MousePosition))
+		return true;
 	return false;
 }
 
@@ -903,6 +932,14 @@ bool CheckCursorActions(const Point currentTile, bool flipflag)
  */
 void CheckCursMove()
 {
+	ScopedD3dWindowPointer windowPointer;
+	if (IsD3dFloatingPanelPoint(MousePosition) || IsD3dMinimapPoint(MousePosition) || IsPointOnD3dHud(MousePosition)) {
+		// A projected item label behind a header/minimap must never outrank UI.
+		ResetItemlabelHighlighted();
+		ResetCursorInfo();
+		if (CheckPanelsAndFlags(GetMainPanel()))
+			return;
+	}
 	if (IsItemLabelHighlighted()) {
 		if (IsTownViewActive() && !IsTownViewNativePose()) {
 			// A label is an item target even over sky/another world surface.

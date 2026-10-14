@@ -10,6 +10,9 @@
 #include <span>
 
 #include "control/control.hpp"
+#include "control/d3d_hud.hpp"
+#include "control/d3d_floating_panels.hpp"
+#include "engine/render/d3d_panel_presentation.hpp"
 #include "controls/plrctrls.h"
 #include "cursor.h"
 #include "engine/clx_sprite.hpp"
@@ -425,7 +428,8 @@ void DrawVisualStore(const Surface &out)
 	if (!VisualStorePanelArt)
 		return;
 
-	RenderClxSprite(out, (*VisualStorePanelArt)[0], GetPanelPosition(UiPanels::Stash));
+	if(IsD3dHudSelected()) { DrawD3dFloatingPanelBody(out,UiPanels::Stash); DrawD3dFloatingPanelHeader(out,UiPanels::Stash); }
+	else RenderClxSprite(out, (*VisualStorePanelArt)[0], GetPanelPosition(UiPanels::Stash));
 
 	const Point panelPos = GetPanelPosition(UiPanels::Stash);
 	const UiFlags styleWhite = UiFlags::VerticalCenter | UiFlags::ColorWhite;
@@ -459,8 +463,9 @@ void DrawVisualStore(const Surface &out)
 	}
 	}
 
-	if (VisualStore.currentPage >= VisualStore.pages.size())
-		return;
+	if (VisualStore.currentPage >= VisualStore.pages.size()) {
+		SealD3dPanelBackplate(out); return;
+	}
 
 	const VisualStorePage &page = VisualStore.pages[VisualStore.currentPage];
 	std::span<Item> allItems = GetVisualStoreItems();
@@ -470,6 +475,7 @@ void DrawVisualStore(const Surface &out)
 	// First pass: draw item slot backgrounds
 	for (int y = 0; y < VisualStoreGridHeight; y++) {
 		for (int x = 0; x < VisualStoreGridWidth; x++) {
+			if(IsD3dHudSelected()) DrawD3dFloatingPanelFrame(out,{GetVisualStoreSlotCoord({x,y}),InventorySlotSizeInPixels});
 			const uint16_t itemPlusOne = page.grid[x][y];
 			if (itemPlusOne == 0)
 				continue;
@@ -511,6 +517,7 @@ void DrawVisualStore(const Surface &out)
 		const Rectangle repairBtnPos = { GetPanelPosition(UiPanels::Stash, VisualStoreButtonRect[RepairBtn].position), VisualStoreButtonRect[RepairBtn].size };
 		RenderClxSprite(out, (*VisualStoreRepairButtonArt)[VisualStoreButtonPressed == RepairBtn], repairBtnPos.position);
 	}
+	SealD3dPanelBackplate(out);
 }
 
 int16_t CheckVisualStoreHLight(Point mousePosition)

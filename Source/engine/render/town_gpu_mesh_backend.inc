@@ -105,6 +105,7 @@ struct Interpolated {
  nointerpolation float4 shadowParameters : TEXCOORD4;
  nointerpolation float2 fallback : TEXCOORD5;
  nointerpolation float2 volume : TEXCOORD7;
+ float4 authoredColor : TEXCOORD8;
  float3 clipDistance : SV_ClipDistance0;
 };
 Interpolated VS(Input input) {
@@ -151,6 +152,7 @@ Interpolated VS(Input input) {
  output.shadowParameters = materialReceiver;
  output.fallback = fallback.xy;
  output.volume = float2(-1, 1);
+ output.authoredColor = float4(1,1,1,1);
  if (control.y != 0) {
   float3 rawNormal = float3(dot(normalToWorld[0].xyz, input.normal), dot(normalToWorld[1].xyz, input.normal), dot(normalToWorld[2].xyz, input.normal));
   // Inverse-transpose values can be finite while their squared length overflows.
@@ -329,9 +331,11 @@ bool BindGeometryConstants(const Constants &constants)
 
 void BindGeometryMaterial(const CachedTexture &texture, bool preservePicking, bool paletteBlend = false)
 {
+	FrameRgbaLut = FrameRgbaLut || (texture.lut != nullptr && texture.lut->hasRgba);
 	ID3D11ShaderResourceView *resources[] { texture.texels->codes.get(), texture.texels->opacity.get(), texture.lut != nullptr ? texture.lut->view.get() : nullptr, ShadowResource.get(),
-		paletteBlend ? PriorIndexedColorView.get() : nullptr, paletteBlend ? PaletteBlendResource.get() : nullptr };
-	Context->PSSetShaderResources(0, 6, resources);
+		paletteBlend ? PriorIndexedColorView.get() : nullptr, paletteBlend ? PaletteBlendResource.get() : nullptr, RgbPaletteResource.get(), NativeLightResource.get(), texture.texels->unlit.get(),
+		texture.lut != nullptr ? texture.lut->rgbaView.get() : nullptr };
+	Context->PSSetShaderResources(0, 10, resources);
 	Context->OMSetBlendState(paletteBlend ? PaletteBlendWriteState.get() : BlendStates[preservePicking ? 1 : 0].get(), nullptr, 0xFFFFFFFFU);
 	Context->OMSetDepthStencilState(paletteBlend ? PaletteBlendDepthState.get() : DepthState.get(), 0);
 }

@@ -60,6 +60,20 @@ struct TownViewCathedralFallbackDiagnostic {
 static_assert(std::is_trivially_copyable_v<TownViewCathedralFallbackDiagnostic>);
 static_assert(std::is_nothrow_copy_assignable_v<TownViewCathedralFallbackDiagnostic>);
 
+/** First unintentional normal-C1 refusal in this game session. Kept independently
+ * of latest classification and log throttling, including across recovery/load.
+ * Fixed storage remains usable when the refusal itself is an allocation failure. */
+struct TownViewCathedralFirstRefusal {
+	bool present = false;
+	TownViewCathedralFallbackDiagnostic observation {};
+	int cameraMode = 0, firstPersonPhase = 0, thirdPersonPhase = 0, playerMode = -1;
+	float yaw = 0, pitch = 0, distance = 0, verticalFovDegrees = 0;
+	uint8_t firstPersonKeys = 0, thirdPersonKeys = 0;
+	bool leftDown = false, active = false, playerChangingLevel = false;
+};
+static_assert(std::is_trivially_copyable_v<TownViewCathedralFirstRefusal>);
+TownViewCathedralFirstRefusal GetTownViewCathedralFirstRefusal() noexcept;
+
 /** Owning native/SDL thread only. Copies numbers, never strings or allocations.
  * This API does not change resources, camera, eligibility, options or picking. */
 TownViewCathedralFallbackDiagnostic GetTownViewCathedralFallbackDiagnostic() noexcept;

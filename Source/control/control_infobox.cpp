@@ -1,6 +1,7 @@
 #include "control.hpp"
 #include "control_panel.hpp"
 #include "control/d3d_hud.hpp"
+#include "control/d3d_hud_geometry.hpp"
 #include "controls/control_mode.hpp"
 #include "engine/render/d3d_hud_presentation.hpp"
 #include "engine/render/primitive_render.hpp"
@@ -39,8 +40,11 @@ void PrintInfo(const Surface &out)
 
 	const auto newLineCount = static_cast<int>(c_count(InfoString.str(), '\n'));
 	const int spaceIndex = std::min(4, newLineCount);
-	const int spacing = space[spaceIndex];
-	const int lineHeight = 12 + spacing;
+	const bool compact = IsD3dHudLayoutActive()
+	    && GetD3dHudGeometry().mode == D3dHudGeometryMode::Compact;
+	const auto &metrics = GetD3dHudMetrics();
+	const int spacing = compact ? 0 : space[spaceIndex];
+	const int lineHeight = compact ? metrics.infoLineHeight : 12 + spacing;
 
 	// Adjusting the line height to add spacing between lines
 	// will also add additional space beneath the last line
@@ -50,14 +54,16 @@ void PrintInfo(const Surface &out)
 	SpeakText(InfoString);
 
 	std::optional<OwnedSurface> hudInfo;
-	if (IsD3dHudEnabled()) {
-		// Text uses the authored dimensions before the uniform screen scale.
-		// Keep the native 12px font and all five lines instead of squeezing a
-		// 400px text image into the narrower contextual box.
-		const int screenHeight = std::max<int>(1, GetScreenHeight());
-		hudInfo.emplace(std::max(1, infoBox.size.width * 480 / screenHeight),
-		    std::max(1, infoBox.size.height * 480 / screenHeight));
-		DrawD3dHudPlate(*hudInfo, { { 0, 0 }, { hudInfo->w(), hudInfo->h() } });
+	if (IsD3dHudSelected()) {
+		if (compact) {
+			hudInfo.emplace(std::max(1, static_cast<int>(infoBox.size.width / metrics.infoGlyphScaleX)),
+			    std::max(1, static_cast<int>(infoBox.size.height / metrics.infoGlyphScaleY)));
+		} else {
+			const int scaleHeight = IsD3dHudLayoutActive() ? std::max<int>(1, GetScreenHeight()) : 480;
+			hudInfo.emplace(std::max(1, infoBox.size.width * 480 / scaleHeight),
+			    std::max(1, infoBox.size.height * 480 / scaleHeight));
+		}
+		FillRect(*hudInfo, 0, 0, hudInfo->w(), hudInfo->h(), 1);
 	}
 	const Surface &textOut = hudInfo ? *hudInfo : out;
 	const TextRenderOptions textOptions {
@@ -65,17 +71,19 @@ void PrintInfo(const Surface &out)
 		.spacing = 2,
 		.lineHeight = lineHeight,
 	};
-	DrawString(textOut, InfoString, hudInfo ? Rectangle { { 0, spacing / 2 }, { hudInfo->w(), hudInfo->h() } } : infoBox,
-	    textOptions);
+	Rectangle textRect = hudInfo ? Rectangle { { 0, spacing / 2 }, { hudInfo->w(), hudInfo->h() } } : infoBox;
+	if (compact) {
+		// Keep the native five-line capacity, including VerticalCenter's full
+		// line-height accounting. Rounding must not clip the fifth line.
+		const int lines = std::min(5, newLineCount + 1);
+		const int insetX = std::min(metrics.infoInsetX, std::max(0, (hudInfo->w() - 1) / 2));
+		const int insetY = std::min(metrics.infoInsetY, std::max(0, (hudInfo->h() - lines * lineHeight) / 2));
+		textRect = { { insetX, insetY }, { hudInfo->w() - 2 * insetX, hudInfo->h() - 2 * insetY } };
+	}
+	DrawString(textOut, InfoString, textRect, textOptions);
 	if (hudInfo) {
-		DrawD3dHudSurface(out, *hudInfo, GetD3dHudInfoRect());
-		// Keep the text separate from the fallback plate so the RGBA skin can
-		// replace its background without hiding native glyphs or their colors.
-		const OwnedSurface foreground(hudInfo->w(), hudInfo->h());
-		FillRect(foreground, 0, 0, foreground.w(), foreground.h(), 1);
-		DrawString(foreground, InfoString, { { 0, spacing / 2 }, { foreground.w(), foreground.h() } }, textOptions);
 		ClearD3dHudForeground(GetD3dHudInfoRect());
-		RecordD3dHudForeground(foreground, GetD3dHudInfoRect());
+		DrawD3dHudContent(out, *hudInfo, GetD3dHudInfoRect());
 	}
 }
 
@@ -410,12 +418,14 @@ void CheckPanelInfo()
 
 void DrawInfoBox(const Surface &out)
 {
-	const bool d3dHudEnabled = IsD3dHudEnabled();
+	const bool d3dHudEnabled = IsD3dHudSelected();
 	if (d3dHudEnabled)
 		ClearD3dHudForeground(GetD3dHudInfoRect());
-	if (d3dHudEnabled && gmenu_is_active())
+	if (IsD3dHudSelected() && gmenu_is_active())
 		return;
-	if (!d3dHudEnabled)
+	if (d3dHudEnabled)
+		DrawD3dHudPlate(out, GetD3dHudInfoRect());
+	else
 		DrawPanelBox(out, MakeSdlRect(InfoBoxRect.position.x, InfoBoxRect.position.y + PanelPaddingHeight, InfoBoxRect.size.width, InfoBoxRect.size.height), GetMainPanel().position + Displacement { InfoBoxRect.position.x, InfoBoxRect.position.y });
 	if (!MainPanelFlag && !trigflag && pcursinvitem == -1 && pcursstashitem == StashStruct::EmptyCell && pcursstoreitem == -1 && pcursstorebtn == -1 && !SpellSelectFlag && pcurs != CURSOR_HOURGLASS) {
 		InfoString = StringOrView {};

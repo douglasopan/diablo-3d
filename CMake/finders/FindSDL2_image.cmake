@@ -10,7 +10,7 @@ else()
 
   find_path(SDL2_image_INCLUDE_DIR SDL_image.h
             HINTS ${PC_SDL2_image_INCLUDEDIR} ${PC_SDL2_image_INCLUDE_DIRS})
-          
+
   find_library(SDL2_image_LIBRARY
                NAMES SDL2_image libSDL2_image
                HINTS ${PC_SDL2_image_LIBDIR} ${PC_SDL2_image_LIBRARY_DIRS})

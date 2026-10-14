@@ -227,6 +227,79 @@ float TownPointLightVisibility(TownLightVector light, TownLightVector receiver,
 	return 1;
 }
 
+bool ValidateTownSpritePointLighting(std::span<const TownPointLight> lights,
+	std::span<const TownLightOccluder> occluders)
+{
+	if (lights.size() > TownMaxPointLights || occluders.size() > TownMaxLightOccluders)
+		return false;
+	const auto boundedColor = [](float value) {
+		return std::isfinite(value) && value >= 0 && value <= 16;
+	};
+	for (const TownPointLight &light : lights) {
+		if (!Finite(light.position) || !std::isfinite(light.radius) || light.radius <= 0 || light.radius > 256
+		    || !boundedColor(light.color.red) || !boundedColor(light.color.green) || !boundedColor(light.color.blue)
+		    || !boundedColor(light.intensity))
+			return false;
+	}
+	for (const TownLightOccluder &occluder : occluders) {
+		if (!Finite(occluder.minimum) || !Finite(occluder.maximum)
+		    || occluder.minimum.x >= occluder.maximum.x || occluder.minimum.height >= occluder.maximum.height
+		    || occluder.minimum.z >= occluder.maximum.z || occluder.apertures.size() > TownMaxLightApertures
+		    || !std::all_of(occluder.apertures.begin(), occluder.apertures.end(), ValidAperture))
+			return false;
+		for (const TownLightAperture &aperture : occluder.apertures) {
+			const unsigned axis = static_cast<unsigned>(aperture.plane);
+			const std::array<float, 3> minimum { occluder.minimum.x, occluder.minimum.height, occluder.minimum.z };
+			const std::array<float, 3> maximum { occluder.maximum.x, occluder.maximum.height, occluder.maximum.z };
+			const unsigned uAxis = axis == 0 ? 2 : 0;
+			const unsigned vAxis = axis == 1 ? 2 : 1;
+			if ((std::abs(aperture.coordinate - minimum[axis]) > BoundaryEpsilon
+			        && std::abs(aperture.coordinate - maximum[axis]) > BoundaryEpsilon)
+			    || aperture.minU < minimum[uAxis] - BoundaryEpsilon || aperture.maxU > maximum[uAxis] + BoundaryEpsilon
+			    || aperture.minV < minimum[vAxis] - BoundaryEpsilon || aperture.maxV > maximum[vAxis] + BoundaryEpsilon)
+				return false;
+		}
+	}
+	return true;
+}
+
+TownLightColor SampleTownSpritePointLighting(TownLightVector position,
+	std::span<const TownPointLight> lights, std::span<const TownLightOccluder> occluders)
+{
+	if (!Finite(position) || !ValidateTownSpritePointLighting(lights, occluders))
+		return {};
+	TownLightColor irradiance;
+	for (const TownPointLight &light : lights) {
+		const TownLightVector direction = Difference(light.position, position);
+		const float distanceSquared = Dot(direction, direction);
+		const float radiusSquared = light.radius * light.radius;
+		if (distanceSquared >= radiusSquared || light.intensity == 0
+		    || TownPointLightVisibility(light.position, position, occluders) == 0)
+			continue;
+		const float range = 1 - distanceSquared / radiusSquared;
+		const float attenuation = range * range / (1 + distanceSquared);
+		irradiance = Add(irradiance, Scale(light.color, attenuation * light.intensity));
+	}
+	return irradiance;
+}
+
+uint32_t TintTownSpritePointArgb(uint32_t argb, TownLightColor pointIrradiance)
+{
+	const auto bounded = [](float value) {
+		return std::isfinite(value) && value >= 0 && value <= TownMaxPointLights * 16 * 16;
+	};
+	if (!bounded(pointIrradiance.red) || !bounded(pointIrradiance.green) || !bounded(pointIrradiance.blue)
+	    || (pointIrradiance.red == 0 && pointIrradiance.green == 0 && pointIrradiance.blue == 0))
+		return argb;
+	const TownLightColor linear = TownSrgbToLinear({ static_cast<float>((argb >> 16) & 255) / 255,
+		static_cast<float>((argb >> 8) & 255) / 255, static_cast<float>(argb & 255) / 255 });
+	const float luminance = 0.2126F * linear.red + 0.7152F * linear.green + 0.0722F * linear.blue;
+	const TownLightColor tinted = TownLinearToSrgb({ linear.red + luminance * pointIrradiance.red,
+		linear.green + luminance * pointIrradiance.green, linear.blue + luminance * pointIrradiance.blue });
+	const auto encode = [](float value) { return static_cast<uint32_t>(value * 255 + 0.5F); };
+	return (argb & 0xFF000000U) | (encode(tinted.red) << 16) | (encode(tinted.green) << 8) | encode(tinted.blue);
+}
+
 TownLightingSample SampleTownLighting(TownLightVector normal, TownLightVector position,
 	float directionalShadow, const TownLightingConfig &config,
 	std::span<const TownPointLight> lights, std::span<const TownLightOccluder> occluders)

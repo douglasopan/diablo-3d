@@ -5,6 +5,8 @@
  */
 #pragma once
 
+#include <optional>
+
 #include "cursor_defs.hpp"
 #include "engine/clx_sprite.hpp"
 #include "engine/point.hpp"
@@ -50,6 +52,9 @@ void DrawItem(const Item &item, const Surface &out, Point position, ClxSprite cl
 
 /** Returns the sprite for the given inventory index. */
 ClxSprite GetInvItemSprite(int cursId);
+/** Bounded read of the same inventory cache. cursId includes CURSOR_FIRSTITEM;
+ * missing cache/invalid frame refuses without changing cursor or input. */
+std::optional<ClxSprite> TryGetInvItemSprite(int cursId);
 
 ClxSprite GetHalfSizeItemSprite(int cursId);
 ClxSprite GetHalfSizeItemSpriteRed(int cursId);

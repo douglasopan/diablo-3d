@@ -1,0 +1,88 @@
+{
+  "format": "d3d.item-concept-art",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "scope": "Targeted R2 correction of Two-Handed Sword thumbnail; reference and original R1 remain preserved.",
+  "catalogSha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d",
+  "generationTool": "built-in image_gen.imagegen",
+  "generationCalls": 1,
+  "postProcessing": "none; original generated PNG bytes copied unchanged",
+  "originalGameImagesIncluded": false,
+  "visualApproval": false,
+  "runtimeInstalled": false,
+  "entries": [
+    {
+      "productionId": "item.design.base.two-handed-sword",
+      "conceptId": "item.design.base.two-handed-sword.concept.r2",
+      "revision": "r2",
+      "status": "candidate",
+      "kind": "turnaround",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "revisionPrompts": [
+        "Precise revision of this candidate TWO-HANDED SWORD concept sheet. Correct ONLY the small ICON thumbnail on the right so it represents the EXACT SAME sword already shown in the large FRONT view. Copy the design, not pixels: redraw a fresh HD miniature of that front-view concept with the identical count, vertical positions, widths, alternating diagonal directions and continuity of every silver band on the orange/copper-colored blade, identical pointed silver tip, identical oval opening in the hilt, curved silver crossguard, dark red-brown wrapped grip and brass disc pommel. The miniature should be a straightforward scaled FRONT composition, not an alternative band pattern. It must remain newly drawn realistic HD, never pixel art. Keep all four large views, main title, view labels, backdrop, overall layout, dimensions, geometry, material colors and neutral illumination exactly unchanged. Do not add or remove bands or embellishments from the main views. Do not reinterpret the ambiguous orange material or add magic. This creates explicit candidate revision R2 to correct the thumbnail mismatch; no approval or runtime icon is implied."
+      ],
+      "generationTool": "built-in image_gen.imagegen",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-thumbnail"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "postProcessing": "none; original generated PNG bytes copied unchanged",
+      "styleReferences": [
+        {
+          "role": "layout-neutral-rendering-only",
+          "image": "assets/concept-art/items/r1/claymore-r1.png",
+          "sha256": "e9a2e4061bcdad78e7833fa7657722672c127466a0e77a2e5dbf2df536070567"
+        }
+      ],
+      "image": "assets/concept-art/items/r2/two-handed-sword-r2.png",
+      "sha256": "16fffbd61a60fe9fec9c951ebe2ab877894a584720f8a51c2b4847d74c97a16b",
+      "prompt": "Precise revision of this candidate TWO-HANDED SWORD concept sheet. Correct ONLY the small ICON thumbnail on the right so it represents the EXACT SAME sword already shown in the large FRONT view. Copy the design, not pixels: redraw a fresh HD miniature of that front-view concept with the identical count, vertical positions, widths, alternating diagonal directions and continuity of every silver band on the orange/copper-colored blade, identical pointed silver tip, identical oval opening in the hilt, curved silver crossguard, dark red-brown wrapped grip and brass disc pommel. The miniature should be a straightforward scaled FRONT composition, not an alternative band pattern. It must remain newly drawn realistic HD, never pixel art. Keep all four large views, main title, view labels, backdrop, overall layout, dimensions, geometry, material colors and neutral illumination exactly unchanged. Do not add or remove bands or embellishments from the main views. Do not reinterpret the ambiguous orange material or add magic. This creates explicit candidate revision R2 to correct the thumbnail mismatch; no approval or runtime icon is implied.",
+      "referenceHash": "6a1c703b78e01bcbbef5fa8822cc96115f4885015b890afe739f96067f7bdc0e",
+      "reference": {
+        "cursorId": 110,
+        "sha256": "6a1c703b78e01bcbbef5fa8822cc96115f4885015b890afe739f96067f7bdc0e",
+        "availability": "local-private",
+        "notes": "Referência 6x inspecionada antes da geração. Corpo alaranjado, faixas claras, ponta cinza, região oval escura próxima da guarda, cabo castanho-avermelhado e pomo dourado são observações da imagem. A composição do corpo/faixas é ambígua."
+      },
+      "inferredAreas": [
+        "Leitura proposta do corpo alaranjado como superfície opaca em tom de cobre e das faixas como metal claro; a referência não comprova esses materiais nem sua construção.",
+        "A região oval escura do hilt foi interpretada como abertura passante; profundidade, perfuração e aro tridimensional são inferências, não geometria comprovada pelo sprite.",
+        "Espessura, face posterior, sistema de fixação das faixas, geometria do aro/guarda, desgaste fino e detalhes do pomo são reconstruções."
+      ],
+      "coherenceReview": {
+        "status": "reviewed-candidate",
+        "coherentAcrossViews": null,
+        "observed": "R2 brings the inset closer to the principal FRONT band pattern while retaining the orange body, pale bands, silver tip, oval hilt opening, dark grip and brass pommel. This is visual inspection, not mechanical geometric proof.",
+        "pendingIssues": [
+          "Orange/copper-colored material, band construction and hilt opening remain inferred.",
+          "Reconcile exact band continuity and thickness on the eventual 3D volume; the generated sheet does not prove a mechanically identical turnaround.",
+          "Two-hand grip length, clearances and sockets require the character rig gate."
+        ]
+      },
+      "notes": "Candidate R2 corrects the previously observed thumbnail-pattern mismatch. Same licensed reference and unapproved material inference as R1. The new HD inset remains a concept preview, not a runtime icon. R1 is immutable in the archive manifest; R2 is explicitly proposed for review, not accepted or selected.",
+      "originRevision": {
+        "conceptId": "item.design.base.two-handed-sword.concept.r1",
+        "manifest": "docs/items-study/batch-02-large-blades.json",
+        "image": "assets/concept-art/items/r1/two-handed-sword-r1.png",
+        "sha256": "f26c2ba133d2475ed2d4dd6d43eec66f6a37584a7c128042873f38226f9ddb0e"
+      },
+      "sourceGenerationPrompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate modeling turnaround, NOT a finished runtime icon.\nInput image 1: PRIVATE original pixel-art silhouette and color reference for ONE item, Two-Handed Sword, item.design.base.two-handed-sword, ICURS_TWO_HANDED_SWORD 110. Use it only to inform a wholly NEW detailed concept; never paste its pixels or reproduce a pixel-art inset. Input image 2: layout, neutral rendering and presentation style reference ONLY (the clean Claymore board); do not copy its sword design.\nCreate a clean high-detail realistic game-prop concept sheet with the exact SAME SINGLE physical object shown whole in FRONT flat face, true SIDE thickness, BACK opposite face, and THREE-QUARTER views, plus a smaller NEW HD rendered inventory-composition thumbnail of that same concept. Large clearly separated vertical views; charcoal-gray background, neutral soft studio illumination, restrained fine wear. Labels only TWO-HANDED SWORD / FRONT / SIDE / BACK / 3-4 / ICON, understated light serif lettering. Keep all tips and pommels inside the frame.\nIdentity is the unusual reference, NOT a generic two-handed steel sword: long nearly straight tapered upper body, sharp exposed dark-silver steel point; most of its length is warm opaque burnt-orange/ochre-brown, interrupted by broad diagonal pale silver-gray bands around the body. Preserve the original relative proportions, orange dominance, alternating bands and silhouette. Near the lower blade/base retain the conspicuous dark oval pierced space with pale metal rim and branching curled silver-gray guard, then a long dark reddish-brown grip and small muted brass/olive-gold pommel. The original band's exact construction and the orange material are ambiguous: for THIS CANDIDATE ONLY infer a solid copper-toned orange-brown inset or facing restrained by diagonal pale steel bands, with real non-emissive material. Do not claim this material is recovered historical fact. The BACK and thickness are proposed reconstructions; keep the bands count/positions, guard topology, grip length, pommel and point coherent across every view, including the small thumbnail. The SIDE view must show thin physical thickness and the guard's actual profile, not a second full face. BACK is the opposite face of the same geometry.\nNo fire, glow, magic particles, neon, broad generic claymore blade, extra jewels, skulls, hands, characters, scenery, measurements, collage, source pixel-art or alternate designs. No giant shadow or colored rim light. Every object depiction including ICON is freshly rendered in the same clean realistic HD material style.",
+      "generationIntent": "Targeted ICON thumbnail pattern correction; original R1 bytes retained."
+    }
+  ]
+}

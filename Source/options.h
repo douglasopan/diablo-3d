@@ -595,6 +595,14 @@ struct GraphicsOptions : OptionCategoryBase {
 	OptionEntryInt<int> townViewCameraSensitivity;
 	/** @brief Visual-only distant scenery and distance fog; never expands gameplay terrain. */
 	OptionEntryBoolean townViewHorizon;
+	/** Town world lighting only; persists and applies next frame. */
+	OptionEntryEnum<int> townViewTimeOfDay;
+	/** Continuous world lighting and RGB composition; native simulation/UI unchanged. */
+	OptionEntryBoolean smooth3dLighting;
+	/** One shared decorative background opacity for the HUD and floating panels. */
+	OptionEntryInt<int> hudTransparency;
+	/** Import a validated profile hud-theme.ini; applies on the next game load. */
+	OptionEntryBoolean importedHudTheme;
 	/** @brief Subtile lighting for smoother light gradients. */
 	OptionEntryBoolean perPixelLighting;
 	/** @brief Enable color cycling animations. */

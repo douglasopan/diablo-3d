@@ -1,0 +1,163 @@
+{
+  "format": "d3d.item-concept-art",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "scope": "Independent remaining-blunt-weapons-unique-identity-all-02 candidate/reuse batch for root consolidation; no global coverage claim.",
+  "batchId": "batch-next-blunt-weapons-uniques-02",
+  "productionQueueGroup": "remaining-blunt-weapons-unique-identity-all-02",
+  "catalogSha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d",
+  "generationTool": "built-in image_gen.imagegen; shared-cursor reuse causes zero new calls",
+  "postProcessing": "none; generated PNG bytes copied unchanged, all prior revisions retained",
+  "originalGameImagesIncluded": false,
+  "privateMediaPathsIncluded": false,
+  "visualApproval": false,
+  "accepted": false,
+  "selected": false,
+  "installed": false,
+  "runtimeInstalled": false,
+  "summary": {
+    "candidateUnits": 2,
+    "newImages": 0,
+    "reuseProposals": 2,
+    "modelsGenerated": 0,
+    "runtimeIconsGenerated": 0
+  },
+  "entries": [
+    {
+      "productionId": "item.design.unique.the-celestial-star",
+      "conceptId": "item.design.unique.the-celestial-star.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "family-sheet",
+      "image": "assets/concept-art/items/r2/flail-r2.png",
+      "sha256": "f037fe4e2829252b5623d61f8734968005d5bfcb87e58010a9a59970f273028d",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D single-item candidate modelling turnaround, not final game icon.\nThe first input image is the original licensed inventory sprite, PRIMARY silhouette/proportion/palette reference ONLY. The second input image is the generated Claymore sheet, LAYOUT and neutral material presentation ONLY; never include its sword.\nCreate one coherent HD sheet showing the exact SAME object in FRONT, true SIDE thickness, BACK (correctly reverse any asymmetric outline), and 3-4 perspective, plus one small ICON inset newly rendered in crisp HD from the SAME object. All views share identical proportions/geometry/materials, whole item visible and spaced cleanly. Plain charcoal gray background, neutral soft WHITE studio illumination without colored light or warm cast, realistic worn medieval materials, restrained surface wear and minimum contact shadows. Hidden reverse surfaces, thickness and exact fine material details are conservative inferred reconstruction.\nText only item TITLE and labels FRONT / SIDE / BACK / 3-4 / ICON; small footer CANDIDATE - REVERSE AND THICKNESS INFERRED. Never paste/reproduce/trace the source sprite, its image rectangle, reference board or pixel art into output. No characters/hands/scenery, extra objects, magical glow, flames, invented jewels/runes/skulls or watermark. Thumbnail is NEW HD concept depiction, not a runtime icon.\nFLAIL. Production ID item.design.base.flail, ICURS131. Match actual sprite: one straight short red-brown leather handle at LEFT with a vertical row of small golden/brass diamond/round studs, ornate but compact stepped brass upper cap and a plain rounded red-brown bottom. One long slender dark steel linked CHAIN attaches at top cap, sweeps upward in a tall arch/loop over the handle, bends across to the RIGHT then descends to one large dark charcoal iron SPIKED BALL hanging on the right at about the upper-middle handle level. Brass little ring/collar above the ball. Ball dark faceted spherical with a few stout black iron spikes directed around it; pale gray metallic highlights, not silver smooth ball. Preserve this long-chain silhouette and red/gold/black palette. One handle, ONE chain, one ball. Chain links must be discernible metal links, not a solid rope, duplicate chain or rigid bar. The sheet shows an illustrative arranged chain pose for comparison; chain is articulated, and its pose is not a rigid model specification. Preserve plausible link connectivity across all views. Do not invent flame or magic.",
+      "revisionPrompts": [
+        "Use case: precise-object-edit. Edit input image 1 (the generated FLAIL board) only to fix two reproduced defects. Input image 2 is the original inventory sprite, silhouette/color authority only; never paste its pixels.\n1. Fix BACK as a true 180-degree reverse of the FRONT pose. In the BACK column, place the spiked ball on the LEFT and the handle on the RIGHT, with the same arching chain rotated/mirrored, rear of the grip visible without front studs. FRONT ball stays RIGHT of its handle; BACK ball must be LEFT of its handle. Reposition only inside the BACK column to fit, do not overlap other views or labels. Preserve one chain with exactly connected handle cap and ball cap.\n2. Remove the invented gold/brass BOTTOM ferrule from EVERY handle depiction, including FRONT, SIDE, BACK, 3-4 and ICON. End each handle in a simple rounded RED-BROWN leather/wood butt matching the primary sprite. Keep the upper stepped brass cap and gold grip studs unchanged.\nKeep the same one object design, proportions, all other views, chain/ball shapes, charcoal backdrop, neutral white light, labels FLAIL / FRONT / SIDE / BACK / 3-4 / ICON and candidate footer. No pasted pixel icon or source rectangle. No other edits. This is one conservative R2 correction; not an approved model or runtime icon."
+      ],
+      "generationTool": "reuse; no new generation; source built-in image_gen.imagegen",
+      "generationCalls": 0,
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 131,
+        "sha256": "5ba4aed729a2c7b4c7ef61b79321327461838ef392a7355dd86c80fd34aaaad9",
+        "notes": "Original inventory source identity; private paths/pixels omitted. Exact presented source was inspected before new generation."
+      },
+      "referencePresentedSha256": "dfbb1a6eccf089f6b5e80d9964fd7fa3731fe4e72e45e9ba5d9a1e1f6704ef41",
+      "referenceVisualInspected": false,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-thumbnail-proposal"
+      ],
+      "inferredParts": [
+        "Hidden reverse surfaces, depth and thickness",
+        "Fasteners, exact material microtexture and dimensions"
+      ],
+      "review": {
+        "status": "family-reuse-proposal",
+        "approval": false,
+        "limitations": [
+          "Shared native cursor is an explicit family appearance proposal, not an approved unique redesign.",
+          "Native identity, unique powers and gameplay remain separate from shared geometry. Source-concept inferential limits still apply."
+        ]
+      },
+      "notes": "Explicit family reuse proposal only. Native unique identity, powers, stats, scope and saves remain separate; no new design inferred from the name. This sheet is not unique-specific fidelity or an accepted master.",
+      "reusedFromProductionId": "item.design.base.flail",
+      "reusedFromConceptId": "item.design.base.flail.concept.r2",
+      "reuseGate": "Review explicit shared-cursor reuse; native unique powers and identity remain separate. A new unique visual requires a separate approved design brief.",
+      "nativeCursorNames": [
+        "FLAIL"
+      ],
+      "identityAmbiguous": false,
+      "sourcePromptPolicy": "Exact source generation prompt retained; this identity caused zero new generation calls.",
+      "sourceUniqueIds": [
+        "item.unique.the-celestial-star"
+      ]
+    },
+    {
+      "productionId": "item.design.unique.the-cranium-basher",
+      "conceptId": "item.design.unique.the-cranium-basher.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "family-sheet",
+      "image": "assets/concept-art/items/r1/maul-r1.png",
+      "sha256": "6f294243452655d3f7247038d9d5ef28c34a299d1fe62232622ce789d0dfec9c",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D single-item candidate modelling turnaround, not final game icon.\nThe first input image is the original licensed inventory sprite, PRIMARY silhouette/proportion/palette reference ONLY. The second input image is the generated Claymore sheet, LAYOUT and neutral material presentation ONLY; never include its sword.\nCreate one coherent HD sheet showing the exact SAME object in FRONT, true SIDE thickness, BACK (correctly reverse any asymmetric outline), and 3-4 perspective, plus one small ICON inset newly rendered in crisp HD from the SAME object. All views share identical proportions/geometry/materials, whole item visible and spaced cleanly. Plain charcoal gray background, neutral soft WHITE studio illumination without colored light or warm cast, realistic worn medieval materials, restrained surface wear and minimum contact shadows. Hidden reverse surfaces, thickness and exact fine material details are conservative inferred reconstruction.\nText only item TITLE and labels FRONT / SIDE / BACK / 3-4 / ICON; small footer CANDIDATE - REVERSE AND THICKNESS INFERRED. Never paste/reproduce/trace the source sprite, its image rectangle, reference board or pixel art into output. No characters/hands/scenery, extra objects, magical glow, flames, invented jewels/runes/skulls or watermark. Thumbnail is NEW HD concept depiction, not a runtime icon.\nMAUL. Production ID item.design.base.maul, ICURS122. Match actual sprite: large horizontal silver-gray rectangular steel hammer block, short rounded corners, centered atop a long straight pale olive-tan wooden shaft. On the broad front of head a circular recessed/raised round boss with four chunky quartered silver lobes separated by dark grooves; no invented skull or crest. Head has a low round silver top cap. Upper/middle wooden shaft has a short red leather wrap segment with red bands above and below ONE muted blue-gray/lavender band centered on it. Rest shaft exposed tan wood. Bottom grip has several broad silver steel collars stacked with dark olive-brown wood/leather gaps between them, ending in a simple blunt silver round ferrule. Preserve reference silver/tan/red/single blue band palette, huge block head relative thin straight shaft; no spiked ball, no golden ornament.",
+      "revisionPrompts": [],
+      "generationTool": "reuse; no new generation; source built-in image_gen.imagegen",
+      "generationCalls": 0,
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 122,
+        "sha256": "78e2f5de530179081b5644c48ea8985050be501e203185c28545b84f28f2c43b",
+        "notes": "Original inventory source identity; private paths/pixels omitted. Exact presented source was inspected before new generation."
+      },
+      "referencePresentedSha256": "411ee8d67e96277bf2a0c4203011171a40d3d1bdbb290cca56ec5602df27d6f5",
+      "referenceVisualInspected": false,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-thumbnail-proposal"
+      ],
+      "inferredParts": [
+        "Hidden reverse surfaces, depth and thickness",
+        "Fasteners, exact material microtexture and dimensions"
+      ],
+      "review": {
+        "status": "family-reuse-proposal",
+        "approval": false,
+        "limitations": [
+          "Shared native cursor is an explicit family appearance proposal, not an approved unique redesign.",
+          "Native identity, unique powers and gameplay remain separate from shared geometry. Source-concept inferential limits still apply."
+        ]
+      },
+      "notes": "Explicit family reuse proposal only. Native unique identity, powers, stats, scope and saves remain separate; no new design inferred from the name. This sheet is not unique-specific fidelity or an accepted master.",
+      "reusedFromProductionId": "item.design.base.maul",
+      "reusedFromConceptId": "item.design.base.maul.concept.r1",
+      "reuseGate": "Review explicit shared-cursor reuse; native unique powers and identity remain separate. A new unique visual requires a separate approved design brief.",
+      "nativeCursorNames": [
+        "MAUL"
+      ],
+      "identityAmbiguous": false,
+      "sourcePromptPolicy": "Exact source generation prompt retained; this identity caused zero new generation calls.",
+      "sourceUniqueIds": [
+        "item.unique.the-cranium-basher"
+      ]
+    }
+  ],
+  "handoff": {
+    "rootAction": "Consolidate candidate entries and update gallery/queue only after validation. Devlog labels: concept candidate or explicit family reuse proposal; never publish private sprites.",
+    "limits": "No approval/selection/installation/model/runtime icon. Reverse geometry inferred; same master/material gate still required."
+  }
+}

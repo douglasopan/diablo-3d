@@ -1,0 +1,155 @@
+{
+  "format": "d3d.item-concept-art",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "scope": "Independent remaining-axes-unique-identity-all-02 candidate/reuse batch for root consolidation; no global coverage claim.",
+  "batchId": "batch-next-axes-uniques-02",
+  "productionQueueGroup": "remaining-axes-unique-identity-all-02",
+  "catalogSha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d",
+  "generationTool": "built-in image_gen.imagegen; shared-cursor reuse causes zero new calls",
+  "postProcessing": "none; generated PNG bytes copied unchanged, all prior revisions retained",
+  "originalGameImagesIncluded": false,
+  "privateMediaPathsIncluded": false,
+  "visualApproval": false,
+  "accepted": false,
+  "selected": false,
+  "installed": false,
+  "runtimeInstalled": false,
+  "summary": {
+    "candidateUnits": 2,
+    "newImages": 0,
+    "reuseProposals": 2,
+    "modelsGenerated": 0,
+    "runtimeIconsGenerated": 0
+  },
+  "entries": [
+    {
+      "productionId": "item.design.unique.the-mangler",
+      "conceptId": "item.design.unique.the-mangler.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "family-sheet",
+      "image": "assets/concept-art/items/r1/axe-r1.png",
+      "sha256": "27afa131a1c518cea53408006bacfc0572ef66898e884f597377ab517d746cb0",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D single-item candidate modelling turnaround. Production ID item.design.base.axe, native inventory cursor ICURS144.\nInput image 1 is the original licensed inventory sprite, PRIMARY shape/proportion/palette reference only. Input image 2 is a Claymore board, layout/neutral presentation reference ONLY; never include that sword.\nCreate ONE Axe matching image 1: a long straight slender dark olive-brown wooden haft standing vertically, with ONE dark forged-steel head projecting to the RIGHT at its top. The head begins narrow at the eye and expands into a broad roughly triangular silver cutting blade, with almost vertical slightly convex outer cutting edge ending in a downward-pointing beard; compact top edge rising slightly toward the outside. Preserve the asymmetry: no second blade, no rear spike, no spear above. The dark iron eye sleeve is studded by several small pale steel rivets. A few dull brass wraps/collars sit just under the head. Most upper exposed haft is dark brown wood; lower third is a straight deep burgundy-brown leather grip bounded above and below by several thin aged-brass rings, ending in a narrow blunt brass ferrule. No dangling strap. Preserve the understated original palette of charcoal steel, silver edge, dark brown/olive wood, very dark red-brown grip and small old-gold rings. Do not turn it into the red-handled Small Axe or a generic double axe.\nA professional HD technical board of the SAME axe shown in FRONT, SIDE edge-on thickness, BACK (head correctly reverses side), and 3-4 perspective, with one small ICON inset newly rendered in HD from this same object. Keep identical geometry/materials/length across all views. Entire object visible, spaced cleanly like input 2, no cropped ferrules or edges. Dark neutral charcoal gray background, neutral soft white studio illumination, believable worn iron, steel, wood and leather, restrained microtexture and minor edge wear, no baked painted shadows. Minimal contact shadow only. Hidden reverse and thickness are conservative proposed reconstruction.\nText only title 'AXE', view labels 'FRONT', 'SIDE', 'BACK', '3-4', 'ICON', and footer 'CANDIDATE - REVERSE AND THICKNESS INFERRED'. Do NOT paste/reproduce pixel reference sprite or reference board; ICON must be a NEW crisp realistic HD render, never pixel art. No hands, person, props, scenery, skulls, runes, gems, flames, magical glow, second blade or watermark. Candidate concept only, not a runtime icon.",
+      "revisionPrompts": [],
+      "generationTool": "reuse; no new generation; source built-in image_gen.imagegen",
+      "generationCalls": 0,
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 144,
+        "sha256": "545a6116c017903d147e4b910b730d894068a6736dcd8e1aadb9e3459d2df2d6",
+        "notes": "Original inventory source identity; private paths/pixels omitted. Exact presented source was inspected before new generation."
+      },
+      "referencePresentedSha256": "300829ad8d749b7d746db524ce2cb8744a357e50a5d7036271d83bc617571d39",
+      "referenceVisualInspected": false,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-thumbnail-proposal"
+      ],
+      "inferredParts": [
+        "Hidden reverse surfaces, depth and thickness",
+        "Fasteners, exact material microtexture and dimensions"
+      ],
+      "review": {
+        "status": "family-reuse-proposal",
+        "approval": false,
+        "limitations": [
+          "Source concept is a candidate; shared cursor proves source visual reuse, not unique-specific design approval.",
+          "Reverse/thickness and any source concept ambiguity remain pending; native unique powers are not visual geometry."
+        ]
+      },
+      "notes": "Explicit family reuse proposal only. Native unique identity, powers, stats, scope and saves remain separate; no new design inferred from the name. This sheet is not unique-specific fidelity or an accepted master.",
+      "reusedFromProductionId": "item.design.base.axe",
+      "reusedFromConceptId": "item.design.base.axe.concept.r1",
+      "reuseGate": "Review explicit shared-cursor reuse; native unique powers and identity remain separate. A new unique visual requires a separate approved design brief.",
+      "nativeCursorNames": [
+        "AXE"
+      ],
+      "identityAmbiguous": false,
+      "sourcePromptPolicy": "Exact source generation prompt retained; this identity caused zero new generation calls."
+    },
+    {
+      "productionId": "item.design.unique.wicked-axe",
+      "conceptId": "item.design.unique.wicked-axe.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "family-sheet",
+      "image": "assets/concept-art/items/r1/great-axe-r1.png",
+      "sha256": "883240479300154ea758897839b0c929c700b26b8a01b893e1c62db3d21813a3",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D single-item candidate modelling turnaround. Production ID item.design.base.great-axe, native inventory cursor ICURS143.\nImage 1 is the original licensed inventory sprite, PRIMARY silhouette, detail and palette reference. Image 2 is a Claymore board for clean neutral layout ONLY; never include its sword.\nReconstruct ONE Great Axe as shown, not a generic symmetric double axe. Tall straight haft, elaborate asymmetric head. On the LEFT is one large sweeping CRESCENT cutting blade with a very bright silver outward curved edge and pointed lower beard; its upper inner body/root is aged olive-gold/brass with an angular engraved/geometric border and a deep dark recessed interior nearer the central socket. The blade body thins into a curving lower silver root. On the RIGHT is a short stout TRIANGULAR arrowhead-like poll/spike, silver outer rim and dark inset center, connected by a short aged-brass curved arm. Central head is a thick intricate DARK IRON socket, layered forged ridges, a raised circular boss/loop detail near the top and compact interlocking sculpted plates below, with a tiny pointed steel cap above. Preserve the dark central relief from the reference, do not simplify to a plain T socket or invent a huge skull. Most identifiable color/detail should remain on this head. Below is a short dark steel neck followed by a smooth DEEP BURGUNDY upper handle segment. A narrow gray steel collar separates it from the lower olive-brown/dark-brown tightly wrapped leather grip; narrow steel bands at lower grip end, large angular faceted SILVER iron/steel bulb pommel at bottom. NO wrist lanyard, no blue grip, no second crescent, no long wooden pole. Match reference proportions, head roughly upper two-fifths of full object.\nOne coherent HD technical concept sheet, the SAME item in full-length FRONT, true SIDE edge-on thickness, BACK with asymmetric head correctly reversed, 3-4 perspective and small ICON inset newly rendered HD from the same item. All views agree on forms, relative lengths, bronze inlays, red upper grip, brown lower grip and silver pommel. Plain charcoal neutral background, neutral soft WHITE studio illumination without yellow tint; physically plausible worn steel/iron, aged brass and leather with crisp restrained wear. Minimal contact shadow, no environment. Reverse hidden relief, depth/thickness and tiny ambiguous source relief are conservative proposed reconstruction rather than measured fidelity.\nText only title 'GREAT AXE', labels 'FRONT', 'SIDE', 'BACK', '3-4', 'ICON', footer 'CANDIDATE - REVERSE AND THICKNESS INFERRED'. Never paste/reproduce source sprite, black reference rectangle or reference sheet into output. ICON inset must be newly rendered high-definition, no pixel art. No characters/hands, other objects, added gems/runes, glow/fire, oversized spikes, watermark. Candidate concept only, no runtime icon.",
+      "revisionPrompts": [],
+      "generationTool": "reuse; no new generation; source built-in image_gen.imagegen",
+      "generationCalls": 0,
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 143,
+        "sha256": "eacab39b6e85c0bc45c1dbcb4713615f51ff6c72ffde4b80a91a306ee1789c4a",
+        "notes": "Original inventory source identity; private paths/pixels omitted. Exact presented source was inspected before new generation."
+      },
+      "referencePresentedSha256": "258920780c497027b7511bd8081e2a59a12fd5c60fc02802096a1fd58d9ea84d",
+      "referenceVisualInspected": false,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-thumbnail-proposal"
+      ],
+      "inferredParts": [
+        "Hidden reverse surfaces, depth and thickness",
+        "Fasteners, exact material microtexture and dimensions"
+      ],
+      "review": {
+        "status": "family-reuse-proposal",
+        "approval": false,
+        "limitations": [
+          "Source concept is a candidate; shared cursor proves source visual reuse, not unique-specific design approval.",
+          "Reverse/thickness and any source concept ambiguity remain pending; native unique powers are not visual geometry."
+        ]
+      },
+      "notes": "Explicit family reuse proposal only. Native unique identity, powers, stats, scope and saves remain separate; no new design inferred from the name. This sheet is not unique-specific fidelity or an accepted master.",
+      "reusedFromProductionId": "item.design.base.great-axe",
+      "reusedFromConceptId": "item.design.base.great-axe.concept.r1",
+      "reuseGate": "Review explicit shared-cursor reuse; native unique powers and identity remain separate. A new unique visual requires a separate approved design brief.",
+      "nativeCursorNames": [
+        "GREAT_AXE"
+      ],
+      "identityAmbiguous": false,
+      "sourcePromptPolicy": "Exact source generation prompt retained; this identity caused zero new generation calls."
+    }
+  ],
+  "handoff": {
+    "rootAction": "Consolidate candidate entries and update gallery/queue only after validation. Devlog labels: concept candidate or explicit family reuse proposal; never publish private sprites.",
+    "limits": "No approval/selection/installation/model/runtime icon. Reverse geometry inferred; same master/material gate still required."
+  }
+}

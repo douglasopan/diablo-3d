@@ -1,0 +1,246 @@
+{
+  "format": "d3d.item-concept-art",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "scope": "Quatro armaduras físicas candidatas, sem personagens, malha equipada ou rig concorrente.",
+  "catalogSha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d",
+  "generationTool": "built-in image_gen.imagegen",
+  "generationCalls": 4,
+  "originalGameImagesIncluded": false,
+  "visualApproval": false,
+  "runtimeInstalled": false,
+  "postProcessing": "none; original generated PNG bytes copied unchanged",
+  "summary": {
+    "conceptCandidatesInThisFile": 4,
+    "newImages": 4,
+    "familyReuses": 0,
+    "modelsGenerated": 0,
+    "runtimeIconsGenerated": 0
+  },
+  "entries": [
+    {
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-thumbnail"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "postProcessing": "none; original generated PNG bytes copied unchanged",
+      "productionId": "item.design.base.hard-leather-armor",
+      "conceptId": "item.design.base.hard-leather-armor.concept.r1",
+      "image": "assets/concept-art/items/r1/hard-leather-armor-r1.png",
+      "sha256": "39f9e0ce44b6ecbfb790ad5889fd15ab4bd60961c945be3aaa04bfd888b1aeb2",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "byteCount": 1961236,
+      "prompt": "Use case: stylized-concept. Diablo 3D candidate physical armor study based ONLY on private attached ICURS 127, item.design.base.hard-leather-armor. Reconstruct the native item silhouette, NOT a generic item inspired by its name. Burgundy/dark wine-red torso armor with a broad layered shoulder/yoke structure edged in muted ochre-gold, short fringed/segmented shoulder ends, several strongly curved overlapping horizontal chest/belly bands separated by deep black recesses, small central deep-red protruding sternum ridge, ochre-gold belt with round central buckle and short hanging burgundy segmented skirt strips edged ochre. It is NOT an ordinary soft brown vest. Preserve this stylized laminated red silhouette; hard leather versus metal is uncertain from pixels.\nEXACTLY FIVE separate depictions of the SAME physical item: four large whole-object views in one row FRONT, SIDE, BACK, 3-4 and a fifth smaller NEW HD inventory preview ICON beneath/right. Do not merge 3-4 and ICON. Use charcoal-gray background, neutral soft studio lighting and restrained realistic candidate leather/textile/metal materials. No painted floor shadow. Empty armor suspended by invisible support, NO person, flesh, face, mannequin, body, hands or stand. Keep each view whole and separated. SIDE shows true depth; BACK rotates the same item 180 degrees, transfers asymmetric details to correct side, shows minimal plausible rear closure and matching construction rather than invented insignia. All views and thumbnail share dimensions, buckle/stud positions, segments, color blocks and hem. Do not add helmet, weapon, shield, boots, text on garment, power effects, gold filigree, scenery, or source sprite inset. The thumbnail is newly painted HD art, never native pixels. Rear, thickness, fastenings, stitch/segment detail and material interpretations are provisional. No rig or class body is created; fitted/rigid parts remain later character-contract gates.",
+      "referenceHash": "95e0cbdb4b3feb5f498d4180a9d97cb45081dc8ad642d730bc0f107d1802538a",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 127,
+        "sha256": "95e0cbdb4b3feb5f498d4180a9d97cb45081dc8ad642d730bc0f107d1802538a",
+        "notes": "Referência nativa 6x inspecionada antes da chamada. Fonte privada usada apenas para silhueta/cores; pixels não incorporados."
+      },
+      "sourceViewCount": 1,
+      "queueGroupId": "remaining-body-armor-base-design-flexible-01",
+      "inferredAreas": [
+        "Verso, espessura, construção e materiais propostos a partir de uma vista; não constituem geometria histórica recuperada."
+      ],
+      "coherenceReview": {
+        "status": "pending-review",
+        "coherentAcrossViewsVerified": false,
+        "observed": "Cinco representações; placas/lâminas burgundy, recessos negros, orlas ocres e saia segmentada preservados.",
+        "pendingIssues": [
+          "Material híbrido couro rígido/metal, rebites e construção do cinto são inferidos.",
+          "Reconciliar sobreposições das lâminas, folgas de ombro e fechamento dorsal no rig existente; não usar nome como prova de material."
+        ]
+      },
+      "notes": "Candidato sem aprovação. Thumbnail HD de estudo não é ícone runtime. Master/material, chão, rig/encaixe e legibilidade na grade lógica de 28px continuam pendentes."
+    },
+    {
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-thumbnail"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "postProcessing": "none; original generated PNG bytes copied unchanged",
+      "productionId": "item.design.base.leather-armor",
+      "conceptId": "item.design.base.leather-armor.concept.r1",
+      "image": "assets/concept-art/items/r1/leather-armor-r1.png",
+      "sha256": "9b4f79ce819a763130bc1fcd36576a940681eeeb13ba0b05865576d7443b9b22",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "byteCount": 1813750,
+      "prompt": "Use case: stylized-concept. Diablo 3D candidate physical armor study based ONLY on private attached ICURS 135, item.design.base.leather-armor. Reconstruct the native item silhouette, NOT a generic item inspired by its name. Rusty reddish-brown leather tunic armor, short broad sleeves/shoulders, dark open round neck, small ochre studs across upper chest/collar and down front center, dark waist belt with a plain square dull brass/ochre buckle with black center, short split ragged/lobed skirt flaps. The image-right shoulder appears slightly redder. Keep plain soft worn leather and sparse studs, not a full steel suit.\nEXACTLY FIVE separate depictions of the SAME physical item: four large whole-object views in one row FRONT, SIDE, BACK, 3-4 and a fifth smaller NEW HD inventory preview ICON beneath/right. Do not merge 3-4 and ICON. Use charcoal-gray background, neutral soft studio lighting and restrained realistic candidate leather/textile/metal materials. No painted floor shadow. Empty armor suspended by invisible support, NO person, flesh, face, mannequin, body, hands or stand. Keep each view whole and separated. SIDE shows true depth; BACK rotates the same item 180 degrees, transfers asymmetric details to correct side, shows minimal plausible rear closure and matching construction rather than invented insignia. All views and thumbnail share dimensions, buckle/stud positions, segments, color blocks and hem. Do not add helmet, weapon, shield, boots, text on garment, power effects, gold filigree, scenery, or source sprite inset. The thumbnail is newly painted HD art, never native pixels. Rear, thickness, fastenings, stitch/segment detail and material interpretations are provisional. No rig or class body is created; fitted/rigid parts remain later character-contract gates.",
+      "referenceHash": "d3039b996ac237f6f5de3a8821b6dbc8871b98993ce2f388d94d000f2cc07730",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 135,
+        "sha256": "d3039b996ac237f6f5de3a8821b6dbc8871b98993ce2f388d94d000f2cc07730",
+        "notes": "Referência nativa 6x inspecionada antes da chamada. Fonte privada usada apenas para silhueta/cores; pixels não incorporados."
+      },
+      "sourceViewCount": 1,
+      "queueGroupId": "remaining-body-armor-base-design-flexible-01",
+      "inferredAreas": [
+        "Verso, espessura, construção e materiais propostos a partir de uma vista; não constituem geometria histórica recuperada."
+      ],
+      "coherenceReview": {
+        "status": "pending-review",
+        "coherentAcrossViewsVerified": false,
+        "observed": "Cinco representações; túnica curta castanha, studs ocres, cinto escuro/fivela quadrada e barra recortada preservados.",
+        "pendingIssues": [
+          "SIDE e quarta vista são próximas de perfis opostos; falta uma 3-4 mais informativa de frente.",
+          "Studs viraram cubos definidos, cortes da barra e costura dorsal inferidos; conciliar espessura e flexão."
+        ]
+      },
+      "notes": "Candidato sem aprovação. Thumbnail HD de estudo não é ícone runtime. Master/material, chão, rig/encaixe e legibilidade na grade lógica de 28px continuam pendentes."
+    },
+    {
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-thumbnail"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "postProcessing": "none; original generated PNG bytes copied unchanged",
+      "productionId": "item.design.base.quilted-armor",
+      "conceptId": "item.design.base.quilted-armor.concept.r1",
+      "image": "assets/concept-art/items/r1/quilted-armor-r1.png",
+      "sha256": "c0825c589dc0e38bb75c147c0f13ec83b40e970cba5cb00587267be995716eaa",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "byteCount": 1983621,
+      "prompt": "Use case: stylized-concept. Diablo 3D candidate physical armor study based ONLY on private attached ICURS 129, item.design.base.quilted-armor. Reconstruct the native item silhouette, NOT a generic item inspired by its name. Deep red padded short-sleeved tunic, wide dull ochre-gold raised ring collar with black empty neck aperture, conspicuous broad diamond quilting pattern with small dull ochre points at intersections, dark brown waist belt with rectangular ochre buckle, mid-thigh flared quilted skirt. Maintain RED textile and diamond structure. No steel breastplate, chainmail or decorative spell runes.\nEXACTLY FIVE separate depictions of the SAME physical item: four large whole-object views in one row FRONT, SIDE, BACK, 3-4 and a fifth smaller NEW HD inventory preview ICON beneath/right. Do not merge 3-4 and ICON. Use charcoal-gray background, neutral soft studio lighting and restrained realistic candidate leather/textile/metal materials. No painted floor shadow. Empty armor suspended by invisible support, NO person, flesh, face, mannequin, body, hands or stand. Keep each view whole and separated. SIDE shows true depth; BACK rotates the same item 180 degrees, transfers asymmetric details to correct side, shows minimal plausible rear closure and matching construction rather than invented insignia. All views and thumbnail share dimensions, buckle/stud positions, segments, color blocks and hem. Do not add helmet, weapon, shield, boots, text on garment, power effects, gold filigree, scenery, or source sprite inset. The thumbnail is newly painted HD art, never native pixels. Rear, thickness, fastenings, stitch/segment detail and material interpretations are provisional. No rig or class body is created; fitted/rigid parts remain later character-contract gates.",
+      "referenceHash": "b4cbc87aa504f28490b87fd30736090336ac6e1ba699c13864a17de4f2eec835",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 129,
+        "sha256": "b4cbc87aa504f28490b87fd30736090336ac6e1ba699c13864a17de4f2eec835",
+        "notes": "Referência nativa 6x inspecionada antes da chamada. Fonte privada usada apenas para silhueta/cores; pixels não incorporados."
+      },
+      "sourceViewCount": 1,
+      "queueGroupId": "remaining-body-armor-base-design-flexible-01",
+      "inferredAreas": [
+        "Verso, espessura, construção e materiais propostos a partir de uma vista; não constituem geometria histórica recuperada."
+      ],
+      "coherenceReview": {
+        "status": "pending-review",
+        "coherentAcrossViewsVerified": false,
+        "observed": "Cinco representações sem rótulos; tecido vermelho, gola ocre, padrão losangular e fivela preservados.",
+        "pendingIssues": [
+          "Peças ocres foram interpretadas como studs metálicos, material/gola/acolchoamento ainda inferidos.",
+          "Confirmar orientação das vistas sem rótulos, espessura de gola e consistência da malha do quilting entre frente/verso."
+        ]
+      },
+      "notes": "Candidato sem aprovação. Thumbnail HD de estudo não é ícone runtime. Master/material, chão, rig/encaixe e legibilidade na grade lógica de 28px continuam pendentes."
+    },
+    {
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-thumbnail"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "postProcessing": "none; original generated PNG bytes copied unchanged",
+      "productionId": "item.design.base.studded-leather-armor",
+      "conceptId": "item.design.base.studded-leather-armor.concept.r1",
+      "image": "assets/concept-art/items/r1/studded-leather-armor-r1.png",
+      "sha256": "f191b441a6e39a9de1e40b86b414c32184f69ee2d3fdbda4a9b461a07e7a9e9b",
+      "dimensions": [
+        1774,
+        887
+      ],
+      "byteCount": 2210198,
+      "prompt": "Use case: stylized-concept. Diablo 3D candidate physical armor study based ONLY on private attached ICURS 107, item.design.base.studded-leather-armor. Reconstruct the native item silhouette, NOT a generic item inspired by its name. Near-black graphite leather segmented torso armor, open dark neck with folded raised collar, tiny ochre/gold throat fastener and large square ochre-gold waist buckle with dark center. Many subdued pale silver-gray studs/rivets, dark layered broad shoulders, curved segmented upper-arm sections and two ribbed forearm/sleeve armor pieces hanging along the torso sides, plus split rounded lower protective flaps. Preserve dark palette and source silhouette. Bright pixels can be gray hardware/highlights; do not turn into shiny silver plate or add flesh, gloves, boots or helmet.\nEXACTLY FIVE separate depictions of the SAME physical item: four large whole-object views in one row FRONT, SIDE, BACK, 3-4 and a fifth smaller NEW HD inventory preview ICON beneath/right. Do not merge 3-4 and ICON. Use charcoal-gray background, neutral soft studio lighting and restrained realistic candidate leather/textile/metal materials. No painted floor shadow. Empty armor suspended by invisible support, NO person, flesh, face, mannequin, body, hands or stand. Keep each view whole and separated. SIDE shows true depth; BACK rotates the same item 180 degrees, transfers asymmetric details to correct side, shows minimal plausible rear closure and matching construction rather than invented insignia. All views and thumbnail share dimensions, buckle/stud positions, segments, color blocks and hem. Do not add helmet, weapon, shield, boots, text on garment, power effects, gold filigree, scenery, or source sprite inset. The thumbnail is newly painted HD art, never native pixels. Rear, thickness, fastenings, stitch/segment detail and material interpretations are provisional. No rig or class body is created; fitted/rigid parts remain later character-contract gates.",
+      "referenceHash": "8c180ca528369b79510e9ab499914ecada415b2b6a9dbc06e2ed51a2a9f8d6ff",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 107,
+        "sha256": "8c180ca528369b79510e9ab499914ecada415b2b6a9dbc06e2ed51a2a9f8d6ff",
+        "notes": "Referência nativa 6x inspecionada antes da chamada. Fonte privada usada apenas para silhueta/cores; pixels não incorporados."
+      },
+      "sourceViewCount": 1,
+      "queueGroupId": "remaining-body-armor-base-design-flexible-01",
+      "inferredAreas": [
+        "Verso, espessura, construção e materiais propostos a partir de uma vista; não constituem geometria histórica recuperada."
+      ],
+      "coherenceReview": {
+        "status": "pending-review",
+        "coherentAcrossViewsVerified": false,
+        "observed": "Cinco representações sem rótulos; paleta quase preta, rebites cinza, gola, buckle ocre, ombros e mangas segmentadas preservados.",
+        "pendingIssues": [
+          "Quarta vista ficou próxima de outro perfil; ortografia e volume da 3-4 exigem revisão.",
+          "Rivets, fecho da gola e articulação do antebraço ficaram mais definidos que os pixels; confirmar conjuntos rígidos/flexíveis e evitar mãos fundidas no master."
+        ]
+      },
+      "notes": "Candidato sem aprovação. Thumbnail HD de estudo não é ícone runtime. Master/material, chão, rig/encaixe e legibilidade na grade lógica de 28px continuam pendentes."
+    }
+  ]
+}

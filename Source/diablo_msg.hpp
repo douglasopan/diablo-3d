@@ -73,6 +73,7 @@ enum diablo_message : uint8_t {
 void InitDiabloMsg(diablo_message e, uint32_t duration = 3500);
 void InitDiabloMsg(std::string_view msg, uint32_t duration = 3500);
 bool IsDiabloMsgAvailable();
+bool IsDiabloMsgBlockingInput();
 void CancelCurrentDiabloMsg();
 void ClrDiabloMsg();
 void DrawDiabloMsg(const Surface &out);

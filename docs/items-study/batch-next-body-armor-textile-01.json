@@ -1,0 +1,246 @@
+{
+  "format": "d3d.item-concept-art",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "scope": "Quatro vestimentas físicas candidatas; sem gerar personagens, variantes por classe ou rig concorrente.",
+  "catalogSha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d",
+  "generationTool": "built-in image_gen.imagegen",
+  "generationCalls": 4,
+  "originalGameImagesIncluded": false,
+  "visualApproval": false,
+  "runtimeInstalled": false,
+  "postProcessing": "none; original generated PNG bytes copied unchanged",
+  "summary": {
+    "conceptCandidatesInThisFile": 4,
+    "newImages": 4,
+    "familyReuses": 0,
+    "modelsGenerated": 0,
+    "runtimeIconsGenerated": 0
+  },
+  "entries": [
+    {
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-thumbnail"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "postProcessing": "none; original generated PNG bytes copied unchanged",
+      "productionId": "item.design.base.cape",
+      "conceptId": "item.design.base.cape.concept.r1",
+      "image": "assets/concept-art/items/r1/cape-r1.png",
+      "sha256": "f2c665e56a232c146a3f88e23274dd8329284d7935df145c84d5319890ccec11",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "byteCount": 1853983,
+      "prompt": "Use case: stylized-concept. Diablo 3D candidate physical garment study based ONLY on attached private ICURS 150, item.design.base.cape. Reconstruct the actual source silhouette and colors, not generic equipment suggested by its name. Deep burgundy-red sleeveless cape, broad rounded shoulder curve with dark oval neck opening, two small dull silver-gray circular clasps near collar joined by short ochre link, deep vertical folds, flared scalloped lower edges and dull ochre/gold horizontal trim band near hem. No hood or sleeves. Keep muted red and heavy drape.\nCreate a clean realistic HD modeling sheet with EXACTLY FIVE separate depictions of ONE SAME garment: four LARGE complete separated views in a row labeled FRONT, SIDE, BACK, 3-4, and a FIFTH smaller newly painted HD thumbnail beneath/right labeled ICON. Do not combine 3-4 and ICON. Fit whole object in each view. Charcoal background, neutral soft studio light, realistic restrained cloth/leather/material texture, no painted floor shadow. The object is displayed by invisible support, WITHOUT body, head, mannequin, hands, visible stand or character. FRONT follows the native garment; SIDE shows true depth, BACK rotates that same garment 180 degrees, preserves collar/closures/hem/holes, and uses minimal plausible unseen construction. The fifth thumbnail is independently rendered HD art of the same garment at inventory angle, NEVER pasted source pixels. No sprite inset, glow, scene, weapons or invented magical powers. No readable letters on garment. Hidden back, thickness, lining, seams and material readings are proposed inferences. Preserve same length, aperture positions, folds and accessories across views. Candidate only, not rigged or approved clothing.",
+      "referenceHash": "e1e51ee0c928a1bc6171c5c69b11c042c7d57ecc25a673a26f973b246ed0d5af",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 150,
+        "sha256": "e1e51ee0c928a1bc6171c5c69b11c042c7d57ecc25a673a26f973b246ed0d5af",
+        "notes": "Referência nativa 6x inspecionada antes da chamada. Fonte privada usada apenas para silhueta/cores; pixels não incorporados."
+      },
+      "sourceViewCount": 1,
+      "queueGroupId": "remaining-body-armor-base-design-textile-01",
+      "inferredAreas": [
+        "Verso, espessura, construção e materiais propostos a partir de uma vista; não constituem geometria histórica recuperada."
+      ],
+      "coherenceReview": {
+        "status": "pending-review",
+        "coherentAcrossViewsVerified": false,
+        "observed": "Cinco vistas, capa burgundy, fechos circulares, faixa ocre e volume aberto preservados.",
+        "pendingIssues": [
+          "Centros vermelhos dos fechos, elos quadrados e múltiplas linhas da barra são inferidos; confirmar sem assumir gemas.",
+          "SIDE/3-4 e queda das pontas exigem reconciliar abertura, comprimento e simulação flexível no rig existente."
+        ]
+      },
+      "notes": "Candidato sem aprovação. Thumbnail HD de estudo não é ícone runtime. Master/material, chão, rig/encaixe e legibilidade na grade lógica de 28px continuam pendentes."
+    },
+    {
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-thumbnail"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "postProcessing": "none; original generated PNG bytes copied unchanged",
+      "productionId": "item.design.base.cloak",
+      "conceptId": "item.design.base.cloak.concept.r1",
+      "image": "assets/concept-art/items/r1/cloak-r1.png",
+      "sha256": "c070f96e91e75b553f05dc6d183dbc539247351e2001384ed07567f9b2dd3862",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "byteCount": 2290137,
+      "prompt": "Use case: stylized-concept. Diablo 3D candidate physical garment study based ONLY on attached private ICURS 149, item.design.base.cloak. Reconstruct the actual source silhouette and colors, not generic equipment suggested by its name. Pale gray/silver hooded open-front cloak, tall pointed hood with black empty opening, broad draped shoulders, black central opening, gray inner hanging fabric, muted ochre/gold double tie at throat, and darker patterned gray edging descending both front openings with pale hem. No face, no hands, no extra chest armor.\nCreate a clean realistic HD modeling sheet with EXACTLY FIVE separate depictions of ONE SAME garment: four LARGE complete separated views in a row labeled FRONT, SIDE, BACK, 3-4, and a FIFTH smaller newly painted HD thumbnail beneath/right labeled ICON. Do not combine 3-4 and ICON. Fit whole object in each view. Charcoal background, neutral soft studio light, realistic restrained cloth/leather/material texture, no painted floor shadow. The object is displayed by invisible support, WITHOUT body, head, mannequin, hands, visible stand or character. FRONT follows the native garment; SIDE shows true depth, BACK rotates that same garment 180 degrees, preserves collar/closures/hem/holes, and uses minimal plausible unseen construction. The fifth thumbnail is independently rendered HD art of the same garment at inventory angle, NEVER pasted source pixels. No sprite inset, glow, scene, weapons or invented magical powers. No readable letters on garment. Hidden back, thickness, lining, seams and material readings are proposed inferences. Preserve same length, aperture positions, folds and accessories across views. Candidate only, not rigged or approved clothing.",
+      "referenceHash": "cc937cffd6e1b0ca6fe0ac728bdf918b3aed8c9823456467c5f70bc4c38d3055",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 149,
+        "sha256": "cc937cffd6e1b0ca6fe0ac728bdf918b3aed8c9823456467c5f70bc4c38d3055",
+        "notes": "Referência nativa 6x inspecionada antes da chamada. Fonte privada usada apenas para silhueta/cores; pixels não incorporados."
+      },
+      "sourceViewCount": 1,
+      "queueGroupId": "remaining-body-armor-base-design-textile-01",
+      "inferredAreas": [
+        "Verso, espessura, construção e materiais propostos a partir de uma vista; não constituem geometria histórica recuperada."
+      ],
+      "coherenceReview": {
+        "status": "pending-review",
+        "coherentAcrossViewsVerified": false,
+        "observed": "Cinco vistas, capuz pontudo cinza, abertura escura, laço ocre e bordas escuras preservados.",
+        "pendingIssues": [
+          "SIDE ficou levemente oblíqua, não ortográfica; confirmar profundidade do capuz.",
+          "Padrão em degraus, forro e costura dorsal são inferidos; confirmar contorno/hem e cobertura por classe."
+        ]
+      },
+      "notes": "Candidato sem aprovação. Thumbnail HD de estudo não é ícone runtime. Master/material, chão, rig/encaixe e legibilidade na grade lógica de 28px continuam pendentes."
+    },
+    {
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-thumbnail"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "postProcessing": "none; original generated PNG bytes copied unchanged",
+      "productionId": "item.design.base.rags",
+      "conceptId": "item.design.base.rags.concept.r1",
+      "image": "assets/concept-art/items/r1/rags-r1.png",
+      "sha256": "bec70ce4c28ef6996a9cf8a8164d1d15d0c47d68409599a38d839ad7d8fa07ad",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "byteCount": 1934059,
+      "prompt": "Use case: stylized-concept. Diablo 3D candidate physical garment study based ONLY on attached private ICURS 128, item.design.base.rags. Reconstruct the actual source silhouette and colors, not generic equipment suggested by its name. Short irregular russet/rust-brown torn sleeveless garment, wide dark neck opening, jagged torn lower edge, uneven shoulder structure. The source has a conspicuous pale-gray irregular tuft/patch across image-left shoulder and a small pale ochre rounded hanging pouch or disc on image-right suspended by a thin ochre strap. These ambiguous details must remain restrained source-shaped forms, not a skull, emblem, new pauldron or elaborate ornament. Preserve torn holes and dark weathered brown.\nCreate a clean realistic HD modeling sheet with EXACTLY FIVE separate depictions of ONE SAME garment: four LARGE complete separated views in a row labeled FRONT, SIDE, BACK, 3-4, and a FIFTH smaller newly painted HD thumbnail beneath/right labeled ICON. Do not combine 3-4 and ICON. Fit whole object in each view. Charcoal background, neutral soft studio light, realistic restrained cloth/leather/material texture, no painted floor shadow. The object is displayed by invisible support, WITHOUT body, head, mannequin, hands, visible stand or character. FRONT follows the native garment; SIDE shows true depth, BACK rotates that same garment 180 degrees, preserves collar/closures/hem/holes, and uses minimal plausible unseen construction. The fifth thumbnail is independently rendered HD art of the same garment at inventory angle, NEVER pasted source pixels. No sprite inset, glow, scene, weapons or invented magical powers. No readable letters on garment. Hidden back, thickness, lining, seams and material readings are proposed inferences. Preserve same length, aperture positions, folds and accessories across views. Candidate only, not rigged or approved clothing.",
+      "referenceHash": "fd8973d130a915b9ddadb7223fce69fc728a7ce882c20aedaf8ac9e37df5d3f3",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 128,
+        "sha256": "fd8973d130a915b9ddadb7223fce69fc728a7ce882c20aedaf8ac9e37df5d3f3",
+        "notes": "Referência nativa 6x inspecionada antes da chamada. Fonte privada usada apenas para silhueta/cores; pixels não incorporados."
+      },
+      "sourceViewCount": 1,
+      "queueGroupId": "remaining-body-armor-base-design-textile-01",
+      "inferredAreas": [
+        "Verso, espessura, construção e materiais propostos a partir de uma vista; não constituem geometria histórica recuperada."
+      ],
+      "coherenceReview": {
+        "status": "pending-review",
+        "coherentAcrossViewsVerified": false,
+        "observed": "Cinco vistas, forma curta irregular castanha, detalhe cinza à esquerda e pingente/pouch ocre à direita preservados.",
+        "pendingIssues": [
+          "Remendo cinza, pouch, cordões de fechamento e furos são interpretações; a fonte não resolve construção.",
+          "Reconciliar lateralidade/visibilidade da bolsa em SIDE/BACK, abertura de braço e topologia dos rasgos antes do master."
+        ]
+      },
+      "notes": "Candidato sem aprovação. Thumbnail HD de estudo não é ícone runtime. Master/material, chão, rig/encaixe e legibilidade na grade lógica de 28px continuam pendentes."
+    },
+    {
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-thumbnail"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "postProcessing": "none; original generated PNG bytes copied unchanged",
+      "productionId": "item.design.base.robe",
+      "conceptId": "item.design.base.robe.concept.r1",
+      "image": "assets/concept-art/items/r1/robe-r1.png",
+      "sha256": "57c55eb454a7a4246791bb3c3ddaf245b37aee7005edf493ee770bdaf638b688",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "byteCount": 2328794,
+      "prompt": "Use case: stylized-concept. Diablo 3D candidate physical garment study based ONLY on attached private ICURS 137, item.design.base.robe. Reconstruct the actual source silhouette and colors, not generic equipment suggested by its name. Long gray robe with broad layered cowl collar draped around V neck, full long sleeves ending black empty cuffs, narrow burgundy red waist sash with two long hanging red ends and ochre trim marks at their ends, gray ankle-length skirt with a central darker vertical band of subdued abstract marks. Preserve monochrome gray cloth and red sash; no readable magical lettering, no individual spell design, no hooded head.\nCreate a clean realistic HD modeling sheet with EXACTLY FIVE separate depictions of ONE SAME garment: four LARGE complete separated views in a row labeled FRONT, SIDE, BACK, 3-4, and a FIFTH smaller newly painted HD thumbnail beneath/right labeled ICON. Do not combine 3-4 and ICON. Fit whole object in each view. Charcoal background, neutral soft studio light, realistic restrained cloth/leather/material texture, no painted floor shadow. The object is displayed by invisible support, WITHOUT body, head, mannequin, hands, visible stand or character. FRONT follows the native garment; SIDE shows true depth, BACK rotates that same garment 180 degrees, preserves collar/closures/hem/holes, and uses minimal plausible unseen construction. The fifth thumbnail is independently rendered HD art of the same garment at inventory angle, NEVER pasted source pixels. No sprite inset, glow, scene, weapons or invented magical powers. No readable letters on garment. Hidden back, thickness, lining, seams and material readings are proposed inferences. Preserve same length, aperture positions, folds and accessories across views. Candidate only, not rigged or approved clothing.",
+      "referenceHash": "5146b00ed45d65a211a96923574aee9fde58c3a9736ae595a5e759f62a9439c8",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 137,
+        "sha256": "5146b00ed45d65a211a96923574aee9fde58c3a9736ae595a5e759f62a9439c8",
+        "notes": "Referência nativa 6x inspecionada antes da chamada. Fonte privada usada apenas para silhueta/cores; pixels não incorporados."
+      },
+      "sourceViewCount": 1,
+      "queueGroupId": "remaining-body-armor-base-design-textile-01",
+      "inferredAreas": [
+        "Verso, espessura, construção e materiais propostos a partir de uma vista; não constituem geometria histórica recuperada."
+      ],
+      "coherenceReview": {
+        "status": "pending-review",
+        "coherentAcrossViewsVerified": false,
+        "observed": "Cinco vistas, gola drapeada, mangas cinzas vazias, faixa vermelha e marcas abstratas preservadas.",
+        "pendingIssues": [
+          "Marcas centrais não são letras recuperadas; manter sem magia individual.",
+          "Reconciliar cobertura da gola, punhos, comprimento e distribuição da faixa SIDE/BACK; thumbnail sobrepõe parte da região inferior direita da prancha."
+        ]
+      },
+      "notes": "Candidato sem aprovação. Thumbnail HD de estudo não é ícone runtime. Master/material, chão, rig/encaixe e legibilidade na grade lógica de 28px continuam pendentes."
+    }
+  ]
+}

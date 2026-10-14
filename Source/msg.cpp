@@ -5,6 +5,8 @@
  */
 #include "msg.h"
 
+#include "engine/render/player_actor_native_hooks.hpp"
+
 #include <climits>
 #include <cmath>
 #include <cstdint>
@@ -2309,6 +2311,7 @@ size_t OnPlayerJoinLevel(const TCmdLocParam2 &message, Player &player)
 		return sizeof(message);
 	}
 
+	const NativePlayerActorActivationScope actorActivation(player);
 	player._pLvlChanging = false;
 	if (player._pName[0] != '\0' && !player.plractive) {
 		ResetPlayerGFX(player);

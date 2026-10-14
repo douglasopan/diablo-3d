@@ -1,0 +1,399 @@
+{
+  "schema": "own-heroes-independent-retarget-review/v1",
+  "localDate": "2026-10-12",
+  "timezone": "America/Sao_Paulo",
+  "generatedAtUtc": "2026-10-12T03:41:58.181306+00:00",
+  "inputs": [
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\retarget-receipt.json",
+      "bytes": 14627,
+      "sha256": "577934a2aaffbb7eeb60c3ee035f43f745201edbf0bd1d89850569ebad2f018f"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\models\\meshy\\characters-20261008\\griswold-rig-r1\\downloads\\basic_animations_walking_glb_url.glb",
+      "bytes": 16290736,
+      "sha256": "6ea36f19d87ecb784f50a11cc6880853c7196e7aab781a64b42255e0600c1dce"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\diagnostics\\characters-rigs\\tripo-warrior-derivative-20261009\\r2\\candidate\\warrior-light-unarmed-r3-tripo-bind-basis-repaired-2k.glb",
+      "bytes": 6725032,
+      "sha256": "1c09cc5e55fbc1f6de5d5db94adae2cbb52a2842e5d1b300b3913f98a4d28507"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\warrior-r2-firstwalk1.glb",
+      "bytes": 6742468,
+      "sha256": "ad2b74aa5444281f9c80dd9a1c74ef6e08c695ee18b54e1b42672952edb32272"
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\devilutionx\\docs\\own-art-pack\\heroes-local-r1\\pipeline\\retarget_local_probe.py",
+      "bytes": 13863,
+      "sha256": "a6dc0fe84b8345e93ab2afe19993c2784e22d49afcde41f120f4a2652edb2aa4"
+    }
+  ],
+  "reviewer": {
+    "path": "D:\\Diablo 1 3D\\devilutionx\\docs\\own-art-pack\\heroes-local-r1\\review_retarget_independent.py",
+    "bytes": 26350,
+    "sha256": "b1dba491dadeb0916c1eedee69c9d2686afac0bcf1ba3cb647781aa9340e3439"
+  },
+  "independentImplementation": "Standalone GLB/accessor/TRS/quaternion/slerp/hierarchy/LBS parser in this review. Does not import producer or its reader; reads real source and candidate bytes.",
+  "methodAssessment": {
+    "spine": "Source Hips→Spine02→Spine01→Spine maps target Hips→Spine→Spine1→Spine2, preserving actual order.",
+    "rotations": "Source current world proper-polar rotation * inverse source bind world rotation applied to target bind world rotation; locals rebuilt under animated target parents. No direct source-local quaternion copy.",
+    "bindDefaultsMaxAbsError": {
+      "source": 4.891031601950147e-07,
+      "target": 4.910997259746596e-07
+    },
+    "originalKeyWorldRotationMaxAbsError": 4.0845623461294167e-07,
+    "sourceArmatureScale": [
+      0.009999999776482582,
+      0.009999999776482582,
+      0.009999999776482582
+    ],
+    "targetArmatureScale": [
+      1,
+      1,
+      1
+    ],
+    "legLengthRatio": 0.6077088127290038,
+    "pelvisVerticalWorldMaxAbsError": 3.982253525894319e-08,
+    "pelvisPlanarWorldMaxAbsError": 0.0,
+    "inPlace": "Source pelvis XZ translation is discarded once. Vertical displacement is taken in source world after0.01 ancestor scale and multiplied by target/source leg length. Other translations/scales stay target bind."
+  },
+  "motionProof": {
+    "candidateClip": "own-retarget-griswold-walk-proof-r1",
+    "sourceKeyCount": 32,
+    "sourceRangeSeconds": [
+      0.03333333507180214,
+      1.0666667222976685
+    ],
+    "candidateRangeSeconds": [
+      0.0,
+      1.033333420753479
+    ],
+    "motionTracks": 23,
+    "differentEightPoses": 8,
+    "realSourceRetargetProven": true,
+    "fakeClipOrRepeatedRaster": false,
+    "candidateIsNativeCompatibleWalk": false,
+    "nativeValidatedClipCount": 0
+  },
+  "ground": {
+    "eightPhaseMinimumY": -0.017225675083951883,
+    "denseSampleCount": 288,
+    "denseMinimumY": -0.031217044874241477,
+    "lowest": {
+      "targetTimeSeconds": 0.3430989762273384,
+      "sourcePhase": 0.33203125,
+      "vertex": 72,
+      "position": [
+        -0.15653863259525747,
+        -0.031217044874241477,
+        -0.22114899573911084
+      ],
+      "dominantJoint": "mixamorig:RightToeBase",
+      "weightInfluences": [
+        {
+          "name": "mixamorig:RightToeBase",
+          "weight": 0.9845848679542542
+        },
+        {
+          "name": "mixamorig:RightFoot",
+          "weight": 0.015129216015338898
+        },
+        {
+          "name": "mixamorig:RightLeg",
+          "weight": 0.00028590793954208493
+        }
+      ]
+    },
+    "samples": [
+      {
+        "phase": 0.0,
+        "targetTimeSeconds": 0.0,
+        "worldMin": [
+          -0.2509285730989926,
+          -0.015607260549055,
+          -0.10400139699937877
+        ],
+        "worldMax": [
+          0.24432007204579084,
+          0.9952389974726694,
+          0.14389823816612884
+        ],
+        "leftFootMinY": -0.015607260549055,
+        "rightFootMinY": -0.006745123926963269,
+        "poseSha256": "c8bf6c768114ba0fb21041da69442fad3a26ca1a6a43a4aabbe006c7ab8384e5",
+        "receiptBoundsMaxDelta": 2.090562081086267e-08
+      },
+      {
+        "phase": 0.125,
+        "targetTimeSeconds": 0.1291666734032333,
+        "worldMin": [
+          -0.23308384018663247,
+          -0.002197852497350681,
+          -0.1504999775513055
+        ],
+        "worldMax": [
+          0.23724995762593504,
+          0.9834910837152877,
+          0.36413503554997295
+        ],
+        "leftFootMinY": 0.03830389183585488,
+        "rightFootMinY": -0.002197852497350681,
+        "poseSha256": "f57392d4eae0805cd8afe7dea0a5c72c6abf4598bd71d306064138e0eacc10d7",
+        "receiptBoundsMaxDelta": 1.2018041561923098e-08
+      },
+      {
+        "phase": 0.25,
+        "targetTimeSeconds": 0.2583333468064666,
+        "worldMin": [
+          -0.2314164204787314,
+          -0.008055513782840763,
+          -0.27588747129582075
+        ],
+        "worldMax": [
+          0.2359560686065207,
+          0.9563654606885006,
+          0.38274533874405636
+        ],
+        "leftFootMinY": 0.015448633372333542,
+        "rightFootMinY": -0.008055513782840763,
+        "poseSha256": "933c91a1d23381cd997d4b26d02ad4cba9a70b7319f5c07894893248608c3113",
+        "receiptBoundsMaxDelta": 1.1575578828804112e-08
+      },
+      {
+        "phase": 0.375,
+        "targetTimeSeconds": 0.38750002020969987,
+        "worldMin": [
+          -0.2544477084749679,
+          -0.012902381627978014,
+          -0.31305619766389536
+        ],
+        "worldMax": [
+          0.25859493356727237,
+          0.9667472614551932,
+          0.2597884133895989
+        ],
+        "leftFootMinY": -0.01175527013104993,
+        "rightFootMinY": -0.012902381627978014,
+        "poseSha256": "4de3a4f4807941f1da10459608565623e2faff62a82e383a18a16d206afd6eee",
+        "receiptBoundsMaxDelta": 1.2430737883484255e-08
+      },
+      {
+        "phase": 0.5,
+        "targetTimeSeconds": 0.5166666936129332,
+        "worldMin": [
+          -0.2725097650207584,
+          -0.004542148511422525,
+          -0.12393329874974109
+        ],
+        "worldMax": [
+          0.22423219903257438,
+          0.9955215005077285,
+          0.14254485390473864
+        ],
+        "leftFootMinY": -0.004542148511422525,
+        "rightFootMinY": -0.0027177167130752536,
+        "poseSha256": "aa8ca660f1aa973b8482f983b0506bb4f28426261c1dc67800ab39fd7d882a34",
+        "receiptBoundsMaxDelta": 5.5052837358293694e-08
+      },
+      {
+        "phase": 0.625,
+        "targetTimeSeconds": 0.6458333670161664,
+        "worldMin": [
+          -0.24660406634217721,
+          0.0036499723369594027,
+          -0.16140757436253164
+        ],
+        "worldMax": [
+          0.19212443209071914,
+          0.9890690726072071,
+          0.3464836619493685
+        ],
+        "leftFootMinY": 0.0036499723369594027,
+        "rightFootMinY": 0.031205548954390226,
+        "poseSha256": "48c7dcec5a4a49ffc60d144d73bcea1a790ca7128c27b4a7928801c884ce68d6",
+        "receiptBoundsMaxDelta": 3.4808974591626907e-08
+      },
+      {
+        "phase": 0.75,
+        "targetTimeSeconds": 0.7750000404193997,
+        "worldMin": [
+          -0.23622145816879547,
+          -0.002954188320136327,
+          -0.28538612425461735
+        ],
+        "worldMax": [
+          0.1856997949786552,
+          0.9565802452672044,
+          0.3682005080742853
+        ],
+        "leftFootMinY": -0.002954188320136327,
+        "rightFootMinY": 0.004158306654269049,
+        "poseSha256": "c754d2667377caccf9162f484e88bb2500650a76f07328539cc64bf381b245e3",
+        "receiptBoundsMaxDelta": 2.219029571204345e-08
+      },
+      {
+        "phase": 0.875,
+        "targetTimeSeconds": 0.904166713822633,
+        "worldMin": [
+          -0.2623757603515061,
+          -0.017225675083951883,
+          -0.31131649164538594
+        ],
+        "worldMax": [
+          0.19743362558848712,
+          0.9677193639703437,
+          0.250482557513099
+        ],
+        "leftFootMinY": -0.017225675083951883,
+        "rightFootMinY": -0.014913581788084372,
+        "poseSha256": "1d5d94eb61432b4678ff1d2c3039b66a95a1cbae526479df6cbae5458e20f29f",
+        "receiptBoundsMaxDelta": 2.861031861423058e-08
+      }
+    ],
+    "units": "Normalized Warrior GLB source units; meter/native world calibration is not established. 0.002 is a strict source-unit tolerance, not proven2millimeters.",
+    "noPixelOrPivotCorrection": true,
+    "noFootLockingOrIkPerformed": true
+  },
+  "timingAndLoop": {
+    "sourceSpanSeconds": 1.0333333872258663,
+    "nativeWalkBaseSlots": 8,
+    "nativeTicksPerSlot": 1,
+    "nominalNativeStepSecondsAt20Ticks": 0.4,
+    "sourceToNominalNativeSpanRatio": 2.583333468064666,
+    "eightPhaseSamplesAreNativeTiming": false,
+    "seam": {
+      "endpointVertexMaxDistance": 5.666779304753558e-07,
+      "endpointVertexRmsDistance": 2.1727339210144515e-07,
+      "meaning": "Reopened endpoint positions agree to float tolerance; endpoint agreement alone does not qualify stance, phase chaining, velocity continuity or foot locking."
+    },
+    "required": "Define phase mapping to active native frame/fraction and step chaining with fixed actor footpoint, then validate foot contacts, stance travel and loop seam. Preserving source duration is not native timing synchronization."
+  },
+  "checks": [
+    {
+      "name": "receipt hashes match immutable inputs",
+      "passed": true
+    },
+    {
+      "name": "22 semantic joints mapped by actual anatomical chain",
+      "passed": true
+    },
+    {
+      "name": "source and target default equal inverse IBM bind within1e-4",
+      "passed": true
+    },
+    {
+      "name": "target nodes shape materials skins and IBMs unchanged",
+      "passed": true
+    },
+    {
+      "name": "original target binary prefix unchanged",
+      "passed": true
+    },
+    {
+      "name": "32 actual source keys retained with time origin shifted only",
+      "passed": true
+    },
+    {
+      "name": "22 rotation tracks plus one pelvis translation track",
+      "passed": true
+    },
+    {
+      "name": "world bind delta rotations independently reproduced at original keys",
+      "passed": true
+    },
+    {
+      "name": "pelvis vertical delta uses source world units and leg ratio",
+      "passed": true
+    },
+    {
+      "name": "pelvis planar motion explicitly removed",
+      "passed": true
+    },
+    {
+      "name": "other mapped local translations and all mapped scales unchanged",
+      "passed": true
+    },
+    {
+      "name": "eight distinct actual skin deformations",
+      "passed": true
+    },
+    {
+      "name": "eight receipt bounds independently reproduced",
+      "passed": true
+    },
+    {
+      "name": "ground tolerance0.002GLBunits",
+      "passed": false,
+      "classification": "concrete rejection criterion"
+    },
+    {
+      "name": "input bytes preserved during independent review",
+      "passed": true
+    }
+  ],
+  "structuralChecksPassed": true,
+  "status": "diagnostic-reject-ground-and-native-readiness",
+  "disposition": "Preserve this real-motion candidate as rejected diagnostic. Root subsequently authorized 64 directional DIAGNOSTIC renders to visualize the actual motion and defect with diagnostic-reject and runtimeEligible=false labels; do not promote or distribute it as compatible native animation/gameplay.",
+  "concreteReasons": [
+    "Ground penetrates to-0.031217045GLB units in288dense samples; strict tolerance=-0.002. Lowest vertex is controlled by foot/toe weights, not an abstract hierarchy failure.",
+    "Source span1.033333s retained. Eight proof phases do not map the nominal native0.4s step, entry distribution, effective interpolation or chained walk phases.",
+    "No foot contact/IK/foot locking, closed-loop gait or anatomy/weapon acceptance; zero other hero action coverage."
+  ],
+  "nextPermittedWork": "The explicitly authorized 64 diagnostic renders may show the rejected candidate's motion/defect. A future eligible animation requires a separate local candidate with foot/contact pose authoring or IK, preserving target bone lengths/footpoint/shape and source master. Review dense sole trajectory, stance/sliding and phase wrap before qualification/distribution as compatible native animation; no per-frame image lift/anchor recenter.",
+  "gameplayPolicy": "ONLY SPRITES for every hero/NPC including Warrior/Ogden until correct rig+animations are validated; no runtime promotion.",
+  "operations": {
+    "sourceOrCandidateWrites": 0,
+    "producerMethodEdits": 0,
+    "renderedFrames": 0,
+    "providerCalls": 0,
+    "sourceRegistryBuildInstallWrites": 0,
+    "reviewOutputs": [
+      "retarget-independent-review-r1.json",
+      "retarget-independent-review-r1.md"
+    ]
+  },
+  "diagnosticRenderAuthorization": {
+    "source": "Root explicit follow-up after ground rejection, 2026-10-12",
+    "plannedFrames": 64,
+    "purpose": "Diagnostic visualization of real motion and reproduced defect; never compatible/native-qualified delivery.",
+    "renderOwner": "root/hero_local_pipeline",
+    "statusAtAuthorizationAddendum": "in execution per producer report; final count/hashes belong to root manifest/render receipt",
+    "nativeValidatedClipCount": 0,
+    "runtimeEligible": false,
+    "reviewAgentRenderedFrames": 0
+  },
+  "textOnlyAuthorizationAddendum": {
+    "localDate": "2026-10-12",
+    "numericChecksRerun": false,
+    "frozenNumericSectionsPreserved": true,
+    "frozenInputIdentityPreserved": true,
+    "producerMethodOrSourcesChangedByReview": false,
+    "denseSamples": 288,
+    "denseMinimumYGlbUnits": -0.031217044874241477,
+    "inputHashesRecheckedAfterTextUpdate": [
+      {
+        "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\retarget-receipt.json",
+        "unchanged": true
+      },
+      {
+        "path": "D:\\Diablo 1 3D\\models\\meshy\\characters-20261008\\griswold-rig-r1\\downloads\\basic_animations_walking_glb_url.glb",
+        "unchanged": true
+      },
+      {
+        "path": "D:\\Diablo 1 3D\\diagnostics\\characters-rigs\\tripo-warrior-derivative-20261009\\r2\\candidate\\warrior-light-unarmed-r3-tripo-bind-basis-repaired-2k.glb",
+        "unchanged": true
+      },
+      {
+        "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\candidate-firstwalk1\\warrior-r2-firstwalk1.glb",
+        "unchanged": true
+      },
+      {
+        "path": "D:\\Diablo 1 3D\\devilutionx\\docs\\own-art-pack\\heroes-local-r1\\pipeline\\retarget_local_probe.py",
+        "unchanged": true
+      }
+    ],
+    "allFrozenInputHashesStillMatch": true
+  }
+}

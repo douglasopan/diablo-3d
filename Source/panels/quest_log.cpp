@@ -5,8 +5,11 @@
 
 #include "DiabloUI/ui_flags.hpp"
 #include "control/control.hpp"
+#include "control/d3d_floating_panels.hpp"
+#include "control/d3d_hud.hpp"
 #include "effects.h"
 #include "engine/render/clx_render.hpp"
+#include "engine/render/d3d_panel_presentation.hpp"
 #include "engine/render/text_render.hpp"
 #include "minitext.h"
 #include "panels/ui_panels.hpp"
@@ -40,7 +43,8 @@ int FinishedQuestOffset;
 int QuestLogMouseToEntry()
 {
 	Rectangle innerArea = InnerPanel;
-	innerArea.position += Displacement(GetLeftPanel().position.x, GetLeftPanel().position.y);
+	const Point origin = GetPanelPosition(UiPanels::Quest);
+	innerArea.position += Displacement(origin.x, origin.y);
 	if (!innerArea.contains(MousePosition) || (EncounteredQuestCount == 0))
 		return -1;
 	const int y = MousePosition.y - innerArea.position.y;
@@ -76,7 +80,13 @@ void DrawQuestLog(const Surface &out)
 		SelectedQuest = l;
 	}
 	const auto x = InnerPanel.position.x;
-	ClxDraw(out, GetPanelPosition(UiPanels::Quest, { 0, 351 }), (*pQLogCel)[0]);
+	const bool floating = IsD3dHudSelected();
+	if (floating) {
+		DrawD3dFloatingPanelBody(out, UiPanels::Quest);
+		DrawD3dFloatingPanelHeader(out, UiPanels::Quest);
+	} else {
+		ClxDraw(out, GetPanelPosition(UiPanels::Quest, { 0, 351 }), (*pQLogCel)[0]);
+	}
 	int y = InnerPanel.position.y + ListYOffset;
 	for (int i = 0; i < EncounteredQuestCount; i++) {
 		if (i == FirstFinishedQuest) {
@@ -85,6 +95,8 @@ void DrawQuestLog(const Surface &out)
 		PrintQLString(out, x, y, _(QuestsData[EncounteredQuests[i]]._qlstr), i == SelectedQuest, i >= FirstFinishedQuest);
 		y += LineSpacing;
 	}
+	if (floating)
+		SealD3dPanelBackplate(out);
 }
 
 void StartQuestlog()

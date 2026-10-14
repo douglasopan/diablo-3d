@@ -1,0 +1,426 @@
+{
+  "format": "d3d.item-concept-art",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "batchId": "batch-03-shields",
+  "scope": "Six BASE shield candidate concepts for next-02-shields; six immutable r1 PNGs plus an explicit kite-shield r2 coherence repair. This batch is an overlay fragment, not full catalog completion.",
+  "catalogSha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d",
+  "generationTool": "built-in image_gen.imagegen",
+  "generationCalls": 7,
+  "postProcessing": "none; original generated PNG bytes copied unchanged",
+  "originalGameImagesIncluded": false,
+  "visualApproval": false,
+  "runtimeInstalled": false,
+  "summary": {
+    "productionUnits": 228,
+    "batchProductionUnits": 6,
+    "conceptCandidateEntries": 7,
+    "generatedImages": 7,
+    "modelsGenerated": 0,
+    "runtimeIconsGenerated": 0
+  },
+  "entries": [
+    {
+      "productionId": "item.design.base.buckler",
+      "conceptId": "item.design.base.buckler.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/buckler-r1.png",
+      "sha256": "dc996ae113ee39813a26d0f72bd061647f426e8d4af990acc510a1a90567bbd0",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate item-modeling reference, not an accepted asset or runtime icon.\nInput image 1 is a PRIVATE original inventory sprite supplied only as silhouette, color and surface-layout reference. Reconstruct its recognizable design in NEW detailed HD imagery; NEVER paste, reproduce or include the pixel sprite anywhere on the board.\nMake a clean professional technical turnaround board of ONE shield: FRONT, SIDE, BACK and THREE-QUARTER views plus a small NEW HD inventory-composition thumbnail of exactly the SAME object. All five depictions must share geometry, face design, thickness, materials and scale. SIDE must show the same front curvature and boss depth; BACK is the real reverse face, not another decorated front. Show a plausible separate grip/attachment on the back only, without any hand or body; rear grip, hidden construction, thickness and scale are explicitly proposed reconstruction. Front design must follow the source.\nPlain charcoal-gray background, generous spacing, full shield visible in each view, neutral soft studio illumination, restrained realistic dark medieval materials with fine wear. Color comes from materials/paint, no glow, colored lighting or painted floor shadows. No scenery, character, weapon, pedestal, exploded variants or ornamental additions. Crisp modern HD rendering throughout, including the thumbnail. Only minimal labels: item name, FRONT, SIDE, BACK, 3/4, ICON.\nSubject: item.design.base.buckler. Original inventory cursor 83.\nBUCKLER. Preserve the small ROUND compact all-metal shield in the reference: very dark blackened iron/steel face, large central rounded domed steel boss, narrow dark metal outer rim and a ring of small spaced rounded metal studs on the surrounding face. Subtle concentric incised/curving ironwork follows the source rather than a heraldic symbol. The brightest muted steel catches are on the upper/right rim and boss; this remains a dark iron material under neutral light. No wood face, painted colors, lion, gold crest, spikes, tall kite outline or oversized boss. Back is dark forged metal with a believable compact transverse grip behind the central boss; do not put a second front boss on the reverse.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "cursorId": 83,
+        "sha256": "b390513524d105a6dfc3530e98d895bfd679421a90e0f39a159f233f69fa4570",
+        "availability": "local-private",
+        "notes": "Original licensed inventory sprite inspected at nearest-neighbor 6x enlargement; only its hash and cursor are published."
+      },
+      "referenceNativeSpriteSha256": "c5af8872a584bb705f1285c1f81e538fe9a52d1a6e1e3a28c11814a9f1589dd8",
+      "referenceCursorName": "BUCKLER",
+      "referenceInspected": true,
+      "viewsUsed": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-concept-thumbnail"
+      ],
+      "inferredParts": [
+        "Rear face and hidden construction",
+        "Grip, forearm strap and attachment placement",
+        "Material thickness, curvature depth and absolute real-world scale",
+        "Fine fasteners, wear and details not resolved by the original pixels"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "notes": "Candidate concept only. Back/handle construction is inferred and must be reconciled with the character socket/grip contract. The HD inset is a new concept preview, not the final runtime icon. No master, attachment or gameplay change is delivered."
+    },
+    {
+      "productionId": "item.design.base.small-shield",
+      "conceptId": "item.design.base.small-shield.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/small-shield-r1.png",
+      "sha256": "c5f6d5f0800d9ccf7917f95d29a8a04cc4d3c19384e4a8a59069e01bc584cce8",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate item-modeling reference, not an accepted asset or runtime icon.\nInput image 1 is a PRIVATE original inventory sprite supplied only as silhouette, color and surface-layout reference. Reconstruct its recognizable design in NEW detailed HD imagery; NEVER paste, reproduce or include the pixel sprite anywhere on the board.\nMake a clean professional technical turnaround board of ONE shield: FRONT, SIDE, BACK and THREE-QUARTER views plus a small NEW HD inventory-composition thumbnail of exactly the SAME object. All five depictions must share geometry, face design, thickness, materials and scale. SIDE must show the same front curvature and boss depth; BACK is the real reverse face, not another decorated front. Show a plausible separate grip/attachment on the back only, without any hand or body; rear grip, hidden construction, thickness and scale are explicitly proposed reconstruction. Front design must follow the source.\nPlain charcoal-gray background, generous spacing, full shield visible in each view, neutral soft studio illumination, restrained realistic dark medieval materials with fine wear. Color comes from materials/paint, no glow, colored lighting or painted floor shadows. No scenery, character, weapon, pedestal, exploded variants or ornamental additions. Crisp modern HD rendering throughout, including the thumbnail. Only minimal labels: item name, FRONT, SIDE, BACK, 3/4, ICON.\nSubject: item.design.base.small-shield. Original inventory cursor 105.\nSMALL SHIELD. Preserve the compact nearly ROUND, subtly clipped/octagonal silhouette in the source. Warm reddish-brown vertical wooden boards enclosed by a substantial plain silver-gray steel rim. Exactly FIVE rounded steel bosses: one larger central dome plus four smaller domes at TOP, BOTTOM, LEFT and RIGHT. Keep four small plain dark rivets between those cardinal bosses, and the wood grain vertical. The five bosses and warm wood/silver contrast are the identity. No heraldic crest, gold, broad cross bands, long pointed outline or spikes. Proposed reverse shows the same wood backing, metal rim and believable modest leather straps/grip attached to the back; no duplicated five-boss front pattern on the reverse.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "cursorId": 105,
+        "sha256": "c2e04b66468dcde57c70c72871bd9fa0ffc8794123a0e4c207fc89dd4614fdb4",
+        "availability": "local-private",
+        "notes": "Original licensed inventory sprite inspected at nearest-neighbor 6x enlargement; only its hash and cursor are published."
+      },
+      "referenceNativeSpriteSha256": "c4185c4716a90cac1b5447d2c69e38f9f5e45be89f0c2b39803b8be4ce2edf52",
+      "referenceCursorName": "SMALL_SHIELD",
+      "referenceInspected": true,
+      "viewsUsed": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-concept-thumbnail"
+      ],
+      "inferredParts": [
+        "Rear face and hidden construction",
+        "Grip, forearm strap and attachment placement",
+        "Material thickness, curvature depth and absolute real-world scale",
+        "Fine fasteners, wear and details not resolved by the original pixels"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "notes": "Candidate concept only. Back/handle construction is inferred and must be reconciled with the character socket/grip contract. The HD inset is a new concept preview, not the final runtime icon. No master, attachment or gameplay change is delivered."
+    },
+    {
+      "productionId": "item.design.base.large-shield",
+      "conceptId": "item.design.base.large-shield.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/large-shield-r1.png",
+      "sha256": "fffc78cbb62a813b9dc971fbdad567fd7aee24edc7b77e5d6f9b5ba46f3cd4bb",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate item-modeling reference, not an accepted asset or runtime icon.\nInput image 1 is a PRIVATE original inventory sprite supplied only as silhouette, color and surface-layout reference. Reconstruct its recognizable design in NEW detailed HD imagery; NEVER paste, reproduce or include the pixel sprite anywhere on the board.\nMake a clean professional technical turnaround board of ONE shield: FRONT, SIDE, BACK and THREE-QUARTER views plus a small NEW HD inventory-composition thumbnail of exactly the SAME object. All five depictions must share geometry, face design, thickness, materials and scale. SIDE must show the same front curvature and boss depth; BACK is the real reverse face, not another decorated front. Show a plausible separate grip/attachment on the back only, without any hand or body; rear grip, hidden construction, thickness and scale are explicitly proposed reconstruction. Front design must follow the source.\nPlain charcoal-gray background, generous spacing, full shield visible in each view, neutral soft studio illumination, restrained realistic dark medieval materials with fine wear. Color comes from materials/paint, no glow, colored lighting or painted floor shadows. No scenery, character, weapon, pedestal, exploded variants or ornamental additions. Crisp modern HD rendering throughout, including the thumbnail. Only minimal labels: item name, FRONT, SIDE, BACK, 3/4, ICON.\nSubject: item.design.base.large-shield. Original inventory cursor 147.\nLARGE SHIELD. Preserve the tall broad-shouldered shield tapering down to a long angular pointed bottom, with a softly curved upper contour and shallow convex face. The source is muted blue-gray/blued steel, NOT plain brown timber. Its defining front is the large dark almost-black spread-wing heraldic EAGLE/bird motif occupying most of the face, with a narrow central body and strong angular wing shapes reaching both shoulders. Closely follow the source's silhouette, dark bird placement and slate-blue iron palette. Fine edge wear and restrained blue steel highlights, no bright royal blue, red, brass lion, quartering, round boss, spikes or extra rim ornaments. Exact tiny bird features hidden by the pixel resolution are inferred; keep the broad black eagle silhouette rather than inventing elaborate plumage. Reverse is simple dark blued metal backing with plausible modest leather forearm strap and hand grip, no eagle stamped again on the back.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "cursorId": 147,
+        "sha256": "548fa709929462b732351f850527a6cab5e1f6c1822c4c3ae0557394fbde66f9",
+        "availability": "local-private",
+        "notes": "Original licensed inventory sprite inspected at nearest-neighbor 6x enlargement; only its hash and cursor are published."
+      },
+      "referenceNativeSpriteSha256": "b97c90b983a7f550ecd0d1f64e8f37081be6d0a08e85a71d8ecefc33067f0263",
+      "referenceCursorName": "LARGE_SHIELD",
+      "referenceInspected": true,
+      "viewsUsed": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-concept-thumbnail"
+      ],
+      "inferredParts": [
+        "Rear face and hidden construction",
+        "Grip, forearm strap and attachment placement",
+        "Material thickness, curvature depth and absolute real-world scale",
+        "Fine fasteners, wear and details not resolved by the original pixels",
+        "Fine heraldic anatomy and ornament details beyond source pixel resolution"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "notes": "Candidate concept only. Back/handle construction is inferred and must be reconciled with the character socket/grip contract. The HD inset is a new concept preview, not the final runtime icon. No master, attachment or gameplay change is delivered."
+    },
+    {
+      "productionId": "item.design.base.kite-shield",
+      "conceptId": "item.design.base.kite-shield.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/kite-shield-r1.png",
+      "sha256": "e36b8c45647e88b7f981b6ed1feb2a0582a81eaa1cc6a497407912817d2fae41",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate item-modeling reference, not an accepted asset or runtime icon.\nInput image 1 is a PRIVATE original inventory sprite supplied only as silhouette, color and surface-layout reference. Reconstruct its recognizable design in NEW detailed HD imagery; NEVER paste, reproduce or include the pixel sprite anywhere on the board.\nMake a clean professional technical turnaround board of ONE shield: FRONT, SIDE, BACK and THREE-QUARTER views plus a small NEW HD inventory-composition thumbnail of exactly the SAME object. All five depictions must share geometry, face design, thickness, materials and scale. SIDE must show the same front curvature and boss depth; BACK is the real reverse face, not another decorated front. Show a plausible separate grip/attachment on the back only, without any hand or body; rear grip, hidden construction, thickness and scale are explicitly proposed reconstruction. Front design must follow the source.\nPlain charcoal-gray background, generous spacing, full shield visible in each view, neutral soft studio illumination, restrained realistic dark medieval materials with fine wear. Color comes from materials/paint, no glow, colored lighting or painted floor shadows. No scenery, character, weapon, pedestal, exploded variants or ornamental additions. Crisp modern HD rendering throughout, including the thumbnail. Only minimal labels: item name, FRONT, SIDE, BACK, 3/4, ICON.\nSubject: item.design.base.kite-shield. Original inventory cursor 113.\nKITE SHIELD. Preserve the source's elongated kite outline: broad upper shoulders, near-flat/slightly sloping top, long straight taper into a sharp lower point, subtly convex face. The essential heraldic painted front is QUARTERED: upper LEFT deep cobalt BLUE, upper RIGHT bright golden YELLOW, lower LEFT golden YELLOW, lower RIGHT cobalt BLUE, with a small plain silver-gray hemispherical boss centered at the intersection. Each quarter contains a subtle same-family darker/tonal heraldic rampant-lion silhouette, positioned and oriented like the source, not a new eagle or cross. Keep the vivid blue/yellow identity as realistic pigment over a wooden shield, not glow or neon; yellow is painted ochre/golden yellow, not giant polished gold-metal panels. No added thick metal quadrant divider, spikes, ornate border or extra bosses. Proposed back shows warm wood backing, modest leather forearm strap and grip, with the same pointed outline; do not repeat the four colored front quarters on the reverse.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "cursorId": 113,
+        "sha256": "4cc2c4c5fab40be9c345afa8e95510fe06484cc00d5d567228bf186218d9587f",
+        "availability": "local-private",
+        "notes": "Original licensed inventory sprite inspected at nearest-neighbor 6x enlargement; only its hash and cursor are published."
+      },
+      "referenceNativeSpriteSha256": "916fc18289a657896f5bb5369e4563861b49947716670fa0ae6de5d8828eec06",
+      "referenceCursorName": "KITE_SHIELD",
+      "referenceInspected": true,
+      "viewsUsed": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-concept-thumbnail"
+      ],
+      "inferredParts": [
+        "Rear face and hidden construction",
+        "Grip, forearm strap and attachment placement",
+        "Material thickness, curvature depth and absolute real-world scale",
+        "Fine fasteners, wear and details not resolved by the original pixels",
+        "Fine heraldic anatomy and ornament details beyond source pixel resolution",
+        "Exact shoulder-notch geometry and edge curvature"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "notes": "Candidate concept only. Back/handle construction is inferred and must be reconciled with the character socket/grip contract. The HD inset is a new concept preview, not the final runtime icon. No master, attachment or gameplay change is delivered. Preserve r1 as generation history; its SIDE conflict is addressed separately by r2.",
+      "knownIssues": [
+        {
+          "id": "side-extra-reverse-boss",
+          "severity": "major",
+          "description": "SIDE shows an incorrect extra metal boss on the reverse face, inconsistent with BACK.",
+          "addressedByConceptId": "item.design.base.kite-shield.concept.r2"
+        }
+      ]
+    },
+    {
+      "productionId": "item.design.base.kite-shield",
+      "conceptId": "item.design.base.kite-shield.concept.r2",
+      "revision": "r2",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r2/kite-shield-r2.png",
+      "sha256": "b084829d48205623769b0e58fef5d2bfb135cf998f11d9b0cf0b7501bf3de264",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: precise-object-edit.\nEdit target: this KITE SHIELD concept turnaround board, candidate revision r1.\nChange ONLY the central SIDE-view shield drawing, especially the extra silver hemisphere protruding to its LEFT at the boss height. The SIDE drawing currently incorrectly shows a front metal boss on both faces.\nCorrect it to ONE silver hemispherical boss protruding from the painted FRONT face to the RIGHT in SIDE view. The reverse face toward the LEFT must have NO silver boss. Remove the extra LEFT silver dome and replace that small region with the dark rear wooden surface/edge and a modest brown leather wrapped grip profile consistent with the grip already shown in BACK. This is a side-view coherence repair, not a second design.\nKeep the full FRONT, BACK, 3/4 and ICON depictions exactly unchanged: same outline, shoulder notches, blue/yellow quarter order, four tonal lions, front steel boss, material wear, grip layout, scale, neutral lighting and charcoal background. Keep all text, labels and layout unchanged. Never paste any source pixel-art. Preserve the polished HD rendering. The corrected SIDE must depict the very same shield shown in the other four views.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "cursorId": 113,
+        "sha256": "4cc2c4c5fab40be9c345afa8e95510fe06484cc00d5d567228bf186218d9587f",
+        "availability": "local-private",
+        "notes": "Original licensed inventory sprite inspected at nearest-neighbor 6x enlargement; only its hash and cursor are published."
+      },
+      "referenceNativeSpriteSha256": "916fc18289a657896f5bb5369e4563861b49947716670fa0ae6de5d8828eec06",
+      "referenceCursorName": "KITE_SHIELD",
+      "referenceInspected": true,
+      "viewsUsed": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-concept-thumbnail"
+      ],
+      "inferredParts": [
+        "Rear face and hidden construction",
+        "Grip, forearm strap and attachment placement",
+        "Material thickness, curvature depth and absolute real-world scale",
+        "Fine fasteners, wear and details not resolved by the original pixels",
+        "Fine heraldic anatomy and ornament details beyond source pixel resolution",
+        "Exact shoulder-notch geometry and edge curvature"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "notes": "Candidate concept only. Back/handle construction is inferred and must be reconciled with the character socket/grip contract. The HD inset is a new concept preview, not the final runtime icon. No master, attachment or gameplay change is delivered. r2 addresses the r1 lateral-view conflict; no revision is automatically selected or accepted.",
+      "revisionOfConceptId": "item.design.base.kite-shield.concept.r1",
+      "revisionReason": "Targeted coherence repair: remove the extra reverse-side metal boss in SIDE, retaining a single front boss and showing a plausible rear grip profile.",
+      "revisionHistory": [
+        {
+          "fromRevision": "r1",
+          "toRevision": "r2",
+          "defect": "SIDE displayed an incorrect metal boss on the reverse face.",
+          "inspection": "r2 SIDE now shows one front boss and a rear leather grip profile; all views remain candidates."
+        }
+      ]
+    },
+    {
+      "productionId": "item.design.base.tower-shield",
+      "conceptId": "item.design.base.tower-shield.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/tower-shield-r1.png",
+      "sha256": "fe929c494c547566df14e6300f04a18354cf95b3e57719c582e81110f912c87a",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate item-modeling reference, not an accepted asset or runtime icon.\nInput image 1 is a PRIVATE original inventory sprite supplied only as silhouette, color and surface-layout reference. Reconstruct its recognizable design in NEW detailed HD imagery; NEVER paste, reproduce or include the pixel sprite anywhere on the board.\nMake a clean professional technical turnaround board of ONE shield: FRONT, SIDE, BACK and THREE-QUARTER views plus a small NEW HD inventory-composition thumbnail of exactly the SAME object. All five depictions must share geometry, face design, thickness, materials and scale. SIDE must show the same front curvature and boss depth; BACK is the real reverse face, not another decorated front. Show a plausible separate grip/attachment on the back only, without any hand or body; rear grip, hidden construction, thickness and scale are explicitly proposed reconstruction. Front design must follow the source.\nPlain charcoal-gray background, generous spacing, full shield visible in each view, neutral soft studio illumination, restrained realistic dark medieval materials with fine wear. Color comes from materials/paint, no glow, colored lighting or painted floor shadows. No scenery, character, weapon, pedestal, exploded variants or ornamental additions. Crisp modern HD rendering throughout, including the thumbnail. Only minimal labels: item name, FRONT, SIDE, BACK, 3/4, ICON.\nSubject: item.design.base.tower-shield. Original inventory cursor 132.\nTOWER SHIELD. Preserve this specific source: a very tall NARROW RECTANGULAR blackened iron/steel tower shield, nearly straight upper and lower edges with subtly rounded corners, shallow cylindrical convex face, no pointed kite bottom. The face is charcoal-black metal, with one narrow warm BRASS/GOLD vertical reinforcing spine running near its center and exactly TWO narrow horizontal brass reinforcing bars, one near the upper third and one near the lower third, making two cross intersections on that spine. Closely follow the source proportions and restrained gold-on-black arrangement; tiny dark fasteners are plausible. No huge bright heraldic cross covering the whole face, no lion/eagle, no wood front, no red, no giant central dome, no sharp spikes, no ornate crown. The dark face must remain legible under neutral light without turning silver. Proposed reverse is plain dark metal backing with a plausible leather forearm strap and hand grip and no duplicated decorative face; same tall rectangular shape and curved thickness.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "cursorId": 132,
+        "sha256": "e430e1eda902e326acd605706c574c355a13ca5f2708f686b547efc07f65ccdb",
+        "availability": "local-private",
+        "notes": "Original licensed inventory sprite inspected at nearest-neighbor 6x enlargement; only its hash and cursor are published."
+      },
+      "referenceNativeSpriteSha256": "34fce0f415f93b1d63483a275a5aa7091e7db76b54b23201f2e679c17fdc7665",
+      "referenceCursorName": "TOWER_SHIELD",
+      "referenceInspected": true,
+      "viewsUsed": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-concept-thumbnail"
+      ],
+      "inferredParts": [
+        "Rear face and hidden construction",
+        "Grip, forearm strap and attachment placement",
+        "Material thickness, curvature depth and absolute real-world scale",
+        "Fine fasteners, wear and details not resolved by the original pixels"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "notes": "Candidate concept only. Back/handle construction is inferred and must be reconciled with the character socket/grip contract. The HD inset is a new concept preview, not the final runtime icon. No master, attachment or gameplay change is delivered."
+    },
+    {
+      "productionId": "item.design.base.gothic-shield",
+      "conceptId": "item.design.base.gothic-shield.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/gothic-shield-r1.png",
+      "sha256": "5e943ec42b550618a39a8786092e5fea452d2cd62ce55e5259c4fe2de02cc141",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate item-modeling reference, not an accepted asset or runtime icon.\nInput image 1 is a PRIVATE original inventory sprite supplied only as silhouette, color and surface-layout reference. Reconstruct its recognizable design in NEW detailed HD imagery; NEVER paste, reproduce or include the pixel sprite anywhere on the board.\nMake a clean professional technical turnaround board of ONE shield: FRONT, SIDE, BACK and THREE-QUARTER views plus a small NEW HD inventory-composition thumbnail of exactly the SAME object. All five depictions must share geometry, face design, thickness, materials and scale. SIDE must show the same front curvature and boss depth; BACK is the real reverse face, not another decorated front. Show a plausible separate grip/attachment on the back only, without any hand or body; rear grip, hidden construction, thickness and scale are explicitly proposed reconstruction. Front design must follow the source.\nPlain charcoal-gray background, generous spacing, full shield visible in each view, neutral soft studio illumination, restrained realistic dark medieval materials with fine wear. Color comes from materials/paint, no glow, colored lighting or painted floor shadows. No scenery, character, weapon, pedestal, exploded variants or ornamental additions. Crisp modern HD rendering throughout, including the thumbnail. Only minimal labels: item name, FRONT, SIDE, BACK, 3/4, ICON.\nSubject: item.design.base.gothic-shield. Original inventory cursor 148.\nGOTHIC SHIELD. Preserve the distinctive tall broad-shouldered heater/kite shield tapering to a pointed bottom, gently arched upper rim and shallow convex face. Front field is near-BLACK dark steel, with a thin antique BRASS/GOLD rim. The defining front ornament is a LARGE raised antique-brass rampant LION facing the viewer's LEFT: forepaws extend toward the left side, strong body occupies center/right, tail curls upward on the right, lower legs continue downward. A narrow cool SILVER/STEEL vertical reinforcement runs down the central face behind/across portions of the raised lion, as visible in the source. Closely preserve the source's black/gold/silver palette, raised lion silhouette and proportions. Fine heraldic anatomy hidden by the pixels is reconstructed rather than claimed exact. No eagle, colored quartering, wood face, extra lion heads, spikes, gems or generic plain medieval shield. Proposed reverse is plain dark metal backing with modest leather forearm strap and grip, preserving curvature and outline; no lion repeated on the reverse.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "cursorId": 148,
+        "sha256": "bfc5d5363613f0c503665b226c4ff68d50a274e84bf5405bdfaf8f00a60dfbeb",
+        "availability": "local-private",
+        "notes": "Original licensed inventory sprite inspected at nearest-neighbor 6x enlargement; only its hash and cursor are published."
+      },
+      "referenceNativeSpriteSha256": "5027605f4d0ae5b4d27809a4b029c4d600cf0618a447f450a4e2d0b32836183d",
+      "referenceCursorName": "GOTHIC_SHIELD",
+      "referenceInspected": true,
+      "viewsUsed": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-concept-thumbnail"
+      ],
+      "inferredParts": [
+        "Rear face and hidden construction",
+        "Grip, forearm strap and attachment placement",
+        "Material thickness, curvature depth and absolute real-world scale",
+        "Fine fasteners, wear and details not resolved by the original pixels",
+        "Fine heraldic anatomy and ornament details beyond source pixel resolution"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "notes": "Candidate concept only. Back/handle construction is inferred and must be reconciled with the character socket/grip contract. The HD inset is a new concept preview, not the final runtime icon. No master, attachment or gameplay change is delivered."
+    }
+  ],
+  "devlogHandoff": {
+    "destination": "Integrator consolidates into the separately owned Diablo 3D site/devlog.",
+    "includeAllGeneratedImages": true,
+    "images": [
+      {
+        "productionId": "item.design.base.buckler",
+        "revision": "r1",
+        "image": "assets/concept-art/items/r1/buckler-r1.png",
+        "sha256": "dc996ae113ee39813a26d0f72bd061647f426e8d4af990acc510a1a90567bbd0"
+      },
+      {
+        "productionId": "item.design.base.small-shield",
+        "revision": "r1",
+        "image": "assets/concept-art/items/r1/small-shield-r1.png",
+        "sha256": "c5f6d5f0800d9ccf7917f95d29a8a04cc4d3c19384e4a8a59069e01bc584cce8"
+      },
+      {
+        "productionId": "item.design.base.large-shield",
+        "revision": "r1",
+        "image": "assets/concept-art/items/r1/large-shield-r1.png",
+        "sha256": "fffc78cbb62a813b9dc971fbdad567fd7aee24edc7b77e5d6f9b5ba46f3cd4bb"
+      },
+      {
+        "productionId": "item.design.base.kite-shield",
+        "revision": "r1",
+        "image": "assets/concept-art/items/r1/kite-shield-r1.png",
+        "sha256": "e36b8c45647e88b7f981b6ed1feb2a0582a81eaa1cc6a497407912817d2fae41"
+      },
+      {
+        "productionId": "item.design.base.kite-shield",
+        "revision": "r2",
+        "image": "assets/concept-art/items/r2/kite-shield-r2.png",
+        "sha256": "b084829d48205623769b0e58fef5d2bfb135cf998f11d9b0cf0b7501bf3de264"
+      },
+      {
+        "productionId": "item.design.base.tower-shield",
+        "revision": "r1",
+        "image": "assets/concept-art/items/r1/tower-shield-r1.png",
+        "sha256": "fe929c494c547566df14e6300f04a18354cf95b3e57719c582e81110f912c87a"
+      },
+      {
+        "productionId": "item.design.base.gothic-shield",
+        "revision": "r1",
+        "image": "assets/concept-art/items/r1/gothic-shield-r1.png",
+        "sha256": "5e943ec42b550618a39a8786092e5fea452d2cd62ce55e5259c4fe2de02cc141"
+      }
+    ],
+    "facts": [
+      "Six distinct BASE shield identities received candidate turnaround boards with FRONT, SIDE, BACK, 3/4 and a newly rendered HD concept thumbnail.",
+      "Each original reference was inspected privately before its individual built-in generation call.",
+      "Kite shield r1 is preserved; r2 repairs a visible SIDE-view duplicate-boss conflict."
+    ],
+    "limitations": [
+      "No concept is visually approved, selected or installed.",
+      "Rear grip/strap layout, thickness, absolute scale and unresolved heraldic details are proposed reconstruction.",
+      "Kite r1 contains a documented major SIDE-view conflict; compare r2 before modeling.",
+      "A generated board is not proof of exact multiview geometry. Reconcile all views before master production.",
+      "No 3D model, rig/socket attachment or final inventory icon has been produced."
+    ]
+  },
+  "revisionSelectionPolicy": "All entries remain candidates. Do not select by latest filename or revision automatically.",
+  "registryAuthority": "assets/registry.json"
+}
+

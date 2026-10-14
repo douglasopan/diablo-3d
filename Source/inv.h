@@ -87,6 +87,8 @@ extern DVL_API_FOR_TEST bool invflag;
 extern const Rectangle InvRect[NUM_XY_SLOTS];
 
 void InvDrawSlotBack(const Surface &out, Point targetPosition, Size size, item_quality itemQuality);
+/** Pure native quality-family sample; no item state or main surface is changed. */
+bool GetD3dHudBeltTint(int slot, uint8_t &paletteIndex);
 /**
  * @brief Checks whether the given item can be placed on the belt. Takes item size as well as characteristics into account. Items
  * that cannot be placed on the belt have to be placed in the inventory instead.

@@ -91,7 +91,7 @@ if (Test-Path $CMakeListPath) {
         # StormLib is C++ and must be linked with a C++ linker.
         $Patch1 = "project(SMPQ)`r`nfile(GLOB_RECURSE CFILES `"`${CMAKE_SOURCE_DIR}/*.c`")`r`nSET_SOURCE_FILES_PROPERTIES(`${CFILES} PROPERTIES LANGUAGE CXX)"
         $CMakeParams = $CMakeParams -replace "project\(SMPQ\)", $Patch1
-        
+
         # Do not generate the manual
         $CMakeParams = $CMakeParams -replace "if\(NOT CMAKE_CROSSCOMPILING\)", "if(FALSE)"
         Set-Content -Path $CMakeListPath -Value $CMakeParams -Encoding UTF8

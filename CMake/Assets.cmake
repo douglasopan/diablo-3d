@@ -11,37 +11,17 @@ if(USE_GETTEXT_FROM_VCPKG)
   list(APPEND Gettext_ROOT ${CMAKE_CURRENT_BINARY_DIR}/vcpkg_installed/${VCPKG_TARGET_TRIPLET}/tools/gettext/bin)
 endif()
 find_package(Gettext)
-if(Gettext_FOUND)
-  set(_catalog_compiler "${GETTEXT_MSGFMT_EXECUTABLE}" -o)
-else()
-  find_package(Python3 3.8 QUIET COMPONENTS Interpreter)
-  if(Python3_Interpreter_FOUND)
-    set(_catalog_compiler "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/tools/compile_translations.py")
-    set(_catalog_compiler_dependencies
-      "${CMAKE_CURRENT_SOURCE_DIR}/tools/compile_translations.py"
-      "${CMAKE_CURRENT_SOURCE_DIR}/tools/third_party/cpython/msgfmt.py")
-    message(STATUS "Compiling translations with the bundled CPython compiler")
-  else()
-    message(WARNING "Translations will not be built: install GNU gettext or Python 3")
-  endif()
-endif()
-if(_catalog_compiler)
+if (Gettext_FOUND)
   file(MAKE_DIRECTORY "${DEVILUTIONX_ASSETS_OUTPUT_DIRECTORY}")
   foreach(lang ${devilutionx_langs})
     set(_po_file "${CMAKE_CURRENT_SOURCE_DIR}/Translations/${lang}.po")
     set(_gmo_file "${DEVILUTIONX_ASSETS_OUTPUT_DIRECTORY}/${lang}.gmo")
     set(_lang_target devilutionx_lang_${lang})
-    if(Gettext_FOUND)
-      set(_catalog_arguments "${_gmo_file}" "${_po_file}")
-    else()
-      set(_catalog_arguments "${_po_file}" "${_gmo_file}")
-    endif()
     add_custom_command(
-      COMMAND ${_catalog_compiler} ${_catalog_arguments}
+      COMMAND "${GETTEXT_MSGFMT_EXECUTABLE}" -o "${_gmo_file}" "${_po_file}"
       WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
       OUTPUT "${_gmo_file}"
       MAIN_DEPENDENCY "${_po_file}"
-      DEPENDS ${_catalog_compiler_dependencies}
       VERBATIM
     )
     add_custom_target("${_lang_target}" DEPENDS "${_gmo_file}")
@@ -65,7 +45,6 @@ endif()
 
 set(devilutionx_assets
   ASSETS_VERSION
-  d3d-lighting.ini
   arena/church.dun
   arena/circle_of_death.dun
   arena/hell.dun
@@ -244,34 +223,6 @@ set(devilutionx_assets
   ui_art/dvl_lrpopup.clx
   ui_art/mainmenuw.clx)
 
-# Owner-provided D3D animation; independently generated, not game-archive art.
-list(APPEND devilutionx_assets
-  ui_art/d3d-menu.pcx
-  ui_art/d3d-title.pcx
-  ui_art/d3d-pause.pcx)
-
-# Generated menu scenery and the shared Godot/C++ UI layout.
-list(APPEND devilutionx_assets
-  d3d-ui/menu-background.png
-  d3d-ui/layout.ini)
-
-# Original RGBA HUD artwork, shared with the Godot authoring preview.
-list(APPEND devilutionx_assets
-  d3d-ui/hud/r1/chassis.png
-  d3d-ui/hud/r1/button.png
-  d3d-ui/hud/r1/inset.png
-  d3d-ui/hud/r1/orb-frame.png
-  d3d-ui/hud/r1/orb-red.png
-  d3d-ui/hud/r1/orb-blue.png)
-
-# Optional locally supplied soundtrack. Register it so asset trimming preserves
-# the file on subsequent builds; public clones retain the original soundtrack.
-foreach(_d3d_music menu-rock2 menu-alternative town-rock town-alternative town-third cathedral-rock catacombs-rock caves-rock hell-rock nest-rock crypt-rock)
-  if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/assets/music/d3d/${_d3d_music}.mp3")
-    list(APPEND devilutionx_assets "music/d3d/${_d3d_music}.mp3")
-  endif()
-endforeach()
-
 if(NOT UNPACKED_MPQS)
   list(APPEND devilutionx_assets
     data/inv/objcurs-widths.txt)
@@ -314,7 +265,7 @@ else()
     OUTPUT_DIR "${DEVILUTIONX_ASSETS_OUTPUT_DIRECTORY}"
     OUTPUT_VARIABLE DEVILUTIONX_OUTPUT_ASSETS_FILES)
   set(DEVILUTIONX_MPQ_FILES ${devilutionx_assets})
-  if(devilutionx_lang_files)
+  if (Gettext_FOUND)
     foreach(lang ${devilutionx_langs})
       list(APPEND DEVILUTIONX_MPQ_FILES "${lang}.gmo")
     endforeach()

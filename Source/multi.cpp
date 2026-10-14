@@ -4,6 +4,7 @@
  * Implementation of functions for keeping multiplaye games in sync.
  */
 #include "multi.h"
+#include "engine/render/player_actor_native_hooks.hpp"
 
 #include <cstddef>
 #include <cstdint>
@@ -261,6 +262,7 @@ void ParseTurn(uint8_t pnum, uint32_t turn)
 
 void PlayerLeftMsg(Player &player, bool left)
 {
+	DeactivateNativePlayerActor(player);
 	if (&player == InspectPlayer)
 		InspectPlayer = MyPlayer;
 
@@ -821,6 +823,7 @@ void NetClose()
 	if (gbIsMultiplayer)
 		SDL_Delay(2000);
 	if (!demo::IsRunning()) {
+		NativePlayerActorLifecycle().InvalidateLevel();
 		Players.clear();
 		MyPlayer = nullptr;
 	}
@@ -836,6 +839,7 @@ bool NetInit(bool bSinglePlayer)
 		memset(sgbPlayerLeftGameTbl, 0, sizeof(sgbPlayerLeftGameTbl));
 		memset(sgdwPlayerLeftReasonTbl, 0, sizeof(sgdwPlayerLeftReasonTbl));
 		memset(sgbSendDeltaTbl, 0, sizeof(sgbSendDeltaTbl));
+		NativePlayerActorLifecycle().InvalidateLevel();
 		Players.clear();
 		MyPlayer = nullptr;
 		memset(sgwPackPlrOffsetTbl, 0, sizeof(sgwPackPlrOffsetTbl));
@@ -943,6 +947,7 @@ void recv_plrinfo(Player &player, const TCmdPlrInfoHdr &header, bool recv)
 		return;
 	}
 
+	const NativePlayerActorActivationScope actorActivation(player);
 	ResetPlayerGFX(player);
 	player.plractive = true;
 	gbActivePlayers++;

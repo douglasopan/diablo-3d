@@ -353,6 +353,369 @@ TownVolumeMesh BuildTownPropVolume(const TownVolumeSprite &sprite, int pixelStep
 	return BuildSilhouetteVolume(sprite, pixelStep, true);
 }
 
+namespace {
+
+uint32_t PropHash(uint32_t value)
+{
+	value ^= value >> 16;
+	value *= 0x7feb352dU;
+	value ^= value >> 15;
+	value *= 0x846ca68bU;
+	return value ^ (value >> 16);
+}
+
+TownVolumeVertex PhysicalPropVertex(float x, float height, float z)
+{
+	return { x, height, z, 0, 0 };
+}
+
+void PhysicalPropTriangle(TownVolumeMesh &mesh, TownVolumeVertex a, TownVolumeVertex b,
+    TownVolumeVertex c, uint8_t color, Vec outward)
+{
+	Triangle(mesh, a, b, c, TownVolumeMaterial::SpriteSide, color, outward);
+}
+
+void SmallGroundedRock(TownVolumeMesh &mesh, float centerX, float centerZ,
+    float radiusX, float radiusZ, float height, uint32_t seed, uint8_t color)
+{
+	constexpr size_t Sides = 10;
+	constexpr std::array<float, 3> RingRadius { 0.72F, 1.0F, 0.60F };
+	constexpr std::array<float, 3> RingHeight { 0, 0.32F, 0.78F };
+	std::array<std::array<TownVolumeVertex, Sides>, 3> rings;
+	const float yaw = static_cast<float>(PropHash(seed) & 65535U) * (2 * Pi / 65536);
+	for (size_t ring = 0; ring < rings.size(); ++ring) {
+		for (size_t side = 0; side < Sides; ++side) {
+			const float angle = 2 * Pi * static_cast<float>(side) / static_cast<float>(Sides);
+			const float irregular = 0.92F + static_cast<float>(PropHash(seed + static_cast<uint32_t>(side)) & 255U) * (0.16F / 255);
+			const float x = std::cos(angle) * radiusX * RingRadius[ring] * irregular;
+			const float z = std::sin(angle) * radiusZ * RingRadius[ring] * irregular;
+			rings[ring][side] = PhysicalPropVertex(centerX + x * std::cos(yaw) - z * std::sin(yaw),
+			    height * RingHeight[ring], centerZ + x * std::sin(yaw) + z * std::cos(yaw));
+		}
+	}
+	const auto base = PhysicalPropVertex(centerX, 0, centerZ);
+	const auto top = PhysicalPropVertex(centerX + radiusX * 0.08F, height, centerZ - radiusZ * 0.06F);
+	for (size_t side = 0; side < Sides; ++side) {
+		const size_t next = (side + 1) % Sides;
+		PhysicalPropTriangle(mesh, base, rings[0][next], rings[0][side], color, { 0, -1, 0 });
+		for (size_t ring = 0; ring + 1 < rings.size(); ++ring) {
+			const Vec outward { (rings[ring][side].x + rings[ring][next].x) / 2 - centerX, 0,
+			    (rings[ring][side].z + rings[ring][next].z) / 2 - centerZ };
+			Quad(mesh, { rings[ring][side], rings[ring][next], rings[ring + 1][next], rings[ring + 1][side] },
+			    TownVolumeMaterial::SpriteSide, color, outward);
+		}
+		PhysicalPropTriangle(mesh, rings[2][side], rings[2][next], top, color,
+		    { rings[2][side].x - centerX, height, rings[2][side].z - centerZ });
+	}
+}
+
+struct ProfilePoint { float x, height; };
+
+float ProfileCross(ProfilePoint a, ProfilePoint b, ProfilePoint c)
+{
+	return (b.x - a.x) * (c.height - a.height) - (b.height - a.height) * (c.x - a.x);
+}
+
+bool ExtrudeGraveProfile(TownVolumeMesh &mesh, const std::vector<ProfilePoint> &profile,
+    float centerX, float centerZ, float thickness, uint8_t color)
+{
+	// Ear clipping preserves cross-shaped concavities; a center fan would fill
+	// the missing corners around the arms. All caps and side edges share points.
+	std::vector<size_t> remaining(profile.size());
+	for (size_t i = 0; i < remaining.size(); ++i) remaining[i] = i;
+	std::vector<std::array<size_t, 3>> caps;
+	while (remaining.size() > 3) {
+		bool clipped = false;
+		for (size_t i = 0; i < remaining.size(); ++i) {
+			const size_t a = remaining[(i + remaining.size() - 1) % remaining.size()];
+			const size_t b = remaining[i], c = remaining[(i + 1) % remaining.size()];
+			if (ProfileCross(profile[a], profile[b], profile[c]) <= 0.0000001F) continue;
+			bool occupied = false;
+			for (size_t p : remaining) {
+				if (p == a || p == b || p == c) continue;
+				occupied |= ProfileCross(profile[a], profile[b], profile[p]) >= -0.0000001F
+				    && ProfileCross(profile[b], profile[c], profile[p]) >= -0.0000001F
+				    && ProfileCross(profile[c], profile[a], profile[p]) >= -0.0000001F;
+			}
+			if (occupied) continue;
+			caps.push_back({ a, b, c });
+			remaining.erase(remaining.begin() + static_cast<std::ptrdiff_t>(i));
+			clipped = true;
+			break;
+		}
+		if (!clipped) return false;
+	}
+	caps.push_back({ remaining[0], remaining[1], remaining[2] });
+	const auto vertex = [&](size_t i, float z) {
+		return PhysicalPropVertex(centerX + profile[i].x, profile[i].height, centerZ + z);
+	};
+	for (const auto &cap : caps) {
+		PhysicalPropTriangle(mesh, vertex(cap[0], thickness), vertex(cap[1], thickness), vertex(cap[2], thickness), color, { 0, 0, 1 });
+		PhysicalPropTriangle(mesh, vertex(cap[0], -thickness), vertex(cap[1], -thickness), vertex(cap[2], -thickness), color, { 0, 0, -1 });
+	}
+	for (size_t i = 0; i < profile.size(); ++i) {
+		const size_t next = (i + 1) % profile.size();
+		Quad(mesh, { vertex(i, -thickness), vertex(next, -thickness), vertex(next, thickness), vertex(i, thickness) },
+		    TownVolumeMaterial::SpriteSide, color,
+		    { profile[next].height - profile[i].height, profile[i].x - profile[next].x, 0 });
+	}
+	return true;
+}
+
+bool GraveMarker(TownVolumeMesh &mesh, float centerX, float centerZ, float width,
+    float height, bool cross, bool round, uint8_t color)
+{
+	const float w = width / 2;
+	std::vector<ProfilePoint> profile;
+	if (cross) {
+		const float stem = w * 0.30F, low = height * 0.59F, high = height * 0.79F;
+		profile = { { -stem, 0 }, { stem, 0 }, { stem, low }, { w, low }, { w, high }, { stem, high },
+			{ stem, height }, { -stem, height }, { -stem, high }, { -w, high }, { -w, low }, { -stem, low } };
+	} else {
+		profile = { { -w, 0 }, { w, 0 }, { w, round ? height - w : height } };
+		if (round) {
+			for (int i = 1; i <= 8; ++i) {
+				const float angle = Pi * static_cast<float>(i) / 8;
+				profile.push_back({ w * std::cos(angle), height - w + w * std::sin(angle) });
+			}
+		} else {
+			profile.push_back({ -w, height });
+		}
+	}
+	return ExtrudeGraveProfile(mesh, profile, centerX, centerZ, 0.065F, color);
+}
+
+void NativePhysicalBox(TownVolumeMesh &mesh, float minX, float minZ, float maxX,
+    float maxZ, float height, uint8_t color)
+{
+	// These offsets follow native tile X/Z; DrawVolume's physical basis is fixed
+	// image-right/native-forward, so convert once before the renderer rotates it.
+	constexpr float S = 0.7071067811865475F;
+	const auto v = [&](float x, float y, float z) { return PhysicalPropVertex((x - z) * S, y, (x + z) * S); };
+	const auto normal = [&](float x, float y, float z) { return Vec { (x - z) * S, y, (x + z) * S }; };
+	Quad(mesh, { v(minX, 0, minZ), v(maxX, 0, minZ), v(maxX, height, minZ), v(minX, height, minZ) }, TownVolumeMaterial::SpriteSide, color, normal(0, 0, -1));
+	Quad(mesh, { v(maxX, 0, maxZ), v(minX, 0, maxZ), v(minX, height, maxZ), v(maxX, height, maxZ) }, TownVolumeMaterial::SpriteSide, color, normal(0, 0, 1));
+	Quad(mesh, { v(minX, 0, maxZ), v(minX, 0, minZ), v(minX, height, minZ), v(minX, height, maxZ) }, TownVolumeMaterial::SpriteSide, color, normal(-1, 0, 0));
+	Quad(mesh, { v(maxX, 0, minZ), v(maxX, 0, maxZ), v(maxX, height, maxZ), v(maxX, height, minZ) }, TownVolumeMaterial::SpriteSide, color, normal(1, 0, 0));
+	Quad(mesh, { v(minX, height, minZ), v(maxX, height, minZ), v(maxX, height, maxZ), v(minX, height, maxZ) }, TownVolumeMaterial::SpriteSide, color, { 0, 1, 0 });
+	Quad(mesh, { v(minX, 0, maxZ), v(maxX, 0, maxZ), v(maxX, 0, minZ), v(minX, 0, minZ) }, TownVolumeMaterial::SpriteSide, color, { 0, -1, 0 });
+}
+
+struct WallRectangle { float minX, minZ, maxX, maxZ; };
+
+void NativeWallUnion(TownVolumeMesh &mesh, const std::vector<WallRectangle> &rectangles,
+    float height, uint8_t color)
+{
+	// A rectilinear union makes X/Z runs and L corners one closed wall body.
+	// Internal faces are omitted, keeping the coping continuous and flat.
+	std::vector<float> xs, zs;
+	for (const auto &rect : rectangles) {
+		xs.insert(xs.end(), { rect.minX, rect.maxX });
+		zs.insert(zs.end(), { rect.minZ, rect.maxZ });
+	}
+	if (xs.empty()) return;
+	for (auto *axis : { &xs, &zs }) {
+		std::sort(axis->begin(), axis->end());
+		axis->erase(std::unique(axis->begin(), axis->end()), axis->end());
+	}
+	const size_t width = xs.size() - 1, depth = zs.size() - 1;
+	std::vector<bool> occupied(width * depth);
+	for (size_t z = 0; z < depth; ++z) for (size_t x = 0; x < width; ++x) {
+		const float cx = (xs[x] + xs[x + 1]) / 2, cz = (zs[z] + zs[z + 1]) / 2;
+		occupied[z * width + x] = std::any_of(rectangles.begin(), rectangles.end(), [&](const auto &rect) {
+			return cx > rect.minX && cx < rect.maxX && cz > rect.minZ && cz < rect.maxZ;
+		});
+	}
+	const auto has = [&](int x, int z) {
+		return x >= 0 && z >= 0 && static_cast<size_t>(x) < width && static_cast<size_t>(z) < depth
+		    && occupied[static_cast<size_t>(z) * width + static_cast<size_t>(x)];
+	};
+	constexpr float S = 0.7071067811865475F;
+	const auto v = [&](float x, float y, float z) { return PhysicalPropVertex((x - z) * S, y, (x + z) * S); };
+	const auto n = [&](float x, float y, float z) { return Vec { (x - z) * S, y, (x + z) * S }; };
+	for (int z = 0; z < static_cast<int>(depth); ++z) for (int x = 0; x < static_cast<int>(width); ++x) {
+		if (!has(x, z)) continue;
+		const float left = xs[static_cast<size_t>(x)], right = xs[static_cast<size_t>(x) + 1];
+		const float back = zs[static_cast<size_t>(z)], front = zs[static_cast<size_t>(z) + 1];
+		Quad(mesh, { v(left, height, back), v(right, height, back), v(right, height, front), v(left, height, front) }, TownVolumeMaterial::SpriteSide, color, { 0, 1, 0 });
+		Quad(mesh, { v(left, 0, front), v(right, 0, front), v(right, 0, back), v(left, 0, back) }, TownVolumeMaterial::SpriteSide, color, { 0, -1, 0 });
+		if (!has(x - 1, z)) Quad(mesh, { v(left, 0, front), v(left, 0, back), v(left, height, back), v(left, height, front) }, TownVolumeMaterial::SpriteSide, color, n(-1, 0, 0));
+		if (!has(x + 1, z)) Quad(mesh, { v(right, 0, back), v(right, 0, front), v(right, height, front), v(right, height, back) }, TownVolumeMaterial::SpriteSide, color, n(1, 0, 0));
+		if (!has(x, z - 1)) Quad(mesh, { v(left, 0, back), v(right, 0, back), v(right, height, back), v(left, height, back) }, TownVolumeMaterial::SpriteSide, color, n(0, 0, -1));
+		if (!has(x, z + 1)) Quad(mesh, { v(right, 0, front), v(left, 0, front), v(left, height, front), v(right, height, front) }, TownVolumeMaterial::SpriteSide, color, n(0, 0, 1));
+	}
+}
+
+} // namespace
+
+TownVolumeMesh BuildTownPhysicalPropVolume(const TownVolumeSprite &sprite,
+    town_prop_stencils::Kind kind, uint16_t nativeLayout, uint32_t placementSeed)
+{
+	TownVolumeMesh mesh;
+	Image image { sprite };
+	if (!image.FindBounds()) return mesh;
+	const auto layouts = town_prop_stencils::GetLayouts();
+	if (std::none_of(layouts.begin(), layouts.end(), [&](const auto &layout) {
+		return layout.kind == kind && layout.nativeLayout == nativeLayout;
+	})) return mesh;
+	const uint8_t color = image.Color((image.left + image.right) / 2,
+	    image.top + (image.bottom - image.top) / 3, 2);
+	if (kind == town_prop_stencils::Kind::Rock) {
+		const float scale = 0.90F + static_cast<float>(PropHash(placementSeed) & 255U) * (0.20F / 255);
+		float rx = 0.13F, rz = 0.10F, height = 0.13F;
+		switch (nativeLayout) {
+		case 219:
+			SmallGroundedRock(mesh, -0.17F * scale, 0, 0.12F * scale, 0.14F * scale, 0.17F * scale, placementSeed, color);
+			SmallGroundedRock(mesh, 0.17F * scale, 0.03F * scale, 0.11F * scale, 0.13F * scale, 0.14F * scale, placementSeed + 11, color);
+			break;
+		case 221: break;
+		case 222: rx = 0.16F; rz = 0.12F; height = 0.17F; break;
+		case 223: rx = 0.23F; rz = 0.16F; height = 0.21F; break;
+		case 226: rx = 0.29F; rz = 0.20F; height = 0.24F; break;
+		case 230: rx = 0.34F; rz = 0.24F; height = 0.28F; break;
+		default: return {};
+		}
+		if (nativeLayout != 219) SmallGroundedRock(mesh, 0, 0, rx * scale, rz * scale, height * scale, placementSeed, color);
+	} else if (kind == town_prop_stencils::Kind::Grave) {
+		// Existing native-til identifiers describe complete arrangements, never a
+		// new resource called "grave". Crosses, upright steles and flat slabs are
+		// separate semantic kit components; none uses the rock builder.
+		bool ok = true;
+		const auto marker = [&](float x, float z, float w, float h, bool cross, bool round) {
+			ok &= GraveMarker(mesh, x, z, w, h, cross, round, color);
+		};
+		switch (nativeLayout) {
+		case 250: case 257: case 259: case 270: marker(0, 0, 0.44F, 0.86F, true, false); break;
+		case 251: case 269: case 271: marker(0, 0, 0.40F, 0.88F, false, true); break;
+		case 256: marker(0, 0, 0.28F, 0.50F, false, true); break;
+		case 260: case 262: marker(0, 0, 0.42F, 0.86F, false, false); break;
+		case 252: case 258:
+			marker(-0.28F, -0.06F, 0.26F, 0.58F, false, false);
+			marker(0.28F, 0.06F, 0.24F, 0.43F, false, true); break;
+		case 253:
+			marker(-0.28F, -0.06F, 0.36F, 0.86F, false, true);
+			marker(0.28F, 0.06F, 0.27F, 0.52F, true, false); break;
+		case 254: case 263: case 267:
+			marker(-0.28F, -0.06F, 0.36F, 0.88F, false, nativeLayout != 254);
+			marker(0.28F, 0.06F, 0.24F, 0.45F, false, false); break;
+		case 255: case 261:
+			// Red native grave-ground paint is not evidence of a stone slab.
+			// It remains in SceneGround; only the visible marker gains volume.
+			marker(0.34F, -0.12F, 0.28F, 0.52F, true, false); break;
+		case 264: case 268:
+			marker(0, 0, 0.42F, 0.80F, false, false); break;
+		case 266:
+			marker(-0.28F, -0.06F, 0.25F, 0.55F, true, false);
+			marker(0.28F, 0.06F, 0.24F, 0.45F, false, false); break;
+		default: return {};
+		}
+		if (!ok) return {};
+	} else if (kind == town_prop_stencils::Kind::Wall) {
+		const auto found = std::find_if(layouts.begin(), layouts.end(), [&](const auto &layout) {
+			return layout.kind == kind && layout.nativeLayout == nativeLayout;
+		});
+		std::vector<WallRectangle> walls;
+		std::vector<const town_prop_stencils::Cell *> upright;
+		for (const auto &cell : found->cells) if (cell.replacesScenery && cell.upright) upright.push_back(&cell);
+		constexpr float HalfThickness = 0.14F;
+		for (size_t i = 0; i < upright.size(); ++i) {
+			const auto &a = *upright[i];
+			const float ax = static_cast<float>(a.x - found->footX) - 0.5F;
+			const float az = static_cast<float>(a.y - found->footY) - 0.5F;
+			bool joined = false;
+			for (size_t j = 0; j < upright.size(); ++j) {
+				if (j == i) continue;
+				const auto &b = *upright[j];
+				if (std::abs(int(a.x) - int(b.x)) + std::abs(int(a.y) - int(b.y)) != 1) continue;
+				joined = true;
+				if (j < i) continue;
+				const float bx = static_cast<float>(b.x - found->footX) - 0.5F;
+				const float bz = static_cast<float>(b.y - found->footY) - 0.5F;
+				if (a.y == b.y) walls.push_back({ std::min(ax, bx) - 0.5F, az - HalfThickness, std::max(ax, bx) + 0.5F, az + HalfThickness });
+				else walls.push_back({ ax - HalfThickness, std::min(az, bz) - 0.5F, ax + HalfThickness, std::max(az, bz) + 0.5F });
+			}
+			if (!joined) walls.push_back({ ax - HalfThickness, az - HalfThickness, ax + HalfThickness, az + HalfThickness });
+		}
+		NativeWallUnion(mesh, walls, 0.72F, color);
+		// Non-solid source wall paint is a broken/low component. It must not be
+		// promoted into a tall segment that visually closes a native passage.
+		for (const auto &cell : found->cells) if (cell.replacesScenery && !cell.upright) {
+			const float x = static_cast<float>(cell.x - found->footX) - 0.5F;
+			const float z = static_cast<float>(cell.y - found->footY) - 0.5F;
+			NativePhysicalBox(mesh, x - 0.18F, z - 0.18F, x + 0.18F, z + 0.18F, 0.08F, color);
+		}
+	} else return {};
+	Measure(mesh);
+	return mesh;
+}
+
+TownVolumeMesh BuildCathedralLightStandVolume(const TownVolumeSprite &sprite)
+{
+	TownVolumeMesh mesh;
+	Image image { sprite };
+	if (sprite.width != 64 || sprite.height > 256 || !image.FindBounds())
+		return mesh;
+	struct Ring {
+		float height, radius;
+		uint8_t color;
+	};
+	std::vector<Ring> profile;
+	// The bottom MIN row is the floor diamond. Its center, sixteen pixels
+	// above the image bottom, is the stand's physical ground contact.
+	// but do not revolve it into a broad conical foot. Extend the slender pole
+	// onto the flat 3D floor with a small plate reconstructed from the bowl width.
+	// Four native rows per band bound the geometry while preserving the bowl
+	// and pole. A circle recovers depth hidden in the isometric art;
+	// the relief used for rocks would otherwise turn these into flattened slabs.
+	const int bodyBottom = std::min(image.bottom, sprite.height - 33);
+	const int groundAnchor = sprite.height - 16;
+	for (int y = bodyBottom; y >= image.top; y -= 4) {
+		int left = sprite.width, right = -1;
+		for (int row = std::max(image.top, y - 3); row <= y; ++row) {
+			for (int x = image.left; x <= image.right; ++x) {
+				if (!image.Opaque(x, row)) continue;
+				left = std::min(left, x); right = std::max(right, x);
+			}
+		}
+		if (right < left) continue;
+		const float height = static_cast<float>(groundAnchor - 1 - y) / VerticalPixels;
+		const float radius = std::max(0.015F, (right - left + 1) / (2 * HorizontalPixels));
+		profile.push_back({ height, radius, image.Color((left + right) / 2, std::max(image.top, y - 1), 1) });
+	}
+	if (profile.size() < 2) return mesh;
+	const auto widest = std::max_element(profile.begin(), profile.end(), [](const Ring &a, const Ring &b) { return a.radius < b.radius; });
+	const float footRadius = std::clamp(widest->radius * 0.8F, 0.06F, 0.25F);
+	const uint8_t footColor = image.Color(sprite.width / 2, sprite.height - 16, 2);
+	const float poleRadius = profile.front().radius;
+	profile.insert(profile.begin(), { { 0, footRadius, footColor }, { 0.07F, footRadius, footColor },
+		{ 0.12F, poleRadius, profile.front().color } });
+	profile.back().height = static_cast<float>(groundAnchor - image.top) / VerticalPixels;
+	constexpr int Sides = 16;
+	const auto vertex = [&](const Ring &ring, int side) {
+		const float angle = 2 * Pi * side / Sides;
+		return image.Vertex({ ring.radius * std::cos(angle), ring.height, ring.radius * std::sin(angle) });
+	};
+	mesh.triangles.reserve(profile.size() * Sides * 2);
+	for (size_t band = 1; band < profile.size(); ++band) {
+		for (int side = 0; side < Sides; ++side) {
+			const int next = (side + 1) % Sides;
+			const float angle = 2 * Pi * (side + 0.5F) / Sides;
+			Quad(mesh, { vertex(profile[band - 1], side), vertex(profile[band - 1], next),
+				vertex(profile[band], next), vertex(profile[band], side) },
+				TownVolumeMaterial::SpriteSide, profile[band].color, { std::cos(angle), 0, std::sin(angle) });
+		}
+	}
+	for (int side = 0; side < Sides; ++side) {
+		const int next = (side + 1) % Sides;
+		Triangle(mesh, image.Vertex({ 0, 0, 0 }), vertex(profile.front(), side), vertex(profile.front(), next),
+			TownVolumeMaterial::SpriteSide, profile.front().color, { 0, -1, 0 });
+		Triangle(mesh, image.Vertex({ 0, profile.back().height, 0 }), vertex(profile.back(), side), vertex(profile.back(), next),
+			TownVolumeMaterial::SpriteSide, profile.back().color, { 0, 1, 0 });
+	}
+	Measure(mesh);
+	return mesh;
+}
+
 TownVolumeMesh BuildTownTreeVolume(const TownVolumeSprite &sprite, uint32_t seed, bool foliage)
 {
 	TownVolumeMesh mesh;

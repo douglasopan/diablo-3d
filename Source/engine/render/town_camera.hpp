@@ -116,6 +116,8 @@ struct TownCameraVertex {
 	TownCameraPoint world;
 	float u = 0;
 	float v = 0;
+	// Linear glTF COLOR_0. Existing callers retain neutral modulation.
+	std::array<float, 4> authoredColor { 1, 1, 1, 1 };
 };
 
 struct TownCameraProjectedVertex {
@@ -127,7 +129,7 @@ struct TownCameraProjectedVertex {
 };
 
 /** Six-plane view clipping before division. A clipped triangle has <=9 vertices
- * and <=7 triangles; fixed capacity avoids frame allocations. World/UV values
+ * and <=7 triangles; fixed capacity avoids frame allocations. World/UV/COLOR_0 values
  * are clipped linearly, then corrected during screen-space interpolation. */
 struct TownCameraClippedTriangles {
 	std::array<std::array<TownCameraProjectedVertex, 3>, 7> triangles;
@@ -150,9 +152,10 @@ struct TownCameraSample {
 	float depth = 0;
 	float u = 0;
 	float v = 0;
+	std::array<float, 4> authoredColor { 1, 1, 1, 1 };
 };
 /** Barycentrics are screen-space weights; output depth, world and UV come from
- * the same corrected weights. Accepted tiny negative edge errors clamp to zero
+ * the same corrected weights, including linear COLOR_0. Accepted tiny negative edge errors clamp to zero
  * before normalization, never extrapolating beyond the triangle. The caller
  * publishes color/depth/pick together. */
 bool InterpolateTownCameraSample(const std::array<TownCameraProjectedVertex, 3> &triangle,

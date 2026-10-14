@@ -43,8 +43,8 @@ uint64_t FrameCounter = 0;
 
 bool NativeEligible() noexcept
 {
-	return MyPlayer != nullptr && currlevel == 1 && leveltype == DTYPE_CATHEDRAL
-	    && !gbIsSpawn && !gbIsHellfire && !setlevel
+	return MyPlayer != nullptr && !gbIsSpawn
+	    && SupportsRetailLevel(currlevel, leveltype, gbIsHellfire, setlevel, setlevel ? setlvlnum : SL_NONE)
 	    && dminPosition.x == ActiveMin && dminPosition.y == ActiveMin
 	    && dmaxPosition.x == ActiveMax && dmaxPosition.y == ActiveMax;
 }
@@ -119,15 +119,19 @@ struct Hash {
 			Add(list.data()); Add(list.numSprites()); Add(list.dataSize());
 		}
 	}
-	void Add(const AnimationInfo &animation) noexcept
+	void Add(const AnimationInfo &animation, bool allowLegacyGroundItemTiming = false) noexcept
 	{
 		Add(animation.sprites); Add(animation.ticksPerFrame); Add(animation.tickCounterOfCurrentFrame);
 		Add(animation.numberOfFrames); Add(animation.currentFrame); Add(animation.isPetrified);
 		if (!animation.sprites) return;
-		if (animation.numberOfFrames <= 0 || animation.ticksPerFrame <= 0
+		if (animation.numberOfFrames <= 0 || animation.ticksPerFrame < 0
+		    || (animation.ticksPerFrame == 0 && !allowLegacyGroundItemTiming)
 		    || animation.numberOfFrames > static_cast<int>(animation.sprites->numSprites())) { valid = false; return; }
 		const int frame = animation.getFrameToUseForRendering();
-		Add(frame); Add(animation.getAnimationProgress());
+		// Saved ground items restore frame data but no ticksPerFrame. Their native
+		// draw reads the rendered frame only; retain raw timing and hash progress0
+		// without calling getAnimationProgress on the zero-tick legacy record.
+		Add(frame); Add(animation.ticksPerFrame == 0 ? uint8_t { 0 } : animation.getAnimationProgress());
 		if (frame < 0 || frame >= animation.numberOfFrames) { valid = false; return; }
 		Add((*animation.sprites)[frame]);
 	}
@@ -198,7 +202,7 @@ bool NativeFingerprint(uint64_t &fingerprint) noexcept
 		seenItems[slot] = true;
 		const Item &item = Items[slot];
 		h.Add(slot); h.Add(item.position); h.Add(item._iSeed); h.Add(item._iCreateInfo); h.Add(item._itype);
-		h.Add(item.AnimInfo); h.Add(item._iAnimFlag); h.Add(item._iDelFlag); h.Add(item.selectionRegion);
+		h.Add(item.AnimInfo, true); h.Add(item._iAnimFlag); h.Add(item._iDelFlag); h.Add(item.selectionRegion);
 		h.Add(item._iPostDraw); h.Add(item._iIdentified); h.Add(item._iCurs); h.Add(item.IDidx);
 	}
 	h.Add(Players.size()); h.Add(MyPlayerId); h.Add(MyPlayer); h.Add(MyPlayerIsDead);
@@ -240,7 +244,20 @@ bool NativeFingerprint(uint64_t &fingerprint) noexcept
 			h.Translation(Monsters[m._misource].uniqueMonsterTRN.get());
 		}
 	}
-	for (const Corpse &corpse : Corpses) {
+	// Native InitCorpses overwrites only this level's slots. Unused slots may
+	// still reference freed artwork from a previous level; never inspect them.
+	std::array<bool, MaxCorpses> referencedCorpses {};
+	for (const auto &column : dCorpse) {
+		for (const auto value : column) {
+			const unsigned slot = static_cast<uint8_t>(value) & 0x1F;
+			if (slot > MaxCorpses) return false;
+			if (slot != 0) referencedCorpses[slot - 1] = true;
+		}
+	}
+	for (size_t slot = 0; slot < referencedCorpses.size(); ++slot) {
+		if (!referencedCorpses[slot]) continue;
+		h.Add(slot);
+		const Corpse &corpse = Corpses[slot];
 		h.Add(corpse.sprites); h.Add(corpse.frame); h.Add(corpse.width); h.Add(corpse.translationPaletteIndex);
 		if (corpse.translationPaletteIndex != 0) {
 			if (corpse.translationPaletteIndex > MaxMonsters) return false;

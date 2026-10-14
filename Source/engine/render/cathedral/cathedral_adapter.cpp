@@ -142,8 +142,18 @@ void ReserveOpenDoorSockets(Region &region, const Snapshot &snapshot)
 		if(original.module<ModuleKind::Wall||original.module>ModuleKind::Junction4) {fitted.push_back(original);continue;}
 		std::vector<Bounds> pieces {original.bounds};bool changed=false;
 		for(const Door &door:snapshot.doors) {
-			if(door.state==DoorState::Closed) continue;
 			const bool left=door.orientation==DoorOrientation::Left;
+			// End masonry one native square before the doorway art, in both
+			// orientations and every state. The authored arch spans 2.129 cells;
+			// the three-cell socket exposes it without resizing the asset or SOL.
+			const Bounds archSocket=left?Bounds{{door.x-1.5F,0,door.z-1.5F},{door.x+1.5F,Height,door.z+1.5F}}
+				:Bounds{{door.x-1.5F,0,door.z-1.5F},{door.x+1.5F,Height,door.z+1.5F}};
+			if(PositiveOverlap(original.bounds,archSocket)) {
+				std::vector<Bounds> remainder;
+				for(const Bounds &piece:pieces) SubtractBox(remainder,piece,archSocket);
+				pieces=std::move(remainder);changed=true;
+			}
+			if(door.state==DoorState::Closed) continue;
 			// The actual leaf defines eligibility. The wider technical collar must
 			// never recruit a neighboring primitive that did not hide that leaf.
 			const Bounds leaf=left?Bounds{{door.x-1.0F,0,door.z-0.55F},{static_cast<float>(door.x),2.2F,door.z-0.45F}}
@@ -158,6 +168,18 @@ void ReserveOpenDoorSockets(Region &region, const Snapshot &snapshot)
 			} else if(!left&&original.bounds.max.x-original.bounds.min.x<=Thickness+0.0001F) {
 				socket.min.x=std::min(socket.min.x,original.bounds.min.x);socket.max.x=std::max(socket.max.x,original.bounds.max.x);
 			}
+			std::vector<Bounds> remainder;
+			for(const Bounds &piece:pieces) SubtractBox(remainder,piece,socket);
+			pieces=std::move(remainder);changed=true;
+		}
+		// Stair center tiles own a 2x2 native footprint. Reserve their complete
+		// flight and landing in presentation geometry, across region boundaries.
+		for(int mz=0;mz<40;++mz) for(int mx=0;mx<40;++mx) {
+			const auto id=snapshot.mega[static_cast<std::size_t>(mz)*40+mx];
+			if(id!=64&&id!=59) continue;
+			const float cx=16+mx*2+0.5F, cz=16+mz*2+0.5F;
+			const Bounds socket {{cx-1.0F,0,cz-4.0F},{cx+1.0F,Height,cz+0.1F}};
+			if(!PositiveOverlap(original.bounds,socket)) continue;
 			std::vector<Bounds> remainder;
 			for(const Bounds &piece:pieces) SubtractBox(remainder,piece,socket);
 			pieces=std::move(remainder);changed=true;
@@ -185,7 +207,7 @@ void ReserveOpenDoorSockets(Region &region, const Snapshot &snapshot)
 uint64_t Signature(const Snapshot &s, int rx, int rz)
 {
 	uint64_t h = HashOffset;
-	Mix(h,s.gameRevision); Mix(h,s.level); Mix(h,2); // Technical socket geometry revision.
+	Mix(h,s.gameRevision); Mix(h,s.level); Mix(h,3); // Door arch socket reserves one neighboring square.
 	// Two-cell halo includes door leaf neighbor, native DoorSet mutation and endpoint joins.
 	for (int z=std::max(0,rz-2);z<std::min(GridSize,rz+RegionSize+2);++z)
 		for (int x=std::max(0,rx-2);x<std::min(GridSize,rx+RegionSize+2);++x) {
@@ -229,7 +251,7 @@ bool StairHole(const std::vector<Stair> &stairs,int x,int z)
 {
 	// Remove every unit floor square with positive-area overlap with the full
 	// technical descent bounds. A two-cell cut caps the right/first tread at y=0.
-	for(const Stair &st:stairs) if(!st.up&&x+0.5F>st.x-1&&x-0.5F<st.x+1&&z+0.5F>st.z-4&&z-0.5F<st.z) return true;
+	for(const Stair &st:stairs) if(!st.up&&x+0.5F>st.x-0.5F&&x-0.5F<st.x+1.5F&&z+0.5F>st.z-3.5F&&z-0.5F<st.z+0.5F) return true;
 	return false;
 }
 std::shared_ptr<const Region> BuildRegion(const Snapshot &s, int rx, int rz, uint64_t signature)
@@ -274,11 +296,17 @@ std::shared_ptr<const Region> BuildRegion(const Snapshot &s, int rx, int rz, uin
 		const auto raw=s.mega[static_cast<std::size_t>((z-16)/2)*40+(x-16)/2];
 		const PickBinding pick {PickKind::Architecture,x,z,-1};
 		if(raw==15) Add(*r,s,ModuleKind::Pillar,x,z,{x+0.5F,0,z+0.5F},0,0,pick);
-		else if(raw==11||raw==12) Add(*r,s,ModuleKind::ArchFrame,x,z,{x+0.5F,0,z+0.5F},raw==11?1:0,0,pick);
+		else if(raw==11||raw==12) {
+			// The native mega-tile arch is part of a door surround when its
+			// center falls inside the reserved doorway. Do not stack it over
+			// the separate door frame (authored or technical fallback).
+			const bool doorSurround=std::any_of(s.doors.begin(),s.doors.end(),[&](const Door &door){return std::abs(x+0.5F-door.x)<=1.5F && std::abs(z+0.5F-door.z)<=1.5F;});
+			if(!doorSurround) Add(*r,s,ModuleKind::ArchFrame,x,z,{x+0.5F,0,z+0.5F},raw==11?1:0,0,pick);
+		}
 		else if(raw==35||raw==36) Add(*r,s,ModuleKind::Fence,x,z,{x+0.5F,0,z+0.5F},raw==35?1:0,0,pick);
 	}
 	for(const Stair &st:stairs) if(st.x>=rx&&st.x<rx+8&&st.z>=rz&&st.z<rz+8)
-		Add(*r,s,st.up?ModuleKind::StairsUp:ModuleKind::StairsDown,st.x,st.z,{static_cast<float>(st.x),0,static_cast<float>(st.z)},0,0,st.pick);
+		Add(*r,s,st.up?ModuleKind::StairsUp:ModuleKind::StairsDown,st.x,st.z,{st.x+0.5F,0,st.z+0.5F},0,0,st.pick);
 	r->bounds=EmptyBounds();
 	for(const Instance &instance:r->instances) {Include(r->bounds,instance.bounds.min);Include(r->bounds,instance.bounds.max);}
 	if(r->instances.empty()) r->bounds={{static_cast<float>(rx),0,static_cast<float>(rz)},{static_cast<float>(rx+8),0,static_cast<float>(rz+8)}};
@@ -286,8 +314,9 @@ std::shared_ptr<const Region> BuildRegion(const Snapshot &s, int rx, int rz, uin
 }
 void Validate(const Snapshot &s)
 {
-	if(s.level!=1||s.hellfire) throw std::invalid_argument("Technical pilot supports retail Cathedral level 1 only");
-	if(s.levelType!=1||s.setLevel||s.setLevelId!=0||s.minX!=16||s.minZ!=16||s.maxX!=96||s.maxZ!=96||s.gameRevision==0)
+	if(!SupportsRetailLevel(s.level,s.levelType,s.hellfire,s.setLevel,s.setLevelId))
+		throw std::invalid_argument("Technical adapter requires retail Cathedral floors 1..4 or Skeleton King L1 map");
+	if(s.minX!=16||s.minZ!=16||s.maxX!=96||s.maxZ!=96||s.gameRevision==0)
 		throw std::invalid_argument("Ineligible native map type, set level, active bounds or epoch");
 	if(s.micros.size()>1379) throw std::invalid_argument("Invalid native micros count");
 	for(const Cell &c:s.cells) if(c.piece>=1379||c.object==-128) throw std::invalid_argument("Invalid native cell");

@@ -6,6 +6,7 @@
 #include <utility>
 
 #include "mpq/mpq_common.hpp"
+#include "engine/hd_sprite_pack.hpp"
 #include "utils/status_macros.hpp"
 #include "utils/str_cat.hpp"
 
@@ -20,6 +21,9 @@ namespace devilution {
 
 std::expected<OwnedClxSpriteListOrSheet, std::string> LoadCl2ListOrSheetWithStatus(const char *pszName, PointerOrValue<uint16_t> widthOrWidths)
 {
+	auto hd = LoadHdSpriteReplacement(pszName);
+	if (!hd) return std::unexpected(hd.error());
+	if (*hd) return std::move(**hd);
 	char path[MaxMpqPathSize];
 	*BufCopy(path, pszName, DEVILUTIONX_CL2_EXT) = '\0';
 #ifdef UNPACKED_MPQS

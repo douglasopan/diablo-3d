@@ -1,0 +1,503 @@
+{
+  "format": "d3d.item-concept-art",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "scope": "next-04-axes only: six base axes plus The Butcher's Cleaver; independent candidate batch for root consolidation. Does not claim global catalog coverage.",
+  "batchId": "batch-05-axes",
+  "productionQueueGroup": "next-04-axes",
+  "catalogSha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d",
+  "generationTool": "built-in image_gen.imagegen",
+  "postProcessing": "none; generated PNG bytes copied unchanged and originals retained",
+  "originalGameImagesIncluded": false,
+  "privateMediaPathsIncluded": false,
+  "visualApproval": false,
+  "accepted": false,
+  "selected": false,
+  "installed": false,
+  "runtimeInstalled": false,
+  "summary": {
+    "conceptCandidates": 7,
+    "generatedPngFiles": 7,
+    "modelsGenerated": 0,
+    "runtimeIconsGenerated": 0,
+    "generationCalls": 7
+  },
+  "referenceVerification": {
+    "originalReferenceHashesChecked": 7,
+    "providedEnlargementHashesChecked": 7,
+    "allMatched": true,
+    "referencePixelsInspectedBeforeGeneration": true,
+    "privatePathsOmitted": true
+  },
+  "entries": [
+    {
+      "productionId": "item.design.base.small-axe",
+      "conceptId": "item.design.base.small-axe.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/small-axe-r1.png",
+      "sha256": "4d2ad12ebbf9c3e5410422acb2255a0a29c70a10935d0ae3678798f9571f4766",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D single-item candidate modelling turnaround. Production ID item.design.base.small-axe, native inventory cursor ICURS112.\nInput image 1 is the original licensed inventory sprite, PRIMARY silhouette/proportion/palette reference only. Input image 2 is an already generated Claymore board, LAYOUT and neutral material presentation reference only, never include its sword.\nReconstruct ONE Small Axe exactly as recognizable in image 1, even where it differs from a conventional small axe: an upright short slender axe with a tall dark iron blade to the LEFT of its shaft, a bright silver sharpened outer left edge, a tall near-rectangular blade body tapering downward into a pointed beard, restrained dark interlaced geometric engraving on the blade face. At the top of the central haft is a small silver spear-shaped cap; on the RIGHT behind the head is a small triangular iron poll/spike with a visibly recessed dark triangular center. Preserve the distinctive asymmetric outline. Red leather wrapping covers most of the straight narrow handle below the head; small aged brass collar above the silver rounded faceted bottom pommel. A RED leather wrist lanyard is tied below the pommel and hangs leftward in a loose oval loop, matching the visible red shape in the sprite. Keep that loop in every view; no wooden brown handle substitute.\nCreate one clean high-definition concept sheet showing the exact SAME object in FRONT, SIDE edge-on thickness, BACK, and 3-4 perspective views plus one small ICON inset that is a NEW HD rendered view of the same axe. Entire objects including red lanyard visible, four major views have the same length/proportions/materials. Reverse view should correctly reverse the asymmetric head, not create a second cutting blade. Dark neutral charcoal background, neutral soft white studio illumination with no warm color cast, no scenery, no dramatic cast shadow. Realistic restrained worn steel/iron, red leather, aged brass, crisp readable surface details. Infer hidden reverse surfaces and thickness conservatively from the sprite; no invented heraldic symbols. Small title exactly 'SMALL AXE'; small labels exactly 'FRONT', 'SIDE', 'BACK', '3-4', 'ICON'. Add small footer 'CANDIDATE - REVERSE AND THICKNESS INFERRED'.\nDo not paste, trace, or reproduce the pixel sprite, its black image rectangle, or the reference board into this sheet. The ICON inset must be newly rendered HD, never pixel art. No hands, people, extra items, added skulls, gems, glow, runes, oversized spikes, or watermark. This is concept only, not a finished runtime icon.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "cursorId": 112,
+        "sha256": "a14f8c519be738dab35f4310c4b9725d40eea73f3392ac2efbff9a30cea451aa",
+        "availability": "local-private",
+        "notes": "Original inventory sprite identity only; private pixels and paths omitted. Visually inspected 6x integer nearest-neighbor presentation before generation."
+      },
+      "referencePresentedSha256": "5573833d9ab05c1a32bb67c11c9a527035313f12f2cc0de9e407a7115d77c943",
+      "referencePresentation": "6x integer nearest-neighbor enlargement; primary silhouette/proportion/palette reference only",
+      "layoutReference": {
+        "conceptId": "item.design.base.claymore.concept.r1",
+        "image": "assets/concept-art/items/r1/claymore-r1.png",
+        "sha256": "e9a2e4061bcdad78e7833fa7657722672c127466a0e77a2e5dbf2df536070567",
+        "role": "Layout and neutral studio material presentation only; not an identity or geometry source."
+      },
+      "referenceVisualInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-thumbnail-proposal"
+      ],
+      "inferredParts": [
+        "Hidden reverse surfaces and details",
+        "Depth, thickness, bevel geometry and fasteners",
+        "Physical dimensions, flexible details and exact material microtexture"
+      ],
+      "review": {
+        "status": "inspected-candidate",
+        "silhouetteAndPaletteObserved": "Asymmetric engraved dark iron head, silver left cutting edge, triangular right poll, red leather handle/lanyard, brass collar and faceted silver pommel.",
+        "thumbnail": "New HD concept depiction of the same object; no pasted pixel sprite; not a final runtime icon.",
+        "limitations": [
+          "Reverse engraving absence and polygonal pommel facets are proposed, not measured from the single sprite.",
+          "SIDE depicts lanyard turned edge-on; flexible lanyard drape is illustrative rather than a rig specification."
+        ],
+        "approval": false,
+        "requiresBeforeMaster": "Artistic comparison and approval, followed by coherent geometry/material reconciliation; no automatic 3D production."
+      },
+      "notes": "Candidate concept only. All views are intended to describe one object; generated views are not measured orthographic geometry. Rear surfaces/thickness are inferred. Future equipped, ground and inventory forms must derive from the same accepted master and materials. R1 preserved unchanged for review/devlog."
+    },
+    {
+      "productionId": "item.design.base.axe",
+      "conceptId": "item.design.base.axe.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/axe-r1.png",
+      "sha256": "27afa131a1c518cea53408006bacfc0572ef66898e884f597377ab517d746cb0",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D single-item candidate modelling turnaround. Production ID item.design.base.axe, native inventory cursor ICURS144.\nInput image 1 is the original licensed inventory sprite, PRIMARY shape/proportion/palette reference only. Input image 2 is a Claymore board, layout/neutral presentation reference ONLY; never include that sword.\nCreate ONE Axe matching image 1: a long straight slender dark olive-brown wooden haft standing vertically, with ONE dark forged-steel head projecting to the RIGHT at its top. The head begins narrow at the eye and expands into a broad roughly triangular silver cutting blade, with almost vertical slightly convex outer cutting edge ending in a downward-pointing beard; compact top edge rising slightly toward the outside. Preserve the asymmetry: no second blade, no rear spike, no spear above. The dark iron eye sleeve is studded by several small pale steel rivets. A few dull brass wraps/collars sit just under the head. Most upper exposed haft is dark brown wood; lower third is a straight deep burgundy-brown leather grip bounded above and below by several thin aged-brass rings, ending in a narrow blunt brass ferrule. No dangling strap. Preserve the understated original palette of charcoal steel, silver edge, dark brown/olive wood, very dark red-brown grip and small old-gold rings. Do not turn it into the red-handled Small Axe or a generic double axe.\nA professional HD technical board of the SAME axe shown in FRONT, SIDE edge-on thickness, BACK (head correctly reverses side), and 3-4 perspective, with one small ICON inset newly rendered in HD from this same object. Keep identical geometry/materials/length across all views. Entire object visible, spaced cleanly like input 2, no cropped ferrules or edges. Dark neutral charcoal gray background, neutral soft white studio illumination, believable worn iron, steel, wood and leather, restrained microtexture and minor edge wear, no baked painted shadows. Minimal contact shadow only. Hidden reverse and thickness are conservative proposed reconstruction.\nText only title 'AXE', view labels 'FRONT', 'SIDE', 'BACK', '3-4', 'ICON', and footer 'CANDIDATE - REVERSE AND THICKNESS INFERRED'. Do NOT paste/reproduce pixel reference sprite or reference board; ICON must be a NEW crisp realistic HD render, never pixel art. No hands, person, props, scenery, skulls, runes, gems, flames, magical glow, second blade or watermark. Candidate concept only, not a runtime icon.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "cursorId": 144,
+        "sha256": "545a6116c017903d147e4b910b730d894068a6736dcd8e1aadb9e3459d2df2d6",
+        "availability": "local-private",
+        "notes": "Original inventory sprite identity only; private pixels and paths omitted. Visually inspected 6x integer nearest-neighbor presentation before generation."
+      },
+      "referencePresentedSha256": "300829ad8d749b7d746db524ce2cb8744a357e50a5d7036271d83bc617571d39",
+      "referencePresentation": "6x integer nearest-neighbor enlargement; primary silhouette/proportion/palette reference only",
+      "layoutReference": {
+        "conceptId": "item.design.base.claymore.concept.r1",
+        "image": "assets/concept-art/items/r1/claymore-r1.png",
+        "sha256": "e9a2e4061bcdad78e7833fa7657722672c127466a0e77a2e5dbf2df536070567",
+        "role": "Layout and neutral studio material presentation only; not an identity or geometry source."
+      },
+      "referenceVisualInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-thumbnail-proposal"
+      ],
+      "inferredParts": [
+        "Hidden reverse surfaces and details",
+        "Depth, thickness, bevel geometry and fasteners",
+        "Physical dimensions, flexible details and exact material microtexture"
+      ],
+      "review": {
+        "status": "inspected-candidate",
+        "silhouetteAndPaletteObserved": "Single rightward steel blade, studded iron eye, exposed olive-brown wooden upper haft, burgundy lower grip and brass rings.",
+        "thumbnail": "New HD concept depiction of the same object; no pasted pixel sprite; not a final runtime icon.",
+        "limitations": [
+          "The generated 3-4 view is shallow; an approved 3D master still needs genuine 360-degree review.",
+          "Stud count and full wood grain are proposed detail beyond the original pixel resolution."
+        ],
+        "approval": false,
+        "requiresBeforeMaster": "Artistic comparison and approval, followed by coherent geometry/material reconciliation; no automatic 3D production."
+      },
+      "notes": "Candidate concept only. All views are intended to describe one object; generated views are not measured orthographic geometry. Rear surfaces/thickness are inferred. Future equipped, ground and inventory forms must derive from the same accepted master and materials. R1 preserved unchanged for review/devlog."
+    },
+    {
+      "productionId": "item.design.base.large-axe",
+      "conceptId": "item.design.base.large-axe.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/large-axe-r1.png",
+      "sha256": "c1e6f601d3a925028785ea129019694fed2317a7dcfef6f732242574247de0ff",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D single-item candidate modelling turnaround. Production ID item.design.base.large-axe, native inventory cursor ICURS142.\nInput image 1 is the original licensed inventory sprite and is the PRIMARY exact silhouette/proportion/palette reference. Input image 2 is a Claymore concept board for neutral layout only; never include its sword.\nReconstruct ONE Large Axe as actually drawn in image 1: an upright straight haft with an asymmetric double-sided silver steel axe head. LEFT blade is distinctly taller and larger, a broad convex outward cutting edge with top and bottom points and concave inner beard/neck transitions. RIGHT blade is shorter and smaller, rounded broad silver edge with pointed top and lower end. Both join a dark iron central socket bulging like a rounded vertical steel rib. Keep this left/right size imbalance, not a symmetric double axe. Above the socket is a small stepped aged-BRASS finial. Below the head are compact stepped brass collars, a short exposed DEEP RED neck segment, then a long tightly wrapped DARK NAVY BLUE leather grip making most of the lower haft, as in the sprite. Terminate with several brass ferrule rings and a small round gold/brass bulb pommel. NO red lanyard, no exposed light wooden shaft, no skull.\nRender the exact same object in large FRONT, true SIDE edge-on thickness, BACK with unequal blades correctly reversed by rotation, and 3-4 perspective views, plus one small ICON inset of the same object as a NEW HD rendered thumbnail. All five depictions share exactly the same unequal head sizes, red neck length, blue wrapping and brass fittings. Whole objects visible. Clean technical concept sheet, dark neutral charcoal background, soft neutral WHITE studio lighting without warm tint, materials readable by local color: silver steel, charcoal iron, aged brass, burgundy red neck and deep navy blue leather. Fine restrained wear, not exaggerated corrosion. No scenery or strong painted ground shadow. Reverse hidden surfaces/thickness conservatively inferred.\nText only title 'LARGE AXE', labels 'FRONT', 'SIDE', 'BACK', '3-4', 'ICON', footer 'CANDIDATE - REVERSE AND THICKNESS INFERRED'. Do not paste the pixel sprite/reference rectangle or any reference board. ICON is newly rendered realistic HD, never pixel art. No characters, hands, props, gems, glowing runes, flames, added spikes, watermark. Candidate concept for later coherent 3D master, not final runtime icon.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "cursorId": 142,
+        "sha256": "da2ba9940e93cde19984cc678cc1744f156ca50423a3f722ae64f3fe0272360a",
+        "availability": "local-private",
+        "notes": "Original inventory sprite identity only; private pixels and paths omitted. Visually inspected 6x integer nearest-neighbor presentation before generation."
+      },
+      "referencePresentedSha256": "710a40795ef5998bbd7ba615ee872e96c640250dfeda93e3ae849ee20f0591e2",
+      "referencePresentation": "6x integer nearest-neighbor enlargement; primary silhouette/proportion/palette reference only",
+      "layoutReference": {
+        "conceptId": "item.design.base.claymore.concept.r1",
+        "image": "assets/concept-art/items/r1/claymore-r1.png",
+        "sha256": "e9a2e4061bcdad78e7833fa7657722672c127466a0e77a2e5dbf2df536070567",
+        "role": "Layout and neutral studio material presentation only; not an identity or geometry source."
+      },
+      "referenceVisualInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-thumbnail-proposal"
+      ],
+      "inferredParts": [
+        "Hidden reverse surfaces and details",
+        "Depth, thickness, bevel geometry and fasteners",
+        "Physical dimensions, flexible details and exact material microtexture"
+      ],
+      "review": {
+        "status": "inspected-candidate",
+        "silhouetteAndPaletteObserved": "Double head with taller left crescent, smaller right blade, brass finial/fittings, red neck, navy-blue leather grip and brass pommel.",
+        "thumbnail": "New HD concept depiction of the same object; no pasted pixel sprite; not a final runtime icon.",
+        "limitations": [
+          "Reverse root shapes, edge thickness and small ferrule ornament are proposed reconstruction.",
+          "Repeated material wear and exact curve profiles must be reconciled when modelling."
+        ],
+        "approval": false,
+        "requiresBeforeMaster": "Artistic comparison and approval, followed by coherent geometry/material reconciliation; no automatic 3D production."
+      },
+      "notes": "Candidate concept only. All views are intended to describe one object; generated views are not measured orthographic geometry. Rear surfaces/thickness are inferred. Future equipped, ground and inventory forms must derive from the same accepted master and materials. R1 preserved unchanged for review/devlog."
+    },
+    {
+      "productionId": "item.design.base.broad-axe",
+      "conceptId": "item.design.base.broad-axe.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/broad-axe-r1.png",
+      "sha256": "5c567ec45b8c04c3a58554ff735a3284aafb37101689a0cb7f836b8177f3681c",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D single-item candidate modelling turnaround. Production ID item.design.base.broad-axe, native inventory cursor ICURS141.\nInput image 1 is the original inventory sprite and PRIMARY silhouette, material-color and proportion reference. Image 2 is a Claymore concept sheet for layout/neutral lighting only; do not include its sword.\nReconstruct ONE Broad Axe faithfully from image 1: a long straight narrow haft with a dark charcoal forged iron head at the top. The LEFT working blade is tall and broad with a bright silver convex outward cutting edge, high pointed top and lower tapering beard. Its black/charcoal body narrows markedly toward the center. Behind the haft on the RIGHT is a much SMALLER short swept triangular wedge/hook poll, with a pale silver curved lower/outer bevel and pointed far tip; NOT a second full-sized axe blade. Central iron eye sleeve is narrow and dark with small vertically aligned silver rivets. Above it a small dark-gold/brass round finial; below it thin brass rings, a short exposed gray steel haft section, another fine brass collar, then a long deep red-brown leather grip with widely spaced diagonal olive-brass/golden bands winding around it. Preserve that distinctive burgundy-and-dull-gold spiral handle; no plain brown wooden replacement. Bottom has compact stacked brass ferrule rings and a small narrow gold cap; no red lanyard. Head roughly occupies upper two-fifths of the object's full length, keep original slender proportions.\nCreate a clean HD modelling board of exactly the SAME object in FRONT, true SIDE edge-on thickness, BACK with asymmetric head correctly reversed by rotation, and 3-4 perspective plus one small ICON inset of the same object newly rendered in high definition. All views must share identical length, head asymmetry, colors, spirals and fittings. Full objects visible. Dark neutral charcoal background, soft neutral white studio light without warm tint, readable realistic iron/steel/brass and leather, fine restrained wear without invented ornament. Neutral minimal contact shadows, no floor scenery. Hidden reverse and thickness conservative inferred geometry.\nText only title 'BROAD AXE', labels 'FRONT', 'SIDE', 'BACK', '3-4', 'ICON', footer 'CANDIDATE - REVERSE AND THICKNESS INFERRED'. Never paste/reproduce the pixel source, its backdrop rectangle or reference sheet. ICON inset must be NEW HD render of the same item, no pixel art. No people, hands, skulls, gems, glows, runes, flames, added long spikes or watermark. Candidate concept only, no runtime icon.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "cursorId": 141,
+        "sha256": "03dd3c5b29dabac69b17e5228e5bc7220c13f956634a00778998f369f7e58dec",
+        "availability": "local-private",
+        "notes": "Original inventory sprite identity only; private pixels and paths omitted. Visually inspected 6x integer nearest-neighbor presentation before generation."
+      },
+      "referencePresentedSha256": "c07abebf89213d41a8f26c4cde3d7dc675f5c506ef1ba83461cc8b9970f16206",
+      "referencePresentation": "6x integer nearest-neighbor enlargement; primary silhouette/proportion/palette reference only",
+      "layoutReference": {
+        "conceptId": "item.design.base.claymore.concept.r1",
+        "image": "assets/concept-art/items/r1/claymore-r1.png",
+        "sha256": "e9a2e4061bcdad78e7833fa7657722672c127466a0e77a2e5dbf2df536070567",
+        "role": "Layout and neutral studio material presentation only; not an identity or geometry source."
+      },
+      "referenceVisualInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-thumbnail-proposal"
+      ],
+      "inferredParts": [
+        "Hidden reverse surfaces and details",
+        "Depth, thickness, bevel geometry and fasteners",
+        "Physical dimensions, flexible details and exact material microtexture"
+      ],
+      "review": {
+        "status": "inspected-candidate",
+        "silhouetteAndPaletteObserved": "Tall left blade and small right hook/wedge, silver exposed upper haft, burgundy grip with dull-gold spiral bands and brass fittings.",
+        "thumbnail": "New HD concept depiction of the same object; no pasted pixel sprite; not a final runtime icon.",
+        "limitations": [
+          "Back spiral phase and bottom cap opening are proposed, not reference-proven geometry.",
+          "Head thickness and fastening arrangement need later orthographic reconciliation."
+        ],
+        "approval": false,
+        "requiresBeforeMaster": "Artistic comparison and approval, followed by coherent geometry/material reconciliation; no automatic 3D production."
+      },
+      "notes": "Candidate concept only. All views are intended to describe one object; generated views are not measured orthographic geometry. Rear surfaces/thickness are inferred. Future equipped, ground and inventory forms must derive from the same accepted master and materials. R1 preserved unchanged for review/devlog."
+    },
+    {
+      "productionId": "item.design.base.battle-axe",
+      "conceptId": "item.design.base.battle-axe.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/battle-axe-r1.png",
+      "sha256": "520faa312eeaafebab681d10aa0705f67cb9e03197a89c1f437d122f880bc45c",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D single-item candidate modelling turnaround. Production ID item.design.base.battle-axe, native inventory cursor ICURS101.\nImage 1 is the original licensed inventory sprite, PRIMARY shape/proportion/palette reference. Image 2 is the Claymore board, layout and neutral studio material presentation ONLY; never include its sword.\nReconstruct ONE Battle Axe faithfully from image 1. Its broad double head consists of two nearly mirrored silver-gray crescent/half-moon steel blades, curving outward left and right and descending into pointed lower beards. The blade tops rise and end as short squared inner tips with a distinct open top central gap, rather than a spike or connecting upper bridge. Outer convex cutting rims are lighter silver; the broad inset faces are medium gray iron with a handful of dark irregular round/triangular wear pits or recessed forge marks, as the dark marks in the source. Do not invent runic symbols or skull reliefs; these low-resolution marks do not prove through-holes, make shallow recesses. Darker black/charcoal root sockets join both blades around a narrow upright aged brass central shaft. A tiny red cap at the top of this brass shaft is visible in the gap. Below the blade roots is thick reddish-brown/orange-red leather wrapping around the neck, a compact brass collar, then a long straight tightly spiral-wrapped red-brown leather lower grip and blunt small gold/brass ferrule at bottom. Preserve the warm red-brown HANDLE color under neutral light, not navy or plain wood. No wrist loop.\nBuild one coherent HD modelling board with full-length FRONT, SIDE true edge-on head thickness, BACK correctly rotated, 3-4 perspective and one small newly rendered HD ICON inset of this SAME item. All views agree on overall length, gap, double crescents, leather wrapping, brass fittings and surface marks. Complete object visible, clean spacing. Plain dark charcoal gray backdrop, neutral soft WHITE studio illumination, readable realistic steel/iron, brass and leather microtexture with restrained age. Minimal contact shadows only, no scenery. Hidden reverse geometry, head thickness and interpretation of dark marks are conservative modelling inferences.\nText exactly title 'BATTLE AXE', view labels 'FRONT', 'SIDE', 'BACK', '3-4', 'ICON', footer 'CANDIDATE - REVERSE AND THICKNESS INFERRED'. Never paste/reproduce any pixel source/reference board into output. ICON is a NEW crisp HD render, never pixel art. No people/hands, extra objects, gems, glow, flame, runes, excessive spikes or watermark. Candidate concept only, not a finished runtime icon.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "cursorId": 101,
+        "sha256": "00a1b94e990e641cafc3bc213dd92adfe3f35adbd1ed11307f0eed656831e50c",
+        "availability": "local-private",
+        "notes": "Original inventory sprite identity only; private pixels and paths omitted. Visually inspected 6x integer nearest-neighbor presentation before generation."
+      },
+      "referencePresentedSha256": "6813e48d94df8e62b523725555d5912dd6b28ed68efd814934a3f6467e6b980d",
+      "referencePresentation": "6x integer nearest-neighbor enlargement; primary silhouette/proportion/palette reference only",
+      "layoutReference": {
+        "conceptId": "item.design.base.claymore.concept.r1",
+        "image": "assets/concept-art/items/r1/claymore-r1.png",
+        "sha256": "e9a2e4061bcdad78e7833fa7657722672c127466a0e77a2e5dbf2df536070567",
+        "role": "Layout and neutral studio material presentation only; not an identity or geometry source."
+      },
+      "referenceVisualInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-thumbnail-proposal"
+      ],
+      "inferredParts": [
+        "Hidden reverse surfaces and details",
+        "Depth, thickness, bevel geometry and fasteners",
+        "Physical dimensions, flexible details and exact material microtexture"
+      ],
+      "review": {
+        "status": "inspected-candidate",
+        "silhouetteAndPaletteObserved": "Nearly mirrored rounded double crescents with open top gap, small red shaft cap, brass center/fittings and red-brown spiral leather grip.",
+        "thumbnail": "New HD concept depiction of the same object; no pasted pixel sprite; not a final runtime icon.",
+        "limitations": [
+          "Dark marks appear hole-like in the generated candidate despite the prompt asking for shallow recesses. The original sprite does not resolve pit versus through-hole; do not cut holes in the master without review.",
+          "The visible reverse marks repeat the front arrangement; reverse wear is inferred, not verified.",
+          "The small red top cap is a material-colored cap proposal, not an emissive gem."
+        ],
+        "approval": false,
+        "requiresBeforeMaster": "Artistic comparison and approval, followed by coherent geometry/material reconciliation; no automatic 3D production."
+      },
+      "notes": "Candidate concept only. All views are intended to describe one object; generated views are not measured orthographic geometry. Rear surfaces/thickness are inferred. Future equipped, ground and inventory forms must derive from the same accepted master and materials. R1 preserved unchanged for review/devlog."
+    },
+    {
+      "productionId": "item.design.base.great-axe",
+      "conceptId": "item.design.base.great-axe.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/great-axe-r1.png",
+      "sha256": "883240479300154ea758897839b0c929c700b26b8a01b893e1c62db3d21813a3",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D single-item candidate modelling turnaround. Production ID item.design.base.great-axe, native inventory cursor ICURS143.\nImage 1 is the original licensed inventory sprite, PRIMARY silhouette, detail and palette reference. Image 2 is a Claymore board for clean neutral layout ONLY; never include its sword.\nReconstruct ONE Great Axe as shown, not a generic symmetric double axe. Tall straight haft, elaborate asymmetric head. On the LEFT is one large sweeping CRESCENT cutting blade with a very bright silver outward curved edge and pointed lower beard; its upper inner body/root is aged olive-gold/brass with an angular engraved/geometric border and a deep dark recessed interior nearer the central socket. The blade body thins into a curving lower silver root. On the RIGHT is a short stout TRIANGULAR arrowhead-like poll/spike, silver outer rim and dark inset center, connected by a short aged-brass curved arm. Central head is a thick intricate DARK IRON socket, layered forged ridges, a raised circular boss/loop detail near the top and compact interlocking sculpted plates below, with a tiny pointed steel cap above. Preserve the dark central relief from the reference, do not simplify to a plain T socket or invent a huge skull. Most identifiable color/detail should remain on this head. Below is a short dark steel neck followed by a smooth DEEP BURGUNDY upper handle segment. A narrow gray steel collar separates it from the lower olive-brown/dark-brown tightly wrapped leather grip; narrow steel bands at lower grip end, large angular faceted SILVER iron/steel bulb pommel at bottom. NO wrist lanyard, no blue grip, no second crescent, no long wooden pole. Match reference proportions, head roughly upper two-fifths of full object.\nOne coherent HD technical concept sheet, the SAME item in full-length FRONT, true SIDE edge-on thickness, BACK with asymmetric head correctly reversed, 3-4 perspective and small ICON inset newly rendered HD from the same item. All views agree on forms, relative lengths, bronze inlays, red upper grip, brown lower grip and silver pommel. Plain charcoal neutral background, neutral soft WHITE studio illumination without yellow tint; physically plausible worn steel/iron, aged brass and leather with crisp restrained wear. Minimal contact shadow, no environment. Reverse hidden relief, depth/thickness and tiny ambiguous source relief are conservative proposed reconstruction rather than measured fidelity.\nText only title 'GREAT AXE', labels 'FRONT', 'SIDE', 'BACK', '3-4', 'ICON', footer 'CANDIDATE - REVERSE AND THICKNESS INFERRED'. Never paste/reproduce source sprite, black reference rectangle or reference sheet into output. ICON inset must be newly rendered high-definition, no pixel art. No characters/hands, other objects, added gems/runes, glow/fire, oversized spikes, watermark. Candidate concept only, no runtime icon.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "cursorId": 143,
+        "sha256": "eacab39b6e85c0bc45c1dbcb4713615f51ff6c72ffde4b80a91a306ee1789c4a",
+        "availability": "local-private",
+        "notes": "Original inventory sprite identity only; private pixels and paths omitted. Visually inspected 6x integer nearest-neighbor presentation before generation."
+      },
+      "referencePresentedSha256": "258920780c497027b7511bd8081e2a59a12fd5c60fc02802096a1fd58d9ea84d",
+      "referencePresentation": "6x integer nearest-neighbor enlargement; primary silhouette/proportion/palette reference only",
+      "layoutReference": {
+        "conceptId": "item.design.base.claymore.concept.r1",
+        "image": "assets/concept-art/items/r1/claymore-r1.png",
+        "sha256": "e9a2e4061bcdad78e7833fa7657722672c127466a0e77a2e5dbf2df536070567",
+        "role": "Layout and neutral studio material presentation only; not an identity or geometry source."
+      },
+      "referenceVisualInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-thumbnail-proposal"
+      ],
+      "inferredParts": [
+        "Hidden reverse surfaces and details",
+        "Depth, thickness, bevel geometry and fasteners",
+        "Physical dimensions, flexible details and exact material microtexture"
+      ],
+      "review": {
+        "status": "inspected-candidate",
+        "silhouetteAndPaletteObserved": "Asymmetric left silver crescent with brass upper root, triangular right poll, dark relief center, burgundy upper handle, brown lower wrap and silver pommel.",
+        "thumbnail": "New HD concept depiction of the same object; no pasted pixel sprite; not a final runtime icon.",
+        "limitations": [
+          "Tiny central source relief is ambiguous. The candidate's layered plates, circular boss and rivet details are interpretive rather than a verified hidden structure.",
+          "Top steel point, brass border thickness and reverse relief need artistic comparison before modelling.",
+          "The blade proportions are reconstructed from the sprite, not physical measurements."
+        ],
+        "approval": false,
+        "requiresBeforeMaster": "Artistic comparison and approval, followed by coherent geometry/material reconciliation; no automatic 3D production."
+      },
+      "notes": "Candidate concept only. All views are intended to describe one object; generated views are not measured orthographic geometry. Rear surfaces/thickness are inferred. Future equipped, ground and inventory forms must derive from the same accepted master and materials. R1 preserved unchanged for review/devlog."
+    },
+    {
+      "productionId": "item.design.unique.the-butcher-s-cleaver",
+      "conceptId": "item.design.unique.the-butcher-s-cleaver.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/the-butcher-s-cleaver-r1.png",
+      "sha256": "fcfc9f3f1df67f0d0c2a7616fe7e6d584e4b41fdf1d6c0dac1dc1787f0cdd7c9",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D single-item candidate modelling turnaround. Production ID item.design.unique.the-butcher-s-cleaver, native inventory cursor ICURS106.\nInput image 1 is the original licensed inventory sprite, PRIMARY silhouette/proportion/color reference. Image 2 is a Claymore concept board, neutral layout presentation ONLY; do not include its sword.\nReconstruct ONE The Butcher's Cleaver faithfully as visible in image 1. This is a huge heavy near-rectangular butcher's CHOPPING blade, upright and aligned with an offset handle at its lower LEFT, not a double axe or a sword. Blade occupies about two-thirds of total height and most of its width extends to the RIGHT of the handle axis. Its LEFT spine is long straight pale gray steel, broad flat face is charcoal/dark iron. Upper blade edge slopes upward to the far RIGHT high pointed silver corner. The right cutting edge is pale silver, deeply battered with irregular notches/scallops/chips rather than a perfect straight edge; lower cutting corner tapers toward a ragged short bevel at bottom right. Three small dark round recessed marks aligned down the left part of the blade. Large irregular dull RUST-RED / dark reddish-brown dry stains and streaks travel diagonally across its flat face and along the right edge exactly as the visible warm red-brown marks in the original. Preserve the stained, hacked utilitarian silhouette; no shiny clean ceremonial redesign. Small dark olive-brass tab/collar at the blade's top-left spine as visible. Narrow short dark olive-BROWN wooden handle continues downward from the left spine, subtly rough/faceted, tapering and ending in a modest blunt flared wooden pommel; a tiny brown side protrusion near the base, not a huge crossguard. No leather wrapping, no jewels, no long pole, no red wrist strap. Worn metal and wood, stains are dry only; no bodies or scene.\nProduce a coherent HD modelling sheet showing the SAME object in large FRONT broadside, true SIDE edge-on thickness, BACK correctly reversed with handle/blade offset, 3-4 perspective and one small ICON inset newly rendered in HD. All views agree on the offset handle, overall dimensions, blade damage silhouette, material and dry stain color. Whole item visible in every view. Dark neutral charcoal backdrop, neutral soft WHITE studio illumination, readable physically plausible dark forged iron/steel, gray cutting bevel, dark olive-brown wood. Minimal contact shadows, no scenery. Hidden reverse stains, wood grip shape and thickness are conservative proposed reconstruction.\nText only title 'THE BUTCHER\\'S CLEAVER', labels 'FRONT', 'SIDE', 'BACK', '3-4', 'ICON', footer 'CANDIDATE - REVERSE AND THICKNESS INFERRED'. Do NOT paste/reproduce pixel sprite, its rectangle or reference sheet. ICON must be NEW crisp realistic HD render, never pixel art. No hands, characters, corpses, flesh, fresh dripping blood, extra objects, ornate skulls, magical effects, flames, runes, watermark. Candidate concept only, not final runtime icon.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "cursorId": 106,
+        "sha256": "826324f36ab33e405b689a5db3fbbcfce4ee3a5d68fb4511cf5e3ba703635f25",
+        "availability": "local-private",
+        "notes": "Original inventory sprite identity only; private pixels and paths omitted. Visually inspected 6x integer nearest-neighbor presentation before generation."
+      },
+      "referencePresentedSha256": "9acb60f5525f9571aa41e6e647d370a3a7b0331497e58346a4a209fa87105da2",
+      "referencePresentation": "6x integer nearest-neighbor enlargement; primary silhouette/proportion/palette reference only",
+      "layoutReference": {
+        "conceptId": "item.design.base.claymore.concept.r1",
+        "image": "assets/concept-art/items/r1/claymore-r1.png",
+        "sha256": "e9a2e4061bcdad78e7833fa7657722672c127466a0e77a2e5dbf2df536070567",
+        "role": "Layout and neutral studio material presentation only; not an identity or geometry source."
+      },
+      "referenceVisualInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-thumbnail-proposal"
+      ],
+      "inferredParts": [
+        "Hidden reverse surfaces and details",
+        "Depth, thickness, bevel geometry and fasteners",
+        "Physical dimensions, flexible details and exact material microtexture"
+      ],
+      "review": {
+        "status": "inspected-candidate",
+        "silhouetteAndPaletteObserved": "Tall dark near-rectangular blade offset right of short wooden handle, chipped silver right edge, three dark recesses and dry red-brown stains.",
+        "thumbnail": "New HD concept depiction of the same object; no pasted pixel sprite; not a final runtime icon.",
+        "limitations": [
+          "Back stains and recess depth are inferred; the exact front/back stain topology is not source-proven.",
+          "The candidate interprets the warm markings as dry rust-red staining, not fresh dripping blood.",
+          "Wooden grip flaring and upper-left brass tab depth require review; no dimensions or collision are implied."
+        ],
+        "approval": false,
+        "requiresBeforeMaster": "Artistic comparison and approval, followed by coherent geometry/material reconciliation; no automatic 3D production."
+      },
+      "notes": "Candidate concept only. All views are intended to describe one object; generated views are not measured orthographic geometry. Rear surfaces/thickness are inferred. Future equipped, ground and inventory forms must derive from the same accepted master and materials. R1 preserved unchanged for review/devlog."
+    }
+  ],
+  "handoff": {
+    "recipient": "Root item front for consolidation and integrator/site devlog handoff",
+    "delivered": "Seven R1 concept sheets and this separate manifest",
+    "rootActions": [
+      "Consolidate these candidate entries into the concept overlay without changing existing revisions.",
+      "Reconcile queue/gallery coverage only after validation.",
+      "Include generated art with concept-in-review labels in the devlog; never attach private retail sprites."
+    ],
+    "nextAction": "Artistic review of candidate concepts and inferential limits; retain all native identities, stats and source data unchanged.",
+    "changedScope": "Seven new PNGs and this manifest only; no overlay/gallery/validator/catalog/queue/runtime/registry/Git changes."
+  }
+}

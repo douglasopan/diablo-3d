@@ -1,5 +1,7 @@
 # HUD principal e edição visual no Godot
 
+**Checkpoint R2 em 10/10/2026:** os 43 deltas do HUD estão integrados na Source, com clique pendente e roda corrigidos. Candidato privado Windows `89767726…`: input 5.950 checks; 44 frames de RenderPresent/33.350 checks; minimapa Dungeon 481. Sem teste físico, FPS ou aprovação artística integral. A versão instalada continua `56e112ab…`; a instalação foi substituída pela nova prioridade web. Os 13 bootstraps anteriores são reuso compatível declarado. Detalhes operacionais e evidências no [guia de execução](PROJECT-EXECUTION.md).
+
 Entrega autorizada em 8 de outubro de 2026: implementar primeiro a visão principal do HUD aprovada no estudo, conservando os controles do DevilutionX. Esta trilha é independente da revisão G1 da cabana; não conclui Tristram. Os arquivos em `docs/hud-study/images/` são conceitos, não capturas da implementação.
 
 O escopo é refazer a apresentação das funções existentes e permitir editar seu layout depois. O usuário reforçou que novas funções poderão ser discutidas no futuro, mas não pertencem a esta entrega. A faixa adicional de quatro botões de magia foi retirada; os atalhos originais permanecem. O contrato visual corresponde aos seis botões de jogador único, às duas funções condicionais de multijogador, aos oito espaços do cinto, aos dois globos, à magia preparada e à caixa de informações, com os avisos e estados condicionais nativos preservados.

@@ -21,6 +21,13 @@ bool Finite(TownCameraPoint point)
 	return std::isfinite(point.x) && std::isfinite(point.height) && std::isfinite(point.z);
 }
 
+bool ValidAuthoredColor(const std::array<float, 4> &color)
+{
+	return std::all_of(color.begin(), color.end(), [](float component) {
+		return std::isfinite(component) && component >= 0 && component <= 1;
+	});
+}
+
 float Dot(TownCameraPoint a, TownCameraPoint b)
 {
 	return a.x * b.x + a.height * b.height + a.z * b.z;
@@ -98,7 +105,10 @@ ClipVertex Lerp(const ClipVertex &a, const ClipVertex &b, double t)
 	const auto point = [&scalar](TownCameraPoint start, TownCameraPoint end) {
 		return TownCameraPoint { scalar(start.x, end.x), scalar(start.height, end.height), scalar(start.z, end.z) };
 	};
-	return { { point(a.source.world, b.source.world), scalar(a.source.u, b.source.u), scalar(a.source.v, b.source.v) }, point(a.view, b.view) };
+	TownCameraVertex source { point(a.source.world, b.source.world), scalar(a.source.u, b.source.u), scalar(a.source.v, b.source.v) };
+	for (size_t component = 0; component < source.authoredColor.size(); ++component)
+		source.authoredColor[component] = scalar(a.source.authoredColor[component], b.source.authoredColor[component]);
+	return { source, point(a.view, b.view) };
 }
 
 void SnapToPlane(const TownCameraFrame &frame, ClipVertex &vertex, size_t plane)
@@ -413,7 +423,8 @@ TownCameraClippedTriangles ClipTownCameraTriangle(const TownCameraFrame &frame,
 	std::array<ClipVertex, 10> polygon {}, scratch {};
 	size_t count = 3;
 	for (size_t i = 0; i < count; ++i) {
-		if (!Finite(triangle[i].world) || !std::isfinite(triangle[i].u) || !std::isfinite(triangle[i].v))
+		if (!Finite(triangle[i].world) || !std::isfinite(triangle[i].u) || !std::isfinite(triangle[i].v)
+		    || !ValidAuthoredColor(triangle[i].authoredColor))
 			return result;
 		polygon[i] = { triangle[i], TownCameraToView(frame, triangle[i].world) };
 		if (!Finite(polygon[i].view))
@@ -475,7 +486,8 @@ bool InterpolateTownCameraSample(const std::array<TownCameraProjectedVertex, 3> 
 	std::array<float, 3> weights;
 	for (size_t i = 0; i < 3; ++i) {
 		if (!std::isfinite(barycentric[i]) || barycentric[i] < -0.00001F
-		    || !std::isfinite(triangle[i].reciprocalW) || triangle[i].reciprocalW <= 0)
+		    || !std::isfinite(triangle[i].reciprocalW) || triangle[i].reciprocalW <= 0
+		    || !ValidAuthoredColor(triangle[i].source.authoredColor))
 			return false;
 		// Tiny negative coverage errors belong to the boundary, not to an
 		// extrapolated point which could escape the clipped near/far interval.
@@ -492,6 +504,19 @@ bool InterpolateTownCameraSample(const std::array<TownCameraProjectedVertex, 3> 
 		sample.world = sample.world + triangle[i].source.world * weight;
 		sample.u += triangle[i].source.u * weight;
 		sample.v += triangle[i].source.v * weight;
+	}
+	for (size_t component = 0; component < sample.authoredColor.size(); ++component) {
+		const float first = triangle[0].source.authoredColor[component];
+		// Preserve constant attributes exactly, particularly legacy white, rather
+		// than publishing tiny interpolation drift as a new color stream.
+		if (first == triangle[1].source.authoredColor[component] && first == triangle[2].source.authoredColor[component]) {
+			sample.authoredColor[component] = first;
+			continue;
+		}
+		double color = 0;
+		for (size_t i = 0; i < 3; ++i)
+			color += static_cast<double>(triangle[i].source.authoredColor[component]) * (weights[i] / denominator);
+		sample.authoredColor[component] = std::clamp(static_cast<float>(color), 0.0F, 1.0F);
 	}
 	if (!Finite(sample.world) || !std::isfinite(sample.depth) || !std::isfinite(sample.u) || !std::isfinite(sample.v))
 		return false;

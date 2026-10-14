@@ -1,0 +1,396 @@
+{
+  "format": "d3d.item-concept-art",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "batchId": "batch-next-headgear-base-design-all-01",
+  "scope": "Queue-group study fragment; candidate generation and explicit visual reuse only, never full-catalog completion or asset approval.",
+  "catalogSha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d",
+  "generationTool": "built-in image_gen.imagegen",
+  "generationCalls": 6,
+  "postProcessing": "none; generated PNG bytes copied unchanged",
+  "originalGameImagesIncluded": false,
+  "visualApproval": false,
+  "runtimeInstalled": false,
+  "registryAuthority": "assets/registry.json",
+  "summary": {
+    "productionUnits": 228,
+    "batchProductionUnits": 6,
+    "conceptCandidateEntries": 6,
+    "generatedImages": 6,
+    "reuseProposals": 0,
+    "blockedUnits": 0,
+    "modelsGenerated": 0,
+    "runtimeIconsGenerated": 0
+  },
+  "entries": [
+    {
+      "productionId": "item.design.base.cap",
+      "conceptId": "item.design.base.cap.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/cap-r1.png",
+      "sha256": "bef17e640120fe6813d48b4147ed5af49c0346559e6868edce5386642bd2dc4b",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate object-modeling reference.\nInput image 1 is a PRIVATE original inventory sprite, used only to preserve recognizable silhouette, colors, material regions and distinctive details. Create NEW HD imagery throughout; never paste the sprite into any view or thumbnail.\nA clean technical board of the exact SAME single object in FRONT, SIDE, BACK, THREE-QUARTER and a small NEW HD INVENTORY thumbnail. All views must agree on geometry, proportions, material layout and distinctive details; back is the true reverse, not another front. Full object visible, generously spaced, plain charcoal-gray backdrop, neutral soft studio lighting, no colored illumination or glow, realistic restrained dark medieval materials and fine wear. No scene, body, face, hands, stand, exploded alternatives or extra props. Rear/hidden surfaces and absolute scale are proposed reconstruction; preserve visible source design. Thumbnail must be a new high-detail render of this same object, never pixel-art or the supplied sprite. Minimal labels: item name, FRONT, SIDE, BACK, 3/4, ICON.\nSubject: Cap; item.design.base.cap; native cursor 91.\nA dark olive-brown soft leather hood-like CAP with domed stitched crown, a prominent center seam, a rolled rim around a completely empty open face, and TWO hanging side earflaps ending in small gray metal fasteners. Preserve the original close rounded silhouette and earthy brown/olive material; dark interior is empty, not a face. No horns, crown spikes, eye visor, plume, face or metallic full helmet. Hidden stitching/interior lining is inferred.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "cursorId": 91,
+        "sha256": "c46390de90c6e9cae91f3ee60ded827011d930e786625dd670da220f1b1e47ca",
+        "availability": "local-private",
+        "notes": "Licensed original inventory sprite inspected privately at nearest-neighbor 6x enlargement; no original pixels or file paths are included."
+      },
+      "referenceNativeSpriteSha256": "c37df70112e4eb8740ee2e9d2f51c24fd566073cde703f7b875382e97aa7f489",
+      "referenceInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "viewsUsed": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-concept-thumbnail"
+      ],
+      "inferredParts": [
+        "Back and hidden surfaces",
+        "Thickness and absolute scale",
+        "Fine construction/material details unresolved by source pixels"
+      ],
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "sourceBaseIds": [
+        "item.base.048.cap"
+      ],
+      "sourceUniqueIds": [],
+      "nativeIdentityPolicy": "Visual study only. Native item identities, unique powers, stats, affixes, saves and RNG are separate and unchanged.",
+      "identityGate": "Candidate design requires visual review and multiview reconciliation before master production.",
+      "notes": "Neutral-light candidate board. HD thumbnail is a new concept preview, not a final runtime icon. Hidden geometry is proposed reconstruction."
+    },
+    {
+      "productionId": "item.design.base.crown",
+      "conceptId": "item.design.base.crown.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/crown-r1.png",
+      "sha256": "da3f95bd614d17b7a580949b8223aa4e59bbb88dfb7021e6dde285bcb4453d83",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate object-modeling reference.\nInput image 1 is a PRIVATE original inventory sprite, used only to preserve recognizable silhouette, colors, material regions and distinctive details. Create NEW HD imagery throughout; never paste the sprite into any view or thumbnail.\nA clean technical board of the exact SAME single object in FRONT, SIDE, BACK, THREE-QUARTER and a small NEW HD INVENTORY thumbnail. All views must agree on geometry, proportions, material layout and distinctive details; back is the true reverse, not another front. Full object visible, generously spaced, plain charcoal-gray backdrop, neutral soft studio lighting, no colored illumination or glow, realistic restrained dark medieval materials and fine wear. No scene, body, face, hands, stand, exploded alternatives or extra props. Rear/hidden surfaces and absolute scale are proposed reconstruction; preserve visible source design. Thumbnail must be a new high-detail render of this same object, never pixel-art or the supplied sprite. Minimal labels: item name, FRONT, SIDE, BACK, 3/4, ICON.\nSubject: Crown; item.design.base.crown; native cursor 95.\nA low antique gold/brass CROWN circlet with a few tall slender pointed foliate spires, not a dense baroque royal crown. Preserve the source's thin circular band, a particularly tall spear-like front/side spire with one small pale silver/white gem near its upper portion, smaller plain points around the band, restrained dark rectangular inset accents and a modest embossed circular front-band fitting. Original proportions are narrow and open above, no fabric cap. No red/purple jewels, huge gemstones, horns or exaggerated ornate filigree. Number and arrangement of hidden points are proposed but must remain consistent between all views.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "cursorId": 95,
+        "sha256": "a5d6a464773532f7d5fd0f955961f6e694c6a58f1a0f5dba881b22d7964d5b4a",
+        "availability": "local-private",
+        "notes": "Licensed original inventory sprite inspected privately at nearest-neighbor 6x enlargement; no original pixels or file paths are included."
+      },
+      "referenceNativeSpriteSha256": "0f4c39d3b62a2431c0fa924d6206a17a07ac7fb44a7ef91d515c3686ca0db835",
+      "referenceInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "viewsUsed": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-concept-thumbnail"
+      ],
+      "inferredParts": [
+        "Back and hidden surfaces",
+        "Thickness and absolute scale",
+        "Fine construction/material details unresolved by source pixels"
+      ],
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "sourceBaseIds": [
+        "item.base.052.crown"
+      ],
+      "sourceUniqueIds": [],
+      "nativeIdentityPolicy": "Visual study only. Native item identities, unique powers, stats, affixes, saves and RNG are separate and unchanged.",
+      "identityGate": "Candidate design requires visual review and multiview reconciliation before master production.",
+      "notes": "Neutral-light candidate board. HD thumbnail is a new concept preview, not a final runtime icon. Hidden geometry is proposed reconstruction."
+    },
+    {
+      "productionId": "item.design.base.full-helm",
+      "conceptId": "item.design.base.full-helm.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/full-helm-r1.png",
+      "sha256": "0a2cc59d66aa924796f6f2ab14b89203cde65eb111ded121d01a2ea5c11fb668",
+      "dimensions": [
+        1254,
+        1254
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate object-modeling reference.\nInput image 1 is a PRIVATE original inventory sprite, used only to preserve recognizable silhouette, colors, material regions and distinctive details. Create NEW HD imagery throughout; never paste the sprite into any view or thumbnail.\nA clean technical board of the exact SAME single object in FRONT, SIDE, BACK, THREE-QUARTER and a small NEW HD INVENTORY thumbnail. All views must agree on geometry, proportions, material layout and distinctive details; back is the true reverse, not another front. Full object visible, generously spaced, plain charcoal-gray backdrop, neutral soft studio lighting, no colored illumination or glow, realistic restrained dark medieval materials and fine wear. No scene, body, face, hands, stand, exploded alternatives or extra props. Rear/hidden surfaces and absolute scale are proposed reconstruction; preserve visible source design. Thumbnail must be a new high-detail render of this same object, never pixel-art or the supplied sprite. Minimal labels: item name, FRONT, SIDE, BACK, 3/4, ICON.\nSubject: Full Helm; item.design.base.full-helm; native cursor 75.\nA full steel enclosed helmet: tall near-cylindrical face with one narrow continuous black horizontal eye slit, conical/faceted peaked roof, strong vertical front center ridge, TWO symmetrical perforated lower-face panels on either side of that ridge, and a restrained warm brass edge along its pointed/flared lower rim. Preserve gray steel and the source's angular face and lower central point. No open face, separate big eye sockets, plume, hair, horns or character. Interior is hollow and dark; rear rivets and liner are inferred.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "cursorId": 75,
+        "sha256": "dae81e12ff4c828123d0d0515039f49fd781e5c8b11c7aab28900866ba76444e",
+        "availability": "local-private",
+        "notes": "Licensed original inventory sprite inspected privately at nearest-neighbor 6x enlargement; no original pixels or file paths are included."
+      },
+      "referenceNativeSpriteSha256": "0d8a77df5093c1568f5be4fb4cb13b4623c896cc273f0164425087ad743bfd58",
+      "referenceInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "viewsUsed": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-concept-thumbnail"
+      ],
+      "inferredParts": [
+        "Back and hidden surfaces",
+        "Thickness and absolute scale",
+        "Fine construction/material details unresolved by source pixels"
+      ],
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "sourceBaseIds": [
+        "item.base.051.full-helm"
+      ],
+      "sourceUniqueIds": [],
+      "nativeIdentityPolicy": "Visual study only. Native item identities, unique powers, stats, affixes, saves and RNG are separate and unchanged.",
+      "identityGate": "Candidate design requires visual review and multiview reconciliation before master production.",
+      "notes": "Neutral-light candidate board. HD thumbnail is a new concept preview, not a final runtime icon. Hidden geometry is proposed reconstruction."
+    },
+    {
+      "productionId": "item.design.base.great-helm",
+      "conceptId": "item.design.base.great-helm.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/great-helm-r1.png",
+      "sha256": "a1ebee48138df34df21cead1a7b127b1a3a61e42b7537434829a70cfda3c6f2f",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate object-modeling reference.\nInput image 1 is a PRIVATE original inventory sprite, used only to preserve recognizable silhouette, colors, material regions and distinctive details. Create NEW HD imagery throughout; never paste the sprite into any view or thumbnail.\nA clean technical board of the exact SAME single object in FRONT, SIDE, BACK, THREE-QUARTER and a small NEW HD INVENTORY thumbnail. All views must agree on geometry, proportions, material layout and distinctive details; back is the true reverse, not another front. Full object visible, generously spaced, plain charcoal-gray backdrop, neutral soft studio lighting, no colored illumination or glow, realistic restrained dark medieval materials and fine wear. No scene, body, face, hands, stand, exploded alternatives or extra props. Rear/hidden surfaces and absolute scale are proposed reconstruction; preserve visible source design. Thumbnail must be a new high-detail render of this same object, never pixel-art or the supplied sprite. Minimal labels: item name, FRONT, SIDE, BACK, 3/4, ICON.\nSubject: Great Helm; item.design.base.great-helm; native cursor 98.\nThe source's GREAT HELM is an OPEN-faced steel helmet, distinct from the full enclosed helmet: rounded/conical polished-gray bowl, a short upright red plume/crest on the very top, a broad antique brass/gold horizontal brow band, two steel side cheek guards hanging beside the large empty dark face opening, brass lower-edge fittings and slightly flared side ends. Preserve the red crest, gold band and open front silhouette. Do not turn it into a closed barrel helmet, add a face, giant horns or a long flowing feather tail. Back and interior are inferred.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "cursorId": 98,
+        "sha256": "113756c9be3a8d1ca0e0a12d512c5d87b45d53d8e4098f61127cf9d0d72459bd",
+        "availability": "local-private",
+        "notes": "Licensed original inventory sprite inspected privately at nearest-neighbor 6x enlargement; no original pixels or file paths are included."
+      },
+      "referenceNativeSpriteSha256": "e9ad7eba75954aa76f23b46afe1b7d71263aa3dad54498c58761121dcae2b337",
+      "referenceInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "viewsUsed": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-concept-thumbnail"
+      ],
+      "inferredParts": [
+        "Back and hidden surfaces",
+        "Thickness and absolute scale",
+        "Fine construction/material details unresolved by source pixels"
+      ],
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "sourceBaseIds": [
+        "item.base.053.great-helm"
+      ],
+      "sourceUniqueIds": [],
+      "nativeIdentityPolicy": "Visual study only. Native item identities, unique powers, stats, affixes, saves and RNG are separate and unchanged.",
+      "identityGate": "Candidate design requires visual review and multiview reconciliation before master production.",
+      "notes": "Neutral-light candidate board. HD thumbnail is a new concept preview, not a final runtime icon. Hidden geometry is proposed reconstruction."
+    },
+    {
+      "productionId": "item.design.base.helm",
+      "conceptId": "item.design.base.helm.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/helm-r1.png",
+      "sha256": "ea21cd9c40c7c295c45a06da899a9114d439f6e0510e23fe83b9ec00a2c0843f",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate object-modeling reference.\nInput image 1 is a PRIVATE original inventory sprite, used only to preserve recognizable silhouette, colors, material regions and distinctive details. Create NEW HD imagery throughout; never paste the sprite into any view or thumbnail.\nA clean technical board of the exact SAME single object in FRONT, SIDE, BACK, THREE-QUARTER and a small NEW HD INVENTORY thumbnail. All views must agree on geometry, proportions, material layout and distinctive details; back is the true reverse, not another front. Full object visible, generously spaced, plain charcoal-gray backdrop, neutral soft studio lighting, no colored illumination or glow, realistic restrained dark medieval materials and fine wear. No scene, body, face, hands, stand, exploded alternatives or extra props. Rear/hidden surfaces and absolute scale are proposed reconstruction; preserve visible source design. Thumbnail must be a new high-detail render of this same object, never pixel-art or the supplied sprite. Minimal labels: item name, FRONT, SIDE, BACK, 3/4, ICON.\nSubject: Helm; item.design.base.helm; native cursor 82.\nA rounded gray steel HELM with a strong wide vertical center reinforcement continuing into a long nasal bar, a horizontal brow reinforcement and TWO large squared dark eye openings divided by the nasal. Paired gold/brass hinged cheek/jaw guards hang below at the left and right, leaving the lower face open and empty. Preserve source gray steel above and warm brass lower pieces. No face inside, plume, horns, full closed mouth plate or gemstone. Back and hidden hinge construction are proposed.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "cursorId": 82,
+        "sha256": "2e666c107adfc0f6436454d3abf1b8585b78910a6fbc17086aa10764e75d539b",
+        "availability": "local-private",
+        "notes": "Licensed original inventory sprite inspected privately at nearest-neighbor 6x enlargement; no original pixels or file paths are included."
+      },
+      "referenceNativeSpriteSha256": "f29279f3bcbbcfc92d4917c8b0055eb7e702fc7b1c7a83b30abca954eb9fa3e9",
+      "referenceInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "viewsUsed": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-concept-thumbnail"
+      ],
+      "inferredParts": [
+        "Back and hidden surfaces",
+        "Thickness and absolute scale",
+        "Fine construction/material details unresolved by source pixels"
+      ],
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "sourceBaseIds": [
+        "item.base.050.helm"
+      ],
+      "sourceUniqueIds": [],
+      "nativeIdentityPolicy": "Visual study only. Native item identities, unique powers, stats, affixes, saves and RNG are separate and unchanged.",
+      "identityGate": "Candidate design requires visual review and multiview reconciliation before master production.",
+      "notes": "Neutral-light candidate board. HD thumbnail is a new concept preview, not a final runtime icon. Hidden geometry is proposed reconstruction."
+    },
+    {
+      "productionId": "item.design.base.skull-cap",
+      "conceptId": "item.design.base.skull-cap.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/skull-cap-r1.png",
+      "sha256": "c50e96d98a852ca4b3b9013c9191e07175233e0a8bc9f806739b6276ace6cdb6",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate object-modeling reference.\nInput image 1 is a PRIVATE original inventory sprite, used only to preserve recognizable silhouette, colors, material regions and distinctive details. Create NEW HD imagery throughout; never paste the sprite into any view or thumbnail.\nA clean technical board of the exact SAME single object in FRONT, SIDE, BACK, THREE-QUARTER and a small NEW HD INVENTORY thumbnail. All views must agree on geometry, proportions, material layout and distinctive details; back is the true reverse, not another front. Full object visible, generously spaced, plain charcoal-gray backdrop, neutral soft studio lighting, no colored illumination or glow, realistic restrained dark medieval materials and fine wear. No scene, body, face, hands, stand, exploded alternatives or extra props. Rear/hidden surfaces and absolute scale are proposed reconstruction; preserve visible source design. Thumbnail must be a new high-detail render of this same object, never pixel-art or the supplied sprite. Minimal labels: item name, FRONT, SIDE, BACK, 3/4, ICON.\nSubject: Skull Cap; item.design.base.skull-cap; native cursor 90.\nA compact FLUTED/conically ridged dark gray steel SKULL CAP with a broad flat oval antique brass/gold brim band, small pointed silver finial with gold collar on top, and one narrow silver nasal tab hanging from the front brim. Preserve the low bowl and diagonal radial flutes of the source; this is not a round cloth cap or full face helmet. The underside is hollow with a dark inferred liner, no eyes or face. No tall crown spires, plume or horns.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "cursorId": 90,
+        "sha256": "b0c6860a88962fc4552bf0227cf33d819443196c55d5c00449eff912dc794e77",
+        "availability": "local-private",
+        "notes": "Licensed original inventory sprite inspected privately at nearest-neighbor 6x enlargement; no original pixels or file paths are included."
+      },
+      "referenceNativeSpriteSha256": "f356a55d933445e6032bbaed982ec4244b5c4f449ffafb14e1e0489eb367861b",
+      "referenceInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "viewsUsed": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-concept-thumbnail"
+      ],
+      "inferredParts": [
+        "Back and hidden surfaces",
+        "Thickness and absolute scale",
+        "Fine construction/material details unresolved by source pixels"
+      ],
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "sourceBaseIds": [
+        "item.base.049.skull-cap"
+      ],
+      "sourceUniqueIds": [],
+      "nativeIdentityPolicy": "Visual study only. Native item identities, unique powers, stats, affixes, saves and RNG are separate and unchanged.",
+      "identityGate": "Candidate design requires visual review and multiview reconciliation before master production.",
+      "notes": "Neutral-light candidate board. HD thumbnail is a new concept preview, not a final runtime icon. Hidden geometry is proposed reconstruction."
+    }
+  ],
+  "blockedUnits": [],
+  "devlogHandoff": {
+    "includeAllGeneratedImages": true,
+    "images": [
+      {
+        "image": "assets/concept-art/items/r1/cap-r1.png",
+        "sha256": "bef17e640120fe6813d48b4147ed5af49c0346559e6868edce5386642bd2dc4b",
+        "dimensions": [
+          1536,
+          1024
+        ]
+      },
+      {
+        "image": "assets/concept-art/items/r1/crown-r1.png",
+        "sha256": "da3f95bd614d17b7a580949b8223aa4e59bbb88dfb7021e6dde285bcb4453d83",
+        "dimensions": [
+          1536,
+          1024
+        ]
+      },
+      {
+        "image": "assets/concept-art/items/r1/full-helm-r1.png",
+        "sha256": "0a2cc59d66aa924796f6f2ab14b89203cde65eb111ded121d01a2ea5c11fb668",
+        "dimensions": [
+          1254,
+          1254
+        ]
+      },
+      {
+        "image": "assets/concept-art/items/r1/great-helm-r1.png",
+        "sha256": "a1ebee48138df34df21cead1a7b127b1a3a61e42b7537434829a70cfda3c6f2f",
+        "dimensions": [
+          1536,
+          1024
+        ]
+      },
+      {
+        "image": "assets/concept-art/items/r1/helm-r1.png",
+        "sha256": "ea21cd9c40c7c295c45a06da899a9114d439f6e0510e23fe83b9ec00a2c0843f",
+        "dimensions": [
+          1536,
+          1024
+        ]
+      },
+      {
+        "image": "assets/concept-art/items/r1/skull-cap-r1.png",
+        "sha256": "c50e96d98a852ca4b3b9013c9191e07175233e0a8bc9f806739b6276ace6cdb6",
+        "dimensions": [
+          1536,
+          1024
+        ]
+      }
+    ],
+    "generatedConceptIds": [
+      "item.design.base.cap.concept.r1",
+      "item.design.base.crown.concept.r1",
+      "item.design.base.full-helm.concept.r1",
+      "item.design.base.great-helm.concept.r1",
+      "item.design.base.helm.concept.r1",
+      "item.design.base.skull-cap.concept.r1"
+    ],
+    "reuseProductionIds": [],
+    "limits": [
+      "All outputs remain unapproved candidates.",
+      "Shared cursor reuse preserves separate native identities and powers.",
+      "Hidden surfaces and scale are inferred; master/socket/icon work remains gated."
+    ]
+  }
+}
+

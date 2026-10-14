@@ -5,6 +5,7 @@
 #include <string>
 
 #include "engine/clx_sprite.hpp"
+#include "engine/hd_sprite_pack.hpp"
 #include "engine/point.hpp"
 #include "engine/surface.hpp"
 #include "tables/spelldat.h"
@@ -75,6 +76,10 @@ enum class SpellIcon : uint8_t {
  * @param spell Spell ID.
  */
 void DrawLargeSpellIcon(const Surface &out, Point position, SpellID spell);
+
+/** Full replacement pixels with the same native skill/spell/scroll translation. */
+std::expected<HdSpritePixels, std::string> LoadLargeSpellIconHdPixels(SpellID spell);
+std::expected<std::vector<uint32_t>, std::string> LoadLargeSpellIconRgba(SpellID spell);
 
 /**
  * Draw a small (37x38) spell icon onto the given buffer.

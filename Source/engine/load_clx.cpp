@@ -6,12 +6,16 @@
 
 #include "appfat.h"
 #include "engine/assets.hpp"
+#include "engine/hd_sprite_pack.hpp"
 #include "engine/load_file.hpp"
 
 namespace devilution {
 
 OptionalOwnedClxSpriteListOrSheet LoadOptionalClxListOrSheet(const char *path)
 {
+	auto hd = LoadHdSpriteReplacement(path);
+	if (!hd) app_fatal(hd.error());
+	if (*hd) return std::move(*hd);
 	AssetRef ref = FindAsset(path);
 	if (!ref.ok())
 		return std::nullopt;
@@ -27,6 +31,9 @@ OptionalOwnedClxSpriteListOrSheet LoadOptionalClxListOrSheet(const char *path)
 
 std::expected<OwnedClxSpriteListOrSheet, std::string> LoadClxListOrSheetWithStatus(const char *path)
 {
+	auto hd = LoadHdSpriteReplacement(path);
+	if (!hd) return std::unexpected(hd.error());
+	if (*hd) return std::move(**hd);
 	size_t size;
 	std::expected<std::unique_ptr<uint8_t[]>, std::string> data = LoadFileInMemWithStatus<uint8_t>(path, &size);
 	if (!data.has_value()) return std::unexpected(std::move(data).error());

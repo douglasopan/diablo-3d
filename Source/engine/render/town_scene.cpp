@@ -7,7 +7,11 @@
 
 #include "engine/render/town_model_import.hpp"
 #include "engine/render/town_editor_map.hpp"
+#include "engine/render/town_visual_objects.hpp"
+#include "engine/render/town_visual_scene.hpp"
+#include "engine/render/town_scene_logic.hpp"
 #include "levels/dun_tile_data.hpp"
+#include "utils/log.hpp"
 
 namespace devilution {
 namespace {
@@ -844,6 +848,202 @@ std::shared_ptr<const TownCabinInterior> MakeCabinInterior(const TownSceneModel 
 	return interior;
 }
 
+// Church runtime adjunct shares the measured aperture/point-light renderer.
+// The supplied master is retained; only the exterior presentation is clipped.
+// UVs for a closed generic side arch come from the adjacent coplanar masonry,
+// rather than a new texture or a stretched picture of the old window.
+void AppendChurchMasonryPatch(std::vector<TownSceneTriangle> &output, const TownSceneModel &model,
+    float x, float minZ, float maxZ, float minHeight, float maxHeight, float outward)
+{
+	const TownSceneTriangle *reference = nullptr;
+	float best = 1000000;
+	for (const TownSceneTriangle &triangle : model.triangles) {
+		if (triangle.normal.x * outward < 0.99F)
+			continue;
+		const auto &a = triangle.vertices[0];
+		const auto &b = triangle.vertices[1];
+		const auto &c = triangle.vertices[2];
+		const float plane = (a.x + b.x + c.x) / 3;
+		const float centerHeight = (a.height + b.height + c.height) / 3;
+		const float centerZ = (a.z + b.z + c.z) / 3;
+		const float area = std::abs((b.height - a.height) * (c.z - a.z) - (b.z - a.z) * (c.height - a.height));
+		if (std::abs(plane - x) > 0.04F || centerHeight > minHeight || area < 0.1F)
+			continue;
+		const float score = std::abs(centerZ - (minZ + maxZ) / 2) + std::abs(centerHeight - minHeight) * 0.2F;
+		if (score < best) {
+			best = score;
+			reference = &triangle;
+		}
+	}
+	if (reference == nullptr)
+		return;
+	const auto &a = reference->vertices[0];
+	const auto &b = reference->vertices[1];
+	const auto &c = reference->vertices[2];
+	const float bh = b.height - a.height;
+	const float bz = b.z - a.z;
+	const float ch = c.height - a.height;
+	const float cz = c.z - a.z;
+	const float determinant = bh * cz - bz * ch;
+	const auto vertex = [&](float height, float z) {
+		// The texture adjacent to the old arched hole includes its dark trim.
+		// Sample the intact lower masonry, instead of repainting that old arch
+		// silhouette on the newly closed wall. Geometry retains its real height.
+		const float sampleHeight = height - 2.2F;
+		const float beta = ((sampleHeight - a.height) * cz - (z - a.z) * ch) / determinant;
+		const float gamma = (bh * (z - a.z) - bz * (sampleHeight - a.height)) / determinant;
+		return TownSceneVertex { x, height, z,
+			std::clamp(a.u + beta * (b.u - a.u) + gamma * (c.u - a.u), 0.0F, 1.0F),
+			std::clamp(a.v + beta * (b.v - a.v) + gamma * (c.v - a.v), 0.0F, 1.0F) };
+	};
+	const std::array<TownSceneVertex, 4> vertices { vertex(minHeight, minZ), vertex(maxHeight, minZ),
+		vertex(maxHeight, maxZ), vertex(minHeight, maxZ) };
+	for (const auto &indices : { std::array<size_t, 3> { 0, 1, 2 }, std::array<size_t, 3> { 0, 2, 3 } }) {
+		TownSceneTriangle patch = *reference;
+		patch.vertices = { vertices[indices[0]], vertices[indices[outward > 0 ? 1 : 2]], vertices[indices[outward > 0 ? 2 : 1]] };
+		if (SetCabinTriangleNormal(patch))
+			output.push_back(patch);
+	}
+}
+
+std::shared_ptr<TownCabinInterior> BuildChurchInterior(const TownSceneModel &model)
+{
+	auto room = std::make_shared<TownCabinInterior>();
+	room->roomMinimum = { 23.3F, 0.12F, 24.5F };
+	room->roomMaximum = { 26.7F, 5.3F, 28.0F };
+	room->fireColor = { 1.0F, 0.025F, 0.012F };
+	room->openings = {
+		// Human 20% reduction affects the clear opening about its floor anchor,
+		// not the selected church's uniform fit or the intensity/halo of its light.
+		{ TownCabinOpeningKind::Door, { TownLightPlane::Z, 28.0F, 23.92F, 26.08F, 0.0F, 2.48F, 0 }, 28.15F, 26.8F, 28.15F, false },
+		{ TownCabinOpeningKind::Door, { TownLightPlane::Z, 28.0F, 23.92F, 26.08F, 1.40F, 3.56F, 20 }, 28.15F, 26.8F, 28.15F, false },
+	};
+	// Stable storage is completed before creating borrowed aperture spans. Each
+	// shell has two apertures, staying inside TownMaxLightApertures (8).
+	room->apertures.reserve(14);
+	for (const auto &opening : room->openings)
+		room->apertures.push_back(opening.aperture);
+	// The cut remains anchored to the native ground. Light crosses the room
+	// shell only above its real raised receiving floor, never below that shell.
+	room->apertures.front().minV = room->roomMinimum.height;
+	room->fireSources.push_back({ TownCabinFireKind::Hearth,
+		{ { 25, 1.4F, 26.8F }, room->fireColor, 4, 3 }, {}, 0xC471ED01U });
+	struct ChurchCross {
+		float outerX;
+		float centerZ;
+	};
+	// These outer faces/centers are measured on the selected master. Native art
+	// has its crosses on the buttresses, not the generic arched wall windows.
+	constexpr std::array<ChurchCross, 3> LeftCrosses {{
+		{ 17.15684F, 11.2633F }, { 17.15684F, 15.7725F }, { 16.67803F, 20.0859F }
+	}};
+	constexpr float StemHalfWidth = 0.12F;
+	constexpr float CrossHalfWidth = 0.40F;
+	constexpr float CrossBottom = 2.45F;
+	constexpr float CrossTop = 3.70F;
+	constexpr float ArmBottom = 3.18F;
+	constexpr float ArmTop = 3.40F;
+	constexpr float CrossDepth = 0.34F;
+	Builder crosses = MakeBuilder(model.kind, model.minTile, model.maxTile, model.triangles.front().sourceTile, { 25, 29 });
+	for (unsigned side = 0; side < 2; ++side) {
+		for (unsigned index = 0; index < LeftCrosses.size(); ++index) {
+			const auto &cross = LeftCrosses[index];
+			const float outward = side == 0 ? -1.0F : 1.0F;
+			const float outerX = side == 0 ? cross.outerX : 50.0F - cross.outerX;
+			const float innerX = outerX - outward * CrossDepth;
+			const float minX = std::min(outerX, innerX);
+			const float maxX = std::max(outerX, innerX);
+			for (const auto &bounds : { std::array<float, 4> { cross.centerZ - StemHalfWidth, cross.centerZ + StemHalfWidth, CrossBottom, CrossTop },
+			         std::array<float, 4> { cross.centerZ - CrossHalfWidth, cross.centerZ + CrossHalfWidth, ArmBottom, ArmTop } }) {
+				TownCabinOpening opening { TownCabinOpeningKind::Window,
+					{ TownLightPlane::X, outerX, bounds[0], bounds[1], bounds[2], bounds[3], 0 },
+					outerX, minX - 0.015F, maxX + 0.015F, false };
+				room->openings.push_back(opening);
+				room->apertures.push_back(opening.aperture);
+			}
+			const size_t apertureOffset = 2 + (side * LeftCrosses.size() + index) * 2;
+			room->lightOccluders.push_back({ { minX, CrossBottom, cross.centerZ - CrossHalfWidth },
+				{ maxX, CrossTop, cross.centerZ + CrossHalfWidth },
+				std::span<const TownLightAperture>(room->apertures.data() + apertureOffset, 2) });
+			// Concave union perimeter: no duplicated rectangular lining across the
+			// intersection of the stem and arms, and no opaque bars in the cross.
+			const std::array<std::array<float, 2>, 12> outline {{
+				{ -StemHalfWidth, CrossBottom }, { StemHalfWidth, CrossBottom },
+				{ StemHalfWidth, ArmBottom }, { CrossHalfWidth, ArmBottom },
+				{ CrossHalfWidth, ArmTop }, { StemHalfWidth, ArmTop },
+				{ StemHalfWidth, CrossTop }, { -StemHalfWidth, CrossTop },
+				{ -StemHalfWidth, ArmTop }, { -CrossHalfWidth, ArmTop },
+				{ -CrossHalfWidth, ArmBottom }, { -StemHalfWidth, ArmBottom }
+			}};
+			for (size_t edge = 0; edge < outline.size(); ++edge) {
+				const auto &a = outline[edge];
+				const auto &b = outline[(edge + 1) % outline.size()];
+				crosses.Quad({ outerX, a[1], cross.centerZ + a[0] }, { outerX, b[1], cross.centerZ + b[0] },
+					{ innerX, b[1], cross.centerZ + b[0] }, { innerX, a[1], cross.centerZ + a[0] }, TownSceneMaterial::Stone);
+			}
+			const auto back = [&](float u0, float u1, float v0, float v1) {
+				crosses.Quad({ innerX, v0, cross.centerZ + u0 }, { innerX, v1, cross.centerZ + u0 },
+					{ innerX, v1, cross.centerZ + u1 }, { innerX, v0, cross.centerZ + u1 }, TownSceneMaterial::Stone);
+			};
+			back(-StemHalfWidth, StemHalfWidth, CrossBottom, CrossTop);
+			back(-CrossHalfWidth, -StemHalfWidth, ArmBottom, ArmTop);
+			back(StemHalfWidth, CrossHalfWidth, ArmBottom, ArmTop);
+			room->fireSources.push_back({ TownCabinFireKind::Hearth,
+				{ { outerX - outward * CrossDepth * 0.55F, 3.25F, cross.centerZ }, room->fireColor, 1.6F, 2.0F },
+				{}, 0xC471ED10U + side * 3 + index });
+		}
+	}
+	room->lightOccluders.insert(room->lightOccluders.begin(),
+		{ room->roomMinimum, room->roomMaximum, std::span<const TownLightAperture>(room->apertures.data(), 2) });
+	// Red illumination is placed in front of the upper tower's actual front
+	// masonry, independently of the entrance source. No smoke/fire particles.
+	room->fireSources.push_back({ TownCabinFireKind::Hearth,
+		{ { 25.0F, 18.1F, 25.0F }, room->fireColor, 4.2F, 3.0F }, {}, 0xC471ED20U });
+	// Remove the lower generic arch family before adding a same-material wall
+	// patch. These cuts are geometry cleanup only, never light apertures.
+	std::vector<TownCabinOpening> exteriorCuts = room->openings;
+	constexpr std::array<float, 3> GenericWindowCenters { 8.9814F, 13.5236F, 17.9549F };
+	for (unsigned side = 0; side < 2; ++side) {
+		const float wallX = side == 0 ? 18.4817F : 31.5183F;
+		for (float z : GenericWindowCenters)
+			exteriorCuts.push_back({ TownCabinOpeningKind::Window,
+				{ TownLightPlane::X, wallX, z - 0.47F, z + 0.47F, 2.80F, 4.90F, 0 },
+				wallX, side == 0 ? 18.27F : 30.90F, side == 0 ? 19.10F : 31.73F, false });
+	}
+	room->exteriorTriangles = CutCabinOpenings(model.triangles, exteriorCuts, &room->clippedSourceTriangles);
+	// Reducing a new cut cannot close an opening already present in the master.
+	// Fill only the old entrance's upper throat, then cut that adjunct with the
+	// exact reduced portal. This closes its former high corners/top physically.
+	std::vector<TownSceneTriangle> portalInfill;
+	AppendChurchMasonryPatch(portalInfill, model, 18.4817F, 8.9814F - 1.08F, 8.9814F + 1.08F,
+		2.48F, 4.07F, -1.0F);
+	for (auto &triangle : portalInfill) {
+		for (auto &vertex : triangle.vertices) {
+			vertex.x = 25.0F + vertex.z - 8.9814F;
+			vertex.z = 28.14F;
+		}
+		SetCabinTriangleNormal(triangle);
+	}
+	const std::vector<TownCabinOpening> doorCuts(room->openings.begin(), room->openings.begin() + 2);
+	portalInfill = CutCabinOpenings(portalInfill, doorCuts);
+	room->exteriorTriangles.insert(room->exteriorTriangles.end(), portalInfill.begin(), portalInfill.end());
+	for (unsigned side = 0; side < 2; ++side) {
+		const float wallX = side == 0 ? 18.4817F : 31.5183F;
+		for (float z : GenericWindowCenters)
+			AppendChurchMasonryPatch(room->exteriorTriangles, model, wallX, z - 0.47F, z + 0.47F, 2.80F, 4.90F, side == 0 ? -1.0F : 1.0F);
+	}
+	Builder inside = MakeBuilder(model.kind, model.minTile, model.maxTile, model.triangles.front().sourceTile, {25,29});
+	inside.Quad({23.3F,0.12F,24.5F},{26.7F,0.12F,24.5F},{26.7F,0.12F,28.0F},{23.3F,0.12F,28.0F},TownSceneMaterial::Stone);
+	inside.Quad({23.3F,0.12F,24.5F},{23.3F,5.3F,24.5F},{26.7F,5.3F,24.5F},{26.7F,0.12F,24.5F},TownSceneMaterial::Stone);
+	inside.Quad({23.3F,0.12F,24.5F},{23.3F,0.12F,28.0F},{23.3F,5.3F,28.0F},{23.3F,5.3F,24.5F},TownSceneMaterial::Stone);
+	inside.Quad({26.7F,0.12F,28.0F},{26.7F,0.12F,24.5F},{26.7F,5.3F,24.5F},{26.7F,5.3F,28.0F},TownSceneMaterial::Stone);
+	PrepareCabinInteriorTriangles(inside.model.triangles, room->roomMinimum);
+	room->interiorTriangles = std::move(inside.model.triangles);
+	PrepareCabinInteriorTriangles(crosses.model.triangles, room->roomMinimum);
+	room->interiorTriangles.insert(room->interiorTriangles.end(), crosses.model.triangles.begin(), crosses.model.triangles.end());
+	return room;
+}
+
 void AddCabin(Point minTile, Point maxTile)
 {
 	Builder builder = MakeBuilder(TownSceneKind::Cabin, minTile, maxTile,
@@ -1084,7 +1284,9 @@ void AddCabin(Point minTile, Point maxTile)
 		hoop.vertices, { 2.20F * Pi * (BarrelRadius + 0.015F) / 10, -0.715F },
 		{ 2.80F * Pi * (BarrelRadius + 0.015F) / 10, -0.685F });
 	FinishBuilder(builder);
-	if (minTile.x == 70 && LoadTownModelOverride(Scene.back(), "d3d-models/cabin-east.d3d"))
+	if (minTile.x == 70 && LoadTownModelOverride(Scene.back(), "d3d-models/player-cabin-user-r1.d3d", "822d428513999e580c0e47ab82652b7a41ac4bddac38b93470938be0f1020d09", "player-cabin-user-r1-uniform5.6-yaw90"))
+		return; // New closed exterior; legacy interior cuts belong only to their old exact master.
+	if (minTile.x == 70 && LoadTownModelOverride(Scene.back(), "d3d-models/cabin-east.d3d", TownCabinBaselineSha256, "meshy-v2-multiview"))
 		BuildTownCabinInterior(Scene.back());
 }
 
@@ -1282,6 +1484,20 @@ void AddCathedral(Point minTile, Point maxTile, Point sourceTile, Point entrance
 	builder.model.minTile = { 15, 14 };
 	builder.model.maxTile = { 29, 28 };
 	FinishBuilder(builder);
+	// Human church revision; same native bounds, trigger and collision authority.
+	LoadTownModelOverride(Scene.back(), "d3d-models/church-user-r1.d3d", "c7994e8d25c39569d5a260aa2291ffceb10882526503b073b3436f77bd672f1a", "church-user-r1-uniform22.8");
+	if (Scene.back().externalModel) {
+		// Uniform 1.9x enlargement about the measured front entrance anchor.
+		// Original decoded asset, native trigger and SOL remain unchanged.
+		for (auto &triangle : Scene.back().triangles)
+			for (auto &vertex : triangle.vertices) {
+				vertex.x = 25.0F + (vertex.x - 25.0F) * 1.9F;
+				vertex.height *= 1.9F;
+				vertex.z = 28.3970703125F + (vertex.z - 28.3970703125F) * 1.9F;
+			}
+		Scene.back().cabinInterior = BuildChurchInterior(Scene.back());
+	}
+
 }
 
 void SetWallSource(Point tile)
@@ -1318,6 +1534,8 @@ void BuildScene()
 	// Pepin's painted roof extends west beyond the conservative wall plan.
 	Scene.back().minTile = { 46, 74 };
 	Scene.back().maxTile = { 55, 80 };
+	// Human healer house, preserving Pepin and native interaction/collision.
+	LoadTownModelOverride(Scene.back(), "d3d-models/healer-house-user-r1.d3d", "2e12f58ca5c8bbaad833af5a60f348c97b49db4867b821a3991bb4fc98ed2574", "healer-house-user-r1-uniform8-yaw90");
 	AddWitchHut();
 	SetWallSource({ 78, 20 });
 	AddHouse(TownSceneKind::House, { 46, 40 }, { 54, 46 }, { 50, 42 }, { 55, 44 }, 2.65F, 1.8F, false,
@@ -1356,8 +1574,24 @@ const std::vector<TownSceneTriangle> &TownSceneExteriorTriangles(const TownScene
 
 const std::vector<TownSceneModel> &GetTownScene()
 {
-	if (Scene.empty())
-		BuildScene();
+	if (Scene.empty()) {
+		// The saved visual scene is the source when valid. Conversion is an
+		// explicit editor operation; startup never writes or rebuilds its assets.
+		const bool persistent = LoadTownVisualScene(Scene, [](std::string_view path, std::string_view sha, std::string &failure) {
+			return LoadTownVisualObjects(path, sha, failure);
+		});
+		if (!persistent)
+			BuildScene();
+		const auto &audit = GetTownVisualSceneAudit();
+		const auto &statics = GetTownVisualObjectAudit();
+		LogInfo("Tristram scene load: status={}, sourceKind={}, revision={}, manifest={}, manifestSHA={}, architectures={}, staticData={}, staticSHA={}, staticStatus={}, staticObjects={}, textures={}, architectureFallback={}, reason={}",
+		    audit.status, audit.sourceKind, audit.revision, audit.assetPath, audit.sha256, audit.objects.size(),
+		    audit.staticData, audit.staticSha256, statics.status, statics.objects, statics.textures, !persistent, audit.failure);
+		const auto &logic = GetTownSceneLogicAudit();
+		LogInfo("Tristram world patch: status={}, path={}, sha256={}, expectedSHA={}, sourceManifestSHA={}, baselineStaticSHA={}, targetStaticSHA={}, objects={}, cells={}, routes={}, reason={}",
+		    logic.status, logic.path, logic.sha256, logic.expectedSha256, logic.sourceManifestSha256,
+		    logic.baselineStaticSha256, logic.targetStaticSha256, logic.objects, logic.cells.size(), logic.routes.size(), logic.failure);
+	}
 	return Scene;
 }
 
@@ -1368,8 +1602,12 @@ uint64_t GetTownSceneRevision()
 
 bool TownSceneReplacesTile(Point tile)
 {
-	if (tile.x == 25 && (tile.y == 29 || tile.y == 30))
-		return false;
+	if (tile.x == 25 && (tile.y == 29 || tile.y == 30)) {
+        for (const auto &model : GetTownScene())
+            if (model.kind == TownSceneKind::Cathedral && model.externalModel && model.runtimeAudit.revision == "church-user-r1-uniform22.8")
+                return true; // Suppress only duplicate entrance paint, never native trigger/SOL.
+        return false;
+    }
 	// The bell and nave source art are painted several cells above their physical
 	// footprint. Restrict this extra mask by both place and native art family.
 	if (tile.x >= 10 && tile.x <= 33 && tile.y >= 8 && tile.y <= 31) {
@@ -1407,6 +1645,8 @@ void ResetTownScene()
 	++SceneRevision;
 	Scene.clear();
 	ResetTownEditorMapAudit();
+	ResetTownVisualSceneAudit();
+	ClearTownVisualObjects();
 }
 
 } // namespace devilution

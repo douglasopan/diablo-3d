@@ -2,7 +2,11 @@
 #include "control.hpp"
 #include "control_panel.hpp"
 
+#include <string_view>
+
 #include "control/control_chat_commands.hpp"
+#include "control/d3d_hud.hpp"
+#include "control/d3d_hud_skin.hpp"
 #include "engine/backbuffer_state.hpp"
 #include "engine/render/clx_render.hpp"
 #include "options.h"
@@ -95,17 +99,23 @@ void DrawChatBox(const Surface &out)
 
 	const Point mainPanelPosition = GetMainPanel().position;
 
-	DrawPanelBox(out, MakeSdlRect(175, sgbPlrTalkTbl + 20, 294, 5), mainPanelPosition + Displacement { 175, 4 });
-	int off = 0;
-	for (int i = 293; i > 283; off++, i--) {
-		DrawPanelBox(out, MakeSdlRect((off / 2) + 175, sgbPlrTalkTbl + off + 25, i, 1), mainPanelPosition + Displacement { (off / 2) + 175, off + 9 });
+	if (IsD3dHudSelected()) {
+		// Keep the existing input and recipient geometry while using only the
+		// selected skin, including when chat needs the compact panel layout.
+		DrawD3dHudSkinIndexedPlate(out, { mainPanelPosition + Displacement { 170, 4 }, { 310, 115 } });
+	} else {
+		DrawPanelBox(out, MakeSdlRect(175, sgbPlrTalkTbl + 20, 294, 5), mainPanelPosition + Displacement { 175, 4 });
+		int off = 0;
+		for (int i = 293; i > 283; off++, i--) {
+			DrawPanelBox(out, MakeSdlRect((off / 2) + 175, sgbPlrTalkTbl + off + 25, i, 1), mainPanelPosition + Displacement { (off / 2) + 175, off + 9 });
+		}
+		DrawPanelBox(out, MakeSdlRect(185, sgbPlrTalkTbl + 35, 274, 30), mainPanelPosition + Displacement { 185, 19 });
+		DrawPanelBox(out, MakeSdlRect(180, sgbPlrTalkTbl + 65, 284, 5), mainPanelPosition + Displacement { 180, 49 });
+		for (int i = 0; i < 10; i++) {
+			DrawPanelBox(out, MakeSdlRect(180, sgbPlrTalkTbl + i + 70, i + 284, 1), mainPanelPosition + Displacement { 180, i + 54 });
+		}
+		DrawPanelBox(out, MakeSdlRect(170, sgbPlrTalkTbl + 80, 310, 55), mainPanelPosition + Displacement { 170, 64 });
 	}
-	DrawPanelBox(out, MakeSdlRect(185, sgbPlrTalkTbl + 35, 274, 30), mainPanelPosition + Displacement { 185, 19 });
-	DrawPanelBox(out, MakeSdlRect(180, sgbPlrTalkTbl + 65, 284, 5), mainPanelPosition + Displacement { 180, 49 });
-	for (int i = 0; i < 10; i++) {
-		DrawPanelBox(out, MakeSdlRect(180, sgbPlrTalkTbl + i + 70, i + 284, 1), mainPanelPosition + Displacement { 180, i + 54 });
-	}
-	DrawPanelBox(out, MakeSdlRect(170, sgbPlrTalkTbl + 80, 310, 55), mainPanelPosition + Displacement { 170, 64 });
 
 	int x = mainPanelPosition.x + 200;
 	const int y = mainPanelPosition.y + 10;
@@ -128,7 +138,17 @@ void DrawChatBox(const Surface &out)
 
 		const UiFlags color = player.friendlyMode ? UiFlags::ColorWhitegold : UiFlags::ColorRed;
 		const Point talkPanPosition = mainPanelPosition + Displacement { 172, 84 + (18 * talkBtn) };
-		if (WhisperList[i]) {
+		if (IsD3dHudSelected()) {
+			const bool pressed = TalkButtonsDown[talkBtn];
+			const Rectangle button { mainPanelPosition + Displacement { MuteButtonRect.position.x, MuteButtonRect.position.y + talkBtn * (MuteButtonRect.size.height + MuteButtonPadding) }, MuteButtonRect.size };
+			DrawD3dHudSkinIndexedPlate(out, button, pressed, D3dHudSkinPart::Button);
+			const std::string_view label = WhisperList[i] ? _("voice") : _("mute");
+			const Rectangle text { button.position + Displacement { 4, pressed ? 2 : 1 }, { button.size.width - 8, 0 } };
+			DrawString(out, label, { text.position + Displacement { 0, 1 }, text.size },
+			    { .flags = UiFlags::AlignCenter | UiFlags::KerningFitSpacing | UiFlags::ColorBlack });
+			DrawString(out, label, text,
+			    { .flags = UiFlags::AlignCenter | UiFlags::KerningFitSpacing | (pressed ? UiFlags::ColorButtonpushed : UiFlags::ColorButtonface) });
+		} else if (WhisperList[i]) {
 			// the normal (unpressed) voice button is pre-rendered on the panel, only need to draw over it when the button is held
 			if (TalkButtonsDown[talkBtn]) {
 				const unsigned spriteIndex = talkBtn == 0 ? 2 : 3; // the first button sprite includes a tip from the devils wing so is different to the rest.
