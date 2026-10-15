@@ -1,21 +1,29 @@
 {
-  "version": "v0.1.0-preview.local3-tristram.full4",
+  "version": "v0.1.0-preview.local4-tristram.full1",
   "archive": {
-    "url": "https://github.com/douglasopan/diablo-3d/releases/download/v0.1.0-preview.local3-tristram.full4/Diablo3D-Windows-local3-Tristram-full4.zip",
-    "sha256": "bfb0b4bcd39637cd775a928462edb72f903cf6824fceb4434ab00d9cc21f3264",
-    "bytes": 217684454
+    "url": "https://github.com/douglasopan/diablo-3d/releases/download/v0.1.0-preview.local4-tristram.full1/Diablo3D-Windows-local4-Tristram-full1.zip",
+    "sha256": "400f15625d2f6d950c01e93dad2428343a4791cab8e1a97fbaf884308f3644ee",
+    "bytes": 217784904
   },
   "sourceArchive": {
-    "url": "https://github.com/douglasopan/diablo-3d/releases/download/v0.1.0-preview.local3-tristram.full4/Diablo3D-local3-Tristram-full4-corresponding-source.tar.gz",
-    "sha256": "fca44f7372cb409899be91f710378309808b4f83f8938ccc933cf8713f2b3cf9",
-    "bytes": 279618731
+    "url": "https://github.com/douglasopan/diablo-3d/releases/download/v0.1.0-preview.local4-tristram.full1/Diablo3D-local4-Tristram-full1-corresponding-source.tar.gz",
+    "sha256": "2c8a2705907784e6ffa5ffe0771c22e4937a811fe1cb690c39ad9836ea61d9c9",
+    "bytes": 293617779
   },
   "entrypoint": "Iniciar-Diablo3D.cmd",
-  "profileLocation": "%LOCALAPPDATA%/Diablo3D-local3-Tristram/profile",
+  "profileLocation": "%LOCALAPPDATA%/Diablo3D-local4-Tristram/profile",
   "requiredExternalData": "Original compatible retail DIABDAT.MPQ only",
-  "releaseUrl": "https://github.com/douglasopan/diablo-3d/releases/tag/v0.1.0-preview.local3-tristram.full4",
-  "selectedSceneRevision": "cardinal-exits-r1",
+  "releaseUrl": "https://github.com/douglasopan/diablo-3d/releases/tag/v0.1.0-preview.local4-tristram.full1",
+  "selectedSceneRevision": "human19h05-native-lighting-cardinal-r2",
   "runtimeFilesRecreatedExactly": 19,
-  "nativeLoaderGate": "PASS",
-  "manualGameplayGate": "not run"
+  "nativeLoaderGate": "PASS-14architectures18lights25cells4routes",
+  "warriorTownCpuTpFp": "PASS",
+  "wellCpuMaterialGate": "PASS-4states130checks",
+  "cacheCpuGate": "PASS-2023checks-16cold48route",
+  "originalCacheReproduction": "INCONCLUSIVE",
+  "cathedralFullInputGate": "FAIL-RefreshLiveFrameRefused",
+  "newGpuGameplayGate": "not run",
+  "manualGameplayGate": "user testing; no result claimed",
+  "godotEffectsPending": 18,
+  "sourceCommit": "c957ab57cfa77d7f67632dc768d630dc0944f384"
 }
