@@ -1,4 +1,5 @@
 #include "engine/render/player_actor_runtime.hpp"
+#include "engine/render/world_grid_metric.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -111,7 +112,7 @@ bool PlayerActorNativeRuntime::Prepare(const Player &player, const PlayerActorLi
         // selected body/eye landmarks and attachments; native placement is unchanged.
         // Real idle pose height is 0.96368939 authored units. Uniform 2 makes
         // it 1.92738 town units and the head 1.7059; floor/root stay authored.
-        next.fit = { { 0, 0, 0 }, 2, 0 };
+        next.fit = { { 0, 0, 0 }, PhysicalToNativeGrid(2), 0 };
         const auto &authored = PlayerActorHumanPilotClips[clip];
         ActorPlayerPhaseBinding phase;
         phase.loop = next.capture.snapshot.action == ActorVisualAction::Idle || next.capture.snapshot.action == ActorVisualAction::Walk;

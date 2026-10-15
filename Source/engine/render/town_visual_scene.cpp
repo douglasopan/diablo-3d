@@ -523,26 +523,35 @@ bool ValidTransform(const TownVisualSceneTransform &t)
 {
 	return Bounded(t.pivot.x, -128, 240) && Bounded(t.pivot.height, -128, 128) && Bounded(t.pivot.z, -128, 240)
 	    && Bounded(t.translation.x, -112, 112) && Bounded(t.translation.height, -64, 64) && Bounded(t.translation.z, -112, 112)
-	    && Bounded(t.yawDegrees, -36000, 36000) && Bounded(t.uniformScale, 0.01F, 100);
+	    && Bounded(t.yawDegrees, -36000, 36000) && Bounded(t.uniformScale, 0.01F, 100)
+	    && Bounded(t.authoredScale.x, .01F, 100) && Bounded(t.authoredScale.height, .01F, 100) && Bounded(t.authoredScale.z, .01F, 100);
 }
 
 bool ApplyTransform(TownSceneModel &model, const TownVisualSceneTransform &t)
 {
 	// Identity is bit-exact; exported baseline vertices/normals are not rebaked.
-	if (t.translation.x == 0 && t.translation.height == 0 && t.translation.z == 0 && t.yawDegrees == 0 && t.uniformScale == 1) return true;
+	if (t.translation.x == 0 && t.translation.height == 0 && t.translation.z == 0 && t.yawDegrees == 0 && t.uniformScale == 1
+	    && t.authoredScale.x == 1 && t.authoredScale.height == 1 && t.authoredScale.z == 1) return true;
 	// Occluder shells/apertures are axis aligned by the existing lighting API.
 	// Do not turn a rotated opening into a bounding-box light leak.
-	if (model.cabinInterior && t.yawDegrees != 0) return false;
+	if (model.cabinInterior && (t.yawDegrees != 0 || t.authoredScale.x != 1 || t.authoredScale.height != 1 || t.authoredScale.z != 1)) return false;
 	constexpr float Pi = 3.14159265358979323846F;
 	const float yaw = t.yawDegrees * Pi / 180, c = std::cos(yaw), s = std::sin(yaw);
 	auto position = [&](float &x, float &height, float &z) {
-		const float dx = (x - t.pivot.x) * t.uniformScale, dz = (z - t.pivot.z) * t.uniformScale;
+		const float dx = (x - t.pivot.x) * t.uniformScale * t.authoredScale.x, dz = (z - t.pivot.z) * t.uniformScale * t.authoredScale.z;
 		x = t.pivot.x + t.translation.x + c * dx + s * dz;
 		z = t.pivot.z + t.translation.z - s * dx + c * dz;
-		height = t.pivot.height + t.translation.height + (height - t.pivot.height) * t.uniformScale;
+		height = t.pivot.height + t.translation.height + (height - t.pivot.height) * t.uniformScale * t.authoredScale.height;
 	};
 	for (auto &triangle : model.triangles) {
 		for (auto &vertex : triangle.vertices) position(vertex.x, vertex.height, vertex.z);
+		if (t.authoredScale.x != 1 || t.authoredScale.height != 1 || t.authoredScale.z != 1) {
+			const float length = std::sqrt(triangle.normal.x * triangle.normal.x + triangle.normal.height * triangle.normal.height + triangle.normal.z * triangle.normal.z);
+			triangle.normal.x /= t.authoredScale.x; triangle.normal.height /= t.authoredScale.height; triangle.normal.z /= t.authoredScale.z;
+			const float inverseLength = std::sqrt(triangle.normal.x * triangle.normal.x + triangle.normal.height * triangle.normal.height + triangle.normal.z * triangle.normal.z);
+			if (!(length > 0) || !(inverseLength > 0)) return false;
+			triangle.normal.x *= length / inverseLength; triangle.normal.height *= length / inverseLength; triangle.normal.z *= length / inverseLength;
+		}
 		const float nx = triangle.normal.x, nz = triangle.normal.z;
 		triangle.normal.x = c * nx + s * nz; triangle.normal.z = -s * nx + c * nz;
 		if (!ValidTriangle(triangle)) return false;
@@ -605,7 +614,7 @@ bool ApplyTransform(TownSceneModel &model, const TownVisualSceneTransform &t)
 		minX = std::min(minX, nx); maxX = std::max(maxX, nx); minZ = std::min(minZ, nz); maxZ = std::max(maxZ, nz);
 	}
 	b.minX = minX; b.maxX = maxX; b.minZ = minZ; b.maxZ = maxZ;
-	b.wallHeight = t.pivot.height + t.translation.height + (b.wallHeight - t.pivot.height) * t.uniformScale;
+	b.wallHeight = t.pivot.height + t.translation.height + (b.wallHeight - t.pivot.height) * t.uniformScale * t.authoredScale.height;
 	return Bounded(minX, -128, 240) && Bounded(maxX, -128, 240) && Bounded(minZ, -128, 240) && Bounded(maxZ, -128, 240) && Bounded(b.wallHeight, 0, 128);
 }
 
@@ -683,7 +692,7 @@ bool ParseManifest(std::vector<TownSceneModel> &models, std::span<const std::byt
 		begin = end + 1;
 	}
 	if (sections.size() != ids.size() + 1 || !sections.contains("Scene")) return Reject("manifest-missing-section");
-	constexpr std::array<std::string_view, 11> ObjectKeys { "name", "class", "model", "sha256", "pivot", "translation", "yawDegrees", "uniformScale", "nativeMin", "nativeMax", "eventBinding" };
+	constexpr std::array<std::string_view, 12> ObjectKeys { "name", "class", "model", "sha256", "pivot", "translation", "yawDegrees", "uniformScale", "authoredScale", "nativeMin", "nativeMax", "eventBinding" };
 	std::vector<TownSceneModel> candidates;
 	std::vector<TownSceneModel> candidateSources;
 	candidates.reserve(objectCount); candidateSources.reserve(objectCount); candidateAudit.objects.reserve(objectCount);
@@ -692,7 +701,7 @@ bool ParseManifest(std::vector<TownSceneModel> &models, std::span<const std::byt
 		const std::string_view id = request.value;
 		if (!KnownKeys(ini, id, ObjectKeys)) return Reject("manifest-object-fields");
 		for (auto key : ObjectKeys)
-			if (ini.get(id, key).size() != 1 || ini.getString(id, key).empty()) return Reject("manifest-object-required-field");
+			if (key != "authoredScale" && (ini.get(id, key).size() != 1 || ini.getString(id, key).empty())) return Reject("manifest-object-required-field");
 		TownVisualSceneObjectAudit object;
 		object.sceneIndex = candidates.size(); object.stableId = id;
 		object.name = ini.getString(id, "name"); object.objectClass = ini.getString(id, "class"); object.assetPath = ini.getString(id, "model");
@@ -702,6 +711,8 @@ bool ParseManifest(std::vector<TownSceneModel> &models, std::span<const std::byt
 		    || !ParsePoint(ini.getString(id, "nativeMin"), object.nativeMin) || !ParsePoint(ini.getString(id, "nativeMax"), object.nativeMax)
 		    || !ValidRectangle(object.nativeMin, object.nativeMax)) return Reject("manifest-object-identity");
 		auto &transform = object.transform;
+		if (ini.get(id, "authoredScale").size() > 1 || (!ini.get(id, "authoredScale").empty()
+		    && !ParseVector(ini.getString(id, "authoredScale"), transform.authoredScale))) return Reject("manifest-authored-scale");
 		if (!ParseVector(ini.getString(id, "pivot"), transform.pivot) || !ParseVector(ini.getString(id, "translation"), transform.translation)
 		    || !ParseFloat(ini.getString(id, "yawDegrees"), transform.yawDegrees) || !ParseFloat(ini.getString(id, "uniformScale"), transform.uniformScale) || !ValidTransform(transform))
 			return Reject("manifest-transform");

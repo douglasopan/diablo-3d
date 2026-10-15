@@ -37,21 +37,23 @@ struct RequestCell {
 	uint16_t before = 0, special = 0, after = 0;
 };
 
-// Schema2 is one pinned designer-removal composition, not arbitrary scenery
+// Schema3 repairs the destructive tavern removal in Schema2. It preserves
+// the three native architectural pieces and their visual source objects.
+// This is one pinned designer-removal composition, not arbitrary scenery
 // clearing. Schema1's IDs, class rules, donors and corridor policy stay intact.
-constexpr std::array<std::string_view, 10> DesignerPatchIds {
+constexpr std::array<std::string_view, 7> DesignerPatchIds {
     "rock-41-85", "rock-41-87", "rock-9-47", "scenery-38-10",
-    "rock-3-6", "rock-31-3", "rock-33-3", "scenery-49-64", "scenery-50-64", "scenery-51-64"
+    "rock-3-6", "rock-31-3", "rock-33-3"
 };
-constexpr std::array<std::string_view, 6> DesignerRemovalIds {
-    "rock-3-6", "rock-31-3", "rock-33-3", "scenery-49-64", "scenery-50-64", "scenery-51-64"
+constexpr std::array<std::string_view, 3> DesignerRemovalIds {
+    "rock-3-6", "rock-31-3", "rock-33-3"
 };
 struct DesignerCell {
 	std::string_view object;
 	Point tile;
 	uint16_t before;
 };
-constexpr std::array<DesignerCell, 25> DesignerCells { {
+constexpr std::array<DesignerCell, 22> DesignerCells { {
 	{ "rock-41-85", { 40, 84 }, 226 }, { "rock-41-85", { 41, 84 }, 227 },
 	{ "rock-41-85", { 40, 85 }, 228 }, { "rock-41-85", { 41, 85 }, 229 },
 	{ "rock-41-87", { 40, 86 }, 230 }, { "rock-41-87", { 41, 86 }, 231 },
@@ -63,7 +65,6 @@ constexpr std::array<DesignerCell, 25> DesignerCells { {
 	{ "rock-31-3", { 30, 2 }, 223 }, { "rock-31-3", { 30, 3 }, 224 }, { "rock-31-3", { 31, 3 }, 225 },
 	{ "rock-33-3", { 32, 2 }, 226 }, { "rock-33-3", { 33, 2 }, 227 },
 	{ "rock-33-3", { 32, 3 }, 228 }, { "rock-33-3", { 33, 3 }, 229 },
-	{ "scenery-49-64", { 49, 64 }, 382 }, { "scenery-50-64", { 50, 64 }, 385 }, { "scenery-51-64", { 51, 64 }, 386 }
 } };
 constexpr std::array<std::string_view, 4> DesignerRoutes {
     "38,11;38,10;38,9;38,8", "40,82;40,83;40,84;40,85", "83,23;84,23;85,23", "10,46;9,46;8,46"
@@ -242,7 +243,7 @@ bool ParseApply(std::span<const std::byte> data, const TownSceneLogicPatchContex
 	for (const auto key : HeaderKeys)
 		if (key != "object" && (ini.get("WorldPatch", key).size() != 1 || ini.getString("WorldPatch", key).empty())) return Reject("patch-required-field");
 	const bool legacyCardinal = ini.getString("WorldPatch", "schemaVersion") == "1" && ini.getString("WorldPatch", "operation") == "create-cardinal-exits";
-	const bool designerRemovals = ini.getString("WorldPatch", "schemaVersion") == "2" && ini.getString("WorldPatch", "operation") == "designer-removals-and-cardinal-exits";
+	const bool designerRemovals = ini.getString("WorldPatch", "schemaVersion") == "3" && ini.getString("WorldPatch", "operation") == "designer-removals-and-cardinal-exits";
 	if (ini.getString("WorldPatch", "format") != "d3d.town-world-patch" || ini.getString("WorldPatch", "edition") != "retail"
 	    || (!legacyCardinal && !designerRemovals)) return Reject("patch-schema");
 	LogicAudit.sourceManifestSha256 = ini.getString("WorldPatch", "sourceManifestSha256");

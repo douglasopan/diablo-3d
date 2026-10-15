@@ -1,5 +1,6 @@
 #include "engine/render/cathedral/dungeon_rectified_material.hpp"
 #include "engine/render/town_view.hpp"
+#include "engine/render/world_grid_metric.hpp"
 
 #include <algorithm>
 #include <array>
@@ -775,6 +776,7 @@ void TryLogCathedralDiagnostic() noexcept
 }
 
 std::unordered_map<uint16_t, Texture> SceneGroundCache;
+std::unordered_map<uint16_t, Texture> NativeBridgeTextureCache;
 std::unordered_map<size_t, NativeSceneArt> SceneArtworkCache;
 struct SceneDetailMaterial {
 	Texture texture;
@@ -1093,11 +1095,17 @@ bool FollowThroughTownArchitecture()
 	    && IsTownGameplayCameraMode(CameraRig.mode());
 }
 
+float PhysicalCameraRadius(const TownCameraFrame &frame)
+{
+	const float radius = TownCameraCollisionRadius(frame);
+	return radius > 0 ? radius - .03F + PhysicalToNativeGrid(.03F) : 0;
+}
+
 float GameplayEyeHeight()
 {
 	// Reuse the caller-authored ocular calibration; do not infer anatomy from sprites.
 	const auto preferences = CameraRig.preferences();
-	return ConfigureTownGameplayEyeHeight(preferences, preferences.firstPersonEyeHeight).eyeHeight;
+	return PhysicalToNativeGrid(ConfigureTownGameplayEyeHeight(preferences, preferences.firstPersonEyeHeight).eyeHeight);
 }
 
 bool PrepareCameraVisibilityFrame()
@@ -1133,7 +1141,7 @@ bool PrepareCameraVisibilityFrame()
 		}
 		const TownCameraPoint focus { ViewCamera.target.x, ViewCamera.target.y + FollowCameraState.eyeHeight, ViewCamera.target.z };
 		const auto stats = CathedralVisibilityIndex.Query(ViewCamera.projection.eye, focus,
-		    TownCameraCollisionRadius(ViewCamera.projection) + 0.02F, true, CathedralVisibilityGeometry, CathedralHiddenOwners);
+		    PhysicalCameraRadius(ViewCamera.projection) + 0.02F, true, CathedralVisibilityGeometry, CathedralHiddenOwners);
 		if (!stats.valid) std::fill(CathedralHiddenOwners.begin(), CathedralHiddenOwners.end(), 0);
 		return true;
 	}
@@ -1202,7 +1210,7 @@ bool PrepareCameraVisibilityFrame()
 	const auto &frame = ViewCamera.projection;
 	const TownCameraPoint focus = { ViewCamera.target.x, ViewCamera.target.y + FollowCameraState.eyeHeight, ViewCamera.target.z };
 	const auto stats = CameraVisibilityIndex.Query(frame.eye, focus,
-	    TownCameraCollisionRadius(frame) + 0.02F,
+	    PhysicalCameraRadius(frame) + 0.02F,
 	    CameraRig.mode() == TownCameraMode::ThirdPerson || CameraRig.VisualDistance() > 0.0001F,
 	    epoch, CameraVisibilityQueryMask);
 	if (CameraVisibilityState.active != true || CameraVisibilityState.valid != stats.valid
@@ -1274,10 +1282,10 @@ void ResolveFollowCamera(TownCameraFrame &frame, TownCameraPoint anchor)
 		TownViewFollowCameraState state;
 		state.active = true;
 		state.transition = CameraRig.IsVisualTransitionActive();
-		state.desiredDistance = CameraRig.pose().distance;
-		state.visualDistance = CameraRig.VisualDistance();
+		state.desiredDistance = PhysicalToNativeGrid(CameraRig.pose().distance);
+		state.visualDistance = PhysicalToNativeGrid(CameraRig.VisualDistance());
 		state.eyeHeight = GameplayEyeHeight();
-		state.radius = TownCameraCollisionRadius(frame);
+		state.radius = PhysicalCameraRadius(frame);
 		state.desiredEye = frame.eye;
 		state.resolvedEye = frame.eye;
 		// The floor only shortens the boom on its authored eye/focus axis.
@@ -1295,8 +1303,8 @@ void ResolveFollowCamera(TownCameraFrame &frame, TownCameraPoint anchor)
 		state.blocked = allowed < length;
 		state.resolvedDistance = CameraPointLength(state.resolvedEye - focus);
 		state.sceneRevision = GetTownSceneRevision();
-		state.localPlayerHidden = CameraRig.HideLocalPlayer(state.resolvedDistance)
-		    || (previous.localPlayerHidden && state.resolvedDistance < 0.85F);
+		state.localPlayerHidden = CameraRig.HideLocalPlayer(state.resolvedDistance * WorldMetresPerTile)
+		    || (previous.localPlayerHidden && state.resolvedDistance < PhysicalToNativeGrid(0.85F));
 		if (!previous.active || CameraPointLength(state.resolvedEye - previous.resolvedEye) > 0.000001F
 		    || previous.localPlayerHidden != state.localPlayerHidden || !previous.valid)
 			++FollowProjectionRevision;
@@ -1310,10 +1318,10 @@ void ResolveFollowCamera(TownCameraFrame &frame, TownCameraPoint anchor)
 	TownViewFollowCameraState state;
 	state.active = true;
 	state.transition = CameraRig.IsVisualTransitionActive();
-	state.desiredDistance = CameraRig.pose().distance;
-	state.visualDistance = CameraRig.VisualDistance();
-	state.eyeHeight = CameraRig.VisualEyeHeight();
-	state.radius = TownCameraCollisionRadius(frame);
+	state.desiredDistance = PhysicalToNativeGrid(CameraRig.pose().distance);
+	state.visualDistance = PhysicalToNativeGrid(CameraRig.VisualDistance());
+	state.eyeHeight = PhysicalToNativeGrid(CameraRig.VisualEyeHeight());
+	state.radius = PhysicalCameraRadius(frame);
 	state.desiredEye = frame.eye;
 	state.sceneRevision = CameraCollisionSceneRevision;
 	state.triangles = CameraCollisionIndex.triangleCount();
@@ -1391,8 +1399,8 @@ void ResolveFollowCamera(TownCameraFrame &frame, TownCameraPoint anchor)
 	state.resolvedEye = candidate;
 	state.resolvedDistance = CameraPointLength(candidate - focus);
 	state.transition |= !state.blocked && std::abs(state.resolvedDistance - desiredLength) > 0.001F;
-	state.localPlayerHidden = CameraRig.HideLocalPlayer(state.resolvedDistance)
-	    || (previous.localPlayerHidden && state.resolvedDistance < 0.85F);
+	state.localPlayerHidden = CameraRig.HideLocalPlayer(state.resolvedDistance * WorldMetresPerTile)
+	    || (previous.localPlayerHidden && state.resolvedDistance < PhysicalToNativeGrid(0.85F));
 	if (!previous.active || CameraPointLength(candidate - previous.resolvedEye) > 0.000001F
 	    || previous.localPlayerHidden != state.localPlayerHidden || previous.valid != state.valid)
 		++FollowProjectionRevision;
@@ -1437,10 +1445,16 @@ void ConfigureCamera(int width, int height, bool diagnosticProjection = false)
 		projectionRig.Suspend(false);
 	ViewCamera.projection = BuildTownCameraFrame(projectionRig, { target.x, target.y, target.z }, width, height,
 		centerX, centerY, static_cast<float>(zoomFactor));
+	if (ViewCamera.projection.perspective) {
+		const TownCameraPoint nativeAnchor { target.x, target.y, target.z };
+		ViewCamera.projection.eye = nativeAnchor + (ViewCamera.projection.eye - nativeAnchor) * PhysicalToNativeGrid(1);
+		ViewCamera.projection.nearClip = PhysicalToNativeGrid(ViewCamera.projection.nearClip);
+		ViewCamera.projection.farClip = PhysicalToNativeGrid(ViewCamera.projection.farClip);
+	}
 	if (FollowThroughTownArchitecture()) {
 		// Translate only the gameplay frame onto one calibrated eye anchor. The
 		// raw four-mode rig, its visual zoom and Cathedral/legacy fixtures remain.
-		ViewCamera.projection.eye.height += GameplayEyeHeight() - CameraRig.VisualEyeHeight();
+		ViewCamera.projection.eye.height += GameplayEyeHeight() - PhysicalToNativeGrid(CameraRig.VisualEyeHeight());
 	}
 	ResolveFollowCamera(ViewCamera.projection, { target.x, target.y, target.z });
 	const TownCameraFrame &frame = ViewCamera.projection;
@@ -3243,8 +3257,8 @@ bool DrawOgdenIdlePilot(const Surface &out, const Towner &towner, size_t index)
 			const auto onGround = [&](float u, float v) {
 				const float px = (u - 0.5F) * OgdenPilot.shadow.width;
 				const float py = v * OgdenPilot.shadow.height - OgdenPilot.shadow.height + 1;
-				return Vec3 { input.authoritativeFootpoint.x + (2 * py + px) / 64, 0.001F,
-					input.authoritativeFootpoint.z + (2 * py - px) / 64 };
+				return Vec3 { input.authoritativeFootpoint.x + PhysicalToNativeGrid((2 * py + px) / 64), 0.001F,
+					input.authoritativeFootpoint.z + PhysicalToNativeGrid((2 * py - px) / 64) };
 			};
 			PickRecord shadowPick = PickAt(towner.position);
 			shadowPick.preservePicking = true;
@@ -3260,7 +3274,7 @@ bool DrawOgdenIdlePilot(const Surface &out, const Towner &towner, size_t index)
 			Vec3 normal {};
 			for (size_t corner = 0; corner < 3; ++corner) {
 				const uint32_t vertex = OgdenPilot.model.indices[triangle + corner];
-				const Vec3 point = rotate(pose.positions[vertex]);
+				const Vec3 point = rotate(pose.positions[vertex]) * PhysicalToNativeGrid(1);
 				vertices[corner] = { { point.x + input.authoritativeFootpoint.x, point.y,
 					point.z + input.authoritativeFootpoint.z }, OgdenPilot.model.vertices[vertex].uv.x, OgdenPilot.model.vertices[vertex].uv.y };
 				normal = normal + rotate(pose.normals[vertex]);
@@ -3570,8 +3584,52 @@ void DrawScene(const Surface &out)
 	    [](const CachedArchitectureBounds &cached) { return cached.ready; }));
 }
 
+bool IsNativeTownBridgePiece(uint16_t piece)
+{
+	return leveltype == DTYPE_TOWN && piece >= 309 && piece <= 312;
+}
+
+const Texture &NativeBridgeTexture(uint16_t piece)
+{
+	const auto found = NativeBridgeTextureCache.find(piece);
+	if (found != NativeBridgeTextureCache.end()) return found->second;
+	const auto &art = GetTile(piece);
+	Texture texture = art.original;
+	// Walkable MIN bottom rows use a separate native floor bitmap. Composite
+	// underneath the foliage, exactly as the classic floor/cell pass does.
+	for (int y = 0; y < art.ground.height; ++y) {
+		for (int x = 0; x < art.ground.width; ++x) {
+			const size_t dst = size_t(y + texture.height - art.ground.height) * texture.width + x;
+			const size_t src = size_t(y) * art.ground.width + x;
+			if (texture.opacity[dst] == 0) {
+				texture.pixels[dst] = art.ground.pixels[src];
+				texture.opacity[dst] = art.ground.opacity[src];
+			}
+		}
+	}
+	return NativeBridgeTextureCache.emplace(piece, std::move(texture)).first->second;
+}
+
+void DrawNativeBridgeTile(const Surface &out, Point tile, uint16_t piece)
+{
+	const auto &texture = NativeBridgeTexture(piece);
+	const auto vertex = [&](float x, float y) {
+		return Vec3 { tile.x + (2 * (y - 255) + x - 32) / 64,
+			0.002F, tile.y + (2 * (y - 255) - x + 32) / 64 };
+	};
+	// Bridge art is horizontal decking, not a raised generic scenery relief.
+	// Inverse projection preserves the complete native coverage and pick anchor.
+	DrawQuad(out, { vertex(0, 0), vertex(float(texture.width), 0),
+		vertex(float(texture.width), float(texture.height)), vertex(0, float(texture.height)) },
+		texture, PickAt(tile), dLight[tile.x][tile.y], true);
+}
+
 void DrawGround(const Surface &out, Point tile, const Texture &ground)
 {
+	if (IsNativeTownBridgePiece(dPiece[tile.x][tile.y])) {
+		DrawNativeBridgeTile(out, tile, dPiece[tile.x][tile.y]);
+		return;
+	}
 	const float x = static_cast<float>(tile.x);
 	const float z = static_cast<float>(tile.y);
 	const PickRecord pick = PickAt(tile);
@@ -3643,23 +3701,23 @@ void DrawResidentVolume(Vec3 position, const VolumeArtwork &art, PickRecord pick
 	}
 }
 
-void DrawVolume(const Surface &out, Vec3 position, Point tile, const VolumeArtwork &art, PickKind kind, int entity, int lighting, bool residentAllowed = true)
+void DrawVolume(const Surface &out, Vec3 position, Point tile, const VolumeArtwork &art, PickKind kind, int entity, int lighting, bool residentAllowed = true, float localScale = 1)
 {
 	constexpr float InverseSqrt2 = 0.7071067811865475F;
 	const auto world = [&](const TownVolumeVertex &vertex) {
 		// The frame stays in world space. Its depth follows the native viewing ray,
 		// preserving the authored front's silhouette without following the camera.
-		return Vec3 { position.x + (vertex.x + vertex.z) * InverseSqrt2,
-			position.y + vertex.height + (art.physicalFrame ? 0 : vertex.z * InverseSqrt2 - 1 / PixelsPerWorldUnit),
-			position.z + (-vertex.x + vertex.z) * InverseSqrt2 };
+		return Vec3 { position.x + (vertex.x + vertex.z) * InverseSqrt2 * localScale,
+			position.y + (vertex.height + (art.physicalFrame ? 0 : vertex.z * InverseSqrt2 - 1 / PixelsPerWorldUnit)) * localScale,
+			position.z + (-vertex.x + vertex.z) * InverseSqrt2 * localScale };
 	};
 	// A ground decal can enter the frame while its body is outside it.
 	if (!art.shadow.pixels.empty()) {
 		const auto onGround = [&](float u, float v) {
 			const float px = (u - 0.5F) * art.shadow.width;
 			const float py = v * art.shadow.height - art.shadow.height + 1;
-			return Vec3 { position.x + (2 * py + px) / 64, 0.001F,
-				position.z + (2 * py - px) / 64 };
+			return Vec3 { position.x + (2 * py + px) / 64 * localScale, 0.001F,
+				position.z + (2 * py - px) / 64 * localScale };
 		};
 		PickRecord shadowPick = PickAt(tile);
 		shadowPick.preservePicking = true;
@@ -3725,7 +3783,7 @@ void DrawVolume(const Surface &out, Vec3 position, Point tile, const VolumeArtwo
 	const PickRecord pick = PickAt(tile, kind, entity);
 	// Orthographic edge clipping still uses the validated projected path.
 	// Resident buffers are enabled only for perspective props and vegetation.
-	if (CaptureGpu && ResidentMeshesEnabledForDiagnostics && ViewCamera.projection.perspective && residentAllowed && kind == PickKind::Ground) {
+	if (CaptureGpu && ResidentMeshesEnabledForDiagnostics && ViewCamera.projection.perspective && residentAllowed && localScale == 1 && kind == PickKind::Ground) {
 		DrawResidentVolume(position, art, pick, lighting);
 		return;
 	}
@@ -3764,6 +3822,10 @@ void DrawVolume(const Surface &out, Vec3 position, Point tile, const VolumeArtwo
 
 void DrawScenery(const Surface &out, Point tile, const TileArt &art, const Texture &fallback)
 {
+	if (IsNativeTownBridgePiece(dPiece[tile.x][tile.y])) {
+		if (art.solid) DrawNativeBridgeTile(out, tile, dPiece[tile.x][tile.y]);
+		return;
+	}
 	const float x = static_cast<float>(tile.x);
 	const float z = static_cast<float>(tile.y);
 	const int lighting = dLight[tile.x][tile.y];
@@ -4987,6 +5049,18 @@ void DrawFixedTownObjects(const Surface &out, bool volumesAfterArchitecture)
 		const uint64_t changed = FixedObjectNativeSignature(object);
 		if (changed != 0) ++FixedTownObjectState.nativeDeltaObjects;
 		const auto &t = object.transform;
+		const uint16_t piece = dPiece[object.anchor.x][object.anchor.y];
+		const bool nativeBridge = object.sourceCells.size() == 1
+		    && object.sourceCells[0].piece == piece && IsNativeTownBridgePiece(piece)
+		    && object.eventBinding == TownVisualObjectEvent::None
+		    && t.x == 0 && t.height == 0 && t.z == 0 && t.yaw == 0 && t.scale == 1;
+		if (nativeBridge && (object.kind == TownVisualObjectKind::Ground || object.kind == TownVisualObjectKind::Scenery)) {
+			if (object.kind == TownVisualObjectKind::Ground) {
+				DrawNativeBridgeTile(out, object.anchor, piece);
+				++FixedTownObjectState.groundSubmissions;
+			}
+			continue;
+		}
 		const Vec3 origin { static_cast<float>(object.anchor.x) + t.x, t.height, static_cast<float>(object.anchor.y) + t.z };
 		if (object.kind == TownVisualObjectKind::Ground) {
 			const Texture *texture = &FixedTownTextures[object.texture];
@@ -5176,7 +5250,7 @@ void DrawVolumetricSprite(const Surface &out, Vec3 position, Point tile, ClxSpri
 		}
 		found = cache.emplace(key, std::move(artwork)).first;
 	}
-	DrawVolume(out, position, tile, found->second, kind, entity, lighting);
+	DrawVolume(out, position, tile, found->second, kind, entity, lighting, false, PhysicalToNativeGrid(1));
 }
 
 void DrawDirectionalActorVolume(const Surface &out, Vec3 position, Point tile, ClxSpriteSheet sheet,
@@ -5238,7 +5312,7 @@ void DrawDirectionalActorVolume(const Surface &out, Vec3 position, Point tile, C
 		}
 		found = ActorVolumeCache.emplace(key, std::move(art)).first;
 	}
-	DrawVolume(out, position, tile, found->second, kind, entity, 0);
+	DrawVolume(out, position, tile, found->second, kind, entity, 0, false, PhysicalToNativeGrid(1));
 }
 
 void DrawPlayerVolume(const Surface &out, Vec3 position, const Player &player, int entity)
@@ -5458,7 +5532,7 @@ void PrepareWarriorFirstPersonPresentation()
 	}
 	const Vec3 eye = WarriorFirstPersonPoint(nativeEye);
 	const TownCameraPoint presentedEye { eye.x, eye.y, eye.z };
-	const float radius = TownCameraCollisionRadius(camera);
+	const float radius = PhysicalCameraRadius(camera);
 	bool safe = std::isfinite(eye.x) && std::isfinite(eye.y) && std::isfinite(eye.z)
 	    && radius > 0 && eye.y >= radius + .002F;
 	if (safe && !FollowThroughTownArchitecture()) {
@@ -5627,6 +5701,7 @@ void DrawBillboard(const Surface &out, Vec3 position, Point tile, ClxSprite spri
         }
 	}
 	const Texture &texture = found->second.texture;
+	scale = PhysicalToNativeGrid(scale);
 	const float width = static_cast<float>(sprite.width()) / NativeCameraScale * scale;
 	const float height = static_cast<float>(sprite.height()) / PixelsPerWorldUnit * scale;
 	if (contactHeight >= 0) {
@@ -6869,6 +6944,7 @@ void ResetTownViewResources()
 	ClearTownShadowMap();
 	TerrainCache.clear();
 	SceneGroundCache.clear();
+	NativeBridgeTextureCache.clear();
 	SceneArtworkCache.clear();
 	SceneMaterialCache.clear();
 	SceneWaterEventState.clear();
@@ -6963,6 +7039,7 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 		ClearTownShadowMap();
 		TerrainCache.clear();
 		SceneGroundCache.clear();
+	NativeBridgeTextureCache.clear();
 		SceneArtworkCache.clear();
 		SceneMaterialCache.clear();
 		SceneWaterEventState.clear();

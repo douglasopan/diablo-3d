@@ -1,3 +1,5 @@
+> **Local6 / New complete preview:** [Download](https://github.com/douglasopan/diablo-3d/releases/tag/v0.1.0-preview.local6-tristram.grid162). Bridges, saved Godot houses and another35% world scale. [Português](docs/LOCAL6-PACKAGE.pt-BR.md) · [English](docs/LOCAL6-PACKAGE.en.md).
+
 > **New local4 preview / Nova prévia local4:** [Complete Windows download / Download completo](https://github.com/douglasopan/diablo-3d/releases/tag/v0.1.0-preview.local4-tristram.full1). Tristram frozen on14October19:05, Warrior TP/FP, internal preparation from your own DIABDAT.MPQ. CPU Town/Warrior/well/cache results and observed Cathedral/GPU limits: [English](docs/LOCAL4-PACKAGE.en.md) · [Português](docs/LOCAL4-PACKAGE.pt-BR.md). Separate local4 profile; local3 retained.
 
 <p align="center"><img src="assets/branding/diablo3d-banner.png" alt="Diablo 3D" width="100%"></p>

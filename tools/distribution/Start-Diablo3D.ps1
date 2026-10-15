@@ -16,7 +16,7 @@ function Assert-Files([string]$Directory,$Files){
 $manifest=Get-Content -LiteralPath (Join-Path $root 'package-manifest.json') -Raw | ConvertFrom-Json
 Assert-Files $root $manifest.files
 if($VerifyOnly){Write-Output 'Package verified / Pacote verificado.';exit 0}
-if(!$ProfileRoot){$ProfileRoot=Join-Path $env:LOCALAPPDATA 'Diablo3D-local4-Tristram'}
+if(!$ProfileRoot){$ProfileRoot=Join-Path $env:LOCALAPPDATA 'Diablo3D-local6-grid162'}
 $ProfileRoot=[IO.Path]::GetFullPath($ProfileRoot)
 $choice=Join-Path $ProfileRoot 'data-path.txt'
 if(!$DataDirectory -and (Test-Path -LiteralPath $choice)){$DataDirectory=(Get-Content -LiteralPath $choice -Raw).Trim()}
@@ -36,7 +36,7 @@ if(!$DataDirectory){
  $DataDirectory=Split-Path -Parent $dialog.FileName
 }
 if(!(Test-Path -LiteralPath (Join-Path $DataDirectory 'DIABDAT.MPQ') -PathType Leaf)){throw 'DIABDAT.MPQ not found / nao encontrado.'}
-$mutex=[Threading.Mutex]::new($false,'Local\Diablo3D-local4-Tristram-profile')
+$mutex=[Threading.Mutex]::new($false,'Local\Diablo3D-local6-grid162-profile')
 if(!$mutex.WaitOne(0)){throw 'This build is already open / Esta build ja esta aberta.'}
 try{
  $profile=Join-Path $ProfileRoot 'profile'

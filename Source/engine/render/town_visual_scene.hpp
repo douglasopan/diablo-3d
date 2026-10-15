@@ -20,6 +20,8 @@ struct TownVisualSceneTransform {
 	TownLightVector translation;
 	float yawDegrees = 0;
 	float uniformScale = 1;
+	// Explicit authored axes; masters and source UV/projection coordinates remain immutable.
+	TownLightVector authoredScale { 1, 1, 1 };
 };
 
 struct TownVisualSceneObjectAudit {
