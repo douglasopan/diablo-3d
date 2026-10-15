@@ -67,7 +67,8 @@ struct TownLightingSample {
 	TownLightColor total() const;
 };
 
-inline constexpr unsigned TownMaxPointLights = 8;
+inline constexpr unsigned TownMaxPointLights = 32;
+inline constexpr float TownMaxPointLightIntensity = 16;
 inline constexpr unsigned TownMaxLightOccluders = 32;
 inline constexpr unsigned TownMaxLightApertures = 8;
 
@@ -82,7 +83,7 @@ TownLightVector OrientTownLightingNormal(TownLightVector normal, TownLightVector
  * outside pixel loops, using the game's render time rather than simulation RNG.
  * Identity sets independent phases; time is in seconds. Only intensity changes:
  * position, radius and linear source color are copied unchanged. Variation is
- * bounded to 0..0.15 (default 0.06), intensity to 0..16. Invalid or negative time
+ * bounded to 0..0.15 (default 0.06), intensity to 0..TownMaxPointLightIntensity. Invalid or negative time
  * keeps the bounded base intensity. No state, allocation or camera dependence.
  */
 TownPointLight TownFireLightAtTime(const TownPointLight &source, uint32_t emitterIdentity,
@@ -92,7 +93,7 @@ TownPointLight TownFireLightAtTime(const TownPointLight &source, uint32_t emitte
  * Pure world-space diffuse math; no camera, palette, game-state access or
  * allocation. normal and config.toLight are normalized internally. Shadow
  * occlusion 0..1 attenuates directional light only. Point lights are optional;
- * at most the first eight are sampled. Too many or malformed occluders fail
+ * at most the first TownMaxPointLights are sampled. Too many or malformed occluders fail
  * closed for point visibility, rather than leaking light through walls.
  */
 TownLightingSample SampleTownLighting(TownLightVector normal, TownLightVector position,
@@ -107,7 +108,8 @@ float TownPointLightVisibility(TownLightVector light, TownLightVector receiver,
 /** Bounded optional sprite irradiance field. Unlike the interior diffuse
  * sampler, a billboard has no physical surface normal: illumination depends
  * on world position, source radius and shell visibility, never on camera yaw.
- * Invalid inputs fail closed. Sources <= 8, shells <= 32, apertures <= 8 each.
+ * Invalid inputs fail closed. Sources <= TownMaxPointLights, shells <=
+ * TownMaxLightOccluders, apertures <= TownMaxLightApertures each.
  * This validation permits callers to reject a field before recording a frame. */
 bool ValidateTownSpritePointLighting(std::span<const TownPointLight> lights,
 	std::span<const TownLightOccluder> occluders);

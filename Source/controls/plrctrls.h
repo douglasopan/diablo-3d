@@ -47,6 +47,9 @@ void SetPointAndClick(bool value);
 bool IsPointAndClick();
 bool IsMovementHandlerActive();
 
+/** Fresh admitted camera-movement DOWN only; queues native OnWalk before ticks. */
+bool RequestTownCameraNavigationTakeover();
+
 void DetectInputMethod(const SDL_Event &event, const ControllerButtonEvent &gamepadEvent);
 void ProcessGameAction(const GameAction &action);
 

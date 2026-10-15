@@ -14,6 +14,7 @@
 #include "engine/render/town_visual_objects.hpp"
 #include "engine/render/town_visual_scene.hpp"
 #include "game_mode.hpp"
+#include "items.h"
 #include "levels/dun_tile_data.hpp"
 #include "mods/mod_identity.h"
 #include "utils/ini.hpp"
@@ -35,6 +36,54 @@ struct RequestCell {
 	Point tile { 0, 0 }, reference { 0, 0 };
 	uint16_t before = 0, special = 0, after = 0;
 };
+
+// Schema2 is one pinned designer-removal composition, not arbitrary scenery
+// clearing. Schema1's IDs, class rules, donors and corridor policy stay intact.
+constexpr std::array<std::string_view, 10> DesignerPatchIds {
+    "rock-41-85", "rock-41-87", "rock-9-47", "scenery-38-10",
+    "rock-3-6", "rock-31-3", "rock-33-3", "scenery-49-64", "scenery-50-64", "scenery-51-64"
+};
+constexpr std::array<std::string_view, 6> DesignerRemovalIds {
+    "rock-3-6", "rock-31-3", "rock-33-3", "scenery-49-64", "scenery-50-64", "scenery-51-64"
+};
+struct DesignerCell {
+	std::string_view object;
+	Point tile;
+	uint16_t before;
+};
+constexpr std::array<DesignerCell, 25> DesignerCells { {
+	{ "rock-41-85", { 40, 84 }, 226 }, { "rock-41-85", { 41, 84 }, 227 },
+	{ "rock-41-85", { 40, 85 }, 228 }, { "rock-41-85", { 41, 85 }, 229 },
+	{ "rock-41-87", { 40, 86 }, 230 }, { "rock-41-87", { 41, 86 }, 231 },
+	{ "rock-41-87", { 40, 87 }, 232 }, { "rock-41-87", { 41, 87 }, 233 },
+	{ "rock-9-47", { 8, 46 }, 230 }, { "rock-9-47", { 9, 46 }, 231 },
+	{ "rock-9-47", { 8, 47 }, 232 }, { "rock-9-47", { 9, 47 }, 233 },
+	{ "scenery-38-10", { 38, 10 }, 1051 },
+	{ "rock-3-6", { 2, 6 }, 219 }, { "rock-3-6", { 3, 6 }, 220 },
+	{ "rock-31-3", { 30, 2 }, 223 }, { "rock-31-3", { 30, 3 }, 224 }, { "rock-31-3", { 31, 3 }, 225 },
+	{ "rock-33-3", { 32, 2 }, 226 }, { "rock-33-3", { 33, 2 }, 227 },
+	{ "rock-33-3", { 32, 3 }, 228 }, { "rock-33-3", { 33, 3 }, 229 },
+	{ "scenery-49-64", { 49, 64 }, 382 }, { "scenery-50-64", { 50, 64 }, 385 }, { "scenery-51-64", { 51, 64 }, 386 }
+} };
+constexpr std::array<std::string_view, 4> DesignerRoutes {
+    "38,11;38,10;38,9;38,8", "40,82;40,83;40,84;40,85", "83,23;84,23;85,23", "10,46;9,46;8,46"
+};
+
+bool DesignerRemoval(std::string_view id)
+{
+	return std::find(DesignerRemovalIds.begin(), DesignerRemovalIds.end(), id) != DesignerRemovalIds.end();
+}
+
+bool BridgeRemoval(std::string_view id)
+{
+	return id == "scenery-49-64" || id == "scenery-50-64" || id == "scenery-51-64";
+}
+
+const DesignerCell *FindDesignerCell(std::string_view id, Point tile)
+{
+	const auto found = std::find_if(DesignerCells.begin(), DesignerCells.end(), [&](const DesignerCell &cell) { return cell.object == id && cell.tile == tile; });
+	return found == DesignerCells.end() ? nullptr : &*found;
+}
 
 bool Reject(std::string_view failure)
 {
@@ -98,14 +147,21 @@ bool Keys(const Ini &ini, std::string_view section, std::span<const std::string_
 	return true;
 }
 
-bool ProtectedAnchor(Point p)
+bool ProtectedAnchor(Point p, bool designerBridgeApron = false)
 {
 	// Native NPC occupancy (including cows), portals, entrances, and quest tiles.
 	constexpr std::array<Point, 17> Anchors { Point { 62, 63 }, { 55, 79 }, { 24, 32 }, { 55, 62 }, { 62, 71 }, { 71, 84 }, { 80, 20 }, { 43, 66 }, { 11, 53 }, { 58, 16 }, { 56, 14 }, { 59, 20 }, { 57, 40 }, { 59, 40 }, { 61, 40 }, { 63, 40 }, { 25, 31 } };
 	for (const auto anchor : Anchors)
 		if (std::abs(p.x - anchor.x) <= 2 && std::abs(p.y - anchor.y) <= 2) return true;
-	for (const auto &binding : GetTownEditorModelBindings())
-		if (p.x >= binding.nativeMin.x - 1 && p.x <= binding.nativeMax.x + 1 && p.y >= binding.nativeMin.y - 1 && p.y <= binding.nativeMax.y + 1) return true;
+	for (const auto &binding : GetTownEditorModelBindings()) {
+		if (p.x < binding.nativeMin.x - 1 || p.x > binding.nativeMax.x + 1 || p.y < binding.nativeMin.y - 1 || p.y > binding.nativeMax.y + 1) continue;
+		// Exactly three removed bridge scenery cells touch the tavern's apron.
+		// Its actual footprint, every other binding/apron and NPC guard remain.
+		if (designerBridgeApron && binding.instanceId == "tavern-main"
+		    && p.y == 64 && p.x >= 49 && p.x <= 51
+		    && !(p.x >= binding.nativeMin.x && p.x <= binding.nativeMax.x && p.y >= binding.nativeMin.y && p.y <= binding.nativeMax.y)) continue;
+		return true;
+	}
 	// The cathedral's native artwork apron extends beyond its model footprint.
 	if (p.x >= 10 && p.x <= 33 && p.y >= 8 && p.y <= 33) return true;
 	if (p.x >= 46 && p.x <= 51 && p.y >= 18 && p.y <= 24) return true;
@@ -121,6 +177,25 @@ bool Grass(uint16_t piece)
 	const auto &blocks = DPieceMicros[piece].mt;
 	if (!blocks[0].hasValue() || !blocks[1].hasValue()) return false;
 	return std::none_of(std::begin(blocks) + 2, std::end(blocks), [](const LevelCelBlock &block) { return block.hasValue(); });
+}
+
+bool BridgeFloor(const RequestCell &cell)
+{
+	// Measured flat wood tiles immediately below the removed bridge barriers.
+	// Piece381 is walkable but has high MIN blocks and is never a floor donor.
+	const uint16_t expected = cell.tile == Point { 49, 64 } ? 384
+	    : cell.tile == Point { 50, 64 } ? 387 : cell.tile == Point { 51, 64 } ? 388 : 0;
+	if (expected == 0 || cell.after != expected || cell.reference != Point { cell.tile.x, 65 }
+	    || HasAnyOf(SOLData[expected], TileProperties::Solid | TileProperties::BlockMissile | TileProperties::Trap)) return false;
+	const auto &blocks = DPieceMicros[expected].mt;
+	return blocks[0].hasValue() && blocks[1].hasValue()
+	    && std::none_of(std::begin(blocks) + 2, std::end(blocks), [](const LevelCelBlock &block) { return block.hasValue(); });
+}
+
+bool Occupied(Point tile)
+{
+	return dPlayer[tile.x][tile.y] != 0 || dMonster[tile.x][tile.y] != 0
+	    || dObject[tile.x][tile.y] != 0 || dItem[tile.x][tile.y] != 0;
 }
 
 bool Resolve(std::string_view path, std::vector<std::byte> &bytes, std::string &failure)
@@ -166,8 +241,10 @@ bool ParseApply(std::span<const std::byte> data, const TownSceneLogicPatchContex
 	if (!ini.getKeys("").empty() || !Keys(ini, "WorldPatch", HeaderKeys, "object")) return Reject("patch-header-fields");
 	for (const auto key : HeaderKeys)
 		if (key != "object" && (ini.get("WorldPatch", key).size() != 1 || ini.getString("WorldPatch", key).empty())) return Reject("patch-required-field");
-	if (ini.getString("WorldPatch", "format") != "d3d.town-world-patch" || ini.getString("WorldPatch", "schemaVersion") != "1"
-	    || ini.getString("WorldPatch", "edition") != "retail" || ini.getString("WorldPatch", "operation") != "create-cardinal-exits") return Reject("patch-schema");
+	const bool legacyCardinal = ini.getString("WorldPatch", "schemaVersion") == "1" && ini.getString("WorldPatch", "operation") == "create-cardinal-exits";
+	const bool designerRemovals = ini.getString("WorldPatch", "schemaVersion") == "2" && ini.getString("WorldPatch", "operation") == "designer-removals-and-cardinal-exits";
+	if (ini.getString("WorldPatch", "format") != "d3d.town-world-patch" || ini.getString("WorldPatch", "edition") != "retail"
+	    || (!legacyCardinal && !designerRemovals)) return Reject("patch-schema");
 	LogicAudit.sourceManifestSha256 = ini.getString("WorldPatch", "sourceManifestSha256");
 	LogicAudit.baselineStaticSha256 = ini.getString("WorldPatch", "baselineStaticSha256");
 	LogicAudit.targetStaticSha256 = ini.getString("WorldPatch", "targetStaticSha256");
@@ -180,8 +257,12 @@ bool ParseApply(std::span<const std::byte> data, const TownSceneLogicPatchContex
 	if (requests.empty() || requests.size() > MaxObjects) return Reject("patch-object-count");
 	std::set<std::string_view> ids, sections;
 	for (const auto &request : requests) {
-		if ((!request.value.starts_with("rock-") && request.value != "scenery-38-10") || request.value.size() > 32 || !ids.insert(request.value).second) return Reject("patch-object-id");
+		const bool permitted = designerRemovals
+		    ? std::find(DesignerPatchIds.begin(), DesignerPatchIds.end(), request.value) != DesignerPatchIds.end()
+		    : request.value.starts_with("rock-") || request.value == "scenery-38-10";
+		if (!permitted || request.value.size() > 32 || !ids.insert(request.value).second) return Reject("patch-object-id");
 	}
+	if (designerRemovals && ids.size() != DesignerPatchIds.size()) return Reject("patch-designer-object-set");
 	for (size_t begin = 0; begin < text.size();) {
 		const auto end = text.find('\n', begin);
 		const auto line = Trim(text.substr(begin, end == std::string_view::npos ? text.size() - begin : end - begin));
@@ -200,6 +281,7 @@ bool ParseApply(std::span<const std::byte> data, const TownSceneLogicPatchContex
 	std::set<int> routeCells;
 	for (size_t i = 0; i < routes.size(); ++i) {
 		std::string_view list = ini.getString("Routes", RouteNames[i]);
+		if (designerRemovals && list != DesignerRoutes[i]) return Reject("patch-designer-route-changed");
 		while (!list.empty()) {
 			const auto separator = list.find(';');
 			std::array<unsigned, 2> point;
@@ -234,13 +316,21 @@ bool ParseApply(std::span<const std::byte> data, const TownSceneLogicPatchContex
 		// north exit. This is an exact identity/cell/piece exception, never a
 		// permission to clear arbitrary solid scenery or change SOL tables.
 		const bool northScenery = rock.id == "scenery-38-10";
-		const bool allowedClass = northScenery
+		const bool designerObject = designerRemovals && DesignerRemoval(rock.id);
+		const bool bridgeScenery = designerRemovals && BridgeRemoval(rock.id);
+		const DesignerCell *bridge = bridgeScenery ? FindDesignerCell(rock.id, rock.anchor) : nullptr;
+		const bool allowedClass = bridgeScenery
+		    ? bridge != nullptr && rock.kind == TownVisualObjectKind::Scenery && rock.phase == 1 && rock.sourceCells.size() == 1
+		        && rock.sourceCells[0].tile == bridge->tile && rock.sourceCells[0].piece == bridge->before
+		        && rock.sourceCells[0].special == 0 && SOLData[bridge->before] == TileProperties::Solid
+		    : northScenery
 		    ? rock.kind == TownVisualObjectKind::Scenery && rock.phase == 1 && rock.anchor == Point { 38, 10 }
 		        && rock.sourceCells.size() == 1 && rock.sourceCells[0].tile == Point { 38, 10 }
 		        && rock.sourceCells[0].piece == 1051 && rock.sourceCells[0].special == 0 && SOLData[1051] == TileProperties::Solid
 		    : rock.kind == TownVisualObjectKind::Prop && rock.phase == 2
 		        && rock.id == "rock-" + std::to_string(rock.anchor.x) + "-" + std::to_string(rock.anchor.y);
 		if (!allowedClass || rock.eventBinding != TownVisualObjectEvent::None || rock.eventState || !rock.visible || rock.nativeSuppressed || rock.groundFallback) return Reject("patch-rock-class");
+		if (designerRemovals && rock.sourceCells.size() != static_cast<size_t>(std::count_if(DesignerCells.begin(), DesignerCells.end(), [&](const DesignerCell &cell) { return cell.object == rock.id; }))) return Reject("patch-designer-source-count");
 		constexpr std::array<std::string_view, 1> CellKeys { "cell" };
 		if (!Keys(ini, rock.id, CellKeys, "cell") || ini.get(rock.id, "cell").size() != rock.sourceCells.size() || rock.sourceCells.empty()) return Reject("patch-rock-cell-count");
 		std::map<int, TownVisualSourceCell> source;
@@ -249,16 +339,22 @@ bool ParseApply(std::span<const std::byte> data, const TownSceneLogicPatchContex
 		bool nearRoute = false;
 		for (const auto &raw : ini.get(rock.id, "cell")) {
 			std::array<unsigned, 7> value;
-			if (!Numbers(raw.value, value) || value[0] > 94 || value[1] > 94 || value[2] > 65535 || value[3] > 255 || value[4] > 94 || value[5] > 94 || value[6] > 17) return Reject("patch-cell-format");
+			if (!Numbers(raw.value, value) || value[0] > 94 || value[1] > 94 || value[2] > 65535 || value[3] > 255 || value[4] > 94 || value[5] > 94 || value[6] > (bridgeScenery ? 388U : 17U)) return Reject("patch-cell-format");
 			RequestCell cell { { static_cast<int>(value[0]), static_cast<int>(value[1]) }, { static_cast<int>(value[4]), static_cast<int>(value[5]) }, static_cast<uint16_t>(value[2]), static_cast<uint16_t>(value[3]), static_cast<uint16_t>(value[6]) };
 			const auto original = source.find(CellKey(cell.tile));
-			const bool allowedPiece = northScenery ? cell.tile == Point { 38, 10 } && cell.before == 1051 : cell.before >= 219 && cell.before <= 233;
-			if (!SafeCell(cell.tile) || !SafeCell(cell.reference) || ProtectedAnchor(cell.tile) || original == source.end() || original->second.tile != cell.tile || original->second.piece != cell.before || original->second.special != cell.special
+			const DesignerCell *approved = designerRemovals ? FindDesignerCell(rock.id, cell.tile) : nullptr;
+			const bool allowedPiece = bridgeScenery ? approved != nullptr && cell.before == approved->before
+			    : northScenery ? cell.tile == Point { 38, 10 } && cell.before == 1051 : cell.before >= 219 && cell.before <= 233;
+			if (designerRemovals && (approved == nullptr || approved->before != cell.before)) return Reject("patch-designer-cell");
+			if (!SafeCell(cell.tile) || !SafeCell(cell.reference) || ProtectedAnchor(cell.tile, bridgeScenery) || original == source.end() || original->second.tile != cell.tile || original->second.piece != cell.before || original->second.special != cell.special
 			    || !allowedPiece || cell.special != 0 || !changed.emplace(CellKey(cell.tile), cell).second) return Reject("patch-cell-not-approved-rock");
 			source.erase(original);
 			if (changed.size() > MaxCells) return Reject("patch-cell-budget");
 			if (dPiece[cell.tile.x][cell.tile.y] != cell.before || static_cast<uint8_t>(dSpecial[cell.tile.x][cell.tile.y]) != cell.special) return Reject("patch-native-before");
-			if (dPiece[cell.reference.x][cell.reference.y] != cell.after || dSpecial[cell.reference.x][cell.reference.y] != 0 || !Grass(cell.after)) return Reject("patch-native-grass-reference");
+			if (designerRemovals && !designerObject && (cell.reference != Point { 40, 40 } || cell.after != 0)) return Reject("patch-designer-cardinal-reference");
+			const bool validFloor = bridgeScenery ? BridgeFloor(cell) : Grass(cell.after);
+			if (dPiece[cell.reference.x][cell.reference.y] != cell.after || dSpecial[cell.reference.x][cell.reference.y] != 0 || !validFloor) return Reject("patch-native-grass-reference");
+			if (designerRemovals && (Occupied(cell.tile) || Occupied(cell.reference) || ProtectedAnchor(cell.reference))) return Reject("patch-designer-occupied-or-protected-reference");
 			const auto groundId = "ground-" + std::to_string(cell.tile.x) + "-" + std::to_string(cell.tile.y);
 			const auto donorId = "ground-" + std::to_string(cell.reference.x) + "-" + std::to_string(cell.reference.y);
 			const auto ground = byId.find(groundId), donor = byId.find(donorId);
@@ -279,9 +375,13 @@ bool ParseApply(std::span<const std::byte> data, const TownSceneLogicPatchContex
 				nearRoute = nearRoute || routeCells.contains(CellKey({ cell.tile.x + x, cell.tile.y + y }));
 			stagedAudit.push_back({ rock.id, cell.tile, cell.before, cell.after, cell.special, 0, cell.reference });
 		}
-		if (!source.empty() || !nearRoute) return Reject("patch-rock-outside-corridor");
+		if (!source.empty() || (!nearRoute && !designerObject)) return Reject("patch-rock-outside-corridor");
 		rock.visible = false;
 	}
+	if (designerRemovals && changed.size() != DesignerCells.size()) return Reject("patch-designer-cell-set");
+	if (designerRemovals)
+		for (const auto &[key, cell] : changed)
+			if (changed.contains(CellKey(cell.reference))) return Reject("patch-designer-changed-donor");
 	// Static props/vegetation are immutable outside the requested rocks. Refuse
 	// an overlapping tree, grave, wall, or event even if a rock ID names the cell.
 	for (const auto &object : expected.objects) {
@@ -336,6 +436,14 @@ bool ParseApply(std::span<const std::byte> data, const TownSceneLogicPatchContex
 		return resolver(path, bytes, error);
 	};
 	if (!ValidateTownVisualSceneForLogic(manifest, visualResolver, failure)) return Reject(failure.empty() ? "patch-architecture-preflight" : failure);
+	// Recheck live pools only after every decoder/hash/preflight and before the
+	// first native write. Schema1 retains its original admission policy.
+	if (designerRemovals)
+		for (const auto &[key, cell] : changed)
+			if (Occupied(cell.tile) || Occupied(cell.reference)
+			    || dPiece[cell.tile.x][cell.tile.y] != cell.before || dSpecial[cell.tile.x][cell.tile.y] != 0
+			    || dPiece[cell.reference.x][cell.reference.y] != cell.after || dSpecial[cell.reference.x][cell.reference.y] != 0)
+				return Reject("patch-designer-native-state-changed");
 	// Finish every allocation, hash and decoder before the first native write.
 	LogicAudit.objects = requests.size();
 	LogicAudit.cells = std::move(stagedAudit);

@@ -125,10 +125,11 @@ struct TownCabinOpening {
 	TownSceneMaterial liningMaterial = TownSceneMaterial::Stone;
 };
 
-enum class TownCabinFireKind : uint8_t { Candle, Candelabrum, Hearth, Campfire };
+enum class TownCabinFireKind : uint8_t { Candle, Candelabrum, Hearth, Campfire, EditorPoint };
 
 /** Actual fire geometry plus its deterministic base point light. Flicker is a
  * runtime intensity calculation; it never rewrites source geometry or colors.
+ * EditorPoint is an authored static light, with no flame geometry or flicker.
  */
 struct TownCabinFireSource {
 	TownCabinFireKind kind = TownCabinFireKind::Candle;
@@ -140,8 +141,9 @@ struct TownCabinFireSource {
 /** Runtime adjunct for the optional east-cabin model; imported source stays exact.
  * Openings and lighting use the same physical polygons, preserving opaque
  * corners. Interior UVs are world-unit coordinates; exterior copies keep their
- * imported normalized UVs. All fire sources share these linear RGB colors for
- * the renderer's scalar irradiance/emission caches. No electrical lights.
+ * imported normalized UVs. fireColor retains the legacy shared-color palette
+ * profile; differing source RGB selects the optional per-channel RGB interior
+ * path. Fire emission colors remain shared by the native flame geometry.
  */
 struct TownCabinInterior {
 	std::vector<TownSceneTriangle> exteriorTriangles;

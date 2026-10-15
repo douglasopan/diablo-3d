@@ -228,6 +228,8 @@ struct Texture {
 	std::optional<PlayerActorMaterial> actorMaterial;
 	// Interior materials use a small point-irradiance LUT and clean base colors.
 	std::vector<std::array<uint8_t, ImportedLightLevels>> interiorLightTables;
+	// Optional independent-channel RGB rows; legacy palette rows stay intact.
+	std::vector<std::array<uint32_t, ImportedLightLevels>> interiorRgbLightTables;
 	bool emissive = false;
 	TextureGpuIdentity gpuIdentity;
 	bool sample(float u, float v, uint8_t &color, uint32_t *albedoColor = nullptr, uint8_t *unlitColor = nullptr) const
@@ -420,6 +422,9 @@ std::unordered_map<uint64_t, uint32_t> GpuPickIds;
 struct PreparedGpuTexture {
 	std::vector<uint32_t> codes;
 	std::vector<uint8_t> interiorLut;
+	std::vector<uint32_t> interiorRgbLut;
+	std::array<SDL_Color, 256> interiorRgbTone {};
+	uint64_t interiorRgbRevision = 0;
 	uint64_t lastSeen = 0;
 	uint64_t actorPreparedFrame = 0;
 	TownGpuLighting actorPreparedLighting = TownGpuLighting::Unlit;
@@ -784,6 +789,9 @@ struct SceneMaterials {
 };
 std::unordered_map<size_t, SceneMaterials> SceneMaterialCache;
 std::unordered_map<size_t, bool> SceneWaterEventState;
+// Derived Water-only textures own fresh immutable GPU identities. Source
+// texture identity distinguishes the opaque base from each projected mask.
+std::unordered_map<size_t, std::array<std::unordered_map<uint64_t, Texture>, 2>> WellWaterMaterialTextureCache;
 std::unordered_map<size_t, Texture> ImportedTextureCache;
 std::unordered_map<size_t, std::array<Texture, InteriorMaterialCount + FlameBandCount * FlameLightLevels>> CabinInteriorTextureCache;
 struct CachedArchitectureBounds {
@@ -839,7 +847,8 @@ void PrepareFrameSpritePointLighting()
 			return;
 		}
 		for (const TownCabinFireSource &fire : room.fireSources)
-			FrameSpritePointLights[FrameSpritePointLightCount++] = TownFireLightAtTime(fire.light, fire.flickerSeed, FrameFireTime);
+			FrameSpritePointLights[FrameSpritePointLightCount++] = fire.kind == TownCabinFireKind::EditorPoint
+			    ? fire.light : TownFireLightAtTime(fire.light, fire.flickerSeed, FrameFireTime);
 		FrameSpritePointOccluders.insert(FrameSpritePointOccluders.end(), room.lightOccluders.begin(), room.lightOccluders.end());
 	}
 	FrameSpritePointLightingValid = FrameSpritePointLightCount != 0
@@ -1572,6 +1581,23 @@ TownGpuTexture PrepareGpuTexture(const Texture &texture, const InteriorLighting 
 	if (texture.emissive)
 		return result;
 	if (interior != nullptr) {
+		if (!texture.interiorRgbLightTables.empty()) {
+			if (prepared.interiorRgbRevision == 0 || std::memcmp(prepared.interiorRgbTone.data(), SmoothToneRamp.data(), sizeof(SmoothToneRamp)) != 0) {
+				prepared.interiorRgbLut.clear();
+				for (const auto &row : texture.interiorRgbLightTables)
+					for (uint32_t value : row)
+						prepared.interiorRgbLut.push_back(ToneWorldRgb({ float((value >> 16) & 255) / 255, float((value >> 8) & 255) / 255, float(value & 255) / 255 }));
+				prepared.interiorRgbTone = SmoothToneRamp;
+				// The backend cache can outlive this prepared entry across GPU toggles.
+				// Mint a process-wide revision; never restart a private identity at 1.
+				prepared.interiorRgbRevision = NextTextureGpuIdentity();
+			}
+			// Private paired-LUT revision also refreshes this small interior's
+			// texels on a brightness change. Unchanged tones retain a warm hit.
+			result.revision = prepared.interiorRgbRevision;
+			result.rgbaLightLut = prepared.interiorRgbLut;
+			result.rgbaLightLutEnabled = true;
+		}
 		result.lightLut = prepared.interiorLut;
 		result.lightLevels = ImportedLightLevels;
 	} else if (albedo) {
@@ -1767,6 +1793,7 @@ void Rasterize(const Surface &out, const std::array<TownCameraProjectedVertex, 3
 			material.lights = { interior->lights.data(), interior->lightCount };
 			material.interiorRedNormalization = interior->room->fireColor.red;
 			material.interiorPointRange = InteriorPointLightRange;
+			material.interiorRgbLighting = !texture.interiorRgbLightTables.empty();
 			const std::span<const TownLightOccluder> occluders(interior->room->lightOccluders);
 			material.room = &occluders.front();
 			material.useFramePointLightVisibility = FrameSpritePointLightingValid && interior->room == FrameSpritePointChurchRoom;
@@ -1885,9 +1912,22 @@ void Rasterize(const Surface &out, const std::array<TownCameraProjectedVertex, 3
 					} else if (interior != nullptr) {
 						TownLightingConfig ambient;ambient.ambient={.015F,.013F,.010F};ambient.directionalIntensity=0;
 						const auto sample=SampleTownLighting({normal.x,normal.y,normal.z},{world.x,world.y,world.z},0,ambient,{interior->lights.data(),interior->lightCount},interior->room->lightOccluders);
-						level=std::clamp(sample.point.red/interior->room->fireColor.red/InteriorPointLightRange,0.0F,1.0F)*(ImportedLightLevels-1);
-						const unsigned low=unsigned(level),high=std::min<unsigned>(low+1,ImportedLightLevels-1);
-						rgb=BlendWorldRgb(SmoothWorldPalette[texture.interiorLightTables[albedoColor][low]],SmoothWorldPalette[texture.interiorLightTables[albedoColor][high]],level-low);
+						if (!texture.interiorRgbLightTables.empty()) {
+							const auto &row = texture.interiorRgbLightTables[albedoColor];
+							const auto toned = [&](uint32_t value) {
+								return ToneWorldRgb({ float((value >> 16) & 255) / 255, float((value >> 8) & 255) / 255, float(value & 255) / 255 });
+							};
+							const auto channel = [&](float point, unsigned shift) {
+								const float amount = std::clamp(point / InteriorPointLightRange, 0.0F, 1.0F) * (ImportedLightLevels - 1);
+								const unsigned low = unsigned(amount), high = std::min<unsigned>(low + 1, ImportedLightLevels - 1);
+								return BlendWorldRgb(toned(row[low]), toned(row[high]), amount - low) & (255U << shift);
+							};
+							rgb = 0xFF000000U | channel(sample.point.red, 16) | channel(sample.point.green, 8) | channel(sample.point.blue, 0);
+						} else {
+							level=std::clamp(sample.point.red/interior->room->fireColor.red/InteriorPointLightRange,0.0F,1.0F)*(ImportedLightLevels-1);
+							const unsigned low=unsigned(level),high=std::min<unsigned>(low+1,ImportedLightLevels-1);
+							rgb=BlendWorldRgb(SmoothWorldPalette[texture.interiorLightTables[albedoColor][low]],SmoothWorldPalette[texture.interiorLightTables[albedoColor][high]],level-low);
+						}
 					} else if (hasAlbedo) {
 						level=std::clamp(diffuse*(1-smoothShadow),0.0F,1.0F)*(ImportedLightLevels-1);
 						const unsigned low=unsigned(level),high=std::min<unsigned>(low+1,ImportedLightLevels-1);
@@ -2565,6 +2605,48 @@ const SceneMaterials &OpaqueSceneMaterials(size_t index, const TownSceneModel &m
 	return SceneMaterialCache.emplace(index, BuildSceneMaterials(source, art)).first->second;
 }
 
+const Texture &SceneSurfaceTexture(size_t index, const TownSceneModel &model,
+    const TownSceneTriangle &triangle, const Texture &source)
+{
+	if (model.kind != TownSceneKind::Well || triangle.material != TownSceneMaterial::Water)
+		return source;
+	const bool poisoned = TownVisualSceneWaterPoisoned(index);
+	auto &textures = WellWaterMaterialTextureCache[index][poisoned ? 1 : 0];
+	const auto found = textures.find(source.gpuIdentity.value);
+	if (found != textures.end())
+		return found->second;
+	// Bright-to-dark colors measured from the paired native Town CEL well
+	// frames (594..597/602..603 vs 3542..3547), palette SHA309c7e28.
+	// Preserve source tonality; this is a material transfer, not a CEL redraw.
+	constexpr std::array<uint8_t, 7> Poisoned { 5, 19, 17, 45, 47, 54, 80 };
+	constexpr std::array<uint8_t, 7> Clean { 43, 59, 62, 75, 91, 99, 110 };
+	const auto luminance = [](uint8_t code) {
+		const SDL_Color color = logical_palette[code];
+		return (54U * color.r + 183U * color.g + 19U * color.b + 128U) / 256U;
+	};
+	unsigned minimum = 255, maximum = 0;
+	for (size_t i = 0; i < source.pixels.size(); ++i) {
+		if (!source.opacity.empty() && source.opacity[i] == 0)
+			continue;
+		const unsigned value = luminance(source.pixels[i]);
+		minimum = std::min(minimum, value);
+		maximum = std::max(maximum, value);
+	}
+	Texture water = source;
+	for (size_t i = 0; i < water.pixels.size(); ++i) {
+		// Preserve the exact source mask and all unrendered bytes. Only Water
+		// color codes change; geometry, coverage, UV and native owners do not.
+		if (!source.opacity.empty() && source.opacity[i] == 0)
+			continue;
+		const unsigned last = static_cast<unsigned>(poisoned ? Poisoned.size() - 1 : Clean.size() - 1);
+		const unsigned level = maximum > minimum
+		    ? ((maximum - luminance(source.pixels[i])) * last + (maximum - minimum) / 2) / (maximum - minimum)
+		    : last / 2;
+		water.pixels[i] = poisoned ? Poisoned[level] : Clean[level];
+	}
+	return textures.emplace(source.gpuIdentity.value, std::move(water)).first->second;
+}
+
 const Texture &ImportedRgbTexture(size_t index, uint32_t width, uint32_t height, std::span<const uint8_t> rgbBytes, bool cathedralStone = false)
 {
 	const auto found = ImportedTextureCache.find(index);
@@ -3219,6 +3301,9 @@ const std::array<Texture, InteriorMaterialCount + FlameBandCount * FlameLightLev
 	if (cached != CabinInteriorTextureCache.end())
 		return cached->second;
 	std::array<Texture, InteriorMaterialCount + FlameBandCount * FlameLightLevels> textures;
+	const bool coloredPoints = std::any_of(interior.fireSources.begin(), interior.fireSources.end(), [&](const TownCabinFireSource &source) {
+		return source.light.color.red != interior.fireColor.red || source.light.color.green != interior.fireColor.green || source.light.color.blue != interior.fireColor.blue;
+	});
 	constexpr std::array<std::array<int, 3>, InteriorMaterialCount> BaseColors { {
 		{ 125, 99, 64 }, { 76, 72, 67 }, { 150, 124, 77 }, { 40, 38, 34 }, { 12, 10, 8 }
 	} };
@@ -3256,6 +3341,19 @@ const std::array<Texture, InteriorMaterialCount + FlameBandCount * FlameLightLev
 					table[level] = ClosestSceneColor(lit.red * 255, lit.green * 255, lit.blue * 255);
 				}
 				texture.interiorLightTables.push_back(table);
+				if (coloredPoints) {
+					std::array<uint32_t, ImportedLightLevels> rgbTable;
+					for (size_t level = 0; level < rgbTable.size(); ++level) {
+						const float amount = InteriorPointLightRange * static_cast<float>(level) / (rgbTable.size() - 1);
+						TownLightingSample lighting;
+						lighting.ambient = { 0.015F, 0.013F, 0.010F };
+						lighting.point = { amount, amount, amount };
+						const TownLightColor lit = TownLinearToSrgb(ComposeTownLitColor(base, lighting));
+						const auto byte = [](float value) { return static_cast<uint32_t>(value * 255 + 0.5F); };
+						rgbTable[level] = 0xFF000000U | (byte(lit.red) << 16) | (byte(lit.green) << 8) | byte(lit.blue);
+					}
+					texture.interiorRgbLightTables.push_back(rgbTable);
+				}
 			}
 		}
 	}
@@ -3282,7 +3380,8 @@ void DrawCabinInterior(const Surface &out, size_t index, const TownCabinInterior
 		lighting.lightCount = std::min<size_t>(interior.fireSources.size(), lighting.lights.size());
 		for (size_t i = 0; i < lighting.lightCount; ++i) {
 			const auto &source = interior.fireSources[i];
-			lighting.lights[i] = TownFireLightAtTime(source.light, source.flickerSeed, FrameFireTime, FireIntensityVariation);
+			lighting.lights[i] = source.kind == TownCabinFireKind::EditorPoint
+			    ? source.light : TownFireLightAtTime(source.light, source.flickerSeed, FrameFireTime, FireIntensityVariation);
 		}
 	}
 	const auto draw = [&](const TownSceneTriangle &triangle, const Texture &texture, bool roomLit) {
@@ -3366,6 +3465,7 @@ void DrawScene(const Surface &out)
 			// geometry, transform, source pixels and all other caches stay intact.
 			SceneArtworkCache.erase(object.sceneIndex);
 			SceneMaterialCache.erase(object.sceneIndex);
+			WellWaterMaterialTextureCache.erase(object.sceneIndex);
 		}
 	}
 	PrepareArchitectureBoundsCache(scene);
@@ -3384,6 +3484,7 @@ void DrawScene(const Surface &out)
 				// artwork/material texture so Water surfaces show the native change.
 				SceneArtworkCache.erase(index);
 				SceneMaterialCache.erase(index);
+				WellWaterMaterialTextureCache.erase(index);
 			}
 			SceneWaterEventState[index] = poisoned;
 		}
@@ -3435,7 +3536,8 @@ void DrawScene(const Surface &out)
 			pick.architecture = static_cast<int16_t>(index);
 			const float illumination = (triangle.normal.x + triangle.normal.height + triangle.normal.z) / 1.7320508F;
 			const int shade = triangle.surfaceRole == TownSceneSurfaceRole::Underside ? 3 : (illumination < -0.1F ? 2 : (illumination < 0.4F ? 1 : 0));
-			DrawTriangle(out, vertices, detailed ? detail.texture : materials.base[static_cast<size_t>(triangle.material)], pick, shade);
+			DrawTriangle(out, vertices, SceneSurfaceTexture(index, model, triangle,
+			    detailed ? detail.texture : materials.base[static_cast<size_t>(triangle.material)]), pick, shade);
 		}
 		for (size_t triangleIndex = 0; triangleIndex < model.triangles.size(); ++triangleIndex) {
 			++ArchitectureCullingState.trianglesVisited;
@@ -3461,7 +3563,7 @@ void DrawScene(const Surface &out)
 			// has its own continuous opaque material and no projected-photo holes.
 			PickRecord pick = PickAt(triangle.pickTile);
 			pick.architecture = static_cast<int16_t>(index);
-			DrawTriangle(out, vertices, face.texture, pick, 0, true);
+			DrawTriangle(out, vertices, SceneSurfaceTexture(index, model, triangle, face.texture), pick, 0, true);
 		}
 	}
 	ArchitectureCullingState.cachedBounds = static_cast<size_t>(std::count_if(ArchitectureBoundsCache.begin(), ArchitectureBoundsCache.end(),
@@ -4437,34 +4539,51 @@ void PrepareCathedralNativeTextures(const cathedral::PilotFrame &frame)
 	}
 	CathedralCommonPaletteSignature=paletteSignature;
 	if(!CathedralCeilingBindingReady) PrepareCathedralCeilingBinding();
-	PrepareCathedralLightBody();
 	CathedralNativeTextureState.lightGroundPanels=0;
 	for(const auto &panel:frame.nativeArtPanels)
 		CathedralNativeTextureState.lightGroundPanels+=panel.module==cathedral::ModuleKind::Floor;
+	// Capture the complete raw working set before erasing any node. Lit keys
+	// borrow these identities, and the ceiling is needed independently of walls.
+	std::set<CathedralNativeTextureKey> selected;
+	CathedralDiagnosticMaterialBinding = CathedralCeilingBinding;
+	CathedralDiagnosticMaterialBindingValid = true;
+	selected.insert(NativeTextureKey(CathedralCeilingBinding));
 	std::map<CathedralNativeLitTextureKey, cathedral::NativeTextureBinding> selectedLit;
 	for (const auto *surfaces : { &frame.triangles, &frame.nativeArtPanels })
 	for (const auto &surface : *surfaces) {
-		if (surface.visualSuppressed || surface.nativeTexture.kind != cathedral::NativeTextureKind::Masonry) continue;
+		if (surface.visualSuppressed || surface.nativeTexture.kind == cathedral::NativeTextureKind::Technical) continue;
+		CathedralDiagnosticMaterialBinding = surface.nativeTexture;
+		CathedralDiagnosticMaterialBindingValid = true;
+		selected.insert(NativeTextureKey(surface.nativeTexture));
+		if (surface.nativeTexture.kind != cathedral::NativeTextureKind::Masonry) continue;
 		const auto key = NativeLitTextureKey(surface.nativeTexture);
 		if (selectedLit.find(key) != selectedLit.end()) continue;
 		CathedralDiagnosticMaterialBinding = surface.nativeTexture; CathedralDiagnosticMaterialBindingValid = true;
 		if (selectedLit.size() >= CathedralNativeLitTextureMaxEntries) RefuseCathedralNativeLightCacheBudget();
 		selectedLit.emplace(key, surface.nativeTexture);
 	}
-	// Remove only inactive lit sources. Warm selected nodes and GPU identities
-	// stay in place; raw material history/selected masters are untouched.
+	// Remove only inactive sources before admitting new materials. Warm
+	// selected nodes and GPU identities stay in place in both caches.
 	for (auto it = CathedralNativeLitTextureCache.begin(); it != CathedralNativeLitTextureCache.end();) {
 		if (selectedLit.find(it->first) != selectedLit.end()) { ++it; continue; }
 		CathedralNativeLitTextureBytes -= it->second.texture.pixels.size() + it->second.texture.opacity.size() + it->second.texture.lightingBasePixels.size();
 		it = CathedralNativeLitTextureCache.erase(it);
 	}
-	std::set<CathedralNativeTextureKey> selected;
+	for (auto it = CathedralNativeTextureCache.begin(); it != CathedralNativeTextureCache.end();) {
+		if (selected.find(it->first) != selected.end()) { ++it; continue; }
+		CathedralNativeTextureState.bytes -= it->second.texture.pixels.size() + it->second.texture.opacity.size();
+		it = CathedralNativeTextureCache.erase(it);
+	}
+	// Light-body bytes have their own owner inside the raw-byte total.
+	// Preserve that owner and check its first admission after inactive eviction.
+	PrepareCathedralLightBody();
+	std::set<CathedralNativeTextureKey> prepared;
 	const auto prepareRaw=[&](const cathedral::NativeTextureBinding &binding) {
 		// POD identity is captured before signature validation, decode or budget.
 		CathedralDiagnosticMaterialBinding = binding;
 		CathedralDiagnosticMaterialBindingValid = true;
 		const auto key = NativeTextureKey(binding);
-		if (!selected.insert(key).second) return;
+		if (!prepared.insert(key).second) return;
 		const auto found = CathedralNativeTextureCache.find(key);
 		if (found != CathedralNativeTextureCache.end() && found->second.signature == NativeTextureSignature(binding)) {
 			++CathedralNativeTextureState.hits;
@@ -5763,7 +5882,7 @@ void DrawCathedralWorld(const Surface &out)
 		if (!player.plractive || !player.isOnActiveLevel() || !player.AnimInfo.sprites || !CathedralTileInFrame(tile)
 		    || (&player != MyPlayer && !IsTileLit(tile) && !MyPlayer->_pInfraFlag))
 			continue;
-		if (FollowCameraState.localPlayerHidden && WarriorFirstPersonBodyAdmitted(player, i)) continue;
+		if (&player == MyPlayer && !player.hasNoLife() && FollowCameraState.localPlayerHidden) continue;
 		if (&player != MyPlayer && (!IsTileLit(tile) || (MyPlayer->_pInfraFlag && dLight[tile.x][tile.y] > 8)))
 			CathedralTranslation = GetInfravisionTRN();
 		const bool selectable = std::abs(dPlayer[tile.x][tile.y]) == static_cast<int>(i) + 1
@@ -6753,6 +6872,7 @@ void ResetTownViewResources()
 	SceneArtworkCache.clear();
 	SceneMaterialCache.clear();
 	SceneWaterEventState.clear();
+	WellWaterMaterialTextureCache.clear();
 	ClearFixedTownRendererCache();
 	ImportedTextureCache.clear();
 	CabinInteriorTextureCache.clear();
@@ -6846,6 +6966,7 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 		SceneArtworkCache.clear();
 		SceneMaterialCache.clear();
 		SceneWaterEventState.clear();
+		WellWaterMaterialTextureCache.clear();
 		ClearFixedTownRendererCache();
 		ImportedTextureCache.clear();
 		CabinInteriorTextureCache.clear();
@@ -7176,7 +7297,7 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 			const Player &player = Players[i];
 			if (!player.plractive || !player.isOnActiveLevel() || !player.AnimInfo.sprites)
 				continue;
-			if (FollowCameraState.localPlayerHidden && WarriorFirstPersonBodyAdmitted(player, i)) continue;
+			if (&player == MyPlayer && !player.hasNoLife() && FollowCameraState.localPlayerHidden) continue;
 			Vec3 position = PlayerPosition(player);
 			position.y = 0;
 			if (!DrawWarriorNativePilot(out, player, i, true, 0, false))

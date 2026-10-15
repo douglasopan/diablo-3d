@@ -11,6 +11,7 @@
 #include "controls/plrctrls.h"
 #include "cursor.h"
 #include "engine/point.hpp"
+#include "engine/render/town_view.hpp"
 #include "player.h"
 #include "stores.h"
 
@@ -66,6 +67,8 @@ void RepeatPlayerAction()
 			return;
 		}
 	}
+	const bool stationaryWorldAction = IsDungeon3DActionContextForRepeat()
+	    && GetTownViewCameraMode() == TownCameraMode::FirstPerson;
 	if (pcurs != CURSOR_HAND)
 		return;
 
@@ -75,7 +78,7 @@ void RepeatPlayerAction()
 	if (IsPlayerInStore())
 		return;
 
-	if (LastPlayerAction == PlayerActionType::None && !IsDungeon3DActionContextForRepeat())
+	if (LastPlayerAction == PlayerActionType::None && !stationaryWorldAction)
 		return;
 
 	Player &myPlayer = *MyPlayer;
@@ -85,7 +88,7 @@ void RepeatPlayerAction()
 		return;
 	if (!myPlayer.CanChangeAction())
 		return;
-	if (IsDungeon3DActionContextForRepeat()) {
+	if (stationaryWorldAction) {
 		// A hit/death or a temporary invalid aim does not end the held episode.
 		// Re-resolve current aim only when the native player can begin an action.
 		if (sgbMouseDown == CLICK_LEFT && !RefreshDungeon3DStandingAttackTarget()) return;

@@ -125,6 +125,10 @@ struct TownGpuMaterial {
 	 * Submit after world/native palette overlays; later world draws are refused.
 	 * Cannot be combined with paletteBlend or used by resident meshes. */
 	bool viewModel = false;
+	/** Opt-in per-channel diffuse RGB from the paired interior LUT. The indexed
+	 * shade remains a legacy palette witness. Requires Interior plus a paired
+	 * RGB LUT; false preserves the original scalar fire-color path exactly. */
+	bool interiorRgbLighting = false;
 };
 
 /** Immutable native blend table at [destination * 256 + source]. Borrowed
@@ -242,7 +246,7 @@ bool TownGpuPrepareTexture(const TownGpuTexture &texture, TownGpuLighting lighti
 /** Optional RGB palette and native visual light field after Begin, before geometry. */
 bool TownGpuSetSmoothLighting(std::span<const uint32_t> palette, std::span<const float> nativeLight, int fieldWidth, int fieldHeight);
 /** Optional world-space RGB irradiance for opted-in sprites/entities. Call
- * after Begin and before any geometry. Copies <=8 lights and <=32 shells with
+ * after Begin and before any geometry. Copies <=TownMaxPointLights lights and <=32 shells with
  * <=8 apertures each; borrowed spans are never retained. Empty inputs disable
  * the field. Begin/reset disable it; invalid input invalidates the whole frame.
  * This field does not replace the separate diffuse interior-lighting material. */

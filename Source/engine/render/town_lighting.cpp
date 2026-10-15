@@ -41,7 +41,7 @@ bool Normalize(TownLightVector &vector)
 	return true;
 }
 
-float Positive(float value, float maximum = 16)
+float Positive(float value, float maximum = TownMaxPointLightIntensity)
 {
 	return std::isfinite(value) ? std::clamp(value, 0.0F, maximum) : 0;
 }
@@ -238,7 +238,7 @@ bool ValidateTownSpritePointLighting(std::span<const TownPointLight> lights,
 	for (const TownPointLight &light : lights) {
 		if (!Finite(light.position) || !std::isfinite(light.radius) || light.radius <= 0 || light.radius > 256
 		    || !boundedColor(light.color.red) || !boundedColor(light.color.green) || !boundedColor(light.color.blue)
-		    || !boundedColor(light.intensity))
+		    || !std::isfinite(light.intensity) || light.intensity < 0 || light.intensity > TownMaxPointLightIntensity)
 			return false;
 	}
 	for (const TownLightOccluder &occluder : occluders) {
@@ -286,7 +286,7 @@ TownLightColor SampleTownSpritePointLighting(TownLightVector position,
 uint32_t TintTownSpritePointArgb(uint32_t argb, TownLightColor pointIrradiance)
 {
 	const auto bounded = [](float value) {
-		return std::isfinite(value) && value >= 0 && value <= TownMaxPointLights * 16 * 16;
+		return std::isfinite(value) && value >= 0 && value <= TownMaxPointLights * 16 * TownMaxPointLightIntensity;
 	};
 	if (!bounded(pointIrradiance.red) || !bounded(pointIrradiance.green) || !bounded(pointIrradiance.blue)
 	    || (pointIrradiance.red == 0 && pointIrradiance.green == 0 && pointIrradiance.blue == 0))

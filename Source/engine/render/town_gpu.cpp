@@ -85,6 +85,7 @@ struct UInt4 { uint32_t x, y, z, w; };
 constexpr uint32_t SpritePointLightFlag = 1024;
 constexpr uint32_t FramePointVisibilityFlag = 2048;
 constexpr uint32_t ViewModelFlag = 4096;
+constexpr uint32_t InteriorRgbLightFlag = 8192;
 
 // All members occupy complete HLSL constant-buffer registers. Value-initialize
 // the structure before filling it so bytewise batch comparison has no padding.
@@ -109,6 +110,7 @@ struct Constants {
 	std::array<Float4, TownMaxLightOccluders - 1> blockerMaximum;
 };
 static_assert(sizeof(Constants) % 16 == 0);
+static_assert(sizeof(Constants) <= D3D11_REQ_CONSTANT_BUFFER_ELEMENT_COUNT * 16);
 
 /** One bounded frame field, not duplicated in each recorded triangle batch.
  * All apertures are copied; no source spans or scene pointers survive Submit. */
@@ -121,7 +123,9 @@ struct SpritePointConstants {
 	std::array<Float4, TownMaxLightOccluders * TownMaxLightApertures> aperturePlanes;
 	UInt4 counts;
 };
-static_assert(sizeof(SpritePointConstants) == 9488);
+static_assert(sizeof(SpritePointConstants) == sizeof(Float4)
+    * (2 * TownMaxPointLights + 2 * TownMaxLightOccluders
+        + 2 * TownMaxLightOccluders * TownMaxLightApertures + 1));
 static_assert(sizeof(SpritePointConstants) <= D3D11_REQ_CONSTANT_BUFFER_ELEMENT_COUNT * 16);
 
 // Keep legacy projected uploads byte-for-byte 80 B. Optional COLOR0 lives in
@@ -307,18 +311,18 @@ cbuffer Frame : register(b0) {
  float4 shadowUp;
  float4 shadowLight;
  float4 shadowScale;
- float4 lightPositionRadius[8];
- float4 lightRedIntensity[8];
+ float4 lightPositionRadius[TOWN_MAX_POINT_LIGHTS];
+ float4 lightRedIntensity[TOWN_MAX_POINT_LIGHTS];
  float4 apertureBounds[8];
  float4 aperturePlanes[8];
  float4 blockerMinimum[31];
  float4 blockerMaximum[31];
 };
 // Kept separate from per-draw b0 so a shared optional field does not enlarge
-// every projected/resident batch. C++ SpritePointConstants is exactly 9488 B.
+// every projected/resident batch. Dimensions come from the C++ contract macros.
 cbuffer SpritePointField : register(b2) {
- float4 spritePointPositionRadius[8];
- float4 spritePointColorIntensity[8];
+ float4 spritePointPositionRadius[TOWN_MAX_POINT_LIGHTS];
+ float4 spritePointColorIntensity[TOWN_MAX_POINT_LIGHTS];
  float4 spritePointOccluderMinimum[32];
  float4 spritePointOccluderMaximum[32];
  float4 spritePointApertureBounds[256];
@@ -560,6 +564,31 @@ float pointAmount(float3 world, float3 authoredNormal) {
  }
  return saturate(red / normalAndRed.w / parameters.x);
 }
+// The legacy red-only path above stays byte-for-byte intact. This opt-in path
+// carries each emitter's RGB, with the same diffuse/range/shell semantics.
+float3 interiorPointIrradiance(float3 world, float3 authoredNormal) {
+ float3 irradiance = 0;
+ float normalLength = length(authoredNormal);
+ if (normalLength <= 0) return 0;
+ float3 normal = authoredNormal / normalLength;
+ [loop] for (int i = 0; i < (int)parameters.y; ++i) {
+  float4 light = lightPositionRadius[i];
+  float3 direction = light.xyz - world;
+  float distanceSquared = dot(direction, direction);
+  float radiusSquared = light.w * light.w;
+  if (distanceSquared >= radiusSquared || distanceSquared <= 0.00000001) continue;
+  float diffuse = max(0, dot(normal, direction * rsqrt(distanceSquared)));
+  if (diffuse <= 0) continue;
+  bool visible;
+  [branch] if ((flags.w&2048)!=0) visible = spritePointVisibleThrough(light.xyz, world);
+  else visible = visibleThrough(light.xyz, world);
+  if (!visible) continue;
+  float range = 1 - distanceSquared / radiusSquared;
+  irradiance += lightRedIntensity[i].xzw * lightRedIntensity[i].y
+   * diffuse * range * range / (1 + distanceSquared);
+ }
+ return irradiance;
+}
 bool spritePointOpeningAt(float3 hit, int axis, float boundary, uint begin, uint count) {
  float2 uv = float2(axis == 0 ? hit.z : hit.x, axis == 1 ? hit.z : hit.y);
  [loop] for (uint i = begin; i < begin + count; ++i) {
@@ -690,6 +719,10 @@ Pixel PS(Interpolated input) {
   } else if((flags.w&128)!=0) { float4 rgba=litRgba(code,(float)level); rgb=rgba.rgb; alpha=rgba.a; }
   else rgb=paletteRgb(color);
  }
+ [branch] if ((flags.w&8192)!=0) {
+  float3 level = saturate(interiorPointIrradiance(input.world, input.normalDiffuse.xyz) / parameters.x) * (flags.y-1);
+  rgb = float3(litRgba(code,level.r).r,litRgba(code,level.g).g,litRgba(code,level.b).b);
+ }
  if ((flags.w & 16) != 0) {
   uint destination = priorIndexedColor.Load(int3((int2)input.position.xy, 0));
   // 256-wide rows are destination codes; source is the column.
@@ -746,7 +779,9 @@ bool Compile(const char *entry, const char *profile, ComOwner<ID3DBlob> &blob)
 {
 	diag::StageScope diagnosticStage(diag::SessionLogger(), diag::Stage::ShaderCompile, diag::SessionFrame(), diag::SampleSessionFrame());
 	ComOwner<ID3DBlob> errors;
-	const HRESULT result = D3DCompile(ShaderSource, sizeof(ShaderSource) - 1, "town_gpu", nullptr, nullptr,
+	const std::string pointLightCount = std::to_string(TownMaxPointLights);
+	const D3D_SHADER_MACRO macros[] { { "TOWN_MAX_POINT_LIGHTS", pointLightCount.c_str() }, { nullptr, nullptr } };
+	const HRESULT result = D3DCompile(ShaderSource, sizeof(ShaderSource) - 1, "town_gpu", macros, nullptr,
 	    entry, profile, D3DCOMPILE_ENABLE_STRICTNESS | D3DCOMPILE_OPTIMIZATION_LEVEL3, 0, blob.put(), errors.put());
 	if (FAILED(result)) {
 		std::string message = "D3D11 shader compilation failed";
@@ -1200,6 +1235,9 @@ bool MakeConstants(const TownGpuMaterial &material, const CachedTexture &texture
 	        && (!Finite(material.interiorRedNormalization) || material.interiorRedNormalization <= 0
 	            || !Finite(material.interiorPointRange) || material.interiorPointRange <= 0)))
 		return Fail("Invalid GPU material parameters");
+	if (material.interiorRgbLighting
+	    && (material.lighting != TownGpuLighting::Interior || texture.lut == nullptr || !texture.lut->hasRgba))
+		return Fail("GPU interior RGB requires Interior and a paired RGB LUT", S_OK, TownGpuFailureKind::Unsupported);
 	if (material.blockers.size() > TownMaxLightOccluders - 1
 	    || !std::all_of(material.blockers.begin(), material.blockers.end(), ValidOpaqueBlocker))
 		return Fail("Invalid GPU interior opaque blockers");
@@ -1218,7 +1256,8 @@ bool MakeConstants(const TownGpuMaterial &material, const CachedTexture &texture
 		    | (texture.texels->unlit ? 64 : 0) | (texture.lut != nullptr && texture.lut->hasRgba ? 128 : 0) | (material.nativeLighting ? 256 : 0)
 		    | (material.receivesSpritePointLight && FrameSpritePointLighting ? SpritePointLightFlag : 0)
 		    | (material.useFramePointLightVisibility ? FramePointVisibilityFlag : 0)
-		    | (material.viewModel ? ViewModelFlag : 0)) };
+		    | (material.viewModel ? ViewModelFlag : 0)
+		    | (material.interiorRgbLighting ? InteriorRgbLightFlag : 0)) };
 	output.shading.x = material.lighting == TownGpuLighting::Palette ? static_cast<float>(material.shade) : 0;
 	output.normal = { 0, 0, 0, material.interiorRedNormalization };
 	output.parameters = { material.interiorPointRange, 0, 0, static_cast<float>(FrameShadow.resolution) };
@@ -1234,7 +1273,9 @@ bool MakeConstants(const TownGpuMaterial &material, const CachedTexture &texture
 		const size_t index = static_cast<size_t>(output.parameters.y++);
 		output.lightPositionRadius[index] = { light.position.x, light.position.height, light.position.z, light.radius };
 		output.lightRedIntensity[index] = { Finite(light.color.red) ? std::clamp(light.color.red, 0.0F, 16.0F) : 0,
-			Finite(light.intensity) ? std::clamp(light.intensity, 0.0F, 16.0F) : 0, 0, 0 };
+			Finite(light.intensity) ? std::clamp(light.intensity, 0.0F, TownMaxPointLightIntensity) : 0,
+			Finite(light.color.green) ? std::clamp(light.color.green, 0.0F, 16.0F) : 0,
+			Finite(light.color.blue) ? std::clamp(light.color.blue, 0.0F, 16.0F) : 0 };
 	}
 	for (const TownLightOccluder &blocker : material.blockers) {
 		const size_t index = static_cast<size_t>(output.shadowScale.w++);

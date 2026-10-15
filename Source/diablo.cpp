@@ -219,6 +219,9 @@ uint16_t FirstPersonMovementModifiers = 0;
 uint32_t TownCameraLastFrameTicks = 0;
 bool TownCameraHasFrameClock = false;
 bool TownFollowWheelNeedsDraw = false;
+// UP/focus/modal/capture cancellation cannot erase a command already queued.
+// After the normal packet boundary, native destAction/animation owns it.
+bool TownCameraQueuedCombatPending = false;
 
 struct FirstPersonDeferredClick {
 	Uint8 button;
@@ -238,6 +241,7 @@ bool HasFirstPersonPointerPick();
 bool CanUseTownMovementKeys();
 bool CanDispatchDeferredTownWorldMouse();
 bool Dungeon3DActionContext();
+bool Dungeon3DStandingActionContext();
 bool CanUseDungeon3DWorldAction();
 TownFirstPersonInputResult SyncTownCameraMovement(uint8_t pressed = 0, uint8_t released = 0);
 void FlushTownFirstPersonClicks();
@@ -287,6 +291,21 @@ void FreeGame()
 	music_stop();
 }
 
+void ObserveTownCameraQueuedCombat()
+{
+	if (IsAnyOf(LastPlayerAction, PlayerActionType::Attack, PlayerActionType::AttackMonsterTarget,
+	        PlayerActionType::AttackPlayerTarget, PlayerActionType::Spell,
+	        PlayerActionType::SpellMonsterTarget, PlayerActionType::SpellPlayerTarget))
+		TownCameraQueuedCombatPending = true;
+}
+
+void TownCameraNativePacketBoundary()
+{
+	// Called only after RunGameLoop's normal ProcessGameMessagePackets.
+	// Native OnAttack/OnSpell and player state now govern movement eligibility.
+	TownCameraQueuedCombatPending = false;
+}
+
 bool ProcessInput()
 {
 	SyncTownFirstPersonInput();
@@ -306,12 +325,15 @@ bool ProcessInput()
 		FinishSimulatedMouseClicks(MousePosition);
 #endif
 		CheckCursMove();
-		const bool standingAttackHeld = Dungeon3DActionContext() && CanUseDungeon3DWorldAction()
+		const bool standingAttackHeld = Dungeon3DStandingActionContext() && CanUseDungeon3DWorldAction()
 		    && (sgbMouseDown == CLICK_LEFT || sgbMouseDown == CLICK_RIGHT);
 		if (IsTownFirstPersonInputCaptured() && !HasFirstPersonPointerPick() && !standingAttackHeld)
 			LastPlayerAction = PlayerActionType::None;
 		plrctrls_after_check_curs_move();
-		if (!Dungeon3DActionContext()) RepeatPlayerAction();
+		if (!Dungeon3DActionContext()) {
+			RepeatPlayerAction();
+			ObserveTownCameraQueuedCombat();
+		}
 	}
 
 	return true;
@@ -321,6 +343,11 @@ bool Dungeon3DActionContext()
 {
 	return cathedral::SupportsRetailLevel(currlevel, leveltype, gbIsHellfire, setlevel, setlevel ? setlvlnum : SL_NONE)
 	    && IsTownViewEnabled() && IsTownGameplayCameraMode(GetTownViewCameraMode());
+}
+
+bool Dungeon3DStandingActionContext()
+{
+	return Dungeon3DActionContext() && GetTownViewCameraMode() == TownCameraMode::FirstPerson;
 }
 
 bool CanUseDungeon3DWorldAction()
@@ -340,6 +367,7 @@ bool DispatchDungeonStandingAttack()
 	} else {
 		NetSendCmdLoc(MyPlayerId,true,MyPlayer->UsesRangedWeapon()?CMD_RATTACKXY:CMD_SATTACKXY,cursPosition);
 	}
+	ObserveTownCameraQueuedCombat();
 	return true;
 }
 
@@ -364,10 +392,18 @@ void DungeonInteractPressed()
 
 void LeftMouseCmd(bool bShift)
 {
-	if (Dungeon3DActionContext()) {
+	if (Dungeon3DStandingActionContext()) {
 		LastPlayerAction=PlayerActionType::None;
 		DispatchDungeonStandingAttack();
-		return; // Refused/stale frame must not fall through to native click-walk.
+		return; // Refused/stale FP frame cannot become native click-walk.
+	}
+	if (Dungeon3DActionContext()) {
+		// TP keeps native target/action routing, but never a stale hover or
+		// CheckCursMove's hero-tile fallback after a refused world frame.
+		TownViewPickResult pick;
+		if (!CanUseDungeon3DWorldAction()
+		    || (!SelectProjectedItemLabelAt(MousePosition) && !PickTownViewDetailed(MousePosition, pick))) return;
+		CheckCursMove();
 	}
 	bool bNear;
 
@@ -435,6 +471,7 @@ void LeftMouseCmd(bool bShift)
 		LastPlayerAction = PlayerActionType::Walk;
 		NetSendCmdLoc(MyPlayerId, true, CMD_WALKXY, cursPosition);
 	}
+	ObserveTownCameraQueuedCombat();
 }
 
 bool TryOpenDungeonWithMouse()
@@ -457,6 +494,12 @@ bool TryOpenDungeonWithMouse()
 bool HasHudModalPointerOwner()
 {
 	return InGameMenu() || SpellSelectFlag || DropGoldFlag || IsWithdrawGoldOpen || DoomFlag;
+}
+
+bool HasTownWorldPointerUiOwner(Point pointer)
+{
+	return HasHudModalPointerOwner() || IsD3dHudClockPoint(pointer)
+	    || IsD3dFloatingPanelPoint(pointer) || IsD3dMinimapPoint(pointer) || IsPointOnD3dHud(pointer);
 }
 
 void LeftMouseDown(uint16_t modState, bool cancelOwnedWalk = true)
@@ -658,7 +701,10 @@ void RightMouseDown(bool isShiftHeld, bool cancelOwnedWalk = true)
 	if (pcurs == CURSOR_HAND) {
 		if (IsPointOnD3dHud(MousePosition))
 			return;
-		if (!Dungeon3DActionContext() || RefreshDungeon3DStandingSpellTarget()) CheckPlrSpell(isShiftHeld);
+		if (!Dungeon3DStandingActionContext() || RefreshDungeon3DStandingSpellTarget()) {
+			CheckPlrSpell(isShiftHeld);
+			ObserveTownCameraQueuedCombat();
+		}
 	} else if (pcurs > CURSOR_HAND && pcurs < CURSOR_FIRSTITEM) {
 		NewCursor(CURSOR_HAND);
 	}
@@ -1069,9 +1115,11 @@ bool CanUseFollowCameraInput()
 
 bool CanDispatchDeferredTownWorldMouse()
 {
-	// Free-cursor panels preserve WASD, but cannot replay a queued world DOWN.
+	// Panel visibility releases FP look; physical pointer ownership decides
+	// world actions. The map's current moved/resized bounds own only their clicks.
 	const bool worldLook = FirstPersonLookOverPanels && IsTownFirstPersonInputCaptured();
-	return CanUseFollowCameraInput() && (!HasFreeCursorTownPanel() || worldLook) && UiPointerOwnedButtons == 0;
+	return CanUseFollowCameraInput() && UiPointerOwnedButtons == 0
+	    && (worldLook || !HasTownWorldPointerUiOwner(MousePosition));
 }
 
 bool CanUseTownCameraWheel()
@@ -1136,7 +1184,20 @@ TownFirstPersonInputResult SyncTownCameraMovement(uint8_t pressed, uint8_t relea
 void TownMovementActionPressed(uint8_t bit)
 {
 	SyncTownFirstPersonInput();
-	SyncTownCameraMovement(bit);
+	const auto movement = SyncTownCameraMovement(bit);
+	// This callback is reached only by an admitted nonrepeat physical DOWN.
+	// Unknown deferred targets are not reinterpreted as navigation.
+	if (movement.direction == Direction::NoDirection || TownFollowWheelNeedsDraw || TownCameraQueuedCombatPending
+	    || FirstPersonDeferredClickCount != 0
+	    || UiPointerOwnedButtons != 0 || !RequestTownCameraNavigationTakeover())
+		return;
+	if (sgbMouseDown == CLICK_LEFT) {
+		// Retire only the previous world navigation episode, not a UI pair.
+		// Its eventual UP cannot stop the new camera walk or replay that click.
+		FirstPersonConsumedButtons |= 1U << (SDL_BUTTON_LEFT - 1);
+		sgbMouseDown = CLICK_NONE;
+	}
+	LastPlayerAction = PlayerActionType::None;
 }
 
 void TownMovementActionReleased(uint8_t bit)
@@ -1375,7 +1436,7 @@ void HandleMouseButtonDown(Uint8 button, uint16_t modState)
 	const bool floatingPanel = !clock && !IsTownFirstPersonInputCaptured() && IsD3dFloatingPanelPoint(MousePosition);
 	const bool minimap = !clock && !IsTownFirstPersonInputCaptured() && !floatingPanel && IsD3dMinimapPoint(MousePosition);
 	const bool hud = !IsTownFirstPersonInputCaptured() && !floatingPanel && !minimap && IsPointOnD3dHud(MousePosition);
-	if ((floatingPanel || minimap || hud) && sgbMouseDown == CLICK_NONE) {
+	if ((clock || floatingPanel || minimap || hud) && sgbMouseDown == CLICK_NONE) {
 		// UI owns this physical pair before any relative-capture/world path.
 		// Its pointer latch never becomes a native repeated world action.
 		const Point uiPointer = MousePosition;
@@ -1553,6 +1614,7 @@ void FlushTownFirstPersonClicks()
 	if (IsTownFirstPersonInputCaptured())
 		MousePosition = FirstPersonPointerCenter();
 	bool lookedSinceDraw = false;
+	uint32_t deferredUiButtons = 0;
 	for (size_t i = 0; i < count; ++i) {
 		const auto &click = pending[i];
 		if (click.wheelSteps != 0) {
@@ -1567,13 +1629,31 @@ void FlushTownFirstPersonClicks()
 		}
 		const uint32_t pendingButtonMask = click.button > 0 && click.button <= 31 ? 1U << (click.button - 1) : 0;
 		if (!click.down && (UiPointerOwnedButtons & pendingButtonMask) != 0) {
-			// This deferred world UP cannot release a newer immediate UI-owned pair.
-			FirstPersonConsumedButtons &= ~pendingButtonMask;
+			if ((deferredUiButtons & pendingButtonMask) != 0) {
+				MousePosition = click.pointer;
+				HandleMouseButtonUp(click.button, click.modifiers);
+				deferredUiButtons &= ~pendingButtonMask;
+			} else {
+				// A deferred world UP cannot release a newer immediate UI pair.
+				FirstPersonConsumedButtons &= ~pendingButtonMask;
+			}
 			continue;
+		}
+		if (click.down && UiPointerOwnedButtons != 0)
+			continue; // Old queued DOWN cannot replace a newer immediate UI pair.
+		if (click.absoluteClick && click.down && !IsTownFirstPersonInputCaptured()) {
+			// The stored DOWN owns its coordinates, before any current map/HUD gate.
+			MousePosition = click.pointer;
+			if (HasTownWorldPointerUiOwner(MousePosition)) {
+				HandleMouseButtonDown(click.button, click.modifiers);
+				deferredUiButtons |= UiPointerOwnedButtons & pendingButtonMask;
+				continue;
+			}
 		}
 		const bool panelResumeGesture = click.absoluteClick && IsFirstPersonModeActive()
 		    && !IsTownFirstPersonInputCaptured() && HasFreeCursorTownPanel()
-		    && CanUseFollowCameraInput() && UiPointerOwnedButtons == 0;
+		    && CanUseFollowCameraInput() && UiPointerOwnedButtons == 0
+		    && !HasTownWorldPointerUiOwner(MousePosition);
 		if (click.down && !CanDispatchDeferredTownWorldMouse() && !panelResumeGesture)
 			continue; // Keep its consumed-UP latch; do not requeue it behind a later draw.
 		if (click.absoluteClick && click.down) {
@@ -1650,7 +1730,14 @@ void GameEventHandler(const SDL_Event &event, uint16_t modState)
 	FirstPersonMovementModifiers = modState;
 	// Every early UI/controller return still observes any changed input gate.
 	struct SyncAfterEvent {
-		~SyncAfterEvent() { SyncTownFirstPersonInput(); }
+		const PlayerActionType beforeAction = LastPlayerAction;
+		~SyncAfterEvent() {
+			// Restored prior mouse bookkeeping (notably a refused QuickCast)
+			// is not evidence of a new command. Explicit dispatch observers
+			// cover accepted requests that retain the same action type.
+			if (LastPlayerAction != beforeAction) ObserveTownCameraQueuedCombat();
+			SyncTownFirstPersonInput();
+		}
 	} syncAfterEvent;
 #if SDL_VERSION_ATLEAST(3, 0, 0)
 	if (event.type == SDL_EVENT_WINDOW_RESIZED || event.type == SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED) {
@@ -1705,6 +1792,7 @@ void GameEventHandler(const SDL_Event &event, uint16_t modState)
 			return;
 		}
 		if ((button == SDL_BUTTON_LEFT || button == SDL_BUTTON_RIGHT) && HasDeferredFirstPersonDown(button)) {
+			MousePosition = GetTownFirstPersonPointer({ SDLC_EventButtonIntX(event), SDLC_EventButtonIntY(event) });
 			QueueTownFirstPersonClick(button, modState, false);
 			return;
 		}
@@ -1852,6 +1940,10 @@ void GameEventHandler(const SDL_Event &event, uint16_t modState)
 		return;
 	case SDL_EVENT_MOUSE_BUTTON_DOWN:
 		MousePosition = GetTownFirstPersonPointer({ SDLC_EventButtonIntX(event), SDLC_EventButtonIntY(event) });
+		if (!IsTownFirstPersonInputCaptured() && HasTownWorldPointerUiOwner(MousePosition)) {
+			HandleMouseButtonDown(event.button.button, modState);
+			return; // UI acquires its physical DOWN/UP before any world-pick barrier.
+		}
 		if (GetTownViewFollowCameraState().active && !GetTownViewFollowCameraState().valid
 		    && CanControlTownCamera() && (event.button.button == SDL_BUTTON_LEFT || event.button.button == SDL_BUTTON_RIGHT)) {
 			FirstPersonConsumedButtons |= 1U << (event.button.button - 1);
@@ -2059,6 +2151,7 @@ void RunGameLoop(interface_mode uMsg)
 		}
 
 		ProcessGameMessagePackets();
+		TownCameraNativePacketBoundary();
 		this_sdl_thread::yield();
 		if (game_loop(gbGameLoopStartup))
 			diablo_color_cyc_logic();
@@ -2659,7 +2752,10 @@ void GameLogic()
 		return;
 	}
 	// Native simulation cadence, never render-interpolation cadence.
-	if (Dungeon3DActionContext()) RepeatPlayerAction();
+	if (Dungeon3DActionContext()) {
+		RepeatPlayerAction();
+		ObserveTownCameraQueuedCombat();
+	}
 	if (gbProcessPlayers) {
 		gGameLogicStep = GameLogicStep::ProcessPlayers;
 		ProcessPlayers();
@@ -2978,6 +3074,11 @@ const auto OptionChangeHandlerTownViewHorizon = (GetOptions().Graphics.townViewH
 
 } // namespace
 
+void ObserveTownCameraQueuedCombatRequest()
+{
+	ObserveTownCameraQueuedCombat();
+}
+
 bool IsTownFirstPersonInputCaptured()
 {
 	return FirstPersonInput.phase == TownFirstPersonCapturePhase::Captured
@@ -3009,11 +3110,17 @@ bool IsTownCameraMovementInputActive()
 }
 
 bool IsDungeon3DActionContextForRepeat() { return Dungeon3DActionContext(); }
-bool CanRepeatDungeon3DWorldAction() { return CanUseDungeon3DWorldAction(); }
+bool CanRepeatDungeon3DWorldAction()
+{
+	if (!CanUseDungeon3DWorldAction()) return false;
+	if (Dungeon3DStandingActionContext()) return true;
+	TownViewPickResult pick;
+	return SelectProjectedItemLabelAt(MousePosition) || PickTownViewDetailed(MousePosition, pick);
+}
 
 bool RefreshDungeon3DStandingAttackTarget()
 {
-	if (!CanUseDungeon3DWorldAction()) return false;
+	if (!Dungeon3DStandingActionContext() || !CanUseDungeon3DWorldAction()) return false;
 	TownViewPickResult pick;
 	const Point pointer = IsTownFirstPersonInputCaptured() ? GetTownFirstPersonPointer(MousePosition) : MousePosition;
 	if (!PickTownViewStandingAttack(pointer, pick) || !InDungeonBounds(pick.tile)
@@ -3026,7 +3133,7 @@ bool RefreshDungeon3DStandingAttackTarget()
 
 bool RefreshDungeon3DStandingSpellTarget()
 {
-	if (!CanUseDungeon3DWorldAction()) return false;
+	if (!Dungeon3DStandingActionContext() || !CanUseDungeon3DWorldAction()) return false;
 	TownViewPickResult pick;
 	const Point pointer = IsTownFirstPersonInputCaptured() ? GetTownFirstPersonPointer(MousePosition) : MousePosition;
 	if (!PickTownViewStandingAttack(pointer, pick) || !InDungeonBounds(pick.tile)

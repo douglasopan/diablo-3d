@@ -98,6 +98,9 @@ bool IsTownFirstPersonInputCaptured();
 /** Hard-safe keyboard movement in Third, or a captured/legitimate UI-released
  * FPP session. Nontextual panels keep movement; text/modal/device/failure gates do not. */
 bool IsTownCameraMovementInputActive();
+/** Observe an accepted native request before its transient action is restored.
+ * Does not send a command or alter native destinations/animation. */
+void ObserveTownCameraQueuedCombatRequest();
 Point GetTownFirstPersonPointer(Point absolute);
 Direction GetTownFirstPersonMoveDirection();
 /** Release capture, owned arrows and only a walk issued by this adapter. */

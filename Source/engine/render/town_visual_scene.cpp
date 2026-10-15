@@ -343,9 +343,12 @@ bool ReadAdjunct(Reader &reader, std::shared_ptr<const TownCabinInterior> &outpu
 	size_t adjunctTriangles = static_cast<size_t>(exterior) + interior;
 	for (auto &fire : candidate->fireSources) {
 		uint32_t kind, count;
-		if (!reader.u32(kind) || kind > 3 || !ReadLightVector(reader, fire.light.position) || !ReadColor(reader, fire.light.color)
+		if (!reader.u32(kind) || kind > static_cast<uint32_t>(TownCabinFireKind::EditorPoint) || !ReadLightVector(reader, fire.light.position) || !ReadColor(reader, fire.light.color)
 		    || !reader.f32(fire.light.radius) || !reader.f32(fire.light.intensity) || !reader.u32(fire.flickerSeed) || !reader.u32(count)
-		    || count > MaxTriangles || static_cast<uint64_t>(count) * 104 > reader.remaining() || !Bounded(fire.light.radius, 0.000001F, 128) || !Bounded(fire.light.intensity, 0, 64))
+		    || count > MaxTriangles || (kind == static_cast<uint32_t>(TownCabinFireKind::EditorPoint) && count != 0)
+		    || static_cast<uint64_t>(count) * 104 > reader.remaining() || !Bounded(fire.light.radius, 0.000001F, 128)
+		    || !Bounded(fire.light.intensity, 0, TownMaxPointLightIntensity)
+		    || !Bounded(fire.light.color.red, 0, 16) || !Bounded(fire.light.color.green, 0, 16) || !Bounded(fire.light.color.blue, 0, 16))
 			return Fail(failure, "adjunct-fire");
 		adjunctTriangles += count;
 		if (adjunctTriangles > MaxTriangles) return Fail(failure, "adjunct-triangle-budget");
@@ -392,7 +395,12 @@ bool WriteAdjunct(Writer &writer, const TownCabinInterior &adjunct, std::string 
 		WriteLightVector(writer, occluder.minimum); WriteLightVector(writer, occluder.maximum); writer.u32(first); writer.u32(static_cast<uint32_t>(occluder.apertures.size()));
 	}
 	for (const auto &fire : adjunct.fireSources) {
-		if (fire.emissiveTriangles.size() > MaxTriangles) return Fail(failure, "adjunct-fire-count");
+		if (fire.emissiveTriangles.size() > MaxTriangles
+		    || static_cast<uint32_t>(fire.kind) > static_cast<uint32_t>(TownCabinFireKind::EditorPoint)
+		    || (fire.kind == TownCabinFireKind::EditorPoint && !fire.emissiveTriangles.empty())
+		    || !Bounded(fire.light.intensity, 0, TownMaxPointLightIntensity)
+		    || !Bounded(fire.light.color.red, 0, 16) || !Bounded(fire.light.color.green, 0, 16) || !Bounded(fire.light.color.blue, 0, 16))
+			return Fail(failure, "adjunct-fire-count");
 		writer.u32(static_cast<uint32_t>(fire.kind)); WriteLightVector(writer, fire.light.position); WriteColor(writer, fire.light.color);
 		writer.f32(fire.light.radius); writer.f32(fire.light.intensity); writer.u32(fire.flickerSeed); writer.u32(static_cast<uint32_t>(fire.emissiveTriangles.size()));
 		for (const auto &triangle : fire.emissiveTriangles) WriteTriangle(writer, triangle);

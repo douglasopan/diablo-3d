@@ -16,7 +16,7 @@ function Assert-Files([string]$Directory,$Files){
 $manifest=Get-Content -LiteralPath (Join-Path $root 'package-manifest.json') -Raw | ConvertFrom-Json
 Assert-Files $root $manifest.files
 if($VerifyOnly){Write-Output 'Package verified / Pacote verificado.';exit 0}
-if(!$ProfileRoot){$ProfileRoot=Join-Path $env:LOCALAPPDATA 'Diablo3D-local3-Tristram'}
+if(!$ProfileRoot){$ProfileRoot=Join-Path $env:LOCALAPPDATA 'Diablo3D-local4-Tristram'}
 $ProfileRoot=[IO.Path]::GetFullPath($ProfileRoot)
 $choice=Join-Path $ProfileRoot 'data-path.txt'
 if(!$DataDirectory -and (Test-Path -LiteralPath $choice)){$DataDirectory=(Get-Content -LiteralPath $choice -Raw).Trim()}
@@ -36,7 +36,7 @@ if(!$DataDirectory){
  $DataDirectory=Split-Path -Parent $dialog.FileName
 }
 if(!(Test-Path -LiteralPath (Join-Path $DataDirectory 'DIABDAT.MPQ') -PathType Leaf)){throw 'DIABDAT.MPQ not found / nao encontrado.'}
-$mutex=[Threading.Mutex]::new($false,'Local\Diablo3D-local3-Tristram-profile')
+$mutex=[Threading.Mutex]::new($false,'Local\Diablo3D-local4-Tristram-profile')
 if(!$mutex.WaitOne(0)){throw 'This build is already open / Esta build ja esta aberta.'}
 try{
  $profile=Join-Path $ProfileRoot 'profile'
@@ -62,7 +62,12 @@ try{
   $ready=Join-Path $stage 'ready';[IO.Directory]::CreateDirectory($ready)|Out-Null
   Copy-Item -LiteralPath (Join-Path $root 'scene/final/d3d-scenes') -Destination $ready -Recurse
   $static=Join-Path $ready 'd3d-scenes/static';[IO.Directory]::CreateDirectory($static)|Out-Null
-  Copy-Item -LiteralPath $baseline -Destination (Join-Path $static 'tristram-baseline.d3dvis')
+  $baselineBytes=[IO.File]::ReadAllBytes($baseline)
+  foreach($change in $recipe.baselineChanges){
+   if($change.offset -lt 0 -or $change.offset -ge $baselineBytes.Length -or $baselineBytes[$change.offset] -ne $change.before){throw 'Baseline edit mismatch / Edicao de base divergente.'}
+   $baselineBytes[$change.offset]=[byte]$change.after
+  }
+  [IO.File]::WriteAllBytes((Join-Path $static 'tristram-baseline.d3dvis'),$baselineBytes)
   Copy-Item -LiteralPath (Join-Path $materials 'palette.rgb') -Destination (Join-Path $static 'palette.rgb')
   $bytes=[IO.File]::ReadAllBytes($baseline)
   foreach($change in $recipe.changes){

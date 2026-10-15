@@ -2182,6 +2182,29 @@ void LogGamepadChange(GamepadLayout newGamepad)
 
 } // namespace
 
+bool RequestTownCameraNavigationTakeover()
+{
+	if (MyPlayer == nullptr || !CanOwnFirstPersonWalk(*MyPlayer)
+	    || !IsTownCameraMovementInputActive() || InGameMenu() || IsStandingGround())
+		return false;
+	const Player &player = *MyPlayer;
+	// Navigation can yield to a fresh key; attacks, spells, hit/death and native
+	// controller actions keep their own animation/action episode.
+	if (player._pInvincible || (player._pmode != PM_STAND && !player.isWalking())
+	    || !IsAnyOf(player.destAction, ACTION_NONE, ACTION_OPERATE, ACTION_DISARM,
+	        ACTION_PICKUPITEM, ACTION_PICKUPAITEM, ACTION_TALK)
+	    || !IsAnyOf(LastPlayerAction, PlayerActionType::None, PlayerActionType::Walk, PlayerActionType::OperateObject)
+	    || sgbMouseDown == CLICK_RIGHT || ControllerActionHeld != GameActionType_NONE)
+		return false;
+	// RunGameLoop drains these ordered native commands before ProcessPlayers.
+	// OnWalk clears an earlier click/pickup/talk destination even if that prior
+	// request has not been parsed yet. Never mutate destAction/path here and
+	// never call ParseCmd/ProcessGameMessagePackets from an SDL callback.
+	FppWalkOwned = false;
+	NetSendCmdLoc(player.getId(), true, CMD_WALKXY, player.position.future);
+	return true;
+}
+
 void CancelTownFirstPersonWalk()
 {
 	FppWalkOwned = false;
@@ -2821,7 +2844,11 @@ void QuickCast(size_t slot)
 		UpdateSpellTarget(spell);
 	}
 
+	// Early native refusals can leave LastPlayerAction unchanged. Isolate
+	// this cast's result so an old mouse attack cannot look like a new request.
+	LastPlayerAction = PlayerActionType::None;
 	CheckPlrSpell(false, spell, spellType);
+	ObserveTownCameraQueuedCombatRequest();
 	LastPlayerAction = prevMouseButtonAction;
 }
 

@@ -70,9 +70,9 @@ int main(int argc,char **argv)
             const auto &models=GetTownScene();
             const auto &logic=GetTownSceneLogicAudit();
             const auto &fixed=GetTownVisualObjects();
-            if(GetTownVisualSceneAudit().status!="matched"||models.size()!=14||!HasTownVisualObjects()||fixed.objects.size()!=25743||fixed.textures.size()!=1349||logic.status!="applied"||logic.cells.size()!=13||logic.routes.size()!=4)
+            if(GetTownVisualSceneAudit().status!="matched"||models.size()!=14||!HasTownVisualObjects()||fixed.objects.size()!=25743||fixed.textures.size()!=1349||logic.status!="applied"||logic.cells.size()!=25||logic.routes.size()!=4)
                 throw std::runtime_error("Complete selected scene failed native loader/WorldPatch validation");
-            std::cout<<"PASS selected scene: 14 architecture objects, 25743 fixed objects, 1349 textures, 13 native cells and 4 routes; no gameplay/window/input\n";
+            std::cout<<"PASS selected scene: 14 architecture objects, 25743 fixed objects, 1349 textures, 25 native cells and 4 routes; no gameplay/window/input\n";
             return 0;
         }
         auto manifest=LoadFileInMemWithStatus(TownVisualSceneManifestPath.data());
