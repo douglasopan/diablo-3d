@@ -1,29 +1,34 @@
 {
-  "version": "v0.1.0-preview.local4-tristram.full1",
+  "version": "v0.1.0-preview.local6-tristram.grid162",
   "archive": {
-    "url": "https://github.com/douglasopan/diablo-3d/releases/download/v0.1.0-preview.local4-tristram.full1/Diablo3D-Windows-local4-Tristram-full1.zip",
-    "sha256": "400f15625d2f6d950c01e93dad2428343a4791cab8e1a97fbaf884308f3644ee",
-    "bytes": 217784904
+    "url": "https://github.com/douglasopan/diablo-3d/releases/download/v0.1.0-preview.local6-tristram.grid162/Diablo3D-Windows-local6-grid162.zip",
+    "sha256": "703a684625ff155ba7ce08d2a3a31f99f40028142ac37aa6a132d89c0b0f2639",
+    "bytes": 219060543
   },
   "sourceArchive": {
-    "url": "https://github.com/douglasopan/diablo-3d/releases/download/v0.1.0-preview.local4-tristram.full1/Diablo3D-local4-Tristram-full1-corresponding-source.tar.gz",
-    "sha256": "2c8a2705907784e6ffa5ffe0771c22e4937a811fe1cb690c39ad9836ea61d9c9",
-    "bytes": 293617779
+    "url": "https://github.com/douglasopan/diablo-3d/releases/download/v0.1.0-preview.local6-tristram.grid162/Diablo3D-local6-Tristram-grid162-corresponding-source.tar.gz",
+    "sha256": "200dbb502082c3257eca3c3437d989eefa52d45bb772b307b9ec26454acb2895",
+    "bytes": 307617528
   },
   "entrypoint": "Iniciar-Diablo3D.cmd",
-  "profileLocation": "%LOCALAPPDATA%/Diablo3D-local4-Tristram/profile",
+  "profileLocation": "%LOCALAPPDATA%/Diablo3D-local6-grid162/profile",
   "requiredExternalData": "Original compatible retail DIABDAT.MPQ only",
-  "releaseUrl": "https://github.com/douglasopan/diablo-3d/releases/tag/v0.1.0-preview.local4-tristram.full1",
-  "selectedSceneRevision": "human19h05-native-lighting-cardinal-r2",
+  "releaseUrl": "https://github.com/douglasopan/diablo-3d/releases/tag/v0.1.0-preview.local6-tristram.grid162",
+  "selectedSceneRevision": "local6-saved-houses-native-bridges-grid162",
   "runtimeFilesRecreatedExactly": 19,
-  "nativeLoaderGate": "PASS-14architectures18lights25cells4routes",
+  "nativeLoaderGate": "PASS-14architectures18lights22cells4routes",
   "warriorTownCpuTpFp": "PASS",
-  "wellCpuMaterialGate": "PASS-4states130checks",
-  "cacheCpuGate": "PASS-2023checks-16cold48route",
-  "originalCacheReproduction": "INCONCLUSIVE",
-  "cathedralFullInputGate": "FAIL-RefreshLiveFrameRefused",
+  "wellCpuMaterialGate": "PASS-four-states-native-witness-restored",
+  "nativeChecks": 65816,
+  "nativeCheckScope": "Includes65536 texel equality assertions; not independent gameplay cases",
+  "bridgeCpuGate": "PASS-three-native-2x2-planar-submissions-and-coverage",
+  "worldMetresPerTile": 1.62,
+  "increaseOverLocal5": 1.35,
+  "savedGodotHouses": 7,
+  "originalCacheReproduction": "INCONCLUSIVE-inherited-local4",
+  "cathedralFullInputGate": "UNQUALIFIED-inherited-RefreshLiveFrameRefused",
   "newGpuGameplayGate": "not run",
-  "manualGameplayGate": "user testing; no result claimed",
+  "manualGameplayGate": "human test pending; no result claimed",
   "godotEffectsPending": 18,
-  "sourceCommit": "c957ab57cfa77d7f67632dc768d630dc0944f384"
+  "sourceCommit": "30317f1aa4122e218de9e04eef0b37cfc388e4c2"
 }

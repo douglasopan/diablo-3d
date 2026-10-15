@@ -1,0 +1,23 @@
+---
+title: "Local6: bridges, saved Godot houses and a larger world"
+date: 2026-10-15
+description: "Planar bridges, seven saved Godot house edits and another 35% world scale over local5."
+slug: local6-bridges-world-scale
+image: /assets/captures/local3-warrior-tp-hud.webp
+image_alt: "Historical local3 Warrior reference; not a local6 capture."
+category: Protótipo
+order: 30
+status: published
+---
+
+Local 6 includes Tristram and the first-/third-person Warrior. World cells are another 35% larger relative to the character than local 5, reaching 1.62× the original scale. Body, equipment and cameras share the same physical conversion. The three bridges now use horizontal decking with original bitmap coverage instead of generic raised scenery relief. Retains the local 5 restoration of native tavern pieces 382/385/386.
+
+Imports the seven house edits saved in Godot, including the authored Gillian and southeast house scales. The editor Ground offset is treated as registration: the floor stays on the native grid while architecture retains its authored placement relative to that floor. The logical map is not expanded: native paths, collision, coordinates and save format remain authoritative.
+
+Download the complete ZIP, extract into a new folder and run **Iniciar-Diablo3D.cmd**. Only **DIABDAT.MPQ from your compatible original Diablo retail copy** is required. No Godot, Python, compiler or private folders required. K switches first/third person; Home restores third person; F4 switches 3D/classic. Separate profile `%LOCALAPPDATA%/Diablo3D-local6-grid162/profile`, Speed 32.
+
+Tests: actual native NEW CPU renderer, Warrior TP/FP, proportions/cameras, three bridges, classic tavern visual reproduction/restoration and four well states. 65,816 assertions include 65,536 texel comparisons, not 65 thousand gameplay cases. Clean MPQ-only installation, 19 exact files, reuse/preservation, modified-scene refusal, ZIP CRC and file hashes passed.
+
+New GPU/FPS and physical gameplay, relocated building collision and 18 Godot effects remain unqualified. Cathedral RefreshLiveFrameRefused remains under investigation. This is a development preview. No MPQ, extracted native bitmap artwork, saves or PDB distributed. Original credits/licenses retained; custom music: Douglas Pan.
+
+[Download / GitHub Release](https://github.com/douglasopan/diablo-3d/releases/tag/v0.1.0-preview.local6-tristram.grid162)
