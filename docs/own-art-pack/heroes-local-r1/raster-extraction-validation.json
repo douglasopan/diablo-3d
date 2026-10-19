@@ -1,0 +1,313 @@
+{
+  "schema": "d3d.hero-raster-postwrite-validation/1",
+  "passAll": true,
+  "sourceReceiptSha256": "b1a27f19ebf1224c9d92a2476b24d323dea807903d05079596110d9de25883ef",
+  "decodedOutputs": [
+    {
+      "hero": "rogue",
+      "direction": "s",
+      "shaMatches": true,
+      "size": [
+        512,
+        640
+      ],
+      "mode": "RGBA",
+      "frameCount": 1,
+      "animationFrames": 0,
+      "insideCanvas": true,
+      "footpoint": [
+        256,
+        608
+      ],
+      "scaleX": 1.1610337972166997,
+      "scaleY": 1.1610337972166997
+    },
+    {
+      "hero": "rogue",
+      "direction": "sw",
+      "shaMatches": true,
+      "size": [
+        512,
+        640
+      ],
+      "mode": "RGBA",
+      "frameCount": 1,
+      "animationFrames": 0,
+      "insideCanvas": true,
+      "footpoint": [
+        256,
+        608
+      ],
+      "scaleX": 1.1610337972166997,
+      "scaleY": 1.1610337972166997
+    },
+    {
+      "hero": "rogue",
+      "direction": "w",
+      "shaMatches": true,
+      "size": [
+        512,
+        640
+      ],
+      "mode": "RGBA",
+      "frameCount": 1,
+      "animationFrames": 0,
+      "insideCanvas": true,
+      "footpoint": [
+        256,
+        608
+      ],
+      "scaleX": 1.1610337972166997,
+      "scaleY": 1.1610337972166997
+    },
+    {
+      "hero": "rogue",
+      "direction": "nw",
+      "shaMatches": true,
+      "size": [
+        512,
+        640
+      ],
+      "mode": "RGBA",
+      "frameCount": 1,
+      "animationFrames": 0,
+      "insideCanvas": true,
+      "footpoint": [
+        256,
+        608
+      ],
+      "scaleX": 1.1610337972166997,
+      "scaleY": 1.1610337972166997
+    },
+    {
+      "hero": "rogue",
+      "direction": "n",
+      "shaMatches": true,
+      "size": [
+        512,
+        640
+      ],
+      "mode": "RGBA",
+      "frameCount": 1,
+      "animationFrames": 0,
+      "insideCanvas": true,
+      "footpoint": [
+        256,
+        608
+      ],
+      "scaleX": 1.1610337972166997,
+      "scaleY": 1.1610337972166997
+    },
+    {
+      "hero": "rogue",
+      "direction": "ne",
+      "shaMatches": true,
+      "size": [
+        512,
+        640
+      ],
+      "mode": "RGBA",
+      "frameCount": 1,
+      "animationFrames": 0,
+      "insideCanvas": true,
+      "footpoint": [
+        256,
+        608
+      ],
+      "scaleX": 1.1610337972166997,
+      "scaleY": 1.1610337972166997
+    },
+    {
+      "hero": "rogue",
+      "direction": "e",
+      "shaMatches": true,
+      "size": [
+        512,
+        640
+      ],
+      "mode": "RGBA",
+      "frameCount": 1,
+      "animationFrames": 0,
+      "insideCanvas": true,
+      "footpoint": [
+        256,
+        608
+      ],
+      "scaleX": 1.1610337972166997,
+      "scaleY": 1.1610337972166997
+    },
+    {
+      "hero": "rogue",
+      "direction": "se",
+      "shaMatches": true,
+      "size": [
+        512,
+        640
+      ],
+      "mode": "RGBA",
+      "frameCount": 1,
+      "animationFrames": 0,
+      "insideCanvas": true,
+      "footpoint": [
+        256,
+        608
+      ],
+      "scaleX": 1.1610337972166997,
+      "scaleY": 1.1610337972166997
+    },
+    {
+      "hero": "sorcerer",
+      "direction": "s",
+      "shaMatches": true,
+      "size": [
+        512,
+        640
+      ],
+      "mode": "RGBA",
+      "frameCount": 1,
+      "animationFrames": 0,
+      "insideCanvas": true,
+      "footpoint": [
+        256,
+        608
+      ],
+      "scaleX": 1.1085450346420322,
+      "scaleY": 1.1085450346420322
+    },
+    {
+      "hero": "sorcerer",
+      "direction": "sw",
+      "shaMatches": true,
+      "size": [
+        512,
+        640
+      ],
+      "mode": "RGBA",
+      "frameCount": 1,
+      "animationFrames": 0,
+      "insideCanvas": true,
+      "footpoint": [
+        256,
+        608
+      ],
+      "scaleX": 1.1085450346420322,
+      "scaleY": 1.1085450346420322
+    },
+    {
+      "hero": "sorcerer",
+      "direction": "w",
+      "shaMatches": true,
+      "size": [
+        512,
+        640
+      ],
+      "mode": "RGBA",
+      "frameCount": 1,
+      "animationFrames": 0,
+      "insideCanvas": true,
+      "footpoint": [
+        256,
+        608
+      ],
+      "scaleX": 1.1085450346420322,
+      "scaleY": 1.1085450346420322
+    },
+    {
+      "hero": "sorcerer",
+      "direction": "nw",
+      "shaMatches": true,
+      "size": [
+        512,
+        640
+      ],
+      "mode": "RGBA",
+      "frameCount": 1,
+      "animationFrames": 0,
+      "insideCanvas": true,
+      "footpoint": [
+        256,
+        608
+      ],
+      "scaleX": 1.1085450346420322,
+      "scaleY": 1.1085450346420322
+    },
+    {
+      "hero": "sorcerer",
+      "direction": "n",
+      "shaMatches": true,
+      "size": [
+        512,
+        640
+      ],
+      "mode": "RGBA",
+      "frameCount": 1,
+      "animationFrames": 0,
+      "insideCanvas": true,
+      "footpoint": [
+        256,
+        608
+      ],
+      "scaleX": 1.1085450346420322,
+      "scaleY": 1.1085450346420322
+    },
+    {
+      "hero": "sorcerer",
+      "direction": "ne",
+      "shaMatches": true,
+      "size": [
+        512,
+        640
+      ],
+      "mode": "RGBA",
+      "frameCount": 1,
+      "animationFrames": 0,
+      "insideCanvas": true,
+      "footpoint": [
+        256,
+        608
+      ],
+      "scaleX": 1.1085450346420322,
+      "scaleY": 1.1085450346420322
+    },
+    {
+      "hero": "sorcerer",
+      "direction": "e",
+      "shaMatches": true,
+      "size": [
+        512,
+        640
+      ],
+      "mode": "RGBA",
+      "frameCount": 1,
+      "animationFrames": 0,
+      "insideCanvas": true,
+      "footpoint": [
+        256,
+        608
+      ],
+      "scaleX": 1.1085450346420322,
+      "scaleY": 1.1085450346420322
+    },
+    {
+      "hero": "sorcerer",
+      "direction": "se",
+      "shaMatches": true,
+      "size": [
+        512,
+        640
+      ],
+      "mode": "RGBA",
+      "frameCount": 1,
+      "animationFrames": 0,
+      "insideCanvas": true,
+      "footpoint": [
+        256,
+        608
+      ],
+      "scaleX": 1.1085450346420322,
+      "scaleY": 1.1085450346420322
+    }
+  ],
+  "rejectedR1SorcererRefusedBeforeWriting": true,
+  "allMasterHashesStillMatch": true
+}

@@ -1,0 +1,477 @@
+{
+  "format": "d3d.item-concept-art",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "batchId": "batch-next-jewelry-unique-identity-all-01",
+  "scope": "Queue-group study fragment; candidate generation and explicit visual reuse only, never full-catalog completion or asset approval.",
+  "catalogSha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d",
+  "generationTool": "built-in image_gen.imagegen",
+  "generationCalls": 7,
+  "postProcessing": "none; generated PNG bytes copied unchanged",
+  "originalGameImagesIncluded": false,
+  "visualApproval": false,
+  "runtimeInstalled": false,
+  "registryAuthority": "assets/registry.json",
+  "summary": {
+    "productionUnits": 228,
+    "batchProductionUnits": 7,
+    "conceptCandidateEntries": 7,
+    "generatedImages": 7,
+    "reuseProposals": 0,
+    "blockedUnits": 0,
+    "modelsGenerated": 0,
+    "runtimeIconsGenerated": 0
+  },
+  "entries": [
+    {
+      "productionId": "item.design.unique.bramble",
+      "conceptId": "item.design.unique.bramble.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/bramble-r1.png",
+      "sha256": "c57d200594e18cbc33fba8923f273b4cac9dd28290c847fcb0adc17bb38caeef",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate object-modeling reference.\nInput image 1 is a PRIVATE original inventory sprite, used only to preserve recognizable silhouette, colors, material regions and distinctive details. Create NEW HD imagery throughout; never paste the sprite into any view or thumbnail.\nA clean technical board of the exact SAME single object in FRONT, SIDE, BACK, THREE-QUARTER and a small NEW HD INVENTORY thumbnail. All views must agree on geometry, proportions, material layout and distinctive details; back is the true reverse, not another front. Full object visible, generously spaced, plain charcoal-gray backdrop, neutral soft studio lighting, no colored illumination or glow, realistic restrained dark medieval materials and fine wear. No scene, body, face, hands, stand, exploded alternatives or extra props. Rear/hidden surfaces and absolute scale are proposed reconstruction; preserve visible source design. Thumbnail must be a new high-detail render of this same object, never pixel-art or the supplied sprite. Minimal labels: item name, FRONT, SIDE, BACK, 3/4, ICON.\nSubject: Bramble; item.design.unique.bramble; native cursor9.\nA finger ring forming a dark RED/maroon wrapped hoop intertwined with antique GOLD thorn-like metal prongs, several short pointed spikes distributed around its circumference. Preserve the source's thin open circular center, alternating red wrap and golden barbs; this is a small crafted ring, not a living vine wreath or crown. No flowers, green leaves, gem, hand or glow. Thorn count/hidden join are reconstructed consistently across views.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "cursorId": 9,
+        "sha256": "a2df89a78af79cfe00f92e048f2b5aa4cb9bd0f7a80c16f9e285da4b22f3e7d7",
+        "availability": "local-private",
+        "notes": "Licensed original inventory sprite inspected privately at nearest-neighbor 6x enlargement; no original pixels or file paths are included."
+      },
+      "referenceNativeSpriteSha256": "376115c573a4e8c33e63e1c0520f5008a169d994578d8b85e6dba0fa0e808f25",
+      "referenceInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "viewsUsed": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-concept-thumbnail"
+      ],
+      "inferredParts": [
+        "Back and hidden surfaces",
+        "Thickness and absolute scale",
+        "Fine construction/material details unresolved by source pixels"
+      ],
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "sourceBaseIds": [
+        "item.base.156.ring",
+        "item.base.157.ring",
+        "item.base.158.ring"
+      ],
+      "sourceUniqueIds": [
+        "item.unique.bramble"
+      ],
+      "nativeIdentityPolicy": "Visual study only. Native item identities, unique powers, stats, affixes, saves and RNG are separate and unchanged.",
+      "identityGate": "Candidate design requires visual review and multiview reconciliation before master production.",
+      "notes": "Neutral-light candidate board. HD thumbnail is a new concept preview, not a final runtime icon. Hidden geometry is proposed reconstruction."
+    },
+    {
+      "productionId": "item.design.unique.constricting-ring",
+      "conceptId": "item.design.unique.constricting-ring.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/constricting-ring-r1.png",
+      "sha256": "a626672b5a2b6866fded491544cb633e1a8f4638c4fc0e2644e567c1c2dccb49",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate object-modeling reference.\nInput image 1 is a PRIVATE original inventory sprite, used only to preserve recognizable silhouette, colors, material regions and distinctive details. Create NEW HD imagery throughout; never paste the sprite into any view or thumbnail.\nA clean technical board of the exact SAME single object in FRONT, SIDE, BACK, THREE-QUARTER and a small NEW HD INVENTORY thumbnail. All views must agree on geometry, proportions, material layout and distinctive details; back is the true reverse, not another front. Full object visible, generously spaced, plain charcoal-gray backdrop, neutral soft studio lighting, no colored illumination or glow, realistic restrained dark medieval materials and fine wear. No scene, body, face, hands, stand, exploded alternatives or extra props. Rear/hidden surfaces and absolute scale are proposed reconstruction; preserve visible source design. Thumbnail must be a new high-detail render of this same object, never pixel-art or the supplied sprite. Minimal labels: item name, FRONT, SIDE, BACK, 3/4, ICON.\nSubject: Constricting Ring; item.design.unique.constricting-ring; native cursor14.\nA narrow antique GOLD/brass finger ring with ONE substantial warm ORANGE/red-orange faceted stone raised at the top in a simple gold setting. Preserve the source's gold circular loop, tapered shoulders and squat angular orange stone. No snake body added from its name, no red blood, skull, extra gems, glow or diamond-clear stone. Back of band is plain gold; setting underside inferred.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "cursorId": 14,
+        "sha256": "68ab7e42ef82e5c82c9614894511f254723fc0961cf5cf76c30b47c0476383d4",
+        "availability": "local-private",
+        "notes": "Licensed original inventory sprite inspected privately at nearest-neighbor 6x enlargement; no original pixels or file paths are included."
+      },
+      "referenceNativeSpriteSha256": "856b9bf05537d09552e69d4c7af8e73f38ee6d9cd60cdfb35d0cd13f6ea08edb",
+      "referenceInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "viewsUsed": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-concept-thumbnail"
+      ],
+      "inferredParts": [
+        "Back and hidden surfaces",
+        "Thickness and absolute scale",
+        "Fine construction/material details unresolved by source pixels"
+      ],
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "sourceBaseIds": [
+        "item.base.156.ring",
+        "item.base.157.ring",
+        "item.base.158.ring"
+      ],
+      "sourceUniqueIds": [
+        "item.unique.constricting-ring"
+      ],
+      "nativeIdentityPolicy": "Visual study only. Native item identities, unique powers, stats, affixes, saves and RNG are separate and unchanged.",
+      "identityGate": "Candidate design requires visual review and multiview reconciliation before master production.",
+      "notes": "Neutral-light candidate board. HD thumbnail is a new concept preview, not a final runtime icon. Hidden geometry is proposed reconstruction."
+    },
+    {
+      "productionId": "item.design.unique.empyrean-band",
+      "conceptId": "item.design.unique.empyrean-band.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/empyrean-band-r1.png",
+      "sha256": "6337696a576ff2dc48dedb5e3f273dd8f554f4f424093c4ceab870b6d73cddf6",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate object-modeling reference.\nInput image 1 is a PRIVATE original inventory sprite, used only to preserve recognizable silhouette, colors, material regions and distinctive details. Create NEW HD imagery throughout; never paste the sprite into any view or thumbnail.\nA clean technical board of the exact SAME single object in FRONT, SIDE, BACK, THREE-QUARTER and a small NEW HD INVENTORY thumbnail. All views must agree on geometry, proportions, material layout and distinctive details; back is the true reverse, not another front. Full object visible, generously spaced, plain charcoal-gray backdrop, neutral soft studio lighting, no colored illumination or glow, realistic restrained dark medieval materials and fine wear. No scene, body, face, hands, stand, exploded alternatives or extra props. Rear/hidden surfaces and absolute scale are proposed reconstruction; preserve visible source design. Thumbnail must be a new high-detail render of this same object, never pixel-art or the supplied sprite. Minimal labels: item name, FRONT, SIDE, BACK, 3/4, ICON.\nSubject: Empyrean Band; item.design.unique.empyrean-band; native cursor18.\nA substantial ornate gray SILVER finger band with a raised pale icy BLUE/WHITE faceted gem or gem-like central setting at the top, relief-like silver detailing down the shoulders and dark interior. Preserve the source's asymmetric perspective of a broad silver shank and pale cool raised top setting, no gold or warm red/orange gems. Exact small relief and rear setting architecture are inferred. Keep one coherent top jewel across all views, not a bracelet or huge crown.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "cursorId": 18,
+        "sha256": "027b9eebdea61ef460acf10396b8aa92eb6d3cf2f75c9e521b78469063af3fec",
+        "availability": "local-private",
+        "notes": "Licensed original inventory sprite inspected privately at nearest-neighbor 6x enlargement; no original pixels or file paths are included."
+      },
+      "referenceNativeSpriteSha256": "c808de53a02e577e051c05270011d208551663a66bfd9ffb5906f42d22b58e84",
+      "referenceInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "viewsUsed": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-concept-thumbnail"
+      ],
+      "inferredParts": [
+        "Back and hidden surfaces",
+        "Thickness and absolute scale",
+        "Fine construction/material details unresolved by source pixels"
+      ],
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "sourceBaseIds": [
+        "item.base.008.idi-infraring"
+      ],
+      "sourceUniqueIds": [
+        "item.unique.empyrean-band"
+      ],
+      "nativeIdentityPolicy": "Visual study only. Native item identities, unique powers, stats, affixes, saves and RNG are separate and unchanged.",
+      "identityGate": "Candidate design requires visual review and multiview reconciliation before master production.",
+      "notes": "Neutral-light candidate board. HD thumbnail is a new concept preview, not a final runtime icon. Hidden geometry is proposed reconstruction."
+    },
+    {
+      "productionId": "item.design.unique.optic-amulet",
+      "conceptId": "item.design.unique.optic-amulet.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/optic-amulet-r1.png",
+      "sha256": "26a602d5169d108d39bad1b9f8338cc9b862fb743a5c7a334ae3c1feef632da5",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate object-modeling reference.\nInput image 1 is a PRIVATE original inventory sprite, used only to preserve recognizable silhouette, colors, material regions and distinctive details. Create NEW HD imagery throughout; never paste the sprite into any view or thumbnail.\nA clean technical board of the exact SAME single object in FRONT, SIDE, BACK, THREE-QUARTER and a small NEW HD INVENTORY thumbnail. All views must agree on geometry, proportions, material layout and distinctive details; back is the true reverse, not another front. Full object visible, generously spaced, plain charcoal-gray backdrop, neutral soft studio lighting, no colored illumination or glow, realistic restrained dark medieval materials and fine wear. No scene, body, face, hands, stand, exploded alternatives or extra props. Rear/hidden surfaces and absolute scale are proposed reconstruction; preserve visible source design. Thumbnail must be a new high-detail render of this same object, never pixel-art or the supplied sprite. Minimal labels: item name, FRONT, SIDE, BACK, 3/4, ICON.\nSubject: Optic Amulet; item.design.unique.optic-amulet; native cursor44.\nA small pendant made from a plain annular pale SILVER/blue-gray metal loop with an EMPTY circular center, suspended by an antique GOLD cap/bail at its top and a thin muted olive/gold cord loosely looping upward. Preserve source's circular open silver pendant and gold suspension; despite the name, DO NOT insert an eyeball, eye drawing, gem, lens filling the opening or face. The one cord and bail remain consistent between views; hidden knot is inferred.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "cursorId": 44,
+        "sha256": "8f80400e9a4d25a57135dfd285169744582f80297a6252822a343f9daebc3d84",
+        "availability": "local-private",
+        "notes": "Licensed original inventory sprite inspected privately at nearest-neighbor 6x enlargement; no original pixels or file paths are included."
+      },
+      "referenceNativeSpriteSha256": "e58c0d7433028d42fbe6232dd3647521cf40a2c4d3b68a49a03199e58751f26f",
+      "referenceInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "viewsUsed": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-concept-thumbnail"
+      ],
+      "inferredParts": [
+        "Back and hidden surfaces",
+        "Thickness and absolute scale",
+        "Fine construction/material details unresolved by source pixels"
+      ],
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "sourceBaseIds": [
+        "item.base.010.idi-optamulet"
+      ],
+      "sourceUniqueIds": [
+        "item.unique.optic-amulet"
+      ],
+      "nativeIdentityPolicy": "Visual study only. Native item identities, unique powers, stats, affixes, saves and RNG are separate and unchanged.",
+      "identityGate": "Candidate design requires visual review and multiview reconciliation before master production.",
+      "notes": "Neutral-light candidate board. HD thumbnail is a new concept preview, not a final runtime icon. Hidden geometry is proposed reconstruction."
+    },
+    {
+      "productionId": "item.design.unique.ring-of-engagement",
+      "conceptId": "item.design.unique.ring-of-engagement.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/ring-of-engagement-r1.png",
+      "sha256": "835397ccf67fc68bd911a5f69661de9609e243d25bf149ab368a8dd5ef8bc191",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate object-modeling reference.\nInput image 1 is a PRIVATE original inventory sprite, used only to preserve recognizable silhouette, colors, material regions and distinctive details. Create NEW HD imagery throughout; never paste the sprite into any view or thumbnail.\nA clean technical board of the exact SAME single object in FRONT, SIDE, BACK, THREE-QUARTER and a small NEW HD INVENTORY thumbnail. All views must agree on geometry, proportions, material layout and distinctive details; back is the true reverse, not another front. Full object visible, generously spaced, plain charcoal-gray backdrop, neutral soft studio lighting, no colored illumination or glow, realistic restrained dark medieval materials and fine wear. No scene, body, face, hands, stand, exploded alternatives or extra props. Rear/hidden surfaces and absolute scale are proposed reconstruction; preserve visible source design. Thumbnail must be a new high-detail render of this same object, never pixel-art or the supplied sprite. Minimal labels: item name, FRONT, SIDE, BACK, 3/4, ICON.\nSubject: Ring of Engagement; item.design.unique.ring-of-engagement; native cursor13.\nA modest antique GOLD/brass circular finger band as seen in the source, fairly plain rounded outer loop with a few tiny gray/dark metal edging/clasp accents near the upper outer shoulders. Preserve the yellow-metal loop and open center. Crucially NO large diamond, gemstone solitaire, modern wedding advertisement, heart, bow, floral motif or invented elaborate setting; do not draw from the name. Fine original pixel-level nicks are proposed, not new ornaments.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "cursorId": 13,
+        "sha256": "93199058e0a111bef53e8ede6506ff8bb9251629d493dc4b4b6bf1f827291a15",
+        "availability": "local-private",
+        "notes": "Licensed original inventory sprite inspected privately at nearest-neighbor 6x enlargement; no original pixels or file paths are included."
+      },
+      "referenceNativeSpriteSha256": "fd8f56d4692510a0a097073679b6264b1b59dc926b006aa61b32d17d4bb7ec7b",
+      "referenceInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "viewsUsed": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-concept-thumbnail"
+      ],
+      "inferredParts": [
+        "Back and hidden surfaces",
+        "Thickness and absolute scale",
+        "Fine construction/material details unresolved by source pixels"
+      ],
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "sourceBaseIds": [
+        "item.base.156.ring",
+        "item.base.157.ring",
+        "item.base.158.ring"
+      ],
+      "sourceUniqueIds": [
+        "item.unique.ring-of-engagement"
+      ],
+      "nativeIdentityPolicy": "Visual study only. Native item identities, unique powers, stats, affixes, saves and RNG are separate and unchanged.",
+      "identityGate": "Candidate design requires visual review and multiview reconciliation before master production.",
+      "notes": "Neutral-light candidate board. HD thumbnail is a new concept preview, not a final runtime icon. Hidden geometry is proposed reconstruction."
+    },
+    {
+      "productionId": "item.design.unique.ring-of-regha",
+      "conceptId": "item.design.unique.ring-of-regha.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/ring-of-regha-r1.png",
+      "sha256": "feb059d34ae7e5f6a2967db367bfc50c975cac9886f7e3762321bd4c8aba40dc",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate object-modeling reference.\nInput image 1 is a PRIVATE original inventory sprite, used only to preserve recognizable silhouette, colors, material regions and distinctive details. Create NEW HD imagery throughout; never paste the sprite into any view or thumbnail.\nA clean technical board of the exact SAME single object in FRONT, SIDE, BACK, THREE-QUARTER and a small NEW HD INVENTORY thumbnail. All views must agree on geometry, proportions, material layout and distinctive details; back is the true reverse, not another front. Full object visible, generously spaced, plain charcoal-gray backdrop, neutral soft studio lighting, no colored illumination or glow, realistic restrained dark medieval materials and fine wear. No scene, body, face, hands, stand, exploded alternatives or extra props. Rear/hidden surfaces and absolute scale are proposed reconstruction; preserve visible source design. Thumbnail must be a new high-detail render of this same object, never pixel-art or the supplied sprite. Minimal labels: item name, FRONT, SIDE, BACK, 3/4, ICON.\nSubject: Ring of Regha; item.design.unique.ring-of-regha; native cursor11.\nA broad gray SILVER/steel finger ring with a simple squared/flattened top band and THREE small short squared tooth-like silver projections hanging from the front lower edge. Preserve the source's chunky rectangular-edged silver structure and those small downward metal teeth, hollow circular interior. No gems, gold, skull face, horns or living teeth. These are crafted metal tabs, not gore. Hidden back band and join are inferred.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "cursorId": 11,
+        "sha256": "47f643056f635ffffb8ce1de98df9e55a85290b14a607af1ed45c0be355b6220",
+        "availability": "local-private",
+        "notes": "Licensed original inventory sprite inspected privately at nearest-neighbor 6x enlargement; no original pixels or file paths are included."
+      },
+      "referenceNativeSpriteSha256": "0cfa873f1f83176b275c0ea6832dd42acb5f423b2e25d4df3fa667b5039c17dd",
+      "referenceInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "viewsUsed": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-concept-thumbnail"
+      ],
+      "inferredParts": [
+        "Back and hidden surfaces",
+        "Thickness and absolute scale",
+        "Fine construction/material details unresolved by source pixels"
+      ],
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "sourceBaseIds": [
+        "item.base.156.ring",
+        "item.base.157.ring",
+        "item.base.158.ring"
+      ],
+      "sourceUniqueIds": [
+        "item.unique.ring-of-regha"
+      ],
+      "nativeIdentityPolicy": "Visual study only. Native item identities, unique powers, stats, affixes, saves and RNG are separate and unchanged.",
+      "identityGate": "Candidate design requires visual review and multiview reconciliation before master production.",
+      "notes": "Neutral-light candidate board. HD thumbnail is a new concept preview, not a final runtime icon. Hidden geometry is proposed reconstruction."
+    },
+    {
+      "productionId": "item.design.unique.ring-of-truth",
+      "conceptId": "item.design.unique.ring-of-truth.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/ring-of-truth-r1.png",
+      "sha256": "15f78e03ffce1aa686a85666ba2c7860c878ce6923c07e327c936be726526bb9",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate object-modeling reference.\nInput image 1 is a PRIVATE original inventory sprite, used only to preserve recognizable silhouette, colors, material regions and distinctive details. Create NEW HD imagery throughout; never paste the sprite into any view or thumbnail.\nA clean technical board of the exact SAME single object in FRONT, SIDE, BACK, THREE-QUARTER and a small NEW HD INVENTORY thumbnail. All views must agree on geometry, proportions, material layout and distinctive details; back is the true reverse, not another front. Full object visible, generously spaced, plain charcoal-gray backdrop, neutral soft studio lighting, no colored illumination or glow, realistic restrained dark medieval materials and fine wear. No scene, body, face, hands, stand, exploded alternatives or extra props. Rear/hidden surfaces and absolute scale are proposed reconstruction; preserve visible source design. Thumbnail must be a new high-detail render of this same object, never pixel-art or the supplied sprite. Minimal labels: item name, FRONT, SIDE, BACK, 3/4, ICON.\nSubject: Ring of Truth; item.design.unique.ring-of-truth; native cursor10.\nA pale silver/slate-blue finger ring with ONE vivid deep COBALT BLUE faceted gemstone raised in an antique GOLD setting near the top, plus small gold/brass accent collars/fittings around parts of the silver band as in the source. Preserve original blue stone + pale silver band + restrained gold three-material contrast. No red/orange stone, all-gold band, glow, extra gems or hand. Rear setting and exact collars hidden by the sprite are inferred.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "cursorId": 10,
+        "sha256": "6086cfdf85cdc1d7c00a8a556a2a2795d5ce9c8be77827b7c24c669feef7dbc3",
+        "availability": "local-private",
+        "notes": "Licensed original inventory sprite inspected privately at nearest-neighbor 6x enlargement; no original pixels or file paths are included."
+      },
+      "referenceNativeSpriteSha256": "6476dde4b082f2d5811373eabb02e20adde5114ea2e350f697c6ef1dba558b0b",
+      "referenceInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "viewsUsed": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-concept-thumbnail"
+      ],
+      "inferredParts": [
+        "Back and hidden surfaces",
+        "Thickness and absolute scale",
+        "Fine construction/material details unresolved by source pixels"
+      ],
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "sourceBaseIds": [
+        "item.base.011.idi-tring"
+      ],
+      "sourceUniqueIds": [
+        "item.unique.ring-of-truth"
+      ],
+      "nativeIdentityPolicy": "Visual study only. Native item identities, unique powers, stats, affixes, saves and RNG are separate and unchanged.",
+      "identityGate": "Candidate design requires visual review and multiview reconciliation before master production.",
+      "notes": "Neutral-light candidate board. HD thumbnail is a new concept preview, not a final runtime icon. Hidden geometry is proposed reconstruction."
+    }
+  ],
+  "blockedUnits": [],
+  "devlogHandoff": {
+    "includeAllGeneratedImages": true,
+    "images": [
+      {
+        "image": "assets/concept-art/items/r1/bramble-r1.png",
+        "sha256": "c57d200594e18cbc33fba8923f273b4cac9dd28290c847fcb0adc17bb38caeef",
+        "dimensions": [
+          1536,
+          1024
+        ]
+      },
+      {
+        "image": "assets/concept-art/items/r1/constricting-ring-r1.png",
+        "sha256": "a626672b5a2b6866fded491544cb633e1a8f4638c4fc0e2644e567c1c2dccb49",
+        "dimensions": [
+          1536,
+          1024
+        ]
+      },
+      {
+        "image": "assets/concept-art/items/r1/empyrean-band-r1.png",
+        "sha256": "6337696a576ff2dc48dedb5e3f273dd8f554f4f424093c4ceab870b6d73cddf6",
+        "dimensions": [
+          1536,
+          1024
+        ]
+      },
+      {
+        "image": "assets/concept-art/items/r1/optic-amulet-r1.png",
+        "sha256": "26a602d5169d108d39bad1b9f8338cc9b862fb743a5c7a334ae3c1feef632da5",
+        "dimensions": [
+          1536,
+          1024
+        ]
+      },
+      {
+        "image": "assets/concept-art/items/r1/ring-of-engagement-r1.png",
+        "sha256": "835397ccf67fc68bd911a5f69661de9609e243d25bf149ab368a8dd5ef8bc191",
+        "dimensions": [
+          1536,
+          1024
+        ]
+      },
+      {
+        "image": "assets/concept-art/items/r1/ring-of-regha-r1.png",
+        "sha256": "feb059d34ae7e5f6a2967db367bfc50c975cac9886f7e3762321bd4c8aba40dc",
+        "dimensions": [
+          1536,
+          1024
+        ]
+      },
+      {
+        "image": "assets/concept-art/items/r1/ring-of-truth-r1.png",
+        "sha256": "15f78e03ffce1aa686a85666ba2c7860c878ce6923c07e327c936be726526bb9",
+        "dimensions": [
+          1536,
+          1024
+        ]
+      }
+    ],
+    "generatedConceptIds": [
+      "item.design.unique.bramble.concept.r1",
+      "item.design.unique.constricting-ring.concept.r1",
+      "item.design.unique.empyrean-band.concept.r1",
+      "item.design.unique.optic-amulet.concept.r1",
+      "item.design.unique.ring-of-engagement.concept.r1",
+      "item.design.unique.ring-of-regha.concept.r1",
+      "item.design.unique.ring-of-truth.concept.r1"
+    ],
+    "reuseProductionIds": [],
+    "limits": [
+      "All outputs remain unapproved candidates.",
+      "Shared cursor reuse preserves separate native identities and powers.",
+      "Hidden surfaces and scale are inferred; master/socket/icon work remains gated."
+    ]
+  }
+}
+

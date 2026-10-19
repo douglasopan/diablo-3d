@@ -1,5 +1,13 @@
 # Trilha sonora do Diablo 3D
 
+## Easy Listening de Tristram — 16 de outubro de 2026
+
+Douglas Pan forneceu duas novas gravações, `06.mp3` e `06 (1).mp3`, e declarou sua autoria. Na candidata privada local22, as cópias `music/d3d/town-easy-1.mp3` e `town-easy-2.mp3` têm Douglas Pan nas tags internas de artista, artista do álbum e compositor. Os masters são preservados separadamente; somente as tags das cópias mudam, com o payload MP3 idêntico e sem recompressão. Durações aproximadas: 3min28s e 2min53s.
+
+Os IDs persistidos anteriores 0–4 continuam intactos. As novas opções de Tristram são 5 (Easy Listening 1), 6 (Easy Listening 2) e 7 (sequência das duas). O novo perfil usa `[Music] Theme=2` e `Town=7`: começa pela primeira e alterna 1→2→1 ao término das faixas. A sequência tem contador próprio e não consome o RNG da simulação. As opções Rock/aleatórias anteriores continuam disponíveis. A mudança de tema preserva as escolhas efetivas dos demais ambientes.
+
+Esta inclusão é local e não publica novos downloads no site. O recibo privado responsável por build, tags finais, equivalência do áudio, decoder, seleção e instalação é `diagnostics/tristram-easy-listening-local22-20261016-r1/DELIVERY.json`; a escuta artística permanece com o autor. As cinco faixas descritas a seguir são o catálogo anterior, preservado.
+
 O jogo permite escolher **Vanilla**, **Rock** ou uma combinação por ambiente. Em 8 de outubro de 2026, Douglas Pan forneceu `Main_Menu_Rock2.mp3` como nova escolha padrão do menu. A primeira versão fornecida, `Main_Menu.mp3`, continua disponível como alternativa. Também forneceu `06.wav`, `06 (2).wav` e `06 (1).mp3`, disponíveis como Tristram 1, 2 e 3. São três opções de arquivo; a terceira aparenta ser outra exportação da primeira gravação, conforme comparação local, e foi mantida separadamente a pedido de Douglas. As cinco faixas personalizadas são regravações/reinterpretações das músicas originais de Diablo, produzidas por Douglas Pan com auxílio de IA; não são cinco composições originais dele. Estão disponíveis no jogo e na biblioteca pública do site. O repositório publica o suporte, os controles e o [inventário completo](MUSIC-CATALOG.md).
 
 ## Autoria dos arquivos personalizados e publicação

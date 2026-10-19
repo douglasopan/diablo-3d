@@ -644,8 +644,10 @@ const char *pfile_get_password()
 
 void pfile_write_hero(bool writeGameData)
 {
-	SaveWriter saveWriter = GetSaveWriter(gSaveNumber, /*carryForward=*/writeGameData);
-	pfile_write_hero(saveWriter, writeGameData);
+	{
+		SaveWriter saveWriter = GetSaveWriter(gSaveNumber, /*carryForward=*/writeGameData);
+		pfile_write_hero(saveWriter, writeGameData);
+	} // Close the archive before the browser snapshots files to IndexedDB.
 
 #ifdef __EMSCRIPTEN__
 	// Persist saves to IndexedDB for browser storage

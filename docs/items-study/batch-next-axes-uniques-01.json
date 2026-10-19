@@ -1,0 +1,448 @@
+{
+  "format": "d3d.item-concept-art",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "scope": "Independent remaining-axes-unique-identity-all-01 candidate/reuse batch for root consolidation; no global coverage claim.",
+  "batchId": "batch-next-axes-uniques-01",
+  "productionQueueGroup": "remaining-axes-unique-identity-all-01",
+  "catalogSha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d",
+  "generationTool": "built-in image_gen.imagegen; shared-cursor reuse causes zero new calls",
+  "postProcessing": "none; generated PNG bytes copied unchanged, all prior revisions retained",
+  "originalGameImagesIncluded": false,
+  "privateMediaPathsIncluded": false,
+  "visualApproval": false,
+  "accepted": false,
+  "selected": false,
+  "installed": false,
+  "runtimeInstalled": false,
+  "summary": {
+    "candidateUnits": 7,
+    "newImages": 2,
+    "reuseProposals": 5,
+    "modelsGenerated": 0,
+    "runtimeIconsGenerated": 0
+  },
+  "entries": [
+    {
+      "productionId": "item.design.unique.aguinara-s-hatchet",
+      "conceptId": "item.design.unique.aguinara-s-hatchet.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "family-sheet",
+      "image": "assets/concept-art/items/r1/small-axe-r1.png",
+      "sha256": "4d2ad12ebbf9c3e5410422acb2255a0a29c70a10935d0ae3678798f9571f4766",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D single-item candidate modelling turnaround. Production ID item.design.base.small-axe, native inventory cursor ICURS112.\nInput image 1 is the original licensed inventory sprite, PRIMARY silhouette/proportion/palette reference only. Input image 2 is an already generated Claymore board, LAYOUT and neutral material presentation reference only, never include its sword.\nReconstruct ONE Small Axe exactly as recognizable in image 1, even where it differs from a conventional small axe: an upright short slender axe with a tall dark iron blade to the LEFT of its shaft, a bright silver sharpened outer left edge, a tall near-rectangular blade body tapering downward into a pointed beard, restrained dark interlaced geometric engraving on the blade face. At the top of the central haft is a small silver spear-shaped cap; on the RIGHT behind the head is a small triangular iron poll/spike with a visibly recessed dark triangular center. Preserve the distinctive asymmetric outline. Red leather wrapping covers most of the straight narrow handle below the head; small aged brass collar above the silver rounded faceted bottom pommel. A RED leather wrist lanyard is tied below the pommel and hangs leftward in a loose oval loop, matching the visible red shape in the sprite. Keep that loop in every view; no wooden brown handle substitute.\nCreate one clean high-definition concept sheet showing the exact SAME object in FRONT, SIDE edge-on thickness, BACK, and 3-4 perspective views plus one small ICON inset that is a NEW HD rendered view of the same axe. Entire objects including red lanyard visible, four major views have the same length/proportions/materials. Reverse view should correctly reverse the asymmetric head, not create a second cutting blade. Dark neutral charcoal background, neutral soft white studio illumination with no warm color cast, no scenery, no dramatic cast shadow. Realistic restrained worn steel/iron, red leather, aged brass, crisp readable surface details. Infer hidden reverse surfaces and thickness conservatively from the sprite; no invented heraldic symbols. Small title exactly 'SMALL AXE'; small labels exactly 'FRONT', 'SIDE', 'BACK', '3-4', 'ICON'. Add small footer 'CANDIDATE - REVERSE AND THICKNESS INFERRED'.\nDo not paste, trace, or reproduce the pixel sprite, its black image rectangle, or the reference board into this sheet. The ICON inset must be newly rendered HD, never pixel art. No hands, people, extra items, added skulls, gems, glow, runes, oversized spikes, or watermark. This is concept only, not a finished runtime icon.",
+      "revisionPrompts": [],
+      "generationTool": "reuse; no new generation; source built-in image_gen.imagegen",
+      "generationCalls": 0,
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 112,
+        "sha256": "a14f8c519be738dab35f4310c4b9725d40eea73f3392ac2efbff9a30cea451aa",
+        "notes": "Original inventory source identity; private paths/pixels omitted. Exact presented source was inspected before new generation."
+      },
+      "referencePresentedSha256": "5573833d9ab05c1a32bb67c11c9a527035313f12f2cc0de9e407a7115d77c943",
+      "referenceVisualInspected": false,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-thumbnail-proposal"
+      ],
+      "inferredParts": [
+        "Hidden reverse surfaces, depth and thickness",
+        "Fasteners, exact material microtexture and dimensions"
+      ],
+      "review": {
+        "status": "family-reuse-proposal",
+        "approval": false,
+        "limitations": [
+          "Source concept is a candidate; shared cursor proves source visual reuse, not unique-specific design approval.",
+          "Reverse/thickness and any source concept ambiguity remain pending; native unique powers are not visual geometry."
+        ]
+      },
+      "notes": "Explicit family reuse proposal only. Native unique identity, powers, stats, scope and saves remain separate; no new design inferred from the name. This sheet is not unique-specific fidelity or an accepted master.",
+      "reusedFromProductionId": "item.design.base.small-axe",
+      "reusedFromConceptId": "item.design.base.small-axe.concept.r1",
+      "reuseGate": "Review explicit shared-cursor reuse; native unique powers and identity remain separate. A new unique visual requires a separate approved design brief.",
+      "nativeCursorNames": [
+        "SMALL_AXE"
+      ],
+      "identityAmbiguous": false,
+      "sourcePromptPolicy": "Exact source generation prompt retained; this identity caused zero new generation calls."
+    },
+    {
+      "productionId": "item.design.unique.bloodslayer",
+      "conceptId": "item.design.unique.bloodslayer.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "family-sheet",
+      "image": "assets/concept-art/items/r1/axe-r1.png",
+      "sha256": "27afa131a1c518cea53408006bacfc0572ef66898e884f597377ab517d746cb0",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D single-item candidate modelling turnaround. Production ID item.design.base.axe, native inventory cursor ICURS144.\nInput image 1 is the original licensed inventory sprite, PRIMARY shape/proportion/palette reference only. Input image 2 is a Claymore board, layout/neutral presentation reference ONLY; never include that sword.\nCreate ONE Axe matching image 1: a long straight slender dark olive-brown wooden haft standing vertically, with ONE dark forged-steel head projecting to the RIGHT at its top. The head begins narrow at the eye and expands into a broad roughly triangular silver cutting blade, with almost vertical slightly convex outer cutting edge ending in a downward-pointing beard; compact top edge rising slightly toward the outside. Preserve the asymmetry: no second blade, no rear spike, no spear above. The dark iron eye sleeve is studded by several small pale steel rivets. A few dull brass wraps/collars sit just under the head. Most upper exposed haft is dark brown wood; lower third is a straight deep burgundy-brown leather grip bounded above and below by several thin aged-brass rings, ending in a narrow blunt brass ferrule. No dangling strap. Preserve the understated original palette of charcoal steel, silver edge, dark brown/olive wood, very dark red-brown grip and small old-gold rings. Do not turn it into the red-handled Small Axe or a generic double axe.\nA professional HD technical board of the SAME axe shown in FRONT, SIDE edge-on thickness, BACK (head correctly reverses side), and 3-4 perspective, with one small ICON inset newly rendered in HD from this same object. Keep identical geometry/materials/length across all views. Entire object visible, spaced cleanly like input 2, no cropped ferrules or edges. Dark neutral charcoal gray background, neutral soft white studio illumination, believable worn iron, steel, wood and leather, restrained microtexture and minor edge wear, no baked painted shadows. Minimal contact shadow only. Hidden reverse and thickness are conservative proposed reconstruction.\nText only title 'AXE', view labels 'FRONT', 'SIDE', 'BACK', '3-4', 'ICON', and footer 'CANDIDATE - REVERSE AND THICKNESS INFERRED'. Do NOT paste/reproduce pixel reference sprite or reference board; ICON must be a NEW crisp realistic HD render, never pixel art. No hands, person, props, scenery, skulls, runes, gems, flames, magical glow, second blade or watermark. Candidate concept only, not a runtime icon.",
+      "revisionPrompts": [],
+      "generationTool": "reuse; no new generation; source built-in image_gen.imagegen",
+      "generationCalls": 0,
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 144,
+        "sha256": "545a6116c017903d147e4b910b730d894068a6736dcd8e1aadb9e3459d2df2d6",
+        "notes": "Original inventory source identity; private paths/pixels omitted. Exact presented source was inspected before new generation."
+      },
+      "referencePresentedSha256": "300829ad8d749b7d746db524ce2cb8744a357e50a5d7036271d83bc617571d39",
+      "referenceVisualInspected": false,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-thumbnail-proposal"
+      ],
+      "inferredParts": [
+        "Hidden reverse surfaces, depth and thickness",
+        "Fasteners, exact material microtexture and dimensions"
+      ],
+      "review": {
+        "status": "family-reuse-proposal",
+        "approval": false,
+        "limitations": [
+          "Source concept is a candidate; shared cursor proves source visual reuse, not unique-specific design approval.",
+          "Reverse/thickness and any source concept ambiguity remain pending; native unique powers are not visual geometry."
+        ]
+      },
+      "notes": "Explicit family reuse proposal only. Native unique identity, powers, stats, scope and saves remain separate; no new design inferred from the name. This sheet is not unique-specific fidelity or an accepted master.",
+      "reusedFromProductionId": "item.design.base.axe",
+      "reusedFromConceptId": "item.design.base.axe.concept.r1",
+      "reuseGate": "Review explicit shared-cursor reuse; native unique powers and identity remain separate. A new unique visual requires a separate approved design brief.",
+      "nativeCursorNames": [
+        "AXE"
+      ],
+      "identityAmbiguous": false,
+      "sourcePromptPolicy": "Exact source generation prompt retained; this identity caused zero new generation calls."
+    },
+    {
+      "productionId": "item.design.unique.hellslayer",
+      "conceptId": "item.design.unique.hellslayer.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "family-sheet",
+      "image": "assets/concept-art/items/r1/battle-axe-r1.png",
+      "sha256": "520faa312eeaafebab681d10aa0705f67cb9e03197a89c1f437d122f880bc45c",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D single-item candidate modelling turnaround. Production ID item.design.base.battle-axe, native inventory cursor ICURS101.\nImage 1 is the original licensed inventory sprite, PRIMARY shape/proportion/palette reference. Image 2 is the Claymore board, layout and neutral studio material presentation ONLY; never include its sword.\nReconstruct ONE Battle Axe faithfully from image 1. Its broad double head consists of two nearly mirrored silver-gray crescent/half-moon steel blades, curving outward left and right and descending into pointed lower beards. The blade tops rise and end as short squared inner tips with a distinct open top central gap, rather than a spike or connecting upper bridge. Outer convex cutting rims are lighter silver; the broad inset faces are medium gray iron with a handful of dark irregular round/triangular wear pits or recessed forge marks, as the dark marks in the source. Do not invent runic symbols or skull reliefs; these low-resolution marks do not prove through-holes, make shallow recesses. Darker black/charcoal root sockets join both blades around a narrow upright aged brass central shaft. A tiny red cap at the top of this brass shaft is visible in the gap. Below the blade roots is thick reddish-brown/orange-red leather wrapping around the neck, a compact brass collar, then a long straight tightly spiral-wrapped red-brown leather lower grip and blunt small gold/brass ferrule at bottom. Preserve the warm red-brown HANDLE color under neutral light, not navy or plain wood. No wrist loop.\nBuild one coherent HD modelling board with full-length FRONT, SIDE true edge-on head thickness, BACK correctly rotated, 3-4 perspective and one small newly rendered HD ICON inset of this SAME item. All views agree on overall length, gap, double crescents, leather wrapping, brass fittings and surface marks. Complete object visible, clean spacing. Plain dark charcoal gray backdrop, neutral soft WHITE studio illumination, readable realistic steel/iron, brass and leather microtexture with restrained age. Minimal contact shadows only, no scenery. Hidden reverse geometry, head thickness and interpretation of dark marks are conservative modelling inferences.\nText exactly title 'BATTLE AXE', view labels 'FRONT', 'SIDE', 'BACK', '3-4', 'ICON', footer 'CANDIDATE - REVERSE AND THICKNESS INFERRED'. Never paste/reproduce any pixel source/reference board into output. ICON is a NEW crisp HD render, never pixel art. No people/hands, extra objects, gems, glow, flame, runes, excessive spikes or watermark. Candidate concept only, not a finished runtime icon.",
+      "revisionPrompts": [],
+      "generationTool": "reuse; no new generation; source built-in image_gen.imagegen",
+      "generationCalls": 0,
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 101,
+        "sha256": "00a1b94e990e641cafc3bc213dd92adfe3f35adbd1ed11307f0eed656831e50c",
+        "notes": "Original inventory source identity; private paths/pixels omitted. Exact presented source was inspected before new generation."
+      },
+      "referencePresentedSha256": "6813e48d94df8e62b523725555d5912dd6b28ed68efd814934a3f6467e6b980d",
+      "referenceVisualInspected": false,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-thumbnail-proposal"
+      ],
+      "inferredParts": [
+        "Hidden reverse surfaces, depth and thickness",
+        "Fasteners, exact material microtexture and dimensions"
+      ],
+      "review": {
+        "status": "family-reuse-proposal",
+        "approval": false,
+        "limitations": [
+          "Source concept is a candidate; shared cursor proves source visual reuse, not unique-specific design approval.",
+          "Reverse/thickness and any source concept ambiguity remain pending; native unique powers are not visual geometry."
+        ]
+      },
+      "notes": "Explicit family reuse proposal only. Native unique identity, powers, stats, scope and saves remain separate; no new design inferred from the name. This sheet is not unique-specific fidelity or an accepted master.",
+      "reusedFromProductionId": "item.design.base.battle-axe",
+      "reusedFromConceptId": "item.design.base.battle-axe.concept.r1",
+      "reuseGate": "Review explicit shared-cursor reuse; native unique powers and identity remain separate. A new unique visual requires a separate approved design brief.",
+      "nativeCursorNames": [
+        "BATTLE_AXE"
+      ],
+      "identityAmbiguous": false,
+      "sourcePromptPolicy": "Exact source generation prompt retained; this identity caused zero new generation calls."
+    },
+    {
+      "productionId": "item.design.unique.messerschmidt-s-reaver",
+      "conceptId": "item.design.unique.messerschmidt-s-reaver.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/messerschmidt-s-reaver-r1.png",
+      "sha256": "b1920e303bc79aa5f97f4e1da5de4aa1a209a7d4bcd3e6bd24f335f712fcce24",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D single-item candidate modelling turnaround, not final game icon.\nThe first input image is the original licensed inventory sprite, PRIMARY silhouette/proportion/palette reference ONLY. The second input image is the generated Claymore sheet, LAYOUT and neutral material presentation ONLY; never include its sword.\nCreate one coherent HD sheet showing the exact SAME object in FRONT, true SIDE thickness, BACK (correctly reverse any asymmetric outline), and 3-4 perspective, plus one small ICON inset newly rendered in crisp HD from the SAME object. All views share identical proportions/geometry/materials, whole item visible and spaced cleanly. Plain charcoal gray background, neutral soft WHITE studio illumination without colored light or warm cast, realistic worn medieval materials, restrained surface wear and minimum contact shadows. Hidden reverse surfaces, thickness and exact fine material details are conservative inferred reconstruction.\nText only item TITLE and labels FRONT / SIDE / BACK / 3-4 / ICON; small footer CANDIDATE - REVERSE AND THICKNESS INFERRED. Never paste/reproduce/trace the source sprite, its image rectangle, reference board or pixel art into output. No characters/hands/scenery, extra objects, magical glow, flames, invented jewels/runes/skulls or watermark. Thumbnail is NEW HD concept depiction, not a runtime icon.\nMESSERSCHMIDT'S REAVER. Production ID item.design.unique.messerschmidt-s-reaver, ICURS163. Match reference unusual ornate double axe: two tall mirrored broad silver crescent blades with long upper tips reaching straight upward and shorter pointed lower beards, their inward concave top edges form a deep open U around the small central aged-gold finial. Cutting rims silver, dark inset blade roots with geometric engraved ribs, subtle mottled olive-gold and reddish oxidation on the broad steel faces. Central head includes a LARGE dark burgundy-red convex circular/diamond-like boss framed in aged-brass angular border, dark red/black supporting socket below. Preserve this real red central feature but render as non-emissive material, no magical glow. Straight short navy-blue leather lower handle wrapped with several spaced brass rings/bands, compact brass bottom cap. A dark NAVY BLUE wrist strap attached at bottom hangs in an oval loop to the left; no red strap. Head occupies roughly upper three-fifths of full item; preserve huge head relative to grip. Not a generic Great Axe, no one-sided head.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 163,
+        "sha256": "4aa199156e2ff76b33588e0d3bb8b6c261de841ec9daaf02d324942d2ff46fee",
+        "notes": "Original inventory source identity; private paths/pixels omitted. Exact presented source was inspected before new generation."
+      },
+      "referencePresentedSha256": "a843c659297ff17f15899b90584ba7f9b569a4ed6ed89aa8182c2f258ea2ed53",
+      "referenceVisualInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-thumbnail-proposal"
+      ],
+      "inferredParts": [
+        "Hidden reverse surfaces, depth and thickness",
+        "Fasteners, exact material microtexture and dimensions"
+      ],
+      "review": {
+        "status": "inspected-candidate",
+        "approval": false,
+        "limitations": [
+          "Upper blade tips are reconstructed from the edge-cropped original icon.",
+          "Central red boss, blade engravings/oxidation and reverse detail are inferred at HD resolution; no emissive effect is implied."
+        ]
+      },
+      "notes": "Candidate reference-backed concept only; no model, final runtime icon, attachment or installation. Views and new HD thumbnail show one proposed object, not measured geometry."
+    },
+    {
+      "productionId": "item.design.unique.sharp-beak",
+      "conceptId": "item.design.unique.sharp-beak.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "family-sheet",
+      "image": "assets/concept-art/items/r1/great-axe-r1.png",
+      "sha256": "883240479300154ea758897839b0c929c700b26b8a01b893e1c62db3d21813a3",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D single-item candidate modelling turnaround. Production ID item.design.base.great-axe, native inventory cursor ICURS143.\nImage 1 is the original licensed inventory sprite, PRIMARY silhouette, detail and palette reference. Image 2 is a Claymore board for clean neutral layout ONLY; never include its sword.\nReconstruct ONE Great Axe as shown, not a generic symmetric double axe. Tall straight haft, elaborate asymmetric head. On the LEFT is one large sweeping CRESCENT cutting blade with a very bright silver outward curved edge and pointed lower beard; its upper inner body/root is aged olive-gold/brass with an angular engraved/geometric border and a deep dark recessed interior nearer the central socket. The blade body thins into a curving lower silver root. On the RIGHT is a short stout TRIANGULAR arrowhead-like poll/spike, silver outer rim and dark inset center, connected by a short aged-brass curved arm. Central head is a thick intricate DARK IRON socket, layered forged ridges, a raised circular boss/loop detail near the top and compact interlocking sculpted plates below, with a tiny pointed steel cap above. Preserve the dark central relief from the reference, do not simplify to a plain T socket or invent a huge skull. Most identifiable color/detail should remain on this head. Below is a short dark steel neck followed by a smooth DEEP BURGUNDY upper handle segment. A narrow gray steel collar separates it from the lower olive-brown/dark-brown tightly wrapped leather grip; narrow steel bands at lower grip end, large angular faceted SILVER iron/steel bulb pommel at bottom. NO wrist lanyard, no blue grip, no second crescent, no long wooden pole. Match reference proportions, head roughly upper two-fifths of full object.\nOne coherent HD technical concept sheet, the SAME item in full-length FRONT, true SIDE edge-on thickness, BACK with asymmetric head correctly reversed, 3-4 perspective and small ICON inset newly rendered HD from the same item. All views agree on forms, relative lengths, bronze inlays, red upper grip, brown lower grip and silver pommel. Plain charcoal neutral background, neutral soft WHITE studio illumination without yellow tint; physically plausible worn steel/iron, aged brass and leather with crisp restrained wear. Minimal contact shadow, no environment. Reverse hidden relief, depth/thickness and tiny ambiguous source relief are conservative proposed reconstruction rather than measured fidelity.\nText only title 'GREAT AXE', labels 'FRONT', 'SIDE', 'BACK', '3-4', 'ICON', footer 'CANDIDATE - REVERSE AND THICKNESS INFERRED'. Never paste/reproduce source sprite, black reference rectangle or reference sheet into output. ICON inset must be newly rendered high-definition, no pixel art. No characters/hands, other objects, added gems/runes, glow/fire, oversized spikes, watermark. Candidate concept only, no runtime icon.",
+      "revisionPrompts": [],
+      "generationTool": "reuse; no new generation; source built-in image_gen.imagegen",
+      "generationCalls": 0,
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 143,
+        "sha256": "eacab39b6e85c0bc45c1dbcb4713615f51ff6c72ffde4b80a91a306ee1789c4a",
+        "notes": "Original inventory source identity; private paths/pixels omitted. Exact presented source was inspected before new generation."
+      },
+      "referencePresentedSha256": "258920780c497027b7511bd8081e2a59a12fd5c60fc02802096a1fd58d9ea84d",
+      "referenceVisualInspected": false,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-thumbnail-proposal"
+      ],
+      "inferredParts": [
+        "Hidden reverse surfaces, depth and thickness",
+        "Fasteners, exact material microtexture and dimensions"
+      ],
+      "review": {
+        "status": "family-reuse-proposal",
+        "approval": false,
+        "limitations": [
+          "Source concept is a candidate; shared cursor proves source visual reuse, not unique-specific design approval.",
+          "Reverse/thickness and any source concept ambiguity remain pending; native unique powers are not visual geometry."
+        ]
+      },
+      "notes": "Explicit family reuse proposal only. Native unique identity, powers, stats, scope and saves remain separate; no new design inferred from the name. This sheet is not unique-specific fidelity or an accepted master.",
+      "reusedFromProductionId": "item.design.base.great-axe",
+      "reusedFromConceptId": "item.design.base.great-axe.concept.r1",
+      "reuseGate": "Review explicit shared-cursor reuse; native unique powers and identity remain separate. A new unique visual requires a separate approved design brief.",
+      "nativeCursorNames": [
+        "GREAT_AXE"
+      ],
+      "identityAmbiguous": false,
+      "sourcePromptPolicy": "Exact source generation prompt retained; this identity caused zero new generation calls."
+    },
+    {
+      "productionId": "item.design.unique.stonecleaver",
+      "conceptId": "item.design.unique.stonecleaver.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/stonecleaver-r1.png",
+      "sha256": "22677dcd478fddf1226146d0e31dac05eabc01609333589c2d5c84b6fe0c4be6",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D single-item candidate modelling turnaround, not final game icon.\nThe first input image is the original licensed inventory sprite, PRIMARY silhouette/proportion/palette reference ONLY. The second input image is the generated Claymore sheet, LAYOUT and neutral material presentation ONLY; never include its sword.\nCreate one coherent HD sheet showing the exact SAME object in FRONT, true SIDE thickness, BACK (correctly reverse any asymmetric outline), and 3-4 perspective, plus one small ICON inset newly rendered in crisp HD from the SAME object. All views share identical proportions/geometry/materials, whole item visible and spaced cleanly. Plain charcoal gray background, neutral soft WHITE studio illumination without colored light or warm cast, realistic worn medieval materials, restrained surface wear and minimum contact shadows. Hidden reverse surfaces, thickness and exact fine material details are conservative inferred reconstruction.\nText only item TITLE and labels FRONT / SIDE / BACK / 3-4 / ICON; small footer CANDIDATE - REVERSE AND THICKNESS INFERRED. Never paste/reproduce/trace the source sprite, its image rectangle, reference board or pixel art into output. No characters/hands/scenery, extra objects, magical glow, flames, invented jewels/runes/skulls or watermark. Thumbnail is NEW HD concept depiction, not a runtime icon.\nSTONECLEAVER. Production ID item.design.unique.stonecleaver, ICURS104. Match reference: single tall silver crescent cutting blade projecting RIGHT from a rounded ribbed steel socket; small blunt faceted silver HAMMER poll projecting LEFT, not a second blade. Long narrow steel top spike/cap above the socket. Bright silver outer edge, charcoal iron root, asymmetric head. Below socket short gray steel neck then short deep burgundy/red segment. Lower straight grip tightly wrapped DARK NAVY BLUE leather with three spaced aged-brass rings/bands and a rounded faceted golden/brass pommel. No wrist strap. Preserve source proportions and silver/red/navy/gold palette. Despite name do NOT turn head into stone; it is forged metal.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 104,
+        "sha256": "cf0b98549a8d2b0294820430e83d36d3f0ef53952e02eed2deda2fc8325f9691",
+        "notes": "Original inventory source identity; private paths/pixels omitted. Exact presented source was inspected before new generation."
+      },
+      "referencePresentedSha256": "193f1928bb934f4057508b644b434d121b8b7a2571b1550e76d372ba6fa89af5",
+      "referenceVisualInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-thumbnail-proposal"
+      ],
+      "inferredParts": [
+        "Hidden reverse surfaces, depth and thickness",
+        "Fasteners, exact material microtexture and dimensions"
+      ],
+      "review": {
+        "status": "inspected-candidate",
+        "approval": false,
+        "limitations": [
+          "Opposite head orientation is reconstructed by rotation; fastening depth, wraps and metal relief require review."
+        ]
+      },
+      "notes": "Candidate reference-backed concept only; no model, final runtime icon, attachment or installation. Views and new HD thumbnail show one proposed object, not measured geometry."
+    },
+    {
+      "productionId": "item.design.unique.the-celestial-axe",
+      "conceptId": "item.design.unique.the-celestial-axe.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "family-sheet",
+      "image": "assets/concept-art/items/r1/battle-axe-r1.png",
+      "sha256": "520faa312eeaafebab681d10aa0705f67cb9e03197a89c1f437d122f880bc45c",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D single-item candidate modelling turnaround. Production ID item.design.base.battle-axe, native inventory cursor ICURS101.\nImage 1 is the original licensed inventory sprite, PRIMARY shape/proportion/palette reference. Image 2 is the Claymore board, layout and neutral studio material presentation ONLY; never include its sword.\nReconstruct ONE Battle Axe faithfully from image 1. Its broad double head consists of two nearly mirrored silver-gray crescent/half-moon steel blades, curving outward left and right and descending into pointed lower beards. The blade tops rise and end as short squared inner tips with a distinct open top central gap, rather than a spike or connecting upper bridge. Outer convex cutting rims are lighter silver; the broad inset faces are medium gray iron with a handful of dark irregular round/triangular wear pits or recessed forge marks, as the dark marks in the source. Do not invent runic symbols or skull reliefs; these low-resolution marks do not prove through-holes, make shallow recesses. Darker black/charcoal root sockets join both blades around a narrow upright aged brass central shaft. A tiny red cap at the top of this brass shaft is visible in the gap. Below the blade roots is thick reddish-brown/orange-red leather wrapping around the neck, a compact brass collar, then a long straight tightly spiral-wrapped red-brown leather lower grip and blunt small gold/brass ferrule at bottom. Preserve the warm red-brown HANDLE color under neutral light, not navy or plain wood. No wrist loop.\nBuild one coherent HD modelling board with full-length FRONT, SIDE true edge-on head thickness, BACK correctly rotated, 3-4 perspective and one small newly rendered HD ICON inset of this SAME item. All views agree on overall length, gap, double crescents, leather wrapping, brass fittings and surface marks. Complete object visible, clean spacing. Plain dark charcoal gray backdrop, neutral soft WHITE studio illumination, readable realistic steel/iron, brass and leather microtexture with restrained age. Minimal contact shadows only, no scenery. Hidden reverse geometry, head thickness and interpretation of dark marks are conservative modelling inferences.\nText exactly title 'BATTLE AXE', view labels 'FRONT', 'SIDE', 'BACK', '3-4', 'ICON', footer 'CANDIDATE - REVERSE AND THICKNESS INFERRED'. Never paste/reproduce any pixel source/reference board into output. ICON is a NEW crisp HD render, never pixel art. No people/hands, extra objects, gems, glow, flame, runes, excessive spikes or watermark. Candidate concept only, not a finished runtime icon.",
+      "revisionPrompts": [],
+      "generationTool": "reuse; no new generation; source built-in image_gen.imagegen",
+      "generationCalls": 0,
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 101,
+        "sha256": "00a1b94e990e641cafc3bc213dd92adfe3f35adbd1ed11307f0eed656831e50c",
+        "notes": "Original inventory source identity; private paths/pixels omitted. Exact presented source was inspected before new generation."
+      },
+      "referencePresentedSha256": "6813e48d94df8e62b523725555d5912dd6b28ed68efd814934a3f6467e6b980d",
+      "referenceVisualInspected": false,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-thumbnail-proposal"
+      ],
+      "inferredParts": [
+        "Hidden reverse surfaces, depth and thickness",
+        "Fasteners, exact material microtexture and dimensions"
+      ],
+      "review": {
+        "status": "family-reuse-proposal",
+        "approval": false,
+        "limitations": [
+          "Source concept is a candidate; shared cursor proves source visual reuse, not unique-specific design approval.",
+          "Reverse/thickness and any source concept ambiguity remain pending; native unique powers are not visual geometry."
+        ]
+      },
+      "notes": "Explicit family reuse proposal only. Native unique identity, powers, stats, scope and saves remain separate; no new design inferred from the name. This sheet is not unique-specific fidelity or an accepted master.",
+      "reusedFromProductionId": "item.design.base.battle-axe",
+      "reusedFromConceptId": "item.design.base.battle-axe.concept.r1",
+      "reuseGate": "Review explicit shared-cursor reuse; native unique powers and identity remain separate. A new unique visual requires a separate approved design brief.",
+      "nativeCursorNames": [
+        "BATTLE_AXE"
+      ],
+      "identityAmbiguous": false,
+      "sourcePromptPolicy": "Exact source generation prompt retained; this identity caused zero new generation calls."
+    }
+  ],
+  "handoff": {
+    "rootAction": "Consolidate candidate entries and update gallery/queue only after validation. Devlog labels: concept candidate or explicit family reuse proposal; never publish private sprites.",
+    "limits": "No approval/selection/installation/model/runtime icon. Reverse geometry inferred; same master/material gate still required."
+  }
+}

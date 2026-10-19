@@ -26,6 +26,12 @@
 #else
 #include <SDL.h>
 #endif
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#ifndef DEVILUTIONX_WEB_RESIDENT_SCENERY_CANDIDATE
+#define DEVILUTIONX_WEB_RESIDENT_SCENERY_CANDIDATE 0
+#endif
+#endif
 
 #include "control/control.hpp"
 #include "diablo.h"
@@ -347,6 +353,35 @@ TownViewRendererState RendererState;
 bool CaptureGpu = false;
 bool CaptureGpuFailed = false;
 bool ResidentMeshesEnabledForDiagnostics = true;
+#if defined(__EMSCRIPTEN__) && DEVILUTIONX_WEB_RESIDENT_SCENERY_CANDIDATE
+bool WebResidentSceneryForFrame = false;
+bool WebTownStageDiagnosticsForFrame = false;
+struct WebTownStageCounters {
+ size_t projectedBatches = 0, meshBatches = 0, triangles = 0, instances = 0;
+};
+std::array<WebTownStageCounters, 10> WebTownStageRecords {};
+WebTownStageCounters WebTownStagePrevious {}, WebSceneryReliefRecords {};
+size_t WebSceneryReliefCalls = 0, WebTownRecordingPasses = 0;
+WebTownStageCounters WebTownRecordingCounters()
+{
+ if (!CaptureGpu) return {};
+ const auto &mesh = GetTownGpuMeshStats();
+ return { mesh.recordedProjectedBatches, mesh.recordedMeshBatches,
+  GetTownGpuStatus().submittedTriangles, mesh.instances };
+}
+WebTownStageCounters WebTownCounterDelta(WebTownStageCounters after, WebTownStageCounters before)
+{
+ return { after.projectedBatches - before.projectedBatches, after.meshBatches - before.meshBatches,
+  after.triangles - before.triangles, after.instances - before.instances };
+}
+void WebTownRecordStage(size_t stage)
+{
+ if (!WebTownStageDiagnosticsForFrame || !CaptureGpu) return;
+ const auto current = WebTownRecordingCounters();
+ WebTownStageRecords[stage] = WebTownCounterDelta(current, WebTownStagePrevious);
+ WebTownStagePrevious = current;
+}
+#endif
 std::array<float, 2> RasterJitterForDiagnostics {};
 TownGpuRecoveryPolicy GpuRecovery;
 std::string GpuFailure;
@@ -2248,6 +2283,8 @@ bool FailOgdenGpuSubmissionForDiagnostics = false;
 
 bool EnsureOgdenIdlePilotLoaded()
 {
+	if (ShouldDisableKnownMeshyRuntimeContent(OgdenPilotPackageSha256))
+		return false; // No selection/package read, CPU skin or texture preparation.
 	if (OgdenPilot.attempted)
 		return OgdenPilot.ready;
 	OgdenPilot.attempted = true;
@@ -2320,7 +2357,7 @@ void PrepareOgdenIdlePilotTexture()
 
 bool DrawOgdenIdlePilot(const Surface &out, const Towner &towner, size_t index)
 {
-	if (towner._ttype != TOWN_TAVERN || !OgdenPilot.ready)
+	if (towner._ttype != TOWN_TAVERN || !OgdenPilot.ready || ShouldDisableKnownMeshyRuntimeContent(OgdenPilotPackageSha256))
 		return false;
 	bool drawingStarted = false;
 	try {
@@ -2885,7 +2922,20 @@ void DrawScenery(const Surface &out, Point tile, const TileArt &art, const Textu
 	const VolumeArtwork &volume = found != SceneryVolumeCache.end() ? found->second
 		: SceneryVolumeCache.emplace(piece, VolumeArtwork { art.facade,
 			BuildTownPropVolume({ art.facade.width, art.facade.height, art.facade.pixels, art.facade.opacity }) }).first->second;
+#if defined(__EMSCRIPTEN__) && DEVILUTIONX_WEB_RESIDENT_SCENERY_CANDIDATE
+ const auto sceneryBefore = WebTownStageDiagnosticsForFrame ? WebTownRecordingCounters() : WebTownStageCounters {};
+ DrawVolume(out, { x, 0, z }, tile, volume, PickKind::Ground, -1, lighting, WebResidentSceneryForFrame);
+ if (WebTownStageDiagnosticsForFrame && CaptureGpu) {
+  const auto delta = WebTownCounterDelta(WebTownRecordingCounters(), sceneryBefore);
+  WebSceneryReliefRecords.projectedBatches += delta.projectedBatches;
+  WebSceneryReliefRecords.meshBatches += delta.meshBatches;
+  WebSceneryReliefRecords.triangles += delta.triangles;
+  WebSceneryReliefRecords.instances += delta.instances;
+  ++WebSceneryReliefCalls;
+ }
+#else
 	DrawVolume(out, { x, 0, z }, tile, volume, PickKind::Ground, -1, lighting, false);
+#endif
 }
 
 Texture DecodeSprite(ClxSprite sprite)
@@ -3889,18 +3939,22 @@ void DrawCathedralWorld(const Surface &out)
 		if (!pSpecialCels || special.frameIndex < 0 || static_cast<uint32_t>(special.frameIndex) >= pSpecialCels->numSprites())
 			return; // Normal frames were gated; forced diagnostics remain safe.
 		const Point tile { special.x, special.z };
+		// CLX holes remain coverage; TransList is only the original 2D view aid.
 		DrawBillboard(out, { static_cast<float>(tile.x), 0, static_cast<float>(tile.y) }, tile,
-			(*pSpecialCels)[special.frameIndex], PickKind::Ground, -1, special.light, CathedralPaletteBlend);
+			(*pSpecialCels)[special.frameIndex], PickKind::Ground, -1, special.light);
 	};
 	CathedralPaletteBlend = false;
 	InjectCathedralAllocationFailure(TownViewCathedralAllocationFailurePoint::BeforeOpaque);
+	// Native SOL/TransList cutaways let the player see through foreground
+	// walls in the isometric renderer. A 3D wall is always opaque, regardless
+	// of that native view policy. Retain policy/provenance in the frame for
+	// validation; keep raw texture/CLX coverage (doorways and grate holes).
+	// Both disjoint native fence material passes draw opaque here.
 	for (const auto *surfaces : { &CathedralFrame.triangles, &CathedralFrame.nativeArtPanels })
 	for (const auto &surface : *surfaces)
-		if (surface.policy == cathedral::FrameSurfacePolicy::Opaque)
-			drawSurface(surface);
+		drawSurface(surface);
 	for (const auto &special : CathedralFrame.nativeSpecialOverlays)
-		if (!special.blendActive)
-			drawSpecial(special);
+		drawSpecial(special);
 	for (int i = 0; i < ActiveObjectCount; ++i) {
 		const int slot = ActiveObjects[i];
 		if (slot < 0 || slot >= MAXOBJECTS)
@@ -4009,49 +4063,8 @@ void DrawCathedralWorld(const Surface &out)
 		}
 	}
 	InjectCathedralAllocationFailure(TownViewCathedralAllocationFailurePoint::AfterOpaque);
-	struct OverlayCommand {
-		bool special;
-		bool nativePanel;
-		size_t index;
-		float depth;
-	};
-	std::vector<OverlayCommand> overlays;
-	for (size_t i = 0; i < CathedralFrame.triangles.size(); ++i) {
-		const auto &surface = CathedralFrame.triangles[i];
-		if (surface.visualSuppressed || surface.policy != cathedral::FrameSurfacePolicy::NativePaletteBlend)
-			continue;
-		Vec3 center {};
-		for (const auto &vertex : surface.vertices)
-			center = center + Vec3 { vertex.position.x, vertex.position.y, vertex.position.z } * (1.0F / 3);
-		overlays.push_back({ false, false, i, ToCamera(center).z });
-	}
-	for (size_t i = 0; i < CathedralFrame.nativeArtPanels.size(); ++i) {
-		const auto &surface = CathedralFrame.nativeArtPanels[i];
-		if (surface.visualSuppressed || surface.policy != cathedral::FrameSurfacePolicy::NativePaletteBlend) continue;
-		Vec3 center {};
-		for (const auto &vertex : surface.textureVertices)
-			center = center + Vec3 { vertex.position.x, vertex.position.y, vertex.position.z } * (1.0F / 3);
-		overlays.push_back({ false, true, i, ToCamera(center).z });
-	}
-	for (size_t i = 0; i < CathedralFrame.nativeSpecialOverlays.size(); ++i) {
-		const auto &special = CathedralFrame.nativeSpecialOverlays[i];
-		if (!special.blendActive || !pSpecialCels || special.frameIndex < 0
-		    || static_cast<uint32_t>(special.frameIndex) >= pSpecialCels->numSprites())
-			continue;
-		const auto sprite = (*pSpecialCels)[special.frameIndex];
-		const Vec3 center { static_cast<float>(special.x), sprite.height() / (2 * PixelsPerWorldUnit), static_cast<float>(special.z) };
-		overlays.push_back({ true, false, i, ToCamera(center).z });
-	}
-	std::stable_sort(overlays.begin(), overlays.end(), [](const OverlayCommand &a, const OverlayCommand &b) { return a.depth > b.depth; });
-	CathedralPaletteBlend = true;
-	for (const auto &overlay : overlays) {
-		if (overlay.special)
-			drawSpecial(CathedralFrame.nativeSpecialOverlays[overlay.index]);
-		else if (overlay.nativePanel)
-			drawSurface(CathedralFrame.nativeArtPanels[overlay.index]);
-		else
-			drawSurface(CathedralFrame.triangles[overlay.index]);
-	}
+	// Architecture and structural CLX overlays have already written opaque
+	// depth/picking above; do not submit them again as palette blends.
 	CathedralPaletteBlend = false;
 	DrawingCathedral = false;
 }
@@ -4809,6 +4822,7 @@ void SetTownViewRasterJitterForDiagnostics(float x, float y)
 
 void ResetTownViewResources()
 {
+	ResetKnownMeshyRuntimePolicy();
 	ResetCathedralNativeTextureCache();
 	OgdenPilot = {};
 	OgdenPilotState = {};
@@ -4880,6 +4894,15 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 		ClearCameraVisibilityFrame();
 	RasterSampleFactor = 1;
 	RendererState = {};
+#if defined(__EMSCRIPTEN__) && DEVILUTIONX_WEB_RESIDENT_SCENERY_CANDIDATE
+ const int webSceneryFlags = EM_ASM_INT({
+  return (Module.d3dResidentScenery === true ? 1 : 0) | (Module.d3dTownStageDiagnostics === true ? 2 : 0);
+ });
+ WebResidentSceneryForFrame = (webSceneryFlags & 1) != 0;
+ WebTownStageDiagnosticsForFrame = (webSceneryFlags & 2) != 0;
+ WebTownStageRecords = {}; WebTownStagePrevious = {}; WebSceneryReliefRecords = {};
+ WebSceneryReliefCalls = WebTownRecordingPasses = 0;
+#endif
 	ArchitectureCullingState = {};
 	ArchitectureCullingState.requested = *GetOptions().Graphics.townViewFrustumCulling;
 	RendererState.requestedGpu = *GetOptions().Graphics.townViewGpuRendering;
@@ -5089,8 +5112,14 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 			RendererState.sceneRecordMilliseconds += std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - recordStart).count();
 			return;
 		}
+#if defined(__EMSCRIPTEN__) && DEVILUTIONX_WEB_RESIDENT_SCENERY_CANDIDATE
+ if (WebTownStageDiagnosticsForFrame) { ++WebTownRecordingPasses; WebTownStagePrevious = WebTownRecordingCounters(); }
+#endif
 		if (horizonEnabled)
 			DrawHorizon(out);
+#if defined(__EMSCRIPTEN__) && DEVILUTIONX_WEB_RESIDENT_SCENERY_CANDIDATE
+ WebTownRecordStage(0);
+#endif
 		const Texture &fallback = FallbackGround();
 		// Native town generation fills the entire dungeon grid, including the outer
 		// grass visible around Farnham and Adria in wide views.
@@ -5116,12 +5145,27 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 			if (!art.solid)
 				DrawGround(out, tile, TownPropReplacesTile(tile) ? fallback : SceneGround(dPiece[tile.x][tile.y]));
 		});
+#if defined(__EMSCRIPTEN__) && DEVILUTIONX_WEB_RESIDENT_SCENERY_CANDIDATE
+ WebTownRecordStage(1);
+#endif
 		forEachTile([&](Point tile) {
 			DrawScenery(out, tile, GetTile(dPiece[tile.x][tile.y]), fallback);
 		});
+#if defined(__EMSCRIPTEN__) && DEVILUTIONX_WEB_RESIDENT_SCENERY_CANDIDATE
+ WebTownRecordStage(2);
+#endif
 		DrawScene(out);
+#if defined(__EMSCRIPTEN__) && DEVILUTIONX_WEB_RESIDENT_SCENERY_CANDIDATE
+ WebTownRecordStage(3);
+#endif
 		DrawVegetation(out);
+#if defined(__EMSCRIPTEN__) && DEVILUTIONX_WEB_RESIDENT_SCENERY_CANDIDATE
+ WebTownRecordStage(4);
+#endif
 		DrawProps(out);
+#if defined(__EMSCRIPTEN__) && DEVILUTIONX_WEB_RESIDENT_SCENERY_CANDIDATE
+ WebTownRecordStage(5);
+#endif
 		for (size_t i = 0; i < Towners.size(); ++i) {
 			const Towner &towner = Towners[i];
 			if (!towner.anim)
@@ -5151,6 +5195,9 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 			DrawVolumetricSprite(out, { static_cast<float>(towner.position.x), 0, static_cast<float>(towner.position.y) },
 				towner.position, towner.currentSprite(), PickKind::Towner, static_cast<int>(i));
 		}
+#if defined(__EMSCRIPTEN__) && DEVILUTIONX_WEB_RESIDENT_SCENERY_CANDIDATE
+ WebTownRecordStage(6);
+#endif
 		for (uint8_t i = 0; i < ActiveItemCount; ++i) {
 			const int index = ActiveItems[i];
 			const Item &item = Items[index];
@@ -5159,6 +5206,9 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 			DrawVolumetricSprite(out, { static_cast<float>(item.position.x), 0, static_cast<float>(item.position.y) },
 				item.position, item.AnimInfo.currentSprite(), PickKind::Item, index);
 		}
+#if defined(__EMSCRIPTEN__) && DEVILUTIONX_WEB_RESIDENT_SCENERY_CANDIDATE
+ WebTownRecordStage(7);
+#endif
 		for (size_t i = 0; i < Players.size(); ++i) {
 			const Player &player = Players[i];
 			if (!player.plractive || !player.isOnActiveLevel() || !player.AnimInfo.sprites)
@@ -5169,6 +5219,9 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 			position.y = 0;
 			DrawPlayerVolume(out, position, player, static_cast<int>(i));
 		}
+#if defined(__EMSCRIPTEN__) && DEVILUTIONX_WEB_RESIDENT_SCENERY_CANDIDATE
+ WebTownRecordStage(8);
+#endif
 		for (const Missile &missile : Missiles) {
 			if (!missile._miDrawFlag || missile._miDelFlag || !missile._miAnimData
 				|| missile._miAnimFrame <= 0 || static_cast<size_t>(missile._miAnimFrame) > missile._miAnimData->numSprites())
@@ -5181,6 +5234,9 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 			if (InDungeonBounds(tile))
 				DrawBillboard(out, position, tile, (*missile._miAnimData)[missile._miAnimFrame - 1], PickKind::Ground, -1, light);
 		}
+#if defined(__EMSCRIPTEN__) && DEVILUTIONX_WEB_RESIDENT_SCENERY_CANDIDATE
+ WebTownRecordStage(9);
+#endif
 		RendererState.sceneRecordMilliseconds += std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - recordStart).count();
 	};
 	CathedralDiagnosticStage = CathedralFallbackStage::Submission;
@@ -5247,6 +5303,80 @@ static bool DrawTownViewFrame(const Surface &fullOut, bool forceGeometry)
 		}
 	}
 	RendererState.failure = GpuFailure;
+#if defined(__EMSCRIPTEN__) && DEVILUTIONX_WEB_RESIDENT_SCENERY_CANDIDATE
+ if (WebTownStageDiagnosticsForFrame && !cathedralWorld) {
+  EM_ASM({
+   Module.d3dLastTownStageFrame = ({
+    backendSerial:$0 && Module.d3dGpuDiagnostics && Module.d3dLastGpuFrame ? Module.d3dLastGpuFrame.serial : null,
+    usedGpu:!!$0, residentSceneryRequested:!!$1, recordingPasses:$2, completedDrawCalls:$3,
+    recordedProjectedBatches:$4, recordedMeshBatches:$5, sceneryReliefCalls:$6,
+    sceneryRelief:({projectedBatches:$7,meshBatches:$8,triangles:$9,instances:arguments[10]}),
+    stages:({horizon:({projectedBatches:arguments[11],meshBatches:arguments[12],triangles:arguments[13],instances:arguments[14]}),
+      floor:({projectedBatches:arguments[15],meshBatches:arguments[16],triangles:arguments[17],instances:arguments[18]}),
+      sceneryIncludingPaintedBase:({projectedBatches:arguments[19],meshBatches:arguments[20],triangles:arguments[21],instances:arguments[22]}),
+      architecture:({projectedBatches:arguments[23],meshBatches:arguments[24],triangles:arguments[25],instances:arguments[26]}),
+      vegetation:({projectedBatches:arguments[27],meshBatches:arguments[28],triangles:arguments[29],instances:arguments[30]}),
+      props:({projectedBatches:arguments[31],meshBatches:arguments[32],triangles:arguments[33],instances:arguments[34]}),
+      towners:({projectedBatches:arguments[35],meshBatches:arguments[36],triangles:arguments[37],instances:arguments[38]}),
+      items:({projectedBatches:arguments[39],meshBatches:arguments[40],triangles:arguments[41],instances:arguments[42]}),
+      players:({projectedBatches:arguments[43],meshBatches:arguments[44],triangles:arguments[45],instances:arguments[46]}),
+      missiles:({projectedBatches:arguments[47],meshBatches:arguments[48],triangles:arguments[49],instances:arguments[50]})}),
+    counting:'new commands owned by creating stage; merged continuations retain prior command ownership',
+    complete:!!$0, pureGpuMilliseconds:null
+   });
+  }, RendererState.usedGpu,
+   WebResidentSceneryForFrame,
+   static_cast<double>(WebTownRecordingPasses),
+   static_cast<double>(GetTownGpuStatus().drawCalls),
+   static_cast<double>(GetTownGpuMeshStats().recordedProjectedBatches),
+   static_cast<double>(GetTownGpuMeshStats().recordedMeshBatches),
+   static_cast<double>(WebSceneryReliefCalls),
+   static_cast<double>(WebSceneryReliefRecords.projectedBatches),
+   static_cast<double>(WebSceneryReliefRecords.meshBatches),
+   static_cast<double>(WebSceneryReliefRecords.triangles),
+   static_cast<double>(WebSceneryReliefRecords.instances),
+   static_cast<double>(WebTownStageRecords[0].projectedBatches),
+   static_cast<double>(WebTownStageRecords[0].meshBatches),
+   static_cast<double>(WebTownStageRecords[0].triangles),
+   static_cast<double>(WebTownStageRecords[0].instances),
+   static_cast<double>(WebTownStageRecords[1].projectedBatches),
+   static_cast<double>(WebTownStageRecords[1].meshBatches),
+   static_cast<double>(WebTownStageRecords[1].triangles),
+   static_cast<double>(WebTownStageRecords[1].instances),
+   static_cast<double>(WebTownStageRecords[2].projectedBatches),
+   static_cast<double>(WebTownStageRecords[2].meshBatches),
+   static_cast<double>(WebTownStageRecords[2].triangles),
+   static_cast<double>(WebTownStageRecords[2].instances),
+   static_cast<double>(WebTownStageRecords[3].projectedBatches),
+   static_cast<double>(WebTownStageRecords[3].meshBatches),
+   static_cast<double>(WebTownStageRecords[3].triangles),
+   static_cast<double>(WebTownStageRecords[3].instances),
+   static_cast<double>(WebTownStageRecords[4].projectedBatches),
+   static_cast<double>(WebTownStageRecords[4].meshBatches),
+   static_cast<double>(WebTownStageRecords[4].triangles),
+   static_cast<double>(WebTownStageRecords[4].instances),
+   static_cast<double>(WebTownStageRecords[5].projectedBatches),
+   static_cast<double>(WebTownStageRecords[5].meshBatches),
+   static_cast<double>(WebTownStageRecords[5].triangles),
+   static_cast<double>(WebTownStageRecords[5].instances),
+   static_cast<double>(WebTownStageRecords[6].projectedBatches),
+   static_cast<double>(WebTownStageRecords[6].meshBatches),
+   static_cast<double>(WebTownStageRecords[6].triangles),
+   static_cast<double>(WebTownStageRecords[6].instances),
+   static_cast<double>(WebTownStageRecords[7].projectedBatches),
+   static_cast<double>(WebTownStageRecords[7].meshBatches),
+   static_cast<double>(WebTownStageRecords[7].triangles),
+   static_cast<double>(WebTownStageRecords[7].instances),
+   static_cast<double>(WebTownStageRecords[8].projectedBatches),
+   static_cast<double>(WebTownStageRecords[8].meshBatches),
+   static_cast<double>(WebTownStageRecords[8].triangles),
+   static_cast<double>(WebTownStageRecords[8].instances),
+   static_cast<double>(WebTownStageRecords[9].projectedBatches),
+   static_cast<double>(WebTownStageRecords[9].meshBatches),
+   static_cast<double>(WebTownStageRecords[9].triangles),
+   static_cast<double>(WebTownStageRecords[9].instances));
+ }
+#endif
 	for (auto it = PreparedGpuTextures.begin(); it != PreparedGpuTextures.end();) {
 		if (it->second.lastSeen + 2 < GpuFrameNumber)
 			it = PreparedGpuTextures.erase(it);

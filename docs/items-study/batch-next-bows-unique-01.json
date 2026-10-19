@@ -1,0 +1,385 @@
+{
+  "format": "d3d.item-concept-art",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "batchId": "2026-10-08-batch-next-bows-unique-01",
+  "catalogSha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d",
+  "scope": "Reference-available bows; exact-cursor sharing explicit. Missing Hellfire Blitzen, Flambeau, Gnat Sting remain blocked.",
+  "generationTool": "built-in image_gen.imagegen",
+  "generationCalls": 1,
+  "postProcessing": "none; generated PNG bytes copied unchanged",
+  "originalGameImagesIncluded": false,
+  "visualApproval": false,
+  "runtimeInstalled": false,
+  "summary": {
+    "linkedProductionUnits": 7,
+    "newPNGs": 1,
+    "sharedProposals": 6,
+    "modelsGenerated": 0,
+    "runtimeIconsGenerated": 0
+  },
+  "entries": [
+    {
+      "productionId": "item.design.unique.bow-of-the-dead",
+      "conceptId": "item.design.unique.bow-of-the-dead.concept.r1",
+      "revision": "r1",
+      "kind": "family-sheet",
+      "status": "candidate",
+      "image": "assets/concept-art/items/r1/deadly-hunter-r1.png",
+      "sha256": "0adb8a6abbf7baf8220b7dc66a385776a0bdfd246a5bcdd433272af2fcbf2133",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate unique bow modeling turnaround.\nSubject: ONE DEADLY HUNTER, item.design.unique.deadly-hunter, original cursor108. PRIVATE sprite is only exact silhouette/proportion/local-color reference. Reconstruct this slender recurved bow with asymmetrical branching hooked limb fittings of pale gray metal and dull brass, short dark red-orange central wrapped grip, dark tan thin string between tips, and irregular small angled metal prongs along the limbs. Preserve the original lean crescent and readable pointed side fittings. Conservative geometric inference for unclear pixels; no animal or skull decoration invented from name.\nFIVE SEPARATE VIEWS, each showing whole same bow: FRONT broad silhouette, SIDE edge-on thickness, BACK opposite broad face with all asymmetries horizontally mirrored, a large clearly oblique THREE-QUARTER view, AND a separate small newly rendered HD inventory thumbnail. Do not merge the oblique view and thumbnail. All limb branches, grip and string attachment match; string is continuous and connects both tips. No arrow, no alternate variants.\nRealistic worn steel/brass and dark ochre wood/leather, muted red grip. Opaque charcoal-gray backdrop and soft neutral white studio lighting. Labels only DEADLY HUNTER / FRONT / SIDE / BACK / 3-4 / ICON. No glow, gore, horns beyond actual silhouette, character, hands, scene or watermark. Never copy/paste/trace/show any pixel source; inventory preview freshly rendered from this same new concept.",
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 108,
+        "sha256": "f1b1c9865124578912d11bf3ac234cab4e3a94e37326bcc78fc00d326e1377b8"
+      },
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-preview"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "notes": "Exact original cursor inherited. Shared design proposed, not a separately generated unique design or accepted mesh; native powers/stats/identity separate. Source notes: Source proportions and major fittings inspected. Opposite-face silhouette mirrors correctly; string joins tips. Three-quarter is weakly oblique. Fine fittings, band spacing, rear and thickness are inferred and need 3D review. HD thumbnail is a concept preview.",
+      "reusedFromProductionId": "item.design.unique.deadly-hunter",
+      "generationCalls": 0,
+      "reuseProposal": true,
+      "generationIntent": "Exact-cursor shared appearance proposal, no new generation call."
+    },
+    {
+      "productionId": "item.design.unique.deadly-hunter",
+      "conceptId": "item.design.unique.deadly-hunter.concept.r1",
+      "revision": "r1",
+      "kind": "turnaround",
+      "status": "candidate",
+      "image": "assets/concept-art/items/r1/deadly-hunter-r1.png",
+      "sha256": "0adb8a6abbf7baf8220b7dc66a385776a0bdfd246a5bcdd433272af2fcbf2133",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate unique bow modeling turnaround.\nSubject: ONE DEADLY HUNTER, item.design.unique.deadly-hunter, original cursor108. PRIVATE sprite is only exact silhouette/proportion/local-color reference. Reconstruct this slender recurved bow with asymmetrical branching hooked limb fittings of pale gray metal and dull brass, short dark red-orange central wrapped grip, dark tan thin string between tips, and irregular small angled metal prongs along the limbs. Preserve the original lean crescent and readable pointed side fittings. Conservative geometric inference for unclear pixels; no animal or skull decoration invented from name.\nFIVE SEPARATE VIEWS, each showing whole same bow: FRONT broad silhouette, SIDE edge-on thickness, BACK opposite broad face with all asymmetries horizontally mirrored, a large clearly oblique THREE-QUARTER view, AND a separate small newly rendered HD inventory thumbnail. Do not merge the oblique view and thumbnail. All limb branches, grip and string attachment match; string is continuous and connects both tips. No arrow, no alternate variants.\nRealistic worn steel/brass and dark ochre wood/leather, muted red grip. Opaque charcoal-gray backdrop and soft neutral white studio lighting. Labels only DEADLY HUNTER / FRONT / SIDE / BACK / 3-4 / ICON. No glow, gore, horns beyond actual silhouette, character, hands, scene or watermark. Never copy/paste/trace/show any pixel source; inventory preview freshly rendered from this same new concept.",
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 108,
+        "sha256": "f1b1c9865124578912d11bf3ac234cab4e3a94e37326bcc78fc00d326e1377b8"
+      },
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-preview"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "notes": "Source proportions and major fittings inspected. Opposite-face silhouette mirrors correctly; string joins tips. Three-quarter is weakly oblique. Fine fittings, band spacing, rear and thickness are inferred and need 3D review. HD thumbnail is a concept preview."
+    },
+    {
+      "productionId": "item.design.unique.eaglehorn",
+      "conceptId": "item.design.unique.eaglehorn.concept.r1",
+      "revision": "r1",
+      "kind": "family-sheet",
+      "status": "candidate",
+      "image": "assets/concept-art/items/r1/deadly-hunter-r1.png",
+      "sha256": "0adb8a6abbf7baf8220b7dc66a385776a0bdfd246a5bcdd433272af2fcbf2133",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate unique bow modeling turnaround.\nSubject: ONE DEADLY HUNTER, item.design.unique.deadly-hunter, original cursor108. PRIVATE sprite is only exact silhouette/proportion/local-color reference. Reconstruct this slender recurved bow with asymmetrical branching hooked limb fittings of pale gray metal and dull brass, short dark red-orange central wrapped grip, dark tan thin string between tips, and irregular small angled metal prongs along the limbs. Preserve the original lean crescent and readable pointed side fittings. Conservative geometric inference for unclear pixels; no animal or skull decoration invented from name.\nFIVE SEPARATE VIEWS, each showing whole same bow: FRONT broad silhouette, SIDE edge-on thickness, BACK opposite broad face with all asymmetries horizontally mirrored, a large clearly oblique THREE-QUARTER view, AND a separate small newly rendered HD inventory thumbnail. Do not merge the oblique view and thumbnail. All limb branches, grip and string attachment match; string is continuous and connects both tips. No arrow, no alternate variants.\nRealistic worn steel/brass and dark ochre wood/leather, muted red grip. Opaque charcoal-gray backdrop and soft neutral white studio lighting. Labels only DEADLY HUNTER / FRONT / SIDE / BACK / 3-4 / ICON. No glow, gore, horns beyond actual silhouette, character, hands, scene or watermark. Never copy/paste/trace/show any pixel source; inventory preview freshly rendered from this same new concept.",
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 108,
+        "sha256": "f1b1c9865124578912d11bf3ac234cab4e3a94e37326bcc78fc00d326e1377b8"
+      },
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-preview"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "notes": "Exact original cursor inherited. Shared design proposed, not a separately generated unique design or accepted mesh; native powers/stats/identity separate. Source notes: Source proportions and major fittings inspected. Opposite-face silhouette mirrors correctly; string joins tips. Three-quarter is weakly oblique. Fine fittings, band spacing, rear and thickness are inferred and need 3D review. HD thumbnail is a concept preview.",
+      "reusedFromProductionId": "item.design.unique.deadly-hunter",
+      "generationCalls": 0,
+      "reuseProposal": true,
+      "generationIntent": "Exact-cursor shared appearance proposal, no new generation call."
+    },
+    {
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "family-sheet",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-thumbnail"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "postProcessing": "none; original generated PNG bytes copied unchanged",
+      "productionId": "item.design.unique.flamedart",
+      "conceptId": "item.design.unique.flamedart.concept.r1",
+      "image": "assets/concept-art/items/r1/hunter-s-bow-r1.png",
+      "sha256": "6814ce7e19a247f04b861a0be0824097ffcb186e8a7e99b34bb05a63fc11c9f4",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "byteCount": 1689151,
+      "prompt": "Use case: stylized-concept. Asset type: Diablo 3D source-based candidate bow study, not runtime art.\nReconstruct ONLY the ONE physical bow in the private attached ICURS 102 reference for item.design.base.hunter-s-bow. The name does not authorize redesign. Burgundy/red-brown curved wooden limbs, narrow silver-gray segmented reinforcement sections on each limb, small ochre/gold collars, and a distinctive ochre/gold wrapped central grip. Both reddish tips are small split curled/scroll-like ends. Thin dull pale-olive string. Preserve those split tip shapes and decorative restraint; no animal head, horn ornament or added arrow.\nProduce a clean realistic HD modeling sheet, charcoal-gray background and soft neutral studio light, restrained physically plausible wood/metal/string texture with no painted floor shadow. Four complete well-separated views of the SAME object labeled FRONT, SIDE, BACK, 3-4 plus a smaller NEW HD ICON thumbnail. Title HUNTER S BOW. FRONT is full bow plane, SIDE is genuine thin edge-on profile, BACK is opposite face rotated 180 degrees around vertical and therefore horizontally mirrors the curved full silhouette of FRONT. Preserve limbs, tip curves, color blocks, grip, fittings, string nocks and a single taut string in ALL views and the new thumbnail. The 3-4 thumbnail may match native angle but must be newly painted realistic HD, NEVER source pixels. No source sprite inset. No hands, person, scenery, arrows, name/power-derived enchantments, glow, labels on the object or multiple designs. Unseen cross section, back fittings, grip construction and material readings are cautious inferences, keep them minimal. Layout clean and useful for later modeling; this is candidate documentation, not an approved turnaround or finished model.",
+      "referenceHash": "47ab881acc23dd53052f5a86ceb4b979489a49bee22c8d744917bb2e880787f8",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 102,
+        "sha256": "47ab881acc23dd53052f5a86ceb4b979489a49bee22c8d744917bb2e880787f8",
+        "notes": "Referência nativa 6x inspecionada antes da chamada. Silhueta e blocos de cor orientam o estudo; pixels privados não incorporados."
+      },
+      "sourceViewCount": 1,
+      "queueGroupId": "remaining-bows-base-design-all-01",
+      "inferredAreas": [
+        "Verso, espessura, nocks, grip, construção e materiais propostos a partir de uma vista; nada recuperado como geometria histórica."
+      ],
+      "coherenceReview": {
+        "status": "incomplete-study",
+        "coherentAcrossViewsVerified": false,
+        "observed": "Paleta e curva geral preservadas; BACK espelha a curva de FRONT; nenhuma flecha, efeito de poder ou sprite colado.",
+        "pendingIssues": [
+          "A vista 3-4 e ICON foram fundidos; prontidão herdada como estudo incompleto por Long Bow.",
+          "Pontas geradas ficaram com três volutas mais definidas que a fonte; revisar número/forma sem inventar ornamento.",
+          "Conferir topologia das placas, grip e ligação da corda no master."
+        ]
+      },
+      "notes": "Exact original cursor inherited. Shared design proposed, not a separately generated unique design or accepted mesh; native powers/stats/identity separate. Source incomplete-study gate is inherited. Source notes: Candidato sem aprovação; thumbnail HD de estudo não é ícone runtime. Encaixe, corda/animação e grip dependem da frente de personagens.",
+      "reusedFromProductionId": "item.design.base.hunter-s-bow",
+      "generationCalls": 0,
+      "reuseProposal": true,
+      "generationIntent": "Exact-cursor shared appearance proposal, no new generation call."
+    },
+    {
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "family-sheet",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-thumbnail"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "postProcessing": "none; original generated PNG bytes copied unchanged",
+      "productionId": "item.design.unique.fleshstinger",
+      "conceptId": "item.design.unique.fleshstinger.concept.r1",
+      "image": "assets/concept-art/items/r1/hunter-s-bow-r1.png",
+      "sha256": "6814ce7e19a247f04b861a0be0824097ffcb186e8a7e99b34bb05a63fc11c9f4",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "byteCount": 1689151,
+      "prompt": "Use case: stylized-concept. Asset type: Diablo 3D source-based candidate bow study, not runtime art.\nReconstruct ONLY the ONE physical bow in the private attached ICURS 102 reference for item.design.base.hunter-s-bow. The name does not authorize redesign. Burgundy/red-brown curved wooden limbs, narrow silver-gray segmented reinforcement sections on each limb, small ochre/gold collars, and a distinctive ochre/gold wrapped central grip. Both reddish tips are small split curled/scroll-like ends. Thin dull pale-olive string. Preserve those split tip shapes and decorative restraint; no animal head, horn ornament or added arrow.\nProduce a clean realistic HD modeling sheet, charcoal-gray background and soft neutral studio light, restrained physically plausible wood/metal/string texture with no painted floor shadow. Four complete well-separated views of the SAME object labeled FRONT, SIDE, BACK, 3-4 plus a smaller NEW HD ICON thumbnail. Title HUNTER S BOW. FRONT is full bow plane, SIDE is genuine thin edge-on profile, BACK is opposite face rotated 180 degrees around vertical and therefore horizontally mirrors the curved full silhouette of FRONT. Preserve limbs, tip curves, color blocks, grip, fittings, string nocks and a single taut string in ALL views and the new thumbnail. The 3-4 thumbnail may match native angle but must be newly painted realistic HD, NEVER source pixels. No source sprite inset. No hands, person, scenery, arrows, name/power-derived enchantments, glow, labels on the object or multiple designs. Unseen cross section, back fittings, grip construction and material readings are cautious inferences, keep them minimal. Layout clean and useful for later modeling; this is candidate documentation, not an approved turnaround or finished model.",
+      "referenceHash": "47ab881acc23dd53052f5a86ceb4b979489a49bee22c8d744917bb2e880787f8",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 102,
+        "sha256": "47ab881acc23dd53052f5a86ceb4b979489a49bee22c8d744917bb2e880787f8",
+        "notes": "Referência nativa 6x inspecionada antes da chamada. Silhueta e blocos de cor orientam o estudo; pixels privados não incorporados."
+      },
+      "sourceViewCount": 1,
+      "queueGroupId": "remaining-bows-base-design-all-01",
+      "inferredAreas": [
+        "Verso, espessura, nocks, grip, construção e materiais propostos a partir de uma vista; nada recuperado como geometria histórica."
+      ],
+      "coherenceReview": {
+        "status": "incomplete-study",
+        "coherentAcrossViewsVerified": false,
+        "observed": "Paleta e curva geral preservadas; BACK espelha a curva de FRONT; nenhuma flecha, efeito de poder ou sprite colado.",
+        "pendingIssues": [
+          "A vista 3-4 e ICON foram fundidos; prontidão herdada como estudo incompleto por Long Bow.",
+          "Pontas geradas ficaram com três volutas mais definidas que a fonte; revisar número/forma sem inventar ornamento.",
+          "Conferir topologia das placas, grip e ligação da corda no master."
+        ]
+      },
+      "notes": "Exact original cursor inherited. Shared design proposed, not a separately generated unique design or accepted mesh; native powers/stats/identity separate. Source incomplete-study gate is inherited. Source notes: Candidato sem aprovação; thumbnail HD de estudo não é ícone runtime. Encaixe, corda/animação e grip dependem da frente de personagens.",
+      "reusedFromProductionId": "item.design.base.hunter-s-bow",
+      "generationCalls": 0,
+      "reuseProposal": true,
+      "generationIntent": "Exact-cursor shared appearance proposal, no new generation call."
+    },
+    {
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "family-sheet",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-thumbnail"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "postProcessing": "none; original generated PNG bytes copied unchanged",
+      "productionId": "item.design.unique.the-blackoak-bow",
+      "conceptId": "item.design.unique.the-blackoak-bow.concept.r1",
+      "image": "assets/concept-art/items/r1/hunter-s-bow-r1.png",
+      "sha256": "6814ce7e19a247f04b861a0be0824097ffcb186e8a7e99b34bb05a63fc11c9f4",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "byteCount": 1689151,
+      "prompt": "Use case: stylized-concept. Asset type: Diablo 3D source-based candidate bow study, not runtime art.\nReconstruct ONLY the ONE physical bow in the private attached ICURS 102 reference for item.design.base.hunter-s-bow. The name does not authorize redesign. Burgundy/red-brown curved wooden limbs, narrow silver-gray segmented reinforcement sections on each limb, small ochre/gold collars, and a distinctive ochre/gold wrapped central grip. Both reddish tips are small split curled/scroll-like ends. Thin dull pale-olive string. Preserve those split tip shapes and decorative restraint; no animal head, horn ornament or added arrow.\nProduce a clean realistic HD modeling sheet, charcoal-gray background and soft neutral studio light, restrained physically plausible wood/metal/string texture with no painted floor shadow. Four complete well-separated views of the SAME object labeled FRONT, SIDE, BACK, 3-4 plus a smaller NEW HD ICON thumbnail. Title HUNTER S BOW. FRONT is full bow plane, SIDE is genuine thin edge-on profile, BACK is opposite face rotated 180 degrees around vertical and therefore horizontally mirrors the curved full silhouette of FRONT. Preserve limbs, tip curves, color blocks, grip, fittings, string nocks and a single taut string in ALL views and the new thumbnail. The 3-4 thumbnail may match native angle but must be newly painted realistic HD, NEVER source pixels. No source sprite inset. No hands, person, scenery, arrows, name/power-derived enchantments, glow, labels on the object or multiple designs. Unseen cross section, back fittings, grip construction and material readings are cautious inferences, keep them minimal. Layout clean and useful for later modeling; this is candidate documentation, not an approved turnaround or finished model.",
+      "referenceHash": "47ab881acc23dd53052f5a86ceb4b979489a49bee22c8d744917bb2e880787f8",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 102,
+        "sha256": "47ab881acc23dd53052f5a86ceb4b979489a49bee22c8d744917bb2e880787f8",
+        "notes": "Referência nativa 6x inspecionada antes da chamada. Silhueta e blocos de cor orientam o estudo; pixels privados não incorporados."
+      },
+      "sourceViewCount": 1,
+      "queueGroupId": "remaining-bows-base-design-all-01",
+      "inferredAreas": [
+        "Verso, espessura, nocks, grip, construção e materiais propostos a partir de uma vista; nada recuperado como geometria histórica."
+      ],
+      "coherenceReview": {
+        "status": "incomplete-study",
+        "coherentAcrossViewsVerified": false,
+        "observed": "Paleta e curva geral preservadas; BACK espelha a curva de FRONT; nenhuma flecha, efeito de poder ou sprite colado.",
+        "pendingIssues": [
+          "A vista 3-4 e ICON foram fundidos; prontidão herdada como estudo incompleto por Long Bow.",
+          "Pontas geradas ficaram com três volutas mais definidas que a fonte; revisar número/forma sem inventar ornamento.",
+          "Conferir topologia das placas, grip e ligação da corda no master."
+        ]
+      },
+      "notes": "Exact original cursor inherited. Shared design proposed, not a separately generated unique design or accepted mesh; native powers/stats/identity separate. Source incomplete-study gate is inherited. Source notes: Candidato sem aprovação; thumbnail HD de estudo não é ícone runtime. Encaixe, corda/animação e grip dependem da frente de personagens.",
+      "reusedFromProductionId": "item.design.base.hunter-s-bow",
+      "generationCalls": 0,
+      "reuseProposal": true,
+      "generationIntent": "Exact-cursor shared appearance proposal, no new generation call."
+    },
+    {
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "family-sheet",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-thumbnail"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "postProcessing": "none; original generated PNG bytes copied unchanged",
+      "productionId": "item.design.unique.the-celestial-bow",
+      "conceptId": "item.design.unique.the-celestial-bow.concept.r1",
+      "image": "assets/concept-art/items/r1/composite-bow-r1.png",
+      "sha256": "543406dfe2abd0a27b296270b19dd1a0ed05de1de913157f1e21601b7d02f981",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "byteCount": 1702899,
+      "prompt": "Use case: stylized-concept. Asset type: Diablo 3D source-based candidate bow study, not runtime art.\nReconstruct ONLY the ONE physical bow in the private attached ICURS 133 reference for item.design.base.composite-bow. The name does not authorize redesign. The bow is reddish-brown wood, broad silver-gray reinforcing plates on the long upper/left limb and lower/right limb, with exposed red wood between plates, small gold/ochre bindings, silver hooked tips and a thin dull olive string. Preserve the irregular unequal-looking plate segmentation and source overall curve; no arrow, no added ornate grip.\nProduce a clean realistic HD modeling sheet, charcoal-gray background and soft neutral studio light, restrained physically plausible wood/metal/string texture with no painted floor shadow. Four complete well-separated views of the SAME object labeled FRONT, SIDE, BACK, 3-4 plus a smaller NEW HD ICON thumbnail. Title COMPOSITE BOW. FRONT is full bow plane, SIDE is genuine thin edge-on profile, BACK is opposite face rotated 180 degrees around vertical and therefore horizontally mirrors the curved full silhouette of FRONT. Preserve limbs, tip curves, color blocks, grip, fittings, string nocks and a single taut string in ALL views and the new thumbnail. The 3-4 thumbnail may match native angle but must be newly painted realistic HD, NEVER source pixels. No source sprite inset. No hands, person, scenery, arrows, name/power-derived enchantments, glow, labels on the object or multiple designs. Unseen cross section, back fittings, grip construction and material readings are cautious inferences, keep them minimal. Layout clean and useful for later modeling; this is candidate documentation, not an approved turnaround or finished model.",
+      "referenceHash": "c8fa34a5badd66d6f778b5466bd9c5f6d738aaad133c84f50c8396c1dbab40b3",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 133,
+        "sha256": "c8fa34a5badd66d6f778b5466bd9c5f6d738aaad133c84f50c8396c1dbab40b3",
+        "notes": "Referência nativa 6x inspecionada antes da chamada. Silhueta e blocos de cor orientam o estudo; pixels privados não incorporados."
+      },
+      "sourceViewCount": 1,
+      "queueGroupId": "remaining-bows-base-design-all-01",
+      "inferredAreas": [
+        "Verso, espessura, nocks, grip, construção e materiais propostos a partir de uma vista; nada recuperado como geometria histórica."
+      ],
+      "coherenceReview": {
+        "status": "incomplete-study",
+        "coherentAcrossViewsVerified": false,
+        "observed": "Paleta e curva geral preservadas; BACK espelha a curva de FRONT; nenhuma flecha, efeito de poder ou sprite colado.",
+        "pendingIssues": [
+          "A vista 3-4 e o thumbnail foram fundidos em um só inset; falta preview separado, portanto estudo incompleto.",
+          "Rebites, perfil das placas, pontas tipo lâmina e bandas centrais são inferidos; conferir nocks, espessura e grip."
+        ]
+      },
+      "notes": "Exact original cursor inherited. Shared design proposed, not a separately generated unique design or accepted mesh; native powers/stats/identity separate. Source incomplete-study gate is inherited. Source notes: Candidato sem aprovação; thumbnail HD de estudo não é ícone runtime. Encaixe, corda/animação e grip dependem da frente de personagens.",
+      "reusedFromProductionId": "item.design.base.composite-bow",
+      "generationCalls": 0,
+      "reuseProposal": true,
+      "generationIntent": "Exact-cursor shared appearance proposal, no new generation call."
+    }
+  ]
+}

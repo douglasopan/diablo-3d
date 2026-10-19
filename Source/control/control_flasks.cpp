@@ -102,21 +102,21 @@ void DrawFlaskLower(const Surface &out, const Surface &sourceBuffer, int offset,
 
 void DrawLifeFlaskUpper(const Surface &out)
 {
-	if (IsD3dHudEnabled()) return;
+	if (IsD3dHudSelected()) return;
 	constexpr int LifeFlaskUpperOffset = 107;
 	DrawFlaskUpper(out, *pLifeBuff, LifeFlaskUpperOffset, MyPlayer->_pHPPer);
 }
 
 void DrawManaFlaskUpper(const Surface &out)
 {
-	if (IsD3dHudEnabled()) return;
+	if (IsD3dHudSelected()) return;
 	constexpr int ManaFlaskUpperOffset = 475;
 	DrawFlaskUpper(out, *pManaBuff, ManaFlaskUpperOffset, MyPlayer->_pManaPer);
 }
 
 void DrawLifeFlaskLower(const Surface &out, bool drawFilledPortion)
 {
-	if (IsD3dHudEnabled()) {
+	if (IsD3dHudSelected()) {
 		DrawD3dHudFlask(out, false);
 		return;
 	}
@@ -126,7 +126,7 @@ void DrawLifeFlaskLower(const Surface &out, bool drawFilledPortion)
 
 void DrawManaFlaskLower(const Surface &out, bool drawFilledPortion)
 {
-	if (IsD3dHudEnabled()) {
+	if (IsD3dHudSelected()) {
 		DrawD3dHudFlask(out, true);
 		return;
 	}

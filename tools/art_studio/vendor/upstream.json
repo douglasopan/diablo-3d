@@ -1,0 +1,7 @@
+{
+  "commit": "5ba8150e27b4f1bf17ae19dcecdb2341e467885a",
+  "modification": "cutout trim_result option to preserve animation registration",
+  "repository": "https://github.com/rehan-remade/universal-modder",
+  "license": "MIT",
+  "scope": "sprite.py/common.py only; no hooks, plugins or network generation"
+}

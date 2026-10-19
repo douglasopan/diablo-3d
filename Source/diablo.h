@@ -95,14 +95,16 @@ void InitKeymapActions();
 void SetCursorPos(Point position);
 /** Captured first-person input uses the logical world viewport center. */
 bool IsTownFirstPersonInputCaptured();
-/** Eligible keyboard movement in FPP or Third; Third does not capture mouse. */
+/** Hard-safe keyboard movement in Third, or a captured/legitimate UI-released
+ * FPP session. Nontextual panels keep movement; text/modal/device/failure gates do not. */
 bool IsTownCameraMovementInputActive();
 Point GetTownFirstPersonPointer(Point absolute);
 Direction GetTownFirstPersonMoveDirection();
 /** Release capture, owned arrows and only a walk issued by this adapter. */
 void SuspendTownFirstPersonInput();
 void StopTownFirstPersonWalk();
-/** Native interaction takes ownership before its command is dispatched. */
+/** Native world interaction takes ownership before its command is dispatched.
+ * UI pointer pairs use their own latch and must not invoke this cancellation. */
 void CancelTownFirstPersonWalk();
 
 /** Diagnostic seam replaces only SDL capture/focus/keyboard services.
@@ -123,6 +125,9 @@ void SetTownFirstPersonInputServicesForDiagnostics(const TownFirstPersonInputSer
 /** Calls the exact live-session handler and synchronization used by gameplay. */
 void DispatchGameEventForDiagnostics(const SDL_Event &event, uint16_t modState);
 void SyncFirstPersonInputForDiagnostics();
+/** Calls the normal visual-clock/advance gate without drawing; returned seconds
+ * are the actual elapsed clock admitted to AdvanceTownViewCamera. */
+float AdvanceTownCameraForDrawForDiagnostics();
 /** Same post-draw queue flush used by the live game loop. */
 void FlushFirstPersonClicksForDiagnostics();
 EventHandler GetGameEventHandlerForDiagnostics();

@@ -18,7 +18,10 @@
 
 #include "DiabloUI/ui_flags.hpp"
 #include "control/d3d_hud.hpp"
+#include "control/d3d_floating_panels.hpp"
+#include "control/d3d_hud_skin.hpp"
 #include "engine/render/d3d_hud_presentation.hpp"
+#include "engine/render/d3d_panel_presentation.hpp"
 #include "controls/control_mode.hpp"
 #include "controls/plrctrls.h"
 #include "cursor.h"
@@ -1177,6 +1180,10 @@ void FreeInvGFX()
 
 void InitInv()
 {
+	if (IsD3dHudSelected()) {
+		pInvCels = std::nullopt;
+		return;
+	}
 	const PlayerData &playerClassData = GetPlayerDataForClass(MyPlayer->_pClass);
 	const char *invName = playerClassData.inv.c_str();
 	if (gbIsSpawn && (playerClassData.inv == "inv_rog" || playerClassData.inv == "inv_sor")) {
@@ -1187,7 +1194,29 @@ void InitInv()
 
 void DrawInv(const Surface &out)
 {
-	ClxDraw(out, GetPanelPosition(UiPanels::Inventory, { 0, 351 }), (*pInvCels)[0]);
+	const bool floating = IsD3dHudSelected();
+	if (floating) {
+		DrawD3dFloatingPanelBody(out, UiPanels::Inventory);
+		DrawD3dFloatingPanelHeader(out, UiPanels::Inventory);
+		// Geometry is taken from the same equipment and 10x4 native slot data
+		// used by picking. Belt cells remain on the HUD and are not duplicated.
+		for (int slot = SLOTXY_EQUIPPED_FIRST; slot <= SLOTXY_INV_LAST; ++slot) {
+			Rectangle rect = InvRect[slot];
+			rect.position = GetPanelPosition(UiPanels::Inventory, rect.position);
+			DrawD3dFloatingPanelFrame(out, rect);
+		}
+	} else {
+		ClxDraw(out, GetPanelPosition(UiPanels::Inventory, { 0, 351 }), (*pInvCels)[0]);
+	}
+	const auto drawSlotBack = [&](const Surface &target, Point targetPosition, Size size, item_quality quality) {
+		if (floating) {
+			// Functional native quality colors are opaque, independent of the
+			// deferred translucent R1 backdrop and its scratch transparency key.
+			FillRect(target, targetPosition.x, targetPosition.y - size.height + 1,
+			    size.width, size.height, PAL16_GRAY + 5);
+		}
+		InvDrawSlotBack(target, targetPosition, size, quality);
+	};
 
 	const Size slotSize[] = {
 		{ 2, 2 }, // head
@@ -1215,7 +1244,7 @@ void DrawInv(const Surface &out)
 		if (!myPlayer.InvBody[slot].isEmpty()) {
 			int screenX = slotPos[slot].x;
 			int screenY = slotPos[slot].y;
-			InvDrawSlotBack(out, GetPanelPosition(UiPanels::Inventory, { screenX, screenY }), { slotSize[slot].width * InventorySlotSizeInPixels.width, slotSize[slot].height * InventorySlotSizeInPixels.height }, myPlayer.InvBody[slot]._iMagical);
+			drawSlotBack(out, GetPanelPosition(UiPanels::Inventory, { screenX, screenY }), { slotSize[slot].width * InventorySlotSizeInPixels.width, slotSize[slot].height * InventorySlotSizeInPixels.height }, myPlayer.InvBody[slot]._iMagical);
 
 			const int cursId = myPlayer.InvBody[slot]._iCurs + CURSOR_FIRSTITEM;
 
@@ -1238,7 +1267,7 @@ void DrawInv(const Surface &out)
 
 			if (slot == INVLOC_HAND_LEFT) {
 				if (myPlayer.GetItemLocation(myPlayer.InvBody[slot]) == ILOC_TWOHAND) {
-					InvDrawSlotBack(out, GetPanelPosition(UiPanels::Inventory, slotPos[INVLOC_HAND_RIGHT]), { slotSize[INVLOC_HAND_RIGHT].width * InventorySlotSizeInPixels.width, slotSize[INVLOC_HAND_RIGHT].height * InventorySlotSizeInPixels.height }, myPlayer.InvBody[slot]._iMagical);
+					drawSlotBack(out, GetPanelPosition(UiPanels::Inventory, slotPos[INVLOC_HAND_RIGHT]), { slotSize[INVLOC_HAND_RIGHT].width * InventorySlotSizeInPixels.width, slotSize[INVLOC_HAND_RIGHT].height * InventorySlotSizeInPixels.height }, myPlayer.InvBody[slot]._iMagical);
 					const int dstX = GetRightPanel().position.x + slotPos[INVLOC_HAND_RIGHT].x + (frameSize.width == InventorySlotSizeInPixels.width ? INV_SLOT_HALF_SIZE_PX : 0) - 1;
 					const int dstY = GetRightPanel().position.y + slotPos[INVLOC_HAND_RIGHT].y;
 					ClxDrawBlended(out, { dstX, dstY }, sprite);
@@ -1249,7 +1278,7 @@ void DrawInv(const Surface &out)
 
 	for (int i = 0; i < InventoryGridCells; i++) {
 		if (myPlayer.InvGrid[i] != 0) {
-			InvDrawSlotBack(
+			drawSlotBack(
 			    out,
 			    GetPanelPosition(UiPanels::Inventory, InvRect[i + SLOTXY_INV_FIRST].position) + Displacement { 0, InventorySlotSizeInPixels.height },
 			    InventorySlotSizeInPixels,
@@ -1271,31 +1300,35 @@ void DrawInv(const Surface &out)
 			DrawItem(myPlayer.InvList[ii], out, position, sprite);
 		}
 	}
+	if (floating)
+		SealD3dPanelBackplate(out);
+}
+
+bool GetD3dHudBeltTint(int slot, uint8_t &paletteIndex)
+{
+	if (InspectPlayer == nullptr || slot < 0 || slot >= MaxBeltItems
+	    || InspectPlayer->SpdList[slot].isEmpty())
+		return false;
+	OwnedSurface sample(1, 1);
+	*sample.at(0, 0) = PAL16_GRAY + 5;
+	InvDrawSlotBack(sample, { 0, 0 }, { 1, 1 }, InspectPlayer->SpdList[slot]._iMagical);
+	paletteIndex = *sample.at(0, 0);
+	return true;
 }
 
 void DrawInvBelt(const Surface &out)
 {
-	if (ChatFlag) {
-		return;
-	}
-
-	const bool customHud = IsD3dHudEnabled();
-	if (customHud) {
+	if (ChatFlag) return;
+	const bool customHud = IsD3dHudSelected();
+	if (customHud)
 		DrawD3dHudBeltBackground(out);
-	} else {
+	else
 		DrawPanelBox(out, { 205, 21, 232, 28 }, GetMainPanel().position + Displacement { 205, 5 });
-	}
 
 	const Player &myPlayer = *InspectPlayer;
-	// Keep the native item renderer and its outline, including one pixel of margin.
 	std::optional<OwnedSurface> itemBuffer;
-	std::optional<OwnedSurface> foregroundBuffer;
-	std::optional<OwnedSurface> tintSample;
-	if (customHud) {
+	if (customHud)
 		itemBuffer.emplace(InventorySlotSizeInPixels.width + 2, InventorySlotSizeInPixels.height + 2);
-		foregroundBuffer.emplace(InventorySlotSizeInPixels.width + 2, InventorySlotSizeInPixels.height + 2);
-		tintSample.emplace(1, 1);
-	}
 	const auto drawHotkey = [&](int i, Rectangle slot) {
 		const auto beltKey = StrCat("BeltItem", i + 1);
 		std::string_view keyName = ControlMode == ControlTypes::Gamepad
@@ -1305,62 +1338,43 @@ void DrawInvBelt(const Surface &out)
 			DrawD3dHudKeyLabel(out, slot, keyName);
 			return;
 		}
-		if (!customHud && keyName.length() > 2)
-			keyName = {};
+		if (keyName.length() > 2) keyName = {};
 		const Rectangle keyRect { slot.position + Displacement { 0, InventorySlotSizeInPixels.height - 12 }, InventorySlotSizeInPixels };
-		DrawString(out, keyName, keyRect,
-		    { .flags = UiFlags::ColorWhite | UiFlags::AlignRight });
+		DrawString(out, keyName, keyRect, { .flags = UiFlags::ColorWhite | UiFlags::AlignRight });
 	};
 
-	for (int i = 0; i < MaxBeltItems; i++) {
+	for (int i = 0; i < MaxBeltItems; ++i) {
 		const Rectangle slot = GetD3dHudBeltSlotRect(i);
 		if (myPlayer.SpdList[i].isEmpty()) {
-			if (customHud)
-				drawHotkey(i, slot);
+			if (customHud) drawHotkey(i, slot);
 			continue;
 		}
-
 		const Surface &itemOut = customHud ? *itemBuffer : out;
 		const Point position = customHud
 		    ? Point { 1, InventorySlotSizeInPixels.height }
 		    : slot.position + Displacement { 0, InventorySlotSizeInPixels.height };
-		if (customHud)
-			// Preserve the native cell texture beneath the quality tint, item and
-			// hover outline, including the temporary surface's one-pixel margin.
-			DrawPanelBox(itemOut, { 204 + i * 29, 21, itemOut.w(), itemOut.h() }, { 0, 0 });
-		InvDrawSlotBack(itemOut, position, InventorySlotSizeInPixels, myPlayer.SpdList[i]._iMagical);
-		const int cursId = myPlayer.SpdList[i]._iCurs + CURSOR_FIRSTITEM;
-
-		const ClxSprite sprite = GetInvItemSprite(cursId);
-
-		if (pcursinvitem == i + INVITEM_BELT_FIRST) {
-			if (ControlMode == ControlTypes::KeyboardAndMouse || invflag) {
-				ClxDrawOutline(itemOut, GetOutlineColor(myPlayer.SpdList[i], true), position, sprite);
-			}
-		}
-
-		DrawItem(myPlayer.SpdList[i], itemOut, position, sprite);
 		if (customHud) {
+			FillRect(itemOut, 0, 0, itemOut.w(), itemOut.h(), 1);
+			uint8_t tint;
+			if (GetD3dHudBeltTint(i, tint)) {
+				RecordD3dHudBeltTint(i, tint);
+				if (!IsD3dHudPresentationCapturing(out)) {
+					const Rectangle inside = GetD3dHudBeltInteriorRect(slot);
+					DrawD3dHudSkinIndexedTint(out, inside, tint);
+				}
+			}
+		} else {
+			InvDrawSlotBack(itemOut, position, InventorySlotSizeInPixels, myPlayer.SpdList[i]._iMagical);
+		}
+		const ClxSprite sprite = GetInvItemSprite(myPlayer.SpdList[i]._iCurs + CURSOR_FIRSTITEM);
+		if (pcursinvitem == i + INVITEM_BELT_FIRST
+		    && (ControlMode == ControlTypes::KeyboardAndMouse || invflag))
+			ClxDrawOutline(itemOut, GetOutlineColor(myPlayer.SpdList[i], true), position, sprite);
+		DrawItem(myPlayer.SpdList[i], itemOut, position, sprite);
+		if (customHud)
 			DrawD3dHudBeltItem(out, itemOut, slot);
-			// The complete native buffer remains the fallback. The RGB plane
-			// receives only the same item/outline, never its stone cell backdrop.
-			FillRect(*foregroundBuffer, 0, 0, foregroundBuffer->w(), foregroundBuffer->h(), 1);
-			if (pcursinvitem == i + INVITEM_BELT_FIRST
-			    && (ControlMode == ControlTypes::KeyboardAndMouse || invflag))
-				ClxDrawOutline(*foregroundBuffer, GetOutlineColor(myPlayer.SpdList[i], true), position, sprite);
-			DrawItem(myPlayer.SpdList[i], *foregroundBuffer, position, sprite);
-			const Rectangle inside = slot.size.width > 4 && slot.size.height > 4 ? slot.inset({ 2, 2 }) : slot;
-			RecordD3dHudForeground(*foregroundBuffer, inside);
-			// Let the original quality/inspection translation choose its family.
-			FillRect(*tintSample, 0, 0, 1, 1, PAL16_GRAY + 5);
-			InvDrawSlotBack(*tintSample, { 0, 0 }, { 1, 1 }, myPlayer.SpdList[i]._iMagical);
-			RecordD3dHudBeltTint(i, *tintSample->at(0, 0));
-		}
-
-		if (customHud || (myPlayer.SpdList[i].isUsable()
-		                    && myPlayer.SpdList[i]._itype != ItemType::Gold)) {
+		if (customHud || (myPlayer.SpdList[i].isUsable() && myPlayer.SpdList[i]._itype != ItemType::Gold))
 			drawHotkey(i, slot);
-		}
 	}
 }
 

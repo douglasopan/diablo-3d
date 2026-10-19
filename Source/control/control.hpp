@@ -19,6 +19,7 @@
 #endif
 #endif
 
+#include "control/d3d_hud.hpp"
 #include "DiabloUI/text_input.hpp"
 #include "DiabloUI/ui_flags.hpp"
 #include "engine/displacement.hpp"
@@ -84,6 +85,9 @@ void ToggleCharPanel();
  */
 [[nodiscard]] inline bool CanPanelsCoverView()
 {
+	// Floating translucent panels never crop or shift the world camera.
+	if (IsD3dHudSelected())
+		return false;
 	const Rectangle &mainPanel = GetMainPanel();
 	return GetScreenWidth() <= mainPanel.size.width && GetScreenHeight() <= SidePanelSize.height + mainPanel.size.height;
 }

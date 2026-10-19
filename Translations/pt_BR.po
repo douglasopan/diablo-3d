@@ -12722,3 +12722,6 @@ msgstr "Restaurar câmera de Tristram"
 #: Source/diablo.cpp
 msgid "Restore Third Person for the current session without changing the saved camera preference."
 msgstr "Restaura Terceira Pessoa nesta sessão sem alterar a preferência de câmera salva."
+
+msgid "Third-Party Notices"
+msgstr "Avisos de terceiros"

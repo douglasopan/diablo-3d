@@ -1084,7 +1084,7 @@ void AddCabin(Point minTile, Point maxTile)
 		hoop.vertices, { 2.20F * Pi * (BarrelRadius + 0.015F) / 10, -0.715F },
 		{ 2.80F * Pi * (BarrelRadius + 0.015F) / 10, -0.685F });
 	FinishBuilder(builder);
-	if (minTile.x == 70 && LoadTownModelOverride(Scene.back(), "d3d-models/cabin-east.d3d"))
+	if (minTile.x == 70 && LoadTownModelOverride(Scene.back(), "d3d-models/cabin-east.d3d", TownCabinBaselineSha256, "meshy-v2-multiview"))
 		BuildTownCabinInterior(Scene.back());
 }
 

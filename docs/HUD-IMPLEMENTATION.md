@@ -1,5 +1,7 @@
 # HUD principal e edição visual no Godot
 
+**Checkpoint R2 em 10/10/2026:** os 43 deltas do HUD estão integrados na Source, com clique pendente e roda corrigidos. Candidato privado Windows `89767726…`: input 5.950 checks; 44 frames de RenderPresent/33.350 checks; minimapa Dungeon 481. Sem teste físico, FPS ou aprovação artística integral. A versão instalada continua `56e112ab…`; a instalação foi substituída pela nova prioridade web. Os 13 bootstraps anteriores são reuso compatível declarado. Detalhes operacionais e evidências no [guia de execução](PROJECT-EXECUTION.md).
+
 Entrega autorizada em 8 de outubro de 2026: implementar primeiro a visão principal do HUD aprovada no estudo, conservando os controles do DevilutionX. Esta trilha é independente da revisão G1 da cabana; não conclui Tristram. Os arquivos em `docs/hud-study/images/` são conceitos, não capturas da implementação.
 
 O escopo é refazer a apresentação das funções existentes e permitir editar seu layout depois. O usuário reforçou que novas funções poderão ser discutidas no futuro, mas não pertencem a esta entrega. A faixa adicional de quatro botões de magia foi retirada; os atalhos originais permanecem. O contrato visual corresponde aos seis botões de jogador único, às duas funções condicionais de multijogador, aos oito espaços do cinto, aos dois globos, à magia preparada e à caixa de informações, com os avisos e estados condicionais nativos preservados.
@@ -132,3 +134,19 @@ Os números e o executável abaixo pertencem à versão anterior ao defeito visu
 - Capturas de diagnóstico com fundo sintético comprovam o desenho dos controles, não a composição final na janela do jogo. A fidelidade visual ao estudo e a experiência prolongada precisam de revisão identificada no executável candidato.
 
 Nenhum save, modelo, luz, colisão ou rotina de simulação é parte desta mudança. Não existe decisão de portar o jogo para Godot. Próxima ação desta trilha: validar o HUD principal na partida e registrar defeitos concretos antes de iniciar a apresentação dos menus e submenus.
+
+
+## Pedido humano17/10/2026 — molduras discretas
+
+Defeito visual explicitado por captura: linhas vermelhas dos campos do personagem, grade/equipamentos do inventário e cabeçalhos dos menus. Candidato integrado em diagnostics/3d-target-selection-20261016-r1 altera somente DrawD3dFloatingPanelFrame para cinza PAL16_GRAY+9 (realce+6), blend nativo50%, sem sobrepor blend nos cantos. Mesmas posições, escalas, campos e captura de input. CompilaçãoHUD r6 PASS; teste integrado/instalação ainda pendentes, não atribuir à build aberta25. Source selada7ed23e3f49c0e2cf81b43e0301dd4260a3eed9366cf4a0fe8e458ad343ae9c35.
+
+Entrega17/10: molduras cinza50% presentes na engine26 (`Jogar-engine26.cmd`), Source7ed23e3f…/EXE8ce1d90e…; compilação e gateintegrado90000/instalaçãoPASS. Revisão estética humana pendente; sem alterações de interação/escala/layout. Recibo diagnostics/3d-target-selection-20261016-r1/DELIVERY.json.
+
+
+## Correção humana e entrega engine27 —17/10/2026
+
+A captura humana mostrou que o blend de índices nativos26 ainda produzia linhas alaranjadas/vermelhas. Engine27 usa a mesma arte R1 Inset do cinto fixo nos cabeçalhos, campos e grade, com oito bordas e centro vazio, respeitando opacidade/tema. Registro RGBA em painel diferido e recuperaçãoCPU; nenhum novo asset. Inventário flutuante deixa de preencher o fundo dos itens; ícones e linhas permanecem. Source8aed47e…/EXE81bfc7b7…, compilações e gate90027/instalaçãoPASS, revisão estética humana pendente. Layouts/preferências atuais26 copiados byte-exatos ao perfil27. `Jogar-engine27.cmd`; recibo diagnostics/3d-selection-performance-health-local27-20261017-r1/DELIVERY.json.
+
+
+**Correção humana de camadas do inventário/Esc —17/10/2026:** captura27 mostra grade sobre ícones e pede fundo cinza transparente leve; segunda captura pede remover linhas vermelhas também do menuEsc. Patch isolado em `diagnostics/hud-inventory-menu-layer-fix-20261017-r1`, base27 closure8aed47e…;6arquivos delimitados noPATCHSET. Causa: bordasR1 guardadas na camada authoredItemColors, composta após índices dos ícones nativos. Solução: underlayRGBA separado antes de conteúdo indexado e HD tantoCPUquantoGPU; cinzaRGB128 alpha24/255 nos slotsocupados, clipping/tema/fallback mantidos; painel/seleçãoEsc usam frameR1comum. Source27/pacote/perfil entregues intactos. Integração seletiva solicitada ao responsável29 antes de congelar; janela nativa exclusiva29, nenhum build/teste/helper desta correção executado aqui. Não anunciar como já instalado; aguardar recibo29 comSource/EXE/gatepróprios e revisãohumana.
+

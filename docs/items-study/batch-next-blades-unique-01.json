@@ -1,0 +1,384 @@
+{
+  "format": "d3d.item-concept-art",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "scope": "Seven unique-blade shared-appearance proposals, with explicit inherited native cursors and no new images.",
+  "batchId": "next-blades-unique-01",
+  "catalogSha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d",
+  "generationCalls": 0,
+  "originalGameImagesIncluded": false,
+  "visualApproval": false,
+  "runtimeInstalled": false,
+  "summary": {
+    "linkedProductionUnits": 7,
+    "newIndividualImages": 0,
+    "sharedDesignProposals": 7,
+    "incompleteSourceDesigns": 1,
+    "modelsGenerated": 0,
+    "runtimeIconsGenerated": 0
+  },
+  "entries": [
+    {
+      "productionId": "item.design.unique.doombringer",
+      "conceptId": "item.design.unique.doombringer.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "family-sheet",
+      "image": "assets/concept-art/items/r1/bastard-sword-r1.png",
+      "sha256": "171ffc43547cf86b4cd5d606d7a0f4ebee705661b7f0e22d4be7e8462b3caf9f",
+      "dimensions": [
+        1223,
+        1286
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate item modeling turnaround sheet, not a runtime icon.\nSubject: ONE Bastard Sword, productionId item.design.base.bastard-sword, ICURS_BASTARD_SWORD 57. Use the attached PRIVATE ORIGINAL INVENTORY SPRITE ONLY as silhouette, proportion and material-color reference. Preserve its unusual actual design rather than a generic bastard sword: very long narrow straight silver steel blade with needle-like elongated point; a thicker angular stepped steel collar/ricasso at the blade root with small lateral shoulders; a compact dark cobalt-blue curved oval crossguard enclosing a shallow open oval on each side; dark wine-red leather grip; small warm brass/gold disc pommel. Keep the blue guard/red grip/silver blade/gold pommel distinction. The modest stepped steel details near the blade root must remain subordinate, not become huge spikes or a broad serrated blade.\nProduce one coherent high-detail technical concept sheet with FRONT, SIDE thickness, BACK and THREE-QUARTER views of the EXACT SAME sword plus a small NEW detailed HD rendered inventory thumbnail blade up. Entire object visible in every view, spaced cleanly. All views agree on blade silhouette, guard loops, grip and proportions. Hidden rear surfaces, three-dimensional guard and blade cross-section are conservative inferred reconstruction, kept simple.\nRestrained realistic dark medieval worn steel, dark blue patinated metal guard, red-brown leather wrapping and modest brass pommel. Neutral soft white studio illumination, no magic/self-emission or colored light; opaque plain charcoal gray backdrop, minimal shadows. Labels only BASTARD SWORD / FRONT / SIDE / BACK / 3-4 / ICON. Never copy, paste, trace or show pixel-art in the sheet or thumbnail; the inset is a fresh HD render of this concept. No characters, hands, scenery, jewels, skulls, extra objects or watermark.",
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 57,
+        "sha256": "7c33c0274a8b6ede881cfabb5233a781f867f37dc07f460fbdd09d7f11ad5f31",
+        "notes": "Original licensed inventory appearance inspected locally; private source pixels are not included."
+      },
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-preview"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "notes": "Shared base concept proposal for this unique identity. No individually generated unique art or approved geometry reuse is claimed; stats, powers and profile/table identity remain native and separate. Review the source concept and decide whether the inherited appearance is retained before master production.",
+      "reusedFromProductionId": "item.design.base.bastard-sword",
+      "generationIntent": "Explicit source-faithful shared appearance proposal; no new generation call.",
+      "sharedDesignProposal": {
+        "reason": "This unique inherits the exact recorded native cursor of the source base; use the same candidate shape rather than invent an appearance from the name.",
+        "nativeCursorNames": [
+          "BASTARD_SWORD"
+        ],
+        "exclusiveUniqueDesign": "pending-review",
+        "newImageGenerated": false,
+        "sourceConceptId": "item.design.base.bastard-sword.concept.r1"
+      }
+    },
+    {
+      "productionId": "item.design.unique.gibbous-moon",
+      "conceptId": "item.design.unique.gibbous-moon.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "family-sheet",
+      "image": "assets/concept-art/items/r1/broad-sword-r1.png",
+      "sha256": "0dc474e34eb7789dd7be10a7990840bb1f017aed30b2bab012cffbe550863ffa",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept. Asset type: Diablo 3D candidate modeling reference. Reconstruct the SINGLE medieval item described below using input image only as silhouette/color reference. A clean technical turnaround board with the exact SAME item in FRONT, SIDE thickness, BACK, and THREE-QUARTER views, plus a small NEW high-detail rendered inventory thumbnail of that same concept. Never paste or repeat the pixel-art source. All geometry/materials agree; no alternate designs. Whole object visible with spacing, charcoal-gray backdrop, neutral soft studio light, no colored illumination. Realistic restrained dark medieval Diablo 1 materials, fine wear, no neon or gratuitous spikes. Only labels item name and FRONT/SIDE/BACK/3-4/ICON.\nBROAD SWORD. ID item.design.base.broad-sword. Preserve reference: long straight relatively narrow double-edged steel blade with slender elongated point and central ridge, a wide ornate but modest brass-gold crossguard with ridged small rectangular ends and central fitting, dark very muted olive leather grip, small rectangular gold/brass pommel. The original named broad sword has this thin silhouette: do not exaggerate width. No glowing magic, gemstone or oversized shoulders.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "cursorId": 61,
+        "sha256": "e292e808010849c72bc240b311c4553aba7f0fafdafe5506b07d6bfb0411f59a",
+        "availability": "local-private"
+      },
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "notes": "Shared base concept proposal for this unique identity. No individually generated unique art or approved geometry reuse is claimed; stats, powers and profile/table identity remain native and separate. Review the source concept and decide whether the inherited appearance is retained before master production.",
+      "reusedFromProductionId": "item.design.base.broad-sword",
+      "generationIntent": "Explicit source-faithful shared appearance proposal; no new generation call.",
+      "sharedDesignProposal": {
+        "reason": "This unique inherits the exact recorded native cursor of the source base; use the same candidate shape rather than invent an appearance from the name.",
+        "nativeCursorNames": [
+          "BROAD_SWORD"
+        ],
+        "exclusiveUniqueDesign": "pending-review",
+        "newImageGenerated": false,
+        "sourceConceptId": "item.design.base.broad-sword.concept.r1"
+      },
+      "accepted": false,
+      "selected": false,
+      "installed": false
+    },
+    {
+      "productionId": "item.design.unique.ice-shank",
+      "conceptId": "item.design.unique.ice-shank.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "family-sheet",
+      "image": "assets/concept-art/items/r1/long-sword-r1.png",
+      "sha256": "7d24d245813793f48ecec930e0e54782a89dc1c8352ed0bd07c05bd42f4891ff",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate modeling turnaround reference, not a final game icon.\nSubject: ONE Long Sword, productionId item.design.base.long-sword, ICURS_LONG_SWORD 60. Attached PRIVATE ORIGINAL INVENTORY SPRITE is reference-only and defines silhouette/proportions/local colors. Reconstruct the original thin straight steel double-edged blade with long tapered pointed tip and central bevel, a warm brass/gold U-shaped crossguard whose two ends sweep distinctly upward toward the blade, a narrow dark crimson red leather grip, and a small round brass pommel. Preserve the original restrained hilt, very long slender blade-to-hilt ratio and red/gold contrast; no curved blade, no extra rings or gems, no generic straight guard. Brass is non-emissive local material.\nOne coherent high-detail technical concept sheet shows the exact SAME sword in FRONT, SIDE thickness, BACK and THREE-QUARTER views plus a small NEW HD rendered inventory thumbnail of the same object blade up. All views agree on geometry, length, upward guard and materials; whole object visible with clear spacing, no alternate designs. Rear and hidden cross-section reconstructed conservatively.\nRealistic dark medieval worn steel, aged brass and red leather, fine edge wear only, no heavy corrosion or ornate additions. Plain opaque charcoal gray background. Neutral soft white studio lighting, clear material albedo, no colored light, magic glow, baked dramatic shadows, scenery, characters, hands, sci-fi or watermark. Labels only LONG SWORD / FRONT / SIDE / BACK / 3-4 / ICON. Never copy, paste, trace or display a pixel-art inset: inventory thumbnail must be a newly rendered HD preview of this concept.",
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 60,
+        "sha256": "e1269dbc1198670c66d00d36605365f0a3b5197af176a4a85a1c41d5de8857df",
+        "notes": "Original licensed inventory appearance inspected locally; private source pixels are not included."
+      },
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-preview"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "notes": "Shared base concept proposal for this unique identity. No individually generated unique art or approved geometry reuse is claimed; stats, powers and profile/table identity remain native and separate. Review the source concept and decide whether the inherited appearance is retained before master production.",
+      "reusedFromProductionId": "item.design.base.long-sword",
+      "generationIntent": "Explicit source-faithful shared appearance proposal; no new generation call.",
+      "sharedDesignProposal": {
+        "reason": "This unique inherits the exact recorded native cursor of the source base; use the same candidate shape rather than invent an appearance from the name.",
+        "nativeCursorNames": [
+          "LONG_SWORD"
+        ],
+        "exclusiveUniqueDesign": "pending-review",
+        "newImageGenerated": false,
+        "sourceConceptId": "item.design.base.long-sword.concept.r1"
+      }
+    },
+    {
+      "productionId": "item.design.unique.inferno",
+      "conceptId": "item.design.unique.inferno.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "family-sheet",
+      "image": "assets/concept-art/items/r1/long-sword-r1.png",
+      "sha256": "7d24d245813793f48ecec930e0e54782a89dc1c8352ed0bd07c05bd42f4891ff",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate modeling turnaround reference, not a final game icon.\nSubject: ONE Long Sword, productionId item.design.base.long-sword, ICURS_LONG_SWORD 60. Attached PRIVATE ORIGINAL INVENTORY SPRITE is reference-only and defines silhouette/proportions/local colors. Reconstruct the original thin straight steel double-edged blade with long tapered pointed tip and central bevel, a warm brass/gold U-shaped crossguard whose two ends sweep distinctly upward toward the blade, a narrow dark crimson red leather grip, and a small round brass pommel. Preserve the original restrained hilt, very long slender blade-to-hilt ratio and red/gold contrast; no curved blade, no extra rings or gems, no generic straight guard. Brass is non-emissive local material.\nOne coherent high-detail technical concept sheet shows the exact SAME sword in FRONT, SIDE thickness, BACK and THREE-QUARTER views plus a small NEW HD rendered inventory thumbnail of the same object blade up. All views agree on geometry, length, upward guard and materials; whole object visible with clear spacing, no alternate designs. Rear and hidden cross-section reconstructed conservatively.\nRealistic dark medieval worn steel, aged brass and red leather, fine edge wear only, no heavy corrosion or ornate additions. Plain opaque charcoal gray background. Neutral soft white studio lighting, clear material albedo, no colored light, magic glow, baked dramatic shadows, scenery, characters, hands, sci-fi or watermark. Labels only LONG SWORD / FRONT / SIDE / BACK / 3-4 / ICON. Never copy, paste, trace or display a pixel-art inset: inventory thumbnail must be a newly rendered HD preview of this concept.",
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 60,
+        "sha256": "e1269dbc1198670c66d00d36605365f0a3b5197af176a4a85a1c41d5de8857df",
+        "notes": "Original licensed inventory appearance inspected locally; private source pixels are not included."
+      },
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-preview"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "notes": "Shared base concept proposal for this unique identity. No individually generated unique art or approved geometry reuse is claimed; stats, powers and profile/table identity remain native and separate. Review the source concept and decide whether the inherited appearance is retained before master production.",
+      "reusedFromProductionId": "item.design.base.long-sword",
+      "generationIntent": "Explicit source-faithful shared appearance proposal; no new generation call.",
+      "sharedDesignProposal": {
+        "reason": "This unique inherits the exact recorded native cursor of the source base; use the same candidate shape rather than invent an appearance from the name.",
+        "nativeCursorNames": [
+          "LONG_SWORD"
+        ],
+        "exclusiveUniqueDesign": "pending-review",
+        "newImageGenerated": false,
+        "sourceConceptId": "item.design.base.long-sword.concept.r1"
+      }
+    },
+    {
+      "productionId": "item.design.unique.lightsabre",
+      "conceptId": "item.design.unique.lightsabre.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "family-sheet",
+      "image": "assets/concept-art/items/r1/sabre-r1.png",
+      "sha256": "f265ceba5c07442bd92f29c928427df6a107203661992d3a08c8b61d679d0cd3",
+      "dimensions": [
+        1226,
+        1283
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate item modeling reference sheet, not a final runtime icon.\nSubject: ONE Sabre, productionId item.design.base.sabre, ICURS_SABRE 67. The input PRIVATE ORIGINAL INVENTORY SPRITE defines the actual silhouette, proportions and colors. Reconstruct the reference, even though its blade is almost straight: a very long slender bright steel single-edged blade with only a subtle sweep near the oblique pointed tip, a short steel collar at the blade root, and a broad bulbous enclosed bowl/cup guard in aged yellow brass around the hand. A short dark grip is mostly enclosed/occluded by the cup guard; retain the big rounded brass hand protection and modest brass lower fitting seen in the sprite. Do not substitute a thin knucklebow, an exposed straight crossguard or the dramatically curved scimitar. Keep the blade slender and original blade-to-guard proportions.\nCreate one coherent technical concept sheet with FRONT, SIDE, BACK, THREE-QUARTER views of the exact SAME object, plus a small NEW detailed HD rendered inventory thumbnail. All views share the same bowl, steel blade, grip and material colors; whole item visible, clear separation. Rear side of cup, enclosed grip and blade thickness are conservative plausible inferred surfaces; show them consistently. No alternate designs.\nRealistic restrained dark medieval worn steel, slightly tarnished brass and dark leather, no ornate engraving or extra decorations. Neutral soft white studio lighting, material colors readable without colored light, minimal contact shadows, plain opaque charcoal gray background. No scenery, hand, character, sci-fi, glow, jewels, watermarks or extra objects. Labels only SABRE / FRONT / SIDE / BACK / 3-4 / ICON. Never copy, paste, trace or display the pixel-art reference in the sheet. Thumbnail must be a fresh high-detail render of the same concept.",
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 67,
+        "sha256": "293662d11e3133314d31c4a92356712b01f4bbf6ad436b3198a3a9ded3df7eec",
+        "notes": "Original licensed inventory appearance inspected locally; private source pixels are not included."
+      },
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-preview"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "notes": "Shared base concept proposal for this unique identity. No individually generated unique art or approved geometry reuse is claimed; stats, powers and profile/table identity remain native and separate. Review the source concept and decide whether the inherited appearance is retained before master production.",
+      "reusedFromProductionId": "item.design.base.sabre",
+      "generationIntent": "Explicit source-faithful shared appearance proposal; no new generation call.",
+      "sharedDesignProposal": {
+        "reason": "This unique inherits the exact recorded native cursor of the source base; use the same candidate shape rather than invent an appearance from the name.",
+        "nativeCursorNames": [
+          "SABRE"
+        ],
+        "exclusiveUniqueDesign": "pending-review",
+        "newImageGenerated": false,
+        "sourceConceptId": "item.design.base.sabre.concept.r1"
+      }
+    },
+    {
+      "productionId": "item.design.unique.shadowhawk",
+      "conceptId": "item.design.unique.shadowhawk.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "family-sheet",
+      "image": "assets/concept-art/items/r1/broad-sword-r1.png",
+      "sha256": "0dc474e34eb7789dd7be10a7990840bb1f017aed30b2bab012cffbe550863ffa",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept. Asset type: Diablo 3D candidate modeling reference. Reconstruct the SINGLE medieval item described below using input image only as silhouette/color reference. A clean technical turnaround board with the exact SAME item in FRONT, SIDE thickness, BACK, and THREE-QUARTER views, plus a small NEW high-detail rendered inventory thumbnail of that same concept. Never paste or repeat the pixel-art source. All geometry/materials agree; no alternate designs. Whole object visible with spacing, charcoal-gray backdrop, neutral soft studio light, no colored illumination. Realistic restrained dark medieval Diablo 1 materials, fine wear, no neon or gratuitous spikes. Only labels item name and FRONT/SIDE/BACK/3-4/ICON.\nBROAD SWORD. ID item.design.base.broad-sword. Preserve reference: long straight relatively narrow double-edged steel blade with slender elongated point and central ridge, a wide ornate but modest brass-gold crossguard with ridged small rectangular ends and central fitting, dark very muted olive leather grip, small rectangular gold/brass pommel. The original named broad sword has this thin silhouette: do not exaggerate width. No glowing magic, gemstone or oversized shoulders.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "cursorId": 61,
+        "sha256": "e292e808010849c72bc240b311c4553aba7f0fafdafe5506b07d6bfb0411f59a",
+        "availability": "local-private"
+      },
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "notes": "Shared base concept proposal for this unique identity. No individually generated unique art or approved geometry reuse is claimed; stats, powers and profile/table identity remain native and separate. Review the source concept and decide whether the inherited appearance is retained before master production.",
+      "reusedFromProductionId": "item.design.base.broad-sword",
+      "generationIntent": "Explicit source-faithful shared appearance proposal; no new generation call.",
+      "sharedDesignProposal": {
+        "reason": "This unique inherits the exact recorded native cursor of the source base; use the same candidate shape rather than invent an appearance from the name.",
+        "nativeCursorNames": [
+          "BROAD_SWORD"
+        ],
+        "exclusiveUniqueDesign": "pending-review",
+        "newImageGenerated": false,
+        "sourceConceptId": "item.design.base.broad-sword.concept.r1"
+      },
+      "accepted": false,
+      "selected": false,
+      "installed": false
+    },
+    {
+      "productionId": "item.design.unique.shirotachi",
+      "conceptId": "item.design.unique.shirotachi.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "family-sheet",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-thumbnail"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "postProcessing": "none; original generated PNG bytes copied unchanged",
+      "styleReferences": [
+        {
+          "role": "layout-neutral-rendering-only",
+          "image": "assets/concept-art/items/r1/claymore-r1.png",
+          "sha256": "e9a2e4061bcdad78e7833fa7657722672c127466a0e77a2e5dbf2df536070567"
+        }
+      ],
+      "image": "assets/concept-art/items/r1/great-sword-r1.png",
+      "sha256": "b745511079842508445d1a3f1059d2fb56366e9e86e43266753009a89ffdf28b",
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate modeling turnaround, NOT a finished runtime icon.\nInput image 1: PRIVATE original pixel-art silhouette and color reference for ONE item, Great Sword, item.design.base.great-sword, ICURS_GREAT_SWORD 134. Use it only to inform wholly NEW detailed concept art; never paste its pixels or reproduce a pixel-art inset. Input image 2: layout, clean neutral rendering and presentation style reference ONLY (Claymore board); do not borrow its sword geometry.\nCreate a clean high-detail realistic game-prop concept sheet showing the exact SAME SINGLE physical object in FRONT flat face, true SIDE thickness, BACK opposite face, and THREE-QUARTER views, plus a smaller NEW HD rendered inventory-composition thumbnail of that same concept. Whole isolated vertical objects, widely spaced; plain charcoal-gray background, neutral soft studio light, restrained finely worn real steel, brass/copper and leather. Labels only GREAT SWORD / FRONT / SIDE / BACK / 3-4 / ICON, understated light serif typography. Keep the complete blade tips, guards and pommels in frame.\nCrucial reference fidelity: despite its name GREAT SWORD, the source blade is CURVED and comparatively slim, not a straight double-edged claymore. Preserve the long gently sweeping silver-gray single-edged blade, the asymmetric curved outline, relatively narrow width, and the subtly clipped/rounded upper tip visible in the reference rather than inventing a symmetric spear point. The steel blade is much longer than the grip. At its base retain a small warm brass collar and the distinctive dark copper/rust-brown asymmetric curling guard with swept branching quillons, then the visibly crimson/dark red long grip and small muted gold/brass endcap. Preserve the original palette distribution: silver blade, dark orange-brown guard, red grip, small brass accents. For this candidate infer real forged metal and red leather surfaces; unseen thickness/back and the exact guard construction are reconstructions. Do not straighten the blade to suit the item name, do not exaggerate it into a broad falchion/scimitar, and do not replace the curled guard with the Claymore's straight crossguard.\nAll views must have identical grip length, tip shape, blade curvature, guard topology and material placement. BACK is the opposite face of the same asymmetric object, so its projected curvature reverses naturally; it is not a second design. SIDE shows the thin blade thickness rather than another full-width face. The small ICON is a newly rendered high-detail view of this same curved sword, never the input sprite.\nAvoid alternate variants, hands, people, scenery, fire/glow, neon, fantasy jewels/skulls/spikes, added runes, baked dramatic shadows, colored lights, source pixel-art, collage or generic straight greatsword. Sharp readable silhouette and restrained real material detail, matching the existing clean board language.",
+      "referenceHash": "e1a353d80b193efc9f4f766b2495eb29f17260d2e272f0d9e81ae04e232e9ebd",
+      "reference": {
+        "cursorId": 134,
+        "sha256": "e1a353d80b193efc9f4f766b2495eb29f17260d2e272f0d9e81ae04e232e9ebd",
+        "availability": "local-private",
+        "notes": "Referência 6x inspecionada antes da geração. Apesar do nome Great Sword, a imagem mostra lâmina comprida e curva, aço cinza, guarda sinuosa castanho-alaranjada, cabo vermelho e pequenos acentos dourados."
+      },
+      "inferredAreas": [
+        "Espessura, face posterior, construção dos ramos curvos da guarda e detalhes de fixação são reconstruções.",
+        "Os quillons em forma de fita torcida e o corte/recorte da ponta são soluções propostas pelo conceito; a referência de baixa resolução não comprova essas construções.",
+        "Leituras de aço, couro vermelho, cobre e latão são propostas a partir das cores; desgaste fino e detalhes do pomo não foram recuperados do sprite."
+      ],
+      "coherenceReview": {
+        "status": "pending-corrections",
+        "coherentAcrossViews": false,
+        "observed": "A prancha preserva lâmina curva relativamente estreita, paleta cinza/vermelho/castanho-alaranjado/dourado e guarda sinuosa, sem converter o item numa espada reta genérica. Todas as vistas estão presentes; o thumbnail é novo HD.",
+        "pendingIssues": [
+          "BACK mantém o sentido projetado da curvatura de FRONT enquanto espelha a guarda; a face oposta deveria ser reconciliada para representar a mesma lâmina assimétrica.",
+          "Revisar orientação da curva em 3-4 e a ligação entre lâmina, guarda e cabo em todas as vistas antes do master 3D.",
+          "Reconciliar espessura, grip e espaço útil para as mãos com a frente de personagens antes da modelagem; nenhum socket ou encaixe foi validado nesta imagem.",
+          "A ponta ficou mais afilada que a leitura arredondada/oblíqua da referência; confirmar o perfil antes de selecionar o conceito.",
+          "A construção tridimensional dos ramos da guarda é inferida e deve ser revisada com a referência; não tratar o detalhe gerado como fidelidade comprovada."
+        ]
+      },
+      "notes": "Shared base concept proposal for this unique identity. No individually generated unique art or approved geometry reuse is claimed; stats, powers and profile/table identity remain native and separate. The shared Great Sword study is incomplete; asymmetric BACK/guard coherence blocks master production for this identity as well.",
+      "reviewDisposition": "Study candidate only: R1 retains all intended components but has an asymmetric BACK mismatch. R2/R3 targeted corrections were partial/failed; no revision is ready for master production.",
+      "revisionHistoryManifests": [
+        "docs/items-study/batch-02-great-sword-r2.json",
+        "docs/items-study/batch-02-great-sword-r3.json"
+      ],
+      "reusedFromProductionId": "item.design.base.great-sword",
+      "generationIntent": "Explicit source-faithful shared appearance proposal; no new generation call.",
+      "sharedDesignProposal": {
+        "reason": "This unique inherits the exact recorded native cursor of the source base; use the same candidate shape rather than invent an appearance from the name.",
+        "nativeCursorNames": [
+          "GREAT_SWORD"
+        ],
+        "exclusiveUniqueDesign": "pending-review",
+        "newImageGenerated": false,
+        "sourceConceptId": "item.design.base.great-sword.concept.r1"
+      },
+      "modelReadiness": "blocked-concept-coherence"
+    }
+  ]
+}

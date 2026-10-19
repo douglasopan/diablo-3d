@@ -1,0 +1,60 @@
+{
+  "format": "d3d.item-concept-art",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "batchId": "2026-10-08-batch-next-bows-base-02",
+  "catalogSha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d",
+  "scope": "Reference-available bows; exact-cursor sharing explicit. Missing Hellfire Blitzen, Flambeau, Gnat Sting remain blocked.",
+  "generationTool": "built-in image_gen.imagegen",
+  "generationCalls": 1,
+  "postProcessing": "none; generated PNG bytes copied unchanged",
+  "originalGameImagesIncluded": false,
+  "visualApproval": false,
+  "runtimeInstalled": false,
+  "summary": {
+    "linkedProductionUnits": 1,
+    "newPNGs": 1,
+    "sharedProposals": 0,
+    "modelsGenerated": 0,
+    "runtimeIconsGenerated": 0
+  },
+  "entries": [
+    {
+      "productionId": "item.design.base.short-war-bow",
+      "conceptId": "item.design.base.short-war-bow.concept.r1",
+      "revision": "r1",
+      "kind": "turnaround",
+      "status": "candidate",
+      "image": "assets/concept-art/items/r1/short-war-bow-r1.png",
+      "sha256": "10fc427f27b50b202d14ac48b0390593f9ef320073accbc7c17b908910e5334a",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate item modeling turnaround.\nSubject: ONE SHORT WAR BOW, item.design.base.short-war-bow, cursor165. Input PRIVATE original sprite is shape/proportion/local-color reference only. Reconstruct its small compact recurved bow: deep navy-blue limbs and rounded blue tip fittings, two chunky pale-gray metal limb fittings near the central ochre/brass wrapped handle, restrained warm-red inset patches on the limbs, thin tan bowstring joining the tips. Preserve actual compact curve, original colored fittings and handle proportions. Rear and thickness conservative inference; no new ornaments from the name.\nMANDATORY FIVE SEPARATE VIEWS of this SAME entire object, all clearly spaced: FRONT broad silhouette, SIDE edge-on showing limb thickness, BACK opposite broad face with silhouette horizontally mirrored, THREE-QUARTER full-size oblique view, AND a fifth small HD INVENTORY THUMBNAIL. Do not combine the oblique view with the thumbnail. Show string continuous and connected to both tips in every view, same fittings and grip everywhere. No arrow. Every panel shows whole bow, no cropping.\nRealistic dark medieval navy-painted wood, dull steel and aged brass, leather wrap, subtle wear, neutral white soft studio light, plain opaque charcoal background. Labels only SHORT WAR BOW / FRONT / SIDE / BACK / 3-4 / ICON. No character, hands, scenery, magic, glow or watermark. Never copy, paste, trace or display the private pixel sprite. The ICON is a newly rendered HD preview of this same new object.",
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 165,
+        "sha256": "d5ee127d143f52a591167226ac1c89025b6e6386986ef0286645a6805edf73c6"
+      },
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-preview"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "notes": "Source proportions and major fittings inspected. Opposite-face silhouette mirrors correctly; string joins tips. Three-quarter is weakly oblique. Fine fittings, band spacing, rear and thickness are inferred and need 3D review. HD thumbnail is a concept preview."
+    }
+  ]
+}

@@ -1,0 +1,875 @@
+{
+  "format": "d3d.item-inventory-preparation",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "revision": "prep-r1",
+  "status": "metadata-and-view-recipes-prepared",
+  "scope": "Small local preparation packet within the existing item queue, motivated by the relayed explicit inventory-replacement request. No parallel production queue or reservation ledger.",
+  "authority": {
+    "registry": "assets/registry.json",
+    "assetPreparationOwnerThread": "01a11b58-80a9-7e63-973b-47d72752ccc7",
+    "onlyRuntimeBuildInstallGitOwnerThread": "01a1153a-cad1-7fb1-8326-225511ee918d",
+    "registryMutated": false,
+    "conceptSelectionMutated": false
+  },
+  "requestEvidence": {
+    "inventoryRequestEvent": "Sentinel_b8acba09eaec8191987339e698dfcd9c",
+    "evidenceKind": "relayed human request; not visual approval",
+    "relayThread": "01a11b09-c317-75b6-8184-b3a9e37bf015",
+    "latestStudioSteeringRelayThread": "01a11d5c-1062-709c-b696-ea2535db602d",
+    "restriction": "3D batch suspended. Central preflight only for one existing asset; no generation, submission, upload, reservation, render, benchmark or credit use in this packet."
+  },
+  "sourceFiles": [
+    {
+      "path": "docs/items-study/catalog.json",
+      "sha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d"
+    },
+    {
+      "path": "docs/items-study/concept-art.json",
+      "sha256": "25396b2b70da8ebd759d1e18314a07a09cda3b22077145a644381100bf5494c2"
+    },
+    {
+      "path": "assets/registry.json",
+      "sha256": "62f2fbdd943b7ad93175c7167bd2edd1fda20d6f43bf132924bf662a9168d830"
+    },
+    {
+      "path": "Source/cursor.cpp",
+      "sha256": "92a0a8b701a9ec41136e5fe41220aab440b383f481ffe4b3ade693a0f4658376"
+    },
+    {
+      "path": "Source/inv.h",
+      "sha256": "cdce8495eac392dc678016894642bc30c0c09736d32a0e888822bc6c86b5e60e"
+    },
+    {
+      "path": "Source/inv.cpp",
+      "sha256": "b3965818b6e4a3aa53b28f6e43cd2925391f9ada9c2ee244a2e3abd715f8adfe"
+    }
+  ],
+  "privateDimensionEvidence": {
+    "mediaIncluded": false,
+    "manifestSha256": "0d8e0a5442fb3aea119bc3475c6c5c40f5982b7d88bb16af7a0c6ac2f5693b9e",
+    "metadataOnly": true
+  },
+  "audit": {
+    "conceptPngCount": 142,
+    "conceptPngsWithAlpha": 0,
+    "overlayEntryCount": 193,
+    "approvedOverlayEntries": 0,
+    "finalItemIconsFound": 0,
+    "itemMastersFound": 0,
+    "scope": "assets/concept-art/items, docs/items-study and current registry; not a remote provider ledger or an exhaustive audit of other chats"
+  },
+  "summary": {
+    "candidateDesigns": 3,
+    "mappedNativeBaseRecords": 29,
+    "metadataPacketsPrepared": 3,
+    "individualIconsPrepared": 0,
+    "modelsGenerated": 0,
+    "approved": 0,
+    "installed": 0,
+    "testedInGame": 0
+  },
+  "variantPolicy": {
+    "shortSword": "Three mapped base records only; never replace Sword/SwordShield class-wide or a unique item by name alone. Equipped item selection remains a separate character/socket integration gate.",
+    "scroll": "24 base records share SCROLL_OF. Preserve their individual spell/misc IDs and native availability. Do not invent spell marks or treat this family as 24 independently generated meshes.",
+    "healing": "Only POTION_OF_HEALING cursor32 and its two listed bases. Full Healing cursor35, Mana39, Full Mana, Rejuvenation and other variants retain their own native fallback.",
+    "gold": "All three quantity-dependent gold appearances remain untouched.",
+    "unlisted": "All unlisted cursors/identities and missing/invalid/unsupported candidate resources use original native fallback."
+  },
+  "acceptanceEvidenceRequired": [
+    "Exact human-approved concept/icon revision and file hash, with approval scope.",
+    "Individual RGBA bytes with alpha, dimensions, unclipped silhouette and no text/frame/backdrop/shadow.",
+    "Review at native footprint and useful HD size on dark, light, inventory and shop backgrounds; careful glass matting for Healing.",
+    "Corresponding master/material/LOD identity for the final ground/equipped/icon contract, or an explicitly scoped provisional 2D exception.",
+    "Principal-owned adapter/install receipt and real inventory/shop/belt/ground tests where applicable, preserving fallback and gameplay."
+  ],
+  "studioSingleModelTest": {
+    "handledBy": "existing central coordinator/operator",
+    "existingEligibleMasterInThisItemPacket": false,
+    "candidateMaster": null,
+    "uiPlanAndBalanceVerifiedHere": false,
+    "humanDeclaredStudioCredits": 3200,
+    "apiBudgetAuthorized": false,
+    "creditsAuthorizedByThisPacket": 0,
+    "reason": "No local existing item master to test. Do not silently turn a one-model topology preflight into generation of these three items."
+  },
+  "entries": [
+    {
+      "productionId": "item.design.base.short-sword",
+      "name": "Short Sword",
+      "revision": "prep-r1",
+      "registryParent": "tristram.item.ground-visuals",
+      "runtimeAssetId": null,
+      "source": {
+        "conceptId": "item.design.base.short-sword.concept.r1",
+        "revision": "r1",
+        "path": "assets/concept-art/items/r1/short-sword-r1.png",
+        "sha256": "d944a5855290a5fc604ce5ff3970c7c0e908eeda531a43515fd02dfc5c1ab059",
+        "dimensions": [
+          1312,
+          1199
+        ],
+        "pngColorType": 2,
+        "hasAlpha": false,
+        "role": "candidate concept board; not a final icon",
+        "provenance": {
+          "tool": "built-in image_gen.imagegen",
+          "originalBytesPreserved": true,
+          "sourcePixelIconPasted": false,
+          "licensedReferenceMediaIncluded": false
+        }
+      },
+      "native": {
+        "cursorName": "SHORT_SWORD",
+        "cursorValue": 64,
+        "inventoryCursorId": 76,
+        "combinedSpriteIndexZeroBased": 75,
+        "logicalPixelDimensions": [
+          28,
+          84
+        ],
+        "cellSizePixels": 28,
+        "cellFootprint": [
+          1,
+          3
+        ],
+        "dimensionEvidence": "Read-only private reference metadata; licensed pixels are not included. Structural catalog intentionally remains unchanged.",
+        "originalReferenceSha256": "2f49c0f4a4c3bb8813ef2b43184e3fb06033308553bda82f9cb4b3ad24cc6401",
+        "enlarged6xReferenceSha256": "991a06cfc700b3f5f93352f5785602adf786501b97ab371f02bef6f18d9218e9",
+        "baseMappings": [
+          {
+            "baseItemId": "item.base.001.idi-warrior",
+            "nativeIndex": 1,
+            "mappingId": 1,
+            "source": {
+              "path": "assets/txtdata/items/itemdat.tsv",
+              "line": 3,
+              "nativeIndex": 1
+            },
+            "spell": "Null",
+            "miscId": "NONE"
+          },
+          {
+            "baseItemId": "item.base.037.idi-bardsword",
+            "nativeIndex": 37,
+            "mappingId": 37,
+            "source": {
+              "path": "assets/txtdata/items/itemdat.tsv",
+              "line": 39,
+              "nativeIndex": 37
+            },
+            "spell": "Null",
+            "miscId": "NONE"
+          },
+          {
+            "baseItemId": "item.base.119.short-sword",
+            "nativeIndex": 119,
+            "mappingId": 119,
+            "source": {
+              "path": "assets/txtdata/items/itemdat.tsv",
+              "line": 121,
+              "nativeIndex": 119
+            },
+            "spell": "Null",
+            "miscId": "NONE"
+          }
+        ],
+        "sourceUniqueIds": [],
+        "sourceDynamicIds": [],
+        "groundPresentation": {
+          "nativeAnimationIndex": 8,
+          "sourceAssetStem": "items/swrdflip",
+          "nativeFrameCount": 13,
+          "mediaIncluded": false
+        }
+      },
+      "humanChoice": {
+        "status": "not-evidenced-in-audited-sources",
+        "specificRevisionApproval": false,
+        "evidence": null,
+        "scopeNote": "Task authorization and visual inspection do not approve this design or an icon. This is a bounded audit, not a claim that no other conversation could contain a choice."
+      },
+      "preparation": {
+        "status": "recipe-prepared",
+        "imageEditingExecuted": false,
+        "proposedView": "large FRONT view",
+        "proposedRegionXYWH": [
+          78,
+          128,
+          225,
+          930
+        ],
+        "coordinateConvention": "integer source PNG pixels, top-left origin; x,y,width,height; proposal needs edge review before extraction",
+        "matteNotes": [
+          "Remove charcoal backdrop outside the steel/leather silhouette; keep blade edge and pommel.",
+          "Do not preserve labels, adjacent views or a contact shadow.",
+          "Maintain one uniform scale; do not stretch the blade to fill the 1x3 cell canvas."
+        ],
+        "logicalCanvas": [
+          28,
+          84
+        ],
+        "proposedReviewRgbaCanvas4x": [
+          112,
+          336
+        ],
+        "proposedReviewCanvasIsRuntimeContract": false,
+        "scalePolicy": "Uniform fit within native logical footprint; crop size never changes gameplay occupancy. No mirroring, nonuniform stretch or attached floor shadow.",
+        "outputPath": null,
+        "sha256": null,
+        "actualAlpha": null,
+        "actualDimensions": null
+      },
+      "icon": {
+        "status": "not-prepared",
+        "path": null,
+        "sha256": null,
+        "approved": false,
+        "installed": false,
+        "testedInGame": false,
+        "masterBasedFinalIcon": false,
+        "materialRevision": null
+      },
+      "master3d": {
+        "status": "not-generated",
+        "path": null,
+        "sha256": null,
+        "materialRevision": null,
+        "lods": [],
+        "approved": false,
+        "installed": false,
+        "testedInGame": false,
+        "providerTaskId": null,
+        "reserved": false
+      },
+      "fallback": {
+        "enabled": true,
+        "source": "original native cursor and original ground animation",
+        "matchPolicy": "Future adapter must match exact base/production identity plus effective native cursor; preserve unique overrides, dynamic appearances and all unlisted identities.",
+        "preserve": [
+          "native item name and stats",
+          "inventory footprint and slots",
+          "spell identity and charges",
+          "stack/count rules",
+          "native ground animation and picking",
+          "native equipped animation category"
+        ]
+      },
+      "states": {
+        "metadataPrepared": true,
+        "iconPrepared": false,
+        "modelGenerated": false,
+        "visualApproved": false,
+        "installed": false,
+        "testedInGame": false,
+        "eligibleForAutomaticIntegration": false
+      },
+      "blockers": [
+        "Specific human design/revision choice is not evidenced in the audited sources.",
+        "A clean individual RGBA icon does not exist.",
+        "No corresponding accepted master/material/LOD exists; this recipe does not satisfy the final shared-master icon contract.",
+        "No runtime adapter or in-game inventory/shop/ground test is delivered by this asset-preparation packet."
+      ]
+    },
+    {
+      "productionId": "item.design.base.scroll",
+      "name": "Scroll",
+      "revision": "prep-r1",
+      "registryParent": "tristram.item.ground-visuals",
+      "runtimeAssetId": null,
+      "source": {
+        "conceptId": "item.design.base.scroll.concept.r1",
+        "revision": "r1",
+        "path": "assets/concept-art/items/r1/scroll-r1.png",
+        "sha256": "efb23d5d5582b550de65231a3de659474923d63bc47f40e595b6eb60457ab28d",
+        "dimensions": [
+          1536,
+          1024
+        ],
+        "pngColorType": 2,
+        "hasAlpha": false,
+        "role": "candidate concept board; not a final icon",
+        "provenance": {
+          "tool": "built-in image_gen.imagegen",
+          "originalBytesPreserved": true,
+          "sourcePixelIconPasted": false,
+          "licensedReferenceMediaIncluded": false
+        }
+      },
+      "native": {
+        "cursorName": "SCROLL_OF",
+        "cursorValue": 1,
+        "inventoryCursorId": 13,
+        "combinedSpriteIndexZeroBased": 12,
+        "logicalPixelDimensions": [
+          28,
+          28
+        ],
+        "cellSizePixels": 28,
+        "cellFootprint": [
+          1,
+          1
+        ],
+        "dimensionEvidence": "Read-only private reference metadata; licensed pixels are not included. Structural catalog intentionally remains unchanged.",
+        "originalReferenceSha256": "0038045d8431da05ef1068041fdbd3220db65dff1f1c4d2c780ec2891150a5f3",
+        "enlarged6xReferenceSha256": "e9f670289b47f683e769724d70df2184679666c043e3f34372ee5e00d674e45a",
+        "baseMappings": [
+          {
+            "baseItemId": "item.base.026.idi-identify",
+            "nativeIndex": 26,
+            "mappingId": 26,
+            "source": {
+              "path": "assets/txtdata/items/itemdat.tsv",
+              "line": 28,
+              "nativeIndex": 26
+            },
+            "spell": "Identify",
+            "miscId": "SCROLL"
+          },
+          {
+            "baseItemId": "item.base.027.idi-portal",
+            "nativeIndex": 27,
+            "mappingId": 27,
+            "source": {
+              "path": "assets/txtdata/items/itemdat.tsv",
+              "line": 29,
+              "nativeIndex": 27
+            },
+            "spell": "TownPortal",
+            "miscId": "SCROLL"
+          },
+          {
+            "baseItemId": "item.base.034.idi-resurrect",
+            "nativeIndex": 34,
+            "mappingId": 34,
+            "source": {
+              "path": "assets/txtdata/items/itemdat.tsv",
+              "line": 36,
+              "nativeIndex": 34
+            },
+            "spell": "Resurrect",
+            "miscId": "SCROLLT"
+          },
+          {
+            "baseItemId": "item.base.091.scroll-of-healing",
+            "nativeIndex": 91,
+            "mappingId": 91,
+            "source": {
+              "path": "assets/txtdata/items/itemdat.tsv",
+              "line": 93,
+              "nativeIndex": 91
+            },
+            "spell": "Healing",
+            "miscId": "SCROLL"
+          },
+          {
+            "baseItemId": "item.base.092.scroll-of-search",
+            "nativeIndex": 92,
+            "mappingId": 92,
+            "source": {
+              "path": "assets/txtdata/items/itemdat.tsv",
+              "line": 94,
+              "nativeIndex": 92
+            },
+            "spell": "Search",
+            "miscId": "SCROLL"
+          },
+          {
+            "baseItemId": "item.base.093.scroll-of-lightning",
+            "nativeIndex": 93,
+            "mappingId": 93,
+            "source": {
+              "path": "assets/txtdata/items/itemdat.tsv",
+              "line": 95,
+              "nativeIndex": 93
+            },
+            "spell": "Lightning",
+            "miscId": "SCROLLT"
+          },
+          {
+            "baseItemId": "item.base.094.scroll-of-identify",
+            "nativeIndex": 94,
+            "mappingId": 94,
+            "source": {
+              "path": "assets/txtdata/items/itemdat.tsv",
+              "line": 96,
+              "nativeIndex": 94
+            },
+            "spell": "Identify",
+            "miscId": "SCROLL"
+          },
+          {
+            "baseItemId": "item.base.095.scroll-of-resurrect",
+            "nativeIndex": 95,
+            "mappingId": 95,
+            "source": {
+              "path": "assets/txtdata/items/itemdat.tsv",
+              "line": 97,
+              "nativeIndex": 95
+            },
+            "spell": "Resurrect",
+            "miscId": "SCROLLT"
+          },
+          {
+            "baseItemId": "item.base.096.scroll-of-fire-wall",
+            "nativeIndex": 96,
+            "mappingId": 96,
+            "source": {
+              "path": "assets/txtdata/items/itemdat.tsv",
+              "line": 98,
+              "nativeIndex": 96
+            },
+            "spell": "FireWall",
+            "miscId": "SCROLLT"
+          },
+          {
+            "baseItemId": "item.base.097.scroll-of-inferno",
+            "nativeIndex": 97,
+            "mappingId": 97,
+            "source": {
+              "path": "assets/txtdata/items/itemdat.tsv",
+              "line": 99,
+              "nativeIndex": 97
+            },
+            "spell": "Inferno",
+            "miscId": "SCROLLT"
+          },
+          {
+            "baseItemId": "item.base.098.scroll-of-town-portal",
+            "nativeIndex": 98,
+            "mappingId": 98,
+            "source": {
+              "path": "assets/txtdata/items/itemdat.tsv",
+              "line": 100,
+              "nativeIndex": 98
+            },
+            "spell": "TownPortal",
+            "miscId": "SCROLL"
+          },
+          {
+            "baseItemId": "item.base.099.scroll-of-flash",
+            "nativeIndex": 99,
+            "mappingId": 99,
+            "source": {
+              "path": "assets/txtdata/items/itemdat.tsv",
+              "line": 101,
+              "nativeIndex": 99
+            },
+            "spell": "Flash",
+            "miscId": "SCROLLT"
+          },
+          {
+            "baseItemId": "item.base.100.scroll-of-infravision",
+            "nativeIndex": 100,
+            "mappingId": 100,
+            "source": {
+              "path": "assets/txtdata/items/itemdat.tsv",
+              "line": 102,
+              "nativeIndex": 100
+            },
+            "spell": "Infravision",
+            "miscId": "SCROLL"
+          },
+          {
+            "baseItemId": "item.base.101.scroll-of-phasing",
+            "nativeIndex": 101,
+            "mappingId": 101,
+            "source": {
+              "path": "assets/txtdata/items/itemdat.tsv",
+              "line": 103,
+              "nativeIndex": 101
+            },
+            "spell": "Phasing",
+            "miscId": "SCROLL"
+          },
+          {
+            "baseItemId": "item.base.102.scroll-of-mana-shield",
+            "nativeIndex": 102,
+            "mappingId": 102,
+            "source": {
+              "path": "assets/txtdata/items/itemdat.tsv",
+              "line": 104,
+              "nativeIndex": 102
+            },
+            "spell": "ManaShield",
+            "miscId": "SCROLL"
+          },
+          {
+            "baseItemId": "item.base.103.scroll-of-flame-wave",
+            "nativeIndex": 103,
+            "mappingId": 103,
+            "source": {
+              "path": "assets/txtdata/items/itemdat.tsv",
+              "line": 105,
+              "nativeIndex": 103
+            },
+            "spell": "FlameWave",
+            "miscId": "SCROLLT"
+          },
+          {
+            "baseItemId": "item.base.104.scroll-of-fireball",
+            "nativeIndex": 104,
+            "mappingId": 104,
+            "source": {
+              "path": "assets/txtdata/items/itemdat.tsv",
+              "line": 106,
+              "nativeIndex": 104
+            },
+            "spell": "Fireball",
+            "miscId": "SCROLLT"
+          },
+          {
+            "baseItemId": "item.base.105.scroll-of-stone-curse",
+            "nativeIndex": 105,
+            "mappingId": 105,
+            "source": {
+              "path": "assets/txtdata/items/itemdat.tsv",
+              "line": 107,
+              "nativeIndex": 105
+            },
+            "spell": "StoneCurse",
+            "miscId": "SCROLLT"
+          },
+          {
+            "baseItemId": "item.base.106.scroll-of-chain-lightning",
+            "nativeIndex": 106,
+            "mappingId": 106,
+            "source": {
+              "path": "assets/txtdata/items/itemdat.tsv",
+              "line": 108,
+              "nativeIndex": 106
+            },
+            "spell": "ChainLightning",
+            "miscId": "SCROLLT"
+          },
+          {
+            "baseItemId": "item.base.107.scroll-of-guardian",
+            "nativeIndex": 107,
+            "mappingId": 107,
+            "source": {
+              "path": "assets/txtdata/items/itemdat.tsv",
+              "line": 109,
+              "nativeIndex": 107
+            },
+            "spell": "Guardian",
+            "miscId": "SCROLLT"
+          },
+          {
+            "baseItemId": "item.base.109.scroll-of-nova",
+            "nativeIndex": 109,
+            "mappingId": 109,
+            "source": {
+              "path": "assets/txtdata/items/itemdat.tsv",
+              "line": 111,
+              "nativeIndex": 109
+            },
+            "spell": "Nova",
+            "miscId": "SCROLL"
+          },
+          {
+            "baseItemId": "item.base.110.scroll-of-golem",
+            "nativeIndex": 110,
+            "mappingId": 110,
+            "source": {
+              "path": "assets/txtdata/items/itemdat.tsv",
+              "line": 112,
+              "nativeIndex": 110
+            },
+            "spell": "Golem",
+            "miscId": "SCROLLT"
+          },
+          {
+            "baseItemId": "item.base.112.scroll-of-teleport",
+            "nativeIndex": 112,
+            "mappingId": 112,
+            "source": {
+              "path": "assets/txtdata/items/itemdat.tsv",
+              "line": 114,
+              "nativeIndex": 112
+            },
+            "spell": "Teleport",
+            "miscId": "SCROLL"
+          },
+          {
+            "baseItemId": "item.base.113.scroll-of-apocalypse",
+            "nativeIndex": 113,
+            "mappingId": 113,
+            "source": {
+              "path": "assets/txtdata/items/itemdat.tsv",
+              "line": 115,
+              "nativeIndex": 113
+            },
+            "spell": "Apocalypse",
+            "miscId": "SCROLL"
+          }
+        ],
+        "sourceUniqueIds": [],
+        "sourceDynamicIds": [],
+        "groundPresentation": {
+          "nativeAnimationIndex": 16,
+          "sourceAssetStem": "items/scroll",
+          "nativeFrameCount": 13,
+          "mediaIncluded": false
+        }
+      },
+      "humanChoice": {
+        "status": "not-evidenced-in-audited-sources",
+        "specificRevisionApproval": false,
+        "evidence": null,
+        "scopeNote": "Task authorization and visual inspection do not approve this design or an icon. This is a bounded audit, not a claim that no other conversation could contain a choice."
+      },
+      "preparation": {
+        "status": "recipe-prepared",
+        "imageEditingExecuted": false,
+        "proposedView": "existing INVENTORY THUMBNAIL object",
+        "proposedRegionXYWH": [
+          1243,
+          650,
+          221,
+          249
+        ],
+        "coordinateConvention": "integer source PNG pixels, top-left origin; x,y,width,height; proposal needs edge review before extraction",
+        "matteNotes": [
+          "Exclude the inset border, charcoal backdrop and baked floor shadow.",
+          "Preserve ribbon loops/tails, spiral ends and the bottom-left to top-right orientation.",
+          "Physical family only; spell-specific marks remain undefined."
+        ],
+        "logicalCanvas": [
+          28,
+          28
+        ],
+        "proposedReviewRgbaCanvas4x": [
+          112,
+          112
+        ],
+        "proposedReviewCanvasIsRuntimeContract": false,
+        "scalePolicy": "Uniform fit within native logical footprint; crop size never changes gameplay occupancy. No mirroring, nonuniform stretch or attached floor shadow.",
+        "outputPath": null,
+        "sha256": null,
+        "actualAlpha": null,
+        "actualDimensions": null
+      },
+      "icon": {
+        "status": "not-prepared",
+        "path": null,
+        "sha256": null,
+        "approved": false,
+        "installed": false,
+        "testedInGame": false,
+        "masterBasedFinalIcon": false,
+        "materialRevision": null
+      },
+      "master3d": {
+        "status": "not-generated",
+        "path": null,
+        "sha256": null,
+        "materialRevision": null,
+        "lods": [],
+        "approved": false,
+        "installed": false,
+        "testedInGame": false,
+        "providerTaskId": null,
+        "reserved": false
+      },
+      "fallback": {
+        "enabled": true,
+        "source": "original native cursor and original ground animation",
+        "matchPolicy": "Future adapter must match exact base/production identity plus effective native cursor; preserve unique overrides, dynamic appearances and all unlisted identities.",
+        "preserve": [
+          "native item name and stats",
+          "inventory footprint and slots",
+          "spell identity and charges",
+          "stack/count rules",
+          "native ground animation and picking",
+          "native equipped animation category"
+        ]
+      },
+      "states": {
+        "metadataPrepared": true,
+        "iconPrepared": false,
+        "modelGenerated": false,
+        "visualApproved": false,
+        "installed": false,
+        "testedInGame": false,
+        "eligibleForAutomaticIntegration": false
+      },
+      "blockers": [
+        "Specific human design/revision choice is not evidenced in the audited sources.",
+        "A clean individual RGBA icon does not exist.",
+        "No corresponding accepted master/material/LOD exists; this recipe does not satisfy the final shared-master icon contract.",
+        "No runtime adapter or in-game inventory/shop/ground test is delivered by this asset-preparation packet."
+      ]
+    },
+    {
+      "productionId": "item.design.base.potion-of-healing",
+      "name": "Potion of Healing",
+      "revision": "prep-r1",
+      "registryParent": "tristram.item.ground-visuals",
+      "runtimeAssetId": null,
+      "source": {
+        "conceptId": "item.design.base.potion-of-healing.concept.r1",
+        "revision": "r1",
+        "path": "assets/concept-art/items/r1/potion-of-healing-r1.png",
+        "sha256": "fbfeaad3e56dc88ff64bf54d6238ed1390ad70362e1d121a7703b880b227f63e",
+        "dimensions": [
+          1536,
+          1024
+        ],
+        "pngColorType": 2,
+        "hasAlpha": false,
+        "role": "candidate concept board; not a final icon",
+        "provenance": {
+          "tool": "built-in image_gen.imagegen",
+          "originalBytesPreserved": true,
+          "sourcePixelIconPasted": false,
+          "licensedReferenceMediaIncluded": false
+        }
+      },
+      "native": {
+        "cursorName": "POTION_OF_HEALING",
+        "cursorValue": 32,
+        "inventoryCursorId": 44,
+        "combinedSpriteIndexZeroBased": 43,
+        "logicalPixelDimensions": [
+          28,
+          28
+        ],
+        "cellSizePixels": 28,
+        "cellFootprint": [
+          1,
+          1
+        ],
+        "dimensionEvidence": "Read-only private reference metadata; licensed pixels are not included. Structural catalog intentionally remains unchanged.",
+        "originalReferenceSha256": "cac40dca1a16d36caff7343cf676aa3eac5eebbf8b1b654b639f71afe8fde786",
+        "enlarged6xReferenceSha256": "1429531844620003c84f6d7cdd239a468b619dd914d90e20089a8fad2b624213",
+        "baseMappings": [
+          {
+            "baseItemId": "item.base.024.idi-heal",
+            "nativeIndex": 24,
+            "mappingId": 24,
+            "source": {
+              "path": "assets/txtdata/items/itemdat.tsv",
+              "line": 26,
+              "nativeIndex": 24
+            },
+            "spell": "Null",
+            "miscId": "HEAL"
+          },
+          {
+            "baseItemId": "item.base.077.potion-of-healing",
+            "nativeIndex": 77,
+            "mappingId": 77,
+            "source": {
+              "path": "assets/txtdata/items/itemdat.tsv",
+              "line": 79,
+              "nativeIndex": 77
+            },
+            "spell": "Null",
+            "miscId": "HEAL"
+          }
+        ],
+        "sourceUniqueIds": [],
+        "sourceDynamicIds": [],
+        "groundPresentation": {
+          "nativeAnimationIndex": 2,
+          "sourceAssetStem": "items/fbttle",
+          "nativeFrameCount": 16,
+          "mediaIncluded": false
+        }
+      },
+      "humanChoice": {
+        "status": "not-evidenced-in-audited-sources",
+        "specificRevisionApproval": false,
+        "evidence": null,
+        "scopeNote": "Task authorization and visual inspection do not approve this design or an icon. This is a bounded audit, not a claim that no other conversation could contain a choice."
+      },
+      "preparation": {
+        "status": "recipe-prepared",
+        "imageEditingExecuted": false,
+        "proposedView": "large Front View",
+        "proposedRegionXYWH": [
+          48,
+          78,
+          368,
+          590
+        ],
+        "coordinateConvention": "integer source PNG pixels, top-left origin; x,y,width,height; proposal needs edge review before extraction",
+        "matteNotes": [
+          "Preserve glass, red liquid, white reflections, cork and gold cord.",
+          "Do not use a luminance threshold that punches holes through liquid or deletes glass reflections.",
+          "The opaque board bakes its backdrop into transmitted glass; a clean physical alpha cannot be recovered by a simple rectangular crop. A future master render is the definitive source."
+        ],
+        "logicalCanvas": [
+          28,
+          28
+        ],
+        "proposedReviewRgbaCanvas4x": [
+          112,
+          112
+        ],
+        "proposedReviewCanvasIsRuntimeContract": false,
+        "scalePolicy": "Uniform fit within native logical footprint; crop size never changes gameplay occupancy. No mirroring, nonuniform stretch or attached floor shadow.",
+        "outputPath": null,
+        "sha256": null,
+        "actualAlpha": null,
+        "actualDimensions": null
+      },
+      "icon": {
+        "status": "not-prepared",
+        "path": null,
+        "sha256": null,
+        "approved": false,
+        "installed": false,
+        "testedInGame": false,
+        "masterBasedFinalIcon": false,
+        "materialRevision": null
+      },
+      "master3d": {
+        "status": "not-generated",
+        "path": null,
+        "sha256": null,
+        "materialRevision": null,
+        "lods": [],
+        "approved": false,
+        "installed": false,
+        "testedInGame": false,
+        "providerTaskId": null,
+        "reserved": false
+      },
+      "fallback": {
+        "enabled": true,
+        "source": "original native cursor and original ground animation",
+        "matchPolicy": "Future adapter must match exact base/production identity plus effective native cursor; preserve unique overrides, dynamic appearances and all unlisted identities.",
+        "preserve": [
+          "native item name and stats",
+          "inventory footprint and slots",
+          "spell identity and charges",
+          "stack/count rules",
+          "native ground animation and picking",
+          "native equipped animation category"
+        ]
+      },
+      "states": {
+        "metadataPrepared": true,
+        "iconPrepared": false,
+        "modelGenerated": false,
+        "visualApproved": false,
+        "installed": false,
+        "testedInGame": false,
+        "eligibleForAutomaticIntegration": false
+      },
+      "blockers": [
+        "Specific human design/revision choice is not evidenced in the audited sources.",
+        "A clean individual RGBA icon does not exist.",
+        "No corresponding accepted master/material/LOD exists; this recipe does not satisfy the final shared-master icon contract.",
+        "No runtime adapter or in-game inventory/shop/ground test is delivered by this asset-preparation packet."
+      ]
+    }
+  ],
+  "nativeDimensionRule": {
+    "sizeSource": "Source/cursor.cpp:GetInvItemSize",
+    "cellSource": "Source/inv.h:InventorySlotSizeInPixels",
+    "occupancySource": "Source/inv.cpp:GetInventorySize",
+    "policy": "Use native cursor logical dimensions divided by28; never infer occupancy from a concept board or ground animation."
+  }
+}

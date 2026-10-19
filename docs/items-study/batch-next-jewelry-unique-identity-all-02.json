@@ -1,0 +1,105 @@
+{
+  "format": "d3d.item-concept-art",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "batchId": "batch-next-jewelry-unique-identity-all-02",
+  "scope": "Queue-group study fragment; candidate generation and explicit visual reuse only, never full-catalog completion or asset approval.",
+  "catalogSha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d",
+  "generationTool": "built-in image_gen.imagegen",
+  "generationCalls": 1,
+  "postProcessing": "none; generated PNG bytes copied unchanged",
+  "originalGameImagesIncluded": false,
+  "visualApproval": false,
+  "runtimeInstalled": false,
+  "registryAuthority": "assets/registry.json",
+  "summary": {
+    "productionUnits": 228,
+    "batchProductionUnits": 1,
+    "conceptCandidateEntries": 1,
+    "generatedImages": 1,
+    "reuseProposals": 0,
+    "blockedUnits": 0,
+    "modelsGenerated": 0,
+    "runtimeIconsGenerated": 0
+  },
+  "entries": [
+    {
+      "productionId": "item.design.unique.the-bleeder",
+      "conceptId": "item.design.unique.the-bleeder.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r1/the-bleeder-r1.png",
+      "sha256": "e4d805129ae4438ee418f656eed38e3e7d3267a69022aa755fcd798e3cc2f1c9",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate object-modeling reference.\nInput image 1 is a PRIVATE original inventory sprite, used only to preserve recognizable silhouette, colors, material regions and distinctive details. Create NEW HD imagery throughout; never paste the sprite into any view or thumbnail.\nA clean technical board of the exact SAME single object in FRONT, SIDE, BACK, THREE-QUARTER and a small NEW HD INVENTORY thumbnail. All views must agree on geometry, proportions, material layout and distinctive details; back is the true reverse, not another front. Full object visible, generously spaced, plain charcoal-gray backdrop, neutral soft studio lighting, no colored illumination or glow, realistic restrained dark medieval materials and fine wear. No scene, body, face, hands, stand, exploded alternatives or extra props. Rear/hidden surfaces and absolute scale are proposed reconstruction; preserve visible source design. Thumbnail must be a new high-detail render of this same object, never pixel-art or the supplied sprite. Minimal labels: item name, FRONT, SIDE, BACK, 3/4, ICON.\nSubject: THE BLEEDER; item.design.unique.the-bleeder; native cursor8.\nAn antique GOLD/brass finger ring with a simple rounded circular shank and ONE large vivid dark RED flat-topped faceted cabochon/gem set at the top in a plain gold bezel. Preserve the source's gold band, squat wide red stone and thick raised shoulders. The red comes from a ruby-like jewel under neutral light, NEVER blood, leaking liquid or glowing magic. No skull, snake, extra gems, gore, hand or modern diamond solitaire. Hidden bezel underside and back of band are inferred.",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "generationCalls": 1,
+      "reference": {
+        "cursorId": 8,
+        "sha256": "6ce0624a4612ad27a22de171db7b0ddead8a4b5a1271adba97d7a31a96125c4a",
+        "availability": "local-private",
+        "notes": "Licensed original inventory sprite inspected privately at nearest-neighbor 6x enlargement; no original pixels or file paths are included."
+      },
+      "referenceNativeSpriteSha256": "2a6fa3f1964ca3557b276931b929451483d86493950d58bda0ee9400c737b437",
+      "referenceInspected": true,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "viewsUsed": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-concept-thumbnail"
+      ],
+      "inferredParts": [
+        "Back and hidden surfaces",
+        "Thickness and absolute scale",
+        "Fine construction/material details unresolved by source pixels"
+      ],
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "sourceBaseIds": [
+        "item.base.156.ring",
+        "item.base.157.ring",
+        "item.base.158.ring"
+      ],
+      "sourceUniqueIds": [
+        "item.unique.the-bleeder"
+      ],
+      "nativeIdentityPolicy": "Visual study only. Native item identities, unique powers, stats, affixes, saves and RNG are separate and unchanged.",
+      "identityGate": "Candidate design requires visual review and multiview reconciliation before master production.",
+      "notes": "Neutral-light candidate board. HD thumbnail is a new concept preview, not a final runtime icon. Hidden geometry is proposed reconstruction."
+    }
+  ],
+  "blockedUnits": [],
+  "devlogHandoff": {
+    "includeAllGeneratedImages": true,
+    "images": [
+      {
+        "image": "assets/concept-art/items/r1/the-bleeder-r1.png",
+        "sha256": "e4d805129ae4438ee418f656eed38e3e7d3267a69022aa755fcd798e3cc2f1c9",
+        "dimensions": [
+          1536,
+          1024
+        ]
+      }
+    ],
+    "generatedConceptIds": [
+      "item.design.unique.the-bleeder.concept.r1"
+    ],
+    "reuseProductionIds": [],
+    "limits": [
+      "All outputs remain unapproved candidates.",
+      "Shared cursor reuse preserves separate native identities and powers.",
+      "Hidden surfaces and scale are inferred; master/socket/icon work remains gated."
+    ]
+  }
+}
+

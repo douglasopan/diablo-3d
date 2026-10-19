@@ -1,0 +1,151 @@
+#pragma once
+
+#include <cstddef>
+#include <cstdint>
+#include <span>
+
+namespace devilution {
+
+struct TownLightVector {
+	float x = 0;
+	float height = 0;
+	float z = 0;
+};
+
+/** RGB components in linear light, not palette indices or 0..255 sRGB bytes. */
+struct TownLightColor {
+	float red = 0;
+	float green = 0;
+	float blue = 0;
+};
+
+struct TownLightingConfig {
+	TownLightColor ambient { 0.48F, 0.48F, 0.50F };
+	TownLightColor directional { 0.52F, 0.50F, 0.46F };
+	TownLightVector toLight { 0.23F, 1.0F, 0.23F };
+	float directionalIntensity = 1;
+};
+
+struct TownPointLight {
+	TownLightVector position;
+	TownLightColor color { 1.0F, 0.70F, 0.08F };
+	float radius = 5;
+	float intensity = 2;
+};
+
+enum class TownLightPlane { X, Height, Z };
+
+/**
+ * An actual opening in an otherwise opaque room shell. On X planes, u=z and
+ * v=height; on Z planes, u=x and v=height; on Height planes, u=x and v=z.
+ * coordinate must lie on the corresponding shell boundary. Declaring a warm
+ * painted window alone is not an opening: use emission without an aperture.
+ */
+struct TownLightAperture {
+	TownLightPlane plane = TownLightPlane::X;
+	float coordinate = 0;
+	float minU = 0;
+	float maxU = 0;
+	float minV = 0;
+	float maxV = 0;
+	// Zero keeps a rectangular opening. 3..32 uses a regular polygon inscribed
+	// in the ellipse defined by the same bounds; vertex zero points along +u.
+	unsigned polygonSides = 0;
+};
+
+/** Closed axis-aligned opaque room shell, not a solid filled interior volume. */
+struct TownLightOccluder {
+	TownLightVector minimum;
+	TownLightVector maximum;
+	std::span<const TownLightAperture> apertures;
+};
+
+struct TownLightingSample {
+	TownLightColor ambient;
+	TownLightColor directional;
+	TownLightColor point;
+
+	TownLightColor total() const;
+};
+
+inline constexpr unsigned TownMaxPointLights = 32;
+inline constexpr float TownMaxPointLightIntensity = 16;
+inline constexpr unsigned TownMaxLightOccluders = 32;
+inline constexpr unsigned TownMaxLightApertures = 8;
+
+/** Orient only the shading normal of a two-sided surface toward its viewer.
+ * Finite source length is preserved; mesh geometry and authored normals are
+ * not modified. Invalid source normals return zero; an invalid/zero viewing
+ * direction leaves a finite source normal unchanged. One-sided normals stay
+ * unchanged regardless of viewer orientation. */
+TownLightVector OrientTownLightingNormal(TownLightVector normal, TownLightVector towardViewer, bool doubleSided = true);
+
+/** Deterministic, subtle fire flicker. Evaluate once per emitter per frame,
+ * outside pixel loops, using the game's render time rather than simulation RNG.
+ * Identity sets independent phases; time is in seconds. Only intensity changes:
+ * position, radius and linear source color are copied unchanged. Variation is
+ * bounded to 0..0.15 (default 0.06), intensity to 0..TownMaxPointLightIntensity. Invalid or negative time
+ * keeps the bounded base intensity. No state, allocation or camera dependence.
+ */
+TownPointLight TownFireLightAtTime(const TownPointLight &source, uint32_t emitterIdentity,
+	double elapsedSeconds, float intensityVariation = 0.06F);
+
+/** Optional immutable geometry sampler. The caller owns context until
+ * the synchronous sample returns. Light index is the original input
+ * index; visibility is finite 0..1. A complete sampler replaces shell
+ * visibility only, preserving all source energy/color/falloff math.
+ * Empty uses legacy shells; incomplete/invalid samplers block point light. */
+struct TownPointGeometryVisibility {
+	const void *context = nullptr;
+	float (*sample)(const void *, std::size_t, TownLightVector, TownLightVector) = nullptr;
+};
+
+/**
+ * Pure world-space diffuse math; no camera, palette, game-state access or
+ * allocation. normal and config.toLight are normalized internally. Shadow
+ * occlusion 0..1 attenuates directional light only. Point lights are optional;
+ * at most the first TownMaxPointLights are sampled. Too many or malformed occluders fail
+ * closed for point visibility, rather than leaking light through walls.
+ */
+TownLightingSample SampleTownLighting(TownLightVector normal, TownLightVector position,
+	float directionalShadow, const TownLightingConfig &config,
+	std::span<const TownPointLight> lights = {}, std::span<const TownLightOccluder> occluders = {},
+	TownPointGeometryVisibility geometry = {});
+
+/** Exact segment/shell visibility: both interior points are allowed; every
+ * entry/exit crossing needs a matching aperture. Output is 0 blocked or 1 lit. */
+float TownPointLightVisibility(TownLightVector light, TownLightVector receiver,
+	std::span<const TownLightOccluder> occluders);
+
+/** Bounded optional sprite irradiance field. Unlike the interior diffuse
+ * sampler, a billboard has no physical surface normal: illumination depends
+ * on world position, source radius and shell visibility, never on camera yaw.
+ * Invalid inputs fail closed. Sources <= TownMaxPointLights, shells <=
+ * TownMaxLightOccluders, apertures <= TownMaxLightApertures each.
+ * This validation permits callers to reject a field before recording a frame. */
+bool ValidateTownSpritePointLighting(std::span<const TownPointLight> lights,
+	std::span<const TownLightOccluder> occluders);
+TownLightColor SampleTownSpritePointLighting(TownLightVector position,
+	std::span<const TownPointLight> lights, std::span<const TownLightOccluder> occluders = {},
+	TownPointGeometryVisibility geometry = {});
+
+/** Add point RGB irradiance using the existing shaded color's linear Rec.709
+ * luminance. Input/output are ARGB8888 sRGB; alpha is preserved exactly. Zero
+ * irradiance and malformed irradiance return the original bytes unchanged.
+ * Indexed palette/depth/pick data are deliberately outside this color helper. */
+uint32_t TintTownSpritePointArgb(uint32_t argb, TownLightColor pointIrradiance);
+
+/** Keep unlit base color, light factors, and self-emission separate. Result is
+ * linear RGB and may exceed 1; clamp/tone-map only when encoding to a palette. */
+TownLightColor ComposeTownLitColor(TownLightColor baseLinear, const TownLightingSample &lighting,
+	TownLightColor emissionLinear = {});
+
+/** Standard sRGB transfer functions: input and encoded output are normalized
+ * 0..1. Divide source palette bytes by 255 before decoding. These helpers can
+ * prepare palette LUTs once; avoid three pow calls in every rasterized pixel. */
+float TownSrgbToLinear(float normalizedSrgb);
+float TownLinearToSrgb(float linear);
+TownLightColor TownSrgbToLinear(TownLightColor normalizedSrgb);
+TownLightColor TownLinearToSrgb(TownLightColor linear);
+
+} // namespace devilution

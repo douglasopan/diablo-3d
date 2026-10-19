@@ -1,0 +1,490 @@
+{
+  "format": "d3d.item-concept-art",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "scope": "Independent remaining-staves-unique-identity-all-01 candidate/reuse batch for root consolidation; no global coverage claim.",
+  "batchId": "batch-next-staves-uniques-01",
+  "productionQueueGroup": "remaining-staves-unique-identity-all-01",
+  "catalogSha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d",
+  "generationTool": "built-in image_gen.imagegen; shared-cursor reuse causes zero new calls",
+  "postProcessing": "none; generated PNG bytes copied unchanged, all prior revisions retained",
+  "originalGameImagesIncluded": false,
+  "privateMediaPathsIncluded": false,
+  "visualApproval": false,
+  "accepted": false,
+  "selected": false,
+  "installed": false,
+  "runtimeInstalled": false,
+  "summary": {
+    "candidateUnits": 7,
+    "newImages": 0,
+    "reuseProposals": 7,
+    "modelsGenerated": 0,
+    "runtimeIconsGenerated": 0
+  },
+  "entries": [
+    {
+      "productionId": "item.design.unique.gleamsong",
+      "conceptId": "item.design.unique.gleamsong.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "family-sheet",
+      "image": "assets/concept-art/items/r2/short-staff-r2.png",
+      "sha256": "bf6b5eae3f2578da805398824dd972e0859500bc4da0e2327fb980d933030b6a",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D single-item candidate modelling turnaround, not final game icon.\nThe first input image is the original licensed inventory sprite, PRIMARY silhouette/proportion/palette reference ONLY. The second input image is the generated Claymore sheet, LAYOUT and neutral material presentation ONLY; never include its sword.\nCreate one coherent HD sheet showing the exact SAME object in FRONT, true SIDE thickness, BACK (correctly reverse any asymmetric outline), and 3-4 perspective, plus one small ICON inset newly rendered in crisp HD from the SAME object. All views share identical proportions/geometry/materials, whole item visible and spaced cleanly. Plain charcoal gray background, neutral soft WHITE studio illumination without colored light or warm cast, realistic worn medieval materials, restrained surface wear and minimum contact shadows. Hidden reverse surfaces, thickness and exact fine material details are conservative inferred reconstruction.\nText only item TITLE and labels FRONT / SIDE / BACK / 3-4 / ICON; small footer CANDIDATE - REVERSE AND THICKNESS INFERRED. Never paste/reproduce/trace the source sprite, its image rectangle, reference board or pixel art into output. No characters/hands/scenery, extra objects, magical glow, flames, invented jewels/runes/skulls or watermark. Thumbnail is NEW HD concept depiction, not a runtime icon.\nSHORT STAFF. Production ID item.design.base.short-staff, ICURS109. Match actual simple long slim straight pale olive-tan wooden STAFF, two blunt dark navy-blue metal/binding ferrules near its upper and lower ends, little pale silver highlight on each, and tiny tan/brass buttons beyond each ferrule. A broad central grip is wrapped in deep RED leather/cord, with shorter red wraps at upper and lower wood sections separated from central grip by exposed tan wood. No blade, no orb, no crystal, no branch head, no skull. Preserve original red/tan/dark-blue palette and slim continuous pole. Stand upright in orthographic main views; thumbnail can retain original diagonal top-left to bottom-right presentation. Slight handmade wear, exact cord winding and cap depth inferred.",
+      "revisionPrompts": [
+        "Use case: precise-object-edit. Input 1 is the generated SHORT STAFF concept board (edit target); input 2 is original inventory reference only, never paste its pixels. Correct ONLY the SIDE column: add the missing TWO small RED wrapping bands around the exposed upper wooden shaft, at exactly the same heights as the pair shown in FRONT, and add the missing TWO small RED wrapping bands around the lower exposed wooden shaft at exactly the same heights as FRONT. These bands wrap all the way around the cylindrical staff, so they MUST be visible in SIDE, not disappear by rotation. Keep their width, spacing and red material consistent with FRONT/BACK/3-4/ICON. Keep long central red grip, blue ferrules, brass end buttons, shaft dimensions and all other views exactly unchanged. All five depictions show ONE coherent object. Same charcoal background, neutral white lighting, labels and footer; no new pixel icon, no pasted source. No other edits. Candidate R2 only, not an approved master/runtime icon."
+      ],
+      "generationTool": "reuse; no new generation; source built-in image_gen.imagegen",
+      "generationCalls": 0,
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 109,
+        "sha256": "91a341201d00cbf142c8db92a7351347889b36e7a901f27e524f3e3384376f04",
+        "notes": "Original inventory source identity; private paths/pixels omitted. Exact presented source was inspected before new generation."
+      },
+      "referencePresentedSha256": "af711ef88236083fb664157aa23c29861066e49f08534547687a849ff8064530",
+      "referenceVisualInspected": false,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-thumbnail-proposal"
+      ],
+      "inferredParts": [
+        "Hidden reverse surfaces, depth and thickness",
+        "Fasteners, exact material microtexture and dimensions"
+      ],
+      "review": {
+        "status": "family-reuse-proposal",
+        "approval": false,
+        "limitations": [
+          "Exact shared native cursor supports a physical family-reuse proposal; no name-based unique design.",
+          "Unique powers, spells/charges and identity remain separate from geometry/material; all source inferential limits remain pending."
+        ]
+      },
+      "notes": "Explicit family reuse proposal only. Native unique identity, powers, stats, scope and saves remain separate; no new design inferred from the name. This sheet is not unique-specific fidelity or an accepted master.",
+      "reusedFromProductionId": "item.design.base.short-staff",
+      "reusedFromConceptId": "item.design.base.short-staff.concept.r2",
+      "reuseGate": "Review explicit shared-cursor reuse; native unique powers and identity remain separate. A new unique visual requires a separate approved design brief.",
+      "nativeCursorNames": [
+        "SHORT_STAFF"
+      ],
+      "identityAmbiguous": false,
+      "sourcePromptPolicy": "Exact source generation prompt retained; this identity caused zero new generation calls.",
+      "sourceUniqueIds": [
+        "item.unique.gleamsong"
+      ]
+    },
+    {
+      "productionId": "item.design.unique.immolator",
+      "conceptId": "item.design.unique.immolator.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "family-sheet",
+      "image": "assets/concept-art/items/r1/long-staff-r1.png",
+      "sha256": "37cd5397cd4dda60fb0c7fc7ca351e0038e802946c7d8a130b11d3133524495f",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D single-item candidate modelling turnaround, not final game icon.\nThe first input image is the original licensed inventory sprite, PRIMARY silhouette/proportion/palette reference ONLY. The second input image is the generated Claymore sheet, LAYOUT and neutral material presentation ONLY; never include its sword.\nCreate one coherent HD sheet showing the exact SAME object in FRONT, true SIDE thickness, BACK (correctly reverse any asymmetric outline), and 3-4 perspective, plus one small ICON inset newly rendered in crisp HD from the SAME object. All views share identical proportions/geometry/materials, whole item visible and spaced cleanly. Plain charcoal gray background, neutral soft WHITE studio illumination without colored light or warm cast, realistic worn medieval materials, restrained surface wear and minimum contact shadows. Hidden reverse surfaces, thickness and exact fine material details are conservative inferred reconstruction.\nText only item TITLE and labels FRONT / SIDE / BACK / 3-4 / ICON; small footer CANDIDATE - REVERSE AND THICKNESS INFERRED. Never paste/reproduce/trace the source sprite, its image rectangle, reference board or pixel art into output. No characters/hands/scenery, extra objects, magical glow, flames, invented jewels/runes/skulls or watermark. Thumbnail is NEW HD concept depiction, not a runtime icon.\nLONG STAFF. Production ID item.design.base.long-staff, ICURS123. Match the actual asymmetrical icon: long thin gnarled dark olive-brown WOODEN shaft with a gentle crooked bend, small knots and wood grain; modest blunt tapered wooden butt. At top a compact irregular OLD-GOLD/BRASS forked ornament with a beak-like short upper arm pointing LEFT, one diagonal lower arm leftward/down, and a shorter curved prong pointing up/RIGHT. Small non-emissive rounded deep RED cap/stone held above the left/top fork in old-brass claws; a tiny dark NAVY BLUE inset/mark near the right neck. Preserve only this modest source forked silhouette, no invented enormous dragon/bird sculpture, skull or extra branches. Upper metal head extends laterally but remains small relative to long shaft. Same asymmetric fork arms/red cap in every view, BACK correctly reverses the head. Red is actual solid local color, not magic light. No shiny straight gold shaft.",
+      "revisionPrompts": [],
+      "generationTool": "reuse; no new generation; source built-in image_gen.imagegen",
+      "generationCalls": 0,
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 123,
+        "sha256": "ef1c64c7500c3b61c16617c5cb60905362bd8dab2f3bf67fe9e98113f1806d91",
+        "notes": "Original inventory source identity; private paths/pixels omitted. Exact presented source was inspected before new generation."
+      },
+      "referencePresentedSha256": "2aa819b2d889f8958d34afe1029eb794fc7eb737971feba4397e5fea85adfccb",
+      "referenceVisualInspected": false,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-thumbnail-proposal"
+      ],
+      "inferredParts": [
+        "Hidden reverse surfaces, depth and thickness",
+        "Fasteners, exact material microtexture and dimensions"
+      ],
+      "review": {
+        "status": "family-reuse-proposal",
+        "approval": false,
+        "limitations": [
+          "Exact shared native cursor supports a physical family-reuse proposal; no name-based unique design.",
+          "Unique powers, spells/charges and identity remain separate from geometry/material; all source inferential limits remain pending."
+        ]
+      },
+      "notes": "Explicit family reuse proposal only. Native unique identity, powers, stats, scope and saves remain separate; no new design inferred from the name. This sheet is not unique-specific fidelity or an accepted master.",
+      "reusedFromProductionId": "item.design.base.long-staff",
+      "reusedFromConceptId": "item.design.base.long-staff.concept.r1",
+      "reuseGate": "Review explicit shared-cursor reuse; native unique powers and identity remain separate. A new unique visual requires a separate approved design brief.",
+      "nativeCursorNames": [
+        "LONG_STAFF"
+      ],
+      "identityAmbiguous": false,
+      "sourcePromptPolicy": "Exact source generation prompt retained; this identity caused zero new generation calls.",
+      "sourceUniqueIds": [
+        "item.unique.immolator"
+      ]
+    },
+    {
+      "productionId": "item.design.unique.mindcry",
+      "conceptId": "item.design.unique.mindcry.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "family-sheet",
+      "image": "assets/concept-art/items/r2/short-staff-r2.png",
+      "sha256": "bf6b5eae3f2578da805398824dd972e0859500bc4da0e2327fb980d933030b6a",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D single-item candidate modelling turnaround, not final game icon.\nThe first input image is the original licensed inventory sprite, PRIMARY silhouette/proportion/palette reference ONLY. The second input image is the generated Claymore sheet, LAYOUT and neutral material presentation ONLY; never include its sword.\nCreate one coherent HD sheet showing the exact SAME object in FRONT, true SIDE thickness, BACK (correctly reverse any asymmetric outline), and 3-4 perspective, plus one small ICON inset newly rendered in crisp HD from the SAME object. All views share identical proportions/geometry/materials, whole item visible and spaced cleanly. Plain charcoal gray background, neutral soft WHITE studio illumination without colored light or warm cast, realistic worn medieval materials, restrained surface wear and minimum contact shadows. Hidden reverse surfaces, thickness and exact fine material details are conservative inferred reconstruction.\nText only item TITLE and labels FRONT / SIDE / BACK / 3-4 / ICON; small footer CANDIDATE - REVERSE AND THICKNESS INFERRED. Never paste/reproduce/trace the source sprite, its image rectangle, reference board or pixel art into output. No characters/hands/scenery, extra objects, magical glow, flames, invented jewels/runes/skulls or watermark. Thumbnail is NEW HD concept depiction, not a runtime icon.\nSHORT STAFF. Production ID item.design.base.short-staff, ICURS109. Match actual simple long slim straight pale olive-tan wooden STAFF, two blunt dark navy-blue metal/binding ferrules near its upper and lower ends, little pale silver highlight on each, and tiny tan/brass buttons beyond each ferrule. A broad central grip is wrapped in deep RED leather/cord, with shorter red wraps at upper and lower wood sections separated from central grip by exposed tan wood. No blade, no orb, no crystal, no branch head, no skull. Preserve original red/tan/dark-blue palette and slim continuous pole. Stand upright in orthographic main views; thumbnail can retain original diagonal top-left to bottom-right presentation. Slight handmade wear, exact cord winding and cap depth inferred.",
+      "revisionPrompts": [
+        "Use case: precise-object-edit. Input 1 is the generated SHORT STAFF concept board (edit target); input 2 is original inventory reference only, never paste its pixels. Correct ONLY the SIDE column: add the missing TWO small RED wrapping bands around the exposed upper wooden shaft, at exactly the same heights as the pair shown in FRONT, and add the missing TWO small RED wrapping bands around the lower exposed wooden shaft at exactly the same heights as FRONT. These bands wrap all the way around the cylindrical staff, so they MUST be visible in SIDE, not disappear by rotation. Keep their width, spacing and red material consistent with FRONT/BACK/3-4/ICON. Keep long central red grip, blue ferrules, brass end buttons, shaft dimensions and all other views exactly unchanged. All five depictions show ONE coherent object. Same charcoal background, neutral white lighting, labels and footer; no new pixel icon, no pasted source. No other edits. Candidate R2 only, not an approved master/runtime icon."
+      ],
+      "generationTool": "reuse; no new generation; source built-in image_gen.imagegen",
+      "generationCalls": 0,
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 109,
+        "sha256": "91a341201d00cbf142c8db92a7351347889b36e7a901f27e524f3e3384376f04",
+        "notes": "Original inventory source identity; private paths/pixels omitted. Exact presented source was inspected before new generation."
+      },
+      "referencePresentedSha256": "af711ef88236083fb664157aa23c29861066e49f08534547687a849ff8064530",
+      "referenceVisualInspected": false,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-thumbnail-proposal"
+      ],
+      "inferredParts": [
+        "Hidden reverse surfaces, depth and thickness",
+        "Fasteners, exact material microtexture and dimensions"
+      ],
+      "review": {
+        "status": "family-reuse-proposal",
+        "approval": false,
+        "limitations": [
+          "Exact shared native cursor supports a physical family-reuse proposal; no name-based unique design.",
+          "Unique powers, spells/charges and identity remain separate from geometry/material; all source inferential limits remain pending."
+        ]
+      },
+      "notes": "Explicit family reuse proposal only. Native unique identity, powers, stats, scope and saves remain separate; no new design inferred from the name. This sheet is not unique-specific fidelity or an accepted master.",
+      "reusedFromProductionId": "item.design.base.short-staff",
+      "reusedFromConceptId": "item.design.base.short-staff.concept.r2",
+      "reuseGate": "Review explicit shared-cursor reuse; native unique powers and identity remain separate. A new unique visual requires a separate approved design brief.",
+      "nativeCursorNames": [
+        "SHORT_STAFF"
+      ],
+      "identityAmbiguous": false,
+      "sourcePromptPolicy": "Exact source generation prompt retained; this identity caused zero new generation calls.",
+      "sourceUniqueIds": [
+        "item.unique.mindcry"
+      ]
+    },
+    {
+      "productionId": "item.design.unique.naj-s-puzzler",
+      "conceptId": "item.design.unique.naj-s-puzzler.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "family-sheet",
+      "image": "assets/concept-art/items/r1/long-staff-r1.png",
+      "sha256": "37cd5397cd4dda60fb0c7fc7ca351e0038e802946c7d8a130b11d3133524495f",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D single-item candidate modelling turnaround, not final game icon.\nThe first input image is the original licensed inventory sprite, PRIMARY silhouette/proportion/palette reference ONLY. The second input image is the generated Claymore sheet, LAYOUT and neutral material presentation ONLY; never include its sword.\nCreate one coherent HD sheet showing the exact SAME object in FRONT, true SIDE thickness, BACK (correctly reverse any asymmetric outline), and 3-4 perspective, plus one small ICON inset newly rendered in crisp HD from the SAME object. All views share identical proportions/geometry/materials, whole item visible and spaced cleanly. Plain charcoal gray background, neutral soft WHITE studio illumination without colored light or warm cast, realistic worn medieval materials, restrained surface wear and minimum contact shadows. Hidden reverse surfaces, thickness and exact fine material details are conservative inferred reconstruction.\nText only item TITLE and labels FRONT / SIDE / BACK / 3-4 / ICON; small footer CANDIDATE - REVERSE AND THICKNESS INFERRED. Never paste/reproduce/trace the source sprite, its image rectangle, reference board or pixel art into output. No characters/hands/scenery, extra objects, magical glow, flames, invented jewels/runes/skulls or watermark. Thumbnail is NEW HD concept depiction, not a runtime icon.\nLONG STAFF. Production ID item.design.base.long-staff, ICURS123. Match the actual asymmetrical icon: long thin gnarled dark olive-brown WOODEN shaft with a gentle crooked bend, small knots and wood grain; modest blunt tapered wooden butt. At top a compact irregular OLD-GOLD/BRASS forked ornament with a beak-like short upper arm pointing LEFT, one diagonal lower arm leftward/down, and a shorter curved prong pointing up/RIGHT. Small non-emissive rounded deep RED cap/stone held above the left/top fork in old-brass claws; a tiny dark NAVY BLUE inset/mark near the right neck. Preserve only this modest source forked silhouette, no invented enormous dragon/bird sculpture, skull or extra branches. Upper metal head extends laterally but remains small relative to long shaft. Same asymmetric fork arms/red cap in every view, BACK correctly reverses the head. Red is actual solid local color, not magic light. No shiny straight gold shaft.",
+      "revisionPrompts": [],
+      "generationTool": "reuse; no new generation; source built-in image_gen.imagegen",
+      "generationCalls": 0,
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 123,
+        "sha256": "ef1c64c7500c3b61c16617c5cb60905362bd8dab2f3bf67fe9e98113f1806d91",
+        "notes": "Original inventory source identity; private paths/pixels omitted. Exact presented source was inspected before new generation."
+      },
+      "referencePresentedSha256": "2aa819b2d889f8958d34afe1029eb794fc7eb737971feba4397e5fea85adfccb",
+      "referenceVisualInspected": false,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-thumbnail-proposal"
+      ],
+      "inferredParts": [
+        "Hidden reverse surfaces, depth and thickness",
+        "Fasteners, exact material microtexture and dimensions"
+      ],
+      "review": {
+        "status": "family-reuse-proposal",
+        "approval": false,
+        "limitations": [
+          "Exact shared native cursor supports a physical family-reuse proposal; no name-based unique design.",
+          "Unique powers, spells/charges and identity remain separate from geometry/material; all source inferential limits remain pending."
+        ]
+      },
+      "notes": "Explicit family reuse proposal only. Native unique identity, powers, stats, scope and saves remain separate; no new design inferred from the name. This sheet is not unique-specific fidelity or an accepted master.",
+      "reusedFromProductionId": "item.design.base.long-staff",
+      "reusedFromConceptId": "item.design.base.long-staff.concept.r1",
+      "reuseGate": "Review explicit shared-cursor reuse; native unique powers and identity remain separate. A new unique visual requires a separate approved design brief.",
+      "nativeCursorNames": [
+        "LONG_STAFF"
+      ],
+      "identityAmbiguous": false,
+      "sourcePromptPolicy": "Exact source generation prompt retained; this identity caused zero new generation calls.",
+      "sourceUniqueIds": [
+        "item.unique.naj-s-puzzler"
+      ]
+    },
+    {
+      "productionId": "item.design.unique.rod-of-onan",
+      "conceptId": "item.design.unique.rod-of-onan.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "family-sheet",
+      "image": "assets/concept-art/items/r1/war-staff-r1.png",
+      "sha256": "5d7a22a2f8051ab3068da9ca8ae6588acb7a7ce628aa405aa96ce50e93398ed4",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D single-item candidate modelling turnaround, not final game icon.\nThe first input image is the original licensed inventory sprite, PRIMARY silhouette/proportion/palette reference ONLY. The second input image is the generated Claymore sheet, LAYOUT and neutral material presentation ONLY; never include its sword.\nCreate one coherent HD sheet showing the exact SAME object in FRONT, true SIDE thickness, BACK (correctly reverse any asymmetric outline), and 3-4 perspective, plus one small ICON inset newly rendered in crisp HD from the SAME object. All views share identical proportions/geometry/materials, whole item visible and spaced cleanly. Plain charcoal gray background, neutral soft WHITE studio illumination without colored light or warm cast, realistic worn medieval materials, restrained surface wear and minimum contact shadows. Hidden reverse surfaces, thickness and exact fine material details are conservative inferred reconstruction.\nText only item TITLE and labels FRONT / SIDE / BACK / 3-4 / ICON; small footer CANDIDATE - REVERSE AND THICKNESS INFERRED. Never paste/reproduce/trace the source sprite, its image rectangle, reference board or pixel art into output. No characters/hands/scenery, extra objects, magical glow, flames, invented jewels/runes/skulls or watermark. Thumbnail is NEW HD concept depiction, not a runtime icon.\nWAR STAFF. Production ID item.design.base.war-staff, ICURS124. Preserve actual martial silhouette despite name: a long slim dark red-brown shaft with ONE long swept CURVED SILVER STEEL blade-like terminal at the TOP, bending gently outward to the LEFT toward a fine tip. It is not an orb-topped wizard staff and not a large side-mounted farming scythe. The narrow tapered blade continues along the shaft centerline then curves left near the top; outer edge pale steel, inner body darker gray. Small aged-brass collar between blade and shaft. Near upper handle a few tiny DARK NAVY BLUE leather binding segments around the red-brown shaft. A second compact brass collar at middle/lower shaft, and lower grip wrapped red-brown leather with a vertical row of small gold/brass studs; bottom is plain rounded red-brown, NO invented gold bottom cap. Back reverses blade curve. Neutral white lighting, source palette preserved, no magic.",
+      "revisionPrompts": [],
+      "generationTool": "reuse; no new generation; source built-in image_gen.imagegen",
+      "generationCalls": 0,
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 124,
+        "sha256": "f6bbc878caa1ab147bedeb7d631b26072bc907eb4598c282ee35b524dee3d453",
+        "notes": "Original inventory source identity; private paths/pixels omitted. Exact presented source was inspected before new generation."
+      },
+      "referencePresentedSha256": "b6d4da2693183b0e39c06d90cd6a0518fb1f65cbd00c18114b667c8aeed12a0d",
+      "referenceVisualInspected": false,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-thumbnail-proposal"
+      ],
+      "inferredParts": [
+        "Hidden reverse surfaces, depth and thickness",
+        "Fasteners, exact material microtexture and dimensions"
+      ],
+      "review": {
+        "status": "family-reuse-proposal",
+        "approval": false,
+        "limitations": [
+          "Exact shared native cursor supports a physical family-reuse proposal; no name-based unique design.",
+          "Unique powers, spells/charges and identity remain separate from geometry/material; all source inferential limits remain pending."
+        ]
+      },
+      "notes": "Explicit family reuse proposal only. Native unique identity, powers, stats, scope and saves remain separate; no new design inferred from the name. This sheet is not unique-specific fidelity or an accepted master.",
+      "reusedFromProductionId": "item.design.base.war-staff",
+      "reusedFromConceptId": "item.design.base.war-staff.concept.r1",
+      "reuseGate": "Review explicit shared-cursor reuse; native unique powers and identity remain separate. A new unique visual requires a separate approved design brief.",
+      "nativeCursorNames": [
+        "WAR_STAFF"
+      ],
+      "identityAmbiguous": false,
+      "sourcePromptPolicy": "Exact source generation prompt retained; this identity caused zero new generation calls.",
+      "sourceUniqueIds": [
+        "item.unique.rod-of-onan"
+      ]
+    },
+    {
+      "productionId": "item.design.unique.staff-of-shadows",
+      "conceptId": "item.design.unique.staff-of-shadows.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "family-sheet",
+      "image": "assets/concept-art/items/r1/long-staff-r1.png",
+      "sha256": "37cd5397cd4dda60fb0c7fc7ca351e0038e802946c7d8a130b11d3133524495f",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D single-item candidate modelling turnaround, not final game icon.\nThe first input image is the original licensed inventory sprite, PRIMARY silhouette/proportion/palette reference ONLY. The second input image is the generated Claymore sheet, LAYOUT and neutral material presentation ONLY; never include its sword.\nCreate one coherent HD sheet showing the exact SAME object in FRONT, true SIDE thickness, BACK (correctly reverse any asymmetric outline), and 3-4 perspective, plus one small ICON inset newly rendered in crisp HD from the SAME object. All views share identical proportions/geometry/materials, whole item visible and spaced cleanly. Plain charcoal gray background, neutral soft WHITE studio illumination without colored light or warm cast, realistic worn medieval materials, restrained surface wear and minimum contact shadows. Hidden reverse surfaces, thickness and exact fine material details are conservative inferred reconstruction.\nText only item TITLE and labels FRONT / SIDE / BACK / 3-4 / ICON; small footer CANDIDATE - REVERSE AND THICKNESS INFERRED. Never paste/reproduce/trace the source sprite, its image rectangle, reference board or pixel art into output. No characters/hands/scenery, extra objects, magical glow, flames, invented jewels/runes/skulls or watermark. Thumbnail is NEW HD concept depiction, not a runtime icon.\nLONG STAFF. Production ID item.design.base.long-staff, ICURS123. Match the actual asymmetrical icon: long thin gnarled dark olive-brown WOODEN shaft with a gentle crooked bend, small knots and wood grain; modest blunt tapered wooden butt. At top a compact irregular OLD-GOLD/BRASS forked ornament with a beak-like short upper arm pointing LEFT, one diagonal lower arm leftward/down, and a shorter curved prong pointing up/RIGHT. Small non-emissive rounded deep RED cap/stone held above the left/top fork in old-brass claws; a tiny dark NAVY BLUE inset/mark near the right neck. Preserve only this modest source forked silhouette, no invented enormous dragon/bird sculpture, skull or extra branches. Upper metal head extends laterally but remains small relative to long shaft. Same asymmetric fork arms/red cap in every view, BACK correctly reverses the head. Red is actual solid local color, not magic light. No shiny straight gold shaft.",
+      "revisionPrompts": [],
+      "generationTool": "reuse; no new generation; source built-in image_gen.imagegen",
+      "generationCalls": 0,
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 123,
+        "sha256": "ef1c64c7500c3b61c16617c5cb60905362bd8dab2f3bf67fe9e98113f1806d91",
+        "notes": "Original inventory source identity; private paths/pixels omitted. Exact presented source was inspected before new generation."
+      },
+      "referencePresentedSha256": "2aa819b2d889f8958d34afe1029eb794fc7eb737971feba4397e5fea85adfccb",
+      "referenceVisualInspected": false,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-thumbnail-proposal"
+      ],
+      "inferredParts": [
+        "Hidden reverse surfaces, depth and thickness",
+        "Fasteners, exact material microtexture and dimensions"
+      ],
+      "review": {
+        "status": "family-reuse-proposal",
+        "approval": false,
+        "limitations": [
+          "Exact shared native cursor supports a physical family-reuse proposal; no name-based unique design.",
+          "Unique powers, spells/charges and identity remain separate from geometry/material; all source inferential limits remain pending."
+        ]
+      },
+      "notes": "Explicit family reuse proposal only. Native unique identity, powers, stats, scope and saves remain separate; no new design inferred from the name. This sheet is not unique-specific fidelity or an accepted master.",
+      "reusedFromProductionId": "item.design.base.long-staff",
+      "reusedFromConceptId": "item.design.base.long-staff.concept.r1",
+      "reuseGate": "Review explicit shared-cursor reuse; native unique powers and identity remain separate. A new unique visual requires a separate approved design brief.",
+      "nativeCursorNames": [
+        "LONG_STAFF"
+      ],
+      "identityAmbiguous": false,
+      "sourcePromptPolicy": "Exact source generation prompt retained; this identity caused zero new generation calls.",
+      "sourceUniqueIds": [
+        "item.unique.staff-of-shadows"
+      ]
+    },
+    {
+      "productionId": "item.design.unique.storm-spire",
+      "conceptId": "item.design.unique.storm-spire.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "family-sheet",
+      "image": "assets/concept-art/items/r1/war-staff-r1.png",
+      "sha256": "5d7a22a2f8051ab3068da9ca8ae6588acb7a7ce628aa405aa96ce50e93398ed4",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D single-item candidate modelling turnaround, not final game icon.\nThe first input image is the original licensed inventory sprite, PRIMARY silhouette/proportion/palette reference ONLY. The second input image is the generated Claymore sheet, LAYOUT and neutral material presentation ONLY; never include its sword.\nCreate one coherent HD sheet showing the exact SAME object in FRONT, true SIDE thickness, BACK (correctly reverse any asymmetric outline), and 3-4 perspective, plus one small ICON inset newly rendered in crisp HD from the SAME object. All views share identical proportions/geometry/materials, whole item visible and spaced cleanly. Plain charcoal gray background, neutral soft WHITE studio illumination without colored light or warm cast, realistic worn medieval materials, restrained surface wear and minimum contact shadows. Hidden reverse surfaces, thickness and exact fine material details are conservative inferred reconstruction.\nText only item TITLE and labels FRONT / SIDE / BACK / 3-4 / ICON; small footer CANDIDATE - REVERSE AND THICKNESS INFERRED. Never paste/reproduce/trace the source sprite, its image rectangle, reference board or pixel art into output. No characters/hands/scenery, extra objects, magical glow, flames, invented jewels/runes/skulls or watermark. Thumbnail is NEW HD concept depiction, not a runtime icon.\nWAR STAFF. Production ID item.design.base.war-staff, ICURS124. Preserve actual martial silhouette despite name: a long slim dark red-brown shaft with ONE long swept CURVED SILVER STEEL blade-like terminal at the TOP, bending gently outward to the LEFT toward a fine tip. It is not an orb-topped wizard staff and not a large side-mounted farming scythe. The narrow tapered blade continues along the shaft centerline then curves left near the top; outer edge pale steel, inner body darker gray. Small aged-brass collar between blade and shaft. Near upper handle a few tiny DARK NAVY BLUE leather binding segments around the red-brown shaft. A second compact brass collar at middle/lower shaft, and lower grip wrapped red-brown leather with a vertical row of small gold/brass studs; bottom is plain rounded red-brown, NO invented gold bottom cap. Back reverses blade curve. Neutral white lighting, source palette preserved, no magic.",
+      "revisionPrompts": [],
+      "generationTool": "reuse; no new generation; source built-in image_gen.imagegen",
+      "generationCalls": 0,
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 124,
+        "sha256": "f6bbc878caa1ab147bedeb7d631b26072bc907eb4598c282ee35b524dee3d453",
+        "notes": "Original inventory source identity; private paths/pixels omitted. Exact presented source was inspected before new generation."
+      },
+      "referencePresentedSha256": "b6d4da2693183b0e39c06d90cd6a0518fb1f65cbd00c18114b667c8aeed12a0d",
+      "referenceVisualInspected": false,
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "new-hd-inventory-thumbnail-proposal"
+      ],
+      "inferredParts": [
+        "Hidden reverse surfaces, depth and thickness",
+        "Fasteners, exact material microtexture and dimensions"
+      ],
+      "review": {
+        "status": "family-reuse-proposal",
+        "approval": false,
+        "limitations": [
+          "Exact shared native cursor supports a physical family-reuse proposal; no name-based unique design.",
+          "Unique powers, spells/charges and identity remain separate from geometry/material; all source inferential limits remain pending."
+        ]
+      },
+      "notes": "Explicit family reuse proposal only. Native unique identity, powers, stats, scope and saves remain separate; no new design inferred from the name. This sheet is not unique-specific fidelity or an accepted master.",
+      "reusedFromProductionId": "item.design.base.war-staff",
+      "reusedFromConceptId": "item.design.base.war-staff.concept.r1",
+      "reuseGate": "Review explicit shared-cursor reuse; native unique powers and identity remain separate. A new unique visual requires a separate approved design brief.",
+      "nativeCursorNames": [
+        "WAR_STAFF"
+      ],
+      "identityAmbiguous": false,
+      "sourcePromptPolicy": "Exact source generation prompt retained; this identity caused zero new generation calls.",
+      "sourceUniqueIds": [
+        "item.unique.storm-spire"
+      ]
+    }
+  ],
+  "handoff": {
+    "rootAction": "Consolidate candidate entries and update gallery/queue only after validation. Devlog labels: concept candidate or explicit family reuse proposal; never publish private sprites.",
+    "limits": "No approval/selection/installation/model/runtime icon. Reverse geometry inferred; same master/material gate still required."
+  }
+}

@@ -1,0 +1,407 @@
+{
+  "schemaVersion": 1,
+  "createdAtUtc": "2026-10-12T03:29:20.454272+00:00",
+  "status": "technical bind QA passed; gameplay ineligible; zero clips",
+  "renderReceipt": {
+    "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\bind-directions\\render-receipt.json",
+    "sha256": "16b4affc4fc8ff49beda0f207c63218caa5139e2a43dac0c88787bb81d64eeb0"
+  },
+  "checks": [
+    {
+      "name": "source hash unchanged",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "render tool exact source hash",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "reader exact source hash",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "bind never counted as a clip",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "one actual bind pose",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "eight native directions in order",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "one still for s",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "PNG hash s",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "RGBA/canvas s",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "pixel hash s",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "nonempty/not clipped s",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "actual triangles/backface culling s",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixed pivot s",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "one still for sw",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "PNG hash sw",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "RGBA/canvas sw",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "pixel hash sw",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "nonempty/not clipped sw",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "actual triangles/backface culling sw",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixed pivot sw",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "one still for w",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "PNG hash w",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "RGBA/canvas w",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "pixel hash w",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "nonempty/not clipped w",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "actual triangles/backface culling w",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixed pivot w",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "one still for nw",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "PNG hash nw",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "RGBA/canvas nw",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "pixel hash nw",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "nonempty/not clipped nw",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "actual triangles/backface culling nw",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixed pivot nw",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "one still for n",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "PNG hash n",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "RGBA/canvas n",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "pixel hash n",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "nonempty/not clipped n",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "actual triangles/backface culling n",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixed pivot n",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "one still for ne",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "PNG hash ne",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "RGBA/canvas ne",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "pixel hash ne",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "nonempty/not clipped ne",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "actual triangles/backface culling ne",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixed pivot ne",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "one still for e",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "PNG hash e",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "RGBA/canvas e",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "pixel hash e",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "nonempty/not clipped e",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "actual triangles/backface culling e",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixed pivot e",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "one still for se",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "PNG hash se",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "RGBA/canvas se",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "pixel hash se",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "nonempty/not clipped se",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "actual triangles/backface culling se",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "fixed pivot se",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "real Warrior nonexistent idle refused before writing",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "real Warrior nonexistent walk refused before writing",
+      "passed": true,
+      "detail": null
+    },
+    {
+      "name": "five CPU fixture controls",
+      "passed": true,
+      "detail": "test_bind_cannot_be_labelled_idle (test_hero_pipeline.PipelineControls.test_bind_cannot_be_labelled_idle) ... ok\ntest_cpu_projection_keeps_ground_pivot_and_winding (test_hero_pipeline.PipelineControls.test_cpu_projection_keeps_ground_pivot_and_winding) ... ok\ntest_quaternion_short_arc_and_native_order (test_hero_pipeline.PipelineControls.test_quaternion_short_arc_and_native_order) ... ok\ntest_real_skin_follows_actual_clip (test_hero_pipeline.PipelineControls.test_real_skin_follows_actual_clip) ... ok\ntest_static_keys_refused_as_animation (test_hero_pipeline.PipelineControls.test_static_keys_refused_as_animation) ... ok\n\n----------------------------------------------------------------------\nRan 5 tests in 0.134s\n\nOK"
+    }
+  ],
+  "realSourceNegativeControls": [
+    {
+      "args": [
+        "render",
+        "D:\\Diablo 1 3D\\diagnostics\\characters-rigs\\tripo-warrior-derivative-20261009\\r2\\candidate\\warrior-light-unarmed-r3-tripo-bind-basis-repaired-2k.glb",
+        "--output",
+        "C:\\Users\\dougl\\AppData\\Local\\Temp\\own-hero-negative-okeus3t6\\idle-must-not-exist",
+        "--clip",
+        "idle",
+        "--state",
+        "idle",
+        "--frames",
+        "8",
+        "--footpoint",
+        "0,0,0"
+      ],
+      "exitCode": 2,
+      "stderr": "usage: verify_delivery.py [-h] [--repo-root REPO_ROOT] {inspect,render} ...\nverify_delivery.py: error: Animation export needs one exact embedded clip, >=2 frames, and an explicit state",
+      "outputDirectoryCreated": false,
+      "writtenFrames": 0,
+      "sourceClips": 0
+    },
+    {
+      "args": [
+        "render",
+        "D:\\Diablo 1 3D\\diagnostics\\characters-rigs\\tripo-warrior-derivative-20261009\\r2\\candidate\\warrior-light-unarmed-r3-tripo-bind-basis-repaired-2k.glb",
+        "--output",
+        "C:\\Users\\dougl\\AppData\\Local\\Temp\\own-hero-negative-okeus3t6\\walk-must-not-exist",
+        "--clip",
+        "walk",
+        "--state",
+        "walk",
+        "--frames",
+        "8",
+        "--footpoint",
+        "0,0,0"
+      ],
+      "exitCode": 2,
+      "stderr": "usage: verify_delivery.py [-h] [--repo-root REPO_ROOT] {inspect,render} ...\nverify_delivery.py: error: Animation export needs one exact embedded clip, >=2 frames, and an explicit state",
+      "outputDirectoryCreated": false,
+      "writtenFrames": 0,
+      "sourceClips": 0
+    }
+  ],
+  "contactSheet": {
+    "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\warrior\\bind-directions\\warrior-bind-8directions-contact.png",
+    "sha256": "fd0e9d7f511f7d4bee784aa27c26f4113d11ddf8dd685051b353cf25506c15f2",
+    "kind": "labelled review artifact; not native frame"
+  },
+  "runtime": {
+    "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+    "pythonExe": "C:\\Users\\dougl\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+    "pythonExeSha256": "4d6f5f81a4bca11191c4c7c6b43632694d0a4ce74e068619d8fdc161d469859a",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "numpy": "2.4.4",
+    "pillow": "12.0.0",
+    "godotInstalledUnused": {
+      "path": "D:\\Diablo 1 3D\\.tools\\godot\\Godot_v4.7.2-stable_win64_console.exe",
+      "sha256": "c8f0a6bc45a19b33541501e57f6f7cd972ab18453743266339d495cbbe846643"
+    },
+    "gpuUsed": false,
+    "renderer": "CPU NumPy/Pillow; no Godot/Blender startup"
+  },
+  "gameplayGate": "Only sprites until rig and all animation states correctly validated; including Warrior/Ogden; no candidate promotion",
+  "limitations": [
+    "diffuse material approximation; full PBR/light match not claimed",
+    "human visual acceptance pending",
+    "no variant completeness; no native state/slot timing integration",
+    "8 direction pixel variance comes from rotating one bind pose, not animation"
+  ],
+  "globalWrites": false
+}

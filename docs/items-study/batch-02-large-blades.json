@@ -1,0 +1,151 @@
+{
+  "format": "d3d.item-concept-art",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "scope": "Supplemental batch 02: only Two-Handed Sword and Great Sword. Other production units and aggregate coverage are not updated here.",
+  "catalogSha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d",
+  "generationTool": "built-in image_gen.imagegen",
+  "generationCalls": 2,
+  "postProcessing": "none; original generated PNG bytes copied unchanged after confirming destinations absent",
+  "originalGameImagesIncluded": false,
+  "visualApproval": false,
+  "runtimeInstalled": false,
+  "summary": {
+    "conceptCandidatesInThisFile": 2,
+    "modelsGenerated": 0,
+    "runtimeIconsGenerated": 0,
+    "coherenceCorrectionsPending": 2
+  },
+  "entries": [
+    {
+      "productionId": "item.design.base.two-handed-sword",
+      "conceptId": "item.design.base.two-handed-sword.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-thumbnail"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "postProcessing": "none; original generated PNG bytes copied unchanged",
+      "styleReferences": [
+        {
+          "role": "layout-neutral-rendering-only",
+          "image": "assets/concept-art/items/r1/claymore-r1.png",
+          "sha256": "e9a2e4061bcdad78e7833fa7657722672c127466a0e77a2e5dbf2df536070567"
+        }
+      ],
+      "image": "assets/concept-art/items/r1/two-handed-sword-r1.png",
+      "sha256": "f26c2ba133d2475ed2d4dd6d43eec66f6a37584a7c128042873f38226f9ddb0e",
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate modeling turnaround, NOT a finished runtime icon.\nInput image 1: PRIVATE original pixel-art silhouette and color reference for ONE item, Two-Handed Sword, item.design.base.two-handed-sword, ICURS_TWO_HANDED_SWORD 110. Use it only to inform a wholly NEW detailed concept; never paste its pixels or reproduce a pixel-art inset. Input image 2: layout, neutral rendering and presentation style reference ONLY (the clean Claymore board); do not copy its sword design.\nCreate a clean high-detail realistic game-prop concept sheet with the exact SAME SINGLE physical object shown whole in FRONT flat face, true SIDE thickness, BACK opposite face, and THREE-QUARTER views, plus a smaller NEW HD rendered inventory-composition thumbnail of that same concept. Large clearly separated vertical views; charcoal-gray background, neutral soft studio illumination, restrained fine wear. Labels only TWO-HANDED SWORD / FRONT / SIDE / BACK / 3-4 / ICON, understated light serif lettering. Keep all tips and pommels inside the frame.\nIdentity is the unusual reference, NOT a generic two-handed steel sword: long nearly straight tapered upper body, sharp exposed dark-silver steel point; most of its length is warm opaque burnt-orange/ochre-brown, interrupted by broad diagonal pale silver-gray bands around the body. Preserve the original relative proportions, orange dominance, alternating bands and silhouette. Near the lower blade/base retain the conspicuous dark oval pierced space with pale metal rim and branching curled silver-gray guard, then a long dark reddish-brown grip and small muted brass/olive-gold pommel. The original band's exact construction and the orange material are ambiguous: for THIS CANDIDATE ONLY infer a solid copper-toned orange-brown inset or facing restrained by diagonal pale steel bands, with real non-emissive material. Do not claim this material is recovered historical fact. The BACK and thickness are proposed reconstructions; keep the bands count/positions, guard topology, grip length, pommel and point coherent across every view, including the small thumbnail. The SIDE view must show thin physical thickness and the guard's actual profile, not a second full face. BACK is the opposite face of the same geometry.\nNo fire, glow, magic particles, neon, broad generic claymore blade, extra jewels, skulls, hands, characters, scenery, measurements, collage, source pixel-art or alternate designs. No giant shadow or colored rim light. Every object depiction including ICON is freshly rendered in the same clean realistic HD material style.",
+      "referenceHash": "6a1c703b78e01bcbbef5fa8822cc96115f4885015b890afe739f96067f7bdc0e",
+      "reference": {
+        "cursorId": 110,
+        "sha256": "6a1c703b78e01bcbbef5fa8822cc96115f4885015b890afe739f96067f7bdc0e",
+        "availability": "local-private",
+        "notes": "Referência 6x inspecionada antes da geração. Corpo alaranjado, faixas claras, ponta cinza, região oval escura próxima da guarda, cabo castanho-avermelhado e pomo dourado são observações da imagem. A composição do corpo/faixas é ambígua."
+      },
+      "inferredAreas": [
+        "Leitura proposta do corpo alaranjado como superfície opaca em tom de cobre e das faixas como metal claro; a referência não comprova esses materiais nem sua construção.",
+        "A região oval escura do hilt foi interpretada como abertura passante; profundidade, perfuração e aro tridimensional são inferências, não geometria comprovada pelo sprite.",
+        "Espessura, face posterior, sistema de fixação das faixas, geometria do aro/guarda, desgaste fino e detalhes do pomo são reconstruções."
+      ],
+      "coherenceReview": {
+        "status": "pending-corrections",
+        "coherentAcrossViews": false,
+        "observed": "A prancha conserva a dominância alaranjada, faixas claras, ponta cinza, abertura oval, guarda prateada e cabo escuro. Todas as vistas estão presentes, sem sprite original colado; o thumbnail é novo HD.",
+        "pendingIssues": [
+          "O thumbnail simplifica o padrão de faixas em relação às vistas principais; reconciliar contagem, largura, orientação e continuidade das bandas ao redor do mesmo volume.",
+          "Revisar a continuidade tridimensional das faixas entre FRONT/BACK/3-4; a prancha não constitui demonstração geométrica de encaixe.",
+          "Reconciliar espessura, grip e espaço útil para as mãos com a frente de personagens antes da modelagem; nenhum socket ou encaixe foi validado nesta imagem.",
+          "A guarda/aro e o pomo receberam construção detalhada inferida; confirmar escala e fidelidade antes de modelar.",
+          "A escolha de material para a região alaranjada continua pendente de avaliação; não declarar couro, cobre, bainha ou metal como fato recuperado do original."
+        ]
+      },
+      "notes": "Somente conceito candidato. A interpretação de material é explicitamente inferida. Coerência multivista e thumbnail exigem reconciliação antes do master 3D. O inset não é ícone runtime."
+    },
+    {
+      "productionId": "item.design.base.great-sword",
+      "conceptId": "item.design.base.great-sword.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "turnaround",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-thumbnail"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "postProcessing": "none; original generated PNG bytes copied unchanged",
+      "styleReferences": [
+        {
+          "role": "layout-neutral-rendering-only",
+          "image": "assets/concept-art/items/r1/claymore-r1.png",
+          "sha256": "e9a2e4061bcdad78e7833fa7657722672c127466a0e77a2e5dbf2df536070567"
+        }
+      ],
+      "image": "assets/concept-art/items/r1/great-sword-r1.png",
+      "sha256": "b745511079842508445d1a3f1059d2fb56366e9e86e43266753009a89ffdf28b",
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate modeling turnaround, NOT a finished runtime icon.\nInput image 1: PRIVATE original pixel-art silhouette and color reference for ONE item, Great Sword, item.design.base.great-sword, ICURS_GREAT_SWORD 134. Use it only to inform wholly NEW detailed concept art; never paste its pixels or reproduce a pixel-art inset. Input image 2: layout, clean neutral rendering and presentation style reference ONLY (Claymore board); do not borrow its sword geometry.\nCreate a clean high-detail realistic game-prop concept sheet showing the exact SAME SINGLE physical object in FRONT flat face, true SIDE thickness, BACK opposite face, and THREE-QUARTER views, plus a smaller NEW HD rendered inventory-composition thumbnail of that same concept. Whole isolated vertical objects, widely spaced; plain charcoal-gray background, neutral soft studio light, restrained finely worn real steel, brass/copper and leather. Labels only GREAT SWORD / FRONT / SIDE / BACK / 3-4 / ICON, understated light serif typography. Keep the complete blade tips, guards and pommels in frame.\nCrucial reference fidelity: despite its name GREAT SWORD, the source blade is CURVED and comparatively slim, not a straight double-edged claymore. Preserve the long gently sweeping silver-gray single-edged blade, the asymmetric curved outline, relatively narrow width, and the subtly clipped/rounded upper tip visible in the reference rather than inventing a symmetric spear point. The steel blade is much longer than the grip. At its base retain a small warm brass collar and the distinctive dark copper/rust-brown asymmetric curling guard with swept branching quillons, then the visibly crimson/dark red long grip and small muted gold/brass endcap. Preserve the original palette distribution: silver blade, dark orange-brown guard, red grip, small brass accents. For this candidate infer real forged metal and red leather surfaces; unseen thickness/back and the exact guard construction are reconstructions. Do not straighten the blade to suit the item name, do not exaggerate it into a broad falchion/scimitar, and do not replace the curled guard with the Claymore's straight crossguard.\nAll views must have identical grip length, tip shape, blade curvature, guard topology and material placement. BACK is the opposite face of the same asymmetric object, so its projected curvature reverses naturally; it is not a second design. SIDE shows the thin blade thickness rather than another full-width face. The small ICON is a newly rendered high-detail view of this same curved sword, never the input sprite.\nAvoid alternate variants, hands, people, scenery, fire/glow, neon, fantasy jewels/skulls/spikes, added runes, baked dramatic shadows, colored lights, source pixel-art, collage or generic straight greatsword. Sharp readable silhouette and restrained real material detail, matching the existing clean board language.",
+      "referenceHash": "e1a353d80b193efc9f4f766b2495eb29f17260d2e272f0d9e81ae04e232e9ebd",
+      "reference": {
+        "cursorId": 134,
+        "sha256": "e1a353d80b193efc9f4f766b2495eb29f17260d2e272f0d9e81ae04e232e9ebd",
+        "availability": "local-private",
+        "notes": "Referência 6x inspecionada antes da geração. Apesar do nome Great Sword, a imagem mostra lâmina comprida e curva, aço cinza, guarda sinuosa castanho-alaranjada, cabo vermelho e pequenos acentos dourados."
+      },
+      "inferredAreas": [
+        "Espessura, face posterior, construção dos ramos curvos da guarda e detalhes de fixação são reconstruções.",
+        "Os quillons em forma de fita torcida e o corte/recorte da ponta são soluções propostas pelo conceito; a referência de baixa resolução não comprova essas construções.",
+        "Leituras de aço, couro vermelho, cobre e latão são propostas a partir das cores; desgaste fino e detalhes do pomo não foram recuperados do sprite."
+      ],
+      "coherenceReview": {
+        "status": "pending-corrections",
+        "coherentAcrossViews": false,
+        "observed": "A prancha preserva lâmina curva relativamente estreita, paleta cinza/vermelho/castanho-alaranjado/dourado e guarda sinuosa, sem converter o item numa espada reta genérica. Todas as vistas estão presentes; o thumbnail é novo HD.",
+        "pendingIssues": [
+          "BACK mantém o sentido projetado da curvatura de FRONT enquanto espelha a guarda; a face oposta deveria ser reconciliada para representar a mesma lâmina assimétrica.",
+          "Revisar orientação da curva em 3-4 e a ligação entre lâmina, guarda e cabo em todas as vistas antes do master 3D.",
+          "Reconciliar espessura, grip e espaço útil para as mãos com a frente de personagens antes da modelagem; nenhum socket ou encaixe foi validado nesta imagem.",
+          "A ponta ficou mais afilada que a leitura arredondada/oblíqua da referência; confirmar o perfil antes de selecionar o conceito.",
+          "A construção tridimensional dos ramos da guarda é inferida e deve ser revisada com a referência; não tratar o detalhe gerado como fidelidade comprovada."
+        ]
+      },
+      "notes": "Somente conceito candidato. A curvatura real da referência foi preservada como requisito, mas BACK e demais relações espaciais ainda precisam de reconciliação. O inset não é ícone runtime."
+    }
+  ]
+}

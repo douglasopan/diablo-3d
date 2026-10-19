@@ -3,6 +3,8 @@
 #include "control_chat.hpp"
 #include "control_flasks.hpp"
 #include "control/d3d_hud.hpp"
+#include "control/d3d_hud_skin.hpp"
+#include "control/d3d_floating_panels.hpp"
 
 #include "automap.h"
 #include "controls/control_mode.hpp"
@@ -11,6 +13,7 @@
 #include "engine/backbuffer_state.hpp"
 #include "engine/load_cel.hpp"
 #include "engine/render/clx_render.hpp"
+#include "engine/render/d3d_hud_presentation.hpp"
 #include "engine/render/primitive_render.hpp"
 #include "engine/render/ui_overlay_regions.hpp"
 #include "engine/trn.hpp"
@@ -272,9 +275,11 @@ void CalculatePanelAreas()
 		RightPanel.position.x = gnScreenWidth - RightPanel.size.width - LeftPanel.position.x;
 	}
 	RightPanel.position.y = LeftPanel.position.y;
+	if (IsD3dHudSelected())
+		UpdateD3dFloatingPanelAreas(LeftPanel, RightPanel);
 
 	gnViewportHeight = gnScreenHeight;
-	if (gnScreenWidth <= MainPanel.size.width && ControlMode == ControlTypes::VirtualGamepad) {
+	if (!IsD3dHudSelected() && gnScreenWidth <= MainPanel.size.width && ControlMode == ControlTypes::VirtualGamepad) {
 		// Part of the screen is fully obscured by the UI
 		gnViewportHeight -= MainPanel.size.height;
 	}
@@ -358,34 +363,40 @@ void DrawPanelBox(const Surface &out, SDL_Rect srcRect, Point targetPosition)
 std::expected<void, std::string> InitMainPanel()
 {
 	if (!HeadlessMode) {
-		BottomBuffer.emplace(GetMainPanel().size.width, (GetMainPanel().size.height + PanelPaddingHeight) * (IsChatAvailable() ? 2 : 1));
-		pManaBuff.emplace(88, 88);
-		pLifeBuff.emplace(88, 88);
+		if (IsD3dHudSelected()) {
+			RETURN_IF_ERROR(LoadD3dHudSkin());
+		} else {
+			BottomBuffer.emplace(GetMainPanel().size.width, (GetMainPanel().size.height + PanelPaddingHeight) * (IsChatAvailable() ? 2 : 1));
+			pManaBuff.emplace(88, 88);
+			pLifeBuff.emplace(88, 88);
+		}
 
 		RETURN_IF_ERROR(LoadPartyPanel());
 		RETURN_IF_ERROR(LoadCharPanel());
 		RETURN_IF_ERROR(LoadLargeSpellIcons());
-		{
-			ASSIGN_OR_RETURN(const OwnedClxSpriteList sprite, LoadCelWithStatus("ctrlpan\\panel8", GetMainPanel().size.width));
-			ClxDraw(*BottomBuffer, { 0, (GetMainPanel().size.height + PanelPaddingHeight) - 1 }, sprite[0]);
-		}
-		{
-			const Point bulbsPosition { 0, 87 };
-			ASSIGN_OR_RETURN(const OwnedClxSpriteList statusPanel, LoadCelWithStatus("ctrlpan\\p8bulbs", 88));
-			ClxDraw(*pLifeBuff, bulbsPosition, statusPanel[0]);
-			ClxDraw(*pManaBuff, bulbsPosition, statusPanel[1]);
+		if (!IsD3dHudSelected()) {
+			{
+				ASSIGN_OR_RETURN(const OwnedClxSpriteList sprite, LoadCelWithStatus("ctrlpan\\panel8", GetMainPanel().size.width));
+				ClxDraw(*BottomBuffer, { 0, (GetMainPanel().size.height + PanelPaddingHeight) - 1 }, sprite[0]);
+			}
+			{
+				const Point bulbsPosition { 0, 87 };
+				ASSIGN_OR_RETURN(const OwnedClxSpriteList statusPanel, LoadCelWithStatus("ctrlpan\\p8bulbs", 88));
+				ClxDraw(*pLifeBuff, bulbsPosition, statusPanel[0]);
+				ClxDraw(*pManaBuff, bulbsPosition, statusPanel[1]);
+			}
 		}
 	}
 	ChatFlag = false;
 	ChatInputState = std::nullopt;
 	if (IsChatAvailable()) {
 		if (!HeadlessMode) {
-			{
+			if (!IsD3dHudSelected()) {
 				ASSIGN_OR_RETURN(const OwnedClxSpriteList sprite, LoadCelWithStatus("ctrlpan\\talkpanl", GetMainPanel().size.width));
 				ClxDraw(*BottomBuffer, { 0, ((GetMainPanel().size.height + PanelPaddingHeight) * 2) - 1 }, sprite[0]);
+				talkButtons = LoadCel("ctrlpan\\talkbutt", 61);
 			}
 			multiButtons = LoadCel("ctrlpan\\p8but2", 33);
-			talkButtons = LoadCel("ctrlpan\\talkbutt", 61);
 		}
 		sgbPlrTalkTbl = 0;
 		TalkMessage[0] = '\0';
@@ -397,8 +408,10 @@ std::expected<void, std::string> InitMainPanel()
 	MainPanelFlag = false;
 	LevelButtonDown = false;
 	if (!HeadlessMode) {
-		RETURN_IF_ERROR(LoadMainPanel());
-		ASSIGN_OR_RETURN(pMainPanelButtons, LoadCelWithStatus("ctrlpan\\panel8bu", 71));
+		if (!IsD3dHudSelected()) {
+			RETURN_IF_ERROR(LoadMainPanel());
+			ASSIGN_OR_RETURN(pMainPanelButtons, LoadCelWithStatus("ctrlpan\\panel8bu", 71));
+		}
 
 		static const uint16_t CharButtonsFrameWidths[9] { 95, 41, 41, 41, 41, 41, 41, 41, 41 };
 		ASSIGN_OR_RETURN(pChrButtons, LoadCelWithStatus("data\\charbut", CharButtonsFrameWidths));
@@ -420,7 +433,9 @@ std::expected<void, std::string> InitMainPanel()
 
 	if (!HeadlessMode) {
 		RETURN_IF_ERROR(InitSpellBook());
-		ASSIGN_OR_RETURN(pQLogCel, LoadCelWithStatus("data\\quest", static_cast<uint16_t>(SidePanelSize.width)));
+		if (!IsD3dHudSelected()) {
+			ASSIGN_OR_RETURN(pQLogCel, LoadCelWithStatus("data\\quest", static_cast<uint16_t>(SidePanelSize.width)));
+		}
 		ASSIGN_OR_RETURN(GoldBoxBuffer, LoadCelWithStatus("ctrlpan\\golddrop", 261));
 	}
 	CloseGoldDrop();
@@ -434,11 +449,12 @@ std::expected<void, std::string> InitMainPanel()
 
 void DrawMainPanel(const Surface &out)
 {
-	if (IsD3dHudEnabled()) {
+	if (IsD3dHudSelected()) {
 		DrawD3dHudBackground(out);
-		// DrawView has already drawn contextual information. The connected
-		// frame replaces that area, so redraw its native text after the frame.
-		DrawInfoBox(out);
+		// DrawView already records the captured foreground. Direct CPU layouts
+		// still need this redraw after their chassis; recovery never calls it.
+		if (!IsD3dHudPresentationCapturing(out))
+			DrawInfoBox(out);
 		return;
 	}
 	DrawPanelBox(out, MakeSdlRect(0, sgbPlrTalkTbl + PanelPaddingHeight, GetMainPanel().size.width, GetMainPanel().size.height), GetMainPanel().position);
@@ -447,7 +463,13 @@ void DrawMainPanel(const Surface &out)
 
 void DrawNativePanelButton(const Surface &out, int button, bool pressed)
 {
+	if (button < 0 || button >= TotalMpMainPanelButtons)
+		return;
 	if (button < TotalSpMainPanelButtons) {
+		if (IsD3dHudSelected()) {
+			DrawMainPanelButtonLabel(out, button, pressed);
+			return;
+		}
 		const Rectangle source = MainPanelButtonRect[button];
 		DrawPanelBox(out, MakeSdlRect(source.position.x, source.position.y + PanelPaddingHeight,
 		                     source.size.width, source.size.height + 1), { 0, 0 });
@@ -464,9 +486,14 @@ void DrawNativePanelButton(const Surface &out, int button, bool pressed)
 	RenderClxSprite(out, (*multiButtons)[frame], { 0, 0 });
 }
 
+bool IsMainPanelButtonPressed(int button)
+{
+	return button >= PanelButtonFirst && button <= PanelButtonLast && MainPanelButtons[button];
+}
+
 void DrawMainPanelButtons(const Surface &out)
 {
-	if (IsD3dHudEnabled()) {
+	if (IsD3dHudSelected()) {
 		const int count = IsChatAvailable() ? TotalMpMainPanelButtons : TotalSpMainPanelButtons;
 		for (int i = 0; i < count; ++i)
 			DrawD3dHudPanelButton(out, i, MainPanelButtons[i]);
@@ -548,10 +575,14 @@ void CheckMainPanelButtonDead()
 
 void DoAutoMap()
 {
-	if (!AutomapActive)
-		StartAutomap();
-	else
+	if (!AutomapActive) {
+		if (IsD3dHudSelected())
+			StartMinimap();
+		else
+			StartAutomap();
+	} else {
 		AutomapActive = false;
+	}
 }
 
 void CycleAutomapType()
@@ -668,6 +699,7 @@ void FreeControlPan()
 	FreePartyPanel();
 	FreeCharPanel();
 	FreeModifierHints();
+	FreeD3dHudSkin();
 }
 
 void CheckLevelButton()
@@ -696,7 +728,7 @@ void DrawLevelButton(const Surface &out)
 {
 	if (IsLevelUpButtonVisible()) {
 		const int nCel = LevelButtonDown ? 2 : 1;
-		if (IsD3dHudEnabled()) {
+		if (IsD3dHudLayoutActive()) {
 			OwnedSurface button(41, 22);
 			FillRect(button, 0, 0, 41, 22, 0);
 			RenderClxSprite(button, (*pChrButtons)[nCel], { 0, 0 });
@@ -783,7 +815,7 @@ void ReleaseChrBtns(bool addAllStatPoints)
 void DrawDurIcon(const Surface &out)
 {
 	Player &myPlayer = *MyPlayer;
-	if (IsD3dHudEnabled()) {
+	if (IsD3dHudLayoutActive()) {
 		OwnedSurface icons(152, 32);
 		FillRect(icons, 0, 0, 152, 32, 0);
 		int x = 120;

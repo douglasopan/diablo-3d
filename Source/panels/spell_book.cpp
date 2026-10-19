@@ -6,12 +6,15 @@
 #include <string>
 
 #include "control/control.hpp"
+#include "control/d3d_floating_panels.hpp"
+#include "control/d3d_hud.hpp"
 #include "engine/backbuffer_state.hpp"
 #include "engine/clx_sprite.hpp"
 #include "engine/load_cel.hpp"
 #include "engine/load_clx.hpp"
 #include "engine/rectangle.hpp"
 #include "engine/render/clx_render.hpp"
+#include "engine/render/d3d_panel_presentation.hpp"
 #include "engine/render/text_render.hpp"
 #include "game_mode.hpp"
 #include "missiles.h"
@@ -20,6 +23,7 @@
 #include "player.h"
 #include "tables/spelldat.h"
 #include "utils/format.hpp"
+#include "utils/format_int.hpp"
 #include "utils/language.h"
 #include "utils/status_macros.hpp"
 
@@ -120,8 +124,13 @@ StringOrView GetSpellPowerText(SpellID spell, int spellLevel)
 
 std::expected<void, std::string> InitSpellBook()
 {
-	ASSIGN_OR_RETURN(spellBookBackground, LoadCelWithStatus("data\\spellbk", static_cast<uint16_t>(SidePanelSize.width)));
-	ASSIGN_OR_RETURN(spellBookButtons, LoadCelWithStatus("data\\spellbkb", SpellBookButtonWidth()));
+	if (!IsD3dHudSelected()) {
+		ASSIGN_OR_RETURN(spellBookBackground, LoadCelWithStatus("data\\spellbk", static_cast<uint16_t>(SidePanelSize.width)));
+		ASSIGN_OR_RETURN(spellBookButtons, LoadCelWithStatus("data\\spellbkb", SpellBookButtonWidth()));
+	} else {
+		spellBookBackground = std::nullopt;
+		spellBookButtons = std::nullopt;
+	}
 	return LoadSmallSpellIcons();
 }
 
@@ -136,14 +145,33 @@ void DrawSpellBook(const Surface &out)
 {
 	constexpr int SpellBookButtonX = 7;
 	constexpr int SpellBookButtonY = 348;
-	ClxDraw(out, GetPanelPosition(UiPanels::Spell, { 0, 351 }), (*spellBookBackground)[0]);
+	const bool floating = IsD3dHudSelected();
+	if (floating) {
+		DrawD3dFloatingPanelBody(out, UiPanels::Spell);
+		DrawD3dFloatingPanelHeader(out, UiPanels::Spell);
+	} else {
+		ClxDraw(out, GetPanelPosition(UiPanels::Spell, { 0, 351 }), (*spellBookBackground)[0]);
+	}
 	const int buttonX = gbIsHellfire && SpellbookTab < 5
 	    ? SpellBookButtonWidthHellfire * SpellbookTab
 	    : (SpellBookButtonWidthDiablo * SpellbookTab)
 	        // BUGFIX: rendering of page 3 and page 4 buttons are both off-by-one pixel (fixed).
 	        + (SpellbookTab == 2 || SpellbookTab == 3 ? 1 : 0);
 
-	ClxDraw(out, GetPanelPosition(UiPanels::Spell, { SpellBookButtonX + buttonX, SpellBookButtonY }), (*spellBookButtons)[SpellbookTab]);
+	if (floating) {
+		// The same four/five native tab hit areas; the gutter still dispatches as before.
+		const int tabCount = gbIsHellfire ? 5 : 4;
+		for (int tab = 0; tab < tabCount; ++tab) {
+			const int tabX = tab * SpellBookButtonWidth() + (!gbIsHellfire && tab >= 2 ? 1 : 0);
+			const Rectangle tabRect { GetPanelPosition(UiPanels::Spell, { SpellBookButtonX + tabX, 320 }),
+				{ SpellBookButtonWidth(), 29 } };
+			DrawD3dFloatingPanelFrame(out, tabRect, tab == SpellbookTab);
+			DrawString(out, FormatInteger(tab + 1), tabRect,
+				{ .flags = UiFlags::AlignCenter | UiFlags::VerticalCenter | (tab == SpellbookTab ? UiFlags::ColorWhitegold : UiFlags::ColorWhite) });
+		}
+	} else {
+		ClxDraw(out, GetPanelPosition(UiPanels::Spell, { SpellBookButtonX + buttonX, SpellBookButtonY }), (*spellBookButtons)[SpellbookTab]);
+	}
 	const Player &player = *InspectPlayer;
 	const uint64_t spl = player._pMemSpells | player._pISpells | player._pAblSpells;
 
@@ -187,6 +215,8 @@ void DrawSpellBook(const Surface &out)
 		}
 		yp += SpellBookDescription.height;
 	}
+	if (floating)
+		SealD3dPanelBackplate(out);
 }
 
 void CheckSBook()

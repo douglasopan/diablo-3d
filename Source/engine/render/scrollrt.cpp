@@ -11,6 +11,11 @@
 #include <cstddef>
 #include <cstdint>
 
+#ifdef __EMSCRIPTEN__
+#include <chrono>
+#include <emscripten.h>
+#endif
+
 #ifdef USE_SDL3
 #include <SDL3/SDL_keyboard.h>
 #include <SDL3/SDL_rect.h>
@@ -237,6 +242,33 @@ void UndrawCursor(const Surface &out)
 	PrevCursorRect = cursor.rect;
 }
 
+// A deferred HUD recovery only changes its frozen footprints. Preserve late
+// UI outside those regions and never run cursor visibility/input logic again.
+void UndrawD3dHudRecoveryCursor(const Surface &out)
+{
+	const DrawnCursor &cursor = GetDrawnCursor();
+	for (int y = 0; y < cursor.rect.size.height; ++y) {
+		for (int x = 0; x < cursor.rect.size.width; ++x) {
+			const Point pixel = cursor.rect.position + Displacement { x, y };
+			if (out.InBounds(pixel) && IsD3dHudPresentationRecoveryPixel(pixel))
+				out[pixel] = cursor.behindBuffer[static_cast<size_t>(y) * cursor.rect.size.width + x];
+		}
+	}
+}
+
+void RedrawD3dHudRecoveryCursor(const Surface &out)
+{
+	DrawnCursor &cursor = GetDrawnCursor();
+	for (int y = 0; y < cursor.rect.size.height; ++y) {
+		for (int x = 0; x < cursor.rect.size.width; ++x) {
+			const Point pixel = cursor.rect.position + Displacement { x, y };
+			if (out.InBounds(pixel) && IsD3dHudPresentationRecoveryPixel(pixel))
+				cursor.behindBuffer[static_cast<size_t>(y) * cursor.rect.size.width + x] = out[pixel];
+		}
+	}
+	BlitD3dHudPresentationCapturedCursor(out);
+}
+
 bool ShouldShowCursor()
 {
 	if (ControlMode == ControlTypes::KeyboardAndMouse)
@@ -287,6 +319,10 @@ inline void ClxDrawLightBlended(const Surface &out, Point position, ClxSprite cl
 void DrawCursor(const Surface &out)
 {
 	DrawnCursor &cursor = GetDrawnCursor();
+	// Clear the old transient channel, then capture in ordinary UI phase so a
+	// rejected capture records its recovered R1 decoration as persistent UI.
+	BeginUiOverlayCursor();
+	EndUiOverlayCursor();
 	ClearD3dHudPresentationCursor();
 	if (IsTownFirstPersonInputCaptured()) {
 		SetHardwareCursorVisible(false);
@@ -301,7 +337,7 @@ void DrawCursor(const Surface &out)
 		};
 		if (rect.size.width == 0 || rect.size.height == 0)
 			return;
-		BlitCursor(cursor.behindBuffer, rect.size.width, &out[rect.position], out.pitch(), rect.size.width, rect.size.height);
+		std::array<uint8_t, Diameter * Diameter> pixels {};
 		std::array<uint8_t, Diameter * Diameter> opacity {};
 		constexpr auto IsWhite = [](int x, int y) {
 			return (x == 0 && (y <= -2 || y >= 2) && y >= -4 && y <= 4)
@@ -316,15 +352,32 @@ void DrawCursor(const Surface &out)
 				    || IsWhite(dx, dy - 1) || IsWhite(dx, dy + 1);
 				if (!white && !outline)
 					continue;
-				out[pixel] = white ? PAL16_GRAY : PAL16_GRAY + 15;
-				opacity[static_cast<size_t>(y) * rect.size.width + x] = 255;
+				const size_t index = static_cast<size_t>(y) * rect.size.width + x;
+				pixels[index] = white ? PAL16_GRAY : PAL16_GRAY + 15;
+				opacity[index] = 255;
+			}
+		}
+		const size_t area = static_cast<size_t>(rect.size.width) * rect.size.height;
+		// A rejected capture materializes R1 before its background is saved or
+		// any native cursor pixel is written. The clipped reticle stays on stack.
+		CaptureD3dHudPresentationCursorPixels(rect,
+		    std::span<const uint8_t> { pixels.data(), area },
+		    std::span<const uint8_t> { opacity.data(), area });
+		BeginUiOverlayCursor();
+		BlitCursor(cursor.behindBuffer, rect.size.width, &out[rect.position], out.pitch(), rect.size.width, rect.size.height);
+		for (int y = 0; y < rect.size.height; ++y) {
+			for (int x = 0; x < rect.size.width; ++x) {
+				const size_t index = static_cast<size_t>(y) * rect.size.width + x;
+				if (opacity[index] == 0)
+					continue;
+				const Point pixel = rect.position + Displacement { x, y };
 				// Called inside BeginUiOverlayCursor: retain only covered pixels
 				// over the 2x world, without registering the background as UI.
 				MarkUiOverlayRect(out, pixel.x, pixel.y, 1, 1);
+				out[pixel] = pixels[index];
 			}
 		}
-		CaptureD3dHudPresentationCursorPixels(out, rect,
-		    std::span<const uint8_t> { opacity.data(), static_cast<size_t>(rect.size.width) * rect.size.height });
+		EndUiOverlayCursor();
 		return;
 	}
 	if (IsHardwareCursor()) {
@@ -373,10 +426,12 @@ void DrawCursor(const Surface &out)
 	if (rect.size.width == 0 || rect.size.height == 0)
 		return;
 
-	BlitCursor(cursor.behindBuffer, rect.size.width, &out[rect.position], out.pitch(), rect.size.width, rect.size.height);
 	const Point spriteBottomLeft = cursPosition + Displacement { 0, cursSize.height - 1 };
-	DrawSoftwareCursor(out, spriteBottomLeft, pcurs);
 	CaptureD3dHudPresentationCursor(rect, spriteBottomLeft, pcurs);
+	BeginUiOverlayCursor();
+	BlitCursor(cursor.behindBuffer, rect.size.width, &out[rect.position], out.pitch(), rect.size.width, rect.size.height);
+	DrawSoftwareCursor(out, spriteBottomLeft, pcurs);
+	EndUiOverlayCursor();
 }
 
 /**
@@ -1391,12 +1446,16 @@ void DrawView(const Surface &out, Point startPosition)
 	CalcFirstTilePosition(startPosition, offset);
 	ClearUiOverlayRegions();
 	DrawGame(out, startPosition, offset);
+	// Freeze resource fill with the same totals used by every HUD layer in
+	// this frame, before the first ordinary UI write can require CPU recovery.
+	UpdateLifeManaPercent();
 	BeginD3dHudPresentationFrame(out);
+	SetD3dHudRecoveryCursorCallbacks(UndrawD3dHudRecoveryCursor, RedrawD3dHudRecoveryCursor);
 #ifndef USE_SDL1
-	if (GetTownViewHighResolutionFrame() != nullptr || IsD3dHudEnabled()) {
+	if (GetTownViewHighResolutionFrame() != nullptr || IsD3dHudSelected()) {
 		BeginUiOverlayRegions(out);
 		const Rectangle &panel = GetMainPanel();
-		if (!IsD3dHudEnabled())
+		if (!IsD3dHudLayoutActive())
 			MarkUiOverlayRect(out, panel.position.x, panel.position.y, panel.size.width, panel.size.height);
 	}
 #endif
@@ -1412,7 +1471,11 @@ void DrawView(const Surface &out, Point startPosition)
 		const auto renderer = GetTownViewRendererState();
 		if (!IsTownViewNativePose()) {
 			DrawString(out.subregionY(0, gnViewportHeight), renderer.usedGpu
+#ifdef __EMSCRIPTEN__
+					? "3D na GPU | WebGL2"
+#else
 					? "3D na GPU | Direct3D 11"
+#endif
 					: renderer.requestedGpu ? "GPU indisponivel | 3D na CPU | Opcoes de video"
 					                       : "3D na CPU | Opcoes de video",
 			    Point { 8, 76 }, { .flags = UiFlags::ColorWhite });
@@ -1560,7 +1623,6 @@ void DrawView(const Surface &out, Point startPosition)
 	SetD3dHudPresentationNativeUiCapture(false);
 	SetD3dHudPresentationUiCoverage({});
 	DrawInfoBox(out);
-	UpdateLifeManaPercent(); // Update life/mana totals before rendering any portion of the flask.
 	DrawLifeFlaskUpper(out);
 	DrawManaFlaskUpper(out);
 }
@@ -1964,9 +2026,8 @@ void scrollrt_draw_game_screen()
 
 	const Surface &out = GlobalBackBuffer();
 	UndrawCursor(out);
-	BeginUiOverlayCursor();
 	DrawCursor(out);
-	EndUiOverlayCursor();
+	FinalizeD3dHudPresentationFrame(out);
 	DrawMain(hgt, false, false, false, false, false);
 
 	RenderPresent(true);
@@ -1977,6 +2038,49 @@ void DrawAndBlit()
 	if (!gbRunGame || HeadlessMode) {
 		return;
 	}
+#ifdef __EMSCRIPTEN__
+	using DiagnosticClock = std::chrono::steady_clock;
+	const bool diagnosticCapture = EM_ASM_INT({ return !!Module.d3dFrameDiagnostics; }) != 0;
+	const auto diagnosticFrameStart = diagnosticCapture ? DiagnosticClock::now() : DiagnosticClock::time_point {};
+	static uint64_t diagnosticSequence = 0;
+	const double diagnosticFrameSequence = diagnosticCapture ? static_cast<double>(++diagnosticSequence) : 0;
+	struct DiagnosticFrameScope {
+		double sequence;
+		bool completed = false;
+		~DiagnosticFrameScope()
+		{
+			if (sequence == 0) return;
+			EM_ASM({
+				const active = Module.d3dActiveFrameTiming;
+				if (active && active.sequence === $0) {
+					if (!$1) Module.d3dLastFrameTiming = ({ sequence: $0, completedDrawAndBlit: false, pureGpuMilliseconds: null });
+					Module.d3dActiveFrameTiming = null;
+				}
+			}, sequence, completed);
+		}
+	} diagnosticScope { diagnosticFrameSequence };
+	if (diagnosticCapture) {
+		const auto diagnosticCamera = GetTownViewCameraState();
+		const Point diagnosticPlayer = MyPlayer != nullptr ? Point { MyPlayer->position.tile.x, MyPlayer->position.tile.y } : Point { -1, -1 };
+		EM_ASM({
+			const gpu = Module.d3dLastGpuFrame;
+			Module.d3dActiveFrameTiming = ({
+				sequence: $0, gpuSerialBefore: gpu ? gpu.serial : null,
+				renderPresentCount: 0, renderPresent: null,
+				poseAtEntry: {
+					viewX: $1, viewY: $2, playerTileX: $3, playerTileY: $4, playerPresent: !!$5,
+					currlevel: $6, leveltype: $7, zoom: !!$8, townViewActive: !!$9,
+					cameraMode: $10, yaw: $11, pitch: $12, distance: $13,
+					panX: $14, panZ: $15, verticalFovDegrees: arguments[16], eyeHeight: arguments[17]
+				}
+			});
+		}, diagnosticFrameSequence, ViewPosition.x, ViewPosition.y, diagnosticPlayer.x, diagnosticPlayer.y,
+		    MyPlayer != nullptr, currlevel, static_cast<int>(leveltype), *GetOptions().Graphics.zoom, IsTownViewActive(),
+		    static_cast<int>(diagnosticCamera.mode), diagnosticCamera.yaw, diagnosticCamera.pitch,
+		    diagnosticCamera.distance, diagnosticCamera.offsetX, diagnosticCamera.offsetZ,
+		    diagnosticCamera.verticalFovDegrees, diagnosticCamera.eyeHeight);
+	}
+#endif
 	static bool previousHud = IsD3dHudEnabled();
 	const bool currentHud = IsD3dHudEnabled();
 	if (previousHud != currentHud) {
@@ -1995,7 +2099,7 @@ void DrawAndBlit()
 
 	const Rectangle &mainPanel = GetMainPanel();
 
-	if (IsD3dHudEnabled() || gnScreenWidth > mainPanel.size.width || IsRedrawEverything()) {
+	if (IsD3dHudSelected() || gnScreenWidth > mainPanel.size.width || IsRedrawEverything()) {
 		drawHealth = true;
 		drawMana = true;
 		drawControlButtons = true;
@@ -2015,7 +2119,13 @@ void DrawAndBlit()
 	nthread_UpdateProgressToNextGameTick();
 
 	this_sdl_thread::yield();
+#ifdef __EMSCRIPTEN__
+	const auto diagnosticWorldStart = diagnosticCapture ? DiagnosticClock::now() : DiagnosticClock::time_point {};
+#endif
 	DrawView(out, ViewPosition);
+#ifdef __EMSCRIPTEN__
+	const auto diagnosticWorldEnd = diagnosticCapture ? DiagnosticClock::now() : DiagnosticClock::time_point {};
+#endif
 	if (drawCtrlPan) {
 		DrawMainPanel(out);
 	}
@@ -2038,14 +2148,15 @@ void DrawAndBlit()
 	}
 	DrawXPBar(out);
 	RecordD3dHudExperienceBar();
-	if (IsD3dHudEnabled())
+	if (IsD3dHudSelected())
 		DrawD3dHudValues(out);
-	if (!IsD3dHudEnabled() && *GetOptions().Gameplay.showHealthValues)
+	if (!IsD3dHudSelected() && *GetOptions().Gameplay.showHealthValues)
 		DrawFlaskValues(out, { mainPanel.position.x + 134, mainPanel.position.y + 28 }, MyPlayer->_pHitPoints >> 6, MyPlayer->_pMaxHP >> 6);
-	if (!IsD3dHudEnabled() && *GetOptions().Gameplay.showManaValues)
+	if (!IsD3dHudSelected() && *GetOptions().Gameplay.showManaValues)
 		DrawFlaskValues(out, { mainPanel.position.x + mainPanel.size.width - 138, mainPanel.position.y + 28 },
 		    (HasAnyOf(InspectPlayer->_pIFlags, ItemSpecialEffect::NoMana) || MyPlayer->hasNoMana()) ? 0 : MyPlayer->_pMana >> 6,
 		    HasAnyOf(InspectPlayer->_pIFlags, ItemSpecialEffect::NoMana) ? 0 : MyPlayer->_pMaxMana >> 6);
+	SealD3dHudPresentationForeground(out);
 	SetD3dHudPresentationNativeUiCapture(true);
 	if (*GetOptions().Gameplay.floatingInfoBox)
 		DrawFloatingInfoBox(out);
@@ -2054,9 +2165,7 @@ void DrawAndBlit()
 		DrawPartyMemberInfoPanel(out);
 	SetD3dHudPresentationNativeUiCapture(false);
 
-	BeginUiOverlayCursor();
 	DrawCursor(out);
-	EndUiOverlayCursor();
 
 	SetD3dHudPresentationNativeUiCapture(true);
 	DrawFPS(out);
@@ -2064,14 +2173,14 @@ void DrawAndBlit()
 	lua::GameDrawComplete();
 	SetD3dHudPresentationNativeUiCapture(false);
 
-	this_sdl_thread::yield();
-	DrawMain(hgt, drawInfoBox, drawHealth, drawMana, drawBelt, drawControlButtons);
-
 #ifdef _DEBUG
 	SetD3dHudPresentationNativeUiCapture(true);
 	DrawConsole(out);
 	SetD3dHudPresentationNativeUiCapture(false);
 #endif
+	FinalizeD3dHudPresentationFrame(out);
+	this_sdl_thread::yield();
+	DrawMain(hgt, drawInfoBox, drawHealth, drawMana, drawBelt, drawControlButtons);
 
 	RedrawComplete();
 	for (const PanelDrawComponent component : enum_values<PanelDrawComponent>()) {
@@ -2080,7 +2189,66 @@ void DrawAndBlit()
 		}
 	}
 
+#ifdef __EMSCRIPTEN__
+	const auto diagnosticBeforePresent = diagnosticCapture ? DiagnosticClock::now() : DiagnosticClock::time_point {};
+#endif
 	RenderPresent(true);
+#ifdef __EMSCRIPTEN__
+	if (diagnosticCapture) {
+		const auto diagnosticReturned = DiagnosticClock::now();
+		const auto diagnosticCamera = GetTownViewCameraState();
+		const Point diagnosticPlayer = MyPlayer != nullptr ? Point { MyPlayer->position.tile.x, MyPlayer->position.tile.y } : Point { -1, -1 };
+		const auto diagnosticMs = [](auto delta) { return std::chrono::duration<double, std::milli>(delta).count(); };
+		EM_ASM({
+			const active = Module.d3dActiveFrameTiming;
+			if (!active || active.sequence !== $0) return;
+			const gpu = Module.d3dLastGpuFrame;
+			const freshGpu = !!gpu && Number.isFinite(gpu.serial) && gpu.serial !== active.gpuSerialBefore;
+			const presentation = active.renderPresentCount === 1 ? active.renderPresent : null;
+			Module.d3dLastFrameTiming = ({
+				sequence: $0, completedDrawAndBlit: true,
+				clock: 'std::chrono::steady_clock', logicalWidth: $6, logicalHeight: $7,
+				poseAtEntry: active.poseAtEntry,
+				poseAtReturn: {
+					viewX: $8, viewY: $9, playerTileX: $10, playerTileY: $11, playerPresent: !!$12,
+					currlevel: $13, leveltype: $14, zoom: !!$15, townViewActive: !!arguments[16],
+					cameraMode: arguments[17], yaw: arguments[18], pitch: arguments[19], distance: arguments[20],
+					panX: arguments[21], panZ: arguments[22], verticalFovDegrees: arguments[23], eyeHeight: arguments[24]
+				},
+				totalFrameMilliseconds: $1, beforeDrawViewMilliseconds: $2,
+				drawViewMilliseconds: $3, afterDrawViewMilliseconds: $4,
+				beforeRenderPresentMilliseconds: $5,
+				renderPresentCount: active.renderPresentCount, renderPresent: presentation,
+				gpuFrameFresh: freshGpu, gpuSerialBefore: active.gpuSerialBefore,
+				gpuSerial: freshGpu ? gpu.serial : null,
+				backendFrameMilliseconds: freshGpu ? gpu.frameMilliseconds : null,
+				backendCommandMilliseconds: freshGpu ? gpu.commandMilliseconds : null,
+				backendReadbackMilliseconds: freshGpu ? gpu.readbackMilliseconds : null,
+				backendRecordSetupAndOverheadMilliseconds: freshGpu
+					? Math.max(0, gpu.frameMilliseconds - gpu.commandMilliseconds - gpu.readbackMilliseconds) : null,
+				backendRasterWidth: freshGpu ? gpu.width : null, backendRasterHeight: freshGpu ? gpu.height : null,
+				backendDraws: freshGpu ? gpu.draws : null, backendTriangles: freshGpu ? gpu.submittedTriangles : null,
+				pureGpuMilliseconds: null,
+				phases: {
+					total: 'DrawAndBlit entry to return after RenderPresent, includes browser yield and limiter',
+					world: 'DrawView inclusive CPU preparation, recording, backend submission/readback and output composition',
+					backendFrame: 'BeginFrame to completed readbacks; inclusive CPU record/setup and command work',
+					backendCommand: 'CPU/driver GL command phase, not GPU execution time',
+					backendReadback: 'synchronous readbacks and CPU output conversion',
+					sdlPresent: 'SDL presentation call duration, not scanout or GPU completion'
+				}
+			});
+		}, diagnosticFrameSequence, diagnosticMs(diagnosticReturned - diagnosticFrameStart),
+		    diagnosticMs(diagnosticWorldStart - diagnosticFrameStart), diagnosticMs(diagnosticWorldEnd - diagnosticWorldStart),
+		    diagnosticMs(diagnosticBeforePresent - diagnosticWorldEnd), diagnosticMs(diagnosticBeforePresent - diagnosticFrameStart),
+		    gnScreenWidth, gnScreenHeight, ViewPosition.x, ViewPosition.y, diagnosticPlayer.x, diagnosticPlayer.y,
+		    MyPlayer != nullptr, currlevel, static_cast<int>(leveltype), *GetOptions().Graphics.zoom, IsTownViewActive(),
+		    static_cast<int>(diagnosticCamera.mode), diagnosticCamera.yaw, diagnosticCamera.pitch,
+		    diagnosticCamera.distance, diagnosticCamera.offsetX, diagnosticCamera.offsetZ,
+		    diagnosticCamera.verticalFovDegrees, diagnosticCamera.eyeHeight);
+		diagnosticScope.completed = true;
+	}
+#endif
 }
 
 } // namespace devilution

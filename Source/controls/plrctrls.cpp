@@ -1909,10 +1909,11 @@ void Movement(Player &player)
 		FppWalkOwned = false;
 	const bool uiMovement = PadMenuNavigatorActive || PadHotspellMenuActive || InGameMenu()
 	    || GetLeftStickOrDPadGameUIHandler() != nullptr;
-	const bool firstPersonMovement = mayOwnWalk && !otherAction && !uiMovement
-	    && IsTownCameraMovementInputActive()
-	    && !AutomapActive && !DoomFlag && !DropGoldFlag && !IsWithdrawGoldOpen
-	    && !IsChatActive() && !IsLeftPanelOpen() && !IsRightPanelOpen();
+	// The gamepad UI handler can exist while KBM owns movement. Keep it for
+	// the native fallback below; eligible WASD uses the shared adapter gate.
+	const bool firstPersonMovement = mayOwnWalk && !otherAction
+	    && !PadMenuNavigatorActive && !PadHotspellMenuActive && !InGameMenu()
+	    && IsTownCameraMovementInputActive();
 	if (firstPersonMovement) {
 		const AxisDirection direction = FirstPersonAxisDirection(GetTownFirstPersonMoveDirection());
 		if (direction.x == AxisDirectionX_NONE && direction.y == AxisDirectionY_NONE) {

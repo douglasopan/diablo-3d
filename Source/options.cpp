@@ -911,7 +911,12 @@ GraphicsOptions::GraphicsOptions()
     , brightness("Brightness Correction", OptionEntryFlags::Invisible, "Brightness Correction", "Brightness correction level.", 0)
     , zoom("Zoom", OptionEntryFlags::None, N_("Zoom"), N_("Zoom on when enabled."), false)
     , townViewStartIn3D("Start in 3D", OptionEntryFlags::None, N_("Start in 3D"), N_("Start each game in the 3D town view. Applies when starting or loading a game; F4 still switches views during play. Other levels use the original renderer until their 3D version is available."), true)
-    , townViewGpuRendering("3D GPU Rendering", OptionEntryFlags::None, N_("3D GPU Rendering"), N_("Use GPU acceleration for the 3D town view when available. Changes apply on the next frame; CPU rendering is used if unavailable."), false)
+    , townViewGpuRendering("3D GPU Rendering", OptionEntryFlags::None, N_("3D GPU Rendering"), N_("Use GPU acceleration for the 3D town view when available. Changes apply on the next frame; CPU rendering is used if unavailable."),
+#ifdef __EMSCRIPTEN__
+          true)
+#else
+          false)
+#endif
     , townViewFrustumCulling("3D Frustum Culling", OptionEntryFlags::None, N_("3D Frustum Culling"), N_("Skip buildings outside the 3D camera view without reducing model detail. Shadows remain active. Saved changes apply on the next frame."), true)
     , townViewAntialiasing("3D Edge Smoothing", OptionEntryFlags::None, N_("3D Edge Smoothing"), N_("Smooth edges in the 3D town view without resizing the interface. Requires more processing power."), false)
     , townViewCameraMode("3D Camera Mode", OptionEntryFlags::None, N_("3D Camera Mode"), N_("Choose Third Person or First Person for the saved gameplay camera. The mouse wheel zooms between them. Home restores Third Person for this session. Movement keys can be remapped; menus and chat keep their native controls."), 2,

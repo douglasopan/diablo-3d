@@ -269,6 +269,12 @@ if(DEVILUTIONX_DISABLE_EXCEPTIONS)
   endif()
 endif()
 
+if(EMSCRIPTEN)
+  # Import/render failures use native C++ catch paths. Enable catching at both
+  # compilation and link time; Emscripten disables JS exception catching by default.
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-fexceptions> -sDISABLE_EXCEPTION_CATCHING=0)
+endif()
+
 # Remove unused symbols in non-debug mode.
 # This is useful even with LTO (-84 KiB with MinSizeRel).
 #
@@ -357,6 +363,13 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # for clang-tidy
 set(CMAKE_THREAD_PREFER_PTHREAD ON)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
+if(EMSCRIPTEN)
+  # FindThreads adds -pthread for Emscripten even when libc has thread stubs.
+  # Our web SdlThread adapter is synchronous; do not require SharedArrayBuffer.
+  set_property(TARGET Threads::Threads PROPERTY INTERFACE_COMPILE_OPTIONS "")
+  set_property(TARGET Threads::Threads PROPERTY INTERFACE_LINK_OPTIONS "")
+  set_property(TARGET Threads::Threads PROPERTY INTERFACE_LINK_LIBRARIES "")
+endif()
 
 # Dependencies must be included after Platforms.
 include(Dependencies)
@@ -495,12 +508,16 @@ if(EMSCRIPTEN)
     -sFORCE_FILESYSTEM=1
     -sALLOW_MEMORY_GROWTH=1
     -sASYNCIFY
+    -sMIN_WEBGL_VERSION=2
+    -sMAX_WEBGL_VERSION=2
+    -sDISABLE_EXCEPTION_CATCHING=0
+    "-sEXPORTED_RUNTIME_METHODS=['FS']"
     -lidbfs.js
     --shell-file ${CMAKE_CURRENT_SOURCE_DIR}/Packaging/emscripten/index.html
   )
 
   add_dependencies(${BIN_TARGET} hellfire_copied_assets)
-  # Add JavaScript to load MPQ files from the server directory at runtime
+  # Restore local archives/saves and await an explicit browser start.
   target_link_options(${BIN_TARGET} PRIVATE --pre-js ${CMAKE_CURRENT_SOURCE_DIR}/Packaging/emscripten/emscripten_pre.js)
 endif()
 

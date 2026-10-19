@@ -1,0 +1,504 @@
+/**
+ * @file sound.cpp
+ *
+ * Implementation of functions setting up the audio pipeline.
+ */
+#include "engine/sound.h"
+
+#include <algorithm>
+#include <cstddef>
+#include <cstdint>
+#include <expected>
+#include <list>
+#include <memory>
+#include <mutex>
+#include <optional>
+#include <random>
+#include <string>
+#include <utility>
+
+#ifdef USE_SDL3
+#include <SDL3/SDL_error.h>
+#include <SDL3/SDL_timer.h>
+#include <SDL3_mixer/SDL_mixer.h>
+#else
+#include <Aulib/Stream.h>
+#include <SDL.h>
+#endif
+
+#include "appfat.h"
+#include "engine/assets.hpp"
+#include "engine/music_catalog.hpp"
+#include "game_mode.hpp"
+#include "options.h"
+#include "utils/log.hpp"
+#include "utils/math.h"
+#include "utils/sdl_mutex.h"
+#include "utils/status_macros.hpp"
+#include "utils/stdcompat/shared_ptr_array.hpp"
+#include "utils/str_cat.hpp"
+#include "utils/stubs.h"
+
+namespace devilution {
+
+bool gbSndInited;
+
+#ifdef USE_SDL3
+MIX_Mixer *CurrentMixer;
+#endif
+
+/** The active background music track id. */
+_music_id sgnMusicTrack = NUM_MUSIC;
+
+bool gbMusicOn = true;
+/** Specifies whether sound effects are enabled. */
+bool gbSoundOn = true;
+
+namespace {
+
+SoundSample music;
+std::string ActiveMusicSelectionPath;
+bool MusicMuted = false;
+bool MusicInGame = false;
+unsigned ActiveRandomIndex = 0;
+bool ActiveMusicRandomPolicy = false;
+bool ActiveMusicFinite = false;
+
+MusicSelection SelectedMusic(_music_id track, unsigned randomIndex = 0)
+{
+	const auto &options = GetOptions().Music;
+	return ResolveMusicSelection(track, *options.theme, *options.ForTrack(track), HaveFullMusic(),
+	    [](const char *path) { return FindAsset(path).ok(); }, !MusicInGame, *options.menu, randomIndex);
+}
+
+unsigned DrawMusicRandomIndex(bool easySequence)
+{
+	// Audio choices must never consume the simulation's deterministic RNG.
+	static std::mt19937 generator(std::random_device {}());
+	const auto &town = MusicTrackCatalog[TMUSIC_TOWN];
+	unsigned count = 0;
+	for (const char *path : (easySequence ? std::array<const char *,3>{{TownEasyListeningPaths[0],TownEasyListeningPaths[1],""}} : std::array<const char *,3>{{town.rockPath,town.alternativePath,town.thirdPath}})) {
+		if (path[0] != '\0' && FindAsset(path).ok())
+			++count;
+	}
+	// The Easy Listening group starts at the first supplied recording and alternates.
+    static unsigned easyNext=0;
+    if(easySequence)return count==0?0:easyNext++%count;
+	// Draw over the filtered pool itself: modulo of a three-way draw would bias
+	// selection when only two replacements are installed.
+	return count == 0 ? 0 : std::uniform_int_distribution<unsigned>(0, count - 1)(generator);
+}
+
+std::string GetMp3Path(const char *path)
+{
+	std::string mp3Path = path;
+	const std::string::size_type dot = mp3Path.find_last_of('.');
+	mp3Path.replace(dot + 1, mp3Path.size() - (dot + 1), "mp3");
+	return mp3Path;
+}
+
+std::expected<void, std::string> LoadAudioFile(const char *path, bool stream, SoundSample &result)
+{
+	bool isMp3 = true;
+	std::string foundPath = GetMp3Path(path);
+	AssetRef ref = FindAsset(foundPath.c_str());
+	if (!ref.ok()) {
+		ref = FindAsset(path);
+		foundPath = path;
+		isMp3 = false;
+	}
+	if (!ref.ok()) {
+		return std::unexpected(StrCat("Audio file not found\n", path, "\n", SDL_GetError(), "\n" __FILE__ ":", __LINE__));
+	}
+
+#ifdef STREAM_ALL_AUDIO_MIN_FILE_SIZE
+#if STREAM_ALL_AUDIO_MIN_FILE_SIZE == 0
+	stream = true;
+#else
+	size_t size;
+	if (!stream) {
+		size = ref.size();
+		stream = size >= STREAM_ALL_AUDIO_MIN_FILE_SIZE;
+	}
+#endif
+#endif
+
+	if (stream) {
+		if (result.SetChunkStream(foundPath, isMp3, /*logErrors=*/true) != 0) {
+			return std::unexpected(StrCat("Failed to load audio file\n", foundPath, "\n", SDL_GetError(), "\n" __FILE__ ":", __LINE__));
+		}
+	} else {
+#if !defined(STREAM_ALL_AUDIO_MIN_FILE_SIZE) || STREAM_ALL_AUDIO_MIN_FILE_SIZE == 0
+		const size_t size = ref.size();
+#endif
+		AssetHandle handle = OpenAsset(std::move(ref));
+		if (!handle.ok()) {
+			return std::unexpected(StrCat("Failed to load audio file\n", foundPath, "\n", SDL_GetError(), "\n" __FILE__ ":", __LINE__));
+		}
+		auto waveFile = MakeArraySharedPtr<std::uint8_t>(size);
+		if (!handle.read(waveFile.get(), size)) {
+			return std::unexpected(StrCat("Failed to read file\n", foundPath, ": ", SDL_GetError(), __FILE__ ":", __LINE__));
+		}
+		const int error = result.SetChunk(waveFile, size, isMp3);
+		if (error != 0) {
+			return std::unexpected(SDL_GetError());
+		}
+	}
+	return {};
+}
+
+std::list<std::unique_ptr<SoundSample>> duplicateSounds;
+std::optional<SdlMutex> duplicateSoundsMutex;
+
+SoundSample *DuplicateSound(const SoundSample &sound)
+{
+	auto duplicate = std::make_unique<SoundSample>();
+	if (duplicate->DuplicateFrom(sound) != 0)
+		return nullptr;
+	auto *result = duplicate.get();
+	decltype(duplicateSounds.begin()) it;
+	{
+		const std::lock_guard<SdlMutex> lock(*duplicateSoundsMutex);
+		duplicateSounds.push_back(std::move(duplicate));
+		it = duplicateSounds.end();
+		--it;
+	}
+#ifndef USE_SDL3
+	result->SetFinishCallback([it]([[maybe_unused]] Aulib::Stream &stream) {
+		const std::lock_guard<SdlMutex> lock(*duplicateSoundsMutex);
+		duplicateSounds.erase(it);
+	});
+#endif
+	return result;
+}
+
+int CapVolume(int volume)
+{
+	return std::clamp(volume, VOLUME_MIN, VOLUME_MAX);
+}
+
+void OptionAudioChanged()
+{
+	effects_cleanup_sfx(false);
+	music_stop();
+	snd_deinit();
+	snd_init();
+	music_start(TMUSIC_INTRO);
+	if (gbRunGame)
+		sound_init();
+	else
+		ui_sound_init();
+}
+
+const auto OptionChangeSampleRate = (GetOptions().Audio.sampleRate.SetValueChangedCallback(OptionAudioChanged), true);
+const auto OptionChangeChannels = (GetOptions().Audio.channels.SetValueChangedCallback(OptionAudioChanged), true);
+const auto OptionChangeBufferSize = (GetOptions().Audio.bufferSize.SetValueChangedCallback(OptionAudioChanged), true);
+const auto OptionChangeResamplingQuality = (GetOptions().Audio.resamplingQuality.SetValueChangedCallback(OptionAudioChanged), true);
+const auto OptionChangeResampler = (GetOptions().Audio.resampler.SetValueChangedCallback(OptionAudioChanged), true);
+const auto OptionChangeDevice = (GetOptions().Audio.device.SetValueChangedCallback(OptionAudioChanged), true);
+
+void OptionMusicVariantChanged()
+{
+	GetOptions().Music.theme.SetValue(MusicTheme::Custom);
+	music_refresh();
+}
+
+const auto MusicOptionCallbacks = [] {
+	auto &options = GetOptions().Music;
+	options.theme.SetValueChangedCallback(music_refresh);
+	for (int track = 0; track < NUM_MUSIC; ++track)
+		options.ForTrack(static_cast<_music_id>(track)).SetValueChangedCallback(OptionMusicVariantChanged);
+	return true;
+}();
+
+} // namespace
+
+void ClearDuplicateSounds()
+{
+	// Move sound samples to a temporary list,
+	// avoiding a deadlock that involves SDL's
+	// mixer lock being taken by finalizers
+	std::list<std::unique_ptr<SoundSample>> drain;
+	{
+		const std::lock_guard<SdlMutex> lock(*duplicateSoundsMutex);
+		drain = std::move(duplicateSounds);
+		duplicateSounds.clear();
+	}
+}
+
+void snd_play_snd(TSnd *pSnd, int lVolume, int lPan, int userVolume)
+{
+	if (pSnd == nullptr || !gbSoundOn) {
+		return;
+	}
+
+	const uint32_t tc = SDL_GetTicks();
+	if (tc - pSnd->start_tc < 80) {
+		return;
+	}
+
+	SoundSample *sound = &pSnd->DSB;
+	if (sound->IsPlaying()) {
+		sound = DuplicateSound(*sound);
+		if (sound == nullptr)
+			return;
+	}
+
+	sound->PlayWithVolumeAndPan(lVolume, userVolume, lPan);
+	pSnd->start_tc = tc;
+}
+
+std::expected<std::unique_ptr<TSnd>, std::string> SoundFileLoadWithStatus(const char *path, bool stream)
+{
+	auto snd = std::make_unique<TSnd>();
+	snd->start_tc = SDL_GetTicks() - 80 - 1;
+#ifndef NOSOUND
+	RETURN_IF_ERROR(LoadAudioFile(path, stream, snd->DSB));
+#endif
+	return snd;
+}
+
+std::unique_ptr<TSnd> sound_file_load(const char *path, bool stream)
+{
+	std::expected<std::unique_ptr<TSnd>, std::string> result = SoundFileLoadWithStatus(path, stream);
+	if (!result.has_value()) app_fatal(result.error());
+	return std::move(result).value();
+}
+
+TSnd::~TSnd()
+{
+	if (DSB.IsLoaded())
+		DSB.Stop();
+	DSB.Release();
+}
+
+void snd_init()
+{
+	GetOptions().Audio.soundVolume.SetValue(CapVolume(*GetOptions().Audio.soundVolume));
+	gbSoundOn = *GetOptions().Audio.soundVolume > VOLUME_MIN;
+	sgbSaveSoundOn = gbSoundOn;
+
+	GetOptions().Audio.musicVolume.SetValue(CapVolume(*GetOptions().Audio.musicVolume));
+	gbMusicOn = *GetOptions().Audio.musicVolume > VOLUME_MIN;
+
+	// Initialize the SDL_audiolib library. Set the output sample rate to
+	// 22kHz, the audio format to 16-bit signed, use 2 output channels
+	// (stereo), and a 2KiB output buffer.
+#ifdef USE_SDL3
+	if (!MIX_Init()) {
+		LogError(LogCategory::Audio, "Failed to initialize SDL_mixer: {}", SDL_GetError());
+		return;
+	}
+	const AudioOptions &audioOptions = GetOptions().Audio;
+	SDL_AudioSpec specHint = {};
+	specHint.format = SDL_AUDIO_S16LE;
+	specHint.channels = *audioOptions.channels;
+	specHint.freq = static_cast<int>(*audioOptions.sampleRate);
+	CurrentMixer = MIX_CreateMixerDevice(audioOptions.device.id(), &specHint);
+	if (CurrentMixer == nullptr) {
+		LogError(LogCategory::Audio, "Failed to create mixer device: {}", SDL_GetError());
+		SDL_ClearError();
+		MIX_Quit();
+		return;
+	}
+#else
+	if (!Aulib::init(*GetOptions().Audio.sampleRate, AUDIO_S16, *GetOptions().Audio.channels, *GetOptions().Audio.bufferSize, *GetOptions().Audio.device)) {
+		LogError(LogCategory::Audio, "Failed to initialize audio (Aulib::init): {}", SDL_GetError());
+		return;
+	}
+	LogVerbose(LogCategory::Audio, "Aulib sampleRate={} channels={} frameSize={} format={:#x}",
+	    Aulib::sampleRate(), Aulib::channelCount(), Aulib::frameSize(), Aulib::sampleFormat());
+#endif
+
+	duplicateSoundsMutex.emplace();
+	gbSndInited = true;
+}
+
+void snd_deinit()
+{
+	if (gbSndInited) {
+		ClearDuplicateSounds();
+#ifdef USE_SDL3
+		MIX_DestroyMixer(CurrentMixer);
+		CurrentMixer = nullptr;
+		MIX_Quit();
+#else
+		Aulib::quit();
+#endif
+		duplicateSoundsMutex = std::nullopt;
+	}
+
+	gbSndInited = false;
+}
+
+_music_id GetLevelMusic(dungeon_type dungeonType)
+{
+	switch (dungeonType) {
+	case DTYPE_TOWN:
+		return TMUSIC_TOWN;
+	case DTYPE_CATHEDRAL:
+		return TMUSIC_CATHEDRAL;
+	case DTYPE_CATACOMBS:
+		return TMUSIC_CATACOMBS;
+	case DTYPE_CAVES:
+		return TMUSIC_CAVES;
+	case DTYPE_HELL:
+		return TMUSIC_HELL;
+	case DTYPE_NEST:
+		return TMUSIC_NEST;
+	case DTYPE_CRYPT:
+		return TMUSIC_CRYPT;
+	default:
+		return TMUSIC_INTRO;
+	}
+}
+
+void music_stop()
+{
+	music.Release();
+	sgnMusicTrack = NUM_MUSIC;
+	ActiveMusicSelectionPath.clear();
+	ActiveRandomIndex = 0;
+	ActiveMusicRandomPolicy = false;
+	ActiveMusicFinite = false;
+}
+
+void music_start(_music_id nTrack)
+{
+	assert(nTrack < NUM_MUSIC);
+	music_stop();
+	if (!gbMusicOn || !gbSndInited || nTrack >= NUM_MUSIC)
+		return;
+	MusicSelection selection = SelectedMusic(nTrack);
+	const bool randomPolicy = (selection.requested == MusicVariant::Random || selection.requested == MusicVariant::EasySequence) && nTrack == TMUSIC_TOWN && MusicInGame;
+	const unsigned randomIndex = randomPolicy ? DrawMusicRandomIndex(selection.requested==MusicVariant::EasySequence) : 0;
+	if (randomPolicy)
+		selection = SelectedMusic(nTrack, randomIndex);
+	const char *trackPath = selection.path;
+	bool replacementLoaded = selection.actual != MusicVariant::Original;
+
+#ifdef DISABLE_STREAMING_MUSIC
+	const bool stream = false;
+#else
+	const bool stream = true;
+#endif
+	auto loaded = LoadAudioFile(trackPath, stream, music);
+	if (!loaded.has_value() && selection.actual != MusicVariant::Original) {
+		LogWarn(LogCategory::Audio, "Diablo 3D replacement could not be loaded; using original music: {}", trackPath);
+		music.Release();
+		const auto &definition = MusicTrackCatalog[nTrack];
+		trackPath = HaveFullMusic() ? definition.originalPath : definition.sharewarePath;
+		loaded = LoadAudioFile(trackPath, stream, music);
+		replacementLoaded = false;
+	}
+	if (!loaded.has_value()) {
+		LogError(LogCategory::Audio, "Music could not be loaded: {}", loaded.error());
+		music_stop();
+		return;
+	}
+
+	music.SetVolume(*GetOptions().Audio.musicVolume, VOLUME_MIN, VOLUME_MAX);
+	if (MusicMuted)
+		music.Mute();
+	// Only a successfully loaded random replacement gets a finite playthrough.
+	// A missing or rejected replacement loops the original without retry churn.
+	const bool finite = randomPolicy && replacementLoaded;
+	if (!music.Play(/*numIterations=*/finite ? 1 : 0)) {
+		LogError(LogCategory::Audio, "Aulib::Stream::play (from music_start): {}", SDL_GetError());
+		music_stop();
+		return;
+	}
+
+	sgnMusicTrack = nTrack;
+	ActiveMusicSelectionPath = selection.path;
+	ActiveRandomIndex = randomIndex;
+	ActiveMusicRandomPolicy = randomPolicy;
+	ActiveMusicFinite = finite;
+	LogInfo(LogCategory::Audio, "Diablo 3D music playing: {} (context={}, track={}, fallback={}, random={})", trackPath,
+	    MusicInGame ? "game" : "menu", static_cast<int>(nTrack), selection.fallback || std::string_view(trackPath) != selection.path, finite);
+}
+
+void music_set_game_context(bool inGame)
+{
+	MusicInGame = inGame;
+}
+
+void music_refresh()
+{
+	if (!gbSndInited || !gbMusicOn || sgnMusicTrack == NUM_MUSIC)
+		return;
+	const _music_id track = sgnMusicTrack;
+	const MusicSelection selection = SelectedMusic(track, ActiveRandomIndex);
+	const bool randomPolicy = (selection.requested == MusicVariant::Random || selection.requested == MusicVariant::EasySequence) && track == TMUSIC_TOWN && MusicInGame;
+	if (selection.path != ActiveMusicSelectionPath || randomPolicy != ActiveMusicRandomPolicy)
+		music_start(track);
+}
+
+void music_update()
+{
+	// Poll completion from the game thread. Decoder callbacks must not load assets
+	// or recreate a stream while the audio mixer is processing it.
+	if (!gbSndInited || !gbMusicOn || !MusicInGame || !ActiveMusicFinite
+	    || sgnMusicTrack == NUM_MUSIC || !music.IsLoaded() || music.IsPlaying())
+		return;
+	const _music_id track = sgnMusicTrack;
+	music_start(track);
+}
+
+void sound_disable_music(bool disable)
+{
+	if (disable) {
+		music_stop();
+	} else if (sgnMusicTrack != NUM_MUSIC) {
+		music_start(sgnMusicTrack);
+	}
+}
+
+int sound_get_or_set_music_volume(int volume)
+{
+	if (volume == 1)
+		return *GetOptions().Audio.musicVolume;
+
+	GetOptions().Audio.musicVolume.SetValue(volume);
+
+	if (music.IsLoaded())
+		music.SetVolume(*GetOptions().Audio.musicVolume, VOLUME_MIN, VOLUME_MAX);
+
+	return *GetOptions().Audio.musicVolume;
+}
+
+int sound_get_or_set_sound_volume(int volume)
+{
+	if (volume == 1)
+		return *GetOptions().Audio.soundVolume;
+
+	GetOptions().Audio.soundVolume.SetValue(volume);
+
+	return *GetOptions().Audio.soundVolume;
+}
+
+int SoundGetOrSetAudioCuesVolume(int volume)
+{
+	if (volume == 1)
+		return *GetOptions().Audio.audioCuesVolume;
+
+	GetOptions().Audio.audioCuesVolume.SetValue(volume);
+
+	return *GetOptions().Audio.audioCuesVolume;
+}
+
+void music_mute()
+{
+	MusicMuted = true;
+	if (music.IsLoaded())
+		music.Mute();
+}
+
+void music_unmute()
+{
+	MusicMuted = false;
+	if (music.IsLoaded())
+		music.Unmute();
+}
+
+} // namespace devilution

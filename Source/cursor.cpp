@@ -19,7 +19,9 @@
 #endif
 
 #include "DiabloUI/diabloui.h"
+#include "automap.h"
 #include "control/control.hpp"
+#include "control/d3d_floating_panels.hpp"
 #include "control/d3d_hud.hpp"
 #include "controls/control_mode.hpp"
 #include "controls/plrctrls.h"
@@ -829,15 +831,18 @@ bool CheckPlayerState(const Point currentTile, const Player &myPlayer)
 
 bool CheckPanelsAndFlags(Rectangle /*mainPanel*/)
 {
+	// Inventory remains functional before the enclosing floating UI catches
+	// pointer input; its shared body origin also positions CheckInvHLight.
+	if (invflag && GetRightPanel().contains(MousePosition)
+	    && (!ChatFlag || !IsPointOnD3dHud(MousePosition))) {
+		pcursinvitem = CheckInvHLight();
+		return true;
+	}
 	if (IsPointOnD3dHud(MousePosition)) {
 		CheckPanelInfo();
 		return true;
 	}
 	if (DoomFlag) {
-		return true;
-	}
-	if (invflag && GetRightPanel().contains(MousePosition)) {
-		pcursinvitem = CheckInvHLight();
 		return true;
 	}
 	if (IsStashOpen && GetLeftPanel().contains(MousePosition)) {
@@ -852,6 +857,8 @@ bool CheckPanelsAndFlags(Rectangle /*mainPanel*/)
 	if (IsLeftPanelOpen() && GetLeftPanel().contains(MousePosition)) {
 		return true;
 	}
+	if (IsD3dFloatingPanelPoint(MousePosition) || IsD3dMinimapPoint(MousePosition))
+		return true;
 	return false;
 }
 
@@ -903,6 +910,13 @@ bool CheckCursorActions(const Point currentTile, bool flipflag)
  */
 void CheckCursMove()
 {
+	if (IsD3dFloatingPanelPoint(MousePosition) || IsD3dMinimapPoint(MousePosition) || IsPointOnD3dHud(MousePosition)) {
+		// A projected item label behind a header/minimap must never outrank UI.
+		ResetItemlabelHighlighted();
+		ResetCursorInfo();
+		if (CheckPanelsAndFlags(GetMainPanel()))
+			return;
+	}
 	if (IsItemLabelHighlighted()) {
 		if (IsTownViewActive() && !IsTownViewNativePose()) {
 			// A label is an item target even over sky/another world surface.

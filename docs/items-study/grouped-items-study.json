@@ -1,0 +1,987 @@
+{
+  "format": "d3d.item-grouped-study",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "studyId": "item.study.grouped-compact-01",
+  "status": "planning-only; feasibility-not-demonstrated",
+  "newRequirement": {
+    "humanEvents": [
+      "Sentinel_16926d8494ec819193ea3215f4053174",
+      "Sentinel_8feaae0b7c248191bf936c4a00266f04"
+    ],
+    "evidenceKind": "Human request relayed by sole operator via parent",
+    "scope": "Study2-3distinct compact items in ONE image/ONE generation with subsequent local separation. Not multiview; not provider batch of independent jobs.",
+    "previousIndividualProposalIsHistoricalComparison": true,
+    "newQueueCreated": false,
+    "geometryHumanEvent": "Sentinel_cab58c0598d4819195d2878edfe1e535",
+    "referencePreparationHumanEvent": "Sentinel_84292341680c8191a8b69178e78b0d4e"
+  },
+  "coordination": {
+    "itemsOwner": "01a11b58-80a9-7e63-973b-47d72752ccc7",
+    "soleStudioOperator": "01a11d7e-ac7e-767d-9bd1-1d98b81d601b",
+    "onlyRuntimeBuildInstallGitOwner": "01a1153a-cad1-7fb1-8326-225511ee918d",
+    "newPaidImageGenerationAuthorized": false,
+    "uploadAuthorized": false,
+    "providerGenerationAuthorized": false,
+    "reservationAuthorized": false,
+    "creditsAuthorized": 0,
+    "automaticRetriesAuthorized": 0
+  },
+  "candidates": [
+    {
+      "productionId": "item.design.base.scroll",
+      "name": "Scroll physical family (spell-specific markings)",
+      "role": "required-proposal",
+      "conceptId": "item.design.base.scroll.concept.r1",
+      "revision": "r1",
+      "sourceBoard": {
+        "path": "assets/concept-art/items/r1/scroll-r1.png",
+        "sha256": "efb23d5d5582b550de65231a3de659474923d63bc47f40e595b6eb60457ab28d",
+        "bytes": 2231532,
+        "dimensions": [
+          1536,
+          1024
+        ],
+        "hasAlpha": false,
+        "tool": "built-in image_gen.imagegen",
+        "sourcePixelIconPasted": false,
+        "originalBytesPreserved": true,
+        "individualInputReady": false,
+        "specificVisualApproval": false
+      },
+      "native": {
+        "cursorName": "SCROLL_OF",
+        "cursorValue": 1,
+        "inventoryCursorId": 13,
+        "combinedSpriteIndexZeroBased": 12,
+        "logicalPixels": [
+          28,
+          28
+        ],
+        "cellFootprint": [
+          1,
+          1
+        ],
+        "sourceBaseIds": [
+          "item.base.026.idi-identify",
+          "item.base.027.idi-portal",
+          "item.base.034.idi-resurrect",
+          "item.base.091.scroll-of-healing",
+          "item.base.092.scroll-of-search",
+          "item.base.093.scroll-of-lightning",
+          "item.base.094.scroll-of-identify",
+          "item.base.095.scroll-of-resurrect",
+          "item.base.096.scroll-of-fire-wall",
+          "item.base.097.scroll-of-inferno",
+          "item.base.098.scroll-of-town-portal",
+          "item.base.099.scroll-of-flash",
+          "item.base.100.scroll-of-infravision",
+          "item.base.101.scroll-of-phasing",
+          "item.base.102.scroll-of-mana-shield",
+          "item.base.103.scroll-of-flame-wave",
+          "item.base.104.scroll-of-fireball",
+          "item.base.105.scroll-of-stone-curse",
+          "item.base.106.scroll-of-chain-lightning",
+          "item.base.107.scroll-of-guardian",
+          "item.base.109.scroll-of-nova",
+          "item.base.110.scroll-of-golem",
+          "item.base.112.scroll-of-teleport",
+          "item.base.113.scroll-of-apocalypse"
+        ],
+        "sourceUniqueIds": [],
+        "sourceDynamicIds": []
+      },
+      "individualBackup": {
+        "sourceBoardPreserved": true,
+        "preparedIsolatedImage": null,
+        "preparedImageSha256": null,
+        "individualGlb": null,
+        "individualGlbSha256": null
+      },
+      "manualExclusionStatus": "unknown",
+      "paidRemoteDuplicateAbsenceConfirmed": false,
+      "approvedMaster": null,
+      "selected": false,
+      "approved": false
+    },
+    {
+      "productionId": "item.design.base.potion-of-healing",
+      "name": "Potion of Healing",
+      "role": "required-proposal",
+      "conceptId": "item.design.base.potion-of-healing.concept.r1",
+      "revision": "r1",
+      "sourceBoard": {
+        "path": "assets/concept-art/items/r1/potion-of-healing-r1.png",
+        "sha256": "fbfeaad3e56dc88ff64bf54d6238ed1390ad70362e1d121a7703b880b227f63e",
+        "bytes": 2130911,
+        "dimensions": [
+          1536,
+          1024
+        ],
+        "hasAlpha": false,
+        "tool": "built-in image_gen.imagegen",
+        "sourcePixelIconPasted": false,
+        "originalBytesPreserved": true,
+        "individualInputReady": false,
+        "specificVisualApproval": false
+      },
+      "native": {
+        "cursorName": "POTION_OF_HEALING",
+        "cursorValue": 32,
+        "inventoryCursorId": 44,
+        "combinedSpriteIndexZeroBased": 43,
+        "logicalPixels": [
+          28,
+          28
+        ],
+        "cellFootprint": [
+          1,
+          1
+        ],
+        "sourceBaseIds": [
+          "item.base.024.idi-heal",
+          "item.base.077.potion-of-healing"
+        ],
+        "sourceUniqueIds": [],
+        "sourceDynamicIds": []
+      },
+      "individualBackup": {
+        "sourceBoardPreserved": true,
+        "preparedIsolatedImage": null,
+        "preparedImageSha256": null,
+        "individualGlb": null,
+        "individualGlbSha256": null
+      },
+      "manualExclusionStatus": "unknown",
+      "paidRemoteDuplicateAbsenceConfirmed": false,
+      "approvedMaster": null,
+      "selected": false,
+      "approved": false
+    },
+    {
+      "productionId": "item.design.base.potion-of-mana",
+      "name": "Potion of Mana",
+      "role": "optional-proposal; no automatic expansion",
+      "conceptId": "item.design.base.potion-of-mana.concept.r1",
+      "revision": "r1",
+      "sourceBoard": {
+        "path": "assets/concept-art/items/r1/potion-of-mana-r1.png",
+        "sha256": "92a7527bfd54ef0844e52eeb56d4af8ceded077ef1af8d4e1ef16c22969cc177",
+        "bytes": 2107503,
+        "dimensions": [
+          1536,
+          1024
+        ],
+        "hasAlpha": false,
+        "tool": "built-in image_gen.imagegen",
+        "sourcePixelIconPasted": false,
+        "originalBytesPreserved": true,
+        "individualInputReady": false,
+        "specificVisualApproval": false
+      },
+      "native": {
+        "cursorName": "POTION_OF_MANA",
+        "cursorValue": 39,
+        "inventoryCursorId": 51,
+        "combinedSpriteIndexZeroBased": 50,
+        "logicalPixels": [
+          28,
+          28
+        ],
+        "cellFootprint": [
+          1,
+          1
+        ],
+        "sourceBaseIds": [
+          "item.base.025.idi-mana",
+          "item.base.079.potion-of-mana"
+        ],
+        "sourceUniqueIds": [],
+        "sourceDynamicIds": []
+      },
+      "individualBackup": {
+        "sourceBoardPreserved": true,
+        "preparedIsolatedImage": null,
+        "preparedImageSha256": null,
+        "individualGlb": null,
+        "individualGlbSha256": null
+      },
+      "manualExclusionStatus": "unknown",
+      "paidRemoteDuplicateAbsenceConfirmed": false,
+      "approvedMaster": null,
+      "selected": false,
+      "approved": false
+    }
+  ],
+  "excludedFromThisExperiment": [
+    "item.design.base.short-sword"
+  ],
+  "manualModelGroupsStillExcluded": [
+    "item.design.base.great-sword",
+    "item.design.unique.shirotachi"
+  ],
+  "composition": {
+    "actualImage": null,
+    "sha256": null,
+    "finalDimensions": null,
+    "approved": false,
+    "representationsPerItem": 1,
+    "proposedCanvasPixels": [
+      1536,
+      1024
+    ],
+    "normalizedRegionConvention": "x,y,width,height in[0,1]; layout reserve only, not a produced image or measured physical scale.",
+    "twoItemRegions": {
+      "item.design.base.scroll": [
+        0.06,
+        0.14,
+        0.36,
+        0.72
+      ],
+      "item.design.base.potion-of-healing": [
+        0.58,
+        0.18,
+        0.32,
+        0.64
+      ]
+    },
+    "threeItemRegions": {
+      "item.design.base.scroll": [
+        0.04,
+        0.14,
+        0.25,
+        0.72
+      ],
+      "item.design.base.potion-of-healing": [
+        0.375,
+        0.18,
+        0.25,
+        0.64
+      ],
+      "item.design.base.potion-of-mana": [
+        0.71,
+        0.18,
+        0.25,
+        0.64
+      ]
+    },
+    "layoutPolicy": [
+      "One complete representation of each DISTINCT item, generous empty gaps; no contact, overlap, inter-item occlusion or crop.",
+      "Neutral clean background and consistent view/light direction; no floor scenery, text, title, frame, duplicate angle or thumbnail. Preserve legitimate native inscriptions.",
+      "Each item retains its proportions. Relative physical dimensions must be approved before preparation; inventory-cell pixels are not physical units. Regions do not authorize stretching to fill.",
+      "Map production IDs externally to image regions/positions and later model part selections; no ID labels burned into the image.",
+      "Preserve individual source boards and any future isolated inputs as backups; never overwrite masters.",
+      "Healing red liquid versus Mana cobalt-blue must remain separate identities/materials; no cross-contamination or swapped labels."
+    ]
+  },
+  "geometryReuseAlternative": {
+    "productionIds": [
+      "item.design.base.potion-of-healing",
+      "item.design.base.potion-of-mana"
+    ],
+    "status": "pending-review; geometry-sharing-not-approved",
+    "policy": "Healing/Mana share a conceptual bottle. An accepted common master plus separate liquid/material variant could avoid a third geometry job; compare this reuse-first baseline before claiming savings from three independent jobs."
+  },
+  "budget": {
+    "unitGeometryCreditsAssumption": 100,
+    "evidence": "Historical public P2.0/Quad5000/1output plus current empty-form operator report; final grouped input cost not quoted.",
+    "targetPolygonControlAppliesTo": "whole joint output if retained, not5000per item",
+    "conditionalComparisons": [
+      {
+        "objects": 2,
+        "trialScenario": false,
+        "groupedGeometryCredits": 100,
+        "individualGeometryCredits": 200,
+        "grossPotentialSavingCredits": 100,
+        "groupedNewOutputsHypothetical": 1,
+        "individualNewOutputsHypothetical": 2,
+        "confirmedFinalQuote": false,
+        "approved": false,
+        "serviceExtrasQuoted": null,
+        "localSplitServiceCredits": 0,
+        "localWorkTimeEstimate": null,
+        "outputsAuthorized": 0
+      },
+      {
+        "objects": 2,
+        "trialScenario": true,
+        "groupedGeometryCredits": 0,
+        "individualGeometryCredits": 100,
+        "grossPotentialSavingCredits": 100,
+        "groupedNewOutputsHypothetical": 1,
+        "individualNewOutputsHypothetical": 2,
+        "trialUsesPerAlternativePath": 1,
+        "trialEligibleForFinalGroupedOrIndividualInput": null,
+        "confirmedFinalQuote": false,
+        "approved": false,
+        "serviceExtrasQuoted": null,
+        "localSplitServiceCredits": 0,
+        "localWorkTimeEstimate": null,
+        "outputsAuthorized": 0,
+        "trialEligibilityStatus": "unknown; must be reconfirmed for both alternative paths"
+      },
+      {
+        "objects": 3,
+        "trialScenario": false,
+        "groupedGeometryCredits": 100,
+        "individualGeometryCredits": 300,
+        "grossPotentialSavingCredits": 200,
+        "groupedNewOutputsHypothetical": 1,
+        "individualNewOutputsHypothetical": 3,
+        "confirmedFinalQuote": false,
+        "approved": false,
+        "serviceExtrasQuoted": null,
+        "localSplitServiceCredits": 0,
+        "localWorkTimeEstimate": null,
+        "outputsAuthorized": 0
+      },
+      {
+        "objects": 3,
+        "trialScenario": true,
+        "groupedGeometryCredits": 0,
+        "individualGeometryCredits": 200,
+        "grossPotentialSavingCredits": 200,
+        "groupedNewOutputsHypothetical": 1,
+        "individualNewOutputsHypothetical": 3,
+        "trialUsesPerAlternativePath": 1,
+        "trialEligibleForFinalGroupedOrIndividualInput": null,
+        "confirmedFinalQuote": false,
+        "approved": false,
+        "serviceExtrasQuoted": null,
+        "localSplitServiceCredits": 0,
+        "localWorkTimeEstimate": null,
+        "outputsAuthorized": 0,
+        "trialEligibilityStatus": "unknown; must be reconfirmed for both alternative paths"
+      }
+    ],
+    "trialPolicy": "At most one trial if reconfirmed for the final approved input. Compare the same single opportunity on alternative paths; never apply zero per object or as recurring saving. If trial eligibility differs between paths, requote rather than use this fair-trial table.",
+    "texture20ActionIncluded": false,
+    "uiUvTextureSegmentationRemeshQuotes": {
+      "status": "operator-reported UI amounts; final joint-input quotes unconfirmed",
+      "splitStandardCredits": 40,
+      "smartUvStandardCredits": 20,
+      "basicRemeshCredits": 10,
+      "basicRemeshIsSmartRetopology": false,
+      "fillPartsCredits": null,
+      "texture20Included": false,
+      "trialStackEligibilityConfirmed": false
+    },
+    "confirmedNetSavingCredits": null,
+    "approvedSpendCeilingCredits": null,
+    "localSplitCostMeaning": "Zero provider/API credits for local-only processing; human/tool/computation time, quality and effort are not assumed zero.",
+    "breakEven": "The applicable margin is chosen individual/reuse baseline geometry credits minus grouped geometry credits, with any incremental material work/extras also considered. At100per geometry:100for2independent jobs,200for3independent jobs, but100for3identities using2jobs plus accepted Healing/Mana reuse. The same single-trial comparison leaves these margins unchanged if eligibility is equal. Group-specific paid extras/recovery must stay below the applicable margin to preserve gross credit savings. None is quoted or authorized.",
+    "retryIllustration": "One grouped100 plus one individual100 recovery equals a two-item200 baseline. For three independent300 jobs, two individual recoveries after grouped100 erase gross savings. These are arithmetic illustrations, not authorized jobs.",
+    "operatorUiExtrasReport": {
+      "sourceKind": "sole operator relayed message and private receipt; receipt/evidence bytes verified locally by Items",
+      "operatorThreadId": "01a11d7e-ac7e-767d-9bd1-1d98b81d601b",
+      "accountReadByItems": false,
+      "balanceReported": 3200,
+      "geometryEmptyForm": {
+        "engine": "P2.0",
+        "topology": "Quad",
+        "targetControlsInspected": [
+          5000,
+          10000
+        ],
+        "restoredTarget": 5000,
+        "outputs": 1,
+        "displayedStandardCredits": 100,
+        "displayedTrialCredits": 0,
+        "trialCount": 1,
+        "finalInputQuoteConfirmed": false
+      },
+      "splitUi": {
+        "label": "Dividir",
+        "mode": "Equilíbrio",
+        "partsRange": [
+          6,
+          15
+        ],
+        "displayedStandardCredits": 40,
+        "displayedTrialCredits": 0,
+        "trialCount": 1,
+        "executed": false,
+        "applicabilityToFinalJointInputConfirmed": false
+      },
+      "smartUvUi": {
+        "displayedStandardCredits": 20,
+        "displayedTrialCredits": 0,
+        "trialCount": 2,
+        "executed": false,
+        "applicabilityToFinalJointInputConfirmed": false
+      },
+      "basicRemeshUi": {
+        "topology": "Quad",
+        "target": 10000,
+        "displayedCredits": 10,
+        "smartP10Enabled": false,
+        "smartMeshCompatibilityToastReported": true,
+        "isSmartRetopologyQuote": false,
+        "executed": false
+      },
+      "fillPartsUi": {
+        "requiresSegmentedModel": true,
+        "displayedCredits": null,
+        "executed": false
+      },
+      "textureUi": {
+        "displayedCredits": 20,
+        "executed": false,
+        "includedInBudget": false
+      },
+      "jointTrialStackEligibilityConfirmed": false,
+      "exportExistingManual": {
+        "formatsAttempted": [
+          "GLB",
+          "FBX"
+        ],
+        "additionalChargeDisplayed": false,
+        "localFileConfirmed": false,
+        "status": "downloads unconfirmed after timeout; no file in operator download prefix",
+        "repeatOrHiddenRouteScheduled": false
+      },
+      "manualVisualInspection": {
+        "orientationsReported": 3,
+        "visibleSwordVolumesReported": 5,
+        "hierarchyNodesReported": 1,
+        "issuesReported": [
+          "incoherent guards/proportions",
+          "smaller thumbnail volume"
+        ],
+        "identityComponentsVerified": false,
+        "uvMaterialsNormalsPivotsTrianglesRoundTripVerified": false
+      },
+      "uploadOrGenerationOrReservationOrSpendReported": false,
+      "receiptLocalPath": null,
+      "receiptHash": "d712a5969945d3e66f32c9f9284eb34263763c3d17dbc5c87c8ca4353772a570",
+      "receiptFileName": "tripo-studio-learned-workflow.json",
+      "evidenceManifestFileName": "tripo-studio-evidence-manifest.json",
+      "evidenceManifestSha256": "5f2659ee0b7f8b8df0d4e160599deae067d9ef658c95e0b8308c1e6c68cf20ed",
+      "evidenceFileCount": 12,
+      "evidenceBytesHashesVerifiedByItems": true,
+      "newScreenshotPixelsInspectedByItems": false
+    },
+    "serviceAssistedAlternatives": {
+      "status": "arithmetic-only alternatives to local split; no action scheduled or authorized",
+      "incrementalCostRule": "Count only extras additional to the chosen individual/reuse baseline. Local-only split remains zero provider credits; provider split is a separate paid/trial action.",
+      "nonTrialIllustrations": [
+        {
+          "actions": "group geometry + provider split only",
+          "geometryCredits": 100,
+          "incrementalProviderExtrasAssumption": 40,
+          "totalCredits": 140,
+          "savingVsTwoIndependentOrThreeWithReuse": 60,
+          "savingVsThreeIndependent": 160
+        },
+        {
+          "actions": "above + SmartUV only if additionally needed",
+          "geometryCredits": 100,
+          "incrementalProviderExtrasAssumption": 60,
+          "totalCredits": 160,
+          "savingVsTwoIndependentOrThreeWithReuse": 40,
+          "savingVsThreeIndependent": 140
+        },
+        {
+          "actions": "above + basic remesh10 solely as arithmetic; incompatible with required Smart method unless separately resolved",
+          "geometryCredits": 100,
+          "incrementalProviderExtrasAssumption": 70,
+          "totalCredits": 170,
+          "savingVsTwoIndependentOrThreeWithReuse": 30,
+          "savingVsThreeIndependent": 130,
+          "methodCompatibleOrApproved": false
+        }
+      ],
+      "textureIncluded": false,
+      "fillPartsIncluded": false,
+      "localEffortIncluded": false,
+      "finalQuotesConfirmed": false,
+      "approved": false,
+      "outputsAuthorized": 0
+    },
+    "changedGeometryTargetQuoteStatus": "Prior arithmetic retained only as comparison. Higher TOTAL geometry requested for study; exact target, final input price and ceiling await research guide and human decision."
+  },
+  "manualGreatSwordEvidence": {
+    "providerTaskId": "6a744913-ab20-42f4-9e99-0941217d9792",
+    "oneInputOneModelFiveSilhouettesReported": true,
+    "inputR3Sha256VerifiedByOperator": "1390409d3e2f25e51a9f75e1a70cda7ad8f4ce5f1bdfd8443152516a553f8999",
+    "jointGlbExportStatus": "attempted-by-sole-operator; download-unconfirmed-after-timeout; no-local-file",
+    "additionalExportChargeDisplayedReported": false,
+    "localGlb": null,
+    "sha256": null,
+    "connectedComponentsUvMaterialPivotHiddenSurfaceAudit": "pending",
+    "provesSeparability": false,
+    "assignedAsMasterOfStudyCandidates": false,
+    "latestExportStatus": {
+      "formatsAttempted": [
+        "GLB",
+        "FBX"
+      ],
+      "additionalChargeDisplayed": false,
+      "localFileConfirmed": false,
+      "status": "downloads unconfirmed after timeout; no file in operator download prefix",
+      "repeatOrHiddenRouteScheduled": false
+    },
+    "latestVisualReport": {
+      "orientationsReported": 3,
+      "visibleSwordVolumesReported": 5,
+      "hierarchyNodesReported": 1,
+      "issuesReported": [
+        "incoherent guards/proportions",
+        "smaller thumbnail volume"
+      ],
+      "identityComponentsVerified": false,
+      "uvMaterialsNormalsPivotsTrianglesRoundTripVerified": false
+    }
+  },
+  "localSeparation": {
+    "executed": false,
+    "toolVerified": false,
+    "jointGlb": null,
+    "jointSha256": null,
+    "masterPreservationRequired": true,
+    "partMappings": [],
+    "childArtifacts": [],
+    "requiredLineage": [
+      "studyId + constituent productionIds + approved individual source hashes",
+      "composition image hash + external region/scale map",
+      "shared provider taskId + original jointGLBhash + images/material dependencies",
+      "identity-based node/primitive/component selections + source transforms and offsets",
+      "childGLBhash + preserved/shared atlas hash + any derived-material revision",
+      "per-asset QA + visual approval + principal-owned install/test receipt"
+    ]
+  },
+  "qaGates": {
+    "source": "Exact individual source revisions, view and approvals; no full board, extra repeated views, text, inset or licensed source sprite pasted.",
+    "identityParts": "Map nodes/instances/meshes/primitives and connected components to production identity. Several parts can belong to one vial; components are not item count.",
+    "separation": "No inter-item bridges, shared faces, intersections, fused contact or incorporated background. Extract identity groups without inventing/cutting/reconstructing missing geometry to call the split a pass.",
+    "hiddenSurfaces": "Inspect each isolated item360deg, rear/base/neck/interior openings/scroll spirals/ribbon; missing hidden surfaces remain a defect. Do not auto-close legitimate holes.",
+    "materialsUv": "Preserve UVs, normals, texture images, factors/alpha/samplers and atlas links. Shared atlas/material can be retained; cross-item color/shadow leakage fails QA. Repack/rebake is a new revision, not free acceptance.",
+    "pivotsScale": "Record source transforms and composition offsets. Remove only placement into the composition; preserve proportions and source units. No independentXYZstretch. Calibrate uniformly once using approved physical scale, not28pxinventory size.",
+    "exportRoundTrip": "Keep joint GLB immutable. Export traceable self-contained individual GLBs; reopen and compare geometry/transforms/UV/normals/material/images. Existing static-v2 exporter does not demonstrate a GLB separation tool.",
+    "delivery": "Same accepted child master/material must drive final icon/ground/equipped uses with native fallback and separate approval/install gates. File separation does not approve an asset."
+  },
+  "qaResults": {
+    "source": {
+      "status": "pending",
+      "evidence": null
+    },
+    "identityParts": {
+      "status": "pending",
+      "evidence": null
+    },
+    "separation": {
+      "status": "pending",
+      "evidence": null
+    },
+    "hiddenSurfaces": {
+      "status": "pending",
+      "evidence": null
+    },
+    "materialsUv": {
+      "status": "pending",
+      "evidence": null
+    },
+    "pivotsScale": {
+      "status": "pending",
+      "evidence": null
+    },
+    "exportRoundTrip": {
+      "status": "pending",
+      "evidence": null
+    },
+    "delivery": {
+      "status": "pending",
+      "evidence": null
+    }
+  },
+  "abortCriteria": [
+    "Ambiguous identity, inseparable bridges/fusion/intersections or necessary surfaces missing.",
+    "Loss or contamination of liquid/material/color, thin detail or UV/atlas resources.",
+    "Extraction requires geometry reconstruction, repaint/rebake or another paid action outside scope.",
+    "Group-specific quoted extras/recovery or local effort negate the potential saving.",
+    "Shared topology/texture budget leaves any constituent below close-camera quality.",
+    "Export round trip loses geometry, transforms, normals, materials or images."
+  ],
+  "partialSuccessPolicy": "Record which exact identities pass; preserve rejected artifacts and native fallback. Do not claim all items approved because one child can be exported.",
+  "fallbackPolicy": "Preserve all native cursors, quantities, spells, animation/slots/picking and all unlisted variants. Full Mana cursor0 is valid. No icon/runtime substitution by this study.",
+  "sourceSnapshots": [
+    {
+      "path": "docs/items-study/catalog.json",
+      "sha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d"
+    },
+    {
+      "path": "docs/items-study/production-queue.json",
+      "sha256": "fc87a85cfad1f55b81946fa44f2c88945a509ba661212a211a4e6176addd00e8"
+    },
+    {
+      "path": "docs/items-study/concept-art.json",
+      "sha256": "25396b2b70da8ebd759d1e18314a07a09cda3b22077145a644381100bf5494c2"
+    },
+    {
+      "path": "docs/items-study/smart-production-context.json",
+      "sha256": "5f1ae39b96485b2fc3cd654404f637bafafc984dfd27a68b57c9d5bcd52f9d3e"
+    },
+    {
+      "path": "docs/ITEM-PRODUCTION-CONTRACT.md",
+      "sha256": "329f449ffab494b6eadd2af302c120cd9808cf6e3a5926738f2ed59dd1d281e4"
+    },
+    {
+      "path": "assets/registry.json",
+      "sha256": "62f2fbdd943b7ad93175c7167bd2edd1fda20d6f43bf132924bf662a9168d830"
+    }
+  ],
+  "privateNativeDimensionEvidence": {
+    "manifestSha256": "0d8e0a5442fb3aea119bc3475c6c5c40f5982b7d88bb16af7a0c6ac2f5693b9e",
+    "metadataOnly": true,
+    "licensedPixelsIncluded": false
+  },
+  "geometryBudgetStudy": {
+    "humanEvent": "Sentinel_cab58c0598d4819195d2878edfe1e535",
+    "scope": "Prepare existing family/productionId/reuse links and visual-size metadata for the cloud guide; no new queue or count selection.",
+    "status": "linkage-prepared; relayed-experimental-guide-received; target-and-measurements-pending",
+    "researchGuide": {
+      "status": "relayed-hypotheses-only; not measured category minima",
+      "source": "cloud researcher guide summarized by parent and relayed through sole Studio operator",
+      "sourceKind": "relayed message; original guide artifact bytes not provided",
+      "receiptId": "item.geometry.guide.relay.r1",
+      "revision": null,
+      "sha256": null,
+      "categoryRules": [
+        {
+          "categoryId": "coin",
+          "label": "Moeda",
+          "metric": "exportedTriangles",
+          "usageProjectedPixels": [
+            40,
+            150
+          ],
+          "usageTrianglesExperimental": [
+            32,
+            160
+          ],
+          "firstPersonInspectionProjectedPixels": [
+            250,
+            700
+          ],
+          "firstPersonTrianglesExperimental": [
+            150,
+            800
+          ],
+          "minimumVertexCount": null,
+          "measuredMinimum": false,
+          "approved": false
+        },
+        {
+          "categoryId": "gem",
+          "label": "Gema",
+          "metric": "exportedTriangles",
+          "usageProjectedPixels": [
+            40,
+            150
+          ],
+          "usageTrianglesExperimental": [
+            24,
+            160
+          ],
+          "firstPersonInspectionProjectedPixels": [
+            250,
+            700
+          ],
+          "firstPersonTrianglesExperimental": [
+            150,
+            800
+          ],
+          "minimumVertexCount": null,
+          "measuredMinimum": false,
+          "approved": false
+        },
+        {
+          "categoryId": "scroll",
+          "label": "Pergaminho",
+          "metric": "exportedTriangles",
+          "usageProjectedPixels": [
+            40,
+            150
+          ],
+          "usageTrianglesExperimental": [
+            100,
+            500
+          ],
+          "firstPersonInspectionProjectedPixels": [
+            250,
+            700
+          ],
+          "firstPersonTrianglesExperimental": [
+            500,
+            2000
+          ],
+          "minimumVertexCount": null,
+          "measuredMinimum": false,
+          "approved": false
+        },
+        {
+          "categoryId": "potion",
+          "label": "Poção",
+          "metric": "exportedTriangles",
+          "usageProjectedPixels": [
+            40,
+            150
+          ],
+          "usageTrianglesExperimental": [
+            300,
+            900
+          ],
+          "firstPersonInspectionProjectedPixels": [
+            250,
+            700
+          ],
+          "firstPersonTrianglesExperimental": [
+            1000,
+            3000
+          ],
+          "minimumVertexCount": null,
+          "measuredMinimum": false,
+          "approved": false
+        },
+        {
+          "categoryId": "weapon",
+          "label": "Arma",
+          "metric": "exportedTriangles",
+          "usageProjectedPixels": [
+            40,
+            150
+          ],
+          "usageTrianglesExperimental": [
+            400,
+            1800
+          ],
+          "firstPersonInspectionProjectedPixels": [
+            250,
+            700
+          ],
+          "firstPersonTrianglesExperimental": [
+            2000,
+            8000
+          ],
+          "minimumVertexCount": null,
+          "measuredMinimum": false,
+          "approved": false
+        },
+        {
+          "categoryId": "shield",
+          "label": "Escudo",
+          "metric": "exportedTriangles",
+          "usageProjectedPixels": [
+            40,
+            150
+          ],
+          "usageTrianglesExperimental": [
+            300,
+            1400
+          ],
+          "firstPersonInspectionProjectedPixels": [
+            250,
+            700
+          ],
+          "firstPersonTrianglesExperimental": [
+            1000,
+            5000
+          ],
+          "minimumVertexCount": null,
+          "measuredMinimum": false,
+          "approved": false
+        },
+        {
+          "categoryId": "rigid-piece",
+          "label": "Peça rígida",
+          "metric": "exportedTriangles",
+          "usageProjectedPixels": [
+            40,
+            150
+          ],
+          "usageTrianglesExperimental": [
+            500,
+            2500
+          ],
+          "firstPersonInspectionProjectedPixels": [
+            250,
+            700
+          ],
+          "firstPersonTrianglesExperimental": null,
+          "minimumVertexCount": null,
+          "measuredMinimum": false,
+          "approved": false
+        },
+        {
+          "categoryId": "armor",
+          "label": "Armadura",
+          "metric": "exportedTriangles",
+          "usageProjectedPixels": [
+            40,
+            150
+          ],
+          "usageTrianglesExperimental": null,
+          "firstPersonInspectionProjectedPixels": [
+            250,
+            700
+          ],
+          "firstPersonTrianglesExperimental": [
+            2000,
+            8000
+          ],
+          "minimumVertexCount": null,
+          "measuredMinimum": false,
+          "approved": false
+        }
+      ],
+      "lodRatiosExperimental": [
+        1.0,
+        0.5,
+        0.25
+      ],
+      "lodRatioBasis": "per-identity accepted drawable reference, never destructive replacement of preserved master or an automatic choice",
+      "projectedErrorPixelsExperimental": 1,
+      "numericProvenance": "All ranges, ratios, size windows and master2x margin are cloud test proposals; not measured in this project and not numeric recommendations extracted from the linked tool documentation.",
+      "sourcesForWorkflowSemantics": [
+        "https://meshoptimizer.org/#simplification",
+        "https://docs.blender.org/manual/en/5.1/addons/import_export/scene_gltf2.html",
+        "https://docs.blender.org/manual/en/5.1/modeling/meshes/editing/mesh/separate.html"
+      ],
+      "sixItemArithmeticDoesNotExpandPilot": true,
+      "operatorSupplementSha256": "c859071199f655b66be98222bbe7ee67ba95620e65237a51d5d7f8875891151e"
+    },
+    "operatorComplement": {
+      "status": "received-and-bytes-hash-verified; no model binary",
+      "receiptFileName": "tripo-geometry-budget-study.json",
+      "bytes": 14126,
+      "sha256": "c859071199f655b66be98222bbe7ee67ba95620e65237a51d5d7f8875891151e",
+      "parentReceiptSha256": "d712a5969945d3e66f32c9f9284eb34263763c3d17dbc5c87c8ca4353772a570",
+      "parentReceiptHashUnchangedVerifiedByItems": true,
+      "validationFileName": "tripo-geometry-budget-validation.json",
+      "validationSha256": "c812d5b4f440386843db6d23766e87fefa41c4d668186cdb8045cac19f00cb19",
+      "accountReadByItems": false,
+      "modelBinaryAvailable": false
+    },
+    "totalGeometry": {
+      "increaseRequestedForStudy": true,
+      "selectedProviderTarget": null,
+      "selectedMetric": null,
+      "selectedTotalTriangles": null,
+      "observedEmptyFormFaceControls": [
+        5000,
+        10000
+      ],
+      "perIdentityEqualDivisionAssumed": false,
+      "perItemMinimumOrDensityGuaranteed": false,
+      "finalQuoteConfirmed": false,
+      "approved": false,
+      "conditionalTriangleSums": [
+        {
+          "productionIds": [
+            "item.design.base.scroll",
+            "item.design.base.potion-of-healing"
+          ],
+          "firstPersonSumHypothesis": [
+            1500,
+            5000
+          ],
+          "masterTwoTimesHeadroomHypothesis": [
+            3000,
+            10000
+          ],
+          "selected": false,
+          "densityPerItemGuaranteed": false,
+          "usageSumHypothesis": [
+            400,
+            1400
+          ],
+          "usageMasterTwoTimesHeadroomHypothesis": [
+            800,
+            2800
+          ]
+        },
+        {
+          "productionIds": [
+            "item.design.base.scroll",
+            "item.design.base.potion-of-healing",
+            "item.design.base.potion-of-mana"
+          ],
+          "firstPersonSumHypothesis": [
+            2500,
+            8000
+          ],
+          "masterTwoTimesHeadroomHypothesis": [
+            5000,
+            16000
+          ],
+          "selected": false,
+          "densityPerItemGuaranteed": false,
+          "usageSumHypothesis": [
+            700,
+            2300
+          ],
+          "usageMasterTwoTimesHeadroomHypothesis": [
+            1400,
+            4600
+          ]
+        }
+      ],
+      "quadApproximationNotAdopted": "The relay also expressed roughly half as many quads. Do not use triangle/2 as measured quads or a provider target without verified source topology and triangulation. GLB topology and vertex records remain unmeasured."
+    },
+    "metricPolicy": [
+      "Provider/UI face or vertex labels retain their original meaning and source; do not silently reinterpret UI vertices as geometry or attribute records.",
+      "Source quads/polygons, actual exported triangles and vertex records are separate measurements. Record tool/version, primitive mode, accessor/index methodology and triangulation outcome.",
+      "POSITION accessor rows are stored attribute-vertex records, not necessarily distinct geometric positions. Record referenced indices separately from unused rows; UV/normal seams can duplicate positions.",
+      "A distinct-position count needs declared space and exact/tolerance comparison; it is observational only. Do not weld or destroy seams/normals/UVs to report it.",
+      "Count unique stored geometry resources separately from instances/draw occurrences and per-identity selections; shared meshes/atlas prevent naive summation.",
+      "No fixed vertex-to-triangle or face-to-vertex ratio. Source quads, if retained, do not imply exported GLB quad primitives.",
+      "Total provider target is not a per-item target or equal allocation. Relayed category triangle/LOD bands are now recorded as hypotheses; category vertex minima remain null. No actual metric, provider target or minimum is inferred.",
+      "Keep immutable joint/source master, extracted child and each drawable LOD as different stages with hashes and comparable counts. Local extraction must not reduce geometry; any change requires explained revision and renewed QA.",
+      "Primitive mode and index entry count are explicit. Referenced unique attribute rows differ from index entries; indexCount/3 gives triangles only for valid indexed TRIANGLES, not strips/fans/lines/points.",
+      "Simplifier-reported approximate/normalized error, possibly attribute-aware, is not automatically conservative geometricError and cannot set errorVerified=true. Record metric/units/reference, independently establish a conservative bound and pass visual/material QA."
+    ],
+    "visualSizePolicy": "Native28x28 inventory cells and1536x1024 concept canvases are verified presentation metadata, not physical size or close-camera screen coverage. Composition boxes are framing reserves. Physical bounds, camera/FOV/depth/viewport and projected size remain unmeasured.",
+    "closeViewQa": "Preserve scroll spirals/ribbon/thickness and vial neck/cork/cord/glass/liquid; evaluate close silhouette/material and conservative projected error before any LOD choice. The existing selector provides no category triangle budget.",
+    "runtimePolicy": "Parser/transport limits remain technical compatibility gates, not artistic minima. Preserve unsupported source data and native fallback; no automatic decimation, source overwrite or install.",
+    "sourceContracts": [
+      {
+        "path": "docs/ITEM-PRODUCTION-CONTRACT.md",
+        "sha256": "329f449ffab494b6eadd2af302c120cd9808cf6e3a5926738f2ed59dd1d281e4"
+      },
+      {
+        "path": "docs/TOWN-ASSET-LOD-SELECTOR.md",
+        "sha256": "4540e654b7629d42f9391c2332aaf5617451f1a316d56898266c0a06bb0e9e63"
+      },
+      {
+        "path": "docs/TOWN-ASSET-LOD-REVIEW.md",
+        "sha256": "c83a624a7c84ce011e017206a43b3325834ee86d3350e63010f5a313e5edd687"
+      }
+    ],
+    "countsSelected": false,
+    "newJobsAuthorized": 0,
+    "creditsAuthorized": 0
+  },
+  "referencePreparationPolicy": {
+    "humanEvent": "Sentinel_84292341680c8191a8b69178e78b0d4e",
+    "sequence": [
+      "exact original real reference and provenance",
+      "faithful clear imagegen image with neutral light and no strong shadows",
+      "approve exact individual image or deliberate small-group composition hash",
+      "sole operator reconfirms final Studio target/input quote/private destination and human ceiling",
+      "Smart Mesh output",
+      "download/hash immutable joint GLB",
+      "separate identity groups on copies and measure/QA child exports",
+      "principal-owned approved runtime integration/test"
+    ],
+    "originalSourcesPreserved": true,
+    "individualOrDeliberateDistinctGroup": true,
+    "fullMultiviewBoardAsGroupAllowed": false,
+    "currentBoardsAutomaticallyApproved": false,
+    "newImageGenerated": false,
+    "finalImage": null,
+    "finalImageSha256": null,
+    "newPaidImageGenerationAuthorized": false,
+    "uploadOrProviderGenerationAuthorized": false,
+    "creditsAuthorized": 0
+  }
+}

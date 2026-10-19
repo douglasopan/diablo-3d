@@ -1,0 +1,3 @@
+# Local embedded data; manifest records hashes, payloads stay private.
+/Source/engine/render/startup_loading_art.hpp
+/Source/engine/render/town_east_earth_data.hpp

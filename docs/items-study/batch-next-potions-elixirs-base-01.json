@@ -1,0 +1,284 @@
+{
+  "format": "d3d.item-concept-art",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "batchId": "2026-10-08-next-potions-elixirs-base-01",
+  "catalogSha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d",
+  "scope": "Remaining seven reference-available potions/elixirs. Native identity preserved; physical interpretation of ambiguous color regions remains a review gate.",
+  "generationTool": "built-in image_gen.imagegen",
+  "generationCalls": 7,
+  "postProcessing": "none; original generated PNG bytes copied unchanged",
+  "originalGameImagesIncluded": false,
+  "visualApproval": false,
+  "runtimeInstalled": false,
+  "summary": {
+    "linkedProductionUnits": 7,
+    "newPNGs": 7,
+    "modelsGenerated": 0,
+    "runtimeIconsGenerated": 0
+  },
+  "entries": [
+    {
+      "productionId": "item.design.base.arena-potion",
+      "conceptId": "item.design.base.arena-potion.concept.r1",
+      "revision": "r1",
+      "kind": "turnaround",
+      "status": "candidate",
+      "image": "assets/concept-art/items/r1/arena-potion-r1.png",
+      "sha256": "4ca9af0e200076a36836ba5fbb60f0d6d863d83d89340853b941529619b2a0f0",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate consumable modeling turnaround.\nSubject: ONE ARENA POTION, item.design.base.arena-potion, cursor16. PRIVATE original sprite is shape/proportion/local-color reference only. Preserve its squat wide round glass flask, short narrow neck, dull burgundy-red stopper, aged brass collar/wrapped rings at neck and thin hanging gold-colored cord at right. Liquid has vivid but non-emissive RED upper region and BLUE lower region with a narrow ochre/gold horizontal band around the bulb between them as in sprite. Treat the band as exterior trim and propose two visibly separate colored liquid regions conservatively; physical interpretation is a review gate. No label or symbols invented.\nFIVE clearly separate views of SAME entire bottle: FRONT, SIDE, BACK, full-size THREE-QUARTER, and fifth small new HD INVENTORY thumbnail. Same round bulb, stopper, band, liquid levels, glass thickness and cord attachment in every view; rear reverses cord position. No combined 3-4/ICON. Hidden closure and cord depth inferred.\nRealistic slightly worn clear dark glass, non-glowing colored liquids, aged brass and simple stopper. Opaque charcoal-gray background, soft neutral WHITE studio light, no colored lighting, bloom, fantasy aura or dramatic shadow. Labels only ARENA POTION / FRONT / SIDE / BACK / 3-4 / ICON. No hands, character, scenery, extra bottles or watermark. Never paste, trace or display private sprite pixels; ICON newly rendered HD from this same candidate.",
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 16,
+        "sha256": "f71db6d096fdbc79df2b27d5dbed251a3df8f6c25ff84844545f9306303d2587"
+      },
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-preview"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "notes": "Shape/color regions inspected against actual source; five representations and freshly rendered HD preview. Glass depth, stopper material, metal collars, cord attachment and rear are conservative inference. Three-quarter of narrow cylindrical Spectral is weakly oblique; spherical Arena/Magic side turns are shallow. Physical material/transparency and exact closures require a 3D review. No runtime icon.",
+      "interpretationGate": "Two colored liquid/glass regions and exterior mid-band are a proposal from unresolved sprite pixels; internal chamber construction not proven."
+    },
+    {
+      "productionId": "item.design.base.elixir-of-dexterity",
+      "conceptId": "item.design.base.elixir-of-dexterity.concept.r1",
+      "revision": "r1",
+      "kind": "turnaround",
+      "status": "candidate",
+      "image": "assets/concept-art/items/r1/elixir-of-dexterity-r1.png",
+      "sha256": "c7c4f86e2f386c342a6d42ac27b78de46df6dbaeab51680b176053e9a9965d1b",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate bottle modeling turnaround.\nSubject: ONE ELIXIR OF DEXTERITY, item.design.base.elixir-of-dexterity, cursor36. PRIVATE original sprite is only silhouette/proportion/local-color reference. Reconstruct its RECTANGULAR squarish dark glass vial with straight vertical sides, beveled/chamfered shoulders narrowing into a short neck, burgundy-red stopper, small aged brass neck collar, thin aged-gold cord hanging from neck down the right side. Very dark near-black olive liquid, low subtle highlights, original boxy silhouette. Do not make a round flask. No label, engraved symbols or ornaments.\nFive clearly separated whole-object views of SAME vial: FRONT broad rectangular face, SIDE true narrow rectangular thickness, BACK opposite broad face with cord reversed, full-size THREE-QUARTER showing front and side, and a fifth separate small newly rendered HD INVENTORY thumbnail. No merge of 3-4 and thumbnail. All views agree on width/depth, bevels, stopper, cord, fill and materials; back shows true reverse. Hidden construction conservative inference.\nRealistic worn dark glass, opaque nearly black olive liquid, dull burgundy stopper, tarnished brass, neutral soft white studio lighting, opaque charcoal-gray backdrop. No emissive liquid, glow, colored light, hands, character, scenery, extra objects or watermark. Labels only ELIXIR OF DEXTERITY / FRONT / SIDE / BACK / 3-4 / ICON. Never paste, trace or display private sprite pixels; thumbnail freshly renders this new HD candidate.",
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 36,
+        "sha256": "a41ebb70095c5326abfff04d81cd16d9e1534d73037154ae2e0afc60c57e41a4"
+      },
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-preview"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "notes": "Shape/color regions inspected against actual source; five representations and freshly rendered HD preview. Glass depth, stopper material, metal collars, cord attachment and rear are conservative inference. Three-quarter of narrow cylindrical Spectral is weakly oblique; spherical Arena/Magic side turns are shallow. Physical material/transparency and exact closures require a 3D review. No runtime icon."
+    },
+    {
+      "productionId": "item.design.base.elixir-of-magic",
+      "conceptId": "item.design.base.elixir-of-magic.concept.r1",
+      "revision": "r1",
+      "kind": "turnaround",
+      "status": "candidate",
+      "image": "assets/concept-art/items/r1/elixir-of-magic-r1.png",
+      "sha256": "461dd769207a6b52e0737e91e6000ef42aa145f23adf4f443fc52bc11c4c6ce6",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate consumable modeling turnaround.\nSubject: ONE ELIXIR OF MAGIC, item.design.base.elixir-of-magic, cursor34. PRIVATE sprite only silhouette/proportion/local-color reference. Preserve its low broad rounded glass flask with sloped shoulders to a short neck, dark burgundy red stopper, aged brass neck wraps and thin gold-colored cord hanging on right. Filled with deep burnt-orange/copper liquid, brighter orange reflections toward bottom from material only, no emission or magical effects. Preserve round squat silhouette, original brown/orange/gold/red palette. No labels or symbols invented.\nFive separate views of SAME complete bottle: FRONT, true SIDE, BACK opposite face with cord position reversed, full-size THREE-QUARTER and fifth separate small freshly rendered HD INVENTORY preview. No merged oblique/thumbnail. Every view agrees on neck rings, cord, round body, stopper and fill level. Hidden thickness and closure inferred conservatively.\nRealistic worn glass and aged brass, non-glowing orange liquid, simple red stopper, opaque neutral charcoal backdrop, soft neutral WHITE studio illumination. Only ELIXIR OF MAGIC / FRONT / SIDE / BACK / 3-4 / ICON labels. No glow, aura, colored lights, hands, character, scenery, extra bottle, watermark or pasted/traced source pixels. ICON is a new HD rendering of this same candidate.",
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 34,
+        "sha256": "e6f90876c8ea7b2b4721df3ffeb60ce1bface822b4165a0dfe53c291bb399d0c"
+      },
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-preview"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "notes": "Shape/color regions inspected against actual source; five representations and freshly rendered HD preview. Glass depth, stopper material, metal collars, cord attachment and rear are conservative inference. Three-quarter of narrow cylindrical Spectral is weakly oblique; spherical Arena/Magic side turns are shallow. Physical material/transparency and exact closures require a 3D review. No runtime icon."
+    },
+    {
+      "productionId": "item.design.base.elixir-of-strength",
+      "conceptId": "item.design.base.elixir-of-strength.concept.r1",
+      "revision": "r1",
+      "kind": "turnaround",
+      "status": "candidate",
+      "image": "assets/concept-art/items/r1/elixir-of-strength-r1.png",
+      "sha256": "cd62c751942860e3e1b24d568e12f3886d1e6ecc380e606dc01ea112ad5862de",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate bottle modeling turnaround.\nSubject: ONE ELIXIR OF STRENGTH, item.design.base.elixir-of-strength, cursor38. PRIVATE original sprite is only exact silhouette/proportion/local-color reference. Preserve a squat ROUND glass flask with sloping rounded shoulder, short neck, dark burgundy stopper, aged gold/brass neck wraps with thin gold-colored cord hanging on right, filled with pale cloudy blue-gray/lavender liquid. This is the ROUND pale elixir, not the rectangular vitality bottle. Simple original silhouette and regions only; no label or invented symbols.\nFive SEPARATE whole-item views of SAME bottle FRONT / SIDE / BACK / large THREE-QUARTER / small freshly rendered HD INVENTORY preview. Show true reverse with cord on opposite side; side should show cord attachment at 90 degrees, not just repeat front. Same spherical body, fill, stopper and neck rings across views. Do not combine oblique and thumbnail. Thickness and hidden closure inferred conservatively.\nRealistic gently worn glass, cloudy non-emissive pale lavender liquid, aged brass and red stopper, plain opaque charcoal-gray background, soft neutral WHITE studio lighting. No glow, aura, colored light, hands, character, scene, extra bottles or watermark. Only ELIXIR OF STRENGTH / FRONT / SIDE / BACK / 3-4 / ICON labels. Never copy, paste, trace or display source pixels; thumbnail must be newly rendered in HD.",
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 38,
+        "sha256": "4e61004b5d4560871617981267d85307d12c280996b5981818a52b4f62c4125e"
+      },
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-preview"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "notes": "Shape/color regions inspected against actual source; five representations and freshly rendered HD preview. Glass depth, stopper material, metal collars, cord attachment and rear are conservative inference. Three-quarter of narrow cylindrical Spectral is weakly oblique; spherical Arena/Magic side turns are shallow. Physical material/transparency and exact closures require a 3D review. No runtime icon."
+    },
+    {
+      "productionId": "item.design.base.elixir-of-vitality",
+      "conceptId": "item.design.base.elixir-of-vitality.concept.r1",
+      "revision": "r1",
+      "kind": "turnaround",
+      "status": "candidate",
+      "image": "assets/concept-art/items/r1/elixir-of-vitality-r1.png",
+      "sha256": "eef84f85b8d2b96081db8d56a47614c8bed2521acb4308efede9c34f83cb9e1e",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate consumable modeling turnaround.\nSubject: ONE ELIXIR OF VITALITY, item.design.base.elixir-of-vitality, cursor31. PRIVATE original sprite only silhouette/proportion/local-color reference. Preserve a tall RECTANGULAR clear glass vial with straight vertical broad faces, sloped bevel shoulders to short neck, dark burgundy-red stopper, aged brass neck ring, fine gold-colored cord hanging at right, pale cloudy bluish lavender liquid filling most lower rectangular body. This is the PALE RECTANGULAR vial, not a round strength flask or black dexterity vial. No label/symbol ornaments.\nFive distinct fully separated views of SAME complete bottle: FRONT broad face, SIDE true narrow rectangular depth, BACK opposite broad face with cord reversed, full-size THREE-QUARTER clearly showing depth, fifth small fresh HD INVENTORY thumbnail. All dimensions, stopper, collar, liquid level, shoulder chamfers and cord agree; no combined 3-4/thumbnail. Rear and thickness inferred conservatively.\nRealistic subtly worn glass, non-emissive cloudy pale blue/lavender liquid, brass and simple dark red stopper. Opaque charcoal-gray background, neutral soft WHITE studio lighting. Labels only ELIXIR OF VITALITY / FRONT / SIDE / BACK / 3-4 / ICON. No glow, magical aura, colored light, hands, characters, scenery, extra bottle or watermark. Never copy/paste/trace/display private source pixels. ICON is a new HD rendering of this same candidate.",
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 31,
+        "sha256": "c069406783afe19da1b1b81921743d4b7aa2191333a3fe3c51aa8b1134fa94cd"
+      },
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-preview"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "notes": "Shape/color regions inspected against actual source; five representations and freshly rendered HD preview. Glass depth, stopper material, metal collars, cord attachment and rear are conservative inference. Three-quarter of narrow cylindrical Spectral is weakly oblique; spherical Arena/Magic side turns are shallow. Physical material/transparency and exact closures require a 3D review. No runtime icon."
+    },
+    {
+      "productionId": "item.design.base.golden-elixir",
+      "conceptId": "item.design.base.golden-elixir.concept.r1",
+      "revision": "r1",
+      "kind": "turnaround",
+      "status": "candidate",
+      "image": "assets/concept-art/items/r1/golden-elixir-r1.png",
+      "sha256": "50bc23442c77f5bb8ef245c1ab825fecb26f7e34cb873b1d44a6a963464a82c6",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate consumable modeling turnaround.\nSubject: ONE GOLDEN ELIXIR, item.design.base.golden-elixir, cursor17. PRIVATE original sprite only silhouette/proportion/local-color reference. Preserve its short rectangular boxy glass flask, broad near-square body, flat sides and beveled shoulders, short neck with dark burgundy stopper and aged-gold collar. Main body contains dark golden-yellow/olive liquid with yellow reflections near lower edge. A small vivid dark-red central region in the upper short neck immediately beneath gold collar is visible in source: reconstruct as restrained red neck glass/inset, exact physical interpretation pending. Thin pale silver-gray shoulder rim. No hanging cord visible: do not add cord or label. Preserve original square body and gold/olive/red palette.\nFive separate whole-object views of SAME flask FRONT, true narrow SIDE, BACK opposite face, large THREE-QUARTER, separate small freshly rendered HD INVENTORY thumbnail. Same proportions, fill, neck red region and fittings in all views. Never merge 3-4 and thumbnail. Hidden thickness, rear and closure inferred conservatively.\nRealistic worn glass, non-glowing dark olive-gold liquid and aged brass, plain opaque charcoal-gray backdrop, soft neutral WHITE studio light. Only GOLDEN ELIXIR / FRONT / SIDE / BACK / 3-4 / ICON labels. No magic, aura, emissive liquid, colored light, symbols, gems invented elsewhere, hands, character, scene, extra bottles or watermark. Never copy/paste/trace/display private sprite pixels; ICON freshly rendered HD from this same candidate.",
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 17,
+        "sha256": "1c3df94108b611d120853216732ad6e3ab02ae54373f26b7962f2a35e366d166"
+      },
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-preview"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "notes": "Shape/color regions inspected against actual source; five representations and freshly rendered HD preview. Glass depth, stopper material, metal collars, cord attachment and rear are conservative inference. Three-quarter of narrow cylindrical Spectral is weakly oblique; spherical Arena/Magic side turns are shallow. Physical material/transparency and exact closures require a 3D review. No runtime icon.",
+      "interpretationGate": "Red neck region reconstructed as inset/colored glass; exact material and internal construction not source-proven."
+    },
+    {
+      "productionId": "item.design.base.spectral-elixir",
+      "conceptId": "item.design.base.spectral-elixir.concept.r1",
+      "revision": "r1",
+      "kind": "turnaround",
+      "status": "candidate",
+      "image": "assets/concept-art/items/r1/spectral-elixir-r1.png",
+      "sha256": "395acaf2203a8a85a50e678983c267a1b0cb3d33246e7700d909ee210093e5dc",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate consumable modeling turnaround.\nSubject: ONE SPECTRAL ELIXIR, item.design.base.spectral-elixir, cursor15. PRIVATE original sprite is only exact silhouette/proportion/local-color reference. Preserve the exceptionally THIN TALL vial/tube with short dark burgundy-red stopper, gray metallic neck collar, long straight narrow glass body and slightly rounded bottom. Visible non-emissive color regions from top down: dull gold/olive near upper body, dark blue around middle, deep red toward bottom. Use conservative colored glass/liquid bands to reconstruct these unresolved pixel regions; physical separation/material interpretation remains an explicit review gate. No hanging cord, no label, no fantasy ornaments.\nFive distinct fully separated views of SAME complete slender vial FRONT, SIDE thickness, BACK, large THREE-QUARTER and fifth separate small freshly rendered HD INVENTORY thumbnail. All views agree on body aspect ratio, band order and positions, cap and rounded base. Do not make a squat bottle or merge oblique/thumbnail. Hidden construction inferred conservatively.\nRealistic worn glass and dull metal, non-glowing muted colored regions, plain opaque charcoal gray backdrop, soft neutral WHITE studio lighting. Only SPECTRAL ELIXIR / FRONT / SIDE / BACK / 3-4 / ICON labels. No spectral aura, glow, colored lighting, hands, character, scene, extra bottles or watermark. Never copy/paste/trace/display private source pixels; thumbnail freshly renders this same candidate in HD.",
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 15,
+        "sha256": "62b89851417e1fb8c69bbdb3891fbc43e9fec1cc0a1c42752d3f83948732e475"
+      },
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-preview"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "notes": "Shape/color regions inspected against actual source; five representations and freshly rendered HD preview. Glass depth, stopper material, metal collars, cord attachment and rear are conservative inference. Three-quarter of narrow cylindrical Spectral is weakly oblique; spherical Arena/Magic side turns are shallow. Physical material/transparency and exact closures require a 3D review. No runtime icon.",
+      "interpretationGate": "Gold-blue-red band order preserved; liquid separation versus colored glass is not source-proven."
+    }
+  ]
+}

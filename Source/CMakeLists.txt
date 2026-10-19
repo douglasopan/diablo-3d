@@ -17,6 +17,8 @@ if(MSVC)
     engine/render/town_camera_visibility.cpp
     engine/render/town_gpu.cpp
     engine/render/light_render.cpp
+    engine/render/d3d_hud_presentation.cpp
+    engine/render/d3d_panel_presentation.cpp
     PROPERTIES COMPILE_OPTIONS "/EHsc")
 endif()
 
@@ -71,6 +73,7 @@ set(libdevilutionx_SRCS
   DiabloUI/diabloui.cpp
   DiabloUI/dialogs.cpp
   DiabloUI/hero/selhero.cpp
+  DiabloUI/hero/hero_portrait.cpp
   DiabloUI/mainmenu.cpp
   DiabloUI/multi/selconn.cpp
   DiabloUI/multi/selgame.cpp
@@ -112,6 +115,7 @@ set(libdevilutionx_SRCS
   engine/render/d3d_logo.cpp
   engine/render/d3d_menu_presentation.cpp
   engine/render/d3d_hud_presentation.cpp
+  engine/render/d3d_panel_presentation.cpp
   engine/render/d3d_ui_layout.cpp
   engine/render/scrollrt.cpp
   engine/render/town_view.cpp
@@ -220,6 +224,11 @@ set(libdevilutionx_SRCS
 # Apply some optimizations to them even in Debug mode to get reasonable performance.
 #
 # They also perform better with -O2 rather than -O3 even in Release mode.
+if(EMSCRIPTEN)
+  list(REMOVE_ITEM libdevilutionx_SRCS engine/render/town_gpu.cpp)
+  list(APPEND libdevilutionx_SRCS engine/render/town_gpu_webgl2.cpp)
+endif()
+
 set(_optimize_in_debug_srcs
   engine/render/clx_render.cpp
   engine/render/dun_render.cpp
@@ -310,6 +319,9 @@ add_devilutionx_object_library(libdevilutionx_control
   control/control_infobox.cpp
   control/control_panel.cpp
   control/d3d_hud.cpp
+  control/d3d_hud_geometry.cpp
+  control/d3d_hud_skin.cpp
+  control/d3d_floating_panels.cpp
 )
 target_link_dependencies(libdevilutionx_control
   PUBLIC

@@ -1,0 +1,37 @@
+{
+  "format": "d3d.item-inventory-preparation-validation",
+  "date": "2026-10-08",
+  "passed": true,
+  "errors": [],
+  "manifest": {
+    "path": "docs/items-study/inventory-prep-r1.json",
+    "sha256": "f75c435a7b3806523b5c9e888b074ce06ea39f635c199d791b3642511813a97d"
+  },
+  "checks": [
+    "source/art hashes and dimensions",
+    "29 exact base aliases",
+    "native cursor offsets and28px cells",
+    "proposed crop bounds",
+    "separate preparation/approval/install/test states",
+    "no invented icon/master/reservation",
+    "fallback enabled",
+    "private-path/secret marker scan",
+    "structural catalog preserved"
+  ],
+  "inGameTested": false,
+  "imagesEdited": false,
+  "providerSessionRead": false,
+  "independentReview": {
+    "agent": "item_queue_audit",
+    "readOnly": true,
+    "blockingDefects": 0,
+    "checked": [
+      "29 unique bases:3+24+2",
+      "cursor indices and native dimensions",
+      "source and PNG hashes",
+      "private path exclusion",
+      "separate states and Studio restrictions"
+    ],
+    "visualApproval": false
+  }
+}

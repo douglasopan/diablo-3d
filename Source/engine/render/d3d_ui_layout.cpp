@@ -18,6 +18,7 @@ struct Element {
 	int x, y, width, height;
 };
 std::map<std::string, Element, std::less<>> Elements;
+uint64_t LayoutGeneration = 0;
 
 bool ReadInt(const Ini &ini, std::string_view section, std::string_view key, int min, int max, int &value)
 {
@@ -31,6 +32,7 @@ bool ReadInt(const Ini &ini, std::string_view section, std::string_view key, int
 
 void ReloadD3dUiLayout()
 {
+	++LayoutGeneration;
 	Elements.clear();
 	size_t size = 0;
 	auto handle = OpenAsset("d3d-ui/layout.ini", size);
@@ -108,6 +110,26 @@ Rectangle GetD3dUiRect(std::string_view name, int screenWidth, int screenHeight,
 	else if (e.anchor == "top-right") { x = screenWidth; }
 	const int width = std::min(e.width, screenWidth), height = std::min(e.height, screenHeight);
 	return { { std::clamp(x + e.x, 0, screenWidth - width), std::clamp(y + e.y, 0, screenHeight - height) }, { width, height } };
+}
+
+uint64_t GetD3dUiLayoutGeneration()
+{
+	return LayoutGeneration;
+}
+
+bool HasD3dUiLayoutOverride(std::string_view name)
+{
+	return Elements.find(name) != Elements.end();
+}
+
+bool HasD3dHudUiLayoutOverride()
+{
+	constexpr std::array<std::string_view, 13> Names {
+		"HudHealthOrb", "HudManaOrb", "HudBelt", "HudSpell", "HudInfo",
+		"HudCharacter", "HudInventory", "HudSpellbook", "HudQuests", "HudMap",
+		"HudMenu", "HudChat", "HudFriendly"
+	};
+	return std::any_of(Names.begin(), Names.end(), HasD3dUiLayoutOverride);
 }
 
 } // namespace devilution

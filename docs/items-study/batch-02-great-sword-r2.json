@@ -1,0 +1,94 @@
+{
+  "format": "d3d.item-concept-art",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "scope": "Delimited r2 edit of Great Sword only, reopened for the reproduced BACK curvature and tip defects. R1 is preserved; this file does not update aggregate coverage or select a revision.",
+  "catalogSha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d",
+  "generationTool": "built-in image_gen.imagegen",
+  "generationCalls": 1,
+  "postProcessing": "none; original generated PNG bytes copied unchanged to a new r2 path",
+  "originalGameImagesIncluded": false,
+  "visualApproval": false,
+  "runtimeInstalled": false,
+  "summary": {
+    "conceptCandidatesInThisFile": 1,
+    "modelsGenerated": 0,
+    "runtimeIconsGenerated": 0,
+    "fullyResolvedCoherenceReviews": 0
+  },
+  "entries": [
+    {
+      "productionId": "item.design.base.great-sword",
+      "conceptId": "item.design.base.great-sword.concept.r2",
+      "revision": "r2",
+      "originRevision": "r1",
+      "originImage": "assets/concept-art/items/r1/great-sword-r1.png",
+      "originSha256": "b745511079842508445d1a3f1059d2fb56366e9e86e43266753009a89ffdf28b",
+      "originPreserved": true,
+      "supersedesOriginAutomatically": false,
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r2/great-sword-r2.png",
+      "sha256": "8b1c8d09edb927ad8d8a39f1eecb91a14a28e0998bdc15a9db2ad5f987c73215",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "byteCount": 1659936,
+      "prompt": "Use case: precise-object-edit.\nEdit target: image 1, the existing GREAT SWORD candidate turnaround board (r1). Supporting image 2 is the PRIVATE original ICURS_GREAT_SWORD 134 silhouette/color reference, ONLY for checking the curved blade and its less acute tip. This is ONE targeted r2 correction; preserve the board rather than making a different design.\nCorrect these two reproduced defects:\n1. BACK (the third full-size sword, between SIDE and 3-4) already has the opposite-face mirrored guard but wrongly repeats FRONT's blade curvature. Make the BACK sword's blade outline a HORIZONTAL MIRROR of FRONT's curved blade around the local centerline through the blade root/collar. FRONT's blade tip is LEFT of its blade root; BACK's blade tip MUST be RIGHT of its blade root, with the same amount of curve, same width, same length, same tip contour and same base attachment. Keep the BACK guard/grip/pommel as the coherent mirrored opposite face of FRONT. BACK must represent the same asymmetric sword turned over, not a newly shaped variant. Do not leave FRONT and BACK leaning in the same direction. Do not mirror or move the entire board or labels.\n2. The current sharp hooked point is more acute than the source. Refine all appearances of the SAME blade tip to a restrained less acute, softly rounded/obliquely clipped end as suggested by image 2; keep a usable modest asymmetric blade end, no spear point, exaggerated hook or blunt square cleaver. Update FRONT, BACK, SIDE, 3-4 and the existing small ICON rendering consistently, retaining each view's perspective and natural facing. The exact fine tip surface is inferred, not recovered pixel detail.\nPreserve everything else in image 1: the long slim curved steel blade, length/proportions, swept ribbon-like copper-brown quillons, gold/brass collar and endcap, crimson red wrapped grip, fine restrained wear, charcoal background, neutral studio light, whole-object framing, positions, board aspect, understated light serif title and labels GREAT SWORD / FRONT / SIDE / BACK / 3-4 / ICON. Keep 3-4 and ICON depicting this same curvature/guard/grip/material in their existing viewing directions. FRONT's curve direction remains unchanged. The smaller ICON must remain a fresh detailed HD depiction of the concept; never replace it with original pixel-art or insert any reference sprite. No additional objects, annotations, backgrounds, glow, colored light or new ornament. Preserve R1 palette and proportions. This is candidate modeling art, not a runtime icon.",
+      "editPrompt": "Use case: precise-object-edit.\nEdit target: image 1, the existing GREAT SWORD candidate turnaround board (r1). Supporting image 2 is the PRIVATE original ICURS_GREAT_SWORD 134 silhouette/color reference, ONLY for checking the curved blade and its less acute tip. This is ONE targeted r2 correction; preserve the board rather than making a different design.\nCorrect these two reproduced defects:\n1. BACK (the third full-size sword, between SIDE and 3-4) already has the opposite-face mirrored guard but wrongly repeats FRONT's blade curvature. Make the BACK sword's blade outline a HORIZONTAL MIRROR of FRONT's curved blade around the local centerline through the blade root/collar. FRONT's blade tip is LEFT of its blade root; BACK's blade tip MUST be RIGHT of its blade root, with the same amount of curve, same width, same length, same tip contour and same base attachment. Keep the BACK guard/grip/pommel as the coherent mirrored opposite face of FRONT. BACK must represent the same asymmetric sword turned over, not a newly shaped variant. Do not leave FRONT and BACK leaning in the same direction. Do not mirror or move the entire board or labels.\n2. The current sharp hooked point is more acute than the source. Refine all appearances of the SAME blade tip to a restrained less acute, softly rounded/obliquely clipped end as suggested by image 2; keep a usable modest asymmetric blade end, no spear point, exaggerated hook or blunt square cleaver. Update FRONT, BACK, SIDE, 3-4 and the existing small ICON rendering consistently, retaining each view's perspective and natural facing. The exact fine tip surface is inferred, not recovered pixel detail.\nPreserve everything else in image 1: the long slim curved steel blade, length/proportions, swept ribbon-like copper-brown quillons, gold/brass collar and endcap, crimson red wrapped grip, fine restrained wear, charcoal background, neutral studio light, whole-object framing, positions, board aspect, understated light serif title and labels GREAT SWORD / FRONT / SIDE / BACK / 3-4 / ICON. Keep 3-4 and ICON depicting this same curvature/guard/grip/material in their existing viewing directions. FRONT's curve direction remains unchanged. The smaller ICON must remain a fresh detailed HD depiction of the concept; never replace it with original pixel-art or insert any reference sprite. No additional objects, annotations, backgrounds, glow, colored light or new ornament. Preserve R1 palette and proportions. This is candidate modeling art, not a runtime icon.",
+      "revisionPrompts": [
+        "Use case: precise-object-edit.\nEdit target: image 1, the existing GREAT SWORD candidate turnaround board (r1). Supporting image 2 is the PRIVATE original ICURS_GREAT_SWORD 134 silhouette/color reference, ONLY for checking the curved blade and its less acute tip. This is ONE targeted r2 correction; preserve the board rather than making a different design.\nCorrect these two reproduced defects:\n1. BACK (the third full-size sword, between SIDE and 3-4) already has the opposite-face mirrored guard but wrongly repeats FRONT's blade curvature. Make the BACK sword's blade outline a HORIZONTAL MIRROR of FRONT's curved blade around the local centerline through the blade root/collar. FRONT's blade tip is LEFT of its blade root; BACK's blade tip MUST be RIGHT of its blade root, with the same amount of curve, same width, same length, same tip contour and same base attachment. Keep the BACK guard/grip/pommel as the coherent mirrored opposite face of FRONT. BACK must represent the same asymmetric sword turned over, not a newly shaped variant. Do not leave FRONT and BACK leaning in the same direction. Do not mirror or move the entire board or labels.\n2. The current sharp hooked point is more acute than the source. Refine all appearances of the SAME blade tip to a restrained less acute, softly rounded/obliquely clipped end as suggested by image 2; keep a usable modest asymmetric blade end, no spear point, exaggerated hook or blunt square cleaver. Update FRONT, BACK, SIDE, 3-4 and the existing small ICON rendering consistently, retaining each view's perspective and natural facing. The exact fine tip surface is inferred, not recovered pixel detail.\nPreserve everything else in image 1: the long slim curved steel blade, length/proportions, swept ribbon-like copper-brown quillons, gold/brass collar and endcap, crimson red wrapped grip, fine restrained wear, charcoal background, neutral studio light, whole-object framing, positions, board aspect, understated light serif title and labels GREAT SWORD / FRONT / SIDE / BACK / 3-4 / ICON. Keep 3-4 and ICON depicting this same curvature/guard/grip/material in their existing viewing directions. FRONT's curve direction remains unchanged. The smaller ICON must remain a fresh detailed HD depiction of the concept; never replace it with original pixel-art or insert any reference sprite. No additional objects, annotations, backgrounds, glow, colored light or new ornament. Preserve R1 palette and proportions. This is candidate modeling art, not a runtime icon."
+      ],
+      "generationTool": "built-in image_gen.imagegen",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-thumbnail"
+      ],
+      "referenceHash": "e1a353d80b193efc9f4f766b2495eb29f17260d2e272f0d9e81ae04e232e9ebd",
+      "reference": {
+        "cursorId": 134,
+        "sha256": "e1a353d80b193efc9f4f766b2495eb29f17260d2e272f0d9e81ae04e232e9ebd",
+        "availability": "local-private",
+        "notes": "Referência original 6x novamente inspecionada antes da edição, usada apenas como apoio para a curva e a ponta menos aguda/oblíqua. Nenhum sprite foi colado no thumbnail."
+      },
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "postProcessing": "none; generated PNG copied byte-for-byte",
+      "inferredAreas": [
+        "Espessura, face posterior, relação tridimensional entre curva/guarda/cabo e fixação dos quillons permanecem inferências.",
+        "Quillons em forma de fita torcida, recorte fino da ponta, desgaste, aço/cobre/latão e couro vermelho são soluções propostas, não detalhes recuperados com certeza do sprite."
+      ],
+      "coherenceReview": {
+        "status": "partial-correction-pending",
+        "coherentAcrossViews": false,
+        "correctionsObserved": [
+          "BACK passou a mostrar a ponta à direita da base da lâmina enquanto FRONT mantém a ponta à esquerda; o sentido projetado da curva foi invertido.",
+          "Lâmina comprida e estreita, paleta aço/cobre/dourado/vermelho, fundo neutro, título, labels e thumbnail HD foram mantidos de modo geral."
+        ],
+        "introducedOrRemainingIssues": [
+          "A edição mudou a guarda BACK para a mesma lateralidade aparente da FRONT. O sentido da lâmina melhorou, mas guarda e cabo ainda não demonstram a face oposta coerente do mesmo objeto.",
+          "A suavização da ponta não ficou claramente uniforme em FRONT/BACK/3-4/ICON; a fidelidade à ponta menos aguda/oblíqua da referência continua incerta.",
+          "BACK foi reenquadrada dentro da coluna; confirmar posição da raiz, proporções e correspondência da curvatura, sem considerar a imagem uma prova métrica.",
+          "Reconciliar espessura, grip, espaço para as mãos e geometria dos quillons com a frente de personagens antes do master 3D; nenhum socket ou encaixe foi validado."
+        ]
+      },
+      "losses": [
+        "Regressão de lateralidade da guarda BACK introduzida pela edição generativa.",
+        "Preservação de material, microtextura e pixels fora dos alvos não é exata; sem alegação de edição determinística.",
+        "Nenhuma conversão ou recompressão posterior: os bytes PNG gerados foram preservados; R1 mantém seu SHA-256 original."
+      ],
+      "notes": "Somente conceito candidato R2 com correção parcial. Uma chamada embutida foi feita e o resultado foi inspecionado. A curva BACK melhorou, mas o defeito combinado de face oposta ainda não está resolvido e a ponta continua incerta. Não aprovar para modelagem automaticamente. O inset é preview novo HD, não ícone runtime."
+    }
+  ]
+}

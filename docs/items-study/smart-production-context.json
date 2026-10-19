@@ -1,0 +1,310 @@
+{
+  "format": "d3d.item-smart-production-context",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "scope": "Review preparation within the existing item queue; no generation or reservation authority.",
+  "methodDecision": {
+    "feature": "Malha Smart",
+    "appliesTo": "All item design identities that actually require new production after reuse/exclusion review.",
+    "humanEvent": "Sentinel_d13a92ff08748191968cf63ddc3307c2",
+    "relayedHumanText": "vamos fazer todos os itens com essa malha smart com certeza",
+    "evidenceKind": "Human direction relayed by the existing coordinator; method choice only.",
+    "relayThread": "01a11b09-c317-75b6-8184-b3a9e37bf015",
+    "approvesArtRevisions": false,
+    "approvesBatch": false,
+    "approvesSpend": false,
+    "approvesRuntime": false
+  },
+  "coordination": {
+    "itemsOwnerThread": "01a11b58-80a9-7e63-973b-47d72752ccc7",
+    "soleStudioOperatorThread": "01a11d7e-ac7e-767d-9bd1-1d98b81d601b",
+    "onlyRuntimeBuildInstallGitOwnerThread": "01a1153a-cad1-7fb1-8326-225511ee918d",
+    "itemsConcurrentPaidJobs": 0,
+    "itemsReservations": 0,
+    "apiBudgetAuthorized": false,
+    "uploadAuthorized": false,
+    "generationAuthorized": false,
+    "creditsAuthorized": 0
+  },
+  "firstSmallLotProposal": {
+    "productionIdsInPreparationOrder": [
+      "item.design.base.scroll",
+      "item.design.base.short-sword",
+      "item.design.base.potion-of-healing"
+    ],
+    "pilotProductionId": "item.design.base.scroll",
+    "pilotIncludedInLotTotal": true,
+    "approved": false,
+    "rationale": "Reuse the three already documented preparation candidates. Scroll remains the proposed single pilot; Sword and Healing are conditional follow-ups after its review, rather than simultaneous jobs. No design or isolated input is approved by this proposal.",
+    "automaticRetriesOrVariations": 0,
+    "status": "historical-individual-proposal; superseded-as-current-experiment-by-grouped-study",
+    "executeInParallel": false
+  },
+  "studioStatus": {
+    "latestEvidenceKind": "Report from the sole operator and coordinator; not independently read from the account by Items.",
+    "authenticatedSessionReported": true,
+    "headerCreditsObservedByOperator": 3200,
+    "balanceIsSpendCeiling": false,
+    "planVerifiedByItems": false,
+    "finalPerAssetCostConfirmed": false,
+    "privateDestinationConfirmed": false,
+    "authenticatedReceiptReceivedByItems": false,
+    "previousLoggedOutPreflightIsHistorical": true,
+    "historicalPreflight": "docs/items-study/studio-preflight-candidate-r1.json",
+    "planLabelObservedByOperator": "Pro",
+    "currentEmptyFormQuoteReported": {
+      "feature": "Malha Smart",
+      "model": "P2.0",
+      "topology": "Quad",
+      "polygonCountControl": 5000,
+      "outputs": 1,
+      "baseCreditsStruckThrough": 100,
+      "displayedGenerateCredits": 0,
+      "trialLabel": "P2 Teste ×1",
+      "trialOutputsDisplayed": 1,
+      "quoteHasFinalInput": false,
+      "postInputCostReconfirmationRequired": true,
+      "availableForSpecificAssetConfirmed": false,
+      "notUniversalZeroPrice": true
+    },
+    "additionalTextureActionReported": {
+      "displayedCredits": 20,
+      "executed": false,
+      "finalConfigurationQuoted": false,
+      "includedInGeometryBudget": false
+    },
+    "uiInputModesReportedByOperator": {
+      "multiview": {
+        "icon": "cube, second icon",
+        "label": "Imagens multivisão para 3D",
+        "slots": [
+          "Frente",
+          "Esquerda",
+          "Direita",
+          "Verso"
+        ],
+        "objectPolicy": "Separate consistent views of the SAME object, never four different objects. A three-quarter view is not a left/right profile."
+      },
+      "batch": {
+        "icon": "stack, third icon",
+        "label": "Imagens em lote para 3D",
+        "maximumImagesDisplayed": 10,
+        "objectPolicy": "Separate objects for batch production; this control is not multiview and grants no batch authorization."
+      },
+      "imagesUploadedByItemsOrOperatorDuringPreflight": 0
+    },
+    "latestOperatorUiAndExportReport": {
+      "sourceKind": "sole operator relayed message and private receipt; receipt/evidence bytes verified locally by Items",
+      "operatorThreadId": "01a11d7e-ac7e-767d-9bd1-1d98b81d601b",
+      "accountReadByItems": false,
+      "balanceReported": 3200,
+      "geometryEmptyForm": {
+        "engine": "P2.0",
+        "topology": "Quad",
+        "targetControlsInspected": [
+          5000,
+          10000
+        ],
+        "restoredTarget": 5000,
+        "outputs": 1,
+        "displayedStandardCredits": 100,
+        "displayedTrialCredits": 0,
+        "trialCount": 1,
+        "finalInputQuoteConfirmed": false
+      },
+      "splitUi": {
+        "label": "Dividir",
+        "mode": "Equilíbrio",
+        "partsRange": [
+          6,
+          15
+        ],
+        "displayedStandardCredits": 40,
+        "displayedTrialCredits": 0,
+        "trialCount": 1,
+        "executed": false,
+        "applicabilityToFinalJointInputConfirmed": false
+      },
+      "smartUvUi": {
+        "displayedStandardCredits": 20,
+        "displayedTrialCredits": 0,
+        "trialCount": 2,
+        "executed": false,
+        "applicabilityToFinalJointInputConfirmed": false
+      },
+      "basicRemeshUi": {
+        "topology": "Quad",
+        "target": 10000,
+        "displayedCredits": 10,
+        "smartP10Enabled": false,
+        "smartMeshCompatibilityToastReported": true,
+        "isSmartRetopologyQuote": false,
+        "executed": false
+      },
+      "fillPartsUi": {
+        "requiresSegmentedModel": true,
+        "displayedCredits": null,
+        "executed": false
+      },
+      "textureUi": {
+        "displayedCredits": 20,
+        "executed": false,
+        "includedInBudget": false
+      },
+      "jointTrialStackEligibilityConfirmed": false,
+      "exportExistingManual": {
+        "formatsAttempted": [
+          "GLB",
+          "FBX"
+        ],
+        "additionalChargeDisplayed": false,
+        "localFileConfirmed": false,
+        "status": "downloads unconfirmed after timeout; no file in operator download prefix",
+        "repeatOrHiddenRouteScheduled": false
+      },
+      "manualVisualInspection": {
+        "orientationsReported": 3,
+        "visibleSwordVolumesReported": 5,
+        "hierarchyNodesReported": 1,
+        "issuesReported": [
+          "incoherent guards/proportions",
+          "smaller thumbnail volume"
+        ],
+        "identityComponentsVerified": false,
+        "uvMaterialsNormalsPivotsTrianglesRoundTripVerified": false
+      },
+      "uploadOrGenerationOrReservationOrSpendReported": false,
+      "receiptLocalPath": null,
+      "receiptHash": "d712a5969945d3e66f32c9f9284eb34263763c3d17dbc5c87c8ca4353772a570",
+      "receiptFileName": "tripo-studio-learned-workflow.json",
+      "evidenceManifestFileName": "tripo-studio-evidence-manifest.json",
+      "evidenceManifestSha256": "5f2659ee0b7f8b8df0d4e160599deae067d9ef658c95e0b8308c1e6c68cf20ed",
+      "evidenceFileCount": 12,
+      "evidenceBytesHashesVerifiedByItems": true,
+      "newScreenshotPixelsInspectedByItems": false
+    },
+    "geometryBudgetSupplement": {
+      "status": "received-and-bytes-hash-verified; no model binary",
+      "receiptFileName": "tripo-geometry-budget-study.json",
+      "bytes": 14126,
+      "sha256": "c859071199f655b66be98222bbe7ee67ba95620e65237a51d5d7f8875891151e",
+      "parentReceiptSha256": "d712a5969945d3e66f32c9f9284eb34263763c3d17dbc5c87c8ca4353772a570",
+      "parentReceiptHashUnchangedVerifiedByItems": true,
+      "validationFileName": "tripo-geometry-budget-validation.json",
+      "validationSha256": "c812d5b4f440386843db6d23766e87fefa41c4d668186cdb8045cac19f00cb19",
+      "accountReadByItems": false,
+      "modelBinaryAvailable": false
+    }
+  },
+  "existingAssetAudit": {
+    "excludeExistingGoodManualModels": true,
+    "remoteAuditOwner": "01a11d7e-ac7e-767d-9bd1-1d98b81d601b",
+    "remoteIdentityMappingStatus": "unknown",
+    "reportedRemoteAssets": [
+      {
+        "providerAssetId": "ee4a954e-6107-4677-8452-8de8e83751da",
+        "displayedDateReported": "08-03",
+        "productionId": null,
+        "provenance": "unknown",
+        "manualCreationStatus": "unknown",
+        "qualityApproval": "unknown"
+      },
+      {
+        "reportedLabel": "TripoDemoModel",
+        "reportedCount": 4,
+        "productionId": null,
+        "provenance": "unknown"
+      }
+    ],
+    "resolvedManualExclusions": [
+      {
+        "productionId": "item.design.base.great-sword",
+        "providerTaskId": "6a744913-ab20-42f4-9e99-0941217d9792",
+        "providerUrl": "https://studio.tripo3d.ai/pt/workspace/generate/6a744913-ab20-42f4-9e99-0941217d9792",
+        "evidenceKind": "Human manual-test report relayed by the sole operator and coordinator; no new task submitted by Items.",
+        "methodReportedByHuman": "Malha Smart",
+        "historicalEngineVerified": false,
+        "historicalCostCredits": null,
+        "inputCountReported": 1,
+        "outputModelCountReported": 1,
+        "visibleSwordSilhouettesReported": 5,
+        "verifiedMeshConnectedComponents": null,
+        "topologyReported": "Quad",
+        "facesReported": 5402,
+        "verticesReported": 5165,
+        "sourceCandidate": {
+          "conceptId": "item.design.base.great-sword.concept.r3",
+          "path": "assets/concept-art/items/r3/great-sword-r3.png",
+          "sha256": "1390409d3e2f25e51a9f75e1a70cda7ad8f4ce5f1bdfd8443152516a553f8999",
+          "dimensions": [
+            1312,
+            1199
+          ],
+          "provenanceManifest": "docs/items-study/batch-02-great-sword-r3.json",
+          "generationTool": "built-in image_gen.imagegen",
+          "localBytesHashVerifiedByItems": true,
+          "localImageVisuallyInspectedByItems": true,
+          "directoryContainsOnePng": true,
+          "uploadedBytesHashVerified": true,
+          "correlationStatus": "Confirmed by the sole operator: downloaded provider input.png bytes/hash exactly match the locally verified r3 PNG. Items did not access the provider account.",
+          "isConceptBoard": true,
+          "specificVisualApproval": false,
+          "coherenceGate": "BACK upper guard branch missing; r3 is an archived failed correction, not an automatically selected revision.",
+          "uploadedBytesHashVerifiedByOperator": true,
+          "uploadedBytesHashVerifiedByItems": false,
+          "providerReferenceDownloadReported": {
+            "fileName": "input.png",
+            "bytes": 1644705,
+            "sha256": "1390409d3e2f25e51a9f75e1a70cda7ad8f4ce5f1bdfd8443152516a553f8999",
+            "method": "Read-only download from the manual model reference button by the sole operator. No new generation or submission."
+          }
+        },
+        "masterPath": null,
+        "masterSha256": null,
+        "uvMaterialsVerified": false,
+        "qualityApproval": "pending-QA-and-reuse",
+        "newGenerationJobUnits": 0,
+        "reason": "Known manual candidate exists. Exclude this group and dependent reuse identities from new jobs until QA/reuse is resolved; one model containing several visible swords is not five paid jobs.",
+        "mustNotConflateWithProviderAssetId": "ee4a954e-6107-4677-8452-8de8e83751da"
+      }
+    ],
+    "resolvedNoExistingAssetIdentities": [],
+    "unresolvedPolicy": "Unknown is a stop gate for submission, never proof that a model is absent. Reuse an existing good manual/accepted asset rather than regenerate it to standardize the method. Do not infer identity from a UUID, filename or display date alone.",
+    "remoteLedgerReadByItems": false,
+    "globalDuplicateAbsenceConfirmed": false
+  },
+  "conditionalBudgetAssumption": {
+    "creditsPerSingleOutput": 100,
+    "profile": "Malha Smart / P2.0 / Quad / polygon-count control 5000 / one output",
+    "evidence": "Historical logged-out public UI screenshot, inspected by Items.",
+    "confirmedAuthenticatedQuote": false,
+    "notAUniversalPerItemPrice": true,
+    "confirmedTotalCredits": null,
+    "approvedSpendCeilingCredits": null,
+    "scope": "Arithmetic geometry-only scenarios. At most one zero-credit trial if reconfirmed for a final approved input. No automatic variations/retries, texture/post-processing extras, paid input preparation or additional purchase. Actual final per-asset cost may differ.",
+    "singleTrialConditionalScenario": {
+      "maximumDiscountedOutputs": 1,
+      "discountedOutputCreditsIfReconfirmed": 0,
+      "threeOutputGeometryTotalIfReconfirmed": 200,
+      "otherwiseThreeOutputGeometryTotal": 300,
+      "confirmedForFinalInput": false,
+      "textureOrOtherExtrasIncluded": false,
+      "approved": false
+    }
+  },
+  "activeStudy": {
+    "studyId": "item.study.grouped-compact-01",
+    "source": "docs/items-study/grouped-items-study.json",
+    "status": "planning-only; feasibility-not-demonstrated",
+    "humanEvents": [
+      "Sentinel_16926d8494ec819193ea3215f4053174",
+      "Sentinel_8feaae0b7c248191bf936c4a00266f04"
+    ],
+    "supersedesPriorExperimentDesign": true,
+    "priorIndividualBudgetsRetainedForComparison": true,
+    "newGenerationAuthorized": false,
+    "geometryRequirementHumanEvent": "Sentinel_cab58c0598d4819195d2878edfe1e535",
+    "geometryResearchGuideStatus": "relayed experimental guide received; target and measured counts pending",
+    "referencePreparationHumanEvent": "Sentinel_84292341680c8191a8b69178e78b0d4e"
+  }
+}

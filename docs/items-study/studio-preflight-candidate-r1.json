@@ -1,0 +1,138 @@
+{
+  "format": "d3d.item-studio-preflight-candidate",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "revision": "r1",
+  "status": "conditional-candidate-not-upload-ready",
+  "scope": "One reference candidate for the existing central preflight. No production queue, reservation, new operator or generation is created.",
+  "coordination": {
+    "itemsThread": "01a11b58-80a9-7e63-973b-47d72752ccc7",
+    "reportedSoleStudioOperatorThread": "01a11d7e-ac7e-767d-9bd1-1d98b81d601b",
+    "centralCoordinatorThread": "01a11b09-c317-75b6-8184-b3a9e37bf015",
+    "onlyRuntimeBuildInstallGitOwnerThread": "01a1153a-cad1-7fb1-8326-225511ee918d",
+    "itemsPaidGenerationActive": false,
+    "itemsReservationActive": false,
+    "itemsUploadAuthorized": false,
+    "batchSuspended": true,
+    "apiBudgetAuthorized": false
+  },
+  "candidate": {
+    "productionId": "item.design.base.scroll",
+    "conceptId": "item.design.base.scroll.concept.r1",
+    "revision": "r1",
+    "path": "assets/concept-art/items/r1/scroll-r1.png",
+    "sha256": "efb23d5d5582b550de65231a3de659474923d63bc47f40e595b6eb60457ab28d",
+    "dimensions": [
+      1536,
+      1024
+    ],
+    "hasAlpha": false,
+    "view": "Multiple views and a boxed inventory thumbnail on an opaque concept board. Not an approved single-view input.",
+    "provenance": {
+      "tool": "built-in image_gen.imagegen",
+      "originalBytesPreserved": true,
+      "referenceCursorId": 1,
+      "referenceAvailability": "local-private",
+      "referenceEnlarged6xSha256": "e9f670289b47f683e769724d70df2184679666c043e3f34372ee5e00d674e45a",
+      "licensedReferencePixelsIncluded": false,
+      "sourcePixelIconPasted": false
+    },
+    "visualInspected": true,
+    "specificHumanApproval": false,
+    "approvalEvidence": null,
+    "uploadReady": false,
+    "preparedIndividualImage": null,
+    "approvedMaster3d": null,
+    "providerTaskId": null,
+    "reserved": false,
+    "installed": false,
+    "relatedPreparationManifest": "docs/items-study/inventory-prep-r1.json",
+    "proposedSingleViewRecipe": {
+      "status": "recipe-prepared",
+      "imageEditingExecuted": false,
+      "proposedView": "existing INVENTORY THUMBNAIL object",
+      "proposedRegionXYWH": [
+        1243,
+        650,
+        221,
+        249
+      ],
+      "coordinateConvention": "integer source PNG pixels, top-left origin; x,y,width,height; proposal needs edge review before extraction",
+      "matteNotes": [
+        "Exclude the inset border, charcoal backdrop and baked floor shadow.",
+        "Preserve ribbon loops/tails, spiral ends and the bottom-left to top-right orientation.",
+        "Physical family only; spell-specific marks remain undefined."
+      ],
+      "logicalCanvas": [
+        28,
+        28
+      ],
+      "proposedReviewRgbaCanvas4x": [
+        112,
+        112
+      ],
+      "proposedReviewCanvasIsRuntimeContract": false,
+      "scalePolicy": "Uniform fit within native logical footprint; crop size never changes gameplay occupancy. No mirroring, nonuniform stretch or attached floor shadow.",
+      "outputPath": null,
+      "sha256": null,
+      "actualAlpha": null,
+      "actualDimensions": null
+    }
+  },
+  "observedPublicUi": {
+    "url": "https://studio.tripo3d.ai/pt/workspace/generate",
+    "evidenceType": "Screenshot supplied by the sole operator and visually inspected by Items; Items did not open or operate the provider session.",
+    "optionLabel": "Malha Smart",
+    "modelLabel": "P2.0",
+    "topologyLabel": "Quad",
+    "polygonCountControl": 5000,
+    "numberOfGenerations": 1,
+    "generateButtonCredits": 100,
+    "subscriberOnlyLabelVisible": true,
+    "signInLabelVisible": "Registrar/Entrar",
+    "privacyLabelVisible": "Público",
+    "authenticatedSessionConfirmed": false,
+    "planConfirmed": false,
+    "balanceConfirmed": false,
+    "humanDeclaredStudioCredits": 3200,
+    "finalAuthenticatedCostConfirmed": false,
+    "humanApprovedSpendCeiling": null,
+    "creditsAuthorizedByThisReceipt": 0,
+    "generatedOrUploaded": false,
+    "screenshot": {
+      "fileName": "tripo-p2-topology-preflight.jpg",
+      "sha256": "9c709407e99abdcf0eec890637215ec004e22da7bdc52588f9736f4290f96ce0",
+      "storedInRepository": false,
+      "itemsVisuallyInspected": true
+    }
+  },
+  "costInterpretation": "100 is the visible Generate-button value in this logged-out public UI snapshot. It is not an authenticated quote, an approved ceiling, a debit receipt or confirmation of plan/balance. Recheck with the final reference and authenticated session before any authorized execution.",
+  "mutualExclusionEvidence": {
+    "localScope": "Current registry, docs/items-study JSON manifests and assets/concept-art/items manifests audited for this Scroll identity.",
+    "localMeshyTripoTaskOrReservationFound": false,
+    "registryExactProductionEntryFound": false,
+    "remoteProviderLedgerRead": false,
+    "otherChatPaidJobsIndependentlyConfirmed": false,
+    "conclusion": "No active paid job/reservation in the Items front and none found for this candidate locally. Global remote absence is not proven; preserve the sole-operator coordination."
+  },
+  "gates": {
+    "p20NativeGeneration": "Requires an exact approved, isolated reference plus authenticated UI cost and human-approved ceiling. The current board does not satisfy the input gate.",
+    "postRetopology": "No approved existing item master is available here; do not invent or generate a master to turn this into a post-process test.",
+    "publicVisibility": "The screenshot shows Público. Any future authorized submission must confirm its intended visibility rather than inherit this unauthenticated setting silently.",
+    "preservation": "Preserve concept bytes and any future master, UVs, textures and materials. No replacement or installation is granted by this receipt."
+  },
+  "sourceSnapshots": [
+    {
+      "path": "docs/items-study/concept-art.json",
+      "sha256": "25396b2b70da8ebd759d1e18314a07a09cda3b22077145a644381100bf5494c2"
+    },
+    {
+      "path": "docs/items-study/inventory-prep-r1.json",
+      "sha256": "f75c435a7b3806523b5c9e888b074ce06ea39f635c199d791b3642511813a97d"
+    },
+    {
+      "path": "assets/registry.json",
+      "sha256": "62f2fbdd943b7ad93175c7167bd2edd1fda20d6f43bf132924bf662a9168d830"
+    }
+  ]
+}

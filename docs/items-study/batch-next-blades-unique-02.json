@@ -1,0 +1,261 @@
+{
+  "format": "d3d.item-concept-art",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "scope": "Remaining reference-available blades: four individual candidates and two exact-cursor sharing proposals. Missing Hellfire Eater of Souls and Diamondedge remain blocked.",
+  "batchId": "2026-10-08-next-blades-unique-02",
+  "catalogSha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d",
+  "generationTool": "built-in image_gen.imagegen",
+  "generationCalls": 4,
+  "postProcessing": "none; generated PNG bytes copied unchanged",
+  "originalGameImagesIncluded": false,
+  "visualApproval": false,
+  "runtimeInstalled": false,
+  "summary": {
+    "linkedProductionUnits": 6,
+    "newIndividualConcepts": 4,
+    "sharedBaseProposals": 2,
+    "newPNGs": 4,
+    "modelsGenerated": 0,
+    "runtimeIconsGenerated": 0
+  },
+  "entries": [
+    {
+      "productionId": "item.design.unique.wizardspike",
+      "conceptId": "item.design.unique.wizardspike.concept.r1",
+      "revision": "r1",
+      "kind": "turnaround",
+      "status": "candidate",
+      "image": "assets/concept-art/items/r1/wizardspike-r1.png",
+      "sha256": "f12d122ad37443a553c5012c288561bcf9bedfaec5c2f91d14987948840fbfc6",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: candidate Diablo 3D item modeling turnaround.\nSubject: ONE Wizardspike, item.design.unique.wizardspike, cursor 50. The supplied PRIVATE ORIGINAL sprite is silhouette, proportion and local-color reference only. Reconstruct its actual slender steel dagger: a narrow gently sinuous blade ending in a small pointed tip, shallow warm-brass U guard with short upward tips, very short dark navy-blue wrapped grip and small plain brass pommel. Preserve its modest scale and blade/grip proportions. No motifs invented from the name.\nSheet: FRONT, thin SIDE, BACK, THREE-QUARTER and a small freshly rendered HD inventory preview of the same object. Entire object visible in every view. BACK is the opposite flat face and horizontally mirrors the subtly asymmetric sinuous blade; guard, grip and pommel must agree in all views. Conservative plausible thickness and rear construction, no design variants.\nRealistic worn silver steel, aged brass and navy leather. Opaque charcoal-gray background, soft neutral white studio light, restrained wear. Labels only WIZARDSPIKE / FRONT / SIDE / BACK / 3-4 / ICON. No magic, glow, jewels, wizard decoration, hands, scenery or watermark. Never paste, trace or display any pixel sprite in the output; the thumbnail is a new HD render of this candidate.",
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 50,
+        "sha256": "6a431c4bd4195da542793dbaa372392dab9931712cfd8065ad360faf7518b66b"
+      },
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-preview"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "notes": "Opposite-face blade curvature/hooks mirror correctly on visual inspection. Thickness, guard depth, grip wrapping and rear details inferred; not an approval or proof of 3D coherence. New thumbnail is a concept preview, not a runtime icon."
+    },
+    {
+      "productionId": "item.design.unique.the-executioner-s-blade",
+      "conceptId": "item.design.unique.the-executioner-s-blade.concept.r1",
+      "revision": "r1",
+      "kind": "turnaround",
+      "status": "candidate",
+      "image": "assets/concept-art/items/r1/the-executioner-s-blade-r1.png",
+      "sha256": "db98eccbb1946942a8be6ac92d6913e655f54f6c7dbd290b13d221ecef275360",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: candidate Diablo 3D unique sword modeling sheet.\nSubject: ONE The Executioner's Blade, item.design.unique.the-executioner-s-blade, original cursor 58. PRIVATE input sprite is only silhouette/proportion/local-color reference. Reconstruct the original asymmetric gray-steel blade, upright: mostly straight right spine, a broad upper left crescent hook with deep concave open notch beneath the sharply swept tip, a smaller inward hook at mid-left and a lower-left hook near the base. Preserve the number and placement of these readable hooks. Small angular rectangular U crossguard of dark burgundy metal, short deep-red wrapped grip, compact plain aged-gold pommel. Do not replace with a generic executioner's sword or add narrative ornaments.\nCreate one coherent modeling sheet FRONT / SIDE / BACK / 3-4 / ICON. Entire same sword visible in each panel, plus newly rendered HD thumbnail. BACK is opposite face, so horizontally MIRROR the entire asymmetric blade outline, every hook and notch, and any asymmetric guard. SIDE is plausible thin thickness. Same proportions and materials in all views. Rear, bevels and cross-section conservative inference only.\nRealistic steel, muted burgundy metal and leather, aged brass, subtle wear. Opaque neutral charcoal background, soft neutral white studio illumination. Labels only THE EXECUTIONER'S BLADE and view names. No heads, gore, skulls, chains, jewels, magic, colored light, scenery or watermark. Never paste, reproduce, trace or show the private pixel sprite; ICON is a fresh HD render of this exact new concept.",
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 58,
+        "sha256": "8f1607c30cc1dfbfd7d164ad9f74283e16a7374cea7eae7d97d95ff5fcc2b175"
+      },
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-preview"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "notes": "Opposite-face blade curvature/hooks mirror correctly on visual inspection. Thickness, guard depth, grip wrapping and rear details inferred; not an approval or proof of 3D coherence. New thumbnail is a concept preview, not a runtime icon."
+    },
+    {
+      "productionId": "item.design.unique.the-grizzly",
+      "conceptId": "item.design.unique.the-grizzly.concept.r1",
+      "revision": "r1",
+      "kind": "turnaround",
+      "status": "candidate",
+      "image": "assets/concept-art/items/r1/the-grizzly-r1.png",
+      "sha256": "7cff8968ccd43be9ddd6b8c94f69ad70c0490c12c1bd6299f96aaa7ff18f4390",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: candidate Diablo 3D unique weapon modeling sheet.\nSubject: ONE The Grizzly, item.design.unique.the-grizzly, cursor160. Use PRIVATE original sprite only for readable silhouette, proportions and local colors. Reconstruct the actual broad asymmetrical sword: thick dark aged gray-steel body with large hooked open notches along one cutting edge, a pronounced large crescent cutout immediately beneath the thick hooked top, irregular dark recessed/open skeletal spaces toward the opposite side, mottled dull gray/olive and small muted reddish surface wear, aged brass curving crossguard, ochre-brown wrapped grip and small dark round pommel with muted red inset. Keep the original broad rough silhouette and all major openings readable; do not invent bear imagery or a generic smooth sword. Treat unclear pixels conservatively, no extra decorative motifs.\nOne coherent sheet: upright FRONT, narrow SIDE, opposite-face BACK, THREE-QUARTER, small newly rendered HD inventory preview. All panels show the exact SAME entire object. BACK horizontally mirrors every asymmetric hook, opening and notch. Hole count and topology must match all panels. Conservative thickness, bevel and rear details inferred; no different variants.\nRealistic worn dark medieval steel, aged brass and leather, with restrained mottling. Plain opaque charcoal background, soft neutral white studio light. Only labels THE GRIZZLY / FRONT / SIDE / BACK / 3-4 / ICON. No gore, bear heads, skulls, fur, bones added from the name, magical glow, scenery, character or watermark. Never paste, trace, reproduce or show the private pixel sprite; ICON must be a fresh HD render of this new concept.",
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 160,
+        "sha256": "2078af8ab6f3a16a61669ebc0fb902c08c21c7080eff63683c703500b9c056fb"
+      },
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-preview"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "notes": "Readable outline, large hooks and dark openings preserved; hidden topology, surface mottling, bevels and rear depth are inferred. No gore or name-based ornaments added. Front/back major openings and notches visually agree; exact topology requires a 3D gate. New thumbnail is only a concept preview."
+    },
+    {
+      "productionId": "item.design.unique.the-grandfather",
+      "conceptId": "item.design.unique.the-grandfather.concept.r1",
+      "revision": "r1",
+      "kind": "turnaround",
+      "status": "candidate",
+      "image": "assets/concept-art/items/r1/the-grandfather-r1.png",
+      "sha256": "7ba376bcb4ee6b6dd8211663c95ed1779626c8e41eb91253d94886744a75064e",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: candidate Diablo 3D unique sword modeling turnaround.\nSubject: ONE The Grandfather, item.design.unique.the-grandfather, original cursor161. PRIVATE original sprite is only reference for exact readable silhouette, proportions and local colors. Reconstruct THIS actual long slender deeply curved single-edged silver-gray steel saber-like blade, narrow tip, small shallow brass cup/bowl guard, long light-silver diagonally wrapped/braided grip and compact silver-gray rounded pommel. Preserve the original graceful curve, slim width, long grip and restrained silver/brass palette. Do not substitute the more familiar later-game two-handed sword associated with this name or add unrelated lore motifs.\nOne coherent sheet of the same entire weapon: FRONT, thin SIDE, BACK, THREE-QUARTER, plus a small newly rendered HD inventory preview. BACK is the opposite flat face and must horizontally mirror the full strong blade curve. All proportions, wrap, guard and materials match across views. Blade thickness and rear surfaces are conservative inferences only, no alternatives.\nRealistic subtly worn steel, aged brass, light gray grip wrap, plain opaque charcoal-gray backdrop and soft neutral white studio light. Labels only THE GRANDFATHER / FRONT / SIDE / BACK / 3-4 / ICON. No gems, glow, skulls, engravings, hands, characters, scenery or watermark. Never trace, reproduce, paste or show the private pixel sprite; thumbnail is a fresh HD rendering of this new candidate.",
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 161,
+        "sha256": "c0b9337e7811c4396419f9ad396481cf9923016ca9a92f13878a83fdb65151a2"
+      },
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-preview"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "notes": "Opposite-face blade curvature/hooks mirror correctly on visual inspection. Thickness, guard depth, grip wrapping and rear details inferred; not an approval or proof of 3D coherence. New thumbnail is a concept preview, not a runtime icon."
+    },
+    {
+      "productionId": "item.design.unique.the-falcon-s-talon",
+      "conceptId": "item.design.unique.the-falcon-s-talon.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "family-sheet",
+      "image": "assets/concept-art/items/r1/gryphon-s-claw-r1.png",
+      "sha256": "9720e3ae91999fefe1a136fbbb05c81a24a071c310b0b55ad8fca93671f4d23a",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate unique-item modeling turnaround, not a runtime icon.\nSubject: ONE Gryphon's Claw, productionId item.design.unique.gryphon-s-claw, ICURS_GRYPHONS_CLAW 68. Input PRIVATE ORIGINAL INVENTORY SPRITE is only silhouette/proportion/local-color reference. Preserve this actual short straight blade, not an invented bird claw: cool blue-gray steel with a long pointed spear-like top, narrow central ridge, somewhat fuller shoulder on the right side and a modest flared base, a thick rounded shallow bowl-shaped gold/brass guard with horizontal ridges, a dark muted olive-brown wrapped grip and small rectangular brass pommel. Preserve its readable proportions and restrained cool-steel/aged-gold contrast. Any asymmetric blade shoulder must mirror between the two flat opposite faces.\nOne coherent technical sheet showing the exact SAME object in FRONT, SIDE thickness, BACK, THREE-QUARTER, plus a small newly rendered HD inventory thumbnail. Whole item visible with clear spacing, all views agree on blade outline, guard ribs, grip and materials. The BACK flat view is the opposite face: horizontally mirror the asymmetric blade silhouette and guard features where applicable. Rear, guard depth and blade thickness are conservative reconstruction, not design variations.\nRealistic restrained dark medieval metal and aged olive-brown leather, fine wear, no heavy corrosion. Plain opaque charcoal gray backdrop, neutral soft white studio illumination, no glow or colored light, no dramatic hard shadows. Labels only GRYPHON'S CLAW / FRONT / SIDE / BACK / 3-4 / ICON. Do not add feathers, bird motifs, jewels, skulls or ornaments based on the name. No hands, characters, scenery or watermark. Never copy/paste/trace/show the pixel sprite; thumbnail must be a fresh HD rendering of this same new concept.",
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 68,
+        "sha256": "e31a0f71bcc82b9632f220265af723cb20682bc720d021414a4598c0b621a327"
+      },
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-preview"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "runtimeInstalled": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "notes": "Explicit proposal to reuse this exact-cursor candidate. Native unique stats, powers and identity remain separate. Not an independently generated unique turnaround or approved geometry-sharing decision.",
+      "reusedFromProductionId": "item.design.unique.gryphon-s-claw",
+      "generationIntent": "Explicit shared-appearance concept proposal; no new generation call.",
+      "sharedDesignProposal": {
+        "reason": "Native unique inherits this exact original cursor; no separate silhouette invented from the name.",
+        "exclusiveUniqueDesign": "pending-review",
+        "newImageGenerated": false
+      }
+    },
+    {
+      "productionId": "item.design.unique.the-bonesaw",
+      "conceptId": "item.design.unique.the-bonesaw.concept.r1",
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "family-sheet",
+      "image": "assets/concept-art/items/r1/claymore-r1.png",
+      "sha256": "e9a2e4061bcdad78e7833fa7657722672c127466a0e77a2e5dbf2df536070567",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "prompt": "Use case: stylized-concept.\nAsset type: Diablo 3D candidate item modeling turnaround, not a final runtime icon.\nSubject: ONE Claymore, productionId item.design.base.claymore, ICURS_CLAYMORE 65. Input image is the PRIVATE ORIGINAL INVENTORY SPRITE used only as shape, proportions and material-color reference. Reconstruct this precise original sword rather than a generic historical claymore: long narrow straight double-edged cool gray steel blade with pronounced central ridge and elongated tapered point; compact silver-steel crossguard with subtly rising ends and a rounded central collar; short dark reddish-brown leather wrapped grip; modest silver disc pommel. Preserve original blade-to-hilt ratio and restrained silhouette. The cool blue-gray steel is material reflection, not magic or emission.\nCreate one coherent professional technical concept sheet of the EXACT SAME object in FRONT, SIDE thickness, BACK, THREE-QUARTER views, plus a small NEW HD rendered inventory-composition thumbnail of that same object, blade up. Large clear front and back views; side must show believable thin blade thickness. Entire blade, guard and pommel visible in each view; generous spacing. Hidden back surfaces and thickness are plausible conservative reconstructions.\nRealistic restrained dark medieval materials, finely worn steel, leather wrapping, subtle edge wear, no exaggerated corrosion. Neutral soft white studio illumination, even exposure, no colored dramatic light or baked hard shadows. Opaque plain charcoal gray backdrop, no scenery, no character or hands. All views must agree on geometry and materials. Labels only CLAYMORE / FRONT / SIDE / BACK / 3-4 / ICON. Do not copy, paste, trace or display the pixel sprite anywhere in the output. The thumbnail is a fresh detailed render of the new concept. No gems, skulls, oversized Scottish quillons, glowing effects, new decoration, watermarks or extra items.",
+      "generationTool": "built-in image_gen.imagegen",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 65,
+        "sha256": "34170d607b75089c19601c26f8c3e569aa2d0ade760d8978161c10a923b69873",
+        "notes": "Original licensed inventory appearance inspected locally; private source pixels are not included."
+      },
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-preview"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "notes": "Explicit proposal to reuse this exact-cursor candidate. Native unique stats, powers and identity remain separate. Not an independently generated unique turnaround or approved geometry-sharing decision.",
+      "reusedFromProductionId": "item.design.base.claymore",
+      "generationIntent": "Explicit shared-appearance concept proposal; no new generation call.",
+      "sharedDesignProposal": {
+        "reason": "Native unique inherits this exact original cursor; no separate silhouette invented from the name.",
+        "exclusiveUniqueDesign": "pending-review",
+        "newImageGenerated": false
+      }
+    }
+  ]
+}

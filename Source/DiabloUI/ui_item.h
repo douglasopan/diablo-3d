@@ -16,6 +16,7 @@
 namespace devilution {
 
 class D3dLogo;
+struct HeroPortrait;
 
 enum class UiType : uint8_t {
 	Text,
@@ -113,10 +114,15 @@ public:
 	void setSprite(ClxSprite sprite)
 	{
 		sprite_ = sprite;
+		portrait_ = nullptr;
 	}
+
+	void setHeroPortrait(const HeroPortrait *portrait) { portrait_ = portrait; }
+	[[nodiscard]] const HeroPortrait *heroPortrait() const { return portrait_; }
 
 private:
 	ClxSprite sprite_;
+	const HeroPortrait *portrait_ = nullptr;
 };
 
 //=============================================================================

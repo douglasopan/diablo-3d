@@ -1,0 +1,140 @@
+{
+  "format": "d3d.item-concept-art",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "scope": "Duas variantes de quantidade nativa, médio/grande, com arranjos e contagens físicas ainda incertos; nenhum valor da simulação alterado.",
+  "catalogSha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d",
+  "generationTool": "built-in image_gen.imagegen",
+  "generationCalls": 2,
+  "originalGameImagesIncluded": false,
+  "visualApproval": false,
+  "runtimeInstalled": false,
+  "postProcessing": "none; original generated PNG bytes copied unchanged",
+  "summary": {
+    "conceptCandidatesInThisFile": 2,
+    "newImages": 2,
+    "familyReuses": 0,
+    "modelsGenerated": 0,
+    "runtimeIconsGenerated": 0
+  },
+  "entries": [
+    {
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "concept-sheet",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-thumbnail"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "postProcessing": "none; original generated PNG bytes copied unchanged",
+      "productionId": "item.design.dynamic.gold-large",
+      "conceptId": "item.design.dynamic.gold-large.concept.r1",
+      "image": "assets/concept-art/items/r1/gold-large-r1.png",
+      "sha256": "0c6c581c0569005669d8f8eb1a2e09121f29ed2218e043d9e40f388e6b905518",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "byteCount": 1987631,
+      "prompt": "Use case: stylized-concept. Diablo 3D source-based candidate gold variant item.design.dynamic.gold-large, private attached original ICURS6. Source ICURS6 shows a low irregular compact wider heap of overlapping muted yellow-gold coins, with a raised rear-left stack, overlapping broad discs across middle and two low front/right discs. It is a larger arrangement than small ICURS4 and source medium5, not a treasure mountain. Match THIS source footprint, squat height, partial stacked edges and overlap topology. Occluded total coin number cannot be recovered exactly; do not invent a printed quantity, do not imply one depicted coin equals one unit of gold. Use a restrained approximately seven-coin physical interpretation only as needed to explain visible layered discs, then keep that ONE SAME number and arrangement in every view.\nThis runtime native range is value >=2500; never letter this range or quantity on the object. Coins are thick squat circular aged muted ochre/yellow gold, softly hammered edges, extremely faint plain worn rim, no readable numerals, portraits, symbols, dragons, gems or modern currency. Do NOT redesign from name or scale up/reuse the small pile. Keep arrangement native-source based, neutral color, simple material.\nEXACTLY FIVE separate realistic HD depictions of the SAME stable pile: four large views FRONT (elevated view near source angle), SIDE (true low profile to see thickness/stack), BACK (opposite elevated side), 3-4 (different elevated angle showing same arrangement), plus fifth small NEW HD ICON at the original inventory angle. All complete separated on charcoal-gray background with soft neutral studio light, no dramatic glow or painted floor shadow. Label FRONT/SIDE/BACK/3-4/ICON only, never combine 3-4/ICON. Count and adjacency cannot change between views: rotate the same pile as one group, don't rearrange or add coins for BACK/ICON. Rear surfaces, exact thickness, faint rim and unseen overlaps are cautious proposed inferences. No bags, chests, large mountain, scenery, lettering, magic, sprites or source-pixel inset. ICON wholly NEW HD art, not native pixels, not a runtime icon. Candidate study only.",
+      "referenceHash": "a40422c4055b046b7faff0dc0b781c59cfd9e07a1f39af5e6d266c864f6a4e8b",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 6,
+        "sha256": "a40422c4055b046b7faff0dc0b781c59cfd9e07a1f39af5e6d266c864f6a4e8b",
+        "notes": "Referência nativa 6x inspecionada antes da chamada. Fonte privada usada apenas para silhueta/cores; pixels não incorporados."
+      },
+      "sourceViewCount": 1,
+      "nativeAppearanceRule": "value >=2500",
+      "queueGroupId": "remaining-gold-runtime-appearance-all-01",
+      "inferredAreas": [
+        "Contagem física de moedas parcialmente ocultas, espessura, pilha, borda e verso são interpretações; número de discos não equivale ao valor numérico de ouro.",
+        "Regra nativa preservada: value >=2500; GetGoldCursor em Source/items.cpp:2975 e limites Source/items.h:28-29 consultados somente leitura."
+      ],
+      "coherenceReview": {
+        "status": "incomplete-study",
+        "coherentAcrossViewsVerified": false,
+        "observed": "Cinco representações HD novas, moedas ocres sem texto/insígnias e heap baixo; variante distinta do small inicial.",
+        "pendingIssues": [
+          "Prancha não comprova a mesma contagem/adjacência sob rotação: BACK parece rearranjo ou repetição de FRONT; reconciliar mapeamento moeda a moeda antes de master.",
+          "Total físico é incerto na fonte pequena; R1 mostra mais camadas/discos do que a proposta aproximada de sete; não promover essa contagem como fato recuperado.",
+          "Validar footprint, distinção pequeno/médio/grande e legibilidade na grade lógica nativa de 28px; manter os valores na simulação nativa, sem bags ou malha por quantia."
+        ]
+      },
+      "notes": "Estudo incompleto de variante runtime nativa, sem integração. Small ICURS4 inicial preservado; Medium/Large são gráficos distintos, sem simples escala/reuso. Não há ícone runtime, aprovação ou modelo."
+    },
+    {
+      "revision": "r1",
+      "status": "candidate",
+      "kind": "concept-sheet",
+      "revisionPrompts": [],
+      "generationTool": "built-in image_gen.imagegen",
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-thumbnail"
+      ],
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "postProcessing": "none; original generated PNG bytes copied unchanged",
+      "productionId": "item.design.dynamic.gold-medium",
+      "conceptId": "item.design.dynamic.gold-medium.concept.r1",
+      "image": "assets/concept-art/items/r1/gold-medium-r1.png",
+      "sha256": "9c0f824633929385ae20e2b1ba369ebde9ba9c07e07f01cc23d9e0d62b8991c0",
+      "dimensions": [
+        1536,
+        1024
+      ],
+      "byteCount": 2018755,
+      "prompt": "Use case: stylized-concept. Diablo 3D source-based candidate gold variant item.design.dynamic.gold-medium, private attached original ICURS5. Source ICURS5 shows a low small cluster of overlapping muted yellow-gold coins, wider than tiny three-coin small4: raised disc near rear-center/right, layered disc cluster on the left, one disc projecting to middle-right and a low front-center disc. Match THIS source footprint, lopsided overlap and squat height; not a large treasure heap. Occluded total coin number is uncertain; do not invent a printed quantity or imply one depicted coin equals one unit of gold. Use a restrained approximately five-coin physical interpretation only as needed to explain the visible layered discs, then preserve that ONE SAME number and arrangement in every view.\nThis runtime native range is 1000 <value <2500; never letter this range or quantity on the object. Coins are thick squat circular aged muted ochre/yellow gold, softly hammered edges, extremely faint plain worn rim, no readable numerals, portraits, symbols, dragons, gems or modern currency. Do NOT redesign from name or scale up/reuse the small pile. Keep arrangement native-source based, neutral color, simple material.\nEXACTLY FIVE separate realistic HD depictions of the SAME stable pile: four large views FRONT (elevated view near source angle), SIDE (true low profile to see thickness/stack), BACK (opposite elevated side), 3-4 (different elevated angle showing same arrangement), plus fifth small NEW HD ICON at the original inventory angle. All complete separated on charcoal-gray background with soft neutral studio light, no dramatic glow or painted floor shadow. Label FRONT/SIDE/BACK/3-4/ICON only, never combine 3-4/ICON. Count and adjacency cannot change between views: rotate the same pile as one group, don't rearrange or add coins for BACK/ICON. Rear surfaces, exact thickness, faint rim and unseen overlaps are cautious proposed inferences. No bags, chests, large mountain, scenery, lettering, magic, sprites or source-pixel inset. ICON wholly NEW HD art, not native pixels, not a runtime icon. Candidate study only.",
+      "referenceHash": "3c12c29e1452d06eac02dc88d20361acc39a5956d88f0670197873724e15d903",
+      "reference": {
+        "availability": "local-private",
+        "cursorId": 5,
+        "sha256": "3c12c29e1452d06eac02dc88d20361acc39a5956d88f0670197873724e15d903",
+        "notes": "Referência nativa 6x inspecionada antes da chamada. Fonte privada usada apenas para silhueta/cores; pixels não incorporados."
+      },
+      "sourceViewCount": 1,
+      "nativeAppearanceRule": "1000 <value <2500",
+      "queueGroupId": "remaining-gold-runtime-appearance-all-01",
+      "inferredAreas": [
+        "Contagem física de moedas parcialmente ocultas, espessura, pilha, borda e verso são interpretações; número de discos não equivale ao valor numérico de ouro.",
+        "Regra nativa preservada: 1000 <value <2500; GetGoldCursor em Source/items.cpp:2975 e limites Source/items.h:28-29 consultados somente leitura."
+      ],
+      "coherenceReview": {
+        "status": "incomplete-study",
+        "coherentAcrossViewsVerified": false,
+        "observed": "Cinco representações HD novas, moedas ocres sem texto/insígnias e heap baixo; variante distinta do small inicial.",
+        "pendingIssues": [
+          "Prancha não comprova a mesma contagem/adjacência sob rotação: BACK parece rearranjo ou repetição de FRONT; reconciliar mapeamento moeda a moeda antes de master.",
+          "Total físico é incerto na fonte pequena; R1 mostra aproximadamente seis discos em vez da proposta aproximada de cinco; não promover essa contagem como fato recuperado.",
+          "Validar footprint, distinção pequeno/médio/grande e legibilidade na grade lógica nativa de 28px; manter os valores na simulação nativa, sem bags ou malha por quantia."
+        ]
+      },
+      "notes": "Estudo incompleto de variante runtime nativa, sem integração. Small ICURS4 inicial preservado; Medium/Large são gráficos distintos, sem simples escala/reuso. Não há ícone runtime, aprovação ou modelo."
+    }
+  ]
+}

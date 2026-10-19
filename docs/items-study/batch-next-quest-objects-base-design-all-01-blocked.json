@@ -1,0 +1,103 @@
+{
+  "format": "d3d.item-concept-art",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "batchId": "batch-next-quest-objects-base-design-all-01-blocked",
+  "scope": "Queue-group study fragment; candidate generation and explicit visual reuse only, never full-catalog completion or asset approval.",
+  "catalogSha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d",
+  "generationTool": "built-in image_gen.imagegen",
+  "generationCalls": 0,
+  "postProcessing": "none; generated PNG bytes copied unchanged",
+  "originalGameImagesIncluded": false,
+  "visualApproval": false,
+  "runtimeInstalled": false,
+  "registryAuthority": "assets/registry.json",
+  "summary": {
+    "productionUnits": 228,
+    "batchProductionUnits": 0,
+    "conceptCandidateEntries": 0,
+    "generatedImages": 0,
+    "reuseProposals": 0,
+    "blockedUnits": 7,
+    "modelsGenerated": 0,
+    "runtimeIconsGenerated": 0
+  },
+  "entries": [],
+  "blockedUnits": [
+    {
+      "productionId": "item.design.base.brown-suit",
+      "family": "quest-objects",
+      "nativeCursorNames": [
+        "BROWN_SUIT"
+      ],
+      "blockerCode": "missing-hellfire-objcurs2",
+      "reason": "Exact Hellfire reference graphic unavailable locally; do not invent source fidelity."
+    },
+    {
+      "productionId": "item.design.base.grey-suit",
+      "family": "quest-objects",
+      "nativeCursorNames": [
+        "GREY_SUIT"
+      ],
+      "blockerCode": "missing-hellfire-objcurs2",
+      "reason": "Exact Hellfire reference graphic unavailable locally; do not invent source fidelity."
+    },
+    {
+      "productionId": "item.design.base.reconstructed-note",
+      "family": "quest-objects",
+      "nativeCursorNames": [
+        "RECONSTRUCTED_NOTE"
+      ],
+      "blockerCode": "missing-hellfire-objcurs2",
+      "reason": "Exact Hellfire reference graphic unavailable locally; do not invent source fidelity."
+    },
+    {
+      "productionId": "item.design.base.rune-bomb",
+      "family": "quest-objects",
+      "nativeCursorNames": [
+        "RUNE_BOMB"
+      ],
+      "blockerCode": "missing-hellfire-objcurs2",
+      "reason": "Exact Hellfire reference graphic unavailable locally; do not invent source fidelity."
+    },
+    {
+      "productionId": "item.design.base.theodore",
+      "family": "quest-objects",
+      "nativeCursorNames": [
+        "THEODORE"
+      ],
+      "blockerCode": "missing-hellfire-objcurs2",
+      "reason": "Exact Hellfire reference graphic unavailable locally; do not invent source fidelity."
+    },
+    {
+      "productionId": "item.design.base.torn-note-1",
+      "family": "quest-objects",
+      "nativeCursorNames": [
+        "TORN_NOTE_1"
+      ],
+      "blockerCode": "missing-hellfire-objcurs2",
+      "reason": "Exact Hellfire reference graphic unavailable locally; do not invent source fidelity."
+    },
+    {
+      "productionId": "item.design.base.torn-note-2",
+      "family": "quest-objects",
+      "nativeCursorNames": [
+        "TORN_NOTE_2"
+      ],
+      "blockerCode": "missing-hellfire-objcurs2",
+      "reason": "Exact Hellfire reference graphic unavailable locally; do not invent source fidelity."
+    }
+  ],
+  "devlogHandoff": {
+    "includeAllGeneratedImages": true,
+    "images": [],
+    "generatedConceptIds": [],
+    "reuseProductionIds": [],
+    "limits": [
+      "All outputs remain unapproved candidates.",
+      "Shared cursor reuse preserves separate native identities and powers.",
+      "Hidden surfaces and scale are inferred; master/socket/icon work remains gated."
+    ]
+  }
+}
+

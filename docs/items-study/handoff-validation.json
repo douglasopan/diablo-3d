@@ -1,0 +1,322 @@
+{
+  "format": "d3d.item-concept-handoff-validation",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "passed": true,
+  "checks": {
+    "validatedManifests": 51,
+    "generatedPNGsChecked": 142,
+    "pngStructureAndCRCs": true,
+    "publicTextFilesChecked": 58,
+    "privatePaths": 0,
+    "originalSourceByteCopies": 0,
+    "failedHistoricalRevisionsMarked": 2,
+    "referenceAvailableUnitsWithoutConcept": 0,
+    "generatedPNGsWithoutManifest": 0,
+    "revisionSpecificInheritanceFixtures": 3,
+    "catalogSourceRows": 730,
+    "nativeCursorDefinitions": 170,
+    "productionBindings": 279
+  },
+  "summary": {
+    "productionUnits": 228,
+    "linkedUnits": 193,
+    "referenceAvailableOrIndirect": 193,
+    "referenceBlocked": 35,
+    "pendingAvailableUnits": 0,
+    "generatedPNGs": 142,
+    "initialBatchPNGs": 9,
+    "newPNGs": 133,
+    "primaryReviewImages": 135,
+    "archivalImages": 7,
+    "turnaroundEntries": 122,
+    "incompleteStudyEntries": 13,
+    "sharingProposals": 58,
+    "explicitIncompleteOrInheritedGates": 22,
+    "unregisteredPNGs": 0
+  },
+  "sourceFiles": [
+    {
+      "path": "docs/items-study/catalog.json",
+      "sha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d"
+    },
+    {
+      "path": "docs/items-study/concept-art.json",
+      "sha256": "25396b2b70da8ebd759d1e18314a07a09cda3b22077145a644381100bf5494c2"
+    },
+    {
+      "path": "docs/items-study/production-queue.json",
+      "sha256": "fc87a85cfad1f55b81946fa44f2c88945a509ba661212a211a4e6176addd00e8"
+    },
+    {
+      "path": "docs/items-study/devlog-handoff.json",
+      "sha256": "14c9c829f7445bd3a7533ce5df4e3cb2c5f4c169ec8c16923a5510210ff775a0"
+    },
+    {
+      "path": "docs/ITEM-PRODUCTION-CONTRACT.md",
+      "sha256": "1d1a1490ec8c6ed843993d0358ec92102f135629827a12b21caa8bbda14650e0"
+    }
+  ],
+  "manifestReports": [
+    {
+      "path": "docs/items-study/batch-02-blades.json",
+      "entries": 7,
+      "warnings": 1
+    },
+    {
+      "path": "docs/items-study/batch-02-great-sword-r2.json",
+      "entries": 1,
+      "warnings": 0
+    },
+    {
+      "path": "docs/items-study/batch-02-great-sword-r3.json",
+      "entries": 1,
+      "warnings": 0
+    },
+    {
+      "path": "docs/items-study/batch-02-large-blades.json",
+      "entries": 2,
+      "warnings": 0
+    },
+    {
+      "path": "docs/items-study/batch-02-two-handed-sword-r2.json",
+      "entries": 1,
+      "warnings": 0
+    },
+    {
+      "path": "docs/items-study/batch-03-shields.json",
+      "entries": 7,
+      "warnings": 0
+    },
+    {
+      "path": "docs/items-study/batch-04-blade-uniques.json",
+      "entries": 5,
+      "warnings": 2
+    },
+    {
+      "path": "docs/items-study/batch-05-axes.json",
+      "entries": 7,
+      "warnings": 0
+    },
+    {
+      "path": "docs/items-study/batch-06-restoration.json",
+      "entries": 4,
+      "warnings": 0
+    },
+    {
+      "path": "docs/items-study/batch-07-books-oil.json",
+      "entries": 4,
+      "warnings": 0
+    },
+    {
+      "path": "docs/items-study/batch-next-axes-uniques-01.json",
+      "entries": 7,
+      "warnings": 5
+    },
+    {
+      "path": "docs/items-study/batch-next-axes-uniques-02.json",
+      "entries": 2,
+      "warnings": 2
+    },
+    {
+      "path": "docs/items-study/batch-next-blades-unique-01.json",
+      "entries": 7,
+      "warnings": 7
+    },
+    {
+      "path": "docs/items-study/batch-next-blades-unique-02.json",
+      "entries": 6,
+      "warnings": 2
+    },
+    {
+      "path": "docs/items-study/batch-next-blunt-weapons-bases-01.json",
+      "entries": 7,
+      "warnings": 1
+    },
+    {
+      "path": "docs/items-study/batch-next-blunt-weapons-flail-r2.json",
+      "entries": 1,
+      "warnings": 0
+    },
+    {
+      "path": "docs/items-study/batch-next-blunt-weapons-uniques-01.json",
+      "entries": 7,
+      "warnings": 7
+    },
+    {
+      "path": "docs/items-study/batch-next-blunt-weapons-uniques-02.json",
+      "entries": 2,
+      "warnings": 2
+    },
+    {
+      "path": "docs/items-study/batch-next-body-armor-flexible-01.json",
+      "entries": 4,
+      "warnings": 0
+    },
+    {
+      "path": "docs/items-study/batch-next-body-armor-rigid-01.json",
+      "entries": 7,
+      "warnings": 5
+    },
+    {
+      "path": "docs/items-study/batch-next-body-armor-rigid-02.json",
+      "entries": 2,
+      "warnings": 1
+    },
+    {
+      "path": "docs/items-study/batch-next-body-armor-textile-01.json",
+      "entries": 4,
+      "warnings": 0
+    },
+    {
+      "path": "docs/items-study/batch-next-body-armor-unique-01.json",
+      "entries": 7,
+      "warnings": 4
+    },
+    {
+      "path": "docs/items-study/batch-next-body-armor-unique-02.json",
+      "entries": 4,
+      "warnings": 3
+    },
+    {
+      "path": "docs/items-study/batch-next-bows-base-01.json",
+      "entries": 7,
+      "warnings": 5
+    },
+    {
+      "path": "docs/items-study/batch-next-bows-base-02.json",
+      "entries": 1,
+      "warnings": 0
+    },
+    {
+      "path": "docs/items-study/batch-next-bows-unique-01.json",
+      "entries": 7,
+      "warnings": 6
+    },
+    {
+      "path": "docs/items-study/batch-next-bows-unique-02.json",
+      "entries": 3,
+      "warnings": 2
+    },
+    {
+      "path": "docs/items-study/batch-next-ears-all-01.json",
+      "entries": 4,
+      "warnings": 2
+    },
+    {
+      "path": "docs/items-study/batch-next-gold-runtime-01.json",
+      "entries": 2,
+      "warnings": 2
+    },
+    {
+      "path": "docs/items-study/batch-next-headgear-base-design-all-01.json",
+      "entries": 6,
+      "warnings": 0
+    },
+    {
+      "path": "docs/items-study/batch-next-headgear-unique-identity-all-01.json",
+      "entries": 8,
+      "warnings": 1
+    },
+    {
+      "path": "docs/items-study/batch-next-headgear-unique-identity-all-02.json",
+      "entries": 2,
+      "warnings": 1
+    },
+    {
+      "path": "docs/items-study/batch-next-jewelry-base-design-all-01-blocked.json",
+      "entries": 0,
+      "warnings": 0
+    },
+    {
+      "path": "docs/items-study/batch-next-jewelry-base-design-all-01.json",
+      "entries": 2,
+      "warnings": 0
+    },
+    {
+      "path": "docs/items-study/batch-next-jewelry-unique-identity-all-01-blocked.json",
+      "entries": 0,
+      "warnings": 0
+    },
+    {
+      "path": "docs/items-study/batch-next-jewelry-unique-identity-all-01.json",
+      "entries": 7,
+      "warnings": 0
+    },
+    {
+      "path": "docs/items-study/batch-next-jewelry-unique-identity-all-02-blocked.json",
+      "entries": 0,
+      "warnings": 0
+    },
+    {
+      "path": "docs/items-study/batch-next-jewelry-unique-identity-all-02.json",
+      "entries": 1,
+      "warnings": 0
+    },
+    {
+      "path": "docs/items-study/batch-next-potions-elixirs-base-01.json",
+      "entries": 7,
+      "warnings": 0
+    },
+    {
+      "path": "docs/items-study/batch-next-quest-objects-base-design-all-01-blocked.json",
+      "entries": 0,
+      "warnings": 0
+    },
+    {
+      "path": "docs/items-study/batch-next-quest-objects-base-design-all-01.json",
+      "entries": 7,
+      "warnings": 0
+    },
+    {
+      "path": "docs/items-study/batch-next-quest-objects-base-design-all-02-blocked.json",
+      "entries": 0,
+      "warnings": 0
+    },
+    {
+      "path": "docs/items-study/batch-next-quest-objects-base-design-all-02.json",
+      "entries": 2,
+      "warnings": 0
+    },
+    {
+      "path": "docs/items-study/batch-next-quest-objects-unique-identity-all-01-blocked.json",
+      "entries": 0,
+      "warnings": 0
+    },
+    {
+      "path": "docs/items-study/batch-next-shields-uniques-01.json",
+      "entries": 6,
+      "warnings": 3
+    },
+    {
+      "path": "docs/items-study/batch-next-staves-bases-01.json",
+      "entries": 5,
+      "warnings": 2
+    },
+    {
+      "path": "docs/items-study/batch-next-staves-short-staff-r2.json",
+      "entries": 1,
+      "warnings": 0
+    },
+    {
+      "path": "docs/items-study/batch-next-staves-uniques-01.json",
+      "entries": 7,
+      "warnings": 7
+    },
+    {
+      "path": "docs/items-study/batch-next-staves-uniques-02.json",
+      "entries": 2,
+      "warnings": 1
+    },
+    {
+      "path": "docs/items-study/concept-art.json",
+      "entries": 193,
+      "warnings": 72
+    }
+  ],
+  "limits": [
+    "Metadata, bytes, complete PNG structure and source-table coverage do not approve artwork or prove model topology.",
+    "No models, final runtime icons, equipment/ground bridge or installation delivered.",
+    "Integrator owns PROJECT-EXECUTION.md reconciliation, Git and publication of every generated revision in site/devlog."
+  ]
+}

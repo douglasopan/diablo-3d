@@ -1,0 +1,47 @@
+{
+  "format": "d3d.item-concept-art",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "batchId": "batch-next-quest-objects-unique-identity-all-01-blocked",
+  "scope": "Queue-group study fragment; candidate generation and explicit visual reuse only, never full-catalog completion or asset approval.",
+  "catalogSha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d",
+  "generationTool": "built-in image_gen.imagegen",
+  "generationCalls": 0,
+  "postProcessing": "none; generated PNG bytes copied unchanged",
+  "originalGameImagesIncluded": false,
+  "visualApproval": false,
+  "runtimeInstalled": false,
+  "registryAuthority": "assets/registry.json",
+  "summary": {
+    "productionUnits": 228,
+    "batchProductionUnits": 0,
+    "conceptCandidateEntries": 0,
+    "generatedImages": 0,
+    "reuseProposals": 0,
+    "blockedUnits": 1,
+    "modelsGenerated": 0,
+    "runtimeIconsGenerated": 0
+  },
+  "entries": [],
+  "blockedUnits": [
+    {
+      "productionId": "item.design.unique.lightforge",
+      "family": "quest-objects",
+      "nativeCursorNames": [],
+      "blockerCode": "unresolved-lightforge-source",
+      "reason": "Unresolved LGTFORGE source; never substitute Bovine Plate."
+    }
+  ],
+  "devlogHandoff": {
+    "includeAllGeneratedImages": true,
+    "images": [],
+    "generatedConceptIds": [],
+    "reuseProductionIds": [],
+    "limits": [
+      "All outputs remain unapproved candidates.",
+      "Shared cursor reuse preserves separate native identities and powers.",
+      "Hidden surfaces and scale are inferred; master/socket/icon work remains gated."
+    ]
+  }
+}
+

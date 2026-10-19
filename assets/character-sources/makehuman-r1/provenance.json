@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "repository": "https://github.com/makehumancommunity/makehuman",
+  "commit": "a8bc2d54ff0ac92e78ff71431b1023eda42bf482",
+  "license": "CC0-1.0 (core assets only; application code not imported)",
+  "status": "authoring-source-not-selected",
+  "files": {
+    "base.obj": "8e761e6624b8f54536409135d1636da63b32486a90d4897f84e121d144f6fb4c",
+    "caucasian-female-young.target": "118379f6e8ba9266247fdb8788a20e1df40a239f97ced0b9905bcbcc74f6e820",
+    "caucasian-male-old.target": "b0d2b1d58cba0358af59833740e70229265f7da1c20a11240f4123b7192cfd6d",
+    "caucasian-male-young.target": "70e228ba7164737dae664454394536fc5935fa48d333c1a97d77e2dc6eacc5f5",
+    "default.mhskel": "99f179bce0aa850b45d4191a1d0d234c5851f881c057439470ded3bddf729a24",
+    "default_weights.mhw": "0f3641d651ae3d00ad6b4ccee43142edb109d3bd909d27d9e4139ef1beed8625",
+    "LICENSE.ASSETS.md": "f6089cba01cb570a24712b41ab8a586ccd3cc5ef53dc266ca50b95c288956d2c",
+    "LICENSE.md": "edd99571ca62698f78c943fd4fffb159a413c315fa0d4819d3cec5cadaf8b4f1",
+    "universal-male-young-averagemuscle-averageweight.target": "4ba5396ddabda448ece15650a566fbebfbb10239256ccb201e8f883429e12249",
+    "universal-male-young-averagemuscle-maxweight.target": "3e77ff5a07a9b870db5226507e1cf8a295f0e09c109fb72142770f5f50427b5e",
+    "universal-male-young-maxmuscle-averageweight.target": "c171ff9cc95e96273beb3e3b1969a01988c2d4982ebc6fe04bf81cf72ee3b295"
+  }
+}

@@ -1,0 +1,126 @@
+{
+  "format": "d3d.item-concept-art",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "scope": "One delimited r3 edit of the two copper guard branches in Great Sword BACK. The edit failed to preserve both branches. R1/R2 are preserved; no further generation was performed.",
+  "catalogSha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d",
+  "generationTool": "built-in image_gen.imagegen",
+  "generationCalls": 1,
+  "postProcessing": "none; original generated PNG bytes copied unchanged to a new r3 path",
+  "originalGameImagesIncluded": false,
+  "visualApproval": false,
+  "runtimeInstalled": false,
+  "summary": {
+    "conceptCandidatesInThisFile": 1,
+    "modelsGenerated": 0,
+    "runtimeIconsGenerated": 0,
+    "fullyResolvedCoherenceReviews": 0
+  },
+  "entries": [
+    {
+      "productionId": "item.design.base.great-sword",
+      "conceptId": "item.design.base.great-sword.concept.r3",
+      "revision": "r3",
+      "originRevision": "r2",
+      "originImage": "assets/concept-art/items/r2/great-sword-r2.png",
+      "originSha256": "8b1c8d09edb927ad8d8a39f1eecb91a14a28e0998bdc15a9db2ad5f987c73215",
+      "originPreserved": true,
+      "supersedesOriginAutomatically": false,
+      "revisionHistory": [
+        {
+          "revision": "r1",
+          "image": "assets/concept-art/items/r1/great-sword-r1.png",
+          "sha256": "b745511079842508445d1a3f1059d2fb56366e9e86e43266753009a89ffdf28b",
+          "preserved": true,
+          "finding": "BACK espelhava a guarda, mas mantinha a lâmina curva no sentido de FRONT. Ponta mais aguda que a leitura da referência.",
+          "manifest": "docs/items-study/batch-02-large-blades.json"
+        },
+        {
+          "revision": "r2",
+          "image": "assets/concept-art/items/r2/great-sword-r2.png",
+          "sha256": "8b1c8d09edb927ad8d8a39f1eecb91a14a28e0998bdc15a9db2ad5f987c73215",
+          "preserved": true,
+          "finding": "Sentido da curva BACK invertido, mas a guarda BACK passou a repetir a lateralidade de FRONT. Suavização da ponta não demonstrada uniformemente.",
+          "manifest": "docs/items-study/batch-02-great-sword-r2.json"
+        }
+      ],
+      "status": "candidate",
+      "kind": "turnaround",
+      "image": "assets/concept-art/items/r3/great-sword-r3.png",
+      "sha256": "1390409d3e2f25e51a9f75e1a70cda7ad8f4ce5f1bdfd8443152516a553f8999",
+      "dimensions": [
+        1312,
+        1199
+      ],
+      "byteCount": 1644705,
+      "prompt": "Use case: precise-object-edit.\nEdit the supplied GREAT SWORD r2 concept board with ONE strictly local correction. Do not redesign the sheet.\nSemantic coordinates: FRONT is the FIRST full-size view from the left. BACK is the THIRD full-size view from the left, between SIDE and 3-4. In BACK, edit ONLY the two curving brown-copper ribbon quillons of its guard, just above and beside the red grip (approximately the copper region x=540..710, y=755..925 in this 1312x1199 board; the BACK collar/grip axis is near x=590). The current BACK copper branches wrongly curl toward image-right like FRONT. Replace those two branches with the HORIZONTAL MIRROR of FRONT's copper branch shapes, anchored to BACK's existing central guard mount: the upper curl and the lower hanging curl must now extend to image-LEFT of BACK's grip/collar, naturally showing the opposite face of the SAME asymmetrical guard. Swap their lateral handedness. Remove the old rightward branches rather than duplicating them. Preserve their length, ribbon thickness, bends, brown-copper color, metal finish and neutral shading. Keep the attachment at the central mount coherent, without adding new ornament.\nCRITICAL INVARIANTS: keep BACK's already-corrected steel blade curve exactly as in r2, with its tip RIGHT of its blade root. Do not mirror or move the BACK blade or whole BACK column. Keep BACK's red grip, brass collar, gold support plate, pommel, length and position unchanged. Change no blade tip anywhere: tip comparison is a later review gate, outside this edit. FRONT, SIDE, 3-4 and ICON must remain unchanged, as must all labels, title, charcoal background, lighting, overall framing, materials and palette. No other geometry edits. No source pixel-art, no extra inset, no new objects. This r3 is only a local handedness correction to the two copper branches in BACK.",
+      "editPrompt": "Use case: precise-object-edit.\nEdit the supplied GREAT SWORD r2 concept board with ONE strictly local correction. Do not redesign the sheet.\nSemantic coordinates: FRONT is the FIRST full-size view from the left. BACK is the THIRD full-size view from the left, between SIDE and 3-4. In BACK, edit ONLY the two curving brown-copper ribbon quillons of its guard, just above and beside the red grip (approximately the copper region x=540..710, y=755..925 in this 1312x1199 board; the BACK collar/grip axis is near x=590). The current BACK copper branches wrongly curl toward image-right like FRONT. Replace those two branches with the HORIZONTAL MIRROR of FRONT's copper branch shapes, anchored to BACK's existing central guard mount: the upper curl and the lower hanging curl must now extend to image-LEFT of BACK's grip/collar, naturally showing the opposite face of the SAME asymmetrical guard. Swap their lateral handedness. Remove the old rightward branches rather than duplicating them. Preserve their length, ribbon thickness, bends, brown-copper color, metal finish and neutral shading. Keep the attachment at the central mount coherent, without adding new ornament.\nCRITICAL INVARIANTS: keep BACK's already-corrected steel blade curve exactly as in r2, with its tip RIGHT of its blade root. Do not mirror or move the BACK blade or whole BACK column. Keep BACK's red grip, brass collar, gold support plate, pommel, length and position unchanged. Change no blade tip anywhere: tip comparison is a later review gate, outside this edit. FRONT, SIDE, 3-4 and ICON must remain unchanged, as must all labels, title, charcoal background, lighting, overall framing, materials and palette. No other geometry edits. No source pixel-art, no extra inset, no new objects. This r3 is only a local handedness correction to the two copper branches in BACK.",
+      "revisionPrompts": [
+        "Use case: precise-object-edit.\nEdit the supplied GREAT SWORD r2 concept board with ONE strictly local correction. Do not redesign the sheet.\nSemantic coordinates: FRONT is the FIRST full-size view from the left. BACK is the THIRD full-size view from the left, between SIDE and 3-4. In BACK, edit ONLY the two curving brown-copper ribbon quillons of its guard, just above and beside the red grip (approximately the copper region x=540..710, y=755..925 in this 1312x1199 board; the BACK collar/grip axis is near x=590). The current BACK copper branches wrongly curl toward image-right like FRONT. Replace those two branches with the HORIZONTAL MIRROR of FRONT's copper branch shapes, anchored to BACK's existing central guard mount: the upper curl and the lower hanging curl must now extend to image-LEFT of BACK's grip/collar, naturally showing the opposite face of the SAME asymmetrical guard. Swap their lateral handedness. Remove the old rightward branches rather than duplicating them. Preserve their length, ribbon thickness, bends, brown-copper color, metal finish and neutral shading. Keep the attachment at the central mount coherent, without adding new ornament.\nCRITICAL INVARIANTS: keep BACK's already-corrected steel blade curve exactly as in r2, with its tip RIGHT of its blade root. Do not mirror or move the BACK blade or whole BACK column. Keep BACK's red grip, brass collar, gold support plate, pommel, length and position unchanged. Change no blade tip anywhere: tip comparison is a later review gate, outside this edit. FRONT, SIDE, 3-4 and ICON must remain unchanged, as must all labels, title, charcoal background, lighting, overall framing, materials and palette. No other geometry edits. No source pixel-art, no extra inset, no new objects. This r3 is only a local handedness correction to the two copper branches in BACK."
+      ],
+      "generationTool": "built-in image_gen.imagegen",
+      "editTargetInspected": true,
+      "views": [
+        "front",
+        "side",
+        "back",
+        "three-quarter",
+        "inventory-thumbnail"
+      ],
+      "referenceHash": "e1a353d80b193efc9f4f766b2495eb29f17260d2e272f0d9e81ae04e232e9ebd",
+      "reference": {
+        "cursorId": 134,
+        "sha256": "e1a353d80b193efc9f4f766b2495eb29f17260d2e272f0d9e81ae04e232e9ebd",
+        "availability": "local-private",
+        "notes": "Identidade da referência original 6x inspecionada em R1/R2. Esta chamada R3 usou somente a PNG R2 como alvo de edição; a ponta não foi alvo. Nenhum sprite original foi colado."
+      },
+      "visualInspected": true,
+      "sourcePixelIconPasted": false,
+      "visualApproval": false,
+      "accepted": false,
+      "selected": false,
+      "installed": false,
+      "modelStatus": "not-generated",
+      "iconStatus": "not-generated",
+      "runtimeInstalled": false,
+      "postProcessing": "none; generated PNG copied byte-for-byte",
+      "targetedDefect": {
+        "description": "Os dois ramos de cobre da guarda BACK precisavam trocar lateralidade para representar o espelho horizontal de FRONT, preservando a lâmina BACK de R2.",
+        "result": "failed",
+        "observation": "O ramo inferior pendente passou para a esquerda, mas o ramo superior curvo desapareceu. BACK agora não mostra os mesmos dois ramos de FRONT; o requisito de mesmo objeto entre vistas não foi satisfeito.",
+        "furtherGenerationPerformed": false
+      },
+      "coherenceReview": {
+        "status": "failed-targeted-correction",
+        "coherentAcrossViews": false,
+        "modelingReady": false,
+        "observed": [
+          "BACK mantém a lâmina com a ponta à direita da raiz, em sentido oposto à FRONT.",
+          "A paleta geral, fundo neutro, labels, grip vermelho, lâmina longa/estreita e thumbnail HD permanecem reconhecíveis.",
+          "O ramo inferior da guarda BACK foi espelhado para a esquerda."
+        ],
+        "pendingIssues": [
+          "Restabelecer os dois ramos curvos da guarda BACK como a face oposta coerente da guarda FRONT; o ramo superior está ausente em R3.",
+          "Comparar a ponta de todas as vistas com a referência original; esse gate permanece pendente e não foi alvo desta chamada.",
+          "Reconciliar espessura, quillons, grip e espaço para as mãos antes do master 3D. Nenhum socket ou encaixe foi validado.",
+          "A edição generativa não comprova preservação pixel-exata das outras vistas ou da microtextura; registrar e comparar qualquer alteração antes de seleção."
+        ]
+      },
+      "tipGate": {
+        "status": "pending-source-comparison",
+        "editedInThisRevision": false,
+        "notes": "O prompt proibiu mudanças de ponta. A fidelidade da ponta menos aguda/oblíqua continua incerta; não usar R3 como comprovação de correção desse defeito."
+      },
+      "inferredAreas": [
+        "Quillons em fita torcida, sua seção/espessura, fixação e faces ocultas continuam reconstruções propostas.",
+        "Ponta detalhada, materiais e desgaste não são recuperação exata do sprite original."
+      ],
+      "losses": [
+        "Ramo superior curvo da guarda BACK perdido na edição R3.",
+        "Resultado não demonstra os dois ramos coerentes do mesmo objeto; R3 não está pronta para orientar a modelagem.",
+        "Nenhuma conversão ou recompressão posterior: os bytes PNG gerados foram preservados e os hashes de R1/R2 permaneceram iguais."
+      ],
+      "notes": "Somente candidato R3 com falha explícita na correção pontual. Uma chamada adicional delimitada foi feita; após inspeção, nenhuma nova geração foi realizada. R1/R2 preservadas, sem aprovação, seleção, modelo ou ícone runtime."
+    }
+  ]
+}

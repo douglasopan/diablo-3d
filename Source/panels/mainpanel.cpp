@@ -1,5 +1,6 @@
 #include "panels/mainpanel.hpp"
 
+#include <algorithm>
 #include <array>
 #include <cstdint>
 #include <expected>
@@ -7,6 +8,8 @@
 #include <string>
 
 #include "control/control.hpp"
+#include "control/d3d_hud.hpp"
+#include "control/d3d_hud_geometry.hpp"
 #include "engine/clx_sprite.hpp"
 #include "engine/load_clx.hpp"
 #include "engine/render/clx_render.hpp"
@@ -29,12 +32,14 @@ OptionalOwnedClxSpriteList PanelButton;
 OptionalOwnedClxSpriteList PanelButtonGrime;
 OptionalOwnedClxSpriteList PanelButtonDownGrime;
 
-void DrawButtonText(const Surface &out, std::string_view text, Rectangle placement, UiFlags style, int spacing = 1)
+void DrawButtonText(const Surface &out, std::string_view text, Rectangle placement, UiFlags style, int spacing = 1, bool verticalCenter = false)
 {
+	const UiFlags alignment = UiFlags::AlignCenter | UiFlags::KerningFitSpacing
+	    | (verticalCenter ? UiFlags::VerticalCenter : UiFlags::None);
 	DrawString(out, text, { placement.position + Displacement { 0, 1 }, placement.size },
-	    { .flags = UiFlags::AlignCenter | UiFlags::KerningFitSpacing | UiFlags::ColorBlack, .spacing = spacing });
+	    { .flags = alignment | UiFlags::ColorBlack, .spacing = spacing });
 	DrawString(out, text, placement,
-	    { .flags = UiFlags::AlignCenter | UiFlags::KerningFitSpacing | style, .spacing = spacing });
+	    { .flags = alignment | style, .spacing = spacing });
 }
 
 void DrawButtonOnPanel(Point position, std::string_view text, int frame)
@@ -77,16 +82,21 @@ void DrawMainPanelButtonLabel(const Surface &out, int button, bool pressed)
 		return;
 
 	const std::string_view text = labels[button];
+	const bool compact = IsD3dHudLayoutActive() && GetD3dHudGeometry().mode == D3dHudGeometryMode::Compact;
 	const int width = out.w() - 8;
 	int spacing = 2;
 	if (std::min(GetLineWidth(text, GameFont12, spacing), width) > 38)
 		spacing = 1;
-	DrawButtonText(out, text, { { 4, pressed ? 2 : 1 }, { width, 0 } },
-	    pressed ? UiFlags::ColorButtonpushed : UiFlags::ColorButtonface, spacing);
+	DrawButtonText(out, text, { { 4, pressed ? 2 : 1 }, { width, compact ? std::max(1, out.h() - 3) : 0 } },
+	    pressed ? UiFlags::ColorButtonpushed : UiFlags::ColorButtonface, spacing, compact);
 }
 
 std::expected<void, std::string> LoadMainPanel()
 {
+	// Labels are drawn live on the selected skin; none of these legacy templates
+	// or grime sprites are needed by that presentation.
+	if (IsD3dHudSelected())
+		return {};
 	std::optional<OwnedSurface> out;
 	constexpr uint16_t NumButtonSprites = 6;
 	{

@@ -127,6 +127,7 @@ void UiRenderItem(const UiItemBase &item);
 void UiRenderItems(const std::vector<UiItemBase *> &items);
 void UiRenderItems(const std::vector<std::unique_ptr<UiItemBase>> &items);
 ClxSprite UiGetHeroDialogSprite(size_t heroClassIndex);
+const HeroPortrait *UiGetHeroDialogPortrait(size_t heroClassIndex);
 
 void mainmenu_restart_repintro();
 } // namespace devilution

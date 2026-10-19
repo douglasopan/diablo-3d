@@ -66,6 +66,7 @@ endif()
 set(devilutionx_assets
   ASSETS_VERSION
   d3d-lighting.ini
+  d3d-models/known-meshy.policy
   arena/church.dun
   arena/circle_of_death.dun
   arena/hell.dun
@@ -266,7 +267,7 @@ list(APPEND devilutionx_assets
 
 # Optional locally supplied soundtrack. Register it so asset trimming preserves
 # the file on subsequent builds; public clones retain the original soundtrack.
-foreach(_d3d_music menu-rock2 menu-alternative town-rock town-alternative town-third cathedral-rock catacombs-rock caves-rock hell-rock nest-rock crypt-rock)
+foreach(_d3d_music menu-rock2 menu-alternative town-rock town-alternative town-third town-easy-1 town-easy-2 cathedral-rock catacombs-rock caves-rock hell-rock nest-rock crypt-rock)
   if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/assets/music/d3d/${_d3d_music}.mp3")
     list(APPEND devilutionx_assets "music/d3d/${_d3d_music}.mp3")
   endif()

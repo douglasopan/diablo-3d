@@ -1,0 +1,2365 @@
+{
+  "schema": "d3d.hero-raster-qa/1",
+  "generatedAtUtc": "2026-10-12T03:30:56.980698+00:00",
+  "sourceThread": "01a1153a-cad1-7fb1-8326-225511ee918d",
+  "script": {
+    "path": "D:\\Diablo 1 3D\\devilutionx\\docs\\own-art-pack\\heroes-local-r1\\pipeline\\extract_raster_directions.py",
+    "sha256": "c9296436f5e3587124220fdbe3458c8486dcc9f51a2bb0552cfe0161f186c6fd"
+  },
+  "tool": {
+    "name": "Pillow",
+    "version": "12.0.0",
+    "execution": "local CPU; no GPU/network/generation"
+  },
+  "scope": "Rogue/Sorcerer own raster masters, mechanical STILL extraction and QA only",
+  "sources": [
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\masters\\rogue-light-unarmed-a-pose-r1.png",
+      "sha256": "5c0801b8d1836fdb60324b2a12172e9772d2f8fa952adf4d32c46335cc4fedc7",
+      "bytes": 1775511,
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA",
+      "alpha": {
+        "extrema": [
+          0,
+          254
+        ],
+        "alphaZeroPixels": 1169058,
+        "alpha1to15Pixels": 26813,
+        "alpha16to127Pixels": 7636,
+        "alpha128to253Pixels": 367351,
+        "alpha254Pixels": 2006,
+        "alpha255Pixels": 0,
+        "totalPixels": 1572864,
+        "nonzeroBounds": [
+          21,
+          5,
+          1000,
+          1520
+        ],
+        "coreBoundsAlpha128": [
+          184,
+          15,
+          838,
+          1500
+        ]
+      },
+      "animationFrames": 0,
+      "alphaReview": {
+        "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\review\\rogue-light-unarmed-a-pose-r1-alpha-review.png",
+        "sha256": "e7a9c01d8f8fe8ac3f29582a3e3b874bbe22c5e6d287120f46cfde21b3c97143",
+        "bytes": 336459,
+        "size": [
+          1024,
+          796
+        ],
+        "mode": "RGB"
+      },
+      "status": "raster-identity-and-a-pose-authoring-candidate",
+      "notes": [
+        "Full body, hands and boots visible; not a mesh, rig or clip."
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\masters\\rogue-light-unarmed-directions-r1.png",
+      "sha256": "4a3fdfb6664eb429b35f0e960349f1b6e58e7c8caf5ac7e1c120da0908d875c4",
+      "bytes": 1933733,
+      "size": [
+        1536,
+        1024
+      ],
+      "mode": "RGBA",
+      "alpha": {
+        "extrema": [
+          0,
+          254
+        ],
+        "alphaZeroPixels": 1131239,
+        "alpha1to15Pixels": 110633,
+        "alpha16to127Pixels": 13083,
+        "alpha128to253Pixels": 317306,
+        "alpha254Pixels": 603,
+        "alpha255Pixels": 0,
+        "totalPixels": 1572864,
+        "nonzeroBounds": [
+          29,
+          1,
+          1522,
+          1011
+        ],
+        "coreBoundsAlpha128": [
+          96,
+          13,
+          1436,
+          1008
+        ]
+      },
+      "animationFrames": 0,
+      "alphaReview": {
+        "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\review\\rogue-light-unarmed-directions-r1-alpha-review.png",
+        "sha256": "a60b305e12c837bab7e5a02f3eb29979ac34b27b3c9385c5c62e0e658880aa34",
+        "bytes": 370666,
+        "size": [
+          1536,
+          540
+        ],
+        "mode": "RGB"
+      },
+      "status": "reviewed-for-mechanical-authoring-still-extraction-only",
+      "orientationStatus": "nominal-eight-views-coherent-approximate-yaw",
+      "notes": [
+        "Camera is near chest level; not the requested approximately 35-degree elevated isometric camera.",
+        "Yaw labels follow visual front/profile/back orientation; exact 45-degree increments are not measured.",
+        "Costume/identity broadly consistent; individual views are independently generated, not projections of one mesh."
+      ],
+      "reviewedHashMatches": true
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\masters\\sorcerer-light-unarmed-a-pose-r1.png",
+      "sha256": "6ca758b5328b5a32e4cb96b84952a3390ecab9d75507efd984c3b4e8245cddd2",
+      "bytes": 1994923,
+      "size": [
+        1024,
+        1536
+      ],
+      "mode": "RGBA",
+      "alpha": {
+        "extrema": [
+          0,
+          254
+        ],
+        "alphaZeroPixels": 1022873,
+        "alpha1to15Pixels": 20623,
+        "alpha16to127Pixels": 4437,
+        "alpha128to253Pixels": 520965,
+        "alpha254Pixels": 3966,
+        "alpha255Pixels": 0,
+        "totalPixels": 1572864,
+        "nonzeroBounds": [
+          0,
+          9,
+          1008,
+          1492
+        ],
+        "coreBoundsAlpha128": [
+          135,
+          12,
+          885,
+          1488
+        ]
+      },
+      "animationFrames": 0,
+      "alphaReview": {
+        "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\review\\sorcerer-light-unarmed-a-pose-r1-alpha-review.png",
+        "sha256": "720c5055862bb044be07293e2ab0c9539dc4adc9604d9b6579b442b1bc4a7467",
+        "bytes": 413322,
+        "size": [
+          1024,
+          796
+        ],
+        "mode": "RGB"
+      },
+      "status": "raster-identity-and-a-pose-authoring-candidate",
+      "notes": [
+        "Full body, hands and boots visible; not a mesh, rig or clip."
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\masters\\sorcerer-light-unarmed-directions-r1.png",
+      "sha256": "6d9050c0fcf365de3805ea877d3f6ae3e571f3977cc63be7ed38b708db727fda",
+      "bytes": 1945491,
+      "size": [
+        1536,
+        1024
+      ],
+      "mode": "RGBA",
+      "alpha": {
+        "extrema": [
+          0,
+          254
+        ],
+        "alphaZeroPixels": 1057620,
+        "alpha1to15Pixels": 62557,
+        "alpha16to127Pixels": 10555,
+        "alpha128to253Pixels": 441572,
+        "alpha254Pixels": 560,
+        "alpha255Pixels": 0,
+        "totalPixels": 1572864,
+        "nonzeroBounds": [
+          37,
+          0,
+          1496,
+          1015
+        ],
+        "coreBoundsAlpha128": [
+          101,
+          10,
+          1430,
+          1010
+        ]
+      },
+      "animationFrames": 0,
+      "alphaReview": {
+        "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\review\\sorcerer-light-unarmed-directions-r1-alpha-review.png",
+        "sha256": "51eca430fd30c3ceae5e931cdbdea45bcb03129a8be9cf605985d9e18a92f948",
+        "bytes": 401416,
+        "size": [
+          1536,
+          540
+        ],
+        "mode": "RGB"
+      },
+      "status": "rejected-direction-sheet-preserved-no-derivatives",
+      "defects": [
+        {
+          "cell": [
+            1,
+            2
+          ],
+          "nominalDirection": "sw",
+          "observed": "front-right/SE; wrong side"
+        },
+        {
+          "cell": [
+            1,
+            4
+          ],
+          "nominalDirection": "nw",
+          "observed": "near-back/N; NW ambiguous and near duplicated"
+        }
+      ],
+      "notes": [
+        "R1 preserved byte-for-byte; no relabeling or mirroring used to conceal missing directions."
+      ]
+    },
+    {
+      "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\masters\\sorcerer-light-unarmed-directions-r2.png",
+      "sha256": "29817a7cbdc85cad159aedcd577cef14e8b4bc5ec0d109dc060db8fd8fd768e6",
+      "bytes": 1958665,
+      "size": [
+        1536,
+        1024
+      ],
+      "mode": "RGBA",
+      "alpha": {
+        "extrema": [
+          0,
+          254
+        ],
+        "alphaZeroPixels": 1042100,
+        "alpha1to15Pixels": 74361,
+        "alpha16to127Pixels": 9908,
+        "alpha128to253Pixels": 445251,
+        "alpha254Pixels": 1244,
+        "alpha255Pixels": 0,
+        "totalPixels": 1572864,
+        "nonzeroBounds": [
+          27,
+          1,
+          1514,
+          1024
+        ],
+        "coreBoundsAlpha128": [
+          101,
+          11,
+          1430,
+          1010
+        ]
+      },
+      "animationFrames": 0,
+      "alphaReview": {
+        "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\review\\sorcerer-light-unarmed-directions-r2-alpha-review.png",
+        "sha256": "518ad694eadb397af93781b3b20299a92bbd9b46bae95360e011ab7cd6a2e19e",
+        "bytes": 403180,
+        "size": [
+          1536,
+          540
+        ],
+        "mode": "RGB"
+      },
+      "status": "reviewed-for-mechanical-authoring-still-extraction-only",
+      "orientationStatus": "nominal-eight-views-coherent-approximate-yaw",
+      "notes": [
+        "R2 fixes R1 row1col2 SW and row1col4 NW nominal direction defects.",
+        "NE row2col2 is a shallow back-right turn; it does not demonstrate a 45-degree yaw.",
+        "Camera is near chest level; not the requested approximately 35-degree elevated isometric camera.",
+        "Costume/identity broadly consistent; individual views are independently generated, not projections of one mesh."
+      ],
+      "reviewedHashMatches": true
+    }
+  ],
+  "classes": [
+    {
+      "hero": "rogue",
+      "sourceRevision": "r1",
+      "sourceSha256": "4a3fdfb6664eb429b35f0e960349f1b6e58e7c8caf5ac7e1c120da0908d875c4",
+      "orientationStatus": "nominal-eight-views-coherent-approximate-yaw",
+      "notes": [
+        "Camera is near chest level; not the requested approximately 35-degree elevated isometric camera.",
+        "Yaw labels follow visual front/profile/back orientation; exact 45-degree increments are not measured.",
+        "Costume/identity broadly consistent; individual views are independently generated, not projections of one mesh."
+      ],
+      "status": "eight-authoring-stills-produced-not-gameplay-approved",
+      "canvas": [
+        512,
+        640
+      ],
+      "footpointTopLeftPixels": [
+        256,
+        608
+      ],
+      "footpointAlgorithm": "center X of alpha>=128 support envelope in lower 14% of core body height, Y at core bottom edge; an authored raster approximation",
+      "nativeClxPivotValidated": false,
+      "gameCameraValidated": false,
+      "exact45DegreeYawValidated": false,
+      "sharedUniformScale": 1.1610337972166997,
+      "frameCountPerDirection": 1,
+      "animationFrames": 0,
+      "resampler": "Pillow RGBA AFFINE/BICUBIC",
+      "alphaThresholdAppliedToOutput": false,
+      "outputs": [
+        {
+          "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\rogue\\authoring-directions-r1\\s\\still.png",
+          "sha256": "d7ee1881817416fea19b11f1e370a707f8c23619baa24b4bbd0f245a8a485f22",
+          "bytes": 186942,
+          "size": [
+            512,
+            640
+          ],
+          "mode": "RGBA",
+          "direction": "s",
+          "cellRowColOneBased": [
+            1,
+            1
+          ],
+          "sourceCropXYXY": [
+            0,
+            0,
+            384,
+            512
+          ],
+          "sourceCellSize": [
+            384,
+            512
+          ],
+          "sourceCoreBoundsAlpha128Local": [
+            96,
+            15,
+            307,
+            500
+          ],
+          "sourceNonzeroBoundsLocal": [
+            29,
+            11,
+            384,
+            512
+          ],
+          "sourceSupportBandLocal": [
+            114,
+            432,
+            285,
+            500
+          ],
+          "sourceFootpointLocal": [
+            199.5,
+            500.0
+          ],
+          "sourceFootpointSheet": [
+            199.5,
+            500.0
+          ],
+          "sourceAlpha": {
+            "extrema": [
+              0,
+              254
+            ],
+            "alphaZeroPixels": 135788,
+            "alpha1to15Pixels": 14914,
+            "alpha16to127Pixels": 1809,
+            "alpha128to253Pixels": 44067,
+            "alpha254Pixels": 30,
+            "alpha255Pixels": 0,
+            "totalPixels": 196608,
+            "nonzeroBounds": [
+              29,
+              11,
+              384,
+              512
+            ],
+            "coreBoundsAlpha128": [
+              96,
+              15,
+              307,
+              500
+            ]
+          },
+          "kind": "authoring-direction-still",
+          "frameCount": 1,
+          "animationFrames": 0,
+          "state": "natural-standing-authoring-pose-not-native-stand-clip",
+          "loop": false,
+          "sourcePath": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\masters\\rogue-light-unarmed-directions-r1.png",
+          "sourceSha256": "4a3fdfb6664eb429b35f0e960349f1b6e58e7c8caf5ac7e1c120da0908d875c4",
+          "footpointTopLeftPixels": [
+            256,
+            608
+          ],
+          "sharedUniformScale": 1.1610337972166997,
+          "forwardAffineCellToCanvas": [
+            1.1610337972166997,
+            0,
+            24.37375745526839,
+            0,
+            1.1610337972166997,
+            27.483101391650166
+          ],
+          "outputAlpha": {
+            "extrema": [
+              0,
+              255
+            ],
+            "alphaZeroPixels": 254122,
+            "alpha1to15Pixels": 11587,
+            "alpha16to127Pixels": 2566,
+            "alpha128to253Pixels": 58062,
+            "alpha254Pixels": 180,
+            "alpha255Pixels": 1163,
+            "totalPixels": 327680,
+            "nonzeroBounds": [
+              70,
+              41,
+              461,
+              622
+            ],
+            "coreBoundsAlpha128": [
+              136,
+              44,
+              380,
+              608
+            ]
+          },
+          "status": "candidate-authoring-only-no-runtime-promotion"
+        },
+        {
+          "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\rogue\\authoring-directions-r1\\sw\\still.png",
+          "sha256": "84072e3e26fd5cd2496f6157157eecadb4f2941fba45a39570bc1d256bcc77ca",
+          "bytes": 182041,
+          "size": [
+            512,
+            640
+          ],
+          "mode": "RGBA",
+          "direction": "sw",
+          "cellRowColOneBased": [
+            1,
+            2
+          ],
+          "sourceCropXYXY": [
+            384,
+            0,
+            768,
+            512
+          ],
+          "sourceCellSize": [
+            384,
+            512
+          ],
+          "sourceCoreBoundsAlpha128Local": [
+            96,
+            15,
+            282,
+            505
+          ],
+          "sourceNonzeroBoundsLocal": [
+            1,
+            5,
+            384,
+            512
+          ],
+          "sourceSupportBandLocal": [
+            105,
+            436,
+            267,
+            505
+          ],
+          "sourceFootpointLocal": [
+            186.0,
+            505.0
+          ],
+          "sourceFootpointSheet": [
+            570.0,
+            505.0
+          ],
+          "sourceAlpha": {
+            "extrema": [
+              0,
+              254
+            ],
+            "alphaZeroPixels": 137164,
+            "alpha1to15Pixels": 14660,
+            "alpha16to127Pixels": 1787,
+            "alpha128to253Pixels": 42783,
+            "alpha254Pixels": 214,
+            "alpha255Pixels": 0,
+            "totalPixels": 196608,
+            "nonzeroBounds": [
+              1,
+              5,
+              384,
+              512
+            ],
+            "coreBoundsAlpha128": [
+              96,
+              15,
+              282,
+              505
+            ]
+          },
+          "kind": "authoring-direction-still",
+          "frameCount": 1,
+          "animationFrames": 0,
+          "state": "natural-standing-authoring-pose-not-native-stand-clip",
+          "loop": false,
+          "sourcePath": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\masters\\rogue-light-unarmed-directions-r1.png",
+          "sourceSha256": "4a3fdfb6664eb429b35f0e960349f1b6e58e7c8caf5ac7e1c120da0908d875c4",
+          "footpointTopLeftPixels": [
+            256,
+            608
+          ],
+          "sharedUniformScale": 1.1610337972166997,
+          "forwardAffineCellToCanvas": [
+            1.1610337972166997,
+            0,
+            40.04771371769385,
+            0,
+            1.1610337972166997,
+            21.677932405566594
+          ],
+          "outputAlpha": {
+            "extrema": [
+              0,
+              255
+            ],
+            "alphaZeroPixels": 256316,
+            "alpha1to15Pixels": 10954,
+            "alpha16to127Pixels": 2464,
+            "alpha128to253Pixels": 56633,
+            "alpha254Pixels": 322,
+            "alpha255Pixels": 991,
+            "totalPixels": 327680,
+            "nonzeroBounds": [
+              41,
+              28,
+              481,
+              616
+            ],
+            "coreBoundsAlpha128": [
+              152,
+              39,
+              367,
+              608
+            ]
+          },
+          "status": "candidate-authoring-only-no-runtime-promotion"
+        },
+        {
+          "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\rogue\\authoring-directions-r1\\w\\still.png",
+          "sha256": "594a9f517f8a3eafabec353277262713269300e02d071f7a37708a0c37e4eaea",
+          "bytes": 126172,
+          "size": [
+            512,
+            640
+          ],
+          "mode": "RGBA",
+          "direction": "w",
+          "cellRowColOneBased": [
+            1,
+            3
+          ],
+          "sourceCropXYXY": [
+            768,
+            0,
+            1152,
+            512
+          ],
+          "sourceCellSize": [
+            384,
+            512
+          ],
+          "sourceCoreBoundsAlpha128Local": [
+            137,
+            14,
+            238,
+            504
+          ],
+          "sourceNonzeroBoundsLocal": [
+            1,
+            5,
+            380,
+            512
+          ],
+          "sourceSupportBandLocal": [
+            137,
+            435,
+            233,
+            504
+          ],
+          "sourceFootpointLocal": [
+            185.0,
+            504.0
+          ],
+          "sourceFootpointSheet": [
+            953.0,
+            504.0
+          ],
+          "sourceAlpha": {
+            "extrema": [
+              0,
+              254
+            ],
+            "alphaZeroPixels": 156472,
+            "alpha1to15Pixels": 8164,
+            "alpha16to127Pixels": 1176,
+            "alpha128to253Pixels": 30769,
+            "alpha254Pixels": 27,
+            "alpha255Pixels": 0,
+            "totalPixels": 196608,
+            "nonzeroBounds": [
+              1,
+              5,
+              380,
+              512
+            ],
+            "coreBoundsAlpha128": [
+              137,
+              14,
+              238,
+              504
+            ]
+          },
+          "kind": "authoring-direction-still",
+          "frameCount": 1,
+          "animationFrames": 0,
+          "state": "natural-standing-authoring-pose-not-native-stand-clip",
+          "loop": false,
+          "sourcePath": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\masters\\rogue-light-unarmed-directions-r1.png",
+          "sourceSha256": "4a3fdfb6664eb429b35f0e960349f1b6e58e7c8caf5ac7e1c120da0908d875c4",
+          "footpointTopLeftPixels": [
+            256,
+            608
+          ],
+          "sharedUniformScale": 1.1610337972166997,
+          "forwardAffineCellToCanvas": [
+            1.1610337972166997,
+            0,
+            41.208747514910556,
+            0,
+            1.1610337972166997,
+            22.838966202783354
+          ],
+          "outputAlpha": {
+            "extrema": [
+              0,
+              255
+            ],
+            "alphaZeroPixels": 278314,
+            "alpha1to15Pixels": 6243,
+            "alpha16to127Pixels": 1643,
+            "alpha128to253Pixels": 40877,
+            "alpha254Pixels": 107,
+            "alpha255Pixels": 496,
+            "totalPixels": 327680,
+            "nonzeroBounds": [
+              52,
+              29,
+              465,
+              617
+            ],
+            "coreBoundsAlpha128": [
+              201,
+              39,
+              318,
+              608
+            ]
+          },
+          "status": "candidate-authoring-only-no-runtime-promotion"
+        },
+        {
+          "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\rogue\\authoring-directions-r1\\nw\\still.png",
+          "sha256": "7b3a54afb34ebc0e712f3b326779957ae5ca05f06473906df9978b8fb8337ef8",
+          "bytes": 173033,
+          "size": [
+            512,
+            640
+          ],
+          "mode": "RGBA",
+          "direction": "nw",
+          "cellRowColOneBased": [
+            1,
+            4
+          ],
+          "sourceCropXYXY": [
+            1152,
+            0,
+            1536,
+            512
+          ],
+          "sourceCellSize": [
+            384,
+            512
+          ],
+          "sourceCoreBoundsAlpha128Local": [
+            99,
+            13,
+            260,
+            504
+          ],
+          "sourceNonzeroBoundsLocal": [
+            9,
+            1,
+            368,
+            512
+          ],
+          "sourceSupportBandLocal": [
+            107,
+            435,
+            256,
+            504
+          ],
+          "sourceFootpointLocal": [
+            181.5,
+            504.0
+          ],
+          "sourceFootpointSheet": [
+            1333.5,
+            504.0
+          ],
+          "sourceAlpha": {
+            "extrema": [
+              0,
+              254
+            ],
+            "alphaZeroPixels": 138502,
+            "alpha1to15Pixels": 14311,
+            "alpha16to127Pixels": 1673,
+            "alpha128to253Pixels": 42100,
+            "alpha254Pixels": 22,
+            "alpha255Pixels": 0,
+            "totalPixels": 196608,
+            "nonzeroBounds": [
+              9,
+              1,
+              368,
+              512
+            ],
+            "coreBoundsAlpha128": [
+              99,
+              13,
+              260,
+              504
+            ]
+          },
+          "kind": "authoring-direction-still",
+          "frameCount": 1,
+          "animationFrames": 0,
+          "state": "natural-standing-authoring-pose-not-native-stand-clip",
+          "loop": false,
+          "sourcePath": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\masters\\rogue-light-unarmed-directions-r1.png",
+          "sourceSha256": "4a3fdfb6664eb429b35f0e960349f1b6e58e7c8caf5ac7e1c120da0908d875c4",
+          "footpointTopLeftPixels": [
+            256,
+            608
+          ],
+          "sharedUniformScale": 1.1610337972166997,
+          "forwardAffineCellToCanvas": [
+            1.1610337972166997,
+            0,
+            45.27236580516899,
+            0,
+            1.1610337972166997,
+            22.838966202783354
+          ],
+          "outputAlpha": {
+            "extrema": [
+              0,
+              255
+            ],
+            "alphaZeroPixels": 257285,
+            "alpha1to15Pixels": 11392,
+            "alpha16to127Pixels": 2210,
+            "alpha128to253Pixels": 55795,
+            "alpha254Pixels": 152,
+            "alpha255Pixels": 846,
+            "totalPixels": 327680,
+            "nonzeroBounds": [
+              74,
+              24,
+              470,
+              617
+            ],
+            "coreBoundsAlpha128": [
+              160,
+              38,
+              347,
+              608
+            ]
+          },
+          "status": "candidate-authoring-only-no-runtime-promotion"
+        },
+        {
+          "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\rogue\\authoring-directions-r1\\n\\still.png",
+          "sha256": "b8cf4682773bb7023776cd03f57e8b6b0f081773f0151a1a99c5b59963f3c358",
+          "bytes": 182157,
+          "size": [
+            512,
+            640
+          ],
+          "mode": "RGBA",
+          "direction": "n",
+          "cellRowColOneBased": [
+            2,
+            1
+          ],
+          "sourceCropXYXY": [
+            0,
+            512,
+            384,
+            1024
+          ],
+          "sourceCellSize": [
+            384,
+            512
+          ],
+          "sourceCoreBoundsAlpha128Local": [
+            96,
+            8,
+            300,
+            487
+          ],
+          "sourceNonzeroBoundsLocal": [
+            29,
+            0,
+            384,
+            496
+          ],
+          "sourceSupportBandLocal": [
+            113,
+            420,
+            282,
+            487
+          ],
+          "sourceFootpointLocal": [
+            197.5,
+            487.0
+          ],
+          "sourceFootpointSheet": [
+            197.5,
+            999.0
+          ],
+          "sourceAlpha": {
+            "extrema": [
+              0,
+              254
+            ],
+            "alphaZeroPixels": 132235,
+            "alpha1to15Pixels": 19079,
+            "alpha16to127Pixels": 1971,
+            "alpha128to253Pixels": 43304,
+            "alpha254Pixels": 19,
+            "alpha255Pixels": 0,
+            "totalPixels": 196608,
+            "nonzeroBounds": [
+              29,
+              0,
+              384,
+              496
+            ],
+            "coreBoundsAlpha128": [
+              96,
+              8,
+              300,
+              487
+            ]
+          },
+          "kind": "authoring-direction-still",
+          "frameCount": 1,
+          "animationFrames": 0,
+          "state": "natural-standing-authoring-pose-not-native-stand-clip",
+          "loop": false,
+          "sourcePath": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\masters\\rogue-light-unarmed-directions-r1.png",
+          "sourceSha256": "4a3fdfb6664eb429b35f0e960349f1b6e58e7c8caf5ac7e1c120da0908d875c4",
+          "footpointTopLeftPixels": [
+            256,
+            608
+          ],
+          "sharedUniformScale": 1.1610337972166997,
+          "forwardAffineCellToCanvas": [
+            1.1610337972166997,
+            0,
+            26.695825049701796,
+            0,
+            1.1610337972166997,
+            42.57654075546725
+          ],
+          "outputAlpha": {
+            "extrema": [
+              0,
+              255
+            ],
+            "alphaZeroPixels": 250597,
+            "alpha1to15Pixels": 15994,
+            "alpha16to127Pixels": 2716,
+            "alpha128to253Pixels": 57272,
+            "alpha254Pixels": 161,
+            "alpha255Pixels": 940,
+            "totalPixels": 327680,
+            "nonzeroBounds": [
+              63,
+              43,
+              473,
+              618
+            ],
+            "coreBoundsAlpha128": [
+              138,
+              52,
+              375,
+              608
+            ]
+          },
+          "status": "candidate-authoring-only-no-runtime-promotion"
+        },
+        {
+          "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\rogue\\authoring-directions-r1\\ne\\still.png",
+          "sha256": "f20c38d5617486d4f42d9b7bb5bf0db5cb9a06d3430cbbbb7f363f2499c06bf1",
+          "bytes": 173691,
+          "size": [
+            512,
+            640
+          ],
+          "mode": "RGBA",
+          "direction": "ne",
+          "cellRowColOneBased": [
+            2,
+            2
+          ],
+          "sourceCropXYXY": [
+            384,
+            512,
+            768,
+            1024
+          ],
+          "sourceCellSize": [
+            384,
+            512
+          ],
+          "sourceCoreBoundsAlpha128Local": [
+            111,
+            6,
+            291,
+            487
+          ],
+          "sourceNonzeroBoundsLocal": [
+            1,
+            0,
+            384,
+            494
+          ],
+          "sourceSupportBandLocal": [
+            121,
+            420,
+            285,
+            487
+          ],
+          "sourceFootpointLocal": [
+            203.0,
+            487.0
+          ],
+          "sourceFootpointSheet": [
+            587.0,
+            999.0
+          ],
+          "sourceAlpha": {
+            "extrema": [
+              0,
+              254
+            ],
+            "alphaZeroPixels": 137368,
+            "alpha1to15Pixels": 14983,
+            "alpha16to127Pixels": 1715,
+            "alpha128to253Pixels": 42522,
+            "alpha254Pixels": 20,
+            "alpha255Pixels": 0,
+            "totalPixels": 196608,
+            "nonzeroBounds": [
+              1,
+              0,
+              384,
+              494
+            ],
+            "coreBoundsAlpha128": [
+              111,
+              6,
+              291,
+              487
+            ]
+          },
+          "kind": "authoring-direction-still",
+          "frameCount": 1,
+          "animationFrames": 0,
+          "state": "natural-standing-authoring-pose-not-native-stand-clip",
+          "loop": false,
+          "sourcePath": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\masters\\rogue-light-unarmed-directions-r1.png",
+          "sourceSha256": "4a3fdfb6664eb429b35f0e960349f1b6e58e7c8caf5ac7e1c120da0908d875c4",
+          "footpointTopLeftPixels": [
+            256,
+            608
+          ],
+          "sharedUniformScale": 1.1610337972166997,
+          "forwardAffineCellToCanvas": [
+            1.1610337972166997,
+            0,
+            20.310139165009957,
+            0,
+            1.1610337972166997,
+            42.57654075546725
+          ],
+          "outputAlpha": {
+            "extrema": [
+              0,
+              255
+            ],
+            "alphaZeroPixels": 255635,
+            "alpha1to15Pixels": 12376,
+            "alpha16to127Pixels": 2386,
+            "alpha128to253Pixels": 56196,
+            "alpha254Pixels": 144,
+            "alpha255Pixels": 943,
+            "totalPixels": 327680,
+            "nonzeroBounds": [
+              31,
+              43,
+              459,
+              616
+            ],
+            "coreBoundsAlpha128": [
+              149,
+              50,
+              358,
+              608
+            ]
+          },
+          "status": "candidate-authoring-only-no-runtime-promotion"
+        },
+        {
+          "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\rogue\\authoring-directions-r1\\e\\still.png",
+          "sha256": "e924cfcdf356a28a9976c7d12a81e9898835d2b8c1d1e724d566d1e147bcbdb7",
+          "bytes": 119728,
+          "size": [
+            512,
+            640
+          ],
+          "mode": "RGBA",
+          "direction": "e",
+          "cellRowColOneBased": [
+            2,
+            3
+          ],
+          "sourceCropXYXY": [
+            768,
+            512,
+            1152,
+            1024
+          ],
+          "sourceCellSize": [
+            384,
+            512
+          ],
+          "sourceCoreBoundsAlpha128Local": [
+            138,
+            6,
+            231,
+            492
+          ],
+          "sourceNonzeroBoundsLocal": [
+            1,
+            0,
+            384,
+            496
+          ],
+          "sourceSupportBandLocal": [
+            143,
+            424,
+            231,
+            492
+          ],
+          "sourceFootpointLocal": [
+            187.0,
+            492.0
+          ],
+          "sourceFootpointSheet": [
+            955.0,
+            1004.0
+          ],
+          "sourceAlpha": {
+            "extrema": [
+              0,
+              254
+            ],
+            "alphaZeroPixels": 159604,
+            "alpha1to15Pixels": 6732,
+            "alpha16to127Pixels": 1131,
+            "alpha128to253Pixels": 29121,
+            "alpha254Pixels": 20,
+            "alpha255Pixels": 0,
+            "totalPixels": 196608,
+            "nonzeroBounds": [
+              1,
+              0,
+              384,
+              496
+            ],
+            "coreBoundsAlpha128": [
+              138,
+              6,
+              231,
+              492
+            ]
+          },
+          "kind": "authoring-direction-still",
+          "frameCount": 1,
+          "animationFrames": 0,
+          "state": "natural-standing-authoring-pose-not-native-stand-clip",
+          "loop": false,
+          "sourcePath": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\masters\\rogue-light-unarmed-directions-r1.png",
+          "sourceSha256": "4a3fdfb6664eb429b35f0e960349f1b6e58e7c8caf5ac7e1c120da0908d875c4",
+          "footpointTopLeftPixels": [
+            256,
+            608
+          ],
+          "sharedUniformScale": 1.1610337972166997,
+          "forwardAffineCellToCanvas": [
+            1.1610337972166997,
+            0,
+            38.88667992047715,
+            0,
+            1.1610337972166997,
+            36.77137176938368
+          ],
+          "outputAlpha": {
+            "extrema": [
+              0,
+              255
+            ],
+            "alphaZeroPixels": 281774,
+            "alpha1to15Pixels": 5109,
+            "alpha16to127Pixels": 1511,
+            "alpha128to253Pixels": 38588,
+            "alpha254Pixels": 122,
+            "alpha255Pixels": 576,
+            "totalPixels": 327680,
+            "nonzeroBounds": [
+              40,
+              37,
+              485,
+              612
+            ],
+            "coreBoundsAlpha128": [
+              200,
+              44,
+              307,
+              608
+            ]
+          },
+          "status": "candidate-authoring-only-no-runtime-promotion"
+        },
+        {
+          "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\rogue\\authoring-directions-r1\\se\\still.png",
+          "sha256": "004a0ac552a05654dc02de4ef78f052b59fbaec9f3958fa832dfe00c60f66f62",
+          "bytes": 181975,
+          "size": [
+            512,
+            640
+          ],
+          "mode": "RGBA",
+          "direction": "se",
+          "cellRowColOneBased": [
+            2,
+            4
+          ],
+          "sourceCropXYXY": [
+            1152,
+            512,
+            1536,
+            1024
+          ],
+          "sourceCellSize": [
+            384,
+            512
+          ],
+          "sourceCoreBoundsAlpha128Local": [
+            102,
+            6,
+            284,
+            496
+          ],
+          "sourceNonzeroBoundsLocal": [
+            1,
+            0,
+            370,
+            499
+          ],
+          "sourceSupportBandLocal": [
+            114,
+            427,
+            279,
+            496
+          ],
+          "sourceFootpointLocal": [
+            196.5,
+            496.0
+          ],
+          "sourceFootpointSheet": [
+            1348.5,
+            1008.0
+          ],
+          "sourceAlpha": {
+            "extrema": [
+              0,
+              254
+            ],
+            "alphaZeroPixels": 134106,
+            "alpha1to15Pixels": 17790,
+            "alpha16to127Pixels": 1821,
+            "alpha128to253Pixels": 42640,
+            "alpha254Pixels": 251,
+            "alpha255Pixels": 0,
+            "totalPixels": 196608,
+            "nonzeroBounds": [
+              1,
+              0,
+              370,
+              499
+            ],
+            "coreBoundsAlpha128": [
+              102,
+              6,
+              284,
+              496
+            ]
+          },
+          "kind": "authoring-direction-still",
+          "frameCount": 1,
+          "animationFrames": 0,
+          "state": "natural-standing-authoring-pose-not-native-stand-clip",
+          "loop": false,
+          "sourcePath": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\masters\\rogue-light-unarmed-directions-r1.png",
+          "sourceSha256": "4a3fdfb6664eb429b35f0e960349f1b6e58e7c8caf5ac7e1c120da0908d875c4",
+          "footpointTopLeftPixels": [
+            256,
+            608
+          ],
+          "sharedUniformScale": 1.1610337972166997,
+          "forwardAffineCellToCanvas": [
+            1.1610337972166997,
+            0,
+            27.8568588469185,
+            0,
+            1.1610337972166997,
+            32.12723658051698
+          ],
+          "outputAlpha": {
+            "extrema": [
+              0,
+              255
+            ],
+            "alphaZeroPixels": 252868,
+            "alpha1to15Pixels": 14524,
+            "alpha16to127Pixels": 2457,
+            "alpha128to253Pixels": 56621,
+            "alpha254Pixels": 334,
+            "alpha255Pixels": 876,
+            "totalPixels": 327680,
+            "nonzeroBounds": [
+              29,
+              32,
+              457,
+              612
+            ],
+            "coreBoundsAlpha128": [
+              147,
+              40,
+              357,
+              608
+            ]
+          },
+          "status": "candidate-authoring-only-no-runtime-promotion"
+        }
+      ],
+      "review": {
+        "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\review\\rogue-authoring-directions-r1-still-review.png",
+        "sha256": "2e49cb83ad793356a63eca63b3ff16387b7edcf5234b105275b9d6ef0dcc2945",
+        "bytes": 493218,
+        "size": [
+          2048,
+          684
+        ],
+        "mode": "RGB"
+      }
+    },
+    {
+      "hero": "sorcerer",
+      "sourceRevision": "r2",
+      "sourceSha256": "29817a7cbdc85cad159aedcd577cef14e8b4bc5ec0d109dc060db8fd8fd768e6",
+      "orientationStatus": "nominal-eight-views-coherent-approximate-yaw",
+      "notes": [
+        "R2 fixes R1 row1col2 SW and row1col4 NW nominal direction defects.",
+        "NE row2col2 is a shallow back-right turn; it does not demonstrate a 45-degree yaw.",
+        "Camera is near chest level; not the requested approximately 35-degree elevated isometric camera.",
+        "Costume/identity broadly consistent; individual views are independently generated, not projections of one mesh."
+      ],
+      "status": "eight-authoring-stills-produced-not-gameplay-approved",
+      "canvas": [
+        512,
+        640
+      ],
+      "footpointTopLeftPixels": [
+        256,
+        608
+      ],
+      "footpointAlgorithm": "center X of alpha>=128 support envelope in lower 14% of core body height, Y at core bottom edge; an authored raster approximation",
+      "nativeClxPivotValidated": false,
+      "gameCameraValidated": false,
+      "exact45DegreeYawValidated": false,
+      "sharedUniformScale": 1.1085450346420322,
+      "frameCountPerDirection": 1,
+      "animationFrames": 0,
+      "resampler": "Pillow RGBA AFFINE/BICUBIC",
+      "alphaThresholdAppliedToOutput": false,
+      "outputs": [
+        {
+          "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\sorcerer\\authoring-directions-r2\\s\\still.png",
+          "sha256": "ed3470311912f83aa43ee42ef5b9f9b6882ef9aecbdf3e81946176134b241622",
+          "bytes": 206195,
+          "size": [
+            512,
+            640
+          ],
+          "mode": "RGBA",
+          "direction": "s",
+          "cellRowColOneBased": [
+            1,
+            1
+          ],
+          "sourceCropXYXY": [
+            0,
+            0,
+            384,
+            512
+          ],
+          "sourceCellSize": [
+            384,
+            512
+          ],
+          "sourceCoreBoundsAlpha128Local": [
+            101,
+            12,
+            329,
+            505
+          ],
+          "sourceNonzeroBoundsLocal": [
+            27,
+            9,
+            384,
+            512
+          ],
+          "sourceSupportBandLocal": [
+            125,
+            436,
+            302,
+            505
+          ],
+          "sourceFootpointLocal": [
+            213.5,
+            505.0
+          ],
+          "sourceFootpointSheet": [
+            213.5,
+            505.0
+          ],
+          "sourceAlpha": {
+            "extrema": [
+              0,
+              254
+            ],
+            "alphaZeroPixels": 120666,
+            "alpha1to15Pixels": 11821,
+            "alpha16to127Pixels": 1567,
+            "alpha128to253Pixels": 62200,
+            "alpha254Pixels": 354,
+            "alpha255Pixels": 0,
+            "totalPixels": 196608,
+            "nonzeroBounds": [
+              27,
+              9,
+              384,
+              512
+            ],
+            "coreBoundsAlpha128": [
+              101,
+              12,
+              329,
+              505
+            ]
+          },
+          "kind": "authoring-direction-still",
+          "frameCount": 1,
+          "animationFrames": 0,
+          "state": "natural-standing-authoring-pose-not-native-stand-clip",
+          "loop": false,
+          "sourcePath": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\masters\\sorcerer-light-unarmed-directions-r2.png",
+          "sourceSha256": "29817a7cbdc85cad159aedcd577cef14e8b4bc5ec0d109dc060db8fd8fd768e6",
+          "footpointTopLeftPixels": [
+            256,
+            608
+          ],
+          "sharedUniformScale": 1.1085450346420322,
+          "forwardAffineCellToCanvas": [
+            1.1085450346420322,
+            0,
+            19.325635103926118,
+            0,
+            1.1085450346420322,
+            48.184757505773746
+          ],
+          "outputAlpha": {
+            "extrema": [
+              0,
+              255
+            ],
+            "alphaZeroPixels": 239312,
+            "alpha1to15Pixels": 9451,
+            "alpha16to127Pixels": 2065,
+            "alpha128to253Pixels": 75505,
+            "alpha254Pixels": 408,
+            "alpha255Pixels": 939,
+            "totalPixels": 327680,
+            "nonzeroBounds": [
+              73,
+              58,
+              438,
+              616
+            ],
+            "coreBoundsAlpha128": [
+              132,
+              61,
+              384,
+              608
+            ]
+          },
+          "status": "candidate-authoring-only-no-runtime-promotion"
+        },
+        {
+          "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\sorcerer\\authoring-directions-r2\\sw\\still.png",
+          "sha256": "9f087bdd4ebca7d261b4e4ff919f6baf56e857eb72f9f51095a9dd111818a157",
+          "bytes": 199298,
+          "size": [
+            512,
+            640
+          ],
+          "mode": "RGBA",
+          "direction": "sw",
+          "cellRowColOneBased": [
+            1,
+            2
+          ],
+          "sourceCropXYXY": [
+            384,
+            0,
+            768,
+            512
+          ],
+          "sourceCellSize": [
+            384,
+            512
+          ],
+          "sourceCoreBoundsAlpha128Local": [
+            81,
+            11,
+            291,
+            506
+          ],
+          "sourceNonzeroBoundsLocal": [
+            5,
+            5,
+            384,
+            512
+          ],
+          "sourceSupportBandLocal": [
+            87,
+            437,
+            267,
+            506
+          ],
+          "sourceFootpointLocal": [
+            177.0,
+            506.0
+          ],
+          "sourceFootpointSheet": [
+            561.0,
+            506.0
+          ],
+          "sourceAlpha": {
+            "extrema": [
+              0,
+              254
+            ],
+            "alphaZeroPixels": 123027,
+            "alpha1to15Pixels": 10891,
+            "alpha16to127Pixels": 1373,
+            "alpha128to253Pixels": 61227,
+            "alpha254Pixels": 90,
+            "alpha255Pixels": 0,
+            "totalPixels": 196608,
+            "nonzeroBounds": [
+              5,
+              5,
+              384,
+              512
+            ],
+            "coreBoundsAlpha128": [
+              81,
+              11,
+              291,
+              506
+            ]
+          },
+          "kind": "authoring-direction-still",
+          "frameCount": 1,
+          "animationFrames": 0,
+          "state": "natural-standing-authoring-pose-not-native-stand-clip",
+          "loop": false,
+          "sourcePath": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\masters\\sorcerer-light-unarmed-directions-r2.png",
+          "sourceSha256": "29817a7cbdc85cad159aedcd577cef14e8b4bc5ec0d109dc060db8fd8fd768e6",
+          "footpointTopLeftPixels": [
+            256,
+            608
+          ],
+          "sharedUniformScale": 1.1085450346420322,
+          "forwardAffineCellToCanvas": [
+            1.1085450346420322,
+            0,
+            59.78752886836028,
+            0,
+            1.1085450346420322,
+            47.076212471131726
+          ],
+          "outputAlpha": {
+            "extrema": [
+              0,
+              255
+            ],
+            "alphaZeroPixels": 242354,
+            "alpha1to15Pixels": 8200,
+            "alpha16to127Pixels": 1809,
+            "alpha128to253Pixels": 74150,
+            "alpha254Pixels": 215,
+            "alpha255Pixels": 952,
+            "totalPixels": 327680,
+            "nonzeroBounds": [
+              70,
+              53,
+              483,
+              615
+            ],
+            "coreBoundsAlpha128": [
+              149,
+              60,
+              383,
+              608
+            ]
+          },
+          "status": "candidate-authoring-only-no-runtime-promotion"
+        },
+        {
+          "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\sorcerer\\authoring-directions-r2\\w\\still.png",
+          "sha256": "eecb60c96ec22d9cd7079b633474d24197f90075aa651e06b1aa6eda2343c0f1",
+          "bytes": 132652,
+          "size": [
+            512,
+            640
+          ],
+          "mode": "RGBA",
+          "direction": "w",
+          "cellRowColOneBased": [
+            1,
+            3
+          ],
+          "sourceCropXYXY": [
+            768,
+            0,
+            1152,
+            512
+          ],
+          "sourceCellSize": [
+            384,
+            512
+          ],
+          "sourceCoreBoundsAlpha128Local": [
+            101,
+            12,
+            258,
+            508
+          ],
+          "sourceNonzeroBoundsLocal": [
+            1,
+            6,
+            384,
+            512
+          ],
+          "sourceSupportBandLocal": [
+            126,
+            439,
+            209,
+            508
+          ],
+          "sourceFootpointLocal": [
+            167.5,
+            508.0
+          ],
+          "sourceFootpointSheet": [
+            935.5,
+            508.0
+          ],
+          "sourceAlpha": {
+            "extrema": [
+              0,
+              254
+            ],
+            "alphaZeroPixels": 146969,
+            "alpha1to15Pixels": 6223,
+            "alpha16to127Pixels": 873,
+            "alpha128to253Pixels": 42442,
+            "alpha254Pixels": 101,
+            "alpha255Pixels": 0,
+            "totalPixels": 196608,
+            "nonzeroBounds": [
+              1,
+              6,
+              384,
+              512
+            ],
+            "coreBoundsAlpha128": [
+              101,
+              12,
+              258,
+              508
+            ]
+          },
+          "kind": "authoring-direction-still",
+          "frameCount": 1,
+          "animationFrames": 0,
+          "state": "natural-standing-authoring-pose-not-native-stand-clip",
+          "loop": false,
+          "sourcePath": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\masters\\sorcerer-light-unarmed-directions-r2.png",
+          "sourceSha256": "29817a7cbdc85cad159aedcd577cef14e8b4bc5ec0d109dc060db8fd8fd768e6",
+          "footpointTopLeftPixels": [
+            256,
+            608
+          ],
+          "sharedUniformScale": 1.1085450346420322,
+          "forwardAffineCellToCanvas": [
+            1.1085450346420322,
+            0,
+            70.31870669745959,
+            0,
+            1.1085450346420322,
+            44.85912240184757
+          ],
+          "outputAlpha": {
+            "extrema": [
+              0,
+              255
+            ],
+            "alphaZeroPixels": 269769,
+            "alpha1to15Pixels": 4472,
+            "alpha16to127Pixels": 1197,
+            "alpha128to253Pixels": 51382,
+            "alpha254Pixels": 132,
+            "alpha255Pixels": 728,
+            "totalPixels": 327680,
+            "nonzeroBounds": [
+              76,
+              54,
+              496,
+              612
+            ],
+            "coreBoundsAlpha128": [
+              182,
+              58,
+              356,
+              608
+            ]
+          },
+          "status": "candidate-authoring-only-no-runtime-promotion"
+        },
+        {
+          "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\sorcerer\\authoring-directions-r2\\nw\\still.png",
+          "sha256": "4f934520576519350be0a22fff0c1aebfacf6eed0688e2dc25a377af195ba64f",
+          "bytes": 171343,
+          "size": [
+            512,
+            640
+          ],
+          "mode": "RGBA",
+          "direction": "nw",
+          "cellRowColOneBased": [
+            1,
+            4
+          ],
+          "sourceCropXYXY": [
+            1152,
+            0,
+            1536,
+            512
+          ],
+          "sourceCellSize": [
+            384,
+            512
+          ],
+          "sourceCoreBoundsAlpha128Local": [
+            49,
+            12,
+            248,
+            507
+          ],
+          "sourceNonzeroBoundsLocal": [
+            1,
+            1,
+            352,
+            512
+          ],
+          "sourceSupportBandLocal": [
+            53,
+            438,
+            234,
+            507
+          ],
+          "sourceFootpointLocal": [
+            143.5,
+            507.0
+          ],
+          "sourceFootpointSheet": [
+            1295.5,
+            507.0
+          ],
+          "sourceAlpha": {
+            "extrema": [
+              0,
+              254
+            ],
+            "alphaZeroPixels": 129460,
+            "alpha1to15Pixels": 8108,
+            "alpha16to127Pixels": 1202,
+            "alpha128to253Pixels": 57809,
+            "alpha254Pixels": 29,
+            "alpha255Pixels": 0,
+            "totalPixels": 196608,
+            "nonzeroBounds": [
+              1,
+              1,
+              352,
+              512
+            ],
+            "coreBoundsAlpha128": [
+              49,
+              12,
+              248,
+              507
+            ]
+          },
+          "kind": "authoring-direction-still",
+          "frameCount": 1,
+          "animationFrames": 0,
+          "state": "natural-standing-authoring-pose-not-native-stand-clip",
+          "loop": false,
+          "sourcePath": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\masters\\sorcerer-light-unarmed-directions-r2.png",
+          "sourceSha256": "29817a7cbdc85cad159aedcd577cef14e8b4bc5ec0d109dc060db8fd8fd768e6",
+          "footpointTopLeftPixels": [
+            256,
+            608
+          ],
+          "sharedUniformScale": 1.1085450346420322,
+          "forwardAffineCellToCanvas": [
+            1.1085450346420322,
+            0,
+            96.92378752886836,
+            0,
+            1.1085450346420322,
+            45.967667436489705
+          ],
+          "outputAlpha": {
+            "extrema": [
+              0,
+              255
+            ],
+            "alphaZeroPixels": 248660,
+            "alpha1to15Pixels": 6422,
+            "alpha16to127Pixels": 1541,
+            "alpha128to253Pixels": 70077,
+            "alpha254Pixels": 113,
+            "alpha255Pixels": 867,
+            "totalPixels": 327680,
+            "nonzeroBounds": [
+              98,
+              49,
+              465,
+              614
+            ],
+            "coreBoundsAlpha128": [
+              151,
+              59,
+              372,
+              608
+            ]
+          },
+          "status": "candidate-authoring-only-no-runtime-promotion"
+        },
+        {
+          "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\sorcerer\\authoring-directions-r2\\n\\still.png",
+          "sha256": "b1efe92bfb09bb653a76984ecd90525a0a227b48953174c232bc4da206a2b2a7",
+          "bytes": 188433,
+          "size": [
+            512,
+            640
+          ],
+          "mode": "RGBA",
+          "direction": "n",
+          "cellRowColOneBased": [
+            2,
+            1
+          ],
+          "sourceCropXYXY": [
+            0,
+            512,
+            384,
+            1024
+          ],
+          "sourceCellSize": [
+            384,
+            512
+          ],
+          "sourceCoreBoundsAlpha128Local": [
+            103,
+            8,
+            324,
+            493
+          ],
+          "sourceNonzeroBoundsLocal": [
+            39,
+            0,
+            384,
+            497
+          ],
+          "sourceSupportBandLocal": [
+            122,
+            425,
+            302,
+            493
+          ],
+          "sourceFootpointLocal": [
+            212.0,
+            493.0
+          ],
+          "sourceFootpointSheet": [
+            212.0,
+            1005.0
+          ],
+          "sourceAlpha": {
+            "extrema": [
+              0,
+              254
+            ],
+            "alphaZeroPixels": 121399,
+            "alpha1to15Pixels": 11104,
+            "alpha16to127Pixels": 1437,
+            "alpha128to253Pixels": 62480,
+            "alpha254Pixels": 188,
+            "alpha255Pixels": 0,
+            "totalPixels": 196608,
+            "nonzeroBounds": [
+              39,
+              0,
+              384,
+              497
+            ],
+            "coreBoundsAlpha128": [
+              103,
+              8,
+              324,
+              493
+            ]
+          },
+          "kind": "authoring-direction-still",
+          "frameCount": 1,
+          "animationFrames": 0,
+          "state": "natural-standing-authoring-pose-not-native-stand-clip",
+          "loop": false,
+          "sourcePath": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\masters\\sorcerer-light-unarmed-directions-r2.png",
+          "sourceSha256": "29817a7cbdc85cad159aedcd577cef14e8b4bc5ec0d109dc060db8fd8fd768e6",
+          "footpointTopLeftPixels": [
+            256,
+            608
+          ],
+          "sharedUniformScale": 1.1085450346420322,
+          "forwardAffineCellToCanvas": [
+            1.1085450346420322,
+            0,
+            20.988452655889176,
+            0,
+            1.1085450346420322,
+            61.4872979214781
+          ],
+          "outputAlpha": {
+            "extrema": [
+              0,
+              255
+            ],
+            "alphaZeroPixels": 239949,
+            "alpha1to15Pixels": 8845,
+            "alpha16to127Pixels": 1832,
+            "alpha128to253Pixels": 75774,
+            "alpha254Pixels": 253,
+            "alpha255Pixels": 1027,
+            "totalPixels": 327680,
+            "nonzeroBounds": [
+              69,
+              61,
+              447,
+              612
+            ],
+            "coreBoundsAlpha128": [
+              135,
+              70,
+              380,
+              609
+            ]
+          },
+          "status": "candidate-authoring-only-no-runtime-promotion"
+        },
+        {
+          "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\sorcerer\\authoring-directions-r2\\ne\\still.png",
+          "sha256": "a347ce3b7709789badc46c9aa785006872ed9ab2db99c14ee61990be97c06394",
+          "bytes": 176044,
+          "size": [
+            512,
+            640
+          ],
+          "mode": "RGBA",
+          "direction": "ne",
+          "cellRowColOneBased": [
+            2,
+            2
+          ],
+          "sourceCropXYXY": [
+            384,
+            512,
+            768,
+            1024
+          ],
+          "sourceCellSize": [
+            384,
+            512
+          ],
+          "sourceCoreBoundsAlpha128Local": [
+            106,
+            8,
+            305,
+            494
+          ],
+          "sourceNonzeroBoundsLocal": [
+            0,
+            0,
+            384,
+            497
+          ],
+          "sourceSupportBandLocal": [
+            125,
+            426,
+            296,
+            494
+          ],
+          "sourceFootpointLocal": [
+            210.5,
+            494.0
+          ],
+          "sourceFootpointSheet": [
+            594.5,
+            1006.0
+          ],
+          "sourceAlpha": {
+            "extrema": [
+              0,
+              254
+            ],
+            "alphaZeroPixels": 127554,
+            "alpha1to15Pixels": 8782,
+            "alpha16to127Pixels": 1224,
+            "alpha128to253Pixels": 58912,
+            "alpha254Pixels": 136,
+            "alpha255Pixels": 0,
+            "totalPixels": 196608,
+            "nonzeroBounds": [
+              0,
+              0,
+              384,
+              497
+            ],
+            "coreBoundsAlpha128": [
+              106,
+              8,
+              305,
+              494
+            ]
+          },
+          "kind": "authoring-direction-still",
+          "frameCount": 1,
+          "animationFrames": 0,
+          "state": "natural-standing-authoring-pose-not-native-stand-clip",
+          "loop": false,
+          "sourcePath": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\masters\\sorcerer-light-unarmed-directions-r2.png",
+          "sourceSha256": "29817a7cbdc85cad159aedcd577cef14e8b4bc5ec0d109dc060db8fd8fd768e6",
+          "footpointTopLeftPixels": [
+            256,
+            608
+          ],
+          "sharedUniformScale": 1.1085450346420322,
+          "forwardAffineCellToCanvas": [
+            1.1085450346420322,
+            0,
+            22.651270207852207,
+            0,
+            1.1085450346420322,
+            60.37875288683608
+          ],
+          "outputAlpha": {
+            "extrema": [
+              0,
+              255
+            ],
+            "alphaZeroPixels": 247169,
+            "alpha1to15Pixels": 6385,
+            "alpha16to127Pixels": 1557,
+            "alpha128to253Pixels": 71371,
+            "alpha254Pixels": 223,
+            "alpha255Pixels": 975,
+            "totalPixels": 327680,
+            "nonzeroBounds": [
+              43,
+              60,
+              446,
+              610
+            ],
+            "coreBoundsAlpha128": [
+              140,
+              69,
+              361,
+              608
+            ]
+          },
+          "status": "candidate-authoring-only-no-runtime-promotion"
+        },
+        {
+          "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\sorcerer\\authoring-directions-r2\\e\\still.png",
+          "sha256": "3fd5e7c1304155662627cf710f6878751c6d5be7941576062b05a70391fff188",
+          "bytes": 130019,
+          "size": [
+            512,
+            640
+          ],
+          "mode": "RGBA",
+          "direction": "e",
+          "cellRowColOneBased": [
+            2,
+            3
+          ],
+          "sourceCropXYXY": [
+            768,
+            512,
+            1152,
+            1024
+          ],
+          "sourceCellSize": [
+            384,
+            512
+          ],
+          "sourceCoreBoundsAlpha128Local": [
+            101,
+            8,
+            254,
+            496
+          ],
+          "sourceNonzeroBoundsLocal": [
+            1,
+            0,
+            354,
+            512
+          ],
+          "sourceSupportBandLocal": [
+            144,
+            428,
+            229,
+            496
+          ],
+          "sourceFootpointLocal": [
+            186.5,
+            496.0
+          ],
+          "sourceFootpointSheet": [
+            954.5,
+            1008.0
+          ],
+          "sourceAlpha": {
+            "extrema": [
+              0,
+              254
+            ],
+            "alphaZeroPixels": 146816,
+            "alpha1to15Pixels": 7547,
+            "alpha16to127Pixels": 916,
+            "alpha128to253Pixels": 41299,
+            "alpha254Pixels": 30,
+            "alpha255Pixels": 0,
+            "totalPixels": 196608,
+            "nonzeroBounds": [
+              1,
+              0,
+              354,
+              512
+            ],
+            "coreBoundsAlpha128": [
+              101,
+              8,
+              254,
+              496
+            ]
+          },
+          "kind": "authoring-direction-still",
+          "frameCount": 1,
+          "animationFrames": 0,
+          "state": "natural-standing-authoring-pose-not-native-stand-clip",
+          "loop": false,
+          "sourcePath": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\masters\\sorcerer-light-unarmed-directions-r2.png",
+          "sourceSha256": "29817a7cbdc85cad159aedcd577cef14e8b4bc5ec0d109dc060db8fd8fd768e6",
+          "footpointTopLeftPixels": [
+            256,
+            608
+          ],
+          "sharedUniformScale": 1.1085450346420322,
+          "forwardAffineCellToCanvas": [
+            1.1085450346420322,
+            0,
+            49.25635103926098,
+            0,
+            1.1085450346420322,
+            58.16166281755204
+          ],
+          "outputAlpha": {
+            "extrema": [
+              0,
+              255
+            ],
+            "alphaZeroPixels": 270137,
+            "alpha1to15Pixels": 5586,
+            "alpha16to127Pixels": 1186,
+            "alpha128to253Pixels": 50013,
+            "alpha254Pixels": 95,
+            "alpha255Pixels": 663,
+            "totalPixels": 327680,
+            "nonzeroBounds": [
+              68,
+              58,
+              435,
+              626
+            ],
+            "coreBoundsAlpha128": [
+              161,
+              67,
+              330,
+              608
+            ]
+          },
+          "status": "candidate-authoring-only-no-runtime-promotion"
+        },
+        {
+          "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\sorcerer\\authoring-directions-r2\\se\\still.png",
+          "sha256": "f4908395542bf62e8e568bf5b5e91b281ae82b1922b2898e30b86189ef27ecb2",
+          "bytes": 191542,
+          "size": [
+            512,
+            640
+          ],
+          "mode": "RGBA",
+          "direction": "se",
+          "cellRowColOneBased": [
+            2,
+            4
+          ],
+          "sourceCropXYXY": [
+            1152,
+            512,
+            1536,
+            1024
+          ],
+          "sourceCellSize": [
+            384,
+            512
+          ],
+          "sourceCoreBoundsAlpha128Local": [
+            71,
+            8,
+            278,
+            498
+          ],
+          "sourceNonzeroBoundsLocal": [
+            31,
+            0,
+            362,
+            512
+          ],
+          "sourceSupportBandLocal": [
+            99,
+            429,
+            263,
+            498
+          ],
+          "sourceFootpointLocal": [
+            181.0,
+            498.0
+          ],
+          "sourceFootpointSheet": [
+            1333.0,
+            1010.0
+          ],
+          "sourceAlpha": {
+            "extrema": [
+              0,
+              254
+            ],
+            "alphaZeroPixels": 126209,
+            "alpha1to15Pixels": 9885,
+            "alpha16to127Pixels": 1316,
+            "alpha128to253Pixels": 58882,
+            "alpha254Pixels": 316,
+            "alpha255Pixels": 0,
+            "totalPixels": 196608,
+            "nonzeroBounds": [
+              31,
+              0,
+              362,
+              512
+            ],
+            "coreBoundsAlpha128": [
+              71,
+              8,
+              278,
+              498
+            ]
+          },
+          "kind": "authoring-direction-still",
+          "frameCount": 1,
+          "animationFrames": 0,
+          "state": "natural-standing-authoring-pose-not-native-stand-clip",
+          "loop": false,
+          "sourcePath": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\masters\\sorcerer-light-unarmed-directions-r2.png",
+          "sourceSha256": "29817a7cbdc85cad159aedcd577cef14e8b4bc5ec0d109dc060db8fd8fd768e6",
+          "footpointTopLeftPixels": [
+            256,
+            608
+          ],
+          "sharedUniformScale": 1.1085450346420322,
+          "forwardAffineCellToCanvas": [
+            1.1085450346420322,
+            0,
+            55.353348729792174,
+            0,
+            1.1085450346420322,
+            55.94457274826789
+          ],
+          "outputAlpha": {
+            "extrema": [
+              0,
+              255
+            ],
+            "alphaZeroPixels": 245221,
+            "alpha1to15Pixels": 8028,
+            "alpha16to127Pixels": 1708,
+            "alpha128to253Pixels": 71411,
+            "alpha254Pixels": 382,
+            "alpha255Pixels": 930,
+            "totalPixels": 327680,
+            "nonzeroBounds": [
+              126,
+              56,
+              395,
+              624
+            ],
+            "coreBoundsAlpha128": [
+              134,
+              65,
+              364,
+              608
+            ]
+          },
+          "status": "candidate-authoring-only-no-runtime-promotion"
+        }
+      ],
+      "review": {
+        "path": "D:\\Diablo 1 3D\\assets\\own-art\\heroes\\local-r1\\review\\sorcerer-authoring-directions-r2-still-review.png",
+        "sha256": "af2a588f8ed18ea4ae97d303a84f8727a9d00a5b3e07823388da56361957aa2e",
+        "bytes": 498691,
+        "size": [
+          2048,
+          684
+        ],
+        "mode": "RGB"
+      }
+    }
+  ],
+  "visualQa": {
+    "method": "Manual inspection of actual RGBA composited on light gray and checker; RGB-only viewer display is not alpha evidence",
+    "transparency": "Genuine transparent background; composites show isolated silhouettes, not the brown RGB stored underneath alpha=0",
+    "alphaLimitation": "Every master has alpha range 0..254, with no fully opaque 255 pixel; preserved, not silently normalized",
+    "legibility": "Faces, hair, hands, boots and clothing remain legible in master/source and half-size still review",
+    "fringe": "Low-alpha fringe exists (counts recorded); no obvious broad brown backdrop on the tested composite backgrounds",
+    "acceptance": "Technical/manual authoring review only; human artistic acceptance and gameplay calibration not claimed"
+  },
+  "checks": {
+    "mastersPreservedBySha256": true,
+    "masterCount": 5,
+    "outputCanvas512x640": true,
+    "eightStillsPerEmittedClass": true,
+    "uniformScalePerClass": true,
+    "footpoint256608PerStill": true,
+    "noAnimationFrames": true,
+    "rejectedSorcererR1NotExtracted": true
+  },
+  "totalAuthoringStills": 16,
+  "animationFrames": 0,
+  "gameplayPolicy": "Sprite-only until each actor has correct validated rig and animation; these static authoring candidates are not installed or mapped to native animation slots",
+  "integration": {
+    "registryChanged": false,
+    "sourceChanged": false,
+    "buildRun": false,
+    "installationChanged": false,
+    "runtimePromoted": false,
+    "npcOgdenChanged": false
+  },
+  "remaining": [
+    "Measured/elevated game-camera views or renders; exact yaw calibration",
+    "Rig/mesh and actual native-state animations, weapon/armor variants, frame counts and event alignment",
+    "Calibrated native logical dimensions/pivot and runtime integration owned by principal"
+  ]
+}

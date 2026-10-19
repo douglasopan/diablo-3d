@@ -1,0 +1,26 @@
+{
+  "revision": "R15",
+  "date": "2026-10-19",
+  "sourceClosureSha256": "4b67f29e0b09f12d8d217371ae475fac43e3462948a1dd348aba0754ad317935",
+  "normalExecutableSha256": "28da0ed096514a6a3a66090f0f6c4274bb8a4d353f7cdb5667531e5f713732e2",
+  "normalExecutableBytes": 9192960,
+  "scope": "Qualified Windows hardware C1 diagnostic gates and local launcher; not all floors or sustained whole-game FPS.",
+  "normalObjectsAudited": 315,
+  "staleObjectCount": 0,
+  "fireGpuMedianReductionPercent": 30.295121461553897,
+  "pairedSampleCount": 14,
+  "fireGpuMedianMs": {
+    "quarterQuota": 0.79696,
+    "ninthQuota": 0.55552
+  },
+  "sameCompositeRoiPixels": 32256,
+  "wholeGameFpsMeasured": false,
+  "crossedFlameLobes": "Two moving cores merge in the intentionally softer low-resolution silhouette; splitting is subtle.",
+  "nativeLightsAndCastShadowsPreserved": true,
+  "currentSourceNativeC1F4SaveCasesPassed": true,
+  "depthPickingRngPreserved": true,
+  "selectedAssetChanges": 0,
+  "normalExecutableIncluded": false,
+  "privateAssetsIncluded": false,
+  "savesOrProfilesIncluded": false
+}

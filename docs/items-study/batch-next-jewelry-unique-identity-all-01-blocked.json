@@ -1,0 +1,103 @@
+{
+  "format": "d3d.item-concept-art",
+  "schemaVersion": 1,
+  "date": "2026-10-08",
+  "batchId": "batch-next-jewelry-unique-identity-all-01-blocked",
+  "scope": "Queue-group study fragment; candidate generation and explicit visual reuse only, never full-catalog completion or asset approval.",
+  "catalogSha256": "c3c27173f3aedd4e28a7cb2545cf779cd60690c83ee657217374dcf1a8e7e80d",
+  "generationTool": "built-in image_gen.imagegen",
+  "generationCalls": 0,
+  "postProcessing": "none; generated PNG bytes copied unchanged",
+  "originalGameImagesIncluded": false,
+  "visualApproval": false,
+  "runtimeInstalled": false,
+  "registryAuthority": "assets/registry.json",
+  "summary": {
+    "productionUnits": 228,
+    "batchProductionUnits": 0,
+    "conceptCandidateEntries": 0,
+    "generatedImages": 0,
+    "reuseProposals": 0,
+    "blockedUnits": 7,
+    "modelsGenerated": 0,
+    "runtimeIconsGenerated": 0
+  },
+  "entries": [],
+  "blockedUnits": [
+    {
+      "productionId": "item.design.unique.acolyte-s-amulet",
+      "family": "jewelry",
+      "nativeCursorNames": [
+        "ACOLYTES_AMULET"
+      ],
+      "blockerCode": "missing-hellfire-objcurs2",
+      "reason": "Exact Hellfire reference graphic unavailable locally; do not invent source fidelity."
+    },
+    {
+      "productionId": "item.design.unique.amulet-of-warding",
+      "family": "jewelry",
+      "nativeCursorNames": [
+        "AMULET_OF_WARDING"
+      ],
+      "blockerCode": "missing-hellfire-objcurs2",
+      "reason": "Exact Hellfire reference graphic unavailable locally; do not invent source fidelity."
+    },
+    {
+      "productionId": "item.design.unique.giant-s-knuckle",
+      "family": "jewelry",
+      "nativeCursorNames": [
+        "GIANTS_KNUCKLE"
+      ],
+      "blockerCode": "missing-hellfire-objcurs2",
+      "reason": "Exact Hellfire reference graphic unavailable locally; do not invent source fidelity."
+    },
+    {
+      "productionId": "item.design.unique.gladiator-s-ring",
+      "family": "jewelry",
+      "nativeCursorNames": [
+        "GLADIATORS_RING"
+      ],
+      "blockerCode": "missing-hellfire-objcurs2",
+      "reason": "Exact Hellfire reference graphic unavailable locally; do not invent source fidelity."
+    },
+    {
+      "productionId": "item.design.unique.karik-s-ring",
+      "family": "jewelry",
+      "nativeCursorNames": [
+        "KARIKS_RING"
+      ],
+      "blockerCode": "missing-hellfire-objcurs2",
+      "reason": "Exact Hellfire reference graphic unavailable locally; do not invent source fidelity."
+    },
+    {
+      "productionId": "item.design.unique.mercurial-ring",
+      "family": "jewelry",
+      "nativeCursorNames": [
+        "MERCURIAL_RING"
+      ],
+      "blockerCode": "missing-hellfire-objcurs2",
+      "reason": "Exact Hellfire reference graphic unavailable locally; do not invent source fidelity."
+    },
+    {
+      "productionId": "item.design.unique.ring-of-magma",
+      "family": "jewelry",
+      "nativeCursorNames": [
+        "RING_OF_MAGMA"
+      ],
+      "blockerCode": "missing-hellfire-objcurs2",
+      "reason": "Exact Hellfire reference graphic unavailable locally; do not invent source fidelity."
+    }
+  ],
+  "devlogHandoff": {
+    "includeAllGeneratedImages": true,
+    "images": [],
+    "generatedConceptIds": [],
+    "reuseProductionIds": [],
+    "limits": [
+      "All outputs remain unapproved candidates.",
+      "Shared cursor reuse preserves separate native identities and powers.",
+      "Hidden surfaces and scale are inferred; master/socket/icon work remains gated."
+    ]
+  }
+}
+

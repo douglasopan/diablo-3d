@@ -30,6 +30,7 @@
 #include "automap.h"
 #include "capture.h"
 #include "control/control.hpp"
+#include "control/d3d_floating_panels.hpp"
 #include "control/d3d_hud.hpp"
 #include "cursor.h"
 #include "dead.h"
@@ -199,9 +200,15 @@ struct TownMovementOwnedKey {
 std::vector<TownMovementOwnedKey> TownMovementOwnedKeys;
 uint64_t TownMovementEpoch = 0;
 TownCameraMode TownMovementLastMode = TownCameraMode::Isometric;
-TownFirstPersonInputState ThirdPersonMovementInput;
-bool ThirdPersonMovementInitialized = false;
+// Movement aliases belong to the native tick, independently of relative look.
+// Reuse the existing TPP transition for both gameplay camera modes.
+TownFirstPersonInputState TownCameraMovementInput;
+bool TownCameraMovementInitialized = false;
 uint32_t FirstPersonConsumedButtons = 0;
+uint32_t UiPointerOwnedButtons = 0;
+uint32_t UiPointerNativeReleaseButtons = 0;
+bool FirstPersonPanelNeedsWorldClick = false;
+bool FirstPersonUiMovementAllowed = false;
 Point FirstPersonSavedPointer;
 bool FirstPersonHasSavedPointer = false;
 uint16_t FirstPersonMovementModifiers = 0;
@@ -225,7 +232,7 @@ size_t FirstPersonDeferredClickCount = 0;
 void GameEventHandler(const SDL_Event &event, uint16_t modState);
 bool HasFirstPersonPointerPick();
 bool CanUseTownMovementKeys();
-TownFirstPersonInputResult SyncThirdPersonMovement(uint8_t pressed = 0, uint8_t released = 0);
+TownFirstPersonInputResult SyncTownCameraMovement(uint8_t pressed = 0, uint8_t released = 0);
 void FlushTownFirstPersonClicks();
 TownFirstPersonInputResult SyncTownFirstPersonInput(uint8_t pressed = 0, uint8_t released = 0,
     float mouseX = 0, float mouseY = 0, bool escapePressed = false, bool resumeClick = false);
@@ -388,9 +395,10 @@ bool TryOpenDungeonWithMouse()
 	return true;
 }
 
-void LeftMouseDown(uint16_t modState)
+void LeftMouseDown(uint16_t modState, bool cancelOwnedWalk = true)
 {
-	CancelTownFirstPersonWalk();
+	if (cancelOwnedWalk)
+		CancelTownFirstPersonWalk();
 	if (IsTownFirstPersonInputCaptured()) {
 		MousePosition = GetTownFirstPersonPointer(MousePosition);
 		ResetItemlabelHighlighted();
@@ -437,7 +445,13 @@ void LeftMouseDown(uint16_t modState)
 	const bool isShiftHeld = (modState & SDL_KMOD_SHIFT) != 0;
 	const bool isCtrlHeld = (modState & SDL_KMOD_CTRL) != 0;
 
-	if (!IsPointOnD3dHud(MousePosition)) {
+	const bool floatingBody = !ChatFlag && IsD3dFloatingPanelPoint(MousePosition)
+	    && ((IsLeftPanelOpen() && GetLeftPanel().contains(MousePosition))
+	        || (IsRightPanelOpen() && GetRightPanel().contains(MousePosition)));
+	// The foreground native body wins an overlap with the compatibility HUD.
+	// Rechecking only the enclosing HUD would steal bag cells/spellbook tabs.
+	// Chat keeps its native talk/recipient surface in front of that bottom strip.
+	if (floatingBody || !IsPointOnD3dHud(MousePosition)) {
 		if (!gmenu_is_active() && !TryIconCurs()) {
 			if (QuestLogIsOpen && GetLeftPanel().contains(MousePosition)) {
 				QuestlogESC();
@@ -505,9 +519,10 @@ void LeftMouseUp(uint16_t modState)
 		ReleaseStoreBtn();
 }
 
-void RightMouseDown(bool isShiftHeld)
+void RightMouseDown(bool isShiftHeld, bool cancelOwnedWalk = true)
 {
-	CancelTownFirstPersonWalk();
+	if (cancelOwnedWalk)
+		CancelTownFirstPersonWalk();
 	if (IsTownFirstPersonInputCaptured()) {
 		MousePosition = GetTownFirstPersonPointer(MousePosition);
 		ResetItemlabelHighlighted();
@@ -759,7 +774,7 @@ bool CanUseTownCamera()
 	return (leveltype == DTYPE_TOWN || cathedral::LiveLevelEligible())
 	    && MyPlayer != nullptr && !MyPlayerIsDead && MyPlayer->_pmode != PM_DEATH
 	    && PauseMode != 2 && !InGameMenu() && !IsPlayerInStore() && !IsChatActive()
-	    && !QuestLogIsOpen && !HelpFlag && !ChatLogFlag && !qtextflag && !DoomFlag
+	    && !IsStashOpen && !IsVisualStoreOpen && !HelpFlag && !ChatLogFlag && !qtextflag && !DoomFlag
 	    && !SpellSelectFlag && !DropGoldFlag && !IsWithdrawGoldOpen;
 }
 
@@ -771,6 +786,7 @@ bool CanControlTownCamera(bool requireWorldPointer = true)
 		return true;
 	if (MousePosition.x < 0 || MousePosition.x >= gnScreenWidth || MousePosition.y < 0 || MousePosition.y >= gnViewportHeight
 	    || IsPointOnD3dHud(MousePosition)
+	    || IsD3dFloatingPanelPoint(MousePosition) || IsD3dMinimapPoint(MousePosition)
 	    || (IsLeftPanelOpen() && GetLeftPanel().contains(MousePosition))
 	    || (IsRightPanelOpen() && GetRightPanel().contains(MousePosition)))
 		return false;
@@ -875,6 +891,12 @@ uint8_t FirstPersonHeldArrows()
 	const bool modified = HasReservedFirstPersonModifiers(modifiers);
 	if (HasFirstPersonServices() && FirstPersonServices.scancodeHeld == nullptr) {
 		held = FirstPersonServices.heldArrows(); // Diagnostic bits are binding slots, not keycodes.
+		uint8_t ownedBits = 0;
+		for (const auto &owned : TownMovementOwnedKeys) {
+			if (owned.epoch == TownMovementEpoch)
+				ownedBits |= owned.action->movementBit;
+		}
+		held &= ownedBits; // Match the production scancode path's ownership filter.
 		if (modified) {
 			uint8_t allowed = 0;
 			for (const auto *entry : GetOptions().Keymapper.GetEntries()) {
@@ -912,6 +934,21 @@ bool IsFirstPersonModeActive()
 	    && GetTownViewCameraMode() == TownCameraMode::FirstPerson;
 }
 
+bool HasFreeCursorTownPanel()
+{
+	return CharFlag || QuestLogIsOpen || invflag || SpellbookFlag
+	    || (AutomapActive && GetAutomapType() == AutomapType::Minimap);
+}
+
+bool IsNativeFreeCursorNavigationKey(SDL_Keycode key)
+{
+	if (IsTownFirstPersonInputCaptured()
+	    || (!QuestLogIsOpen && !(AutomapActive && GetAutomapType() == AutomapType::Minimap)))
+		return false;
+	remap_keyboard_key(&key);
+	return key == SDLK_UP || key == SDLK_DOWN || key == SDLK_LEFT || key == SDLK_RIGHT;
+}
+
 bool CanUseFollowCameraInput()
 {
 #ifdef USE_SDL1
@@ -926,56 +963,78 @@ bool CanUseFollowCameraInput()
 	    || ControlMode != ControlTypes::KeyboardAndMouse || ControlDevice != ControlTypes::KeyboardAndMouse
 	    || pcurs != CURSOR_HAND || !MyPlayer->HoldItem.isEmpty() || sgnTimeoutCurs != CURSOR_NONE
 	    || demo::IsRunning() || demo::IsRecording() || movie_playing || IsTownViewCameraDragging()
-	    || AutomapActive || IsLeftPanelOpen() || IsRightPanelOpen() || IsDiabloMsgAvailable() || IsInGameSettingsOpen()
+	    || (AutomapActive && GetAutomapType() != AutomapType::Minimap)
+	    || IsDiabloMsgAvailable() || IsInGameSettingsOpen() || PadMenuNavigatorActive || PadHotspellMenuActive
 	    || gnScreenWidth <= 0 || gnViewportHeight <= 0)
 		return false;
 #ifdef _DEBUG
 	if (IsConsoleOpen())
 		return false;
 #endif
-	// A mode change must not capture the middle of a native held mouse action.
-	return FirstPersonInput.phase == TownFirstPersonCapturePhase::Captured || sgbMouseDown == CLICK_NONE;
+	return true;
 #endif
+}
+
+bool CanDispatchDeferredTownWorldMouse()
+{
+	// Free-cursor panels preserve WASD, but cannot replay a queued world DOWN.
+	return CanUseFollowCameraInput() && !HasFreeCursorTownPanel() && UiPointerOwnedButtons == 0;
+}
+
+bool CanUseTownCameraWheel()
+{
+	// A native held mouse or a UI-owned pair blocks wheel, independently of WASD.
+	return CanUseFollowCameraInput() && sgbMouseDown == CLICK_NONE && UiPointerOwnedButtons == 0;
 }
 
 bool CanCaptureFirstPersonInput()
 {
-	return IsFirstPersonModeActive() && CanUseFollowCameraInput() && GetTownViewFollowCameraState().valid;
+	// A native world mouse action must finish before capture. Nontextual panels
+	// release only look; their separate UI DOWN/UP never sets sgbMouseDown.
+	return IsFirstPersonModeActive() && CanUseFollowCameraInput() && !HasFreeCursorTownPanel()
+	    && UiPointerOwnedButtons == 0 && GetTownViewFollowCameraState().valid
+	    && (FirstPersonInput.phase == TownFirstPersonCapturePhase::Captured || sgbMouseDown == CLICK_NONE);
 }
 
 bool CanUseTownMovementKeys()
 {
-	return IsTownFirstPersonInputCaptured()
-	    || (GetTownViewCameraMode() == TownCameraMode::ThirdPerson && CanUseFollowCameraInput()
-	        && GetTownViewFollowCameraState().valid);
+	if (!IsTownGameplayCameraMode(GetTownViewCameraMode()) || !CanUseFollowCameraInput()
+	    || !GetTownViewFollowCameraState().valid)
+		return false;
+	// An SDL acquisition failure or external capture loss must retain the native
+	// fresh-capture rearm. Only an observed captured session can enter UI walk.
+	return GetTownViewCameraMode() != TownCameraMode::FirstPerson
+	    || IsTownFirstPersonInputCaptured() || FirstPersonUiMovementAllowed;
 }
 
-TownFirstPersonInputResult SyncThirdPersonMovement(uint8_t pressed, uint8_t released)
+TownFirstPersonInputResult SyncTownCameraMovement(uint8_t pressed, uint8_t released)
 {
 	TownFirstPersonInputResult result;
-	if (GetTownViewCameraMode() != TownCameraMode::ThirdPerson || !CanUseTownMovementKeys()) {
-		if (ThirdPersonMovementInitialized)
+	if (!CanUseTownMovementKeys()) {
+		if (TownCameraMovementInitialized)
 			StopTownFirstPersonWalk();
-		ThirdPersonMovementInitialized = false;
-		ThirdPersonMovementInput = {};
+		TownCameraMovementInitialized = false;
+		TownCameraMovementInput = {};
 		return result;
 	}
 	TownFirstPersonInputSnapshot input;
 	input.physicalHeld = FirstPersonHeldArrows();
-	if (!ThirdPersonMovementInitialized) {
-		ThirdPersonMovementInput = {};
-		ThirdPersonMovementInput.blockedKeys = input.physicalHeld;
-		ThirdPersonMovementInitialized = true;
+	if (!TownCameraMovementInitialized) {
+		TownCameraMovementInput = {};
+		TownCameraMovementInput.blockedKeys = input.physicalHeld;
+		TownCameraMovementInitialized = true;
 	}
 	// A fresh nonrepeat action is proof of a new physical episode after a gate.
-	ThirdPersonMovementInput.blockedKeys &= static_cast<uint8_t>(~pressed);
+	TownCameraMovementInput.blockedKeys &= static_cast<uint8_t>(~pressed);
 	input.pressed = pressed;
 	input.released = released;
 	const auto camera = GetTownViewCameraState();
 	input.currentYaw = camera.yaw;
 	input.currentPitch = camera.pitch;
-	result = StepTownCameraMovement(ThirdPersonMovementInput, input, {});
-	ThirdPersonMovementInput = result.nextState;
+	// No relative deltas are supplied: the pure capture FSM remains the sole
+	// look consumer, and movement quantizes the resulting actual camera yaw.
+	result = StepTownCameraMovement(TownCameraMovementInput, input, {});
+	TownCameraMovementInput = result.nextState;
 	if (result.stopOwnWalk)
 		StopTownFirstPersonWalk();
 	return result;
@@ -983,10 +1042,8 @@ TownFirstPersonInputResult SyncThirdPersonMovement(uint8_t pressed, uint8_t rele
 
 void TownMovementActionPressed(uint8_t bit)
 {
-	if (GetTownViewCameraMode() == TownCameraMode::ThirdPerson)
-		SyncThirdPersonMovement(bit);
-	else
-		SyncTownFirstPersonInput(bit);
+	SyncTownFirstPersonInput();
+	SyncTownCameraMovement(bit);
 }
 
 void TownMovementActionReleased(uint8_t bit)
@@ -994,10 +1051,8 @@ void TownMovementActionReleased(uint8_t bit)
 	// A platform remap can yield multiple physical keys for one action. An UP
 	// cannot release that slot while another owned physical key still holds it.
 	const uint8_t released = (FirstPersonHeldArrows() & bit) != 0 ? 0 : bit;
-	if (GetTownViewCameraMode() == TownCameraMode::ThirdPerson)
-		SyncThirdPersonMovement(0, released);
-	else
-		SyncTownFirstPersonInput(0, released);
+	SyncTownFirstPersonInput();
+	SyncTownCameraMovement(0, released);
 }
 
 void TownMovementBindingsChanged()
@@ -1005,7 +1060,7 @@ void TownMovementBindingsChanged()
 	SuspendTownFirstPersonInput(); // Preserves old physical UP latches, resets intent.
 }
 
-void AdvanceTownCameraForDraw()
+float AdvanceTownCameraForDraw()
 {
 	const uint32_t now = SDL_GetTicks();
 	const bool eligible = CanUseFollowCameraInput();
@@ -1015,6 +1070,7 @@ void AdvanceTownCameraForDraw()
 	TownCameraHasFrameClock = eligible;
 	if (AdvanceTownViewCamera(seconds))
 		RedrawViewport();
+	return seconds;
 }
 
 Point FirstPersonPointerCenter()
@@ -1052,10 +1108,19 @@ TownFirstPersonInputResult SyncTownFirstPersonInput(uint8_t pressed, uint8_t rel
 	if (mode != TownMovementLastMode) {
 		++TownMovementEpoch;
 		TownMovementLastMode = mode;
-		ThirdPersonMovementInitialized = false;
-		ThirdPersonMovementInput = {};
+		TownCameraMovementInitialized = false;
+		TownCameraMovementInput = {};
+		FirstPersonPanelNeedsWorldClick = false;
+		FirstPersonUiMovementAllowed = false;
 		StopTownFirstPersonWalk();
 	}
+	if (!CanUseFollowCameraInput())
+		FirstPersonUiMovementAllowed = false;
+	else if (IsFirstPersonModeActive() && (HasFreeCursorTownPanel() || UiPointerOwnedButtons != 0)
+	    && FirstPersonInput.phase == TownFirstPersonCapturePhase::Captured && FirstPersonRelativeMouse())
+		FirstPersonUiMovementAllowed = true;
+	if (HasFreeCursorTownPanel() && IsFirstPersonModeActive())
+		FirstPersonPanelNeedsWorldClick = true;
 	TownFirstPersonInputSnapshot input;
 	input.firstPersonActive = IsFirstPersonModeActive();
 	input.inputAllowed = CanCaptureFirstPersonInput();
@@ -1063,8 +1128,10 @@ TownFirstPersonInputResult SyncTownFirstPersonInput(uint8_t pressed, uint8_t rel
 	input.escapePressed = escapePressed;
 	input.resumeClick = resumeClick;
 	input.physicalHeld = FirstPersonHeldArrows();
-	input.pressed = pressed;
-	input.released = released;
+	// This FSM owns relative look/capture only. The independent shared adapter
+	// receives key episodes below; capture acknowledgements cannot erase WASD.
+	input.pressed = 0;
+	input.released = 0;
 	input.relativeMouseX = mouseX;
 	input.relativeMouseY = mouseY;
 	const TownViewCameraState camera = GetTownViewCameraState();
@@ -1081,9 +1148,16 @@ TownFirstPersonInputResult SyncTownFirstPersonInput(uint8_t pressed, uint8_t rel
 		result = StepTownFirstPersonInput(FirstPersonInput, input, preferences);
 		FirstPersonInput = result.nextState;
 		consumeResumeClick |= result.consumeResumeClick;
-		if (result.stopOwnWalk || result.releaseCapture)
+		if ((result.stopOwnWalk || result.releaseCapture) && !CanUseTownMovementKeys())
 			StopTownFirstPersonWalk();
 		if (previousPhase == TownFirstPersonCapturePhase::Captured && FirstPersonInput.phase != TownFirstPersonCapturePhase::Captured) {
+			// Unexpected platform loss is a hard rearm; opening a pointer panel
+			// deliberately preserves movement aliases and native walk ownership.
+			if (!FirstPersonUiMovementAllowed) {
+				StopTownFirstPersonWalk();
+				TownCameraMovementInitialized = false;
+				TownCameraMovementInput = {};
+			}
 			FirstPersonDeferredClickCount = 0;
 			// Includes observed external capture loss, which needs no release request.
 			sgbMouseDown = CLICK_NONE;
@@ -1124,11 +1198,21 @@ TownFirstPersonInputResult SyncTownFirstPersonInput(uint8_t pressed, uint8_t rel
 		input.resumeClick = false;
 	}
 	result.consumeResumeClick = consumeResumeClick;
+	if (FirstPersonInput.phase != TownFirstPersonCapturePhase::Captured && input.relativeCaptured
+	    && FirstPersonUiMovementAllowed) {
+		// A failed platform release did not produce the promised free pointer.
+		FirstPersonUiMovementAllowed = false;
+		StopTownFirstPersonWalk();
+		TownCameraMovementInitialized = false;
+		TownCameraMovementInput = {};
+	}
 	if (FirstPersonInput.phase == TownFirstPersonCapturePhase::Released && !input.relativeCaptured)
 		RestoreFirstPersonPointer();
-	if (result.active)
+	if (IsTownFirstPersonInputCaptured()) {
+		FirstPersonUiMovementAllowed = false;
 		MousePosition = FirstPersonPointerCenter();
-	SyncThirdPersonMovement();
+	}
+	SyncTownCameraMovement(pressed, released);
 	return result;
 }
 
@@ -1147,6 +1231,8 @@ bool ConsumeFirstPersonMouseDown(Uint8 button)
 	const TownFirstPersonInputResult result = SyncTownFirstPersonInput(0, 0, 0, 0, false, true);
 	if (!result.consumeResumeClick)
 		return false;
+	if (IsTownFirstPersonInputCaptured())
+		FirstPersonPanelNeedsWorldClick = false;
 	FirstPersonConsumedButtons |= mask;
 	return true;
 }
@@ -1167,6 +1253,40 @@ void HandleMouseButtonDown(Uint8 button, uint16_t modState)
 	// A fresh down begins a new pair and cannot inherit an old consumed-up latch.
 	const uint32_t firstPersonMask = button > 0 && button <= 31 ? 1U << (button - 1) : 0;
 	FirstPersonConsumedButtons &= ~firstPersonMask;
+	UiPointerOwnedButtons &= ~firstPersonMask;
+	UiPointerNativeReleaseButtons &= ~firstPersonMask;
+	const bool floatingPanel = IsD3dFloatingPanelPoint(MousePosition);
+	const bool minimap = !floatingPanel && IsD3dMinimapPoint(MousePosition);
+	const bool hud = !floatingPanel && !minimap && IsPointOnD3dHud(MousePosition);
+	if ((floatingPanel || minimap || hud) && sgbMouseDown == CLICK_NONE) {
+		// UI owns this physical pair before any relative-capture/world path.
+		// Its pointer latch never becomes a native repeated world action.
+		const Point uiPointer = MousePosition;
+		UiPointerOwnedButtons |= firstPersonMask;
+		if (IsFirstPersonModeActive())
+			FirstPersonPanelNeedsWorldClick = true;
+		SyncTownFirstPersonInput();
+		MousePosition = uiPointer; // Releasing relative mode restores its saved pointer.
+		CheckCursMove();
+		if (minimap) {
+			if (button == SDL_BUTTON_LEFT)
+				HandleD3dMinimapClose(MousePosition);
+			return;
+		}
+		if (button == SDL_BUTTON_LEFT && floatingPanel && HandleD3dFloatingPanelClose(MousePosition))
+			return; // Header/X consumes DOWN even if closing changes the hit region.
+		const bool body = (IsLeftPanelOpen() && GetLeftPanel().contains(MousePosition))
+		    || (IsRightPanelOpen() && GetRightPanel().contains(MousePosition));
+		if (floatingPanel && !body)
+			return; // Right/middle clicks on a header cannot cast or drag the world.
+		if (button == SDL_BUTTON_LEFT) {
+			UiPointerNativeReleaseButtons |= firstPersonMask;
+			LeftMouseDown(modState, false);
+		} else if (button == SDL_BUTTON_RIGHT && (hud || (invflag && GetRightPanel().contains(MousePosition)))) {
+			RightMouseDown((modState & SDL_KMOD_SHIFT) != 0, false);
+		}
+		return;
+	}
 	if (ConsumeFirstPersonMouseDown(button))
 		return;
 	if (IsTownViewCameraDragging())
@@ -1211,6 +1331,14 @@ void HandleMouseButtonDown(Uint8 button, uint16_t modState)
 void HandleMouseButtonUp(Uint8 button, uint16_t modState)
 {
 	const uint32_t firstPersonMask = button > 0 && button <= 31 ? 1U << (button - 1) : 0;
+	if ((UiPointerOwnedButtons & firstPersonMask) != 0) {
+		const bool nativeRelease = (UiPointerNativeReleaseButtons & firstPersonMask) != 0;
+		UiPointerOwnedButtons &= ~firstPersonMask;
+		UiPointerNativeReleaseButtons &= ~firstPersonMask;
+		if (nativeRelease && button == SDL_BUTTON_LEFT)
+			LeftMouseUp(modState);
+		return;
+	}
 	if ((FirstPersonConsumedButtons & firstPersonMask) != 0) {
 		FirstPersonConsumedButtons &= ~firstPersonMask;
 		return;
@@ -1289,7 +1417,7 @@ void FlushTownFirstPersonClicks()
 	for (size_t i = 0; i < count; ++i) {
 		const auto &click = pending[i];
 		if (click.wheelSteps != 0) {
-			if (!IsTownGameplayCameraMode(GetTownViewCameraMode()) || !CanUseFollowCameraInput())
+			if (!IsTownGameplayCameraMode(GetTownViewCameraMode()) || !CanUseTownCameraWheel())
 				continue; // Drop only this ineligible wheel; matching mouse ups must still run.
 			ZoomTownView(click.wheelSteps);
 			TownFollowWheelNeedsDraw = true;
@@ -1298,6 +1426,14 @@ void FlushTownFirstPersonClicks()
 			RedrawViewport();
 			continue;
 		}
+		const uint32_t pendingButtonMask = click.button > 0 && click.button <= 31 ? 1U << (click.button - 1) : 0;
+		if (!click.down && (UiPointerOwnedButtons & pendingButtonMask) != 0) {
+			// This deferred world UP cannot release a newer immediate UI-owned pair.
+			FirstPersonConsumedButtons &= ~pendingButtonMask;
+			continue;
+		}
+		if (click.down && !CanDispatchDeferredTownWorldMouse())
+			continue; // Keep its consumed-UP latch; do not requeue it behind a later draw.
 		if (click.absoluteClick && click.down) {
 			if (lookedSinceDraw) {
 				for (size_t rest = i; rest < count; ++rest)
@@ -1387,7 +1523,10 @@ void GameEventHandler(const SDL_Event &event, uint16_t modState)
 	}
 #endif
 	if (event.type == SDL_EVENT_KEY_DOWN && SDLC_EventKey(event) == SDLK_ESCAPE) {
-		SuspendTownFirstPersonInput();
+		if (HasFreeCursorTownPanel() && CanUseFollowCameraInput())
+			SyncTownFirstPersonInput(0, 0, 0, 0, true);
+		else
+			SuspendTownFirstPersonInput();
 		ReleaseTownCameraDrag();
 	}
 	const TownFirstPersonInputResult synchronizedInput = SyncTownFirstPersonInput();
@@ -1407,6 +1546,12 @@ void GameEventHandler(const SDL_Event &event, uint16_t modState)
 	}
 	if (event.type == SDL_EVENT_MOUSE_BUTTON_UP) {
 		const Uint8 button = event.button.button;
+		const uint32_t uiMask = button > 0 && button <= 31 ? 1U << (button - 1) : 0;
+		if ((UiPointerOwnedButtons & uiMask) != 0) {
+			MousePosition = { SDLC_EventButtonIntX(event), SDLC_EventButtonIntY(event) };
+			HandleMouseButtonUp(button, modState);
+			return;
+		}
 		if ((button == SDL_BUTTON_LEFT || button == SDL_BUTTON_RIGHT) && HasDeferredFirstPersonDown(button)) {
 			QueueTownFirstPersonClick(button, modState, false);
 			return;
@@ -1493,13 +1638,15 @@ void GameEventHandler(const SDL_Event &event, uint16_t modState)
 		const bool keyboardTakeover = wasNonKeyboardDevice
 		    && ControlMode == ControlTypes::KeyboardAndMouse && ControlDevice == ControlTypes::KeyboardAndMouse;
 		const bool resumeFromDevice = !repeat && keyboardTakeover && movement != nullptr
+		    && !FirstPersonPanelNeedsWorldClick
 		    && (!modified || TownMovementAllowsModifiers(*movement)) && CanCaptureFirstPersonInput();
 		SyncTownFirstPersonInput(0, 0, 0, 0, false, resumeFromDevice);
 		if (resumeFromDevice && IsTownFirstPersonInputCaptured())
 			FirstPersonInput.blockedKeys &= static_cast<uint8_t>(~movement->movementBit);
 		const uint32_t identity = TownMovementPhysicalIdentity(event);
 		const auto *action = TownMovementAction(SDLC_EventKey(event));
-		if (!repeat && action != nullptr && (action->isEnabled() || resumeFromDevice) && (!modified || TownMovementAllowsModifiers(*action))) {
+		if (!repeat && action != nullptr && !IsNativeFreeCursorNavigationKey(SDLC_EventKey(event))
+		    && (action->isEnabled() || resumeFromDevice) && (!modified || TownMovementAllowsModifiers(*action))) {
 #ifdef USE_SDL1
 			const int scan = 0;
 #else
@@ -1583,7 +1730,7 @@ void GameEventHandler(const SDL_Event &event, uint16_t modState)
 #if SDL_VERSION_ATLEAST(2, 0, 0)
 	case SDL_EVENT_MOUSE_WHEEL:
 		if (CanControlTownCamera() && (modState & SDL_KMOD_CTRL) == 0
-		    && IsTownGameplayCameraMode(GetTownViewCameraMode()) && CanUseFollowCameraInput()) {
+		    && IsTownGameplayCameraMode(GetTownViewCameraMode()) && CanUseTownCameraWheel()) {
 			float steps = static_cast<float>(SDLC_EventWheelIntY(event));
 #if SDL_VERSION_ATLEAST(3, 0, 0)
 			steps = event.wheel.y;
@@ -2678,9 +2825,8 @@ Point GetTownFirstPersonPointer(Point absolute)
 Direction GetTownFirstPersonMoveDirection()
 {
 	// Consumed only by native Movement(), once per GameLogic tick.
-	const auto result = SyncTownFirstPersonInput();
-	const Direction direction = GetTownViewCameraMode() == TownCameraMode::ThirdPerson
-	    ? SyncThirdPersonMovement().direction : result.direction;
+	SyncTownFirstPersonInput();
+	const Direction direction = SyncTownCameraMovement().direction;
 	return FirstPersonDeferredClickCount == 0 ? direction : Direction::NoDirection;
 }
 
@@ -2692,8 +2838,18 @@ bool IsTownCameraMovementInputActive()
 void SuspendTownFirstPersonInput()
 {
 	++TownMovementEpoch;
-	ThirdPersonMovementInitialized = false;
-	ThirdPersonMovementInput = {};
+	TownCameraMovementInitialized = false;
+	TownCameraMovementInput = {};
+	FirstPersonUiMovementAllowed = false;
+	if (UiPointerOwnedButtons != 0) {
+		// Cancel visual presses without dispatching their release action after
+		// focus loss, device change or a hard modal suspension.
+		ResetMainPanelButtons();
+		CharPanelButtonActive = false;
+		for (bool &pressed : CharPanelButton) pressed = false;
+		LevelButtonDown = false;
+	}
+	UiPointerOwnedButtons = UiPointerNativeReleaseButtons = 0;
 	TownFollowWheelNeedsDraw = false;
 	TownCameraHasFrameClock = false;
 	AdvanceTownViewCamera(0);
@@ -2712,6 +2868,9 @@ void SetTownFirstPersonInputServicesForDiagnostics(const TownFirstPersonInputSer
 	FirstPersonInput = {};
 	TownMovementOwnedKeys.clear();
 	FirstPersonConsumedButtons = 0;
+	UiPointerOwnedButtons = UiPointerNativeReleaseButtons = 0;
+	FirstPersonPanelNeedsWorldClick = false;
+	FirstPersonUiMovementAllowed = false;
 	FirstPersonHasSavedPointer = false;
 	FirstPersonMovementModifiers = 0;
 }
@@ -2724,6 +2883,11 @@ void DispatchGameEventForDiagnostics(const SDL_Event &event, uint16_t modState)
 void SyncFirstPersonInputForDiagnostics()
 {
 	SyncTownFirstPersonInput();
+}
+
+float AdvanceTownCameraForDrawForDiagnostics()
+{
+	return AdvanceTownCameraForDraw();
 }
 
 void FlushFirstPersonClicksForDiagnostics()
@@ -3997,7 +4161,10 @@ void diablo_focus_unpause()
 
 bool PressEscKey()
 {
-	SuspendTownFirstPersonInput();
+	if (HasFreeCursorTownPanel() && CanUseFollowCameraInput())
+		SyncTownFirstPersonInput(0, 0, 0, 0, true);
+	else
+		SuspendTownFirstPersonInput();
 	bool rv = false;
 
 	if (DoomFlag) {

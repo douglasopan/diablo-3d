@@ -1,0 +1,266 @@
+{
+  "format": "d3d.item-smart-production-validation",
+  "date": "2026-10-08",
+  "passed": true,
+  "checks": [
+    "catalog/overlay/registry hashes preserved",
+    "six grouped-study source snapshots match current bytes",
+    "grouped study embedded exactly in full Smart review",
+    "Scroll/Healing/Mana exact IDs and order",
+    "two required proposals and one optional",
+    "26 required base aliases and28 with Mana",
+    "Short Sword excluded",
+    "Great Sword and Shirotachi stay excluded",
+    "item.design.base.scroll source bytes/hash preserved",
+    "item.design.base.scroll native cursor/cell mapping",
+    "item.design.base.scroll unselected/unapproved/unprepared",
+    "item.design.base.potion-of-healing source bytes/hash preserved",
+    "item.design.base.potion-of-healing native cursor/cell mapping",
+    "item.design.base.potion-of-healing unselected/unapproved/unprepared",
+    "item.design.base.potion-of-mana source bytes/hash preserved",
+    "item.design.base.potion-of-mana native cursor/cell mapping",
+    "item.design.base.potion-of-mana unselected/unapproved/unprepared",
+    "twoItemRegions valid bounds",
+    "twoItemRegions positive gaps and no overlap",
+    "threeItemRegions valid bounds",
+    "threeItemRegions positive gaps and no overlap",
+    "no composed image or approval",
+    "zero upload/job/reservation/spend/retry authorization",
+    "fair geometry comparison (2, False)",
+    "no final quote/approval; local-only split0 (2, False)",
+    "fair geometry comparison (2, True)",
+    "no final quote/approval; local-only split0 (2, True)",
+    "one trial per alternative; eligibility unknown (2, True)",
+    "fair geometry comparison (3, False)",
+    "no final quote/approval; local-only split0 (3, False)",
+    "fair geometry comparison (3, True)",
+    "no final quote/approval; local-only split0 (3, True)",
+    "one trial per alternative; eligibility unknown (3, True)",
+    "incremental service arithmetic 140",
+    "incremental service arithmetic 160",
+    "incremental service arithmetic 170",
+    "basic remesh10 not Smart-retopology approval",
+    "eight QA gates, local split and child exports pending",
+    "228 IDs/58reuse/35blockers/22gates/zero jobs preserved",
+    "geometry linkage embedded exactly in Smart review",
+    "all228 geometry links preserve IDs/families/reuse and source order",
+    "only3 category proposals; zero approvals or invented vertex minima",
+    "all8 relayed category triangle hypotheses preserved; missing ranges not merged",
+    "triangle ranges and projected-size windows are unapproved hypotheses",
+    "relayed LOD ratio/error proposals unchanged; no LOD chosen",
+    "original research-guide artifact bytes/revision not invented",
+    "conditional total/master2x arithmetic 2",
+    "conditional total/master2x arithmetic 3",
+    "no total target/unit, equal allocation, final quote or approval selected",
+    "geometry guide grants no selection/jobs/spend",
+    "geometry/LOD contract snapshots match current bytes",
+    "known presentation sizes kept separate from physical/projected measurements item.design.base.scroll",
+    "before/after/reopen measurement templates remain unmeasured item.design.base.scroll",
+    "known presentation sizes kept separate from physical/projected measurements item.design.base.potion-of-healing",
+    "before/after/reopen measurement templates remain unmeasured item.design.base.potion-of-healing",
+    "known presentation sizes kept separate from physical/projected measurements item.design.base.potion-of-mana",
+    "before/after/reopen measurement templates remain unmeasured item.design.base.potion-of-mana",
+    "joint GLB remains unavailable/unmeasured",
+    "usage sums and2x margins preserved independently from close inspection",
+    "operator supplement hash and immutable parent lineage recorded",
+    "faithful neutral-light reference method recorded with no new pixels or paid operations",
+    "ten unmeasured stages explicitly separate index entries, primitive mode and source topology vertices",
+    "simplifier-reported error never automatically establishes conservative errorVerified",
+    "portable paths/no secret-marker match: docs/items-study/smart-production-context.json",
+    "portable paths/no secret-marker match: docs/items-study/grouped-items-study.json",
+    "portable paths/no secret-marker match: docs/items-study/smart-production-review.json",
+    "portable paths/no secret-marker match: docs/items-study/SMART-PRODUCTION-REVIEW.md",
+    "portable paths/no secret-marker match: docs/items-study/GROUPED-ITEMS-STUDY.md",
+    "portable paths/no secret-marker match: docs/items-study/build_smart_production_review.py",
+    "portable paths/no secret-marker match: docs/ITEM-PRODUCTION-CONTRACT.md",
+    "portable paths/no secret-marker match: docs/ITEM-ASSET-CATALOG.md",
+    "portable paths/no secret-marker match: docs/items-study/INVENTORY-PREP-HANDOFF.md",
+    "portable paths/no secret-marker match: docs/items-study/geometry-budget-linkage.json",
+    "portable paths/no secret-marker match: docs/items-study/GEOMETRY-BUDGET-LINKAGE.md",
+    "all relative links exist: 260",
+    "five generated derivatives reproducible"
+  ],
+  "artifacts": [
+    {
+      "path": "docs/items-study/smart-production-context.json",
+      "sha256": "5f1ae39b96485b2fc3cd654404f637bafafc984dfd27a68b57c9d5bcd52f9d3e"
+    },
+    {
+      "path": "docs/items-study/grouped-items-study.json",
+      "sha256": "6c3d40b4944ac5f2bdc471f33f2ebe81a0ded408ac8f490412c3c675df4a31f4"
+    },
+    {
+      "path": "docs/items-study/smart-production-review.json",
+      "sha256": "a18d6485b891dc2aff8aacd8665f8e79825189b88e95ea263edb50ab6d0f2688"
+    },
+    {
+      "path": "docs/items-study/SMART-PRODUCTION-REVIEW.md",
+      "sha256": "542fd286d30ac96a8ac4f5b6a272777728b307512149190f2573bba30db5711d"
+    },
+    {
+      "path": "docs/items-study/GROUPED-ITEMS-STUDY.md",
+      "sha256": "340245f7862f431c823166a457c1905fb0bff15a980034c93b93fbbe20c2d7f4"
+    },
+    {
+      "path": "docs/items-study/build_smart_production_review.py",
+      "sha256": "8bfc5236483c9d165bfd0007279100868abcba98476cbda4990c1de84aaba515"
+    },
+    {
+      "path": "docs/ITEM-PRODUCTION-CONTRACT.md",
+      "sha256": "329f449ffab494b6eadd2af302c120cd9808cf6e3a5926738f2ed59dd1d281e4"
+    },
+    {
+      "path": "docs/ITEM-ASSET-CATALOG.md",
+      "sha256": "2618c5770d45b0a9d0d66ab4e11174da06916801e357d2098ad63eef85393192"
+    },
+    {
+      "path": "docs/items-study/INVENTORY-PREP-HANDOFF.md",
+      "sha256": "8b4254dc993ad0524b48c043557cbdf424d9a36bc88217b0974ee2ff49bcd078"
+    },
+    {
+      "path": "docs/items-study/geometry-budget-linkage.json",
+      "sha256": "b9d1124f9d088ff55eb8c1f52db7e2b642de2b4fee493c8d891d35778e90a3ef"
+    },
+    {
+      "path": "docs/items-study/GEOMETRY-BUDGET-LINKAGE.md",
+      "sha256": "d7dacff12cf2f991965f51f9c02c59343d249732a2538dec5842a580370f894a"
+    }
+  ],
+  "providerAccountReadByItems": false,
+  "remoteAbsenceProven": false,
+  "imagesEditedOrGenerated": false,
+  "creditsConsumedByItems": 0,
+  "inGameTested": false,
+  "independentReviews": [
+    {
+      "agent": "axe_concepts",
+      "readOnly": true,
+      "blockingDefects": 0,
+      "scope": "budget scenarios, counts, pilot inclusion and preserved queue"
+    },
+    {
+      "agent": "equipment_contract_audit",
+      "readOnly": true,
+      "blockingDefects": 0,
+      "scope": "eight per-asset QA gates, source snapshots and manual/dependent distinction"
+    },
+    {
+      "agent": "item_queue_audit",
+      "readOnly": true,
+      "blockingDefects": 0,
+      "scope": "IDs, explicit reuse graph, manual/dependent identity states and input provenance"
+    }
+  ],
+  "reuseTraceability": {
+    "explicitEdges": 58,
+    "versionPinnedIncludingSharedDesignProposal": 46,
+    "unversionedSourceLinks": 12
+  },
+  "latestDeltaIndependentReviews": [
+    {
+      "agent": "axe_concepts",
+      "readOnly": true,
+      "blockingDefects": 0
+    },
+    {
+      "agent": "equipment_contract_audit",
+      "readOnly": true,
+      "blockingDefects": 0
+    }
+  ],
+  "inputCorrelation": {
+    "verifiedByOperator": true,
+    "providerAccountReadByItems": false,
+    "localBytesVerifiedByItems": true,
+    "bytes": 1644705,
+    "sha256": "1390409d3e2f25e51a9f75e1a70cda7ad8f4ce5f1bdfd8443152516a553f8999"
+  },
+  "conditionalSmallLotGeometryCredits": {
+    "withoutTrial": 300,
+    "withOneReconfirmedTrial": 200,
+    "finalAuthenticatedQuote": null,
+    "approvedCeiling": null
+  },
+  "currentExperiment": {
+    "studyId": "item.study.grouped-compact-01",
+    "status": "planning-only; feasibility-not-demonstrated",
+    "requiredCandidates": [
+      "item.design.base.scroll",
+      "item.design.base.potion-of-healing"
+    ],
+    "optionalCandidate": "item.design.base.potion-of-mana",
+    "composedImageProduced": false,
+    "localSeparationProven": false,
+    "authorizedNewJobs": 0,
+    "creditsConsumedByItems": 0
+  },
+  "groupedStudyBudgetValidation": {
+    "conditionalLocalSplitScenarios": 4,
+    "incrementalServiceAlternatives": 3,
+    "reuseMarginAtTwoGeometryJobs": 100,
+    "threeIndependentGeometryMargin": 200,
+    "finalQuotesConfirmed": false,
+    "trialStackEligibilityConfirmed": false
+  },
+  "operatorEvidence": {
+    "source": "sole operator relayed message",
+    "accountReadByItems": false,
+    "screenshotReceiptHashAvailable": true,
+    "operatorReceiptSha256": "d712a5969945d3e66f32c9f9284eb34263763c3d17dbc5c87c8ca4353772a570",
+    "evidenceManifestSha256": "5f2659ee0b7f8b8df0d4e160599deae067d9ef658c95e0b8308c1e6c68cf20ed",
+    "evidenceFilesBytesHashesVerified": 12,
+    "newScreenshotPixelsInspectedByItems": false,
+    "existingManualExportFileConfirmed": false,
+    "paidOrGenerativeProviderActionsExecuted": false
+  },
+  "relativeLinksChecked": 260,
+  "legacyConditionalSmallLotScope": "historical-individual-comparison; not current grouped experiment",
+  "groupedStudyIndependentReviews": [
+    {
+      "agent": "axe_concepts",
+      "readOnly": true,
+      "blockingDefectsAfterCorrections": 0
+    },
+    {
+      "agent": "equipment_contract_audit",
+      "readOnly": true,
+      "blockingDefectsAfterCorrections": 0
+    },
+    {
+      "agent": "item_queue_audit",
+      "readOnly": true,
+      "blockingDefectsAfterCorrections": 0
+    }
+  ],
+  "geometryBudgetLinkageValidation": {
+    "humanEvent": "Sentinel_cab58c0598d4819195d2878edfe1e535",
+    "identities": 228,
+    "families": 17,
+    "proposedCandidateCategories": 3,
+    "guideTriangleRules": 8,
+    "measuredVertexMinima": 0,
+    "selectedTotalTarget": null,
+    "sourceGuideOriginalArtifactAvailable": false,
+    "newJobsAuthorized": 0
+  },
+  "geometryBudgetIndependentReviews": [
+    {
+      "agent": "axe_concepts",
+      "readOnly": true,
+      "blockingDefectsAfterCorrections": 0,
+      "scope": "triangle sums/master2x, conditional price/target and LOD reference basis"
+    },
+    {
+      "agent": "item_queue_audit",
+      "readOnly": true,
+      "blockingDefectsAfterCorrections": 0,
+      "scope": "228 IDs/families/reuse links,8 guide categories,4 sums and supplement lineage"
+    },
+    {
+      "agent": "equipment_contract_audit",
+      "readOnly": true,
+      "blockingDefectsAfterCorrections": 0,
+      "scope": "primitive/index/vertex metrics,conservative error,unmeasured stages and preserved master"
+    }
+  ]
+}
