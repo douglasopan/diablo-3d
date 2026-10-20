@@ -10,7 +10,20 @@
 
 Code, authoring tools, Godot editor, documentation, concepts and selected Warrior resources are public here. Unfinished local code is preserved separately in [the workspace snapshot](https://github.com/douglasopan/diablo-3d/tree/snapshot/workspace-20261014). See [publication scope](docs/PUBLIC-PROJECT-20261014.md).
 
-A Vibecoded community project led by **Douglas Pan** to bring **almost the whole Diablo 1 game into 3D**, including its procedurally generated dungeon levels, built on [DevilutionX](https://github.com/diasurgical/devilutionX). The native simulation remains responsible for maps, seeds, combat, collision, items and saves. The visual layer adds 3D rendering and gameplay cameras while retaining original-view comparison. Tristram and a pilot of nine nearby regions in the first normal Cathedral level exist; reconstruction, loading/reentry and performance still need work.
+## DevilutionX gameplay, a new 3D presentation
+
+**Diablo 3D** is a community project led by **Douglas Pan**, built on [DevilutionX](https://github.com/diasurgical/devilutionX), with the goal of bringing Diablo 1 into 3D while preserving its gameplay rules.
+
+The architecture combines two layers:
+
+- **Inherited DevilutionX core:** player state and attributes, movement and collision, combat, monsters, inventory, quests, dungeon generation, and save/load remain authoritative.
+- **Our 3D development:** first- and third-person cameras, camera-relative input adapters, visual map reconstruction, imported models, surrounding terrain, GPU rendering, fire, lighting and shadows, and modified HUD/menu presentation. These features have different levels of implementation and testing; they do not imply complete coverage of every map or actor.
+
+**How they work together:** input is translated into native actions; DevilutionX updates the game state and resolves gameplay; the visual layer reads that state to prepare and render the 3D scene. An inventory's appearance can change while its item rules remain native. Godot is an authoring tool, not the runtime game engine.
+
+Camera and input modules are already shared. Their integration with world rendering and level transitions is still partly coupled: changing maps rebuilds level-specific resources and can take different adapter paths; it does not rewrite the character controller for each floor. The direction is to keep character, camera and control behavior consistent while map adapters provide environment data. This separation is ongoing, not a completed modular rewrite.
+
+**Em português:** o DevilutionX continua responsável pelas regras, personagem, combate, colisão, inventário, geração das masmorras e saves. Nosso código acrescenta a apresentação 3D, as câmeras, a adaptação dos controles, os modelos, terreno, efeitos e a aparência do HUD e dos menus. Os controles enviam ações ao núcleo nativo; a camada visual lê o resultado e desenha a cena. Câmera e controles já têm módulos compartilhados, mas a ligação com os mapas e as transições ainda precisa ser consolidada. A troca de andar não reescreve o personagem; ela troca dados e recursos do ambiente.
 
 **[Architecture and execution guide](docs/PROJECT-EXECUTION.md)** — current stage, dependencies, completion criteria and ongoing work. Contributors and agents should consult this guide and [AGENTS.md](AGENTS.md) before implementing changes.
 
