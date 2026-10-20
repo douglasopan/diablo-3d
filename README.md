@@ -1,14 +1,8 @@
-> **Local6 / New complete preview:** [Download](https://github.com/douglasopan/diablo-3d/releases/tag/v0.1.0-preview.local6-tristram.grid162). Bridges, saved Godot houses and another 35% world scale. [Português](docs/LOCAL6-PACKAGE.pt-BR.md) · [English](docs/LOCAL6-PACKAGE.en.md).
-
-> **New local4 preview / Nova prévia local4:** [Complete Windows download / Download completo](https://github.com/douglasopan/diablo-3d/releases/tag/v0.1.0-preview.local4-tristram.full1). Tristram frozen on14October19:05, Warrior TP/FP, internal preparation from your own DIABDAT.MPQ. CPU Town/Warrior/well/cache results and observed Cathedral/GPU limits: [English](docs/LOCAL4-PACKAGE.en.md) · [Português](docs/LOCAL4-PACKAGE.pt-BR.md). Separate local4 profile; local3 retained.
+> **Last Build** [[Download](https://github.com/douglasopan/diablo-3d/releases) - run "Jogar-Diablo3d.cmd"
 
 <p align="center"><img src="assets/branding/diablo3d-banner.png" alt="Diablo 3D" width="100%"></p>
 
 # Diablo 3D · D3D
-
-**Latest Windows preview: [local3 FULL](https://github.com/douglasopan/diablo-3d/releases/tag/v0.1.0-preview.local3-tristram.full4).** Extract the ZIP and run `Iniciar-Diablo3D.cmd`; provide only `DIABDAT.MPQ` from your original copy. Executable, libraries, public R17 resources and own Warrior packets are bundled. The selected Tristram scene is prepared automatically from your MPQ and verified against all 19 frozen runtime hashes; real scene/WorldPatch loading passed without fallback. Performance and manual gameplay testing remain pending. [English installation details](docs/TRISTRAM-PUBLIC-PACKAGE.en.md) / [Português](docs/TRISTRAM-PUBLIC-PACKAGE.pt-BR.md).
-
-Code, authoring tools, Godot editor, documentation, concepts and selected Warrior resources are public here. Unfinished local code is preserved separately in [the workspace snapshot](https://github.com/douglasopan/diablo-3d/tree/snapshot/workspace-20261014). See [publication scope](docs/PUBLIC-PROJECT-20261014.md).
 
 ## DevilutionX gameplay, a new 3D presentation
 
