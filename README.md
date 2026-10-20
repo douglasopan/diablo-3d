@@ -1,4 +1,4 @@
-> **Last Build** [[Download](https://github.com/douglasopan/diablo-3d/releases) - run "Jogar-Diablo3d.cmd"
+> **Download the last Build** [[Download](https://github.com/douglasopan/diablo-3d/releases) - run "Jogar-Diablo3d.cmd"
 
 <p align="center"><img src="assets/branding/diablo3d-banner.png" alt="Diablo 3D" width="100%"></p>
 
